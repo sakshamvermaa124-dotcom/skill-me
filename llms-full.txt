@@ -31,12 +31,12 @@ SkillMe operates 4-week structured remote engineering internships designed to br
 - **Deliverables**: Weekly project milestones building interactive features, responsive UI, and optimized front-end performance.
 
 ### Python Engineering Track
-- **Duration**: 4 Weeks (2–4 hours/day, flexible).
+- **Duration**: 4 Weeks (2–3 hours/week, flexible).
 - **Core Topics**: Python 3.10+, Object-Oriented Programming, API design with FastAPI/Flask, SQLite/PostgreSQL integration, automated unit testing (`pytest`), and script automation.
 - **Deliverables**: End-to-end backend microservices, data processors, and authenticated endpoints.
 
 ### AI & Machine Learning Track
-- **Duration**: 4 Weeks (2–4 hours/day, flexible).
+- **Duration**: 4 Weeks (2–3 hours/week, flexible).
 - **Core Topics**: Data preprocessing, feature engineering, integration with modern LLM APIs (OpenAI, Anthropic, Gemini), agentic workflows, and deploying inference microservices.
 
 ## 4. Credential Verification & Authenticity
