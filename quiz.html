@@ -812,14 +812,14 @@ function showResults() {
     badgeText = 'Eligible to apply';
   } else if (score >= 3) {
     title = 'Good effort!';
-    sub = `You scored ${score}/${total}. Don't worry — the internship is built for learners exactly like you. Apply and grow with us!`;
+    sub = `You scored ${score}/${total}. Your basics need some work, so your application will have to make up for it. We shortlist by hand: tell us honestly why you want in and what you'll put into the next 4 weeks.`;
     badgeClass = 'try-harder';
-    badgeText = 'Apply & level up';
+    badgeText = 'You can still apply';
   } else {
     title = 'Just getting started!';
-    sub = `You scored ${score}/${total}. Everyone starts somewhere! Our internship is designed to take you from beginner to contributor. Apply now!`;
+    sub = `You scored ${score}/${total}. Everyone starts somewhere. You can still apply, but our team reads every application, so your answer to "Why do you want to join?" will carry a lot of weight. Brushing up on the basics first will help.`;
     badgeClass = 'try-harder';
-    badgeText = 'Apply & level up';
+    badgeText = 'You can still apply';
   }
 
   document.getElementById('result-title').textContent = title;
