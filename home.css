@@ -654,18 +654,39 @@
   .cta-points li:nth-child(3) { border-left: 0; }
   .cta-points li:nth-child(n+3) { padding-top: 18px; }
 }
+@media (max-width: 760px) {
+  .compare { grid-template-columns: 1fr; }
+  .compare-vs { margin: -12px auto; }
+  .bento-wide { grid-template-columns: 1fr; }
+  .cert-real img { transform: none; }
+  .weeks-tabs { width: 100%; }
+  .weeks-tab { flex: 1; justify-content: center; padding: 0 6px; }
+  .week-panel { grid-template-columns: 1fr; }
+  .domain-search { max-width: none; }
+  .not-for .btn { width: 100%; }
+}
 @media (max-width: 640px) {
+  .hero-badge { font-size: 0.76rem; }
   .hero-actions .btn { flex: 1 1 100%; }
-  .steps, .roadmap-grid, .domains-grid, .wall-grid { grid-template-columns: 1fr; }
-  .roadmap-step, .roadmap-step + .roadmap-step { padding: 0; border-left: 0; }
-  .roadmap-step + .roadmap-step { padding-top: 20px; border-top: 1px solid var(--line); }
-  .domain-card { min-height: 0; flex-direction: row; align-items: center; }
-  .domain-foot { gap: 12px; flex-shrink: 0; }
+  .hero-stage { padding: 46px 0 40px; }
+  .float-offer { left: -4px; }
+  .float-cert { right: -4px; }
+  .steps, .domains-grid, .wall-grid, .bento { grid-template-columns: 1fr; }
+  .domain-card { min-height: 0; }
+  .domain-help { grid-template-columns: auto minmax(0, 1fr); }
+  .domain-help > span:last-child { grid-column: 1 / -1; }
+  .step { display: grid; grid-template-columns: 36px minmax(0, 1fr); column-gap: 14px; row-gap: 4px; padding: 18px; }
+  .step-num { grid-row: span 3; margin-bottom: 0; }
+  .step-meta { margin-top: 2px; }
+  .domain-card { flex-direction: row; align-items: center; }
+  .domain-foot { gap: 8px; flex-shrink: 0; }
+  .domain-cta { display: none; }
   .facts li { padding: 16px; }
-  .fact-value { font-size: 1.15rem; }
+  .fact-value { font-size: 1.25rem; }
   .tracker { padding: 16px; }
   .tracker-row { grid-template-columns: 36px minmax(0, 1fr) auto; padding: 10px; gap: 10px; }
   .tracker-week { width: 36px; }
+  .weeks-tab .mono { display: none; }
   .faq-answer { padding-left: 2px !important; }
   .cta-actions .btn { flex: 1 1 100%; white-space: normal; height: auto; min-height: 52px; padding-top: 12px; padding-bottom: 12px; }
   .cta-points { grid-template-columns: 1fr; }
@@ -674,10 +695,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .live-dot { animation: none; }
+  .live-dot, .float-card, .week-panel { animation: none; }
   .domain-card:hover, .wall-card:hover { transform: none; }
 }
 
 /* Header: theme.css sets `.nav-links + .nav-actions { margin-left: 0 }`, which also applies
    when .nav-links is hidden (<=880px) and pulls the actions next to the logo. */
 @media (max-width: 880px) { .site-nav .nav-links + .nav-actions { margin-left: auto; } }
+@media (min-width: 881px) and (max-width: 1060px) { .nav-links a { padding: 8px 9px; font-size: 0.86rem; } }
