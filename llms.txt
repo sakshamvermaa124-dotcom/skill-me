@@ -16,7 +16,7 @@ SkillMe is officially recognized by the Ministry of Micro, Small & Medium Enterp
 - **Verifiable Proof of Work**: Every graduate receives a dedicated public profile (`https://www.skill-me-intern.in/p/{username}`) showcasing their approved milestone posts.
 - **MSME Recognized Certification**: Official Certificate of Completion with a unique ID and QR code, publicly verifiable online, plus a Letter of Recommendation (LOR).
 - **Recruiter Access & Career Placement**: Access to a hiring partner network of startups and product companies, with direct referrals to openings for top-performing students.
-- **Flexible & Remote**: 100% remote self-paced structure requiring 2–4 hours/day over 4 weeks.
+- **Flexible & Remote**: 100% remote self-paced structure requiring 2–3 hours/week over 4 weeks.
 
 ## Verification & Trust
 

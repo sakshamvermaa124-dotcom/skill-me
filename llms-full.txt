@@ -26,7 +26,7 @@ SkillMe operates 4-week structured remote engineering internships designed to br
 
 ## 3. Internship Tracks
 ### Web Development Track
-- **Duration**: 4 Weeks (2–4 hours/day, flexible).
+- **Duration**: 4 Weeks (2–3 hours/week, flexible).
 - **Core Topics**: Semantic HTML5, CSS3 Grid/Flexbox/Animations, Modern JavaScript (ES6+), Asynchronous JavaScript & RESTful APIs, and Git version control.
 - **Deliverables**: Weekly project milestones building interactive features, responsive UI, and optimized front-end performance.
 
