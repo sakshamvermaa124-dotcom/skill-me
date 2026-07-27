@@ -7,7 +7,7 @@
  */
 
 (function() {
-  const RENDER_URL = 'https://skillme-api.onrender.com';  // ← UPDATE after Render deploy
+  const RENDER_URL = 'https://skill-me.onrender.com';  // Live Render API
   const LOCAL_URL  = 'http://localhost:8000';
 
   const isLocal = (
