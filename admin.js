@@ -302,16 +302,23 @@ async function openEnrollModal(studentId, name) {
   document.getElementById('enroll-student-id').value = studentId;
   document.getElementById('enroll-student-name').textContent = `Enrolling: ${name}`;
   const select = document.getElementById('enroll-batch-select');
-  select.innerHTML = '<option>Loading...</option>';
+  select.innerHTML = '<option>Loading batches...</option>';
   openModal('enroll-modal');
   try {
-    const data = await api('/api/admin/batches?status=active');
+    const data = await api('/api/admin/batches');
     allBatches = data.batches || [];
-    select.innerHTML = allBatches.map(b => `<option value="${b.id}">${b.domain} — Batch #${b.batch_number}</option>`).join('');
+    if (!allBatches.length) {
+      select.innerHTML = '<option value="">⚠️ No batches yet — create one in the Batches tab first!</option>';
+      document.getElementById('enroll-confirm-btn').disabled = true;
+    } else {
+      select.innerHTML = allBatches.map(b => `<option value="${b.id}">${b.domain} — Batch #${b.batch_number}</option>`).join('');
+      document.getElementById('enroll-confirm-btn').disabled = false;
+    }
   } catch(e) {
     select.innerHTML = '<option>Failed to load batches</option>';
   }
 }
+
 
 async function enrollStudent() {
   const studentId = document.getElementById('enroll-student-id').value;

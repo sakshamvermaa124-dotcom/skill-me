@@ -341,14 +341,12 @@ async def update_student_status(
 
     # Send lifecycle email based on new status
     if req.status == "shortlisted":
-        # Get domain from latest application if available
-        enrollment = await db.fetch_one(
-            """SELECT b.domain FROM enrollments e
-               JOIN batches b ON e.batch_id = b.id
-               WHERE e.student_id = ? LIMIT 1""",
+        # Domain is stored directly on the student record
+        student_domain = await db.fetch_one(
+            "SELECT domain FROM students WHERE id = ?",
             (student_id,)
         )
-        domain = enrollment["domain"] if enrollment else "web-dev"
+        domain = student_domain["domain"] if student_domain and student_domain.get("domain") else "open-source"
         background_tasks.add_task(
             email_service.send_shortlist_notification,
             first_name=student["first_name"],
