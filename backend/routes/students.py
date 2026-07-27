@@ -40,8 +40,9 @@ async def apply(req: ApplicationRequest, background_tasks: BackgroundTasks):
     This is called by the apply.html form.
     """
     # Check for duplicate email
+    req.email = req.email.strip()
     existing = await db.fetch_one(
-        "SELECT id, status FROM students WHERE email = ?", (req.email,)
+        "SELECT id, status FROM students WHERE lower(email) = lower(?)", (req.email,)
     )
     if existing:
         return {
@@ -98,8 +99,8 @@ async def apply(req: ApplicationRequest, background_tasks: BackgroundTasks):
 async def check_status(email: str):
     """Check the status of a student's application by email."""
     student = await db.fetch_one(
-        "SELECT id, first_name, last_name, email, status, created_at FROM students WHERE email = ?",
-        (email,),
+        "SELECT id, first_name, last_name, email, status, created_at FROM students WHERE lower(email) = lower(?)",
+        (email.strip(),),
     )
     if not student:
         raise HTTPException(status_code=404, detail="No application found with this email")
@@ -123,10 +124,10 @@ async def check_status(email: str):
 async def get_progress(email: str):
     """Get a student's internship progress by email."""
     student = await db.fetch_one(
-        "SELECT * FROM students WHERE email = ?", (email,)
+        "SELECT * FROM students WHERE lower(email) = lower(?)", (email.strip(),)
     )
     if not student:
-        raise HTTPException(status_code=404, detail="Student not found")
+        raise HTTPException(status_code=404, detail="Student not found with this email.")
 
     progress = await db.fetch_all(
         """SELECT p.week, p.issues_assigned, p.issues_completed, p.prs_merged, p.score,
@@ -137,6 +138,19 @@ async def get_progress(email: str):
            ORDER BY b.domain, p.week""",
         (student["id"],),
     )
+
+    if not progress:
+        # Fallback to enrollments table if no progress rows exist yet
+        enrollments = await db.fetch_all(
+            """SELECT 1 as week, 0 as issues_assigned, 0 as issues_completed, 0 as prs_merged, 0 as score,
+                      b.domain, b.batch_number, b.id as batch_id
+               FROM enrollments e
+               JOIN batches b ON e.batch_id = b.id
+               WHERE e.student_id = ? AND e.status != 'dropped'""",
+            (student["id"],),
+        )
+        if enrollments:
+            progress = enrollments
 
     submissions = await db.fetch_all(
         """SELECT s.pr_url, s.pr_number, s.status, s.submitted_at, s.merged_at,
