@@ -442,10 +442,10 @@ FRONTEND_URL=https://skill-me.vercel.app
 EMAIL_ENABLED=True
 SMTP_HOST=smtp-relay.brevo.com
 SMTP_PORT=587
-SMTP_USER=b350fa001@smtp-brevo.com
-SMTP_PASSWORD=xsmtpsib-...
+SMTP_USER=your_brevo_login@example.com
+SMTP_PASSWORD=your_brevo_smtp_key_here
 SMTP_FROM_NAME=SkillMe Team
-SMTP_FROM_EMAIL=sakshamverma124@gmail.com
+SMTP_FROM_EMAIL=noreply@yourdomain.com
 
 # Razorpay Payment Gateway
 RAZORPAY_KEY_ID=rzp_live_... (or rzp_test_... for sandbox)

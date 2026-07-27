@@ -560,7 +560,7 @@ async function loadEmailStatus() {
     badge.textContent = '\u25cf Offline';
   }
   // Show from email from .env config — we can infer from backend info
-  if (fromEl) fromEl.textContent = 'sakshamverma124@gmail.com';
+  if (fromEl) fromEl.textContent = 'noreply@skillme.in';
 }
 
 async function sendTestEmail() {
