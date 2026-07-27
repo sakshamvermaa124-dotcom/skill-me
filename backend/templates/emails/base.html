@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}SkillMe{% endblock %}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #0d0d1a;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      color: #e8e8f0;
+      margin: 0;
+      padding: 0;
+    }
+    .wrapper {
+      max-width: 620px;
+      margin: 0 auto;
+      background-color: #0d0d1a;
+    }
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, #0b0b18 0%, #141430 100%);
+      border-bottom: 2px solid #d4a853;
+      padding: 32px 40px;
+      text-align: center;
+    }
+    .logo-ring {
+      display: inline-block;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #818cf8, #38bdf8);
+      line-height: 56px;
+      font-size: 26px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+    .brand-name {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: #fff;
+    }
+    .brand-name span { color: #d4a853; }
+    .brand-tagline {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #8a8aaa;
+      margin-top: 4px;
+    }
+    /* ── Body ── */
+    .body {
+      background: #111126;
+      border: 1px solid rgba(212,168,83,0.18);
+      border-top: none;
+      padding: 40px;
+    }
+    .greeting {
+      font-size: 24px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+    .lead {
+      font-size: 15px;
+      line-height: 1.75;
+      color: #b0b0c8;
+      margin-bottom: 24px;
+    }
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(212,168,83,0.3), transparent);
+      margin: 28px 0;
+    }
+    /* ── Info box ── */
+    .info-box {
+      background: rgba(129,140,248,0.08);
+      border: 1px solid rgba(129,140,248,0.2);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+    .info-box-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 14px;
+    }
+    .info-box-row:last-child { border-bottom: none; }
+    .info-label { color: #8a8aaa; }
+    .info-value { color: #e8e8f0; font-weight: 600; }
+    /* ── CTA Button ── */
+    .cta-wrap { text-align: center; margin: 32px 0; }
+    .cta-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #d4a853, #f0c97a);
+      color: #0a0a12 !important;
+      font-weight: 700;
+      font-size: 15px;
+      padding: 14px 36px;
+      border-radius: 10px;
+      text-decoration: none;
+      letter-spacing: 0.03em;
+    }
+    .cta-btn-outline {
+      display: inline-block;
+      background: transparent;
+      color: #d4a853 !important;
+      font-weight: 600;
+      font-size: 14px;
+      padding: 11px 28px;
+      border-radius: 10px;
+      text-decoration: none;
+      border: 1px solid rgba(212,168,83,0.4);
+      margin-top: 10px;
+    }
+    /* ── Steps ── */
+    .steps { margin: 20px 0; }
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .step:last-child { border-bottom: none; }
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #818cf8, #38bdf8);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-text { font-size: 14px; line-height: 1.6; color: #c0c0d8; }
+    .step-text strong { color: #fff; }
+    /* ── Task list ── */
+    .task-item {
+      background: rgba(56,189,248,0.06);
+      border: 1px solid rgba(56,189,248,0.15);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+    }
+    .task-item-title { font-size: 14px; font-weight: 600; color: #e8e8f0; }
+    .task-item-link { font-size: 12px; color: #38bdf8; text-decoration: none; margin-top: 4px; display: block; }
+    /* ── Badge ── */
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .badge-gold { background: rgba(212,168,83,0.15); color: #d4a853; border: 1px solid rgba(212,168,83,0.3); }
+    .badge-green { background: rgba(52,211,153,0.12); color: #34d399; border: 1px solid rgba(52,211,153,0.25); }
+    .badge-purple { background: rgba(129,140,248,0.12); color: #818cf8; border: 1px solid rgba(129,140,248,0.25); }
+    /* ── Cert ID box ── */
+    .cert-id-box {
+      background: rgba(212,168,83,0.08);
+      border: 1px solid rgba(212,168,83,0.25);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      margin: 24px 0;
+    }
+    .cert-id-label { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #8a8aaa; margin-bottom: 8px; }
+    .cert-id-value { font-size: 22px; font-weight: 700; color: #d4a853; letter-spacing: 0.06em; }
+    /* ── Footer ── */
+    .footer {
+      background: #0b0b18;
+      border: 1px solid rgba(212,168,83,0.12);
+      border-top: none;
+      padding: 28px 40px;
+      text-align: center;
+    }
+    .footer-links { margin-bottom: 14px; }
+    .footer-links a {
+      color: #8a8aaa;
+      text-decoration: none;
+      font-size: 13px;
+      margin: 0 10px;
+    }
+    .footer-links a:hover { color: #d4a853; }
+    .footer-copy { font-size: 12px; color: #555575; line-height: 1.6; }
+    .footer-copy a { color: #8a8aaa; text-decoration: none; }
+    .accent-bar {
+      height: 3px;
+      background: linear-gradient(90deg, #818cf8, #38bdf8, #34d399, #d4a853);
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <!-- Accent bar top -->
+  <div class="accent-bar"></div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo-ring">S</div>
+    <div class="brand-name">Skill<span>Me</span></div>
+    <div class="brand-tagline">Open Source Internship Platform</div>
+  </div>
+
+  <!-- Body -->
+  <div class="body">
+    {% block body %}{% endblock %}
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-links">
+      <a href="{{ frontend_url }}">Home</a>
+      <a href="{{ frontend_url }}/dashboard.html">Dashboard</a>
+      <a href="mailto:support@skillme.in">Support</a>
+    </div>
+    <div class="footer-copy">
+      You're receiving this email because you have an account on SkillMe.<br />
+      &copy; 2024 SkillMe. Building the next generation of open-source contributors.
+    </div>
+  </div>
+
+  <!-- Accent bar bottom -->
+  <div class="accent-bar"></div>
+</div>
+</body>
+</html>

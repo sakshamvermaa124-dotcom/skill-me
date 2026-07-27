@@ -1,0 +1,102 @@
+# SkillMe — Auto-Merge Workflow
+# Automatically merges PRs when all CI tests pass.
+# Place this file in each template repo at: .github/workflows/auto-merge.yml
+
+name: SkillMe — Auto Merge
+
+on:
+  # Trigger when a PR is labeled (by the CI workflow)
+  pull_request:
+    types: [labeled]
+  
+  # Also trigger when check suites complete
+  check_suite:
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    name: Auto-Merge Passed PRs
+    runs-on: ubuntu-latest
+    
+    # Only run if the PR has the 'ready-to-merge' label
+    if: >
+      (github.event_name == 'pull_request' && contains(github.event.label.name, 'ready-to-merge')) ||
+      (github.event_name == 'check_suite' && github.event.check_suite.conclusion == 'success')
+
+    steps:
+      - name: Merge Pull Request
+        uses: actions/github-script@v7
+        with:
+          script: |
+            let prNumber;
+            
+            if (context.eventName === 'pull_request') {
+              prNumber = context.payload.pull_request.number;
+            } else if (context.eventName === 'check_suite') {
+              // Get PRs associated with this check suite
+              const prs = context.payload.check_suite.pull_requests;
+              if (!prs || prs.length === 0) {
+                console.log('No PRs associated with this check suite');
+                return;
+              }
+              prNumber = prs[0].number;
+            }
+            
+            if (!prNumber) {
+              console.log('Could not determine PR number');
+              return;
+            }
+            
+            // Check that the PR has the ready-to-merge label
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+            });
+            
+            const hasLabel = pr.labels.some(l => l.name === 'ready-to-merge');
+            if (!hasLabel) {
+              console.log(`PR #${prNumber} does not have 'ready-to-merge' label, skipping`);
+              return;
+            }
+            
+            // Check if PR is still open
+            if (pr.state !== 'open') {
+              console.log(`PR #${prNumber} is not open, skipping`);
+              return;
+            }
+            
+            // Merge the PR
+            try {
+              await github.rest.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                merge_method: 'squash',
+                commit_title: `feat: merge PR #${prNumber} — ${pr.title}`,
+              });
+              
+              console.log(`✅ Merged PR #${prNumber}`);
+              
+              // Add a congratulatory comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: '🎉 **PR merged!** Congratulations on completing this task. Your contribution has been recorded.\n\nKeep up the great work! Check your SkillMe dashboard for your updated progress.\n\n— SkillMe Bot 🤖'
+              });
+              
+            } catch (error) {
+              console.log(`Failed to merge PR #${prNumber}: ${error.message}`);
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: `⚠️ **Auto-merge failed.** This could be due to merge conflicts. Please pull the latest changes from \`main\`, resolve any conflicts, and push again.\n\n\`\`\`bash\ngit pull origin main\n# resolve conflicts\ngit push\n\`\`\`\n\n— SkillMe Bot 🤖`
+              });
+            }

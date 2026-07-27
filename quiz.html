@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Screening Quiz — SkillMe</title>
+  <meta name="description" content="Take the SkillMe screening quiz to check your eligibility for our open-source internship program." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #07070f;
+      --surface: #0f0f1e;
+      --surface2: #14142a;
+      --border: rgba(255,255,255,0.07);
+      --border-gold: rgba(212,168,83,0.3);
+      --gold: #d4a853;
+      --gold-light: #f0c97a;
+      --purple: #818cf8;
+      --blue: #38bdf8;
+      --green: #34d399;
+      --red: #f87171;
+      --text: #e8e8f0;
+      --text-muted: #8a8aaa;
+      --text-dim: #555575;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Orbs ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      pointer-events: none;
+      z-index: 0;
+      animation: orb-drift 12s ease-in-out infinite alternate;
+    }
+    .orb-1 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(129,140,248,0.12) 0%, transparent 70%); top: -150px; left: -100px; }
+    .orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(56,189,248,0.08) 0%, transparent 70%); bottom: 0; right: -100px; animation-delay: -6s; }
+    .orb-3 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(212,168,83,0.07) 0%, transparent 70%); top: 50%; left: 50%; transform: translate(-50%,-50%); }
+    @keyframes orb-drift { from { transform: translateY(0) scale(1); } to { transform: translateY(-30px) scale(1.05); } }
+
+    /* ── Layout ── */
+    .shell {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── Nav ── */
+    nav {
+      width: 100%;
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo { font-size: 20px; font-weight: 800; color: var(--text); text-decoration: none; }
+    .logo span { color: var(--gold); }
+    .nav-badge { font-size: 12px; padding: 4px 12px; border-radius: 20px; background: rgba(212,168,83,0.1); border: 1px solid var(--border-gold); color: var(--gold); font-weight: 600; letter-spacing: 0.06em; }
+
+    /* ── Main container ── */
+    .main {
+      flex: 1;
+      width: 100%;
+      max-width: 720px;
+      padding: 48px 24px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── Screens ── */
+    .screen { width: 100%; display: none; animation: fadeUp 0.4s ease; }
+    .screen.active { display: flex; flex-direction: column; align-items: center; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Screen: Welcome ── */
+    .welcome-icon {
+      font-size: 56px;
+      margin-bottom: 20px;
+      animation: pulse-soft 3s ease-in-out infinite;
+    }
+    @keyframes pulse-soft { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+    .welcome-title { font-size: 36px; font-weight: 800; text-align: center; margin-bottom: 12px; line-height: 1.2; }
+    .welcome-title .hl { background: linear-gradient(135deg, var(--purple), var(--blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .welcome-sub { font-size: 16px; color: var(--text-muted); text-align: center; margin-bottom: 36px; line-height: 1.7; max-width: 520px; }
+    .info-chips { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 40px; }
+    .chip { display: flex; align-items: center; gap: 7px; padding: 8px 16px; background: var(--surface2); border: 1px solid var(--border); border-radius: 40px; font-size: 13px; color: var(--text-muted); }
+    .chip span { font-size: 15px; }
+
+    /* ── Domain picker ── */
+    .section-label { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); font-weight: 600; margin-bottom: 16px; text-align: center; }
+    .domain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; margin-bottom: 32px; }
+    .domain-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .domain-card:hover { border-color: rgba(129,140,248,0.4); background: rgba(129,140,248,0.06); transform: translateY(-2px); }
+    .domain-card.selected { border-color: var(--purple); background: rgba(129,140,248,0.1); box-shadow: 0 0 20px rgba(129,140,248,0.15); }
+    .domain-card .icon { font-size: 26px; margin-bottom: 8px; }
+    .domain-card .label { font-size: 13px; font-weight: 600; color: var(--text); }
+    .domain-card .sublabel { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+    /* ── Start button ── */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 15px 36px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: #0a0a12;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      letter-spacing: 0.02em;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,168,83,0.3); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      border-radius: 10px;
+      background: transparent;
+      border: 1px solid var(--border-gold);
+      color: var(--gold);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-secondary:hover { background: rgba(212,168,83,0.08); transform: translateY(-1px); }
+
+    /* ── Screen: Question ── */
+    .progress-bar-wrap { width: 100%; margin-bottom: 32px; }
+    .progress-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .progress-label { font-size: 13px; color: var(--text-muted); }
+    .progress-count { font-size: 13px; font-weight: 600; color: var(--purple); }
+    .progress-track { width: 100%; height: 4px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--purple), var(--blue)); border-radius: 4px; transition: width 0.4s ease; }
+
+    .q-category { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); font-weight: 600; margin-bottom: 12px; }
+    .q-text { font-size: 22px; font-weight: 700; line-height: 1.4; margin-bottom: 32px; }
+    .q-options { display: flex; flex-direction: column; gap: 12px; width: 100%; margin-bottom: 28px; }
+    .q-option {
+      width: 100%;
+      text-align: left;
+      padding: 16px 20px;
+      border-radius: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-family: 'Inter', sans-serif;
+    }
+    .q-option:hover:not(:disabled) { border-color: rgba(129,140,248,0.4); background: rgba(129,140,248,0.06); }
+    .q-option .opt-letter {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+      color: var(--text-muted);
+      transition: all 0.18s ease;
+    }
+    .q-option.selected { border-color: var(--purple); background: rgba(129,140,248,0.1); }
+    .q-option.selected .opt-letter { background: var(--purple); color: #fff; border-color: var(--purple); }
+    .q-option.correct { border-color: var(--green); background: rgba(52,211,153,0.1); }
+    .q-option.correct .opt-letter { background: var(--green); color: #fff; border-color: var(--green); }
+    .q-option.wrong { border-color: var(--red); background: rgba(248,113,113,0.08); }
+    .q-option.wrong .opt-letter { background: var(--red); color: #fff; border-color: var(--red); }
+    .q-option:disabled { cursor: not-allowed; }
+    .q-option.correct:disabled { opacity: 1; }
+    .q-option.wrong:disabled { opacity: 0.7; }
+
+    .next-btn-wrap { display: flex; justify-content: flex-end; width: 100%; }
+
+    /* ── Screen: Result ── */
+    .result-ring {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      border: 4px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .result-ring::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: conic-gradient(var(--gold) var(--pct, 0%), var(--surface2) 0%);
+      mask: radial-gradient(circle, transparent 52%, black 53%);
+      -webkit-mask: radial-gradient(circle, transparent 52%, black 53%);
+    }
+    .result-score { font-size: 36px; font-weight: 800; color: var(--text); position: relative; z-index: 1; }
+    .result-total { font-size: 14px; color: var(--text-muted); position: relative; z-index: 1; }
+    .result-title { font-size: 30px; font-weight: 800; text-align: center; margin-bottom: 10px; }
+    .result-sub { font-size: 15px; color: var(--text-muted); text-align: center; margin-bottom: 12px; line-height: 1.7; max-width: 500px; }
+    .result-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 36px;
+    }
+    .result-badge.pass { background: rgba(52,211,153,0.12); border: 1px solid rgba(52,211,153,0.3); color: var(--green); }
+    .result-badge.try-harder { background: rgba(212,168,83,0.1); border: 1px solid var(--border-gold); color: var(--gold); }
+    .result-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+    /* ── Breakdown ── */
+    .breakdown { width: 100%; margin: 28px 0; }
+    .breakdown-title { font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); font-weight: 600; margin-bottom: 14px; }
+    .breakdown-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .breakdown-q { flex: 1; color: var(--text-muted); margin-right: 12px; }
+    .breakdown-result { font-size: 16px; }
+
+    @media (max-width: 600px) {
+      .domain-grid { grid-template-columns: repeat(2, 1fr); }
+      .q-text { font-size: 18px; }
+      nav { padding: 16px 20px; }
+      .main { padding: 32px 16px 60px; }
+    }
+  </style>
+  <script src="config.js"></script>`n</head>
+<body>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="shell">
+  <nav>
+    <a href="index.html" class="logo">Skill<span>Me</span></a>
+    <div class="nav-badge">🎯 Screening Quiz</div>
+  </nav>
+
+  <div class="main">
+
+    <!-- ══ SCREEN 1: Welcome ══ -->
+    <div class="screen active" id="screen-welcome">
+      <div class="welcome-icon">🧠</div>
+      <h1 class="welcome-title">The <span class="hl">Screening Quiz</span></h1>
+      <p class="welcome-sub">
+        Before applying, we want to see where you're starting from.
+        8 quick questions — no tricks, no pressure. Pick your domain and let's go.
+      </p>
+      <div class="info-chips">
+        <div class="chip"><span>📋</span> 8 Questions</div>
+        <div class="chip"><span>⏱️</span> ~5 Minutes</div>
+        <div class="chip"><span>🔁</span> One Attempt</div>
+        <div class="chip"><span>✅</span> All eligible to apply</div>
+      </div>
+
+      <p class="section-label">Select Your Domain</p>
+      <div class="domain-grid" id="domain-grid">
+        <div class="domain-card" data-domain="web-dev" onclick="selectDomain(this)">
+          <div class="icon">🌐</div>
+          <div class="label">Web Dev</div>
+          <div class="sublabel">HTML, CSS, JS</div>
+        </div>
+        <div class="domain-card" data-domain="python" onclick="selectDomain(this)">
+          <div class="icon">🐍</div>
+          <div class="label">Python</div>
+          <div class="sublabel">Scripts & Automation</div>
+        </div>
+        <div class="domain-card" data-domain="ml" onclick="selectDomain(this)">
+          <div class="icon">🤖</div>
+          <div class="label">Machine Learning</div>
+          <div class="sublabel">Data & Models</div>
+        </div>
+        <div class="domain-card" data-domain="devops" onclick="selectDomain(this)">
+          <div class="icon">⚙️</div>
+          <div class="label">DevOps</div>
+          <div class="sublabel">CI/CD & Cloud</div>
+        </div>
+        <div class="domain-card" data-domain="mobile" onclick="selectDomain(this)">
+          <div class="icon">📱</div>
+          <div class="label">Mobile Dev</div>
+          <div class="sublabel">Flutter / RN</div>
+        </div>
+        <div class="domain-card" data-domain="ui-ux" onclick="selectDomain(this)">
+          <div class="icon">🎨</div>
+          <div class="label">UI/UX Design</div>
+          <div class="sublabel">Figma & Research</div>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="start-btn" onclick="startQuiz()" disabled>
+        Start Quiz &nbsp; →
+      </button>
+    </div>
+
+    <!-- ══ SCREEN 2: Question ══ -->
+    <div class="screen" id="screen-question" style="width:100%;">
+      <div class="progress-bar-wrap">
+        <div class="progress-meta">
+          <span class="progress-label" id="prog-label">Question 1 of 8</span>
+          <span class="progress-count" id="prog-count">0 / 8</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <p class="q-category" id="q-category">General</p>
+      <p class="q-text" id="q-text">Loading…</p>
+
+      <div class="q-options" id="q-options"></div>
+
+      <div class="next-btn-wrap">
+        <button class="btn-primary" id="next-btn" onclick="nextQuestion()" style="display:none;">
+          Next Question &nbsp; →
+        </button>
+      </div>
+    </div>
+
+    <!-- ══ SCREEN 3: Result ══ -->
+    <div class="screen" id="screen-result" style="width:100%; align-items:center;">
+      <div class="result-ring" id="result-ring">
+        <div class="result-score" id="result-score">0</div>
+        <div class="result-total" id="result-total">/ 8</div>
+      </div>
+      <h2 class="result-title" id="result-title">Great job!</h2>
+      <p class="result-sub" id="result-sub">You've completed the screening quiz.</p>
+      <div class="result-badge pass" id="result-badge">✅ Eligible to Apply</div>
+
+      <div class="result-actions">
+        <button class="btn-primary" onclick="proceedToApply()">Apply Now &nbsp; →</button>
+        <button class="btn-secondary" onclick="reviewAnswers()">Review Answers</button>
+      </div>
+
+      <div class="breakdown" id="breakdown" style="display:none;">
+        <p class="breakdown-title">Question Breakdown</p>
+        <div id="breakdown-list"></div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<script>
+// ──────────────────────────────────────────────────────────────
+// Question Bank
+// ──────────────────────────────────────────────────────────────
+const GENERAL_QUESTIONS = [
+  {
+    category: "General",
+    text: "What does \"Git\" primarily help developers with?",
+    options: ["Writing code faster", "Version control and tracking changes", "Running code on servers", "Testing code quality"],
+    answer: 1
+  },
+  {
+    category: "General",
+    text: "What does \"open source\" mean?",
+    options: ["Software that costs nothing", "Software with source code publicly available", "Software with no bugs", "Software made by big companies"],
+    answer: 1
+  },
+  {
+    category: "General",
+    text: "A \"Pull Request\" (PR) in GitHub means:",
+    options: ["Downloading code from a repository", "Deleting a branch permanently", "Proposing changes to be merged into a codebase", "Creating a new repository"],
+    answer: 2
+  },
+  {
+    category: "General",
+    text: "What is a GitHub \"Issue\"?",
+    options: ["A bug that crashes the app", "A task, bug, or feature request tracked in a repository", "A conflict between two branches", "An expired authentication token"],
+    answer: 1
+  }
+];
+
+const DOMAIN_QUESTIONS = {
+  "web-dev": [
+    { category: "Web Development", text: "What does HTML stand for?", options: ["Hyper Text Markup Language", "High Tech Machine Learning", "Home Tool Markup Language", "Hybrid Text Management Language"], answer: 0 },
+    { category: "Web Development", text: "CSS is primarily used for:", options: ["Handling database queries", "Styling the appearance of web pages", "Making API requests", "Managing server configurations"], answer: 1 },
+    { category: "Web Development", text: "Which of these is a JavaScript framework?", options: ["Django", "Flask", "React", "Laravel"], answer: 2 },
+    { category: "Web Development", text: "\"Responsive design\" means:", options: ["Fast-loading websites", "Websites that adapt to different screen sizes", "Websites with many animations", "Websites built with AI assistance"], answer: 1 }
+  ],
+  "python": [
+    { category: "Python", text: "Python is primarily known for:", options: ["Building mobile apps", "Game development", "Readability and simplicity", "System-level performance"], answer: 2 },
+    { category: "Python", text: "What does \"pip\" do in Python?", options: ["Runs Python scripts", "Installs Python packages", "Tests Python code", "Compiles Python to bytecode"], answer: 1 },
+    { category: "Python", text: "A Python \"list\" is:", options: ["An ordered, mutable collection of items", "A key-value pair data structure", "A function definition", "A module import statement"], answer: 0 },
+    { category: "Python", text: "What is the output of print(2 ** 3)?", options: ["6", "8", "23", "An error"], answer: 1 }
+  ],
+  "ml": [
+    { category: "Machine Learning", text: "\"Training\" a model means:", options: ["Writing the algorithm manually", "Learning patterns from data", "Testing the model on new data", "Deploying the model to production"], answer: 1 },
+    { category: "Machine Learning", text: "\"Overfitting\" refers to:", options: ["Training on too little data", "Performing well on training data but poorly on new data", "Using too many features", "A type of neural network layer"], answer: 1 },
+    { category: "Machine Learning", text: "\"Supervised learning\" requires:", options: ["Learning with no data at all", "Labeled training data", "Only reward signals", "Unsupervised pattern detection"], answer: 1 },
+    { category: "Machine Learning", text: "The most common ML library in Python is:", options: ["NumPy", "Pandas", "scikit-learn", "Matplotlib"], answer: 2 }
+  ],
+  "devops": [
+    { category: "DevOps", text: "CI/CD stands for:", options: ["Code Integration / Code Deployment", "Continuous Integration / Continuous Delivery", "Cloud Infrastructure / Cloud Development", "Container Instance / Container Deployment"], answer: 1 },
+    { category: "DevOps", text: "Docker is primarily used for:", options: ["Writing code", "Containerizing applications", "Version control", "Load balancing traffic"], answer: 1 },
+    { category: "DevOps", text: "Kubernetes is:", options: ["A programming language", "A container orchestration platform", "A cloud provider", "A monitoring tool"], answer: 1 },
+    { category: "DevOps", text: "\"Infrastructure as Code\" means:", options: ["Writing infrastructure documentation", "Managing infrastructure through code files", "Coding in cloud environments", "Testing infrastructure manually"], answer: 1 }
+  ],
+  "mobile": [
+    { category: "Mobile Dev", text: "Flutter is primarily used for:", options: ["Web development", "Cross-platform mobile app development", "Machine learning", "Database management"], answer: 1 },
+    { category: "Mobile Dev", text: "React Native allows developers to:", options: ["Build web apps only", "Build mobile apps using JavaScript", "Build desktop applications", "Build AI models"], answer: 1 },
+    { category: "Mobile Dev", text: "APK in Android development is:", options: ["Android Programming Kit", "Android Package file", "Application Processing Key", "Advanced Programming Kernel"], answer: 1 },
+    { category: "Mobile Dev", text: "\"Hot reload\" in Flutter means:", options: ["Restarting the app completely", "Seeing code changes instantly without full restart", "Reloading the database", "Updating app assets from the server"], answer: 1 }
+  ],
+  "ui-ux": [
+    { category: "UI/UX", text: "\"UX\" stands for:", options: ["Ultimate Experience", "User Experience", "Unified Extension", "User Execution"], answer: 1 },
+    { category: "UI/UX", text: "A \"wireframe\" in design is:", options: ["A high-fidelity prototype", "A basic layout sketch of a user interface", "A design system", "A component library"], answer: 1 },
+    { category: "UI/UX", text: "\"Accessibility\" in UI design means:", options: ["Making apps load faster", "Designing for users with disabilities", "Adding animations", "Using consistent colors throughout"], answer: 1 },
+    { category: "UI/UX", text: "\"Affordance\" in UX refers to:", options: ["How much a product costs to design", "Properties of an object that suggest how it should be used", "The responsiveness of a design", "The font size in a UI"], answer: 1 }
+  ]
+};
+
+// ──────────────────────────────────────────────────────────────
+// State
+// ──────────────────────────────────────────────────────────────
+let selectedDomain = null;
+let questions = [];
+let currentQ = 0;
+let score = 0;
+let answers = [];  // {selected, correct, text}
+
+// ──────────────────────────────────────────────────────────────
+// Domain selection
+// ──────────────────────────────────────────────────────────────
+function selectDomain(el) {
+  document.querySelectorAll('.domain-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedDomain = el.dataset.domain;
+  document.getElementById('start-btn').disabled = false;
+}
+
+// ──────────────────────────────────────────────────────────────
+// Start quiz
+// ──────────────────────────────────────────────────────────────
+function startQuiz() {
+  if (!selectedDomain) return;
+  questions = [...GENERAL_QUESTIONS, ...DOMAIN_QUESTIONS[selectedDomain]];
+  currentQ = 0;
+  score = 0;
+  answers = [];
+  showScreen('screen-question');
+  renderQuestion();
+}
+
+// ──────────────────────────────────────────────────────────────
+// Render current question
+// ──────────────────────────────────────────────────────────────
+function renderQuestion() {
+  const q = questions[currentQ];
+  const total = questions.length;
+
+  document.getElementById('prog-label').textContent = `Question ${currentQ + 1} of ${total}`;
+  document.getElementById('prog-count').textContent = `${score} correct`;
+  document.getElementById('prog-fill').style.width = `${(currentQ / total) * 100}%`;
+  document.getElementById('q-category').textContent = q.category;
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('next-btn').style.display = 'none';
+
+  const LETTERS = ['A', 'B', 'C', 'D'];
+  const container = document.getElementById('q-options');
+  container.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'q-option';
+    btn.innerHTML = `<span class="opt-letter">${LETTERS[i]}</span>${opt}`;
+    btn.onclick = () => selectAnswer(i, q.answer, q.text);
+    container.appendChild(btn);
+  });
+}
+
+// ──────────────────────────────────────────────────────────────
+// Handle answer selection
+// ──────────────────────────────────────────────────────────────
+function selectAnswer(chosen, correct, qText) {
+  const opts = document.querySelectorAll('.q-option');
+  opts.forEach(o => o.disabled = true);
+
+  const isCorrect = chosen === correct;
+  if (isCorrect) score++;
+
+  opts[chosen].classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) opts[correct].classList.add('correct');
+
+  answers.push({ selected: chosen, correct, isCorrect, text: qText });
+
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.style.display = 'inline-flex';
+  if (currentQ === questions.length - 1) {
+    nextBtn.textContent = 'See Results  →';
+  } else {
+    nextBtn.textContent = 'Next Question  →';
+  }
+}
+
+// ──────────────────────────────────────────────────────────────
+// Next question / finish
+// ──────────────────────────────────────────────────────────────
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+// ──────────────────────────────────────────────────────────────
+// Show results
+// ──────────────────────────────────────────────────────────────
+function showResults() {
+  const total = questions.length;
+  const pct = Math.round((score / total) * 100);
+
+  // Animate score ring
+  document.getElementById('result-ring').style.setProperty('--pct', `${pct}%`);
+  document.getElementById('result-score').textContent = score;
+  document.getElementById('result-total').textContent = `/ ${total}`;
+
+  // Message based on score
+  let title, sub, badgeClass, badgeText;
+  if (score >= 7) {
+    title = '🔥 Outstanding!';
+    sub = `You scored ${score}/${total} — that's impressive! You clearly know your domain well. Your application is going to stand out.`;
+    badgeClass = 'pass';
+    badgeText = '✅ Eligible to Apply';
+  } else if (score >= 5) {
+    title = '👏 Well Done!';
+    sub = `You scored ${score}/${total}. Solid fundamentals — the internship will sharpen the rest. You're ready to apply!`;
+    badgeClass = 'pass';
+    badgeText = '✅ Eligible to Apply';
+  } else if (score >= 3) {
+    title = '💪 Good Effort!';
+    sub = `You scored ${score}/${total}. Don't worry — the internship is built for learners exactly like you. Apply and grow with us!`;
+    badgeClass = 'try-harder';
+    badgeText = '🎯 Apply & Level Up';
+  } else {
+    title = '🌱 Just Getting Started!';
+    sub = `You scored ${score}/${total}. Everyone starts somewhere! Our internship is designed to take you from beginner to contributor. Apply now!`;
+    badgeClass = 'try-harder';
+    badgeText = '🎯 Apply & Level Up';
+  }
+
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent = sub;
+  const badge = document.getElementById('result-badge');
+  badge.className = `result-badge ${badgeClass}`;
+  badge.textContent = badgeText;
+
+  // Save to localStorage
+  const result = {
+    passed: true,
+    score,
+    total,
+    pct,
+    domain: selectedDomain,
+    completedAt: new Date().toISOString()
+  };
+  localStorage.setItem('skillme_quiz_result', JSON.stringify(result));
+
+  // Populate breakdown
+  const list = document.getElementById('breakdown-list');
+  list.innerHTML = '';
+  questions.forEach((q, i) => {
+    const a = answers[i];
+    const item = document.createElement('div');
+    item.className = 'breakdown-item';
+    item.innerHTML = `<span class="breakdown-q">${q.text}</span><span class="breakdown-result">${a?.isCorrect ? '✅' : '❌'}</span>`;
+    list.appendChild(item);
+  });
+
+  showScreen('screen-result');
+}
+
+// ──────────────────────────────────────────────────────────────
+// Review toggle
+// ──────────────────────────────────────────────────────────────
+function reviewAnswers() {
+  const bd = document.getElementById('breakdown');
+  bd.style.display = bd.style.display === 'none' ? 'block' : 'none';
+}
+
+// ──────────────────────────────────────────────────────────────
+// Proceed to apply
+// ──────────────────────────────────────────────────────────────
+function proceedToApply() {
+  window.location.href = 'apply.html';
+}
+
+// ──────────────────────────────────────────────────────────────
+// Screen transitions
+// ──────────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  el.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ──────────────────────────────────────────────────────────────
+// Check if quiz already completed — don't re-do it
+// ──────────────────────────────────────────────────────────────
+(function () {
+  const existing = localStorage.getItem('skillme_quiz_result');
+  if (existing) {
+    try {
+      const r = JSON.parse(existing);
+      // Show a small banner if they already did it
+      const banner = document.createElement('div');
+      banner.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#14142a;border:1px solid rgba(212,168,83,0.3);padding:12px 20px;border-radius:10px;font-size:13px;color:#d4a853;z-index:999;cursor:pointer;';
+      banner.innerHTML = `✅ Quiz done (${r.score}/${r.total}) · <u onclick="localStorage.removeItem('skillme_quiz_result');location.reload()">Retake</u> · <a href="apply.html" style="color:#818cf8;text-decoration:underline;">Apply →</a>`;
+      document.body.appendChild(banner);
+    } catch (e) {}
+  }
+})();
+</script>
+</body>
+</html>

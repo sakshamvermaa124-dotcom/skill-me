@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Your Offer Letter — SkillMe{% endblock %}
+
+{% block body %}
+<p class="greeting">Welcome aboard, {{ first_name }}! 🚀</p>
+<p class="lead">
+  We are delighted to offer you a position as an intern at <strong>SkillMe</strong>.
+  This letter confirms your enrollment in the <strong>{{ domain_label }}</strong> internship program.
+</p>
+
+<div class="divider"></div>
+
+<!-- Offer Letter formal block -->
+<div class="info-box" style="border-color:rgba(212,168,83,0.3); background:rgba(212,168,83,0.05);">
+  <p style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:#d4a853; font-weight:700; margin-bottom:16px;">Internship Offer Letter</p>
+  <div class="info-box-row">
+    <span class="info-label">Intern Name</span>
+    <span class="info-value">{{ first_name }} {{ last_name }}</span>
+  </div>
+  <div class="info-box-row">
+    <span class="info-label">Domain</span>
+    <span class="info-value">{{ domain_label }}</span>
+  </div>
+  <div class="info-box-row">
+    <span class="info-label">Batch</span>
+    <span class="info-value">Batch #{{ batch_number }}</span>
+  </div>
+  <div class="info-box-row">
+    <span class="info-label">Duration</span>
+    <span class="info-value">4 Weeks (Week 1 to Week 4)</span>
+  </div>
+  <div class="info-box-row">
+    <span class="info-label">Date of Joining</span>
+    <span class="info-value">{{ joining_date }}</span>
+  </div>
+  <div class="info-box-row">
+    <span class="info-label">Mode</span>
+    <span class="info-value">Remote (GitHub-based)</span>
+  </div>
+  <div class="info-box-row">
+    <span class="info-label">Status</span>
+    <span class="info-value"><span class="badge badge-green">Enrolled</span></span>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<p style="font-size:14px; color:#8a8aaa; margin-bottom:16px; letter-spacing:0.08em; text-transform:uppercase; font-weight:600;">How the internship works</p>
+
+<div class="steps">
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-text"><strong>Weekly GitHub Issues</strong><br />Every week you'll be assigned issues on your batch's GitHub repository. These are real coding tasks.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-text"><strong>Raise Pull Requests</strong><br />Fix the issue and raise a PR. Our CI runs automatically — pass the tests to mark it complete.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-text"><strong>Track Progress</strong><br />Your dashboard updates in real-time as PRs are merged. Watch your completion percentage grow.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-text"><strong>Earn Certificate</strong><br />Complete Week 4 → receive your verified certificate with a unique ID and LinkedIn-shareable format.</div>
+  </div>
+</div>
+
+{% if repo_url %}
+<div class="divider"></div>
+<div class="info-box" style="border-color:rgba(56,189,248,0.25); background:rgba(56,189,248,0.06);">
+  <p style="font-size:12px; color:#38bdf8; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:10px;">🔗 Your Batch Repository</p>
+  <p style="font-size:14px; color:#e8e8f0;">You've been invited to your batch GitHub repository. Accept the invitation to gain access:</p>
+  <p style="margin-top:10px;"><a href="{{ repo_url }}" style="color:#38bdf8; font-size:14px; font-weight:600;">{{ repo_url }}</a></p>
+</div>
+{% endif %}
+
+<div class="cta-wrap">
+  <a href="{{ dashboard_url }}" class="cta-btn">Go to My Dashboard</a><br />
+  {% if repo_url %}
+  <a href="{{ repo_url }}" class="cta-btn-outline">View Batch Repository</a>
+  {% endif %}
+</div>
+
+<p style="font-size:13px; color:#555575; text-align:center;">
+  By accepting this internship, you agree to work professionally, raise genuine PRs, and respect the community code of conduct.
+</p>
+{% endblock %}

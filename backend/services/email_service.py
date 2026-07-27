@@ -1,0 +1,268 @@
+"""
+SkillMe — Email Service (Brevo SMTP relay)
+Sends branded HTML emails for key student lifecycle events.
+
+All public methods are async and never raise — email failures are logged
+but never propagate to crash the calling API endpoint.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import logging
+import smtplib
+import ssl
+from datetime import datetime, timedelta
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from pathlib import Path
+
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+from config import settings
+
+logger = logging.getLogger(__name__)
+
+# ── Template engine ─────────────────────────────────────────────────────────
+_TEMPLATE_DIR = Path(__file__).parent.parent / "templates" / "emails"
+
+_jinja_env = Environment(
+    loader=FileSystemLoader(str(_TEMPLATE_DIR)),
+    autoescape=select_autoescape(["html"]),
+)
+
+
+def _render(template_name: str, **ctx) -> str:
+    """Render a Jinja2 HTML email template with the given context."""
+    ctx.setdefault("frontend_url", settings.frontend_url)
+    ctx.setdefault("dashboard_url", f"{settings.frontend_url}/dashboard.html")
+    tpl = _jinja_env.get_template(template_name)
+    return tpl.render(**ctx)
+
+
+# ── SMTP sender (sync, called inside asyncio.to_thread) ─────────────────────
+
+def _send_sync(to_email: str, to_name: str, subject: str, html_body: str) -> None:
+    """
+    Low-level SMTP send via Brevo relay.
+    Runs synchronously — always call via asyncio.to_thread().
+    """
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = f"{settings.smtp_from_name} <{settings.smtp_from_email}>"
+    msg["To"] = f"{to_name} <{to_email}>" if to_name else to_email
+    msg["Reply-To"] = settings.smtp_from_email
+
+    msg.attach(MIMEText(html_body, "html", "utf-8"))
+
+    ctx = ssl.create_default_context()
+    with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as server:
+        server.ehlo()
+        server.starttls(context=ctx)
+        server.login(settings.smtp_user, settings.smtp_password)
+        server.sendmail(settings.smtp_from_email, [to_email], msg.as_string())
+
+    logger.info("Email sent to %s | subject: %s", to_email, subject)
+
+
+async def _send(to_email: str, to_name: str, subject: str, html_body: str) -> bool:
+    """
+    Async wrapper around _send_sync.
+    Returns True on success, False on failure (never raises).
+    """
+    if not settings.email_enabled:
+        logger.info("[Email disabled] Would send '%s' to %s", subject, to_email)
+        return True
+    if not settings.smtp_user or not settings.smtp_password:
+        logger.warning("SMTP credentials not configured — skipping email to %s", to_email)
+        return False
+    try:
+        await asyncio.to_thread(_send_sync, to_email, to_name, subject, html_body)
+        return True
+    except Exception as exc:
+        logger.error("Failed to send email to %s: %s", to_email, exc)
+        return False
+
+
+# ── Domain label helper ───────────────────────────────────────────────────────
+
+def _domain_label(domain: str) -> str:
+    """Convert domain slug to human-readable label."""
+    mapping = {
+        "web-dev": "Web Development",
+        "python": "Python",
+        "ml": "Machine Learning",
+        "devops": "DevOps / Cloud",
+        "mobile": "Mobile Development",
+        "ui-ux": "UI/UX Design",
+    }
+    return mapping.get(domain, domain.replace("-", " ").title())
+
+
+# ── Public API ────────────────────────────────────────────────────────────────
+
+class EmailService:
+    """High-level email sending service for SkillMe lifecycle events."""
+
+    # 1. Application received
+    async def send_application_confirmation(
+        self,
+        first_name: str,
+        last_name: str,
+        email: str,
+        domain: str,
+        github_username: str = "",
+    ) -> bool:
+        html = _render(
+            "application_received.html",
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            domain_label=_domain_label(domain),
+            github_username=github_username,
+        )
+        return await _send(
+            email,
+            f"{first_name} {last_name}",
+            "✅ We received your SkillMe application!",
+            html,
+        )
+
+    # 2. Shortlisted
+    async def send_shortlist_notification(
+        self,
+        first_name: str,
+        last_name: str,
+        email: str,
+        domain: str,
+    ) -> bool:
+        html = _render(
+            "shortlisted.html",
+            first_name=first_name,
+            last_name=last_name,
+            domain_label=_domain_label(domain),
+        )
+        return await _send(
+            email,
+            f"{first_name} {last_name}",
+            "🎉 You've been shortlisted for SkillMe!",
+            html,
+        )
+
+    # 3. Offer letter / enrollment
+    async def send_offer_letter(
+        self,
+        first_name: str,
+        last_name: str,
+        email: str,
+        domain: str,
+        batch_number: int,
+        joining_date: str | None = None,
+        repo_url: str | None = None,
+    ) -> bool:
+        if not joining_date:
+            joining_date = (datetime.utcnow() + timedelta(days=1)).strftime("%d %B %Y")
+        html = _render(
+            "offer_letter.html",
+            first_name=first_name,
+            last_name=last_name,
+            domain_label=_domain_label(domain),
+            batch_number=batch_number,
+            joining_date=joining_date,
+            repo_url=repo_url or "",
+            dashboard_url=f"{settings.frontend_url}/dashboard.html",
+        )
+        return await _send(
+            email,
+            f"{first_name} {last_name}",
+            f"🚀 Your SkillMe Offer Letter — {_domain_label(domain)} Batch #{batch_number}",
+            html,
+        )
+
+    # 4. Weekly tasks assigned
+    async def send_weekly_tasks_notification(
+        self,
+        first_name: str,
+        last_name: str,
+        email: str,
+        domain: str,
+        batch_number: int,
+        week_number: int,
+        tasks: list[dict],
+        repo_url: str | None = None,
+    ) -> bool:
+        deadline = (datetime.utcnow() + timedelta(days=7)).strftime("%d %B %Y")
+        html = _render(
+            "weekly_tasks.html",
+            first_name=first_name,
+            last_name=last_name,
+            domain_label=_domain_label(domain),
+            batch_number=batch_number,
+            week_number=week_number,
+            tasks=tasks,
+            task_count=len(tasks),
+            deadline=deadline,
+            repo_url=repo_url or "",
+            dashboard_url=f"{settings.frontend_url}/dashboard.html",
+        )
+        return await _send(
+            email,
+            f"{first_name} {last_name}",
+            f"💻 Week {week_number} Tasks Are Live — SkillMe {_domain_label(domain)}",
+            html,
+        )
+
+    # 5. Certificate ready
+    async def send_certificate_ready(
+        self,
+        first_name: str,
+        last_name: str,
+        email: str,
+        domain: str,
+        batch_number: int,
+        cert_id: str,
+        issued_date: str | None = None,
+    ) -> bool:
+        if not issued_date:
+            issued_date = datetime.utcnow().strftime("%d %B %Y")
+        certificate_url = f"{settings.frontend_url}/certificate.html?email={email}"
+        verify_url = f"{settings.frontend_url}/certificate.html?cert_id={cert_id}"
+        html = _render(
+            "certificate_ready.html",
+            first_name=first_name,
+            last_name=last_name,
+            domain_label=_domain_label(domain),
+            batch_number=batch_number,
+            cert_id=cert_id,
+            issued_date=issued_date,
+            certificate_url=certificate_url,
+            verify_url=verify_url,
+        )
+        return await _send(
+            email,
+            f"{first_name} {last_name}",
+            f"🏆 Your SkillMe Certificate is Ready — {cert_id}",
+            html,
+        )
+
+    # Test utility
+    async def send_test_email(self, to_email: str) -> bool:
+        """Send a test email to verify SMTP configuration."""
+        html = _render(
+            "application_received.html",
+            first_name="Test",
+            last_name="User",
+            email=to_email,
+            domain_label="Web Development",
+            github_username="testuser",
+        )
+        return await _send(
+            to_email,
+            "Test User",
+            "🧪 SkillMe Email Test — SMTP Working!",
+            html,
+        )
+
+
+# Singleton instance
+email_service = EmailService()

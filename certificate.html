@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Certificate of Completion — SkillMe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --gold: #d4a853;
+      --gold-light: #f0c97a;
+      --purple: #818cf8;
+      --blue: #38bdf8;
+      --emerald: #34d399;
+      --bg: #04040a;
+      --surface: #0b0b14;
+      --border: rgba(212,168,83,0.25);
+      --text: #f5f0e8;
+      --muted: #8a8a9a;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #000;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 32px 16px;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+    }
+
+    /* ─── ACTION BAR (hidden on print) ─── */
+    .action-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .action-bar .badge {
+      background: rgba(212,168,83,0.12);
+      border: 1px solid rgba(212,168,83,0.3);
+      color: var(--gold);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .btn-download {
+      display: flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, #d4a853, #f0c97a);
+      color: #000;
+      font-weight: 700;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.88rem;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn-download:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-verify {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text);
+      font-weight: 500;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.88rem;
+      padding: 10px 22px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-verify:hover { background: rgba(255,255,255,0.1); }
+
+    /* ─── CERTIFICATE CARD ─── */
+    .cert-wrap {
+      width: 100%;
+      max-width: 960px;
+      position: relative;
+    }
+
+    .certificate {
+      width: 100%;
+      aspect-ratio: 1.4142 / 1;   /* A4 landscape ratio */
+      background: var(--bg);
+      position: relative;
+      overflow: hidden;
+      border-radius: 4px;
+      box-shadow: 0 60px 120px rgba(0,0,0,0.9), 0 0 0 1px rgba(212,168,83,0.2);
+    }
+
+    /* Aurora glows */
+    .cert-glow-1 {
+      position: absolute; top: -15%; left: -10%;
+      width: 55%; height: 55%;
+      background: radial-gradient(circle, rgba(129,140,248,0.14) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cert-glow-2 {
+      position: absolute; bottom: -15%; right: -8%;
+      width: 50%; height: 50%;
+      background: radial-gradient(circle, rgba(56,189,248,0.10) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cert-glow-3 {
+      position: absolute; top: 30%; left: 50%; transform: translateX(-50%);
+      width: 60%; height: 40%;
+      background: radial-gradient(ellipse, rgba(212,168,83,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Grid pattern overlay */
+    .cert-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(212,168,83,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(212,168,83,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+
+    /* Outer border */
+    .cert-border-outer {
+      position: absolute;
+      inset: 16px;
+      border: 1px solid rgba(212,168,83,0.25);
+      border-radius: 2px;
+      pointer-events: none;
+    }
+    /* Inner border */
+    .cert-border-inner {
+      position: absolute;
+      inset: 22px;
+      border: 1px solid rgba(212,168,83,0.10);
+      border-radius: 1px;
+      pointer-events: none;
+    }
+
+    /* Corner ornaments */
+    .corner {
+      position: absolute;
+      width: 36px; height: 36px;
+      pointer-events: none;
+    }
+    .corner::before, .corner::after {
+      content: '';
+      position: absolute;
+      background: var(--gold);
+    }
+    .corner::before { width: 100%; height: 2px; top: 0; left: 0; }
+    .corner::after  { width: 2px; height: 100%; top: 0; left: 0; }
+    .corner.tl { top: 14px; left: 14px; }
+    .corner.tr { top: 14px; right: 14px; transform: scaleX(-1); }
+    .corner.bl { bottom: 14px; left: 14px; transform: scaleY(-1); }
+    .corner.br { bottom: 14px; right: 14px; transform: scale(-1); }
+
+    /* Content layer */
+    .cert-content {
+      position: absolute; inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4% 8%;
+    }
+
+    /* ─── HEADER ─── */
+    .cert-header {
+      text-align: center;
+      width: 100%;
+    }
+    .cert-logo {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      margin-bottom: 8px;
+    }
+    .cert-logo-circle {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, #818cf8, #38bdf8);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700; font-size: 16px; color: #fff;
+      flex-shrink: 0;
+    }
+    .cert-logo-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700; font-size: clamp(0.9rem, 1.8vw, 1.2rem);
+      letter-spacing: 0.05em; color: var(--text);
+    }
+    .cert-logo-name span { color: var(--purple); }
+    .cert-tagline {
+      font-size: clamp(0.5rem, 1vw, 0.65rem);
+      color: var(--muted);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* Gold divider */
+    .cert-divider {
+      width: 100%;
+      display: flex; align-items: center; gap: 12px;
+      margin: 6px 0;
+    }
+    .cert-divider-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(212,168,83,0.5), transparent); }
+    .cert-divider-diamond {
+      width: 6px; height: 6px; background: var(--gold);
+      transform: rotate(45deg); flex-shrink: 0;
+    }
+
+    /* ─── BODY ─── */
+    .cert-body {
+      text-align: center;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    .cert-certify-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(0.7rem, 1.4vw, 1rem);
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+    .cert-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 700;
+      font-size: clamp(1.6rem, 5vw, 3.4rem);
+      color: var(--text);
+      line-height: 1;
+      margin: 4px 0;
+      text-shadow: 0 2px 20px rgba(212,168,83,0.15);
+    }
+    .cert-name-underline {
+      height: 1.5px;
+      background: linear-gradient(90deg, transparent, var(--purple), transparent);
+      width: 70%;
+      margin: 0 auto 8px;
+    }
+    .cert-completed-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(0.65rem, 1.3vw, 0.95rem);
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .cert-domain {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: clamp(0.85rem, 2.2vw, 1.5rem);
+      color: var(--blue);
+      letter-spacing: 0.02em;
+    }
+    .cert-batch-info {
+      font-size: clamp(0.5rem, 1.1vw, 0.72rem);
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      margin-top: 4px;
+    }
+
+    /* ─── FOOTER ─── */
+    .cert-footer {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: flex-end;
+      gap: 16px;
+    }
+    .cert-footer-col { display: flex; flex-direction: column; gap: 2px; }
+    .cert-footer-col.center { align-items: center; }
+    .cert-footer-col.right { align-items: flex-end; }
+    .cert-footer-label {
+      font-size: clamp(0.42rem, 0.85vw, 0.58rem);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .cert-footer-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: clamp(0.55rem, 1.1vw, 0.82rem);
+      color: var(--text);
+    }
+    .cert-footer-value.gold { color: var(--gold); letter-spacing: 0.05em; }
+    .cert-sig-line {
+      width: 100px; height: 1px;
+      background: rgba(212,168,83,0.4);
+      margin-bottom: 2px;
+    }
+    .cert-sig-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(0.55rem, 1.1vw, 0.8rem);
+      color: var(--muted);
+    }
+
+    /* Colored accent strips at bottom */
+    .cert-accent-bar {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #818cf8, #38bdf8, #34d399, #d4a853);
+    }
+
+    /* ─── STATUS SECTION (not printed) ─── */
+    .verify-section {
+      margin-top: 24px;
+      width: 100%;
+      max-width: 960px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .verify-icon {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: rgba(52,211,153,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .verify-text strong { display: block; font-size: 0.88rem; margin-bottom: 2px; }
+    .verify-text span { font-size: 0.78rem; color: var(--muted); }
+    .loading-state { color: var(--muted); font-size: 0.88rem; }
+
+    /* ─── PRINT STYLES ─── */
+    @media print {
+      body { background: #fff; padding: 0; }
+      .action-bar, .verify-section { display: none !important; }
+      .cert-wrap { max-width: 100%; }
+      .certificate {
+        box-shadow: none;
+        border-radius: 0;
+        aspect-ratio: auto;
+        height: 100vh;
+      }
+    }
+  </style>
+  <script src="config.js"></script>`n</head>
+<body>
+
+<!-- Action Bar -->
+<div class="action-bar" id="action-bar">
+  <div class="badge" id="cert-id-badge">Loading...</div>
+  <button class="btn-download" onclick="downloadPDF()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+    Download PDF
+  </button>
+  <button class="btn-verify" onclick="window.print()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+      <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+      <rect x="6" y="14" width="12" height="8"/>
+    </svg>
+    Print
+  </button>
+</div>
+
+<!-- Certificate -->
+<div class="cert-wrap">
+  <div class="certificate" id="certificate">
+    <!-- Background elements -->
+    <div class="cert-glow-1"></div>
+    <div class="cert-glow-2"></div>
+    <div class="cert-glow-3"></div>
+    <div class="cert-grid"></div>
+
+    <!-- Borders -->
+    <div class="cert-border-outer"></div>
+    <div class="cert-border-inner"></div>
+
+    <!-- Corner ornaments -->
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+
+    <!-- Content -->
+    <div class="cert-content">
+
+      <!-- Header -->
+      <div class="cert-header">
+        <div class="cert-logo">
+          <div class="cert-logo-circle">S</div>
+          <div class="cert-logo-name">Skill<span>Me</span></div>
+        </div>
+        <div class="cert-tagline">Internship Platform &nbsp;·&nbsp; Certificate of Completion</div>
+        <div class="cert-divider" style="margin-top:8px;">
+          <div class="cert-divider-line"></div>
+          <div class="cert-divider-diamond"></div>
+          <div class="cert-divider-line"></div>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="cert-body">
+        <div class="cert-certify-text">This is to certify that</div>
+        <div class="cert-name" id="cert-name">Saksham Verma</div>
+        <div class="cert-name-underline"></div>
+        <div class="cert-completed-text">has successfully completed the</div>
+        <div class="cert-domain" id="cert-domain">Web Development Internship</div>
+        <div class="cert-batch-info" id="cert-batch-info">Batch #1 &nbsp;·&nbsp; 4 Weeks &nbsp;·&nbsp; Real-World GitHub Projects</div>
+      </div>
+
+      <!-- Footer -->
+      <div class="cert-footer">
+        <div class="cert-footer-col">
+          <div class="cert-footer-label">Date of Issue</div>
+          <div class="cert-footer-value" id="cert-date">—</div>
+        </div>
+        <div class="cert-footer-col center">
+          <div class="cert-footer-label">Certificate ID</div>
+          <div class="cert-footer-value gold" id="cert-id">SM-XXXX-XXXX-XXXX</div>
+        </div>
+        <div class="cert-footer-col right">
+          <div class="cert-sig-line"></div>
+          <div class="cert-sig-name">Authorised Signatory, SkillMe</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Accent bar -->
+    <div class="cert-accent-bar"></div>
+  </div>
+</div>
+
+<!-- Verify Section -->
+<div class="verify-section" id="verify-section">
+  <div class="loading-state">Loading certificate data...</div>
+</div>
+
+<script>
+  const API = window.SKILLME_API || 'http://localhost:8000';
+  const params = new URLSearchParams(window.location.search);
+  let studentId  = params.get('student_id');
+  let batchId    = params.get('batch_id');
+  const certId   = params.get('cert_id');
+  const email    = params.get('email');       // preferred: resolve everything from email
+  const nameParam   = params.get('name');
+  const domainParam = params.get('domain');
+  let resolvedName  = nameParam || '';        // filled in from API if not in URL
+
+  // Show initial placeholder
+  populateCertificate({
+    holder: nameParam || 'Loading...',
+    domain: domainParam || 'web-dev',
+    batch_number: batchId || '?',
+    issued_at: new Date().toISOString(),
+    cert_id: 'Verifying...',
+  });
+
+  async function loadCertificate() {
+    // Mode 1: direct cert_id verification
+    if (certId) {
+      await verifyCert(certId);
+      return;
+    }
+
+    // Mode 2: email-based lookup (most reliable)
+    if (email) {
+      try {
+        const res = await fetch(`${API}/api/students/progress/${encodeURIComponent(email)}`);
+        if (!res.ok) throw new Error('Student not found');
+        const data = await res.json();
+        studentId = data.student?.id;
+        if (data.student?.name) resolvedName = data.student.name;
+        const prog = data.progress;
+        if (prog && prog.length > 0) batchId = prog[0].batch_id;
+      } catch(e) {
+        showError(`Could not find student by email: ${e.message}`);
+        return;
+      }
+    }
+
+    if (!studentId) {
+      showError('No student identified. Use ?email=you@example.com or ?student_id=X&batch_id=Y');
+      return;
+    }
+
+    // Resolve batchId from enrollment if still missing
+    if (!batchId) {
+      try {
+        const r = await fetch(`${API}/api/certificates/download/${studentId}/0`);
+        if (r.ok) { /* batch resolved server-side */ }
+      } catch(_) {}
+    }
+
+    await triggerAndDisplay();
+  }
+
+  async function triggerAndDisplay() {
+    // Trigger PDF generation + certificate issuance (GET causes it to be recorded)
+    const bid = batchId || 0;
+    try {
+      const dlRes = await fetch(`${API}/api/certificates/download/${studentId}/${bid}`);
+      if (!dlRes.ok) {
+        const err = await dlRes.json().catch(() => ({detail: dlRes.statusText}));
+        showError(err.detail || 'Certificate generation failed');
+        return;
+      }
+      // Fetch cert metadata via the new public metadata endpoint
+      const metaRes = await fetch(`${API}/api/certificates/metadata/${studentId}/${bid}`);
+      if (metaRes.ok) {
+        const myCert = await metaRes.json();
+        batchId = myCert.batch_id;
+        const certHolder = resolvedName || `${myCert.first_name} ${myCert.last_name}`;
+        populateCertificate({
+          holder: certHolder,
+          domain: myCert.domain || domainParam || 'web-dev',
+          batch_number: myCert.batch_number,
+          issued_at: myCert.issued_at,
+          cert_id: myCert.cert_id,
+        });
+        showVerifyBadge(true, { holder: certHolder, issued_at: myCert.issued_at });
+        return;
+      }
+      // Fallback: show with what we know (name from API if available)
+      populateCertificate({
+        holder: resolvedName || `Student #${studentId}`,
+        domain: domainParam || 'web-dev',
+        batch_number: batchId || '?',
+        issued_at: new Date().toISOString(),
+        cert_id: `SM-${String(studentId).padStart(4,'0')}-CERT`,
+      });
+      showVerifyBadge(true, { holder: resolvedName, issued_at: new Date().toISOString() });
+    } catch(e) {
+      showError(`Connection error: ${e.message}. Is the backend running?`);
+    }
+  }
+
+  async function verifyCert(id, ctx = {}) {
+    try {
+      const res = await fetch(`${API}/api/certificates/verify/${id}`);
+      if (!res.ok) throw new Error('Not found');
+      const data = await res.json();
+      populateCertificate(data);
+      showVerifyBadge(true, data);
+    } catch(e) {
+      // Certificate not yet issued — populate from URL params if available
+      if (ctx.studentId && ctx.batchId) {
+        const name = params.get('name') || `Student #${ctx.studentId}`;
+        const domain = params.get('domain') || 'Internship';
+        populateCertificate({
+          holder: name, domain, batch_number: ctx.batchId,
+          issued_at: new Date().toISOString(),
+          cert_id: id,
+        });
+        showVerifyBadge(false);
+      } else {
+        showError('Certificate not found. The ID may be invalid or expired.');
+      }
+    }
+  }
+
+  function populateCertificate(data) {
+    const name   = data.holder || data.student_name || 'Student';
+    const domain = (data.domain || 'Web Development').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const batch  = data.batch_number || '1';
+    const id     = data.cert_id || '';
+    const date   = data.issued_at
+      ? new Date(data.issued_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+      : new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    document.getElementById('cert-name').textContent = name;
+    document.getElementById('cert-domain').textContent = `${domain} Developer Internship`;
+    document.getElementById('cert-batch-info').textContent = `Batch #${batch} · 4 Weeks · Real-World GitHub Projects`;
+    document.getElementById('cert-date').textContent = date;
+    document.getElementById('cert-id').textContent = id;
+    document.getElementById('cert-id-badge').textContent = id || 'PREVIEW';
+    document.title = `Certificate — ${name} — SkillMe`;
+  }
+
+  function showVerifyBadge(valid, data = {}) {
+    const el = document.getElementById('verify-section');
+    if (valid) {
+      el.innerHTML = `
+        <div class="verify-icon">✅</div>
+        <div class="verify-text">
+          <strong>Certificate Verified</strong>
+          <span>This certificate is genuine and was issued by SkillMe to ${data.holder || ''} on ${data.issued_at ? new Date(data.issued_at).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' }) : ''}.</span>
+        </div>`;
+    } else {
+      el.innerHTML = `
+        <div class="verify-icon" style="background:rgba(251,191,36,0.15);">⚠️</div>
+        <div class="verify-text">
+          <strong>Not Yet Verified</strong>
+          <span>This certificate preview has not been officially issued yet. Complete your internship to receive your official certificate.</span>
+        </div>`;
+    }
+  }
+
+  function showError(msg) {
+    document.getElementById('verify-section').innerHTML = `
+      <div class="verify-icon" style="background:rgba(251,113,133,0.15);">❌</div>
+      <div class="verify-text"><strong>Error</strong><span>${msg}</span></div>`;
+    document.getElementById('cert-id-badge').textContent = 'INVALID';
+  }
+
+  // Simple client-side cert ID generator matching the backend logic
+  function generateCertId(studentId, batchId) {
+    // This is a preview — actual ID comes from the server
+    return `SM-PREV-${String(studentId).padStart(4, '0')}-${String(batchId).padStart(4, '0')}`;
+  }
+
+  function downloadPDF() {
+    if (!studentId) {
+      alert('Cannot download: missing student_id in URL.');
+      return;
+    }
+    // Use batchId if known, otherwise try batch_id=0 which triggers enrollment lookup
+    const bid = batchId || 0;
+    const url = `${API}/api/certificates/download/${studentId}/${bid}`;
+    window.open(url, '_blank');
+  }
+
+  loadCertificate();
+</script>
+</body>
+</html>

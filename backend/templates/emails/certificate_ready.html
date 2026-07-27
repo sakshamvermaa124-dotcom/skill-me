@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Your Certificate is Ready — SkillMe{% endblock %}
+
+{% block body %}
+<p class="greeting">You did it, {{ first_name }}! 🏆</p>
+<p class="lead">
+  Congratulations on completing the <strong>{{ domain_label }}</strong> internship at SkillMe.
+  You've raised real PRs, made genuine open-source contributions, and earned your certificate.
+</p>
+
+<div style="text-align:center; margin: 20px 0;">
+  <span class="badge badge-gold" style="font-size:14px; padding:8px 24px;">🎓 Certificate Issued</span>
+</div>
+
+<div class="divider"></div>
+
+<div class="cert-id-box">
+  <div class="cert-id-label">Your Certificate ID</div>
+  <div class="cert-id-value">{{ cert_id }}</div>
+  <p style="font-size:12px; color:#8a8aaa; margin-top:10px;">
+    This unique ID can be used to verify your certificate on SkillMe.
+  </p>
+</div>
+
+<div class="info-box">
+  <div class="info-box-row">
+    <span class="info-label">Intern Name</span>
+    <span class="info-value">{{ first_name }} {{ last_name }}</span>
+  </div>
+  <div class="info-box-row">
+    <span class="info-label">Domain</span>
+    <span class="info-value">{{ domain_label }}</span>
+  </div>
+  <div class="info-box-row">
+    <span class="info-label">Batch</span>
+    <span class="info-value">Batch #{{ batch_number }}</span>
+  </div>
+  <div class="info-box-row">
+    <span class="info-label">Issued On</span>
+    <span class="info-value">{{ issued_date }}</span>
+  </div>
+  <div class="info-box-row">
+    <span class="info-label">Certificate ID</span>
+    <span class="info-value" style="color:#d4a853;">{{ cert_id }}</span>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="cta-wrap">
+  <a href="{{ certificate_url }}" class="cta-btn">📄 View & Download Certificate</a><br />
+  <a href="{{ verify_url }}" class="cta-btn-outline">🔍 Verify Certificate</a>
+</div>
+
+<div class="divider"></div>
+
+<p style="font-size:14px; color:#b0b0c8; margin-bottom:10px; font-weight:600;">Share your achievement 🌟</p>
+<p style="font-size:14px; color:#8a8aaa; line-height:1.7;">
+  Post on LinkedIn and mention <strong>@SkillMe</strong>. Verified certificates with real GitHub contributions
+  stand out to recruiters — make sure the world knows what you built!
+</p>
+
+<p style="font-size:13px; color:#555575; text-align:center; margin-top:20px;">
+  Verify this certificate publicly: <a href="{{ verify_url }}" style="color:#d4a853;">{{ verify_url }}</a>
+</p>
+{% endblock %}

@@ -1,0 +1,127 @@
+# SkillMe — CI Workflow
+# This workflow runs on every Pull Request to test student submissions.
+# Place this file in each template repo at: .github/workflows/ci.yml
+
+name: SkillMe CI — Test Submission
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Detect project type
+        id: detect
+        run: |
+          if [ -f "package.json" ]; then
+            echo "type=node" >> $GITHUB_OUTPUT
+          elif [ -f "requirements.txt" ] || [ -f "setup.py" ] || [ -f "pyproject.toml" ]; then
+            echo "type=python" >> $GITHUB_OUTPUT
+          elif [ -f "pom.xml" ]; then
+            echo "type=java" >> $GITHUB_OUTPUT
+          elif [ -f "pubspec.yaml" ]; then
+            echo "type=flutter" >> $GITHUB_OUTPUT
+          else
+            echo "type=unknown" >> $GITHUB_OUTPUT
+          fi
+
+      # ─── Node.js Projects ───
+      - name: Setup Node.js
+        if: steps.detect.outputs.type == 'node'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install & Test (Node.js)
+        if: steps.detect.outputs.type == 'node'
+        run: |
+          npm ci
+          npm test
+
+      # ─── Python Projects ───
+      - name: Setup Python
+        if: steps.detect.outputs.type == 'python'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install & Test (Python)
+        if: steps.detect.outputs.type == 'python'
+        run: |
+          pip install -r requirements.txt 2>/dev/null || true
+          pip install pytest 2>/dev/null || true
+          python -m pytest tests/ -v --tb=short 2>/dev/null || python -m pytest -v --tb=short
+
+      # ─── Java Projects ───
+      - name: Setup Java
+        if: steps.detect.outputs.type == 'java'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Test (Java)
+        if: steps.detect.outputs.type == 'java'
+        run: mvn test
+
+      # ─── Result Labeling ───
+      - name: Add success label
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['tests-passed', 'ready-to-merge']
+            });
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '✅ **All tests passed!** Great work on this submission. Your PR will be merged automatically.\n\n— SkillMe Bot 🤖'
+            });
+
+      - name: Add failure label
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Remove success label if it existed
+            try {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                name: 'tests-passed'
+              });
+            } catch (e) {}
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['tests-failed']
+            });
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '❌ **Tests failed.** Please review the CI output above, fix the failing tests, and push your changes. The tests will re-run automatically.\n\n💡 **Tip:** Run the tests locally before pushing:\n```bash\nnpm test     # Node.js\npytest       # Python\nmvn test     # Java\n```\n\n— SkillMe Bot 🤖'
+            });

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- SEO Meta Tags -->
+  <title>SkillMe — Build Real Projects. Earn Real Experience.</title>
+  <meta name="description" content="Join India's first open-source internship platform. Fix real GitHub issues, earn open-source contributions, and get a verified certificate. 4-week internship across 12+ domains.">
+  <meta name="keywords" content="internship, open source, github, coding, certificate, remote internship, software development, skillme">
+  <meta name="author" content="SkillMe">
+  <meta name="robots" content="index, follow">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="SkillMe — Build Real Projects. Earn Real Experience.">
+  <meta property="og:description" content="India's first open-source internship platform. Fix real GitHub issues. Earn verifiable certificates.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://skillme.in">
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SkillMe — Open Source Internships">
+  <meta name="twitter:description" content="Fix real GitHub issues. Earn open-source contributions + a verified certificate.">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%233b82f6'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='monospace' font-size='16' font-weight='bold'>S</text></svg>">
+  
+  <!-- Lenis Smooth Scroll -->
+  <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.25/dist/lenis.css">
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="style.css">
+  <script src="config.js"></script>`n</head>
+
+<body>
+  <!-- Aurora Background -->
+  <div class="aurora-bg" aria-hidden="true">
+    <div class="aurora-blob"></div>
+    <div class="aurora-blob"></div>
+    <div class="aurora-blob"></div>
+  </div>
+
+  <!-- ========== NAVBAR ========== -->
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <a href="#" class="nav-logo" id="nav-logo">
+        <span class="logo-icon">&gt;_</span>
+        <span>SkillMe</span>
+      </a>
+      
+      <div class="nav-links" id="nav-links">
+        <a href="#how-it-works">How It Works</a>
+        <a href="#domains">Domains</a>
+        <a href="#benefits">Benefits</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+        <a href="quiz.html" class="nav-cta" id="nav-apply-btn">Apply Now</a>
+      </div>
+      
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ========== HERO SECTION ========== -->
+  <section class="hero" id="hero">
+    <div class="grid-bg" aria-hidden="true"></div>
+    <div class="container">
+      <div class="hero-content reveal">
+        <div class="hero-badge">
+          <span class="dot"></span>
+          Applications Open — Batch Starting Soon
+        </div>
+        
+        <h1 class="hero-title">
+          <span class="line">Build Real Projects.</span>
+          <span class="line"><span class="gradient-text">Earn Real Experience.</span></span>
+        </h1>
+        
+        <p class="hero-description">
+          India's first open-source internship platform. Fix real GitHub issues, 
+          earn genuine open-source contributions, and get a verified certificate 
+          — all in 4 weeks.
+        </p>
+        
+        <div class="hero-actions">
+          <a href="quiz.html" class="btn-primary" id="hero-apply-btn">
+            Apply Now
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <a href="#how-it-works" class="btn-secondary" id="hero-learn-btn">
+            Learn More
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+          </a>
+        </div>
+        
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="stat-number">12+</div>
+            <div class="stat-label">Domains</div>
+          </div>
+          <div class="hero-stat">
+            <div class="stat-number">4 Weeks</div>
+            <div class="stat-label">Duration</div>
+          </div>
+          <div class="hero-stat">
+            <div class="stat-number">100%</div>
+            <div class="stat-label">Remote</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="hero-visual reveal reveal-delay-2">
+        <div class="terminal-card" id="terminal-card">
+          <div class="terminal-header">
+            <span class="terminal-dot red"></span>
+            <span class="terminal-dot yellow"></span>
+            <span class="terminal-dot green"></span>
+            <span class="terminal-title">~/skillme-internship</span>
+          </div>
+          <div class="terminal-body" id="terminal-body">
+            <!-- Terminal lines will be animated by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== HOW IT WORKS ========== -->
+  <section class="how-it-works" id="how-it-works">
+    <div class="grid-bg" aria-hidden="true"></div>
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          How It Works
+        </span>
+        <h2 class="section-title">
+          From Application to <span class="gradient-text">Certificate</span>
+        </h2>
+        <p class="section-subtitle">
+          A simple, transparent process. No hidden steps, no unnecessary complexity.
+        </p>
+      </div>
+      
+      <div class="steps-grid">
+        <div class="step-card reveal reveal-delay-1">
+          <div class="step-number">01</div>
+          <h3>Apply & Take Quiz</h3>
+          <p>Choose your domain, fill in your details, and take a short screening quiz to get shortlisted.</p>
+        </div>
+        
+        <div class="step-card reveal reveal-delay-2">
+          <div class="step-number">02</div>
+          <h3>Get Your Offer Letter</h3>
+          <p>Receive an official offer letter with your batch assignment and joining date. It's real.</p>
+        </div>
+        
+        <div class="step-card reveal reveal-delay-3">
+          <div class="step-number">03</div>
+          <h3>Fix Issues on GitHub</h3>
+          <p>Every week you get assigned real issues on GitHub repos. Raise PRs, fix bugs, build features.</p>
+        </div>
+        
+        <div class="step-card reveal reveal-delay-4">
+          <div class="step-number">04</div>
+          <h3>Earn Your Certificate</h3>
+          <p>Complete 4 weeks of work. Download your verified certificate with real GitHub proof.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== DOMAINS ========== -->
+  <section class="domains" id="domains">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          Domains
+        </span>
+        <h2 class="section-title">
+          Choose Your <span class="gradient-text">Track</span>
+        </h2>
+        <p class="section-subtitle">
+          12+ domains across the tech landscape. Pick the one that matches your interest and skill level.
+        </p>
+      </div>
+      
+      <div class="domains-grid">
+        <div class="domain-card reveal reveal-delay-1" id="domain-webdev">
+          <span class="domain-icon">🌐</span>
+          <h3>Web Development</h3>
+          <span class="domain-badge open">Open</span>
+        </div>
+        
+        <div class="domain-card reveal reveal-delay-1" id="domain-python">
+          <span class="domain-icon">🐍</span>
+          <h3>Python</h3>
+          <span class="domain-badge open">Open</span>
+        </div>
+        
+        <div class="domain-card reveal reveal-delay-2" id="domain-react">
+          <span class="domain-icon">⚛️</span>
+          <h3>React / Next.js</h3>
+          <span class="domain-badge open">Open</span>
+        </div>
+        
+        <div class="domain-card reveal reveal-delay-2" id="domain-node">
+          <span class="domain-icon">🟢</span>
+          <h3>Node.js / Express</h3>
+          <span class="domain-badge open">Open</span>
+        </div>
+        
+        <div class="domain-card reveal reveal-delay-3" id="domain-java">
+          <span class="domain-icon">☕</span>
+          <h3>Java / Spring Boot</h3>
+          <span class="domain-badge open">Open</span>
+        </div>
+        
+        <div class="domain-card reveal reveal-delay-3" id="domain-ml">
+          <span class="domain-icon">🤖</span>
+          <h3>Machine Learning</h3>
+          <span class="domain-badge open">Open</span>
+        </div>
+        
+        <div class="domain-card reveal reveal-delay-4" id="domain-datascience">
+          <span class="domain-icon">📊</span>
+          <h3>Data Science</h3>
+          <span class="domain-badge open">Open</span>
+        </div>
+        
+        <div class="domain-card reveal reveal-delay-4" id="domain-flutter">
+          <span class="domain-icon">📱</span>
+          <h3>Flutter / Mobile</h3>
+          <span class="domain-badge open">Open</span>
+        </div>
+        
+        <div class="domain-card reveal reveal-delay-5" id="domain-devops">
+          <span class="domain-icon">🔧</span>
+          <h3>DevOps / CI-CD</h3>
+          <span class="domain-badge open">Open</span>
+        </div>
+        
+        <div class="domain-card reveal reveal-delay-5" id="domain-cpp">
+          <span class="domain-icon">⚡</span>
+          <h3>C / C++ / DSA</h3>
+          <span class="domain-badge open">Open</span>
+        </div>
+        
+        <div class="domain-card reveal reveal-delay-6" id="domain-cloud">
+          <span class="domain-icon">☁️</span>
+          <h3>Cloud / AWS</h3>
+          <span class="domain-badge coming-soon">Coming Soon</span>
+        </div>
+        
+        <div class="domain-card reveal reveal-delay-6" id="domain-cyber">
+          <span class="domain-icon">🔒</span>
+          <h3>Cybersecurity</h3>
+          <span class="domain-badge coming-soon">Coming Soon</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== WHAT YOU GET ========== -->
+  <section class="benefits" id="benefits">
+    <div class="grid-bg" aria-hidden="true"></div>
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          Benefits
+        </span>
+        <h2 class="section-title">
+          What You <span class="gradient-text">Get</span>
+        </h2>
+        <p class="section-subtitle">
+          This isn't a course. This isn't a video tutorial. This is real work experience you can prove.
+        </p>
+      </div>
+      
+      <div class="benefits-grid">
+        <div class="benefit-card reveal reveal-delay-1" id="benefit-opensource">
+          <div class="benefit-icon">🔀</div>
+          <h3>Real Open Source Contributions</h3>
+          <p>Every PR you raise is a genuine GitHub contribution. Your profile lights up with real activity — not fake commits.</p>
+        </div>
+        
+        <div class="benefit-card reveal reveal-delay-2" id="benefit-certificate">
+          <div class="benefit-icon">📜</div>
+          <h3>Verified Certificate</h3>
+          <p>QR-coded, verifiable certificate with a unique ID. Anyone can validate it on our portal. LinkedIn-ready.</p>
+        </div>
+        
+        <div class="benefit-card reveal reveal-delay-3" id="benefit-structured">
+          <div class="benefit-icon">📋</div>
+          <h3>4-Week Structured Program</h3>
+          <p>Weekly tasks that progressively increase in difficulty. You're not left alone — there's a clear roadmap every week.</p>
+        </div>
+        
+        <div class="benefit-card reveal reveal-delay-4" id="benefit-github">
+          <div class="benefit-icon">🐙</div>
+          <h3>GitHub-Native Workflow</h3>
+          <p>Clone repos, fix issues, push code, raise PRs — the exact same workflow used at every tech company worldwide.</p>
+        </div>
+        
+        <div class="benefit-card reveal reveal-delay-5" id="benefit-batch">
+          <div class="benefit-icon">👥</div>
+          <h3>Batch-Based Experience</h3>
+          <p>You're part of a batch. You have peers. You collaborate, learn, and grow together throughout the internship.</p>
+        </div>
+        
+        <div class="benefit-card reveal reveal-delay-6" id="benefit-offer">
+          <div class="benefit-icon">📨</div>
+          <h3>Official Offer Letter</h3>
+          <p>Receive a proper internship offer letter with joining date, batch details, and domain assignment. It's official.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PRICING ========== -->
+  <section class="pricing" id="pricing">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          Pricing
+        </span>
+        <h2 class="section-title">
+          Simple, <span class="gradient-text">Transparent</span> Pricing
+        </h2>
+        <p class="section-subtitle">
+          The entire internship is free. You only pay when you want to download your verified certificate.
+        </p>
+      </div>
+      
+      <div class="pricing-wrapper">
+        <div class="pricing-card featured reveal" id="pricing-card">
+          <span class="pricing-popular">Most Popular</span>
+          <h3 class="pricing-title">Internship Certificate</h3>
+          <p class="pricing-description">Complete your 4-week internship and download your verified, LinkedIn-ready certificate.</p>
+          
+          <div class="pricing-amount">
+            <span class="currency">₹</span>
+            <span class="price">249</span>
+            <span class="original-price"></span>
+          </div>
+          <p class="pricing-period">One-time payment after completion</p>
+          
+          <ul class="pricing-features">
+            <li><span class="check">✓</span> Verified digital certificate with unique ID</li>
+            <li><span class="check">✓</span> QR code for instant verification</li>
+            <li><span class="check">✓</span> GitHub PR links on certificate</li>
+            <li><span class="check">✓</span> Internship duration & domain mentioned</li>
+            <li><span class="check">✓</span> "Add to LinkedIn" one-click integration</li>
+            <li><span class="check">✓</span> Public verification page on our website</li>
+            <li><span class="check">✓</span> Digital signature from SkillMe</li>
+          </ul>
+          
+          <a href="quiz.html" class="btn-primary" id="pricing-apply-btn">
+            Start Your Internship
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          
+          <div class="referral-callout" id="referral-callout">
+            <p>🎁 <strong>Refer a friend & get ₹50 off!</strong><br>Get your certificate for just ₹199. Max 1 referral per account.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== FAQ ========== -->
+  <section class="faq" id="faq">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+          FAQ
+        </span>
+        <h2 class="section-title">
+          Frequently Asked <span class="gradient-text">Questions</span>
+        </h2>
+      </div>
+      
+      <div class="faq-list reveal">
+        <div class="faq-item" id="faq-1">
+          <button class="faq-question" aria-expanded="false">
+            <span>What is the duration of the internship?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>The internship is 4 weeks (1 month) long. Each week, you'll receive new tasks with GitHub issues to solve. You'll work at your own pace within the weekly deadlines.</p>
+          </div>
+        </div>
+        
+        <div class="faq-item" id="faq-2">
+          <button class="faq-question" aria-expanded="false">
+            <span>Do I need prior experience to apply?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Basic knowledge of your chosen domain is recommended. You should know the fundamentals — we'll provide the issues and guidance. The screening quiz covers basics to make sure you're ready.</p>
+          </div>
+        </div>
+        
+        <div class="faq-item" id="faq-3">
+          <button class="faq-question" aria-expanded="false">
+            <span>How do the weekly tasks work?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Each week, you'll be assigned specific GitHub issues in your batch's repository. You need to fork the repo, fix the issues, and raise a Pull Request. Automated tests will verify your solution. It's the exact same workflow used at real tech companies.</p>
+          </div>
+        </div>
+        
+        <div class="faq-item" id="faq-4">
+          <button class="faq-question" aria-expanded="false">
+            <span>Is this a real internship?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Yes. You receive an official offer letter, work on real codebases, make real open-source contributions visible on your GitHub profile, and earn a verifiable certificate. Your GitHub activity is the proof.</p>
+          </div>
+        </div>
+        
+        <div class="faq-item" id="faq-5">
+          <button class="faq-question" aria-expanded="false">
+            <span>When do I need to pay?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>The entire internship — including all tasks, GitHub access, and learning — is completely free. You only pay ₹249 (or ₹199 with a referral) when you want to download your verified certificate after completing the 4 weeks.</p>
+          </div>
+        </div>
+        
+        <div class="faq-item" id="faq-6">
+          <button class="faq-question" aria-expanded="false">
+            <span>How does the referral discount work?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Refer one friend to SkillMe using your unique referral link. Once they sign up and join, you get ₹50 off — bringing your certificate price from ₹249 to ₹199. Maximum one referral discount per account.</p>
+          </div>
+        </div>
+        
+        <div class="faq-item" id="faq-7">
+          <button class="faq-question" aria-expanded="false">
+            <span>How is the certificate verified?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Every certificate has a unique ID and QR code. Anyone can visit our verification page, enter the ID, and see the certificate details including your name, domain, duration, and links to your actual GitHub PRs. It's fully verifiable and tamper-proof.</p>
+          </div>
+        </div>
+        
+        <div class="faq-item" id="faq-8">
+          <button class="faq-question" aria-expanded="false">
+            <span>Can I do multiple internships in different domains?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Absolutely! You can enroll in as many domains as you like. Each internship is independent with its own timeline, batch, and certificate. It's a great way to build a diverse portfolio.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== CTA SECTION ========== -->
+  <section class="cta-section" id="apply">
+    <div class="container">
+      <div class="cta-box reveal">
+        <span class="section-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+          Start Today
+        </span>
+        <h2 class="section-title">
+          Ready to Build Your <span class="gradient-text">Future?</span>
+        </h2>
+        <p class="section-subtitle">
+          Join thousands of students who are proving their skills through real open-source contributions. Your next interview starts here.
+        </p>
+        <a href="quiz.html" class="btn-primary" id="cta-apply-btn">
+          Apply for Internship
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="footer" id="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="nav-logo">
+            <span class="logo-icon">&gt;_</span>
+            <span>SkillMe</span>
+          </a>
+          <p>India's first open-source internship platform. Build real projects, earn real experience, prove what you can do.</p>
+          <div class="footer-social">
+            <a href="#" aria-label="LinkedIn" id="social-linkedin">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            </a>
+            <a href="#" aria-label="Instagram" id="social-instagram">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+            </a>
+            <a href="https://github.com/skillme-oss" aria-label="GitHub" id="social-github">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+            </a>
+          </div>
+        </div>
+        
+        <div class="footer-column">
+          <h4>Platform</h4>
+          <a href="#how-it-works">How It Works</a>
+          <a href="#domains">Domains</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#faq">FAQ</a>
+        </div>
+        
+        <div class="footer-column">
+          <h4>Resources</h4>
+          <a href="#">Blog</a>
+          <a href="#">Documentation</a>
+          <a href="#">Verify Certificate</a>
+          <a href="#">GitHub Org</a>
+        </div>
+        
+        <div class="footer-column">
+          <h4>Company</h4>
+          <a href="#">About Us</a>
+          <a href="#">Contact</a>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>© 2026 SkillMe. All rights reserved.</p>
+        <p>Built with ❤️ for India's students</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Lenis Smooth Scroll -->
+  <script src="https://unpkg.com/lenis@1.3.25/dist/lenis.min.js"></script>
+  
+  <!-- Custom Scripts -->
+  <script src="script.js"></script>
+</body>
+</html>

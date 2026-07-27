@@ -1,0 +1,506 @@
+"""
+SkillMe — Batch Service
+Orchestrates the batch lifecycle: creation, student enrollment,
+issue assignment, and progress tracking.
+"""
+
+import logging
+from datetime import datetime, timedelta
+from db.database import db
+from services.github_service import github_service
+from services.task_service import task_service
+
+logger = logging.getLogger("skillme.batch")
+
+# Issue templates per week (domain-agnostic structure)
+# These are overridden by domain-specific templates in the template repos
+WEEK_LABELS = {
+    1: {"label": "week-1", "difficulty": "easy", "prefix": "Week 1"},
+    2: {"label": "week-2", "difficulty": "easy", "prefix": "Week 2"},
+    3: {"label": "week-3", "difficulty": "medium", "prefix": "Week 3"},
+    4: {"label": "week-4", "difficulty": "hard", "prefix": "Week 4"},
+}
+
+
+class BatchService:
+    """Manages the full batch lifecycle."""
+
+    # ──────────────────────────────────────────────
+    # Batch CRUD
+    # ──────────────────────────────────────────────
+
+    async def create_batch(
+        self,
+        domain: str,
+        batch_number: int,
+        template_repo: str | None = None,
+        max_students: int = 30,
+        start_date: str | None = None,
+        webhook_url: str | None = None,
+    ) -> dict:
+        """
+        Create a new batch:
+        1. Generate a GitHub repo from the domain's template
+        2. Set up a webhook for PR events
+        3. Insert the batch record into the database
+
+        Args:
+            domain: Domain name (e.g., 'web-dev', 'python')
+            batch_number: Sequential batch number
+            template_repo: Template repo name (defaults to '{domain}-template')
+            max_students: Maximum students in this batch
+            start_date: ISO date string for batch start
+            webhook_url: URL for GitHub webhooks
+        """
+        template = template_repo or f"{domain}-template"
+        repo_name = f"{domain}-batch-{batch_number}"
+
+        # Check if batch already exists in DB
+        existing = await db.fetch_one(
+            "SELECT id FROM batches WHERE domain = ? AND batch_number = ?",
+            (domain, batch_number),
+        )
+        if existing:
+            raise ValueError(f"Batch {domain} #{batch_number} already exists (id={existing['id']})")
+
+        # Check if repo already exists on GitHub
+        existing_repo = await github_service.get_repo(repo_name)
+        if existing_repo:
+            logger.warning(f"Repo {repo_name} already exists on GitHub, using existing")
+        else:
+            # Create repo from template
+            await github_service.create_repo_from_template(
+                template_repo=template,
+                new_repo_name=repo_name,
+                description=f"SkillMe {domain.replace('-', ' ').title()} Internship — Batch {batch_number}",
+            )
+
+        # Set up webhook if URL provided
+        if webhook_url:
+            try:
+                await github_service.create_webhook(repo_name, webhook_url)
+            except Exception as e:
+                logger.error(f"Failed to create webhook for {repo_name}: {e}")
+
+        # Calculate dates
+        if not start_date:
+            start_date = datetime.utcnow().strftime("%Y-%m-%d")
+        end_date = (
+            datetime.strptime(start_date, "%Y-%m-%d") + timedelta(weeks=4)
+        ).strftime("%Y-%m-%d")
+
+        # Insert into database
+        batch_id = await db.insert(
+            """INSERT INTO batches (domain, batch_number, repo_name, status, max_students, start_date, end_date)
+               VALUES (?, ?, ?, 'active', ?, ?, ?)""",
+            (domain, batch_number, repo_name, max_students, start_date, end_date),
+        )
+
+        logger.info(f"Created batch: {domain} #{batch_number} (id={batch_id}, repo={repo_name})")
+
+        return {
+            "id": batch_id,
+            "domain": domain,
+            "batch_number": batch_number,
+            "repo_name": repo_name,
+            "status": "active",
+            "start_date": start_date,
+            "end_date": end_date,
+        }
+
+    async def get_batch(self, batch_id: int) -> dict | None:
+        """Get a batch by ID."""
+        return await db.fetch_one("SELECT * FROM batches WHERE id = ?", (batch_id,))
+
+    async def list_batches(self, status: str | None = None) -> list[dict]:
+        """List all batches, optionally filtered by status."""
+        if status:
+            return await db.fetch_all(
+                "SELECT * FROM batches WHERE status = ? ORDER BY created_at DESC", (status,)
+            )
+        return await db.fetch_all("SELECT * FROM batches ORDER BY created_at DESC")
+
+    async def update_batch_status(self, batch_id: int, status: str) -> bool:
+        """Update batch status."""
+        await db.execute(
+            "UPDATE batches SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+            (status, batch_id),
+        )
+        return True
+
+    # ──────────────────────────────────────────────
+    # Student Enrollment
+    # ──────────────────────────────────────────────
+
+    async def add_student_to_batch(self, student_id: int, batch_id: int) -> dict:
+        """
+        Enroll a student in a batch:
+        1. Add them as a GitHub collaborator
+        2. Create the enrollment record
+
+        Args:
+            student_id: Student database ID
+            batch_id: Batch database ID
+        """
+        # Get student and batch info
+        student = await db.fetch_one("SELECT * FROM students WHERE id = ?", (student_id,))
+        if not student:
+            raise ValueError(f"Student {student_id} not found")
+
+        batch = await db.fetch_one("SELECT * FROM batches WHERE id = ?", (batch_id,))
+        if not batch:
+            raise ValueError(f"Batch {batch_id} not found")
+
+        # Check enrollment count
+        enrolled_count = await db.fetch_one(
+            "SELECT COUNT(*) as count FROM enrollments WHERE batch_id = ? AND status != 'dropped'",
+            (batch_id,),
+        )
+        if enrolled_count and enrolled_count["count"] >= batch["max_students"]:
+            raise ValueError(f"Batch {batch_id} is full ({batch['max_students']} students max)")
+
+        # Check if already enrolled
+        existing = await db.fetch_one(
+            "SELECT id FROM enrollments WHERE student_id = ? AND batch_id = ?",
+            (student_id, batch_id),
+        )
+        if existing:
+            raise ValueError(f"Student {student_id} is already enrolled in batch {batch_id}")
+
+        # Add as GitHub collaborator
+        invite_status = "pending"
+        if student["github_username"] and batch["repo_name"]:
+            try:
+                await github_service.add_collaborator(
+                    batch["repo_name"], student["github_username"]
+                )
+                invite_status = "accepted"  # Optimistic — GitHub sends an invite
+            except Exception as e:
+                logger.error(f"Failed to add {student['github_username']} to {batch['repo_name']}: {e}")
+                invite_status = "failed"
+
+        # Create enrollment
+        enrollment_id = await db.insert(
+            """INSERT INTO enrollments (student_id, batch_id, status, github_invite_status)
+               VALUES (?, ?, 'active', ?)""",
+            (student_id, batch_id, invite_status),
+        )
+
+        # Update student status
+        await db.execute(
+            "UPDATE students SET status = 'enrolled', updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+            (student_id,),
+        )
+
+        logger.info(
+            f"Enrolled student {student['first_name']} {student['last_name']} "
+            f"(id={student_id}) in batch {batch['domain']} #{batch['batch_number']}"
+        )
+
+        return {
+            "enrollment_id": enrollment_id,
+            "student_id": student_id,
+            "batch_id": batch_id,
+            "github_invite_status": invite_status,
+        }
+
+    async def remove_student_from_batch(self, student_id: int, batch_id: int) -> bool:
+        """Remove a student from a batch and revoke GitHub access."""
+        student = await db.fetch_one("SELECT * FROM students WHERE id = ?", (student_id,))
+        batch = await db.fetch_one("SELECT * FROM batches WHERE id = ?", (batch_id,))
+
+        if student and batch and student["github_username"] and batch["repo_name"]:
+            try:
+                await github_service.remove_collaborator(
+                    batch["repo_name"], student["github_username"]
+                )
+            except Exception as e:
+                logger.error(f"Failed to remove collaborator: {e}")
+
+        await db.execute(
+            "UPDATE enrollments SET status = 'dropped' WHERE student_id = ? AND batch_id = ?",
+            (student_id, batch_id),
+        )
+        return True
+
+    # ──────────────────────────────────────────────
+    # Issue Assignment
+    # ──────────────────────────────────────────────
+
+    async def assign_week_from_task_repo(self, batch_id: int, week_number: int) -> list[dict]:
+        """
+        Fetch tasks from the central task repo for the batch's domain and week,
+        and assign them to all enrolled students.
+        """
+        batch = await db.fetch_one("SELECT * FROM batches WHERE id = ?", (batch_id,))
+        if not batch:
+            raise ValueError(f"Batch {batch_id} not found")
+
+        # 1. Fetch tasks for this domain and week
+        tasks = await task_service.fetch_tasks(batch["domain"], week_number)
+        if not tasks:
+            raise ValueError(f"No tasks found for {batch['domain']} week {week_number} in tasks repo.")
+
+        # 2. Get enrolled students
+        enrollments = await db.fetch_all(
+            "SELECT student_id FROM enrollments WHERE batch_id = ? AND status = 'active'",
+            (batch_id,),
+        )
+        if not enrollments:
+            raise ValueError("No active students enrolled in this batch.")
+
+        # 3. Build issue list (each student gets the same set of tasks)
+        issues_to_assign = []
+        for enrollment in enrollments:
+            for task in tasks:
+                issues_to_assign.append({
+                    "title": task["title"],
+                    "body": task["body"],
+                    "assigned_to_student_id": enrollment["student_id"],
+                })
+
+        # 4. Assign using existing logic
+        return await self.assign_weekly_issues(batch_id, week_number, issues_to_assign)
+
+    async def assign_weekly_issues(
+        self,
+        batch_id: int,
+        week_number: int,
+        issues: list[dict],
+    ) -> list[dict]:
+        """
+        Create and assign issues for a specific week.
+
+        Each issue dict should have:
+        - title: str
+        - body: str (markdown description of the task)
+        - assigned_to_student_id: int (student database ID)
+
+        Args:
+            batch_id: Batch database ID
+            week_number: Week number (1-4)
+            issues: List of issue definitions
+        """
+        batch = await db.fetch_one("SELECT * FROM batches WHERE id = ?", (batch_id,))
+        if not batch:
+            raise ValueError(f"Batch {batch_id} not found")
+
+        week_info = WEEK_LABELS.get(week_number, {"label": f"week-{week_number}", "difficulty": "medium", "prefix": f"Week {week_number}"})
+        created_issues = []
+
+        for issue_def in issues:
+            student_id = issue_def.get("assigned_to_student_id")
+            student = None
+            assignee_username = None
+
+            if student_id:
+                student = await db.fetch_one("SELECT * FROM students WHERE id = ?", (student_id,))
+                if student:
+                    assignee_username = student.get("github_username")
+
+            # Create issue on GitHub
+            title = f"[{week_info['prefix']}] {issue_def['title']}"
+            body = issue_def.get("body", "")
+
+            try:
+                gh_issue = await github_service.create_issue(
+                    repo_name=batch["repo_name"],
+                    title=title,
+                    body=body,
+                    assignee=assignee_username,
+                    labels=[week_info["label"], week_info["difficulty"]],
+                )
+                github_issue_number = gh_issue["number"]
+            except Exception as e:
+                logger.error(f"Failed to create GitHub issue: {e}")
+                github_issue_number = None
+
+            # Record in database
+            issue_id = await db.insert(
+                """INSERT INTO issues (batch_id, github_issue_number, title, description, week_number, difficulty, assigned_to, status)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    batch_id,
+                    github_issue_number,
+                    issue_def["title"],
+                    body,
+                    week_number,
+                    week_info["difficulty"],
+                    student_id,
+                    "assigned" if student_id else "open",
+                ),
+            )
+
+            # Initialize/update progress record
+            if student_id:
+                existing_progress = await db.fetch_one(
+                    "SELECT id, issues_assigned FROM progress WHERE student_id = ? AND batch_id = ? AND week = ?",
+                    (student_id, batch_id, week_number),
+                )
+                if existing_progress:
+                    await db.execute(
+                        "UPDATE progress SET issues_assigned = issues_assigned + 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                        (existing_progress["id"],),
+                    )
+                else:
+                    await db.insert(
+                        "INSERT INTO progress (student_id, batch_id, week, issues_assigned) VALUES (?, ?, ?, 1)",
+                        (student_id, batch_id, week_number),
+                    )
+
+            created_issues.append({
+                "id": issue_id,
+                "github_issue_number": github_issue_number,
+                "title": issue_def["title"],
+                "assigned_to": student_id,
+                "week": week_number,
+            })
+
+        logger.info(f"Assigned {len(created_issues)} issues for batch {batch_id}, week {week_number}")
+        return created_issues
+
+    # ──────────────────────────────────────────────
+    # Progress Tracking
+    # ──────────────────────────────────────────────
+
+    async def record_submission(
+        self,
+        batch_id: int,
+        student_github_username: str,
+        pr_number: int,
+        pr_url: str,
+    ) -> dict | None:
+        """
+        Record a PR submission from a student.
+        Called by the webhook handler when a PR is opened.
+        """
+        # Find the student
+        student = await db.fetch_one(
+            "SELECT * FROM students WHERE github_username = ?",
+            (student_github_username,),
+        )
+        if not student:
+            logger.warning(f"Unknown student GitHub user: {student_github_username}")
+            return None
+
+        # Find the enrollment
+        enrollment = await db.fetch_one(
+            "SELECT * FROM enrollments WHERE student_id = ? AND batch_id = ?",
+            (student["id"], batch_id),
+        )
+        if not enrollment:
+            logger.warning(f"Student {student_github_username} not enrolled in batch {batch_id}")
+            return None
+
+        # Find an assigned issue for this student in this batch
+        issue = await db.fetch_one(
+            """SELECT * FROM issues 
+               WHERE batch_id = ? AND assigned_to = ? AND status IN ('assigned', 'open')
+               ORDER BY week_number ASC LIMIT 1""",
+            (batch_id, student["id"]),
+        )
+
+        issue_id = issue["id"] if issue else None
+
+        # Record the submission
+        submission_id = await db.insert(
+            """INSERT INTO submissions (issue_id, student_id, batch_id, pr_url, pr_number, status)
+               VALUES (?, ?, ?, ?, ?, 'open')""",
+            (issue_id, student["id"], batch_id, pr_url, pr_number),
+        )
+
+        # Update issue status
+        if issue:
+            await db.execute(
+                "UPDATE issues SET status = 'in_progress' WHERE id = ?", (issue["id"],)
+            )
+
+        logger.info(f"Recorded submission: PR #{pr_number} by {student_github_username} in batch {batch_id}")
+        return {"submission_id": submission_id, "issue_id": issue_id}
+
+    async def update_submission_status(
+        self, batch_id: int, pr_number: int, status: str
+    ) -> bool:
+        """
+        Update the status of a PR submission.
+        Called by webhook when check_suite completes or PR is merged.
+        """
+        submission = await db.fetch_one(
+            "SELECT * FROM submissions WHERE batch_id = ? AND pr_number = ?",
+            (batch_id, pr_number),
+        )
+        if not submission:
+            return False
+
+        now = datetime.utcnow().isoformat()
+
+        if status == "merged":
+            await db.execute(
+                "UPDATE submissions SET status = 'merged', merged_at = ? WHERE id = ?",
+                (now, submission["id"]),
+            )
+            # Mark issue as completed
+            if submission["issue_id"]:
+                await db.execute(
+                    "UPDATE issues SET status = 'completed' WHERE id = ?",
+                    (submission["issue_id"],),
+                )
+                # Update progress
+                issue = await db.fetch_one(
+                    "SELECT week_number FROM issues WHERE id = ?", (submission["issue_id"],)
+                )
+                if issue:
+                    await db.execute(
+                        """UPDATE progress 
+                           SET issues_completed = issues_completed + 1, 
+                               prs_merged = prs_merged + 1,
+                               score = score + 25,
+                               updated_at = CURRENT_TIMESTAMP
+                           WHERE student_id = ? AND batch_id = ? AND week = ?""",
+                        (submission["student_id"], batch_id, issue["week_number"]),
+                    )
+        else:
+            await db.execute(
+                "UPDATE submissions SET status = ?, reviewed_at = ? WHERE id = ?",
+                (status, now, submission["id"]),
+            )
+
+        return True
+
+    async def get_batch_progress(self, batch_id: int) -> list[dict]:
+        """Get aggregated progress for all students in a batch."""
+        return await db.fetch_all(
+            """SELECT 
+                 s.id as student_id,
+                 s.first_name,
+                 s.last_name,
+                 s.github_username,
+                 e.status as enrollment_status,
+                 COALESCE(SUM(p.issues_assigned), 0) as total_assigned,
+                 COALESCE(SUM(p.issues_completed), 0) as total_completed,
+                 COALESCE(SUM(p.prs_merged), 0) as total_prs_merged,
+                 COALESCE(SUM(p.score), 0) as total_score
+               FROM enrollments e
+               JOIN students s ON e.student_id = s.id
+               LEFT JOIN progress p ON p.student_id = s.id AND p.batch_id = e.batch_id
+               WHERE e.batch_id = ?
+               GROUP BY s.id
+               ORDER BY total_score DESC""",
+            (batch_id,),
+        )
+
+    async def get_student_progress(self, student_id: int) -> list[dict]:
+        """Get all progress records for a student across all batches."""
+        return await db.fetch_all(
+            """SELECT 
+                 p.*, b.domain, b.batch_number, b.repo_name
+               FROM progress p
+               JOIN batches b ON p.batch_id = b.id
+               WHERE p.student_id = ?
+               ORDER BY b.domain, p.week""",
+            (student_id,),
+        )
+
+
+# Global service instance
+batch_service = BatchService()

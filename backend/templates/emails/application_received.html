@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Application Received — SkillMe{% endblock %}
+
+{% block body %}
+<p class="greeting">Hey {{ first_name }}! 👋</p>
+<p class="lead">
+  We just received your application for the <strong>{{ domain_label }}</strong> internship.
+  You're now officially in the queue — and that's a great first step!
+</p>
+
+<div class="divider"></div>
+
+<p style="font-size:14px; color:#8a8aaa; margin-bottom:16px; letter-spacing:0.08em; text-transform:uppercase; font-weight:600;">What happens next</p>
+
+<div class="steps">
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-text"><strong>Review (2–3 days)</strong><br />Our team reviews all applications and selects candidates for the batch.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-text"><strong>Shortlist Notification</strong><br />If selected, you'll get a shortlist email. Keep an eye on this inbox!</div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-text"><strong>Offer Letter</strong><br />Shortlisted candidates receive a formal offer letter with their joining date and batch GitHub repo.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-text"><strong>4-Week Internship Begins</strong><br />Weekly GitHub issues, real PRs, open-source contributions — and a certificate at the end.</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="info-box">
+  <div class="info-box-row">
+    <span class="info-label">Name</span>
+    <span class="info-value">{{ first_name }} {{ last_name }}</span>
+  </div>
+  <div class="info-box-row">
+    <span class="info-label">Email</span>
+    <span class="info-value">{{ email }}</span>
+  </div>
+  <div class="info-box-row">
+    <span class="info-label">Domain Applied</span>
+    <span class="info-value">{{ domain_label }}</span>
+  </div>
+  <div class="info-box-row">
+    <span class="info-label">GitHub</span>
+    <span class="info-value">@{{ github_username or '—' }}</span>
+  </div>
+  <div class="info-box-row">
+    <span class="info-label">Application Status</span>
+    <span class="info-value"><span class="badge badge-purple">Under Review</span></span>
+  </div>
+</div>
+
+<p class="lead" style="font-size:14px; margin-bottom:0;">
+  While you wait — make sure your GitHub profile is active. Recruiters and open-source communities
+  look at contribution graphs. Any public activity you do now is a plus!
+</p>
+
+<div class="cta-wrap">
+  <a href="{{ frontend_url }}" class="cta-btn">Visit SkillMe</a>
+</div>
+{% endblock %}
