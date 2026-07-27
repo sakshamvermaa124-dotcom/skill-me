@@ -44,7 +44,7 @@ def _render(template_name: str, **ctx) -> str:
 
 def _send_sync(to_email: str, to_name: str, subject: str, html_body: str) -> None:
     """
-    Low-level SMTP send via Brevo relay.
+    Low-level SMTP send via Brevo relay with strict timeouts and port fallback.
     Runs synchronously — always call via asyncio.to_thread().
     """
     msg = MIMEMultipart("alternative")
@@ -56,13 +56,35 @@ def _send_sync(to_email: str, to_name: str, subject: str, html_body: str) -> Non
     msg.attach(MIMEText(html_body, "html", "utf-8"))
 
     ctx = ssl.create_default_context()
-    with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as server:
-        server.ehlo()
-        server.starttls(context=ctx)
-        server.login(settings.smtp_user, settings.smtp_password)
-        server.sendmail(settings.smtp_from_email, [to_email], msg.as_string())
+    
+    # Try configured port first, then fallback to Brevo's alternative ports (2525, 465) if firewall blocks
+    ports_to_try = [settings.smtp_port]
+    for p in [587, 2525, 465]:
+        if p not in ports_to_try:
+            ports_to_try.append(p)
 
-    logger.info("Email sent to %s | subject: %s", to_email, subject)
+    last_err = None
+    for port in ports_to_try:
+        try:
+            if port == 465:
+                with smtplib.SMTP_SSL(settings.smtp_host, port, context=ctx, timeout=10) as server:
+                    server.login(settings.smtp_user, settings.smtp_password)
+                    server.sendmail(settings.smtp_from_email, [to_email], msg.as_string())
+            else:
+                with smtplib.SMTP(settings.smtp_host, port, timeout=10) as server:
+                    server.ehlo()
+                    server.starttls(context=ctx)
+                    server.login(settings.smtp_user, settings.smtp_password)
+                    server.sendmail(settings.smtp_from_email, [to_email], msg.as_string())
+            logger.info("Email sent to %s via port %s | subject: %s", to_email, port, subject)
+            return
+        except Exception as e:
+            logger.warning("SMTP connect failed on port %s: %s", port, e)
+            last_err = e
+
+    if last_err:
+        raise last_err
+
 
 
 async def _send(to_email: str, to_name: str, subject: str, html_body: str) -> bool:
