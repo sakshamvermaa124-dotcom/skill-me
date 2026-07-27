@@ -200,6 +200,18 @@ class BatchService:
             f"(id={student_id}) in batch {batch['domain']} #{batch['batch_number']}"
         )
 
+        # Automatically assign tasks if the batch has assigned weeks, or default to Week 1 if active
+        import json
+        try:
+            weeks_to_assign = json.loads(batch.get("weeks_assigned") or "[]")
+            if not weeks_to_assign and batch.get("status") == "active":
+                weeks_to_assign = [1]
+            for w in weeks_to_assign:
+                logger.info(f"Auto-assigning Week {w} tasks for newly enrolled student {student_id}")
+                await self.assign_week_from_task_repo(batch_id=batch_id, week_number=w)
+        except Exception as e:
+            logger.warning(f"Could not auto-assign tasks on enrollment for student {student_id}: {e}")
+
         return {
             "enrollment_id": enrollment_id,
             "student_id": student_id,
@@ -244,13 +256,18 @@ class BatchService:
         if not tasks:
             raise ValueError(f"No tasks found for {batch['domain']} week {week_number} in tasks repo.")
 
-        # 2. Get enrolled students
+        # 2. Get enrolled students who haven't received tasks for this week yet
         enrollments = await db.fetch_all(
-            "SELECT student_id FROM enrollments WHERE batch_id = ? AND status = 'active'",
-            (batch_id,),
+            """SELECT e.student_id FROM enrollments e 
+               WHERE e.batch_id = ? AND e.status = 'active' 
+               AND NOT EXISTS (
+                   SELECT 1 FROM issues i WHERE i.batch_id = e.batch_id AND i.week_number = ? AND i.assigned_to = e.student_id
+               )""",
+            (batch_id, week_number),
         )
         if not enrollments:
-            raise ValueError("No active students enrolled in this batch.")
+            logger.info(f"All active students in batch {batch_id} already have Week {week_number} tasks.")
+            return []
 
         # 3. Build issue list (each student gets the same set of tasks)
         issues_to_assign = []
@@ -263,7 +280,23 @@ class BatchService:
                 })
 
         # 4. Assign using existing logic
-        return await self.assign_weekly_issues(batch_id, week_number, issues_to_assign)
+        created = await self.assign_weekly_issues(batch_id, week_number, issues_to_assign)
+
+        # 5. Update weeks_assigned on the batch if not already present
+        import json
+        try:
+            current_weeks = json.loads(batch.get("weeks_assigned") or "[]")
+            if week_number not in current_weeks:
+                current_weeks.append(week_number)
+                current_weeks.sort()
+                await db.execute(
+                    "UPDATE batches SET weeks_assigned = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                    (json.dumps(current_weeks), batch_id),
+                )
+        except Exception as e:
+            logger.warning(f"Failed to update weeks_assigned for batch {batch_id}: {e}")
+
+        return created
 
     async def assign_weekly_issues(
         self,
