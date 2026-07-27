@@ -63,17 +63,20 @@ class BatchService:
         if existing:
             raise ValueError(f"Batch {domain} #{batch_number} already exists (id={existing['id']})")
 
-        # Check if repo already exists on GitHub
-        existing_repo = await github_service.get_repo(repo_name)
-        if existing_repo:
-            logger.warning(f"Repo {repo_name} already exists on GitHub, using existing")
-        else:
-            # Create repo from template
-            await github_service.create_repo_from_template(
-                template_repo=template,
-                new_repo_name=repo_name,
-                description=f"SkillMe {domain.replace('-', ' ').title()} Internship — Batch {batch_number}",
-            )
+        # Check if repo already exists on GitHub or create from template (non-blocking if GitHub API fails)
+        try:
+            existing_repo = await github_service.get_repo(repo_name)
+            if existing_repo:
+                logger.warning(f"Repo {repo_name} already exists on GitHub, using existing")
+            else:
+                # Create repo from template
+                await github_service.create_repo_from_template(
+                    template_repo=template,
+                    new_repo_name=repo_name,
+                    description=f"SkillMe {domain.replace('-', ' ').title()} Internship — Batch {batch_number}",
+                )
+        except Exception as e:
+            logger.warning(f"GitHub repository check/creation failed for {repo_name} (template: {template}): {e}. Creating batch in DB anyway.")
 
         # Set up webhook if URL provided
         if webhook_url:

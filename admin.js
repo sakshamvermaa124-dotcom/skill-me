@@ -516,6 +516,10 @@ async function assignTasks() {
   }
 }
 
+function openCreateBatchModal() {
+  openModal('create-batch-modal');
+}
+
 async function createBatch() {
   const domain = document.getElementById('new-batch-domain').value;
   const batchNum = parseInt(document.getElementById('new-batch-number').value);
