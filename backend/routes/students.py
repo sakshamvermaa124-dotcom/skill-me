@@ -60,8 +60,8 @@ async def apply(req: ApplicationRequest, background_tasks: BackgroundTasks):
     student_id = await db.insert(
         """INSERT INTO students 
            (first_name, last_name, email, phone, github_username, linkedin_url, 
-            college, year_of_study, motivation, referral_source, status)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'applied')""",
+            college, year_of_study, domain, motivation, referral_source, status)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'applied')""",
         (
             req.first_name,
             req.last_name,
@@ -71,6 +71,7 @@ async def apply(req: ApplicationRequest, background_tasks: BackgroundTasks):
             req.linkedin_url,
             req.college,
             req.year_of_study,
+            req.domain,
             req.motivation,
             req.referral_source,
         ),

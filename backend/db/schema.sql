@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS students (
     linkedin_url TEXT,
     college TEXT,
     year_of_study TEXT,
+    domain TEXT,                          -- e.g. 'web-dev', 'python', 'ml'
     motivation TEXT,
     referral_source TEXT,
     referred_by TEXT,

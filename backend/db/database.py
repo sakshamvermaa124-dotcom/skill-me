@@ -30,6 +30,18 @@ class Database:
         await self._connection.executescript(schema_sql)
         await self._connection.commit()
 
+        # Run migrations — safe to run on every startup (no-op if already done)
+        migrations = [
+            # v1: add domain column to students if missing
+            "ALTER TABLE students ADD COLUMN domain TEXT",
+        ]
+        for migration in migrations:
+            try:
+                await self._connection.execute(migration)
+                await self._connection.commit()
+            except Exception:
+                pass  # Column already exists — safe to ignore
+
     async def disconnect(self):
         """Close database connection."""
         if self._connection:
