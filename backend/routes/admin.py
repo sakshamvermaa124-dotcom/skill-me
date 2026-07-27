@@ -195,6 +195,9 @@ async def add_student_to_batch(
         return {"status": "enrolled", **result}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error enrolling student {req.student_id} into batch {batch_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to enroll student: {str(e)}")
 
 
 @router.delete("/batches/{batch_id}/students/{student_id}", summary="Remove student from batch")
@@ -339,7 +342,7 @@ async def update_student_status(
         (req.status, student_id),
     )
 
-    # Send lifecycle email based on new status
+    # Send lifecycle email or handle cohort removal based on new status
     if req.status == "shortlisted":
         # Domain is stored directly on the student record
         student_domain = await db.fetch_one(
@@ -354,6 +357,18 @@ async def update_student_status(
             email=student["email"],
             domain=domain,
         )
+    elif req.status == "dropped":
+        # If student is dropped, remove them from any active cohorts on GitHub and update enrollments table
+        active_enrollments = await db.fetch_all(
+            "SELECT batch_id FROM enrollments WHERE student_id = ? AND status != 'dropped'",
+            (student_id,)
+        )
+        for enr in active_enrollments:
+            try:
+                await batch_service.remove_student_from_batch(student_id, enr["batch_id"])
+                logger.info(f"Removed dropped student {student_id} from batch {enr['batch_id']}")
+            except Exception as e:
+                logger.error(f"Error removing dropped student {student_id} from batch {enr['batch_id']}: {e}")
 
     return {"status": "updated", "student_id": student_id, "new_status": req.status}
 
