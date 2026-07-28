@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // --- Render Dashboard ---
-  function renderDashboard(data) {
+  async function renderDashboard(data) {
     const { student, progress, submissions } = data;
     
     // Store globally for Razorpay callback
