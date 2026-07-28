@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     smtp_password: str = ""             # Brevo SMTP key (Settings → SMTP & API)
     smtp_from_name: str = "SkillMe Team"
     smtp_from_email: str = ""           # Must match / be verified in Brevo
-    frontend_url: str = "https://skill-me.onrender.com"  # Base URL for email CTAs
+    frontend_url: str = "https://skill-me-three.vercel.app"  # Base URL for email CTAs
     # Comma-separated list of allowed CORS origins. Use "*" for dev.
     # In production set to: https://your-app.vercel.app,https://yourcustom.domain
     allowed_origins: str = "*"
