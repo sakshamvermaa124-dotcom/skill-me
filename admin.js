@@ -158,8 +158,11 @@ function statCard(icon, value, label, bg, color) {
     </div>`;
 }
 
-async function loadRecentApplications() {
+async function loadRecentApplications(silent = false) {
   const el = document.getElementById('recent-applications');
+  if (!silent && !el.querySelector('table')) {
+    el.innerHTML = `<div class="loading-overlay"><div class="spinner"></div></div>`;
+  }
   try {
     const data = await api('/api/admin/students?status=applied&limit=5');
     if (!data.students.length) {
@@ -185,12 +188,17 @@ async function loadRecentApplications() {
         </tbody>
       </table>`;
   } catch(e) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-state-text">${e.message}</div></div>`;
+    if (!silent) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-state-text">${e.message}</div></div>`;
+    }
   }
 }
 
-async function loadOverviewBatches() {
+async function loadOverviewBatches(silent = false) {
   const el = document.getElementById('overview-batches');
+  if (!silent && !el.querySelector('div')) {
+    el.innerHTML = `<div class="loading-overlay"><div class="spinner"></div></div>`;
+  }
   try {
     const data = await api('/api/admin/batches?status=active');
     if (!data.batches.length) {
@@ -212,20 +220,26 @@ async function loadOverviewBatches() {
         </div>`;
     }).join('');
   } catch(e) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-state-text">${e.message}</div></div>`;
+    if (!silent) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-state-text">${e.message}</div></div>`;
+    }
   }
 }
 
 // ─── STUDENTS ───
-async function loadStudents() {
+async function loadStudents(silent = false) {
   const tbody = document.getElementById('students-tbody');
-  tbody.innerHTML = `<tr><td colspan="6"><div class="loading-overlay"><div class="spinner"></div></div></td></tr>`;
+  if (!silent) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="loading-overlay"><div class="spinner"></div></div></td></tr>`;
+  }
   try {
     const data = await api('/api/admin/students?limit=100');
     allStudents = data.students || [];
     renderStudents(allStudents);
   } catch(e) {
-    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-text">${e.message}</div></div></td></tr>`;
+    if (!silent) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-text">${e.message}</div></div></td></tr>`;
+    }
   }
 }
 
@@ -279,8 +293,12 @@ async function updateStatus(studentId, newStatus) {
       body: JSON.stringify({ status: newStatus })
     });
     toast(`Student status updated to "${newStatus}"`);
-    loadStudents();
-    loadStats();
+    if (currentPage === 'overview') {
+      loadRecentApplications(true);
+      loadOverviewBatches(true);
+    }
+    loadStudents(true);
+    loadStats(true);
   } catch(e) {
     toast(e.message, 'error');
   }
@@ -331,17 +349,22 @@ async function enrollStudent() {
     });
     toast('Student enrolled successfully!');
     closeModal('enroll-modal');
-    loadStudents();
-    loadStats();
+    if (currentPage === 'overview') {
+      loadOverviewBatches(true);
+    }
+    loadStudents(true);
+    loadStats(true);
   } catch(e) {
     toast(e.message, 'error');
   }
 }
 
 // ─── BATCHES ───
-async function loadBatches() {
+async function loadBatches(silent = false) {
   const el = document.getElementById('batches-list');
-  el.innerHTML = '<div class="loading-overlay"><div class="spinner"></div> Loading batches...</div>';
+  if (!silent) {
+    el.innerHTML = '<div class="loading-overlay"><div class="spinner"></div> Loading batches...</div>';
+  }
   try {
     const data = await api('/api/admin/batches');
     allBatches = data.batches || [];
@@ -410,7 +433,7 @@ async function toggleAutoAssign(batchId, enabled) {
   try {
     await api(`/api/admin/batches/${batchId}/auto-assign?enabled=${enabled}`, { method: 'PATCH' });
     toast(`Auto-assign ${enabled ? 'enabled' : 'disabled'} for batch ${batchId}`);
-    loadBatches();
+    loadBatches(true);
   } catch(e) { toast(e.message, 'error'); }
 }
 
@@ -422,7 +445,7 @@ async function triggerNow(batchId) {
     await api(`/api/admin/batches/${batchId}/auto-assign?enabled=true`, { method: 'PATCH' });
     const result = await api('/api/admin/scheduler/trigger', { method: 'POST' });
     toast('Scheduler ran! Check the batch for new tasks.');
-    loadBatches();
+    loadBatches(true);
   } catch(e) { toast(e.message, 'error'); }
 }
 
@@ -485,7 +508,7 @@ async function runSchedulerNow() {
     await api('/api/admin/scheduler/trigger', { method: 'POST' });
     toast('Scheduler triggered! All eligible batches received tasks.');
     loadSchedulerStatus();
-    loadBatches();
+    loadBatches(true);
   } catch(e) { toast(e.message, 'error'); }
 }
 
@@ -533,8 +556,11 @@ async function createBatch() {
     });
     toast(`Batch ${domain} #${batchNum} created!`);
     closeModal('create-batch-modal');
-    loadBatches();
-    loadStats();
+    if (currentPage === 'overview') {
+      loadOverviewBatches(true);
+    }
+    loadBatches(true);
+    loadStats(true);
     btn.textContent = 'Create Batch'; btn.disabled = false;
   } catch(e) {
     toast(e.message, 'error');
