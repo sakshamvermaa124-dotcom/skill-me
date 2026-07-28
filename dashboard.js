@@ -232,7 +232,8 @@ document.addEventListener('DOMContentLoaded', () => {
       ['stat-card-3', 260],
       ['stat-card-4', 340],
       ['progress-section-el', 450],
-      ['submissions-section-el', 550],
+      ['guide-section-el', 600],
+      ['submissions-section-el', 700],
     ];
 
     delays.forEach(([id, delay]) => {
@@ -242,6 +243,64 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // --- Guide: Tab Switching ---
+  window.switchGuideTab = function(tab) {
+    // Toggle tab buttons
+    document.querySelectorAll('.guide-tab').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tab === tab);
+    });
+    // Toggle panels
+    document.querySelectorAll('.guide-panel').forEach(panel => {
+      panel.classList.toggle('active', panel.id === `panel-${tab}`);
+    });
+  };
+
+  // --- Guide: Copy to Clipboard ---
+  window.copyCode = function(btn, text) {
+    navigator.clipboard.writeText(text).then(() => {
+      const orig = btn.textContent;
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = orig;
+        btn.classList.remove('copied');
+      }, 2000);
+    }).catch(() => {
+      // Fallback for older browsers
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;left:-9999px;';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  };
+
+  // --- Guide: Toggle Collapse ---
+  window.toggleGuide = function() {
+    const body = document.getElementById('guide-body');
+    const btn = document.getElementById('guide-toggle-btn');
+    const text = document.getElementById('guide-toggle-text');
+    if (body.classList.contains('collapsed')) {
+      body.classList.remove('collapsed');
+      body.style.maxHeight = body.scrollHeight + 'px';
+      body.style.opacity = '1';
+      btn.classList.add('expanded');
+      text.textContent = 'Hide Guide';
+    } else {
+      body.classList.add('collapsed');
+      btn.classList.remove('expanded');
+      text.textContent = 'Show Guide';
+    }
+  };
 
   // --- Intersection Observer for Submission Cards ---
   const subObserver = new IntersectionObserver((entries) => {
