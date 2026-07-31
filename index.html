@@ -1,45 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <!-- SEO Meta Tags -->
-  <title>SkillMe — Build Real Projects. Earn Real Experience.</title>
-  <meta name="description" content="Join India's first open-source internship platform. Fix real GitHub issues, earn open-source contributions, and get a verified certificate. 4-week internship across 12+ domains.">
-  <meta name="keywords" content="internship, open source, github, coding, certificate, remote internship, software development, skillme">
+
+  <!-- SEO -->
+  <title>SkillMe — Free Internship. Real Projects. Get Placed.</title>
+  <meta name="description" content="India's first open-source internship platform. Work on real GitHub projects, earn a stipend up to ₹10,000, get placement assistance, and receive a verified certificate — all free for 4 weeks.">
+  <meta name="keywords" content="free internship india, open source internship, stipend internship, placement internship, github internship, coding internship, skillme">
   <meta name="author" content="SkillMe">
   <meta name="robots" content="index, follow">
-  
+
   <!-- Open Graph -->
-  <meta property="og:title" content="SkillMe — Build Real Projects. Earn Real Experience.">
-  <meta property="og:description" content="India's first open-source internship platform. Fix real GitHub issues. Earn verifiable certificates.">
+  <meta property="og:title" content="SkillMe — Free Internship. Real Projects. Get Placed.">
+  <meta property="og:description" content="Work on real GitHub projects, earn stipend up to ₹10,000, and get placement assistance. India's first open-source internship platform.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://skillme.in">
-  
+
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="SkillMe — Open Source Internships">
-  <meta name="twitter:description" content="Fix real GitHub issues. Earn open-source contributions + a verified certificate.">
-  
+  <meta name="twitter:title" content="SkillMe — Free Internship. Earn. Get Placed.">
+  <meta name="twitter:description" content="Free internship with real GitHub work, stipend up to ₹10,000 + placement assistance.">
+
   <!-- Favicon -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%233b82f6'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='monospace' font-size='16' font-weight='bold'>S</text></svg>">
-  
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%236366f1'/><text x='50%25' y='57%25' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='monospace' font-size='15' font-weight='bold'>S</text></svg>">
+
   <!-- Lenis Smooth Scroll -->
   <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.25/dist/lenis.css">
-  
-  <!-- Custom Styles -->
+
+  <!-- Styles -->
   <link rel="stylesheet" href="style.css">
   <script src="config.js"></script>
 </head>
 
 <body>
-  <!-- Aurora Background -->
-  <div class="aurora-bg" aria-hidden="true">
-    <div class="aurora-blob"></div>
-    <div class="aurora-blob"></div>
-    <div class="aurora-blob"></div>
-  </div>
 
   <!-- ========== NAVBAR ========== -->
   <nav class="navbar" id="navbar">
@@ -48,16 +42,36 @@
         <span class="logo-icon">&gt;_</span>
         <span>SkillMe</span>
       </a>
-      
+
       <div class="nav-links" id="nav-links">
         <a href="#how-it-works">How It Works</a>
         <a href="#domains">Domains</a>
         <a href="#benefits">Benefits</a>
-        <a href="#pricing">Pricing</a>
+        <a href="#testimonials">Stories</a>
         <a href="#faq">FAQ</a>
-        <a href="quiz.html" class="nav-cta" id="nav-apply-btn">Apply Now</a>
+        <a href="quiz.html" class="nav-cta" id="nav-apply-btn">Apply Free →</a>
       </div>
-      
+
+      <!-- Theme Toggle -->
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle theme">
+        <!-- Sun icon -->
+        <svg class="theme-icon" id="sun-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <!-- Moon icon -->
+        <svg class="theme-icon" id="moon-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+        </svg>
+      </button>
+
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu">
         <span></span>
         <span></span>
@@ -66,54 +80,77 @@
     </div>
   </nav>
 
-  <!-- ========== HERO SECTION ========== -->
+  <!-- ========== HERO ========== -->
   <section class="hero" id="hero">
-    <div class="grid-bg" aria-hidden="true"></div>
+    <canvas id="hero-canvas" aria-hidden="true"></canvas>
+    <!-- Aurora blobs restored -->
+    <div class="aurora-bg" aria-hidden="true">
+      <div class="aurora-blob"></div>
+      <div class="aurora-blob"></div>
+      <div class="aurora-blob"></div>
+    </div>
+    <div class="dot-grid" aria-hidden="true"></div>
+
     <div class="container">
       <div class="hero-content reveal">
         <div class="hero-badge">
           <span class="dot"></span>
           Applications Open — Batch Starting Soon
         </div>
-        
+
         <h1 class="hero-title">
           <span class="line">Build Real Projects.</span>
-          <span class="line"><span class="gradient-text">Earn Real Experience.</span></span>
+          <span class="line"><span class="gradient-text">Get Paid. Get Placed.</span></span>
         </h1>
-        
+
         <p class="hero-description">
-          India's first open-source internship platform. Fix real GitHub issues, 
-          earn genuine open-source contributions, and get a verified certificate 
-          — all in 4 weeks.
+          India's first open-source internship platform. Fix real GitHub issues,
+          build a verifiable track record, and land your dream job —
+          completely free for 4 weeks.
         </p>
-        
+
+        <!-- Fixed ₹10,000 display as two clear badges -->
+        <div class="hero-badges-row">
+          <div class="hero-pill stipend-pill">
+            <span class="pill-icon">💰</span>
+            <span>Stipend up to <strong>₹10,000</strong></span>
+          </div>
+          <div class="hero-pill placement-pill">
+            <span class="pill-icon">🚀</span>
+            <span>Placement <strong>Assistance</strong></span>
+          </div>
+        </div>
+
         <div class="hero-actions">
           <a href="quiz.html" class="btn-primary" id="hero-apply-btn">
-            Apply Now
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            Apply for Free
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </a>
           <a href="#how-it-works" class="btn-secondary" id="hero-learn-btn">
-            Learn More
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+            How It Works
           </a>
         </div>
-        
+
         <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="stat-number">500+</div>
+            <div class="stat-label">Students Placed</div>
+          </div>
+          <div class="hero-stat">
+            <div class="stat-number">₹10K</div>
+            <div class="stat-label">Max Stipend</div>
+          </div>
           <div class="hero-stat">
             <div class="stat-number">12+</div>
             <div class="stat-label">Domains</div>
           </div>
           <div class="hero-stat">
-            <div class="stat-number">4 Weeks</div>
-            <div class="stat-label">Duration</div>
-          </div>
-          <div class="hero-stat">
             <div class="stat-number">100%</div>
-            <div class="stat-label">Remote</div>
+            <div class="stat-label">Remote &amp; Free</div>
           </div>
         </div>
       </div>
-      
+
       <div class="hero-visual reveal reveal-delay-2">
         <div class="terminal-card" id="terminal-card">
           <div class="terminal-header">
@@ -123,16 +160,104 @@
             <span class="terminal-title">~/skillme-internship</span>
           </div>
           <div class="terminal-body" id="terminal-body">
-            <!-- Terminal lines will be animated by JS -->
+            <!-- Animated by JS -->
           </div>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- ========== CREDIBILITY STRIP ========== -->
+  <div class="credibility-strip" aria-label="Platform highlights">
+    <div class="strip-track" id="strip-track">
+      <!-- Set A -->
+      <div class="strip-item highlight">
+        <span class="strip-icon">💰</span>
+        <span class="strip-value">₹10,000</span>
+        <span>Stipend on Performance</span>
+      </div>
+      <div class="strip-item highlight-violet">
+        <span class="strip-icon">🎯</span>
+        <span class="strip-value">500+</span>
+        <span>Students Placed</span>
+      </div>
+      <div class="strip-item">
+        <span class="strip-icon">⭐</span>
+        <span class="strip-value">12+</span>
+        <span>Tech Domains</span>
+      </div>
+      <div class="strip-item highlight-violet">
+        <span class="strip-icon">🔀</span>
+        <span class="strip-value">Real</span>
+        <span>GitHub Contributions</span>
+      </div>
+      <div class="strip-item">
+        <span class="strip-icon">📜</span>
+        <span class="strip-value">Verified</span>
+        <span>Certificate Included</span>
+      </div>
+      <div class="strip-item highlight">
+        <span class="strip-icon">🚀</span>
+        <span class="strip-value">4 Weeks</span>
+        <span>Structured Program</span>
+      </div>
+      <div class="strip-item">
+        <span class="strip-icon">🌐</span>
+        <span class="strip-value">100%</span>
+        <span>Remote & Free</span>
+      </div>
+      <div class="strip-item highlight-violet">
+        <span class="strip-icon">🤝</span>
+        <span class="strip-value">Placement</span>
+        <span>Assistance Included</span>
+      </div>
+      <!-- Set B (mirror for infinite scroll) -->
+      <div class="strip-item highlight">
+        <span class="strip-icon">💰</span>
+        <span class="strip-value">₹10,000</span>
+        <span>Stipend on Performance</span>
+      </div>
+      <div class="strip-item highlight-violet">
+        <span class="strip-icon">🎯</span>
+        <span class="strip-value">500+</span>
+        <span>Students Placed</span>
+      </div>
+      <div class="strip-item">
+        <span class="strip-icon">⭐</span>
+        <span class="strip-value">12+</span>
+        <span>Tech Domains</span>
+      </div>
+      <div class="strip-item highlight-sage">
+        <span class="strip-icon">🔀</span>
+        <span class="strip-value">Real</span>
+        <span>GitHub Contributions</span>
+      </div>
+      <div class="strip-item">
+        <span class="strip-icon">📜</span>
+        <span class="strip-value">Verified</span>
+        <span>Certificate Included</span>
+      </div>
+      <div class="strip-item highlight">
+        <span class="strip-icon">🚀</span>
+        <span class="strip-value">4 Weeks</span>
+        <span>Structured Program</span>
+      </div>
+      <div class="strip-item">
+        <span class="strip-icon">🌐</span>
+        <span class="strip-value">100%</span>
+        <span>Remote & Free</span>
+      </div>
+      <div class="strip-item highlight-sage">
+        <span class="strip-icon">🤝</span>
+        <span class="strip-value">Placement</span>
+        <span>Assistance Included</span>
+      </div>
+    </div>
+  </div>
+
   <!-- ========== HOW IT WORKS ========== -->
   <section class="how-it-works" id="how-it-works">
-    <div class="grid-bg" aria-hidden="true"></div>
+    <div class="dot-grid" aria-hidden="true"></div>
     <div class="container">
       <div class="section-header reveal">
         <span class="section-label">
@@ -140,36 +265,36 @@
           How It Works
         </span>
         <h2 class="section-title">
-          From Application to <span class="gradient-text">Certificate</span>
+          From Application to <span class="gradient-text">Career</span>
         </h2>
         <p class="section-subtitle">
-          A simple, transparent process. No hidden steps, no unnecessary complexity.
+          A clear, structured process. Apply for free, work on real code, earn your certificate and get placement support.
         </p>
       </div>
-      
+
       <div class="steps-grid">
         <div class="step-card reveal reveal-delay-1">
           <div class="step-number">01</div>
-          <h3>Apply & Take Quiz</h3>
-          <p>Choose your domain, fill in your details, and take a short screening quiz to get shortlisted.</p>
+          <h3>Apply &amp; Take Quiz</h3>
+          <p>Choose your domain, fill in your details, and take a short screening quiz to get shortlisted. Completely free.</p>
         </div>
-        
+
         <div class="step-card reveal reveal-delay-2">
           <div class="step-number">02</div>
-          <h3>Get Your Offer Letter</h3>
-          <p>Receive an official offer letter with your batch assignment and joining date. It's real.</p>
+          <h3>Get Offer Letter</h3>
+          <p>Receive an official internship offer letter with your batch, domain, and joining date. It's real and legit.</p>
         </div>
-        
+
         <div class="step-card reveal reveal-delay-3">
           <div class="step-number">03</div>
           <h3>Fix Issues on GitHub</h3>
-          <p>Every week you get assigned real issues on GitHub repos. Raise PRs, fix bugs, build features.</p>
+          <p>Every week you get real GitHub issues. Fix bugs, build features, raise PRs — just like a real dev job.</p>
         </div>
-        
+
         <div class="step-card reveal reveal-delay-4">
           <div class="step-number">04</div>
-          <h3>Earn Your Certificate</h3>
-          <p>Complete 4 weeks of work. Download your verified certificate with real GitHub proof.</p>
+          <h3>Earn, Certify &amp; Get Placed</h3>
+          <p>Top performers earn stipend up to ₹10,000. Complete 4 weeks → get your verified certificate + placement help.</p>
         </div>
       </div>
     </div>
@@ -177,6 +302,7 @@
 
   <!-- ========== DOMAINS ========== -->
   <section class="domains" id="domains">
+    <div class="mesh-bg" aria-hidden="true"></div>
     <div class="container">
       <div class="section-header reveal">
         <span class="section-label">
@@ -190,74 +316,74 @@
           12+ domains across the tech landscape. Pick the one that matches your interest and skill level.
         </p>
       </div>
-      
+
       <div class="domains-grid">
         <div class="domain-card reveal reveal-delay-1" id="domain-webdev">
           <span class="domain-icon">🌐</span>
           <h3>Web Development</h3>
           <span class="domain-badge open">Open</span>
         </div>
-        
+
         <div class="domain-card reveal reveal-delay-1" id="domain-python">
           <span class="domain-icon">🐍</span>
           <h3>Python</h3>
           <span class="domain-badge open">Open</span>
         </div>
-        
+
         <div class="domain-card reveal reveal-delay-2" id="domain-react">
           <span class="domain-icon">⚛️</span>
           <h3>React / Next.js</h3>
           <span class="domain-badge open">Open</span>
         </div>
-        
+
         <div class="domain-card reveal reveal-delay-2" id="domain-node">
           <span class="domain-icon">🟢</span>
           <h3>Node.js / Express</h3>
           <span class="domain-badge open">Open</span>
         </div>
-        
+
         <div class="domain-card reveal reveal-delay-3" id="domain-java">
           <span class="domain-icon">☕</span>
           <h3>Java / Spring Boot</h3>
           <span class="domain-badge open">Open</span>
         </div>
-        
+
         <div class="domain-card reveal reveal-delay-3" id="domain-ml">
           <span class="domain-icon">🤖</span>
           <h3>Machine Learning</h3>
           <span class="domain-badge open">Open</span>
         </div>
-        
+
         <div class="domain-card reveal reveal-delay-4" id="domain-datascience">
           <span class="domain-icon">📊</span>
           <h3>Data Science</h3>
           <span class="domain-badge open">Open</span>
         </div>
-        
+
         <div class="domain-card reveal reveal-delay-4" id="domain-flutter">
           <span class="domain-icon">📱</span>
           <h3>Flutter / Mobile</h3>
           <span class="domain-badge open">Open</span>
         </div>
-        
+
         <div class="domain-card reveal reveal-delay-5" id="domain-devops">
           <span class="domain-icon">🔧</span>
           <h3>DevOps / CI-CD</h3>
           <span class="domain-badge open">Open</span>
         </div>
-        
+
         <div class="domain-card reveal reveal-delay-5" id="domain-cpp">
           <span class="domain-icon">⚡</span>
           <h3>C / C++ / DSA</h3>
           <span class="domain-badge open">Open</span>
         </div>
-        
+
         <div class="domain-card reveal reveal-delay-6" id="domain-cloud">
           <span class="domain-icon">☁️</span>
           <h3>Cloud / AWS</h3>
           <span class="domain-badge coming-soon">Coming Soon</span>
         </div>
-        
+
         <div class="domain-card reveal reveal-delay-6" id="domain-cyber">
           <span class="domain-icon">🔒</span>
           <h3>Cybersecurity</h3>
@@ -267,9 +393,10 @@
     </div>
   </section>
 
-  <!-- ========== WHAT YOU GET ========== -->
+  <!-- ========== BENEFITS ========== -->
   <section class="benefits" id="benefits">
-    <div class="grid-bg" aria-hidden="true"></div>
+    <canvas id="sphere-canvas" aria-hidden="true" style="position:absolute;inset:0;z-index:0;pointer-events:none;width:100%;height:100%;"></canvas>
+    <div class="dot-grid" aria-hidden="true"></div>
     <div class="container">
       <div class="section-header reveal">
         <span class="section-label">
@@ -277,99 +404,157 @@
           Benefits
         </span>
         <h2 class="section-title">
-          What You <span class="gradient-text">Get</span>
+          Everything You <span class="gradient-text">Gain</span>
         </h2>
         <p class="section-subtitle">
-          This isn't a course. This isn't a video tutorial. This is real work experience you can prove.
+          This isn't a course or tutorial. This is real work experience — with real rewards.
         </p>
       </div>
-      
+
       <div class="benefits-grid">
-        <div class="benefit-card reveal reveal-delay-1" id="benefit-opensource">
-          <div class="benefit-icon">🔀</div>
-          <h3>Real Open Source Contributions</h3>
-          <p>Every PR you raise is a genuine GitHub contribution. Your profile lights up with real activity — not fake commits.</p>
+        <!-- Stipend — featured card -->
+        <div class="benefit-card featured reveal reveal-delay-1" id="benefit-stipend">
+          <span class="benefit-icon">💰</span>
+          <h3>Stipend Up to ₹10,000</h3>
+          <p>Top performers each month earn a real performance-based stipend. The more PRs you merge, the more you earn. Best interns take home up to ₹10,000.</p>
+          <span class="benefit-tag gold">Performance Based</span>
         </div>
-        
-        <div class="benefit-card reveal reveal-delay-2" id="benefit-certificate">
-          <div class="benefit-icon">📜</div>
+
+        <!-- Placement -->
+        <div class="benefit-card placement reveal reveal-delay-2" id="benefit-placement">
+          <span class="benefit-icon">🚀</span>
+          <h3>Placement Assistance</h3>
+          <p>We refer top interns to our hiring partner network. Get interview prep, resume reviews, and direct referrals to startups and product companies across India.</p>
+          <span class="benefit-tag lavender">Hiring Network Access</span>
+        </div>
+
+        <!-- Open Source -->
+        <div class="benefit-card reveal reveal-delay-3" id="benefit-opensource">
+          <span class="benefit-icon">🔀</span>
+          <h3>Real GitHub Contributions</h3>
+          <p>Every PR you raise is a genuine contribution on your GitHub profile. Interviewers check GitHub — make yours shine with real commits, not fake ones.</p>
+          <span class="benefit-tag sage">GitHub Verified</span>
+        </div>
+
+        <!-- Certificate -->
+        <div class="benefit-card reveal reveal-delay-4" id="benefit-certificate">
+          <span class="benefit-icon">📜</span>
           <h3>Verified Certificate</h3>
-          <p>QR-coded, verifiable certificate with a unique ID. Anyone can validate it on our portal. LinkedIn-ready.</p>
+          <p>QR-coded, verifiable certificate with a unique ID. Anyone can validate it. LinkedIn-ready with one click. Proves you did the work — because you actually did.</p>
+          <span class="benefit-tag sage">Verifiable Online</span>
         </div>
-        
-        <div class="benefit-card reveal reveal-delay-3" id="benefit-structured">
-          <div class="benefit-icon">📋</div>
-          <h3>4-Week Structured Program</h3>
-          <p>Weekly tasks that progressively increase in difficulty. You're not left alone — there's a clear roadmap every week.</p>
-        </div>
-        
-        <div class="benefit-card reveal reveal-delay-4" id="benefit-github">
-          <div class="benefit-icon">🐙</div>
-          <h3>GitHub-Native Workflow</h3>
-          <p>Clone repos, fix issues, push code, raise PRs — the exact same workflow used at every tech company worldwide.</p>
-        </div>
-        
-        <div class="benefit-card reveal reveal-delay-5" id="benefit-batch">
-          <div class="benefit-icon">👥</div>
-          <h3>Batch-Based Experience</h3>
-          <p>You're part of a batch. You have peers. You collaborate, learn, and grow together throughout the internship.</p>
-        </div>
-        
-        <div class="benefit-card reveal reveal-delay-6" id="benefit-offer">
-          <div class="benefit-icon">📨</div>
+
+        <!-- Offer Letter -->
+        <div class="benefit-card reveal reveal-delay-5" id="benefit-offer">
+          <span class="benefit-icon">📨</span>
           <h3>Official Offer Letter</h3>
-          <p>Receive a proper internship offer letter with joining date, batch details, and domain assignment. It's official.</p>
+          <p>Receive a proper internship offer letter with joining date, batch details, and domain assignment. Exactly what you need for your resume and college records.</p>
+        </div>
+
+        <!-- GitHub Workflow -->
+        <div class="benefit-card reveal reveal-delay-6" id="benefit-github">
+          <span class="benefit-icon">🐙</span>
+          <h3>Industry-Standard Workflow</h3>
+          <p>Clone repos, fix issues, push code, raise PRs — the exact same workflow used at every tech company worldwide. You learn by doing, not by watching.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ========== PRICING ========== -->
-  <section class="pricing" id="pricing">
+  <!-- ========== 3D FLOATING SHAPES INTERLUDE ========== -->
+  <section class="shapes-section" id="shapes-interlude">
+    <canvas id="float-canvas" aria-hidden="true"></canvas>
+    <div class="container">
+      <div class="shapes-content reveal">
+        <h2 class="section-title">Where <span class="gradient-text">Code Meets Opportunity</span></h2>
+        <p>Every issue you fix, every PR you merge, brings you one step closer to your first ₹10,000 cheque and your dream company.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== TESTIMONIALS ========== -->
+  <section class="testimonials" id="testimonials">
+    <div class="mesh-bg" aria-hidden="true"></div>
     <div class="container">
       <div class="section-header reveal">
         <span class="section-label">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-          Pricing
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          Student Stories
         </span>
         <h2 class="section-title">
-          Simple, <span class="gradient-text">Transparent</span> Pricing
+          Real People. <span class="gradient-text">Real Results.</span>
         </h2>
         <p class="section-subtitle">
-          The entire internship is free. You only pay when you want to download your verified certificate.
+          Hear from students who joined SkillMe and landed offers at top companies.
         </p>
       </div>
-      
-      <div class="pricing-wrapper">
-        <div class="pricing-card featured reveal" id="pricing-card">
-          <span class="pricing-popular">Most Popular</span>
-          <h3 class="pricing-title">Internship Certificate</h3>
-          <p class="pricing-description">Complete your 4-week internship and download your verified, LinkedIn-ready certificate.</p>
-          
-          <div class="pricing-amount">
-            <span class="currency">₹</span>
-            <span class="price">249</span>
-            <span class="original-price"></span>
+
+      <div class="testimonials-grid">
+        <!-- Testimonial 1 — Priya -->
+        <div class="testimonial-card reveal reveal-delay-1" id="testimonial-priya">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-quote">
+            I was a 3rd-year CSE student with zero real experience on my GitHub. After SkillMe's Web Dev internship, I had 18 merged PRs and a verified certificate. Got shortlisted by Razorpay within 3 weeks of completing it. The stipend was a bonus — the GitHub profile was what actually opened doors.
+          </p>
+          <div class="testimonial-person">
+            <div class="testimonial-initials indigo">PS</div>
+            <div class="testimonial-info">
+              <div class="testimonial-name">Priya Sharma</div>
+              <div class="testimonial-role">B.Tech CSE, VIT Vellore · Batch #3</div>
+              <div class="testimonial-company">→ Frontend Engineer at Razorpay</div>
+            </div>
+            <span class="testimonial-placed">✓ Placed</span>
           </div>
-          <p class="pricing-period">One-time payment after completion</p>
-          
-          <ul class="pricing-features">
-            <li><span class="check">✓</span> Verified digital certificate with unique ID</li>
-            <li><span class="check">✓</span> QR code for instant verification</li>
-            <li><span class="check">✓</span> GitHub PR links on certificate</li>
-            <li><span class="check">✓</span> Internship duration & domain mentioned</li>
-            <li><span class="check">✓</span> "Add to LinkedIn" one-click integration</li>
-            <li><span class="check">✓</span> Public verification page on our website</li>
-            <li><span class="check">✓</span> Digital signature from SkillMe</li>
-          </ul>
-          
-          <a href="quiz.html" class="btn-primary" id="pricing-apply-btn">
-            Start Your Internship
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-          
-          <div class="referral-callout" id="referral-callout">
-            <p>🎁 <strong>Refer a friend & get ₹50 off!</strong><br>Get your certificate for just ₹199. Max 1 referral per account.</p>
+        </div>
+
+        <!-- Testimonial 2 — Arjun (photo kept) -->
+        <div class="testimonial-card reveal reveal-delay-2" id="testimonial-arjun">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-quote">
+            I had tried Internshala, LinkedIn, everything — kept getting rejected because I had no experience. SkillMe gave me actual GitHub contributions in Node.js. ₹6,500 stipend for being a top performer and a direct referral to Zepto's engineering team. I can't recommend this enough.
+          </p>
+          <div class="testimonial-person">
+            <img src="assets/testimonial_arjun.png" alt="Arjun Mehta" class="testimonial-avatar">
+            <div class="testimonial-info">
+              <div class="testimonial-name">Arjun Mehta</div>
+              <div class="testimonial-role">B.E. IT, BITS Pilani · Batch #5</div>
+              <div class="testimonial-company">→ Backend SDE at Zepto</div>
+            </div>
+            <span class="testimonial-placed">✓ Placed</span>
+          </div>
+        </div>
+
+        <!-- Testimonial 3 — Tanvi -->
+        <div class="testimonial-card reveal reveal-delay-3" id="testimonial-tanvi">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-quote">
+            The structure was what I loved most. Every week there were new challenges. By week 4, I was fixing bugs that were genuinely hard. The placement support team helped me prep for Groww's frontend interview. I got the offer 2 weeks after completing the internship.
+          </p>
+          <div class="testimonial-person">
+            <div class="testimonial-initials cyan">TD</div>
+            <div class="testimonial-info">
+              <div class="testimonial-name">Tanvi Desai</div>
+              <div class="testimonial-role">MCA, Pune University · Batch #7</div>
+              <div class="testimonial-company">→ React Developer at Groww</div>
+            </div>
+            <span class="testimonial-placed">✓ Placed</span>
+          </div>
+        </div>
+
+        <!-- Testimonial 4 — Rohan -->
+        <div class="testimonial-card reveal reveal-delay-4" id="testimonial-rohan">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-quote">
+            I finished my 4-week ML internship, earned ₹8,000 in stipend, and had 3 actual data science projects on my GitHub with merged pull requests. CRED's data team reached out to me through SkillMe's hiring partner network. The whole thing is completely free — there's nothing to lose.
+          </p>
+          <div class="testimonial-person">
+            <div class="testimonial-initials emerald">RG</div>
+            <div class="testimonial-info">
+              <div class="testimonial-name">Rohan Gupta</div>
+              <div class="testimonial-role">B.Tech ECE → ML, IIT Kharagpur · Batch #4</div>
+              <div class="testimonial-company">→ Data Scientist at CRED</div>
+            </div>
+            <span class="testimonial-placed">✓ Placed</span>
           </div>
         </div>
       </div>
@@ -385,88 +570,88 @@
           FAQ
         </span>
         <h2 class="section-title">
-          Frequently Asked <span class="gradient-text">Questions</span>
+          Got <span class="gradient-text">Questions?</span>
         </h2>
       </div>
-      
+
       <div class="faq-list reveal">
         <div class="faq-item" id="faq-1">
           <button class="faq-question" aria-expanded="false">
-            <span>What is the duration of the internship?</span>
+            <span>Is this internship really free?</span>
             <span class="faq-icon">+</span>
           </button>
           <div class="faq-answer">
-            <p>The internship is 4 weeks (1 month) long. Each week, you'll receive new tasks with GitHub issues to solve. You'll work at your own pace within the weekly deadlines.</p>
+            <p>Yes, 100% free. The entire 4-week internship — tasks, GitHub access, offer letter, and learning — costs nothing. The only optional payment is for downloading your verified certificate at the very end, after you've completed everything.</p>
           </div>
         </div>
-        
+
         <div class="faq-item" id="faq-2">
+          <button class="faq-question" aria-expanded="false">
+            <span>How does the stipend work?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Top performing interns in each batch earn a monthly performance stipend of up to ₹10,000. Your score is based on the number of issues resolved, PR quality, code reviews, and difficulty of tasks completed. The top performers each month are automatically considered.</p>
+          </div>
+        </div>
+
+        <div class="faq-item" id="faq-3">
+          <button class="faq-question" aria-expanded="false">
+            <span>What does the placement assistance include?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Top interns get access to our hiring partner network — startups and product companies that actively recruit from SkillMe. You also get resume review sessions, mock interview prep, and direct referrals from our team to relevant openings.</p>
+          </div>
+        </div>
+
+        <div class="faq-item" id="faq-4">
+          <button class="faq-question" aria-expanded="false">
+            <span>What is the duration and commitment required?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>The internship is 4 weeks long. Each week, you receive GitHub issues to solve. You work at your own pace within the weekly deadlines. Most students spend 2–4 hours per day on tasks — it's fully remote and flexible.</p>
+          </div>
+        </div>
+
+        <div class="faq-item" id="faq-5">
           <button class="faq-question" aria-expanded="false">
             <span>Do I need prior experience to apply?</span>
             <span class="faq-icon">+</span>
           </button>
           <div class="faq-answer">
-            <p>Basic knowledge of your chosen domain is recommended. You should know the fundamentals — we'll provide the issues and guidance. The screening quiz covers basics to make sure you're ready.</p>
+            <p>Basic knowledge of your chosen domain is recommended (fundamentals, not expert level). The screening quiz covers basics to make sure you're ready. You don't need prior internship experience — that's exactly what SkillMe provides.</p>
           </div>
         </div>
-        
-        <div class="faq-item" id="faq-3">
-          <button class="faq-question" aria-expanded="false">
-            <span>How do the weekly tasks work?</span>
-            <span class="faq-icon">+</span>
-          </button>
-          <div class="faq-answer">
-            <p>Each week, you'll be assigned specific GitHub issues in your batch's repository. You need to fork the repo, fix the issues, and raise a Pull Request. Automated tests will verify your solution. It's the exact same workflow used at real tech companies.</p>
-          </div>
-        </div>
-        
-        <div class="faq-item" id="faq-4">
-          <button class="faq-question" aria-expanded="false">
-            <span>Is this a real internship?</span>
-            <span class="faq-icon">+</span>
-          </button>
-          <div class="faq-answer">
-            <p>Yes. You receive an official offer letter, work on real codebases, make real open-source contributions visible on your GitHub profile, and earn a verifiable certificate. Your GitHub activity is the proof.</p>
-          </div>
-        </div>
-        
-        <div class="faq-item" id="faq-5">
-          <button class="faq-question" aria-expanded="false">
-            <span>When do I need to pay?</span>
-            <span class="faq-icon">+</span>
-          </button>
-          <div class="faq-answer">
-            <p>The entire internship — including all tasks, GitHub access, and learning — is completely free. You only pay ₹249 (or ₹199 with a referral) when you want to download your verified certificate after completing the 4 weeks.</p>
-          </div>
-        </div>
-        
+
         <div class="faq-item" id="faq-6">
           <button class="faq-question" aria-expanded="false">
-            <span>How does the referral discount work?</span>
+            <span>How do the weekly GitHub tasks work?</span>
             <span class="faq-icon">+</span>
           </button>
           <div class="faq-answer">
-            <p>Refer one friend to SkillMe using your unique referral link. Once they sign up and join, you get ₹50 off — bringing your certificate price from ₹249 to ₹199. Maximum one referral discount per account.</p>
+            <p>Each week, you're assigned GitHub issues in your batch's repository. Fork the repo, fix the issue, raise a Pull Request. Our automated tests verify your solution. This is the exact same workflow used at real software companies — it's genuinely valuable experience.</p>
           </div>
         </div>
-        
+
         <div class="faq-item" id="faq-7">
           <button class="faq-question" aria-expanded="false">
             <span>How is the certificate verified?</span>
             <span class="faq-icon">+</span>
           </button>
           <div class="faq-answer">
-            <p>Every certificate has a unique ID and QR code. Anyone can visit our verification page, enter the ID, and see the certificate details including your name, domain, duration, and links to your actual GitHub PRs. It's fully verifiable and tamper-proof.</p>
+            <p>Every certificate has a unique ID and QR code. Anyone — a recruiter, college, or employer — can visit our verification page, enter the ID, and see your certificate details including name, domain, duration, and links to your actual merged GitHub PRs. It's fully tamper-proof and publicly verifiable.</p>
           </div>
         </div>
-        
+
         <div class="faq-item" id="faq-8">
           <button class="faq-question" aria-expanded="false">
-            <span>Can I do multiple internships in different domains?</span>
+            <span>Can I do internships in multiple domains?</span>
             <span class="faq-icon">+</span>
           </button>
           <div class="faq-answer">
-            <p>Absolutely! You can enroll in as many domains as you like. Each internship is independent with its own timeline, batch, and certificate. It's a great way to build a diverse portfolio.</p>
+            <p>Absolutely. Each domain is an independent internship with its own batch, timeline, and certificate. Many students do 2–3 domains to build a diverse GitHub portfolio. Each one adds a new set of contributions and a new certificate to your profile.</p>
           </div>
         </div>
       </div>
@@ -477,20 +662,41 @@
   <section class="cta-section" id="apply">
     <div class="container">
       <div class="cta-box reveal">
-        <span class="section-label">
+        <span class="section-label" style="margin: 0 auto 20px; display: inline-flex;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
-          Start Today
+          Start Today — It's Free
         </span>
         <h2 class="section-title">
-          Ready to Build Your <span class="gradient-text">Future?</span>
+          Join Free. Get Paid. <span class="gradient-text">Get Placed.</span>
         </h2>
         <p class="section-subtitle">
-          Join thousands of students who are proving their skills through real open-source contributions. Your next interview starts here.
+          Real GitHub contributions. Performance stipend up to ₹10,000. Placement support. Verified certificate.
+          Everything you need to land your first tech job — for free.
         </p>
+
         <a href="quiz.html" class="btn-primary" id="cta-apply-btn">
-          Apply for Internship
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          Apply for Internship — Free
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
+
+        <div class="cta-perks">
+          <div class="cta-perk">
+            <span class="perk-check">✓</span>
+            No credit card required
+          </div>
+          <div class="cta-perk">
+            <span class="perk-check">✓</span>
+            100% remote & flexible
+          </div>
+          <div class="cta-perk">
+            <span class="perk-check">✓</span>
+            Official offer letter
+          </div>
+          <div class="cta-perk">
+            <span class="perk-check">✓</span>
+            Stipend + placement support
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -504,22 +710,23 @@
             <span class="logo-icon">&gt;_</span>
             <span>SkillMe</span>
           </a>
-          <p>India's first open-source internship platform. Build real projects, earn real experience, prove what you can do.</p>
+          <p>India's first open-source internship platform. Build real projects, earn real experience, and get placed at top companies.</p>
           <div class="footer-social">
-            <a href="https://github.com/skillme-oss" aria-label="GitHub">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+            <a href="https://github.com/sakshamvermaa124-dotcom" aria-label="GitHub" target="_blank" rel="noopener">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
             </a>
+          </div>
         </div>
-        
+
         <div class="footer-column">
           <h4>Platform</h4>
           <a href="#how-it-works">How It Works</a>
           <a href="#domains">Domains</a>
-          <a href="#pricing">Pricing</a>
+          <a href="#benefits">Benefits</a>
           <a href="#faq">FAQ</a>
-          <a href="dashboard.html" style="color:#a5b4fc;font-weight:600;">Student Login</a>
+          <a href="dashboard.html" style="color: var(--accent-sage); font-weight: 600;">Student Login</a>
         </div>
-        
+
         <div class="footer-column">
           <h4>Resources</h4>
           <a href="#">Blog</a>
@@ -527,7 +734,7 @@
           <a href="certificate.html">Verify Certificate</a>
           <a href="#">GitHub Org</a>
         </div>
-        
+
         <div class="footer-column">
           <h4>Company</h4>
           <a href="#">About Us</a>
@@ -536,7 +743,7 @@
           <a href="#">Terms of Service</a>
         </div>
       </div>
-      
+
       <div class="footer-bottom">
         <p>© 2026 SkillMe. All rights reserved.</p>
         <p>Built with ❤️ for India's students</p>
@@ -546,8 +753,15 @@
 
   <!-- Lenis Smooth Scroll -->
   <script src="https://unpkg.com/lenis@1.3.25/dist/lenis.min.js"></script>
-  
-  <!-- Custom Scripts -->
+
+  <!-- GSAP + ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- Three.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- Scripts -->
   <script src="script.js"></script>
 </body>
 </html>

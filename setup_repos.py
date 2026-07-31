@@ -38,3 +38,13 @@ if __name__ == "__main__":
     
     setup_repo("web-dev-template", "Web Development")
     setup_repo("python-template", "Python")
+    setup_repo("react-template", "React / Next.js")
+    setup_repo("node-template", "Node.js / Express")
+    setup_repo("java-template", "Java / Spring Boot")
+    setup_repo("ml-template", "Machine Learning")
+    setup_repo("datascience-template", "Data Science")
+    setup_repo("flutter-template", "Flutter / Mobile")
+    setup_repo("devops-template", "DevOps / CI-CD")
+    setup_repo("cpp-template", "C / C++ / DSA")
+    setup_repo("cloud-template", "Cloud / AWS")
+    setup_repo("cyber-template", "Cybersecurity")

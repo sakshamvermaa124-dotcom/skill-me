@@ -40,7 +40,7 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting SkillMe backend...")
     await db.connect()
-    logger.info(f"Database connected: {settings.database_path}")
+    logger.info(f"Database connected: {settings.turso_db_url}")
     logger.info(f"GitHub org: {settings.github_org}")
 
     # Verify GitHub token on startup

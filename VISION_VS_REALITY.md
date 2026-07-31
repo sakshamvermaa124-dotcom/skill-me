@@ -1,4 +1,4 @@
-﻿# SkillMe — Original Vision vs Current Reality
+# SkillMe — Original Vision vs Current Reality
 
 A detailed comparison of what was brainstormed at the start and where the platform stands today.
 
@@ -60,7 +60,7 @@ The very first message from you:
 |---------|---------------------|---------------|
 | **Payment Gateway (₹249/₹199)** | Core to the model — charge for certificate download | ❌ Not integrated — certificate is currently free/open. No Razorpay/UPI integration yet |
 | **Referral System** | 1 referral per account, 249Rs → 199Rs | ❌ Not implemented — no referral code generation, tracking, or discount logic |
-| **Offer Letter / Email System** | Send offer letter with date of joining after shortlist | ❌ Not implemented — no email sending (no SMTP/SendGrid integration) |
+| **Offer Letter / Email System** | Send offer letter with date of joining after shortlist | ✅ Implemented — full Brevo SMTP integration with Jinja2 HTML templates and async delivery |
 | **Screening Quiz** | Short quiz before application to create effort investment | ❌ Not implemented — application goes straight to the form |
 | **Certificate Delivery on Payment** | Certificate only unlocked after payment | ❌ Currently unlocked for any enrolled student — payment gate missing |
 
@@ -96,7 +96,7 @@ MISSING FROM ORIGINAL PLAN
 ────────────────────────────────────────────────────────────────
 [❌] Payment Gateway (₹249/₹199)
 [❌] Referral System (1 ref = ₹50 off)
-[❌] Email System (Offer letters, welcome emails)
+[✅] Email System (Brevo SMTP config)
 [❌] Screening Quiz (effort investment before applying)
 [❌] Certificate locked behind payment
 ```

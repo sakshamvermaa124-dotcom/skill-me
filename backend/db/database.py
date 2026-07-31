@@ -1,86 +1,102 @@
 """
 SkillMe — Database Layer
-Async SQLite database with connection pooling.
+Async LibSQL (Turso) database client.
+Replaces aiosqlite with cloud-persistent storage so data survives redeployments.
 """
 
-import aiosqlite
+import logging
 from pathlib import Path
 from config import settings
 
+import libsql_experimental as libsql
+
+logger = logging.getLogger("skillme.database")
 
 SCHEMA_PATH = Path(__file__).parent / "schema.sql"
 
 
 class Database:
-    """Async SQLite database wrapper."""
+    """Async LibSQL (Turso) database wrapper — API-compatible with the old aiosqlite wrapper."""
 
-    def __init__(self, db_path: str | Path):
-        self.db_path = str(db_path)
-        self._connection: aiosqlite.Connection | None = None
+    def __init__(self, url: str, auth_token: str):
+        self._url = url
+        self._auth_token = auth_token
+        self._conn: libsql.Connection | None = None
 
     async def connect(self):
-        """Initialize database connection and create tables."""
-        self._connection = await aiosqlite.connect(self.db_path)
-        self._connection.row_factory = aiosqlite.Row
-        # Enable WAL mode for better concurrent reads
-        await self._connection.execute("PRAGMA journal_mode=WAL")
-        await self._connection.execute("PRAGMA foreign_keys=ON")
-        # Run schema
+        """Initialize the LibSQL connection and create tables from schema."""
+        # libsql_experimental.connect() supports both:
+        #   - Local file:    connect("local.db")
+        #   - Turso remote:  connect("libsql://...", auth_token="...")
+        #   - Embedded sync: connect("local.db", sync_url="libsql://...", auth_token="...")
+        if self._auth_token:
+            # Production — remote Turso DB
+            self._conn = libsql.connect(self._url, auth_token=self._auth_token)
+        else:
+            # Local dev fallback — plain SQLite file
+            self._conn = libsql.connect(self._url)
+
+        # Apply schema (CREATE IF NOT EXISTS — safe to run every start)
         schema_sql = SCHEMA_PATH.read_text(encoding="utf-8")
-        await self._connection.executescript(schema_sql)
-        await self._connection.commit()
+        # Split on semicolons so we can execute each statement individually
+        # (libsql_experimental.Connection.executescript is not async-compatible)
+        statements = [s.strip() for s in schema_sql.split(";") if s.strip()]
+        for stmt in statements:
+            self._conn.execute(stmt)
+        self._conn.commit()
 
         # Run migrations — safe to run on every startup (no-op if already done)
         migrations = [
-            # v1: add domain column to students if missing
             "ALTER TABLE students ADD COLUMN domain TEXT",
         ]
         for migration in migrations:
             try:
-                await self._connection.execute(migration)
-                await self._connection.commit()
+                self._conn.execute(migration)
+                self._conn.commit()
             except Exception:
                 pass  # Column already exists — safe to ignore
 
+        logger.info(f"Database connected: {self._url}")
+
     async def disconnect(self):
         """Close database connection."""
-        if self._connection:
-            await self._connection.close()
-            self._connection = None
+        if self._conn:
+            self._conn.close()
+            self._conn = None
 
-    @property
-    def conn(self) -> aiosqlite.Connection:
-        """Get the active connection."""
-        if not self._connection:
-            raise RuntimeError("Database not connected. Call connect() first.")
-        return self._connection
+    # ── Query helpers ──────────────────────────────────────────────
 
-    async def execute(self, query: str, params: tuple = ()) -> aiosqlite.Cursor:
-        """Execute a single query."""
-        cursor = await self.conn.execute(query, params)
-        await self.conn.commit()
+    async def execute(self, query: str, params: tuple = ()):
+        """Execute a single write query."""
+        cursor = self._conn.execute(query, params)
+        self._conn.commit()
         return cursor
 
     async def fetch_one(self, query: str, params: tuple = ()) -> dict | None:
         """Fetch a single row as a dict."""
-        cursor = await self.conn.execute(query, params)
-        row = await cursor.fetchone()
+        cursor = self._conn.execute(query, params)
+        row = cursor.fetchone()
         if row is None:
             return None
-        return dict(row)
+        columns = [description[0] for description in cursor.description]
+        return dict(zip(columns, row))
 
     async def fetch_all(self, query: str, params: tuple = ()) -> list[dict]:
         """Fetch all rows as a list of dicts."""
-        cursor = await self.conn.execute(query, params)
-        rows = await cursor.fetchall()
-        return [dict(row) for row in rows]
+        cursor = self._conn.execute(query, params)
+        rows = cursor.fetchall()
+        columns = [description[0] for description in cursor.description]
+        return [dict(zip(columns, row)) for row in rows]
 
     async def insert(self, query: str, params: tuple = ()) -> int:
         """Insert a row and return the last inserted ID."""
-        cursor = await self.conn.execute(query, params)
-        await self.conn.commit()
+        cursor = self._conn.execute(query, params)
+        self._conn.commit()
         return cursor.lastrowid
 
 
-# Global database instance
-db = Database(settings.db_path)
+# Global database instance — reads TURSO_DB_URL and TURSO_AUTH_TOKEN from env
+db = Database(
+    url=settings.turso_db_url,
+    auth_token=settings.turso_auth_token,
+)

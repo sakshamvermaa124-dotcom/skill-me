@@ -6,12 +6,10 @@ services:
     plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
-    disk:
-      name: skillme-db
-      mountPath: /data
-      sizeGB: 1
     envVars:
-      - key: DATABASE_PATH
-        value: /data/skillme.db
+      - key: TURSO_DB_URL
+        sync: false   # Set this manually in Render dashboard
+      - key: TURSO_AUTH_TOKEN
+        sync: false   # Set this manually in Render dashboard
       - key: PYTHON_VERSION
         value: 3.11.0

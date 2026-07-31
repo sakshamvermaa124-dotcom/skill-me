@@ -24,14 +24,17 @@ class Settings(BaseSettings):
     # Admin Auth
     admin_api_key: str = "dev-admin-key"
 
-    # Database
-    database_path: str = "data/skillme.db"
+    # Database — Turso (LibSQL)
+    # In production: set TURSO_DB_URL and TURSO_AUTH_TOKEN in Render env vars
+    # For local dev: leave TURSO_AUTH_TOKEN blank and set TURSO_DB_URL to a local file path
+    turso_db_url: str = "local.db"      # e.g. libsql://your-db-name.turso.io
+    turso_auth_token: str = ""           # Turso auth token (blank = local SQLite)
 
     # GitHub API base URL
     github_api_url: str = "https://api.github.com"
 
     # ── Email (Brevo SMTP relay) ───────────────────
-    email_enabled: bool = False          # Set True once SMTP creds are in .env
+    email_enabled: bool = True          # Will attempt to send emails if SMTP creds are in .env
     smtp_host: str = "smtp-relay.brevo.com"
     smtp_port: int = 587
     smtp_user: str = ""                  # Your Brevo login email
@@ -53,13 +56,9 @@ class Settings(BaseSettings):
         env_file_encoding = "utf-8"
 
     @property
-    def db_path(self) -> Path:
-        """Returns the absolute database path, creating parent dirs if needed."""
-        path = Path(self.database_path)
-        if not path.is_absolute():
-            path = Path(__file__).parent / path
-        path.parent.mkdir(parents=True, exist_ok=True)
-        return path
+    def db_path(self) -> str:
+        """Returns the database URL (Turso remote or local SQLite path)."""
+        return self.turso_db_url
 
 
 settings = Settings()
