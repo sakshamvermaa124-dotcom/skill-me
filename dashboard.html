@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,63 +11,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
+    /* Global dashboard background override */
+    body { background: var(--bg-primary); color: var(--text-primary); transition: background 0.3s ease, color 0.3s ease; }
+    
+    /* Sun/Moon hide logic */
+    [data-theme="light"] #sun-icon { display: none; }
+    [data-theme="dark"] #moon-icon { display: none; }
+    
+    /* Overrides */
+    .theme-toggle:hover { border-color: var(--border-indigo); color: var(--accent-indigo); }
+
     /* ======== Lenis Base ======== */
     html.lenis, html.lenis body { height: auto; }
     .lenis.lenis-smooth { scroll-behavior: auto !important; }
     .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
     .lenis.lenis-stopped { overflow: hidden; }
-
-    /* ======== Aurora Background ======== */
-    .aurora-bg {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      overflow: hidden;
-      pointer-events: none;
-    }
-    .aurora-bg::before {
-      content: '';
-      position: absolute;
-      width: 150%;
-      height: 150%;
-      top: -25%;
-      left: -25%;
-      background: 
-        radial-gradient(ellipse 80% 50% at 20% 40%, rgba(99, 102, 241, 0.15) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 70% at 80% 20%, rgba(168, 85, 247, 0.12) 0%, transparent 55%),
-        radial-gradient(ellipse 70% 40% at 50% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
-      animation: auroraShift 12s ease-in-out infinite alternate;
-    }
-    .aurora-bg::after {
-      content: '';
-      position: absolute;
-      width: 120%;
-      height: 120%;
-      top: -10%;
-      left: -10%;
-      background: 
-        radial-gradient(ellipse 50% 60% at 70% 60%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
-        radial-gradient(ellipse 40% 50% at 30% 70%, rgba(236, 72, 153, 0.06) 0%, transparent 45%);
-      animation: auroraShift 16s ease-in-out 2s infinite alternate-reverse;
-    }
-    @keyframes auroraShift {
-      0% { transform: translate(0, 0) rotate(0deg) scale(1); }
-      33% { transform: translate(2%, -3%) rotate(1deg) scale(1.02); }
-      66% { transform: translate(-1%, 2%) rotate(-0.5deg) scale(0.98); }
-      100% { transform: translate(1%, -1%) rotate(0.5deg) scale(1.01); }
-    }
-
-    /* ======== Particle Grid ======== */
-    .grid-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      background-image: 
-        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
-      background-size: 60px 60px;
-      pointer-events: none;
-    }
 
     /* ======== Dashboard Layout ======== */
     .dash-page {
@@ -126,10 +84,10 @@
     }
     .cert-btn:hover { transform: translateY(-2px); opacity: 0.9; }
     .cert-btn-primary { background: linear-gradient(135deg, #d4a853, #f0c97a); color: #000; }
-    .cert-btn-secondary { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--text-1, #f1f1f3); }
+    .cert-btn-secondary { background: var(--bg-card-hover); border: var(--border-subtle); color: var(--text-1, #f1f1f3); }
     .cert-progress-hint {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.08);
+      background: var(--bg-card);
+      border: var(--border-glass);
       border-radius: 16px;
       padding: 18px 22px;
       margin-bottom: 20px;
@@ -156,8 +114,8 @@
     .login-card {
       max-width: 440px;
       width: 100%;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
+      background: var(--bg-card);
+      border: var(--border-glass);
       border-radius: 24px;
       padding: 48px 40px;
       text-align: center;
@@ -189,7 +147,7 @@
       -webkit-text-fill-color: transparent;
     }
     .login-card p {
-      color: rgba(255,255,255,0.5);
+      color: var(--text-secondary);
       font-size: 0.95rem;
       margin-bottom: 32px;
     }
@@ -202,8 +160,8 @@
       padding: 16px 20px;
       font-size: 1rem;
       font-family: 'Inter', sans-serif;
-      color: #fff;
-      background: rgba(255,255,255,0.06);
+      color: var(--text-primary);
+      background: var(--bg-card-hover);
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: 14px;
       outline: none;
@@ -215,7 +173,7 @@
       box-shadow: 0 0 0 4px rgba(99,102,241,0.1), 0 0 20px rgba(99,102,241,0.05);
     }
     .login-input-wrap input::placeholder {
-      color: rgba(255,255,255,0.3);
+      color: var(--text-muted);
     }
     .login-btn {
       width: 100%;
@@ -223,8 +181,8 @@
       font-size: 1rem;
       font-weight: 600;
       font-family: 'Inter', sans-serif;
-      color: #fff;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: var(--text-primary);
+      background: var(--gradient-indigo);
       border: none;
       border-radius: 14px;
       cursor: pointer;
@@ -272,7 +230,7 @@
     }
     .dash-greeting {
       font-size: 0.95rem;
-      color: rgba(255,255,255,0.4);
+      color: var(--text-secondary);
       text-transform: uppercase;
       letter-spacing: 2px;
       font-weight: 500;
@@ -301,8 +259,8 @@
       font-size: 0.85rem;
       font-weight: 500;
       border: 1px solid rgba(255,255,255,0.1);
-      background: rgba(255,255,255,0.04);
-      color: rgba(255,255,255,0.7);
+      background: var(--bg-card);
+      color: var(--text-primary);
       backdrop-filter: blur(10px);
     }
     .dash-tag.accent {
@@ -324,8 +282,8 @@
       margin-bottom: 32px;
     }
     .stat-card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.06);
+      background: var(--bg-card);
+      border: var(--border-glass);
       border-radius: 20px;
       padding: 28px;
       backdrop-filter: blur(15px);
@@ -371,7 +329,7 @@
     }
     .stat-label {
       font-size: 0.8rem;
-      color: rgba(255,255,255,0.4);
+      color: var(--text-secondary);
       text-transform: uppercase;
       letter-spacing: 1px;
       margin-bottom: 8px;
@@ -379,14 +337,14 @@
     .stat-value {
       font-size: 2.4rem;
       font-weight: 800;
-      color: #fff;
+      color: var(--text-primary);
       line-height: 1;
       font-variant-numeric: tabular-nums;
     }
     .stat-value .stat-unit {
       font-size: 1.2rem;
       font-weight: 500;
-      color: rgba(255,255,255,0.3);
+      color: var(--text-muted);
     }
 
     /* Progress Ring */
@@ -399,8 +357,8 @@
       animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     .progress-card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.06);
+      background: var(--bg-card);
+      border: var(--border-glass);
       border-radius: 20px;
       padding: 32px;
       backdrop-filter: blur(15px);
@@ -429,28 +387,28 @@
     .progress-ring-pct {
       font-size: 2.2rem;
       font-weight: 800;
-      color: #fff;
+      color: var(--text-primary);
     }
     .progress-ring-sub {
       font-size: 0.75rem;
-      color: rgba(255,255,255,0.4);
+      color: var(--text-secondary);
       text-transform: uppercase;
       letter-spacing: 1px;
     }
     .progress-details h3 {
       font-size: 1.3rem;
       font-weight: 700;
-      color: #fff;
+      color: var(--text-primary);
       margin-bottom: 8px;
     }
     .progress-details p {
-      color: rgba(255,255,255,0.5);
+      color: var(--text-secondary);
       font-size: 0.95rem;
       line-height: 1.6;
     }
     .progress-bar-track {
       height: 6px;
-      background: rgba(255,255,255,0.06);
+      background: var(--bg-card-hover);
       border-radius: 3px;
       overflow: hidden;
       margin-top: 16px;
@@ -480,7 +438,7 @@
     .section-header h2 {
       font-size: 1.4rem;
       font-weight: 700;
-      color: #fff;
+      color: var(--text-primary);
     }
     .section-header .count-badge {
       padding: 4px 12px;
@@ -519,7 +477,7 @@
     .sub-card:hover {
       transform: translateY(-2px);
       border-color: rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.04);
+      background: var(--bg-card);
     }
     .sub-dot {
       width: 10px;
@@ -534,7 +492,7 @@
     .sub-title {
       font-size: 1rem;
       font-weight: 600;
-      color: #fff;
+      color: var(--text-primary);
       margin-bottom: 4px;
       white-space: nowrap;
       overflow: hidden;
@@ -542,7 +500,7 @@
     }
     .sub-meta {
       font-size: 0.8rem;
-      color: rgba(255,255,255,0.4);
+      color: var(--text-secondary);
       display: flex;
       gap: 12px;
     }
@@ -559,7 +517,7 @@
     .sub-status.open { background: rgba(139,92,246,0.12); color: #a78bfa; border: 1px solid rgba(139,92,246,0.2); }
     .sub-status.failed { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
     .sub-link {
-      color: rgba(255,255,255,0.3);
+      color: var(--text-muted);
       text-decoration: none;
       transition: color 0.3s;
       flex-shrink: 0;
@@ -625,7 +583,7 @@
     }
     .guide-card {
       background: rgba(255,255,255,0.025);
-      border: 1px solid rgba(255,255,255,0.06);
+      border: var(--border-glass);
       border-radius: 24px;
       padding: 36px 32px 32px;
       backdrop-filter: blur(12px);
@@ -659,7 +617,7 @@
     .guide-header h2 {
       font-size: 1.35rem;
       font-weight: 700;
-      color: #fff;
+      color: var(--text-primary);
       margin: 0;
     }
     .guide-subtitle {
@@ -674,9 +632,9 @@
       display: flex;
       gap: 6px;
       padding: 4px;
-      background: rgba(255,255,255,0.04);
+      background: var(--bg-card);
       border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.06);
+      border: var(--border-glass);
       margin-bottom: 28px;
     }
     .guide-tab {
@@ -685,7 +643,7 @@
       border-radius: 10px;
       border: none;
       background: transparent;
-      color: rgba(255,255,255,0.5);
+      color: var(--text-secondary);
       font-size: 0.85rem;
       font-weight: 600;
       cursor: pointer;
@@ -697,8 +655,8 @@
       font-family: 'Inter', sans-serif;
     }
     .guide-tab:hover {
-      color: rgba(255,255,255,0.7);
-      background: rgba(255,255,255,0.03);
+      color: var(--text-primary);
+      background: var(--bg-card);
     }
     .guide-tab.active {
       background: rgba(99,102,241,0.15);
@@ -719,7 +677,7 @@
       color: #34d399;
     }
     .guide-tab:not(.active) .tab-badge {
-      background: rgba(255,255,255,0.06);
+      background: var(--bg-card-hover);
       color: rgba(255,255,255,0.35);
     }
 
@@ -753,7 +711,7 @@
       position: relative;
     }
     .guide-step:hover {
-      background: rgba(255,255,255,0.04);
+      background: var(--bg-card);
       border-color: rgba(255,255,255,0.1);
       transform: translateX(4px);
     }
@@ -777,16 +735,16 @@
     .guide-step-title {
       font-size: 0.95rem;
       font-weight: 700;
-      color: #fff;
+      color: var(--text-primary);
       margin-bottom: 6px;
     }
     .guide-step-desc {
       font-size: 0.83rem;
-      color: rgba(255,255,255,0.5);
+      color: var(--text-secondary);
       line-height: 1.55;
     }
     .guide-step-desc strong {
-      color: rgba(255,255,255,0.8);
+      color: var(--text-primary);
     }
 
     /* Code blocks inside guide */
@@ -794,7 +752,7 @@
       margin-top: 10px;
       padding: 14px 18px;
       background: rgba(0,0,0,0.4);
-      border: 1px solid rgba(255,255,255,0.06);
+      border: var(--border-glass);
       border-radius: 10px;
       font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
       font-size: 0.78rem;
@@ -803,18 +761,18 @@
       position: relative;
       line-height: 1.7;
     }
-    .guide-code .comment { color: rgba(255,255,255,0.3); }
+    .guide-code .comment { color: var(--text-muted); }
     .guide-code .cmd { color: #34d399; }
     .guide-code .flag { color: #fbbf24; }
     .guide-code .url { color: #38bdf8; }
     .guide-code-copy {
       position: absolute;
       top: 8px; right: 8px;
-      background: rgba(255,255,255,0.06);
+      background: var(--bg-card-hover);
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: 6px;
       padding: 5px 8px;
-      color: rgba(255,255,255,0.4);
+      color: var(--text-secondary);
       font-size: 0.7rem;
       cursor: pointer;
       transition: all 0.2s;
@@ -900,11 +858,11 @@
     }
     .guide-repo-link-sub {
       font-size: 0.76rem;
-      color: rgba(255,255,255,0.4);
+      color: var(--text-secondary);
       margin-top: 2px;
     }
     .guide-repo-link-arrow {
-      color: rgba(255,255,255,0.3);
+      color: var(--text-muted);
       transition: transform 0.3s;
     }
     .guide-repo-link:hover .guide-repo-link-arrow {
@@ -921,9 +879,9 @@
       padding: 10px 20px;
       margin-top: 20px;
       background: transparent;
-      border: 1px solid rgba(255,255,255,0.08);
+      border: var(--border-glass);
       border-radius: 10px;
-      color: rgba(255,255,255,0.4);
+      color: var(--text-secondary);
       font-size: 0.8rem;
       font-weight: 500;
       cursor: pointer;
@@ -951,6 +909,27 @@
       pointer-events: none;
     }
 
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+    .theme-toggle {
+      display: flex; align-items: center; justify-content: center;
+      width: 38px; height: 38px; border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05); border: var(--border-glass);
+      color: var(--text-secondary); cursor: pointer;
+      transition: background 0.3s, color 0.3s, transform 0.3s, border-color 0.3s;
+      margin-right: 10px; position: relative; overflow: hidden;
+    }
+    .theme-toggle:hover {
+      background: rgba(99, 102, 241, 0.12); color: var(--accent-indigo);
+      border-color: var(--border-indigo); transform: rotate(15deg) scale(1.08);
+    }
+    .theme-icon { transition: opacity 0.2s ease; }
+    [data-theme="light"] .theme-toggle { background: rgba(0, 0, 0, 0.05); border-color: rgba(0, 0, 0, 0.1); }
+    [data-theme="light"] .theme-toggle:hover { background: rgba(99, 102, 241, 0.1); }
     @media (max-width: 640px) {
       .guide-card { padding: 24px 18px 20px; }
       .guide-tabs { flex-direction: column; }
@@ -960,11 +939,11 @@
   </style>
   <script src="config.js"></script>
 </head>
-<body style="background: #06080f; color: #fff; font-family: 'Inter', sans-serif; margin: 0;">
+<body>
 
   <!-- Aurora Background -->
-  <div class="aurora-bg"></div>
-  <div class="grid-overlay"></div>
+  
+  
 
   <!-- Navigation -->
   <nav class="navbar">
@@ -972,9 +951,16 @@
       <a href="index.html" class="logo">
         <span class="logo-text">SkillMe</span>
       </a>
-      <div class="nav-links">
-        <a href="index.html">Home</a>
-        <a href="apply.html">Apply</a>
+      <div class="nav-right">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle light/dark mode">
+          <svg class="theme-icon" id="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="theme-icon" id="moon-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="apply.html">Apply</a>
+        </div>
       </div>
     </div>
   </nav>
@@ -1270,7 +1256,7 @@
                   <div class="guide-step-content">
                     <div class="guide-step-title">Make Your Changes</div>
                     <div class="guide-step-desc">
-                      Open the project in <strong>VS Code</strong> (<code style="background:rgba(255,255,255,0.06);padding:2px 6px;border-radius:4px;font-size:0.8rem;">code .</code>) or any editor. Edit the files as described in your assigned GitHub issue.
+                      Open the project in <strong>VS Code</strong> (<code style="background: var(--bg-card-hover);padding:2px 6px;border-radius:4px;font-size:0.8rem;">code .</code>) or any editor. Edit the files as described in your assigned GitHub issue.
                     </div>
                   </div>
                 </div>
@@ -1362,5 +1348,29 @@
   <!-- Lenis JS (from darkroomengineering/lenis) -->
   <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
   <script src="dashboard.js?v=2"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Theme toggle logic specific for dashboard
+      const themeToggle = document.getElementById('theme-toggle');
+      const html = document.documentElement;
+      
+      // We already set data-theme via localStorage or 'dark' earlier if possible, 
+      // but let's ensure it's applied correctly.
+      const savedTheme = localStorage.getItem('skillme-theme') || 'dark';
+      html.setAttribute('data-theme', savedTheme);
+      
+      if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+          const current = html.getAttribute('data-theme');
+          const next = current === 'dark' ? 'light' : 'dark';
+          html.setAttribute('data-theme', next);
+          localStorage.setItem('skillme-theme', next);
+          themeToggle.style.transform = 'rotate(360deg) scale(1.1)';
+          setTimeout(() => { themeToggle.style.transform = ''; }, 300);
+        });
+      }
+    });
+  </script>
 </body>
 </html>
