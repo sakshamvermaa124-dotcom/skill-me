@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     webhook_secret: str = ""
 
     # Admin Auth
-    admin_api_key: str = "dev-admin-key"
+    admin_api_key: str = "sakshamm"
 
     # Database — Turso (LibSQL)
     # In production: set TURSO_DB_URL and TURSO_AUTH_TOKEN in Render env vars
