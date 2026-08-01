@@ -50,7 +50,7 @@
     }
 
     .apply-header .back-link:hover {
-      color: var(--accent-blue);
+      color: var(--accent-indigo);
     }
 
     .apply-header h1 {
@@ -84,7 +84,7 @@
       left: 0;
       right: 0;
       height: 3px;
-      background: var(--gradient-primary);
+      background: var(--gradient-indigo);
     }
 
     /* Progress Bar */
@@ -105,7 +105,7 @@
     }
 
     .progress-step.active {
-      background: var(--gradient-primary);
+      background: var(--gradient-indigo);
     }
 
     .progress-step.completed {
@@ -296,7 +296,7 @@
       flex: 1;
       padding: 14px 28px;
       border-radius: var(--radius-full);
-      background: var(--gradient-primary);
+      background: var(--gradient-indigo);
       color: white;
       font-weight: 700;
       font-size: 0.95rem;
@@ -396,7 +396,7 @@
       border: 1px solid rgba(59, 130, 246, 0.2);
       font-family: var(--font-mono);
       font-size: 0.82rem;
-      color: var(--accent-blue);
+      color: var(--accent-indigo);
       margin: 20px 0 28px;
     }
 
@@ -470,7 +470,13 @@
 
   <!-- Apply Page -->
   <section class="apply-page">
-    <div class="grid-bg" aria-hidden="true"></div>
+        <!-- Background Decor (Consistent across all pages) -->
+    <div class="aurora-bg" aria-hidden="true">
+      <div class="aurora-blob"></div>
+      <div class="aurora-blob"></div>
+      <div class="aurora-blob"></div>
+    </div>
+    <div class="dot-grid" aria-hidden="true"></div>
     
     <div class="apply-wrapper">
       <div class="apply-header reveal">
