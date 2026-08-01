@@ -624,19 +624,7 @@ document.addEventListener('DOMContentLoaded', () => {
       },
     });
 
-    // ── 8. Shapes interlude — parallax background depth ──
-    gsap.fromTo('#float-canvas', {
-      y: 40,
-    }, {
-      y: -40,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: '.shapes-section',
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: true,
-      },
-    });
+
 
     // ── 9. Hero title — staggered word entrance on load ──
     gsap.fromTo('.hero-title .line', {
