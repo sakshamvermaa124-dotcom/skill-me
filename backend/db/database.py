@@ -28,11 +28,19 @@ class Database:
         self._conn: libsql.Connection | None = None
 
     def _make_connection(self) -> libsql.Connection:
-        """Create a fresh libsql connection."""
-        if self._auth_token:
-            return libsql.connect(self._url, auth_token=self._auth_token)
+        """Create a fresh libsql connection, bypassing connection pool cache if needed."""
+        import random
+        # Append a random cache-buster to force a fresh connection from the Rust pool
+        url = self._url
+        if "?" in url:
+            url += f"&_cb={random.randint(1, 1000000)}"
         else:
-            return libsql.connect(self._url)
+            url += f"?_cb={random.randint(1, 1000000)}"
+            
+        if self._auth_token:
+            return libsql.connect(url, auth_token=self._auth_token)
+        else:
+            return libsql.connect(url)
 
     def _reconnect(self):
         """Drop the stale connection and open a fresh one (no schema re-run needed)."""
