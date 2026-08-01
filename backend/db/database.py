@@ -16,30 +16,52 @@ SCHEMA_PATH = Path(__file__).parent / "schema.sql"
 
 
 class Database:
-    """Async LibSQL (Turso) database wrapper — API-compatible with the old aiosqlite wrapper."""
+    """Async LibSQL (Turso) database wrapper — API-compatible with the old aiosqlite wrapper.
+    
+    Includes automatic reconnect logic to handle Turso stream expiry errors
+    (error: 'stream not found') that occur after periods of inactivity.
+    """
 
     def __init__(self, url: str, auth_token: str):
         self._url = url
         self._auth_token = auth_token
         self._conn: libsql.Connection | None = None
 
+    def _make_connection(self) -> libsql.Connection:
+        """Create a fresh libsql connection."""
+        if self._auth_token:
+            return libsql.connect(self._url, auth_token=self._auth_token)
+        else:
+            return libsql.connect(self._url)
+
+    def _reconnect(self):
+        """Drop the stale connection and open a fresh one (no schema re-run needed)."""
+        try:
+            if self._conn:
+                self._conn.close()
+        except Exception:
+            pass
+        self._conn = self._make_connection()
+        logger.info("Database: reconnected to Turso after stream expiry.")
+
+    def _execute_with_retry(self, fn, *args, **kwargs):
+        """Call fn(*args) and retry once on Turso stream-expiry errors."""
+        try:
+            return fn(*args, **kwargs)
+        except Exception as e:
+            err = str(e)
+            if "stream not found" in err or "Hrana" in err or "stream" in err.lower():
+                logger.warning(f"Turso stream error, reconnecting: {err}")
+                self._reconnect()
+                return fn(*args, **kwargs)
+            raise
+
     async def connect(self):
         """Initialize the LibSQL connection and create tables from schema."""
-        # libsql_experimental.connect() supports both:
-        #   - Local file:    connect("local.db")
-        #   - Turso remote:  connect("libsql://...", auth_token="...")
-        #   - Embedded sync: connect("local.db", sync_url="libsql://...", auth_token="...")
-        if self._auth_token:
-            # Production — remote Turso DB
-            self._conn = libsql.connect(self._url, auth_token=self._auth_token)
-        else:
-            # Local dev fallback — plain SQLite file
-            self._conn = libsql.connect(self._url)
+        self._conn = self._make_connection()
 
         # Apply schema (CREATE IF NOT EXISTS — safe to run every start)
         schema_sql = SCHEMA_PATH.read_text(encoding="utf-8")
-        # Split on semicolons so we can execute each statement individually
-        # (libsql_experimental.Connection.executescript is not async-compatible)
         statements = [s.strip() for s in schema_sql.split(";") if s.strip()]
         for stmt in statements:
             self._conn.execute(stmt)
@@ -67,32 +89,40 @@ class Database:
     # ── Query helpers ──────────────────────────────────────────────
 
     async def execute(self, query: str, params: tuple = ()):
-        """Execute a single write query."""
-        cursor = self._conn.execute(query, params)
-        self._conn.commit()
-        return cursor
+        """Execute a single write query (with auto-reconnect on stream expiry)."""
+        def _run():
+            cursor = self._conn.execute(query, params)
+            self._conn.commit()
+            return cursor
+        return self._execute_with_retry(_run)
 
     async def fetch_one(self, query: str, params: tuple = ()) -> dict | None:
-        """Fetch a single row as a dict."""
-        cursor = self._conn.execute(query, params)
-        row = cursor.fetchone()
-        if row is None:
-            return None
-        columns = [description[0] for description in cursor.description]
-        return dict(zip(columns, row))
+        """Fetch a single row as a dict (with auto-reconnect on stream expiry)."""
+        def _run():
+            cursor = self._conn.execute(query, params)
+            row = cursor.fetchone()
+            if row is None:
+                return None
+            columns = [description[0] for description in cursor.description]
+            return dict(zip(columns, row))
+        return self._execute_with_retry(_run)
 
     async def fetch_all(self, query: str, params: tuple = ()) -> list[dict]:
-        """Fetch all rows as a list of dicts."""
-        cursor = self._conn.execute(query, params)
-        rows = cursor.fetchall()
-        columns = [description[0] for description in cursor.description]
-        return [dict(zip(columns, row)) for row in rows]
+        """Fetch all rows as a list of dicts (with auto-reconnect on stream expiry)."""
+        def _run():
+            cursor = self._conn.execute(query, params)
+            rows = cursor.fetchall()
+            columns = [description[0] for description in cursor.description]
+            return [dict(zip(columns, row)) for row in rows]
+        return self._execute_with_retry(_run)
 
     async def insert(self, query: str, params: tuple = ()) -> int:
-        """Insert a row and return the last inserted ID."""
-        cursor = self._conn.execute(query, params)
-        self._conn.commit()
-        return cursor.lastrowid
+        """Insert a row and return the last inserted ID (with auto-reconnect on stream expiry)."""
+        def _run():
+            cursor = self._conn.execute(query, params)
+            self._conn.commit()
+            return cursor.lastrowid
+        return self._execute_with_retry(_run)
 
 
 # Global database instance — reads TURSO_DB_URL and TURSO_AUTH_TOKEN from env
