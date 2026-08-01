@@ -249,6 +249,7 @@ class EmailService:
             issued_date = datetime.utcnow().strftime("%d %B %Y")
         certificate_url = f"{settings.frontend_url}/certificate.html?email={email}"
         verify_url = f"{settings.frontend_url}/certificate.html?cert_id={cert_id}"
+        lor_url = f"{settings.frontend_url}/lor.html?cert_id={cert_id}"
         html = _render(
             "certificate_ready.html",
             first_name=first_name,
@@ -259,11 +260,12 @@ class EmailService:
             issued_date=issued_date,
             certificate_url=certificate_url,
             verify_url=verify_url,
+            lor_url=lor_url,
         )
         return await _send(
             email,
             f"{first_name} {last_name}",
-            f"🏆 Your SkillMe Certificate is Ready — {cert_id}",
+            f"🏆 Your Certificate & Letter of Recommendation are Ready — {cert_id}",
             html,
         )
 

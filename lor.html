@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Letter of Recommendation — SkillMe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --text: #1a1a2e;
+      --muted: #475569;
+      --border: #e2e8f0;
+      --bg: #f8fafc;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 16px;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+    }
+
+    /* ─── ACTION BAR (hidden on print) ─── */
+    .action-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .btn-print {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.9rem;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .btn-print:hover { background: #4338ca; transform: translateY(-1px); }
+
+    /* ─── DOCUMENT CARD ─── */
+    .doc-wrap {
+      width: 100%;
+      max-width: 800px;
+      position: relative;
+    }
+
+    .document {
+      width: 100%;
+      aspect-ratio: 1 / 1.4142; /* A4 portrait ratio */
+      background: #ffffff;
+      position: relative;
+      overflow: hidden;
+      border-radius: 4px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      padding: 10% 12%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── LETTERHEAD ─── */
+    .letterhead {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 24px;
+      margin-bottom: 40px;
+    }
+    .lh-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .lh-logo {
+      width: 48px; height: 48px; border-radius: 8px;
+      background: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Courier New', monospace;
+      font-weight: 800; font-size: 20px; color: #fff;
+    }
+    .lh-title {
+      font-weight: 800; font-size: 24px; letter-spacing: -0.5px;
+    }
+    .lh-subtitle {
+      font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px;
+    }
+    .lh-meta {
+      text-align: right;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ─── LETTER BODY ─── */
+    .letter-body {
+      flex: 1;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem;
+      line-height: 1.8;
+      color: #334155;
+      text-align: justify;
+    }
+    .letter-title {
+      text-align: center;
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 32px;
+      color: var(--text);
+    }
+    .letter-date {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+      font-weight: 500;
+    }
+    .letter-salutation {
+      margin-bottom: 24px;
+      font-weight: 600;
+    }
+    .letter-paragraph {
+      margin-bottom: 20px;
+    }
+    .highlight {
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* ─── SIGNATURE ─── */
+    .signature-area {
+      margin-top: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .sig-line {
+      width: 200px;
+      height: 1px;
+      background: #94a3b8;
+      margin-bottom: 12px;
+    }
+    .sig-name {
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--text);
+    }
+    .sig-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ─── FOOTER ─── */
+    .letter-footer {
+      margin-top: auto;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* ─── STATUS SECTION (not printed) ─── */
+    .verify-section {
+      margin-top: 24px;
+      width: 100%;
+      max-width: 800px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .loading-state { color: var(--muted); font-size: 0.9rem; }
+    
+    .verify-icon {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #dcfce7; color: #16a34a;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .verify-text strong { display: block; font-size: 0.9rem; margin-bottom: 2px; color: var(--text); }
+    .verify-text span { font-size: 0.8rem; color: var(--muted); }
+
+    /* ─── PRINT STYLES ─── */
+    @media print {
+      body { background: #fff; padding: 0; }
+      .action-bar, .verify-section { display: none !important; }
+      .doc-wrap { max-width: 100%; }
+      .document {
+        box-shadow: none;
+        border-radius: 0;
+        aspect-ratio: auto;
+        height: 100vh;
+        padding: 40px;
+      }
+    }
+
+    /* ─── MOBILE RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      body { padding: 20px 12px; }
+      .doc-wrap { overflow-x: auto; }
+      .document { min-width: 600px; } /* Ensures readability even if scaled */
+    }
+  </style>
+  <script src="config.js"></script>
+</head>
+<body>
+
+<!-- Action Bar -->
+<div class="action-bar" id="action-bar">
+  <button class="btn-print" onclick="window.print()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+      <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+      <rect x="6" y="14" width="12" height="8"/>
+    </svg>
+    Print / Save as PDF
+  </button>
+</div>
+
+<!-- LOR Document -->
+<div class="doc-wrap">
+  <div class="document" id="lor-document">
+    
+    <div class="letterhead">
+      <div class="lh-brand">
+        <div class="lh-logo">&gt;_</div>
+        <div>
+          <div class="lh-title">SkillMe</div>
+          <div class="lh-subtitle">India's Open Source Platform</div>
+        </div>
+      </div>
+      <div class="lh-meta">
+        support@skillme.in<br>
+        www.skillme-intern.in<br>
+        Ref: <span id="lh-cert-id">Loading...</span>
+      </div>
+    </div>
+
+    <div class="letter-body">
+      <div class="letter-title">Letter of Recommendation</div>
+      <div class="letter-date" id="lb-date">Date: Loading...</div>
+      
+      <div class="letter-salutation">To Whom It May Concern,</div>
+      
+      <div class="letter-paragraph">
+        It is with great pleasure that I write this letter of recommendation for <span class="highlight" id="lb-name">________</span>, who has successfully completed a rigorous 4-week internship program at SkillMe in the domain of <span class="highlight" id="lb-domain">________</span> (Batch <span id="lb-batch">___</span>).
+      </div>
+      
+      <div class="letter-paragraph">
+        During their time at SkillMe, <span class="highlight" id="lb-name-2">________</span> demonstrated exceptional technical proficiency, a strong work ethic, and a genuine passion for open-source development. Our program requires interns to tackle real-world GitHub issues, adhere to strict coding standards, and collaborate via pull requests. <span class="highlight" id="lb-name-3">________</span> navigated these challenges with distinction.
+      </div>
+      
+      <div class="letter-paragraph">
+        Beyond their technical contributions, they showed an ability to learn quickly, adapt to new environments, and deliver quality results within deadlines. Their commitment to continuous improvement and open-source collaboration makes them a valuable asset to any software engineering team.
+      </div>
+
+      <div class="letter-paragraph">
+        I highly recommend <span class="highlight" id="lb-name-4">________</span> for any future endeavors in technology and software development. We are confident they will continue to excel and bring significant value to their future academic or professional roles.
+      </div>
+
+      <div class="signature-area">
+        <div class="sig-line"></div>
+        <div class="sig-name">SkillMe Operations Team</div>
+        <div class="sig-title">Authorised Signatory</div>
+      </div>
+    </div>
+
+    <div class="letter-footer">
+      <div>Verify authenticity: <span id="lf-verify-url">...</span></div>
+      <div>Issued via SkillMe platform</div>
+    </div>
+  </div>
+</div>
+
+<!-- Verify Section -->
+<div class="verify-section" id="verify-section">
+  <div class="loading-state">Loading recommendation data...</div>
+</div>
+
+<script>
+  const API = window.SKILLME_API || 'http://localhost:8000';
+  const params = new URLSearchParams(window.location.search);
+  let studentId  = params.get('student_id');
+  let batchId    = params.get('batch_id');
+  const certId   = params.get('cert_id');
+  const email    = params.get('email');
+  const nameParam   = params.get('name');
+  const domainParam = params.get('domain');
+
+  function showError(msg) {
+    document.getElementById('verify-section').innerHTML = `<div style="color:red;font-size:0.9rem;">Error: ${msg}</div>`;
+  }
+
+  function populateLOR(data) {
+    const name = data.holder || data.student_name || data.first_name ? `${data.first_name} ${data.last_name}` : nameParam || 'Student';
+    const domain = (data.domain || domainParam || 'Web Development').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const batch = data.batch_number || batchId || '1';
+    const id = data.cert_id || certId || 'Pending';
+    const dateStr = data.issued_at ? new Date(data.issued_at).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' }) : new Date().toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' });
+
+    document.getElementById('lh-cert-id').textContent = id;
+    document.getElementById('lb-date').textContent = `Date: ${dateStr}`;
+    document.getElementById('lb-name').textContent = name;
+    document.getElementById('lb-name-2').textContent = name.split(' ')[0];
+    document.getElementById('lb-name-3').textContent = name.split(' ')[0];
+    document.getElementById('lb-name-4').textContent = name;
+    document.getElementById('lb-domain').textContent = domain;
+    document.getElementById('lb-batch').textContent = `#${batch}`;
+    
+    const verifyUrl = `${window.location.origin}/certificate.html?cert_id=${id}`;
+    document.getElementById('lf-verify-url').textContent = verifyUrl;
+    document.title = `LOR — ${name} — SkillMe`;
+  }
+
+  function showVerifyBadge(isValid, data) {
+    const vs = document.getElementById('verify-section');
+    if (isValid) {
+      vs.innerHTML = `
+        <div class="verify-icon">✓</div>
+        <div class="verify-text">
+          <strong>Recommendation Verified</strong>
+          <span>This letter is genuine and is backed by certificate ${data.cert_id}. Issued to ${data.holder || data.first_name} on ${new Date(data.issued_at).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' })}.</span>
+        </div>
+      `;
+    } else {
+      vs.innerHTML = `
+        <div class="verify-icon" style="background:#fef3c7; color:#d97706;">!</div>
+        <div class="verify-text">
+          <strong>Preview Mode</strong>
+          <span>This is a preview. Complete your internship to receive the official Letter of Recommendation.</span>
+        </div>
+      `;
+    }
+  }
+
+  async function loadLOR() {
+    // Mode 1: direct cert_id verification
+    if (certId) {
+      try {
+        const res = await fetch(`${API}/api/certificates/verify/${certId}`);
+        if (!res.ok) throw new Error('Recommendation letter not found');
+        const data = await res.json();
+        populateLOR(data);
+        showVerifyBadge(true, data);
+        return;
+      } catch (e) {
+        showError(e.message);
+        return;
+      }
+    }
+
+    // Mode 2: fetch via studentId & batchId metadata
+    if (studentId && batchId) {
+      try {
+        const metaRes = await fetch(`${API}/api/certificates/metadata/${studentId}/${batchId}`);
+        if (metaRes.ok) {
+          const myCert = await metaRes.json();
+          populateLOR(myCert);
+          showVerifyBadge(true, myCert);
+          return;
+        }
+      } catch(e) {}
+    }
+
+    // Fallback: Populate from URL params
+    if (nameParam || studentId) {
+      populateLOR({});
+      showVerifyBadge(false);
+    } else {
+      showError('No identifying information provided. Use ?cert_id=X or ?email=Y');
+    }
+  }
+
+  loadLOR();
+</script>
+</body>
+</html>
