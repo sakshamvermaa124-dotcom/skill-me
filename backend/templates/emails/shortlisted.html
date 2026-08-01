@@ -1,50 +1,40 @@
 {% extends "base.html" %}
 
-{% block title %}You've Been Shortlisted — SkillMe{% endblock %}
+{% block title %}Shortlist Notification — SkillMe{% endblock %}
 
 {% block body %}
-<p class="greeting">🎉 Congratulations, {{ first_name }}!</p>
+<p class="greeting">Dear {{ first_name }},</p>
 <p class="lead">
-  Out of all the applications we received, your profile stood out.
-  You've been <strong style="color:#34d399;">shortlisted</strong> for the
-  <strong>{{ domain_label }}</strong> internship at SkillMe!
+  We are pleased to inform you that your application has been <strong>shortlisted</strong> for the
+  <strong>{{ domain_label }}</strong> internship program at SkillMe.
 </p>
-
-<div style="text-align:center; margin: 24px 0;">
-  <span class="badge badge-green" style="font-size:14px; padding:8px 20px;">✓ Shortlisted</span>
-</div>
 
 <div class="divider"></div>
 
-<p style="font-size:14px; color:#8a8aaa; margin-bottom:16px; letter-spacing:0.08em; text-transform:uppercase; font-weight:600;">What comes next</p>
+<p class="section-label">Next Steps</p>
 
 <div class="steps">
   <div class="step">
-    <div class="step-num" style="background:linear-gradient(135deg,#34d399,#38bdf8);">✓</div>
-    <div class="step-text"><strong>Shortlisted</strong> — You are here! 🎯</div>
+    <div class="step-num" style="background:#16a34a;">&check;</div>
+    <div class="step-text"><strong>Shortlisted</strong><br />Your application has successfully passed the initial review.</div>
   </div>
   <div class="step">
     <div class="step-num">2</div>
-    <div class="step-text"><strong>Offer Letter (coming soon)</strong><br />You'll receive a formal offer letter with your batch details, GitHub repo access, and joining date.</div>
+    <div class="step-text"><strong>Offer Letter</strong><br />You will shortly receive a formal offer letter containing your batch details, repository access, and joining date.</div>
   </div>
   <div class="step">
     <div class="step-num">3</div>
-    <div class="step-text"><strong>4-Week Internship</strong><br />Work on real GitHub issues weekly. Earn open-source contributions + a verified certificate.</div>
+    <div class="step-text"><strong>Program Commencement</strong><br />Begin your 4-week internship, resolving real GitHub issues and earning open-source contributions.</div>
   </div>
 </div>
 
 <div class="divider"></div>
 
-<p class="lead" style="font-size:14px;">
-  Keep this inbox monitored — your <strong>official offer letter</strong> with
-  joining date and GitHub repo link will arrive shortly.
-</p>
-
-<div class="cta-wrap">
-  <a href="{{ frontend_url }}" class="cta-btn">Learn More About SkillMe</a>
+<div class="note">
+  Please monitor your inbox for your official offer letter.
 </div>
 
-<p style="text-align:center; font-size:13px; color:#555575;">
-  Share the news on LinkedIn 🚀 — tag <strong>@SkillMe</strong> and let the world know!
-</p>
+<div class="cta-wrap">
+  <a href="{{ frontend_url }}" class="cta-btn">Visit SkillMe</a>
+</div>
 {% endblock %}

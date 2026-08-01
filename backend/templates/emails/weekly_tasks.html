@@ -3,61 +3,52 @@
 {% block title %}Week {{ week_number }} Tasks Assigned — SkillMe{% endblock %}
 
 {% block body %}
-<p class="greeting">New tasks are ready, {{ first_name }}! 💻</p>
+<p class="greeting">Hello {{ first_name }},</p>
 <p class="lead">
-  Your <strong>Week {{ week_number }}</strong> tasks for the
-  <strong>{{ domain_label }}</strong> internship have been assigned.
-  You have until <strong>{{ deadline }}</strong> to raise your PRs.
+  Your tasks for <strong>Week {{ week_number }}</strong> of the <strong>{{ domain_label }}</strong> internship program have been assigned.
 </p>
-
-<div style="text-align:center; margin:16px 0 24px;">
-  <span class="badge badge-purple">Week {{ week_number }} of 4</span>
-  &nbsp;
-  <span class="badge badge-gold">{{ task_count }} task{{ 's' if task_count != 1 else '' }} assigned</span>
-</div>
 
 <div class="divider"></div>
 
-<p style="font-size:14px; color:#8a8aaa; margin-bottom:14px; letter-spacing:0.08em; text-transform:uppercase; font-weight:600;">Your Tasks This Week</p>
+<p class="section-label">Task Details</p>
+<div class="info-table">
+  <div class="info-row">
+    <span class="info-label">Batch</span>
+    <span class="info-value">{{ domain_label }} (Batch #{{ batch_number }})</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Week</span>
+    <span class="info-value">{{ week_number }} of 4</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Tasks Assigned</span>
+    <span class="info-value">{{ task_count }}</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Submission Deadline</span>
+    <span class="info-value">{{ deadline }}</span>
+  </div>
+</div>
+
+<p class="section-label">Assigned Issues</p>
 
 {% for task in tasks %}
 <div class="task-item">
   <div class="task-item-title">{{ loop.index }}. {{ task.title }}</div>
   {% if task.issue_url %}
-  <a href="{{ task.issue_url }}" class="task-item-link">→ View GitHub Issue</a>
+  <a href="{{ task.issue_url }}" class="task-item-link">View Issue on GitHub &rarr;</a>
   {% endif %}
 </div>
 {% endfor %}
 
-<div class="divider"></div>
-
-<div class="info-box">
-  <div class="info-box-row">
-    <span class="info-label">Batch</span>
-    <span class="info-value">{{ domain_label }} · Batch #{{ batch_number }}</span>
-  </div>
-  <div class="info-box-row">
-    <span class="info-label">Week</span>
-    <span class="info-value">{{ week_number }} / 4</span>
-  </div>
-  <div class="info-box-row">
-    <span class="info-label">Tasks Assigned</span>
-    <span class="info-value">{{ task_count }}</span>
-  </div>
-  <div class="info-box-row">
-    <span class="info-label">Deadline</span>
-    <span class="info-value">{{ deadline }}</span>
-  </div>
-</div>
-
 <div class="cta-wrap">
-  <a href="{{ dashboard_url }}" class="cta-btn">View My Dashboard</a><br />
+  <a href="{{ dashboard_url }}" class="cta-btn">Access Dashboard</a><br />
   {% if repo_url %}
-  <a href="{{ repo_url }}" class="cta-btn-outline">Open GitHub Repository</a>
+  <a href="{{ repo_url }}" class="cta-btn-secondary">Open Repository</a>
   {% endif %}
 </div>
 
-<p style="font-size:13px; color:#555575; text-align:center;">
-  💡 Tip: Comment on the issue before starting — it lets others know you're working on it and shows initiative.
-</p>
+<div class="note">
+  Please ensure your pull requests are submitted prior to the deadline: <strong>{{ deadline }}</strong>.
+</div>
 {% endblock %}
