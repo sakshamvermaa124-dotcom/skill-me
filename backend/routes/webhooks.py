@@ -141,15 +141,20 @@ async def _handle_check_suite(data: dict) -> dict:
                 pr_number=pr_number,
                 status="tests_passed",
             )
-            # Post a success comment
+            # Post a success comment and auto-merge
             try:
                 await github_service.add_pr_comment(
                     repo_name=repo_name,
                     pr_number=pr_number,
-                    body="✅ **All tests passed!** Great work. Your PR will be reviewed and merged shortly.\n\n— SkillMe Bot 🤖",
+                    body="✅ **All tests passed!** Great work. Your PR is being automatically merged.\n\n— SkillMe Bot 🤖",
+                )
+                # Auto-merge the PR
+                await github_service.merge_pull_request(
+                    repo_name=repo_name,
+                    pr_number=pr_number
                 )
             except Exception as e:
-                logger.error(f"Failed to comment on PR #{pr_number}: {e}")
+                logger.error(f"Failed to auto-merge or comment on PR #{pr_number}: {e}")
 
             results.append({"pr_number": pr_number, "status": "tests_passed"})
 
