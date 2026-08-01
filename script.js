@@ -322,7 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const scene  = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, W() / H(), 0.1, 100);
-    camera.position.set(5, 2, 6);
+    camera.position.set(7, 3, 9);
     camera.lookAt(0, 0, 0);
 
     // Outer wireframe sphere
