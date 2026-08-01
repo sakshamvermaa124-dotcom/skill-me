@@ -40,14 +40,36 @@ document.addEventListener('DOMContentLoaded', () => {
   lenis.on('scroll', ({ scroll }) => navbar.classList.toggle('scrolled', scroll > 50));
 
   navToggle.addEventListener('click', () => {
-    navToggle.classList.toggle('active');
-    navLinks.classList.toggle('open');
+    const isOpen = navLinks.classList.toggle('open');
+    navToggle.classList.toggle('active', isOpen);
+    document.body.style.overflow = isOpen ? 'hidden' : '';
   });
 
   navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
     navToggle.classList.remove('active');
     navLinks.classList.remove('open');
+    document.body.style.overflow = '';
   }));
+
+  // Close mobile menu on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && navLinks.classList.contains('open')) {
+      navToggle.classList.remove('active');
+      navLinks.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  });
+
+  // Close mobile menu when clicking outside of it
+  document.addEventListener('click', (e) => {
+    if (navLinks.classList.contains('open') &&
+        !navLinks.contains(e.target) &&
+        !navToggle.contains(e.target)) {
+      navToggle.classList.remove('active');
+      navLinks.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  });
 
   // ═══════════════════════════════════════════════════════════
   // THEME TOGGLE — Light / Dark with localStorage persistence
