@@ -439,15 +439,16 @@
     }
 
   </style>
+  <script>
+    const savedTheme = localStorage.getItem('skillme_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+  </script>
 </head>
 
 <body>
-  <!-- Aurora Background -->
-  <div class="aurora-bg" aria-hidden="true">
-    <div class="aurora-blob"></div>
-    <div class="aurora-blob"></div>
-    <div class="aurora-blob"></div>
-  </div>
+  
 
   <!-- Navbar -->
   <nav class="navbar scrolled" id="navbar">
