@@ -463,6 +463,17 @@ section { position: relative; padding: var(--section-padding); overflow: hidden;
 .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(99, 102, 241, 0.45); }
 .nav-cta:hover::before { opacity: 1; }
 
+.nav-link-dashboard {
+  padding: 8px 18px; border-radius: var(--radius-full);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  color: #a5b4fc !important;
+  font-weight: 600; font-size: 0.87rem;
+  transition: all var(--transition-fast);
+  letter-spacing: 0.01em;
+}
+.nav-link-dashboard::after { display: none !important; }
+.nav-link-dashboard:hover { background: rgba(99, 102, 241, 0.12); border-color: rgba(99, 102, 241, 0.6); transform: translateY(-1px); }
+
 .nav-toggle {
   display: none; flex-direction: column; gap: 5px;
   background: none; border: none; cursor: pointer; padding: 4px;
