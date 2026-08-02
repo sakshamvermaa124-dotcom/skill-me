@@ -348,8 +348,25 @@ class BatchService:
                 )
                 github_issue_number = gh_issue["number"]
             except Exception as e:
-                logger.error(f"Failed to create GitHub issue: {e}")
-                github_issue_number = None
+                logger.error(f"Failed to create GitHub issue with assignee {assignee_username}: {e}")
+                # Retry without assignee (e.g. if student hasn't accepted invite yet)
+                if assignee_username:
+                    try:
+                        logger.info(f"Retrying issue creation without assignee...")
+                        gh_issue = await github_service.create_issue(
+                            repo_name=batch["repo_name"],
+                            title=title,
+                            body=body,
+                            assignee=None,
+                            labels=[week_info["label"], week_info["difficulty"]],
+                        )
+                        github_issue_number = gh_issue["number"]
+                    except Exception as fallback_e:
+                        logger.error(f"Failed to create GitHub issue without assignee: {fallback_e}")
+                        github_issue_number = None
+                else:
+                    github_issue_number = None
+
 
             # Record in database
             issue_id = await db.insert(
