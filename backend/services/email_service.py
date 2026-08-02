@@ -109,14 +109,34 @@ async def _send(to_email: str, to_name: str, subject: str, html_body: str) -> bo
 # ── Domain label helper ───────────────────────────────────────────────────────
 
 def _domain_label(domain: str) -> str:
-    """Convert domain slug to human-readable label."""
+    """Convert domain slug/value to human-readable label."""
     mapping = {
+        # Original domains
         "web-dev": "Web Development",
+        "Web Development": "Web Development",
         "python": "Python",
+        "Python": "Python",
         "ml": "Machine Learning",
+        "Machine Learning": "Machine Learning",
         "devops": "DevOps / Cloud",
+        "DevOps / CI-CD": "DevOps / CI-CD",
         "mobile": "Mobile Development",
+        "Flutter / Mobile": "Flutter / Mobile",
         "ui-ux": "UI/UX Design",
+        "UI/UX Design": "UI/UX Design",
+        # New domains
+        "React / Next.js": "React / Next.js",
+        "Node.js / Express": "Node.js / Express",
+        "Java / Spring Boot": "Java / Spring Boot",
+        "Data Science": "Data Science",
+        "C/C++ / DSA": "C/C++ / DSA",
+        "Cybersecurity": "Cybersecurity",
+        "Cloud / AWS": "Cloud / AWS",
+        "DSA / Competitive": "DSA / Competitive Programming",
+        "Blockchain / Web3": "Blockchain / Web3",
+        "Android / Kotlin": "Android / Kotlin",
+        "SQL / Databases": "SQL / Databases",
+        "Generative AI": "Generative AI",
     }
     return mapping.get(domain, domain.replace("-", " ").title())
 
@@ -247,9 +267,10 @@ class EmailService:
     ) -> bool:
         if not issued_date:
             issued_date = datetime.utcnow().strftime("%d %B %Y")
-        certificate_url = f"{settings.frontend_url}/certificate.html?email={email}"
-        verify_url = f"{settings.frontend_url}/certificate.html?cert_id={cert_id}"
-        lor_url = f"{settings.frontend_url}/lor.html?cert_id={cert_id}"
+        _base = "https://skill-me-intern.in"
+        certificate_url = f"{_base}/certificate.html?email={email}"
+        verify_url = f"{_base}/certificate.html?cert_id={cert_id}"
+        lor_url = f"{_base}/lor.html?cert_id={cert_id}"
         html = _render(
             "certificate_ready.html",
             first_name=first_name,

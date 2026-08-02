@@ -17,19 +17,66 @@ TASKS_REPO = "SkillMe-Intern-Tasks"
 class TaskService:
     """Service to fetch task definitions from the central tasks repo."""
 
+    # Map form display values / old slugs → repo folder names
+    DOMAIN_SLUG_MAP = {
+        # Form display values → repo folder
+        "Web Development": "web-dev",
+        "Python": "python",
+        "Machine Learning": "ml",
+        "DevOps / Cloud": "devops",
+        "DevOps / CI-CD": "devops",
+        "Mobile Development": "flutter",
+        "Flutter / Mobile": "flutter",
+        "UI/UX Design": "uiux",
+        "React / Next.js": "react",
+        "Node.js / Express": "node",
+        "Java / Spring Boot": "java",
+        "Data Science": "datascience",
+        "C/C++ / DSA": "cpp",
+        "Cybersecurity": "cyber",
+        "Cloud / AWS": "cloud",
+        "DSA / Competitive": "dsa",
+        "DSA / Competitive Programming": "dsa",
+        "Blockchain / Web3": "blockchain",
+        "Android / Kotlin": "android",
+        "SQL / Databases": "sql",
+        "Generative AI": "genai",
+        # Old short slugs (pass-through)
+        "web-dev": "web-dev",
+        "python": "python",
+        "ml": "ml",
+        "devops": "devops",
+        "mobile": "flutter",
+        "ui-ux": "uiux",
+        "react": "react",
+        "node": "node",
+        "java": "java",
+        "datascience": "datascience",
+        "cpp": "cpp",
+        "cyber": "cyber",
+        "cloud": "cloud",
+        "dsa": "dsa",
+        "blockchain": "blockchain",
+        "android": "android",
+        "sql": "sql",
+        "genai": "genai",
+    }
+
     async def fetch_tasks(self, domain: str, week: int) -> list[dict]:
         """
         Fetch all task markdown files for a given domain and week.
         
         Args:
-            domain: e.g. "web-dev", "python"
+            domain: e.g. "web-dev", "python", or form display value like "Web Development"
             week: The week number (1-4)
             
         Returns:
             A list of task dictionaries containing title, body, difficulty, and labels.
         """
-        path = f"{domain}/week-{week}"
-        logger.info(f"Fetching tasks from {TASKS_REPO}/{path}")
+        # Normalize domain to repo folder slug
+        slug = self.DOMAIN_SLUG_MAP.get(domain, domain.lower().replace(" ", "-").replace("/", "-"))
+        path = f"{slug}/week-{week}"
+        logger.info(f"Fetching tasks from {TASKS_REPO}/{path} (domain='{domain}' → slug='{slug}')")
         
         tasks = []
         try:

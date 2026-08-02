@@ -179,7 +179,7 @@ async def add_student_to_batch(
         )
         if student and batch:
             repo_url = (
-                f"https://github.com/{batch['repo_name']}"
+                f"https://github.com/{github_service.org}/{batch['repo_name']}"
                 if batch.get("repo_name") else None
             )
             background_tasks.add_task(
