@@ -112,9 +112,19 @@ async def create_batch(req: CreateBatchRequest, _: str = Depends(require_admin))
 
 @router.get("/batches", summary="List all batches")
 async def list_batches(status: str | None = None, _: str = Depends(require_admin)):
-    """List all batches, optionally filtered by status."""
+    """List all batches with enrolled student counts, optionally filtered by status."""
     batches = await batch_service.list_batches(status=status)
+
+    # Fetch enrollment counts for all batches in one query and attach to each batch
+    enrollment_counts = await db.fetch_all(
+        "SELECT batch_id, COUNT(*) as count FROM enrollments WHERE status != 'dropped' GROUP BY batch_id"
+    )
+    counts_by_batch = {row["batch_id"]: row["count"] for row in enrollment_counts}
+    for b in batches:
+        b["enrolled_students"] = counts_by_batch.get(b["id"], 0)
+
     return {"batches": batches, "count": len(batches)}
+
 
 
 @router.get("/batches/{batch_id}", summary="Get batch details")
