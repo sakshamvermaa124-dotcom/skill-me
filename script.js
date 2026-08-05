@@ -87,6 +87,9 @@ document.addEventListener('DOMContentLoaded', () => {
     html.setAttribute('data-theme', next);
     localStorage.setItem('skillme-theme', next);
 
+    // Notify Three.js scenes of theme change
+    window.dispatchEvent(new CustomEvent('themechange', { detail: { theme: next } }));
+
     // Animate the toggle button
     themeToggle.style.transform = 'rotate(360deg) scale(1.15)';
     setTimeout(() => { themeToggle.style.transform = ''; }, 500);
@@ -111,101 +114,110 @@ document.addEventListener('DOMContentLoaded', () => {
     renderer.setClearColor(0x000000, 0);
 
     const scene  = new THREE.Scene();
+    // Theme-aware fog
+    const isDark = () => html.getAttribute('data-theme') !== 'light';
+    scene.fog = new THREE.FogExp2(isDark() ? 0x0b0b0e : 0xfafafa, 0.08);
+
     const camera = new THREE.PerspectiveCamera(60, W() / H(), 0.1, 100);
-    camera.position.z = 4.5;
+    camera.position.z = 5;
 
-    // ── Multi-cluster particle system ──
-    const COUNT   = 2800;
+    // ── Elegant TorusKnot wireframe centerpiece ──
+    const knotGeo = new THREE.TorusKnotGeometry(1.6, 0.45, 200, 32, 2, 3);
+    const knotMat = new THREE.MeshBasicMaterial({
+      color: 0x6366f1,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.15,
+    });
+    const knot = new THREE.Mesh(knotGeo, knotMat);
+    knot.position.set(1.5, 0, -1);
+    scene.add(knot);
+
+    // Second smaller knot — cyan accent
+    const knot2Geo = new THREE.TorusKnotGeometry(0.8, 0.25, 128, 20, 3, 5);
+    const knot2Mat = new THREE.MeshBasicMaterial({
+      color: 0x22d3ee,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.1,
+    });
+    const knot2 = new THREE.Mesh(knot2Geo, knot2Mat);
+    knot2.position.set(-2, -0.5, -2);
+    scene.add(knot2);
+
+    // Sparse ambient particles for subtle depth
+    const COUNT = 600;
     const positions = new Float32Array(COUNT * 3);
-    const colors    = new Float32Array(COUNT * 3);
-    const sizes     = new Float32Array(COUNT);
-    const velocities = new Float32Array(COUNT * 3);
-
-    // Indigo / cyan / emerald palette — no orange
+    const colors = new Float32Array(COUNT * 3);
     const palette = [
-      new THREE.Color('#6366f1'),  // indigo
-      new THREE.Color('#818cf8'),  // indigo light
-      new THREE.Color('#22d3ee'),  // cyan
-      new THREE.Color('#06b6d4'),  // cyan dark
-      new THREE.Color('#34d399'),  // emerald
-      new THREE.Color('#a78bfa'),  // violet
-      new THREE.Color('#7dd3fc'),  // sky
+      new THREE.Color('#6366f1'),
+      new THREE.Color('#22d3ee'),
+      new THREE.Color('#34d399'),
     ];
 
     for (let i = 0; i < COUNT; i++) {
       const i3 = i * 3;
-
-      // Spread in a sphere-ish volume
-      const radius = 3 + Math.random() * 8;
-      const theta  = Math.random() * Math.PI * 2;
-      const phi    = Math.acos(2 * Math.random() - 1);
-
+      const radius = 3 + Math.random() * 10;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
       positions[i3]     = radius * Math.sin(phi) * Math.cos(theta);
       positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta) * 0.5;
       positions[i3 + 2] = radius * Math.cos(phi) - 2;
-
       const c = palette[Math.floor(Math.random() * palette.length)];
-      colors[i3]     = c.r;
-      colors[i3 + 1] = c.g;
-      colors[i3 + 2] = c.b;
-
-      sizes[i]           = 0.5 + Math.random() * 2.5;
-      velocities[i3]     = (Math.random() - 0.5) * 0.003;
-      velocities[i3 + 1] = (Math.random() - 0.5) * 0.002;
-      velocities[i3 + 2] = (Math.random() - 0.5) * 0.001;
+      colors[i3] = c.r; colors[i3 + 1] = c.g; colors[i3 + 2] = c.b;
     }
 
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('color',    new THREE.BufferAttribute(colors, 3));
-
-    const material = new THREE.PointsMaterial({
-      size: 0.028,
+    const particleGeo = new THREE.BufferGeometry();
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    particleGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    const particleMat = new THREE.PointsMaterial({
+      size: 0.02,
       vertexColors: true,
       transparent: true,
-      opacity: 0.65,
+      opacity: 0.4,
       sizeAttenuation: true,
-      blending: THREE.AdditiveBlending,  // additive glow effect!
+      blending: THREE.AdditiveBlending,
       depthWrite: false,
     });
-
-    const particles = new THREE.Points(geometry, material);
+    const particles = new THREE.Points(particleGeo, particleMat);
     scene.add(particles);
 
     // Mouse parallax
     let mouseX = 0, mouseY = 0;
     let targetX = 0, targetY = 0;
-
     window.addEventListener('mousemove', (e) => {
       mouseX = (e.clientX / window.innerWidth  - 0.5);
       mouseY = (e.clientY / window.innerHeight - 0.5);
     });
 
-    // GSAP integration: connect scroll to particle y
     let scrollProgress = 0;
-    lenis.on('scroll', ({ progress }) => {
-      scrollProgress = progress;
-    });
+    lenis.on('scroll', ({ progress }) => { scrollProgress = progress; });
 
-    const posAttr = geometry.attributes.position;
-    const clock   = new THREE.Clock();
-
+    const clock = new THREE.Clock();
     function animate() {
       requestAnimationFrame(animate);
       const t = clock.getElapsedTime();
 
-      // Gentle rotation + breathing
-      particles.rotation.y = t * 0.04;
-      particles.rotation.x = t * 0.015;
+      // Slow, graceful rotation
+      knot.rotation.x = t * 0.06;
+      knot.rotation.y = t * 0.08;
+      knot2.rotation.x = -t * 0.05;
+      knot2.rotation.y = t * 0.1;
 
-      // Mouse parallax with damping
-      targetX += (mouseX - targetX) * 0.035;
-      targetY += (mouseY - targetY) * 0.035;
-      particles.rotation.y += targetX * 0.4;
-      particles.rotation.x += targetY * 0.25;
+      particles.rotation.y = t * 0.02;
 
-      // Fade particles as user scrolls away from hero
-      material.opacity = Math.max(0, 0.65 - scrollProgress * 2.5);
+      // Mouse parallax with smooth damping
+      targetX += (mouseX - targetX) * 0.03;
+      targetY += (mouseY - targetY) * 0.03;
+      knot.rotation.y += targetX * 0.3;
+      knot.rotation.x += targetY * 0.15;
+      particles.rotation.y += targetX * 0.15;
+
+      // Fade as user scrolls away from hero
+      const fadeOpacity = Math.max(0, 1 - scrollProgress * 3);
+      knotMat.opacity = 0.15 * fadeOpacity;
+      knot2Mat.opacity = 0.1 * fadeOpacity;
+      particleMat.opacity = 0.4 * fadeOpacity;
 
       renderer.render(scene, camera);
     }
@@ -216,6 +228,11 @@ document.addEventListener('DOMContentLoaded', () => {
       renderer.setSize(W(), H());
       camera.aspect = W() / H();
       camera.updateProjectionMatrix();
+    });
+
+    // Update fog on theme switch
+    window.addEventListener('themechange', (e) => {
+      scene.fog.color.set(e.detail.theme === 'light' ? 0xfafafa : 0x0b0b0e);
     });
   })();
 
@@ -239,40 +256,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const camera = new THREE.PerspectiveCamera(50, W() / H(), 0.1, 100);
     camera.position.z = 6;
 
-    const geos = [
-      new THREE.IcosahedronGeometry(0.5, 0),
-      new THREE.OctahedronGeometry(0.55, 0),
-      new THREE.TetrahedronGeometry(0.6, 0),
-      new THREE.TorusGeometry(0.38, 0.14, 6, 14),
-      new THREE.BoxGeometry(0.7, 0.7, 0.7),
-    ];
-
-    // Indigo/cyan/emerald wireframes — matching new palette
-    const wireColors = [0x6366f1, 0x22d3ee, 0x34d399, 0xa78bfa, 0x7dd3fc];
+    // Uniform dodecahedron wireframes — fewer but more impactful
+    const wireColors = [0x6366f1, 0x22d3ee, 0x34d399];
     const orbs = [];
 
-    for (let i = 0; i < 22; i++) {
-      const geo = geos[Math.floor(Math.random() * geos.length)];
-      const col = wireColors[Math.floor(Math.random() * wireColors.length)];
+    for (let i = 0; i < 10; i++) {
+      const geo = new THREE.DodecahedronGeometry(0.5, 0);
+      const col = wireColors[i % wireColors.length];
       const mat = new THREE.MeshBasicMaterial({
         color: col, wireframe: true, transparent: true,
-        opacity: 0.2 + Math.random() * 0.3,
+        opacity: 0.12 + Math.random() * 0.12,
       });
 
       const mesh = new THREE.Mesh(geo, mat);
       mesh.position.set(
-        (Math.random() - 0.5) * 16,
-        (Math.random() - 0.5) * 4,
-        (Math.random() - 0.5) * 4,
+        (Math.random() - 0.5) * 14,
+        (Math.random() - 0.5) * 3,
+        (Math.random() - 0.5) * 3,
       );
-      mesh.scale.setScalar(0.5 + Math.random() * 1.0);
+      mesh.scale.setScalar(0.6 + Math.random() * 0.8);
       mesh.userData = {
-        rx: (Math.random() - 0.5) * 0.014,
-        ry: (Math.random() - 0.5) * 0.02,
-        rz: (Math.random() - 0.5) * 0.01,
+        rx: (Math.random() - 0.5) * 0.008,
+        ry: (Math.random() - 0.5) * 0.012,
+        rz: (Math.random() - 0.5) * 0.006,
         baseY: mesh.position.y,
         floatOff: Math.random() * Math.PI * 2,
-        floatSpd: 0.35 + Math.random() * 0.65,
+        floatSpd: 0.25 + Math.random() * 0.45,
       };
       scene.add(mesh);
       orbs.push(mesh);
@@ -325,34 +334,34 @@ document.addEventListener('DOMContentLoaded', () => {
     camera.position.set(7, 3, 9);
     camera.lookAt(0, 0, 0);
 
-    // Outer wireframe sphere
-    const sphereGeo = new THREE.SphereGeometry(1.8, 24, 24);
+    // Outer wireframe sphere — denser IcosahedronGeometry
+    const sphereGeo = new THREE.IcosahedronGeometry(1.8, 2);
     const sphereMat = new THREE.MeshBasicMaterial({
-      color: 0x6366f1, wireframe: true, transparent: true, opacity: 0.12,
+      color: 0x6366f1, wireframe: true, transparent: true, opacity: 0.08,
     });
     const sphere = new THREE.Mesh(sphereGeo, sphereMat);
     scene.add(sphere);
 
-    // Inner glowing sphere (points)
-    const innerGeo = new THREE.SphereGeometry(1.2, 18, 18);
+    // Inner point cloud — IcosahedronGeometry for denser, more uniform distribution
+    const innerGeo = new THREE.IcosahedronGeometry(1.2, 3);
     const innerMat = new THREE.PointsMaterial({
-      color: 0x22d3ee, size: 0.045, transparent: true, opacity: 0.5,
+      color: 0x22d3ee, size: 0.035, transparent: true, opacity: 0.35,
       sizeAttenuation: true, blending: THREE.AdditiveBlending, depthWrite: false,
     });
     const innerPoints = new THREE.Points(innerGeo, innerMat);
     scene.add(innerPoints);
 
-    // Orbit rings — 3 at different tilts
+    // Orbit rings — sleeker with thinner tubes
     const ringData = [
-      { tiltX: 0,    tiltZ: 0,    color: 0x6366f1, speed: 0.006, radius: 2.5, tube: 0.012 },
-      { tiltX: 1.1,  tiltZ: 0.4,  color: 0x22d3ee, speed: -0.009, radius: 3.0, tube: 0.010 },
-      { tiltX: 0.6,  tiltZ: -0.8, color: 0x34d399, speed: 0.007, radius: 3.5, tube: 0.009 },
+      { tiltX: 0,    tiltZ: 0,    color: 0x6366f1, speed: 0.004, radius: 2.5, tube: 0.008 },
+      { tiltX: 1.1,  tiltZ: 0.4,  color: 0x22d3ee, speed: -0.006, radius: 3.0, tube: 0.007 },
+      { tiltX: 0.6,  tiltZ: -0.8, color: 0x34d399, speed: 0.005, radius: 3.5, tube: 0.006 },
     ];
 
     const rings = ringData.map(d => {
       const geo = new THREE.TorusGeometry(d.radius, d.tube, 4, 80);
       const mat = new THREE.MeshBasicMaterial({
-        color: d.color, transparent: true, opacity: 0.4,
+        color: d.color, transparent: true, opacity: 0.25,
       });
       const mesh = new THREE.Mesh(geo, mat);
       mesh.rotation.x = d.tiltX;
@@ -383,9 +392,9 @@ document.addEventListener('DOMContentLoaded', () => {
       requestAnimationFrame(animate);
       const t = clock.getElapsedTime();
 
-      sphere.rotation.y = t * 0.08;
-      sphere.rotation.x = t * 0.04;
-      innerPoints.rotation.y = -t * 0.1;
+      sphere.rotation.y = t * 0.05;
+      sphere.rotation.x = t * 0.025;
+      innerPoints.rotation.y = -t * 0.06;
 
       rings.forEach(ring => {
         ring.rotation.y += ring.userData.speed;
@@ -441,8 +450,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const camera = new THREE.PerspectiveCamera(50, W() / H(), 0.1, 100);
     camera.position.set(0, 0, 7);
 
-    // DNA double helix using points
-    const helixCount = 200;
+    // DNA double helix using points — dense for smooth strands
+    const helixCount = 300;
     const strand1Pos = [];
     const strand2Pos = [];
     const connectors = [];
@@ -461,7 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
           new THREE.Vector3(Math.cos(t + Math.PI) * 1.5, y, Math.sin(t + Math.PI) * 0.4),
         ];
         const geo = new THREE.BufferGeometry().setFromPoints(pts);
-        const mat = new THREE.LineBasicMaterial({ color: 0x34d399, transparent: true, opacity: 0.2 });
+        const mat = new THREE.LineBasicMaterial({ color: 0x34d399, transparent: true, opacity: 0.12 });
         connectors.push(new THREE.Line(geo, mat));
         scene.add(connectors[connectors.length - 1]);
       }
@@ -470,7 +479,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const s1Geo = new THREE.BufferGeometry();
     s1Geo.setAttribute('position', new THREE.Float32BufferAttribute(strand1Pos, 3));
     const s1Mat = new THREE.PointsMaterial({
-      color: 0x6366f1, size: 0.055, transparent: true, opacity: 0.7,
+      color: 0x6366f1, size: 0.04, transparent: true, opacity: 0.45,
       sizeAttenuation: true, blending: THREE.AdditiveBlending, depthWrite: false,
     });
     const strand1 = new THREE.Points(s1Geo, s1Mat);
@@ -479,7 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const s2Geo = new THREE.BufferGeometry();
     s2Geo.setAttribute('position', new THREE.Float32BufferAttribute(strand2Pos, 3));
     const s2Mat = new THREE.PointsMaterial({
-      color: 0x22d3ee, size: 0.055, transparent: true, opacity: 0.7,
+      color: 0x22d3ee, size: 0.04, transparent: true, opacity: 0.45,
       sizeAttenuation: true, blending: THREE.AdditiveBlending, depthWrite: false,
     });
     const strand2 = new THREE.Points(s2Geo, s2Mat);
@@ -493,8 +502,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function animate() {
       requestAnimationFrame(animate);
       const t = clock.getElapsedTime();
-      group.rotation.y = t * 0.35;
-      group.position.y = Math.sin(t * 0.5) * 0.2;
+      group.rotation.y = t * 0.2;
+      group.position.y = Math.sin(t * 0.35) * 0.15;
       renderer.render(scene, camera);
     }
 
@@ -750,38 +759,41 @@ document.addEventListener('DOMContentLoaded', () => {
   // ═══════════════════════════════════════════════════════════
   // 3D TILT — shared for all interactive cards
   // ═══════════════════════════════════════════════════════════
-  function addTilt(selector, strength = 12) {
+  function addTilt(selector, strength = 6) {
+    // Skip tilt on touch devices
+    if (!matchMedia('(hover: hover) and (pointer: fine)').matches) return;
     document.querySelectorAll(selector).forEach(card => {
       card.addEventListener('mousemove', (e) => {
         const r = card.getBoundingClientRect();
         const rX = ((e.clientY - r.top)  / r.height - 0.5) * strength;
         const rY = ((e.clientX - r.left) / r.width  - 0.5) * -strength;
-        card.style.transform = `perspective(700px) rotateX(${rX}deg) rotateY(${rY}deg) translateY(-4px) scale(1.02)`;
+        card.style.transform = `perspective(800px) rotateX(${rX}deg) rotateY(${rY}deg) translateY(-3px)`;
       });
       card.addEventListener('mouseenter', () => { card.style.transition = 'transform 0.1s ease'; });
       card.addEventListener('mouseleave', () => {
-        card.style.transform = 'perspective(700px) rotateX(0) rotateY(0) translateY(0) scale(1)';
-        card.style.transition = 'transform 0.55s cubic-bezier(0.34,1.56,0.64,1)';
+        card.style.transform = 'perspective(800px) rotateX(0) rotateY(0) translateY(0)';
+        card.style.transition = 'transform 0.5s cubic-bezier(0.23,1,0.32,1)';
       });
     });
   }
 
-  addTilt('.domain-card', 8);
-  addTilt('.testimonial-card', 6);
-  addTilt('.step-card', 7);
+  addTilt('.domain-card', 5);
+  addTilt('.testimonial-card', 4);
+  addTilt('.step-card', 5);
 
   // ═══════════════════════════════════════════════════════════
   // BENEFIT CARD SPOTLIGHT
   // ═══════════════════════════════════════════════════════════
   document.querySelectorAll('.benefit-card').forEach(card => {
+    if (!matchMedia('(hover: hover) and (pointer: fine)').matches) return;
     card.addEventListener('mousemove', (e) => {
       const r = card.getBoundingClientRect();
       const x = e.clientX - r.left, y = e.clientY - r.top;
       const color = card.classList.contains('featured')
-        ? 'rgba(52, 211, 153, 0.09)'
+        ? 'rgba(52, 211, 153, 0.05)'
         : card.classList.contains('placement')
-          ? 'rgba(99, 102, 241, 0.09)'
-          : 'rgba(34, 211, 238, 0.06)';
+          ? 'rgba(99, 102, 241, 0.05)'
+          : 'rgba(34, 211, 238, 0.035)';
       card.style.background = `radial-gradient(circle 240px at ${x}px ${y}px, ${color}, var(--bg-card))`;
     });
     card.addEventListener('mouseleave', () => { card.style.background = ''; });
@@ -790,19 +802,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // ═══════════════════════════════════════════════════════════
   // MAGNETIC BUTTONS
   // ═══════════════════════════════════════════════════════════
-  document.querySelectorAll('.btn-primary, .nav-cta').forEach(btn => {
-    btn.addEventListener('mousemove', (e) => {
-      const r = btn.getBoundingClientRect();
-      const x = (e.clientX - r.left - r.width  / 2) * 0.2;
-      const y = (e.clientY - r.top  - r.height / 2) * 0.2;
-      btn.style.transform = `translate(${x}px, ${y}px) translateY(-3px) scale(1.03)`;
+  if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    document.querySelectorAll('.btn-primary, .nav-cta').forEach(btn => {
+      btn.addEventListener('mousemove', (e) => {
+        const r = btn.getBoundingClientRect();
+        const x = (e.clientX - r.left - r.width  / 2) * 0.12;
+        const y = (e.clientY - r.top  - r.height / 2) * 0.12;
+        btn.style.transform = `translate(${x}px, ${y}px) translateY(-2px)`;
+      });
+      btn.addEventListener('mouseenter', () => { btn.style.transition = 'transform 0.1s ease, box-shadow 0.3s ease'; });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.transform = '';
+        btn.style.transition = 'transform 0.5s cubic-bezier(0.23,1,0.32,1), box-shadow 0.3s ease';
+      });
     });
-    btn.addEventListener('mouseenter', () => { btn.style.transition = 'transform 0.1s ease, box-shadow 0.3s ease'; });
-    btn.addEventListener('mouseleave', () => {
-      btn.style.transform = '';
-      btn.style.transition = 'transform 0.5s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease';
-    });
-  });
+  }
 
   // ═══════════════════════════════════════════════════════════
   // STAT COUNTERS
@@ -838,13 +852,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const cursorGlow = document.createElement('div');
   cursorGlow.style.cssText = `
     position: fixed; pointer-events: none; z-index: 9999;
-    width: 280px; height: 280px;
-    background: radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%);
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(99,102,241,0.04) 0%, transparent 70%);
     border-radius: 50%; transform: translate(-50%, -50%);
     transition: opacity 0.3s ease;
     top: 0; left: 0;
   `;
   document.body.appendChild(cursorGlow);
+
+  // Update cursor glow on theme switch
+  function updateGlowTheme(theme) {
+    const color = theme === 'light'
+      ? 'radial-gradient(circle, rgba(0,0,0,0.02) 0%, transparent 70%)'
+      : 'radial-gradient(circle, rgba(99,102,241,0.04) 0%, transparent 70%)';
+    cursorGlow.style.background = color;
+  }
+  updateGlowTheme(html.getAttribute('data-theme'));
+  window.addEventListener('themechange', (e) => updateGlowTheme(e.detail.theme));
 
   let glowX = 0, glowY = 0, glowTargetX = 0, glowTargetY = 0;
 
