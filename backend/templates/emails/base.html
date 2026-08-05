@@ -9,7 +9,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background-color: #f0f2f5;
+      background-color: #e8e4dc;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
       color: #1a1a2e;
       margin: 0;
@@ -20,53 +20,62 @@
     .wrapper {
       max-width: 600px;
       margin: 32px auto;
-      background-color: #ffffff;
-      border-radius: 8px;
+      background-color: #faf8f4;
+      border-radius: 4px;
       overflow: hidden;
-      border: 1px solid #e2e8f0;
+      border: 1px solid rgba(184,134,11,0.2);
     }
 
-    /* Top accent line */
+    /* Top accent — gold gradient bar */
     .accent-bar {
       height: 4px;
-      background: #4f46e5;
+      background: linear-gradient(90deg, #8b6914, #b8860b, #d4a853, #b8860b, #8b6914);
     }
 
-    /* Header */
+    /* Header — matches certificate letterhead */
     .header {
-      background: #ffffff;
-      padding: 28px 40px 24px;
-      border-bottom: 1px solid #e2e8f0;
+      background: #1a2340;
+      padding: 22px 36px 18px;
+      border-bottom: 3px solid #b8860b;
     }
     .logo-wrap {
       display: flex;
       align-items: center;
+      justify-content: space-between;
+    }
+    .logo-left {
+      display: flex;
+      align-items: center;
       gap: 10px;
     }
-    .logo-mark {
-      display: inline-block;
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      background: #4f46e5;
-      text-align: center;
-      line-height: 36px;
-      font-size: 16px;
-      font-weight: 800;
-      color: #ffffff;
-      font-family: 'Courier New', monospace;
+    .logo-left img {
+      height: 34px;
+      border-radius: 6px;
     }
     .brand-name {
       font-size: 18px;
       font-weight: 700;
-      color: #1a1a2e;
+      color: #ffffff;
       letter-spacing: -0.02em;
+    }
+    .brand-name span {
+      color: #b8860b;
+    }
+    .header-meta {
+      text-align: right;
+      font-size: 10px;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.6;
+    }
+    .header-meta a {
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
     }
 
     /* Body */
     .body {
-      background: #ffffff;
-      padding: 36px 40px;
+      background: #faf8f4;
+      padding: 32px 36px;
     }
 
     /* Typography */
@@ -80,14 +89,14 @@
     .lead {
       font-size: 15px;
       line-height: 1.7;
-      color: #475569;
+      color: #3d4663;
       margin-bottom: 24px;
     }
 
-    /* Divider */
+    /* Divider — gold themed */
     .divider {
       height: 1px;
-      background: #e2e8f0;
+      background: linear-gradient(90deg, transparent, rgba(184,134,11,0.3), transparent);
       margin: 28px 0;
     }
 
@@ -97,15 +106,15 @@
       font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: #94a3b8;
+      color: #b8860b;
       margin-bottom: 16px;
     }
 
     /* Info table */
     .info-table {
       width: 100%;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
+      border: 1px solid rgba(184,134,11,0.15);
+      border-radius: 4px;
       overflow: hidden;
       margin-bottom: 24px;
     }
@@ -114,10 +123,11 @@
       justify-content: space-between;
       align-items: center;
       padding: 11px 16px;
-      border-bottom: 1px solid #f1f5f9;
+      border-bottom: 1px solid rgba(184,134,11,0.08);
       font-size: 14px;
     }
     .info-row:last-child { border-bottom: none; }
+    .info-row:nth-child(even) { background: rgba(184,134,11,0.03); }
     .info-label { color: #64748b; font-weight: 500; }
     .info-value { color: #1a1a2e; font-weight: 600; text-align: right; }
 
@@ -128,14 +138,14 @@
       align-items: flex-start;
       gap: 14px;
       padding: 12px 0;
-      border-bottom: 1px solid #f1f5f9;
+      border-bottom: 1px solid rgba(184,134,11,0.08);
     }
     .step:last-child { border-bottom: none; }
     .step-num {
       width: 26px;
       height: 26px;
       border-radius: 50%;
-      background: #4f46e5;
+      background: #1a2340;
       color: #ffffff;
       font-size: 12px;
       font-weight: 700;
@@ -145,14 +155,14 @@
       flex-shrink: 0;
       margin-top: 1px;
     }
-    .step-text { font-size: 14px; line-height: 1.65; color: #475569; }
+    .step-text { font-size: 14px; line-height: 1.65; color: #3d4663; }
     .step-text strong { color: #1a1a2e; font-weight: 600; }
 
     /* Task items */
     .task-item {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-left: 3px solid #4f46e5;
+      background: rgba(184,134,11,0.04);
+      border: 1px solid rgba(184,134,11,0.15);
+      border-left: 3px solid #b8860b;
       border-radius: 4px;
       padding: 12px 16px;
       margin-bottom: 8px;
@@ -160,10 +170,11 @@
     .task-item-title { font-size: 14px; font-weight: 600; color: #1a1a2e; }
     .task-item-link {
       font-size: 13px;
-      color: #4f46e5;
+      color: #1a2340;
       text-decoration: none;
       margin-top: 4px;
       display: block;
+      font-weight: 500;
     }
 
     /* Badge */
@@ -176,16 +187,16 @@
       letter-spacing: 0.06em;
       text-transform: uppercase;
     }
-    .badge-green  { background: #dcfce7; color: #16a34a; }
+    .badge-green  { background: #dcfce7; color: #059669; }
     .badge-blue   { background: #dbeafe; color: #2563eb; }
     .badge-purple { background: #ede9fe; color: #7c3aed; }
-    .badge-amber  { background: #fef3c7; color: #d97706; }
+    .badge-amber  { background: rgba(184,134,11,0.12); color: #8b6914; }
 
     /* Cert ID block */
     .cert-id-box {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
+      background: rgba(184,134,11,0.06);
+      border: 1px solid rgba(184,134,11,0.2);
+      border-radius: 4px;
       padding: 20px;
       text-align: center;
       margin: 20px 0;
@@ -195,13 +206,13 @@
       font-weight: 700;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: #94a3b8;
+      color: #b8860b;
       margin-bottom: 8px;
     }
     .cert-id-value {
       font-size: 22px;
       font-weight: 700;
-      color: #4f46e5;
+      color: #1a2340;
       letter-spacing: 0.04em;
       font-family: 'Courier New', monospace;
     }
@@ -210,83 +221,91 @@
     .cta-wrap { text-align: center; margin: 28px 0; }
     .cta-btn {
       display: inline-block;
-      background: #4f46e5;
+      background: linear-gradient(135deg, #b8860b, #d4a853);
       color: #ffffff !important;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 15px;
       padding: 13px 32px;
-      border-radius: 6px;
+      border-radius: 4px;
       text-decoration: none;
       letter-spacing: 0.01em;
     }
     .cta-btn-secondary {
       display: inline-block;
       background: transparent;
-      color: #4f46e5 !important;
+      color: #1a2340 !important;
       font-weight: 600;
       font-size: 14px;
       padding: 10px 24px;
-      border-radius: 6px;
+      border-radius: 4px;
       text-decoration: none;
-      border: 1px solid #c7d2fe;
+      border: 1px solid rgba(184,134,11,0.3);
       margin-top: 10px;
     }
 
     /* Repo link */
     .repo-box {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
+      background: rgba(184,134,11,0.04);
+      border: 1px solid rgba(184,134,11,0.15);
+      border-radius: 4px;
       padding: 16px;
       margin: 20px 0;
     }
-    .repo-box p { font-size: 14px; color: #475569; margin-bottom: 8px; }
-    .repo-box a { font-size: 14px; color: #4f46e5; text-decoration: none; font-weight: 600; word-break: break-all; }
+    .repo-box p { font-size: 14px; color: #3d4663; margin-bottom: 8px; }
+    .repo-box a { font-size: 14px; color: #1a2340; text-decoration: none; font-weight: 600; word-break: break-all; }
 
-    /* Footer */
+    /* Footer — matches certificate bottom strip */
     .footer {
-      background: #f8fafc;
-      border-top: 1px solid #e2e8f0;
-      padding: 24px 40px;
+      background: #1a2340;
+      border-top: 3px solid #b8860b;
+      padding: 20px 36px;
       text-align: center;
     }
-    .footer-links { margin-bottom: 12px; }
+    .footer-links { margin-bottom: 10px; }
     .footer-links a {
-      color: #64748b;
+      color: rgba(255,255,255,0.6);
       text-decoration: none;
-      font-size: 13px;
+      font-size: 12px;
       margin: 0 10px;
     }
     .footer-copy {
-      font-size: 12px;
-      color: #94a3b8;
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
       line-height: 1.6;
     }
 
     /* Highlight note */
     .note {
       font-size: 13px;
-      color: #64748b;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
+      color: #3d4663;
+      background: rgba(184,134,11,0.05);
+      border: 1px solid rgba(184,134,11,0.15);
+      border-radius: 4px;
       padding: 12px 16px;
       margin-top: 20px;
       line-height: 1.6;
     }
+    .note strong { color: #1a1a2e; }
+    .note a { color: #1a2340; font-weight: 600; }
   </style>
 </head>
 <body>
 <div class="wrapper">
 
-  <!-- Top accent line -->
+  <!-- Top gold accent line -->
   <div class="accent-bar"></div>
 
-  <!-- Header -->
+  <!-- Header — Navy letterhead -->
   <div class="header">
     <div class="logo-wrap">
-      <img src="https://skill-me-intern.in/assets/logo.png" alt="SkillMe Logo" style="height: 36px; border-radius: 8px;">
-      <div class="brand-name">SkillMe</div>
+      <div class="logo-left">
+        <img src="https://skill-me-intern.in/assets/logo.png" alt="SkillMe Logo">
+        <div class="brand-name">Skill<span>Me</span></div>
+      </div>
+      <div class="header-meta">
+        <a href="https://skill-me-intern.in">skill-me-intern.in</a><br>
+        New Delhi, India
+      </div>
     </div>
   </div>
 
@@ -295,7 +314,7 @@
     {% block body %}{% endblock %}
   </div>
 
-  <!-- Footer -->
+  <!-- Footer — Dark navy with gold top-border -->
   <div class="footer">
     <div class="footer-links">
       <a href="https://skill-me-intern.in">Home</a>
@@ -304,7 +323,7 @@
     </div>
     <div class="footer-copy">
       You received this email because you applied on SkillMe.<br />
-      &copy; 2026 SkillMe &mdash; India's open-source internship platform.
+      &copy; 2026 SkillMe &mdash; India's Open Source Internship Platform.
     </div>
   </div>
 
