@@ -1,6 +1,7 @@
 {
   "entries": [
     { "path": "skills/emilkowalski-skills/skills" },
-    { "path": "skills/threejs-skills/skills" }
+    { "path": "skills/threejs-skills/skills" },
+    { "path": "skills/some_claude_skills/.claude/skills" }
   ]
 }

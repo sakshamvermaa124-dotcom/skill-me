@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const scene  = new THREE.Scene();
     // Theme-aware fog
     const isDark = () => html.getAttribute('data-theme') !== 'light';
-    scene.fog = new THREE.FogExp2(isDark() ? 0x0b0b0e : 0xfafafa, 0.08);
+    scene.fog = new THREE.FogExp2(isDark() ? 0x111111 : 0xfafafa, 0.08);
 
     const camera = new THREE.PerspectiveCamera(60, W() / H(), 0.1, 100);
     camera.position.z = 5;
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── Elegant TorusKnot wireframe centerpiece ──
     const knotGeo = new THREE.TorusKnotGeometry(1.6, 0.45, 200, 32, 2, 3);
     const knotMat = new THREE.MeshBasicMaterial({
-      color: 0x6366f1,
+      color: 0xf59e0b,
       wireframe: true,
       transparent: true,
       opacity: 0.15,
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const positions = new Float32Array(COUNT * 3);
     const colors = new Float32Array(COUNT * 3);
     const palette = [
-      new THREE.Color('#6366f1'),
+      new THREE.Color('#f59e0b'),
       new THREE.Color('#22d3ee'),
       new THREE.Color('#34d399'),
     ];
@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update fog on theme switch
     window.addEventListener('themechange', (e) => {
-      scene.fog.color.set(e.detail.theme === 'light' ? 0xfafafa : 0x0b0b0e);
+      scene.fog.color.set(e.detail.theme === 'light' ? 0xfafafa : 0x111111);
     });
   })();
 
@@ -257,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
     camera.position.z = 6;
 
     // Uniform dodecahedron wireframes — fewer but more impactful
-    const wireColors = [0x6366f1, 0x22d3ee, 0x34d399];
+    const wireColors = [0xf59e0b, 0x22d3ee, 0x34d399];
     const orbs = [];
 
     for (let i = 0; i < 10; i++) {
@@ -337,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Outer wireframe sphere — denser IcosahedronGeometry
     const sphereGeo = new THREE.IcosahedronGeometry(1.8, 2);
     const sphereMat = new THREE.MeshBasicMaterial({
-      color: 0x6366f1, wireframe: true, transparent: true, opacity: 0.08,
+      color: 0xf59e0b, wireframe: true, transparent: true, opacity: 0.08,
     });
     const sphere = new THREE.Mesh(sphereGeo, sphereMat);
     scene.add(sphere);
@@ -353,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Orbit rings — sleeker with thinner tubes
     const ringData = [
-      { tiltX: 0,    tiltZ: 0,    color: 0x6366f1, speed: 0.004, radius: 2.5, tube: 0.008 },
+      { tiltX: 0,    tiltZ: 0,    color: 0xf59e0b, speed: 0.004, radius: 2.5, tube: 0.008 },
       { tiltX: 1.1,  tiltZ: 0.4,  color: 0x22d3ee, speed: -0.006, radius: 3.0, tube: 0.007 },
       { tiltX: 0.6,  tiltZ: -0.8, color: 0x34d399, speed: 0.005, radius: 3.5, tube: 0.006 },
     ];
@@ -479,7 +479,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const s1Geo = new THREE.BufferGeometry();
     s1Geo.setAttribute('position', new THREE.Float32BufferAttribute(strand1Pos, 3));
     const s1Mat = new THREE.PointsMaterial({
-      color: 0x6366f1, size: 0.04, transparent: true, opacity: 0.45,
+      color: 0xf59e0b, size: 0.04, transparent: true, opacity: 0.45,
       sizeAttenuation: true, blending: THREE.AdditiveBlending, depthWrite: false,
     });
     const strand1 = new THREE.Points(s1Geo, s1Mat);
@@ -792,7 +792,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const color = card.classList.contains('featured')
         ? 'rgba(52, 211, 153, 0.05)'
         : card.classList.contains('placement')
-          ? 'rgba(99, 102, 241, 0.05)'
+          ? 'rgba(245, 158, 11, 0.05)'
           : 'rgba(34, 211, 238, 0.035)';
       card.style.background = `radial-gradient(circle 240px at ${x}px ${y}px, ${color}, var(--bg-card))`;
     });
@@ -853,7 +853,7 @@ document.addEventListener('DOMContentLoaded', () => {
   cursorGlow.style.cssText = `
     position: fixed; pointer-events: none; z-index: 9999;
     width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(99,102,241,0.04) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
     border-radius: 50%; transform: translate(-50%, -50%);
     transition: opacity 0.3s ease;
     top: 0; left: 0;
@@ -864,7 +864,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateGlowTheme(theme) {
     const color = theme === 'light'
       ? 'radial-gradient(circle, rgba(0,0,0,0.02) 0%, transparent 70%)'
-      : 'radial-gradient(circle, rgba(99,102,241,0.04) 0%, transparent 70%)';
+      : 'radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%)';
     cursorGlow.style.background = color;
   }
   updateGlowTheme(html.getAttribute('data-theme'));
