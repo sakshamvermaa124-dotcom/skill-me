@@ -42,7 +42,7 @@ async def verify_certificate(cert_id: str):
 # ─── Student: download own certificate as PDF ───
 @router.get("/download/{student_id}/{batch_id}", summary="Download certificate PDF")
 async def download_certificate(student_id: int, batch_id: int):
-    """Generate and download a certificate as PDF. Creates a DB record on first download."""
+    """Generate and download a certificate as PDF. Requires completed payment."""
     student = await db.fetch_one("SELECT * FROM students WHERE id = ?", (student_id,))
     if not student:
         raise HTTPException(status_code=404, detail=f"Student {student_id} not found")
@@ -57,6 +57,19 @@ async def download_certificate(student_id: int, batch_id: int):
         if not enrollment:
             raise HTTPException(status_code=404, detail=f"No batch found for student {student_id}")
         batch = enrollment
+
+    # ── Payment gate ──────────────────────────────────────────────────────────
+    # Certificate download is only available after successful payment
+    payment = await db.fetch_one(
+        "SELECT id FROM payments WHERE student_id = ? AND batch_id = ? AND status = 'paid'",
+        (student_id, batch["id"]),
+    )
+    if not payment:
+        raise HTTPException(
+            status_code=402,
+            detail="Payment required. Please complete the ₹249 payment from your dashboard to download your certificate."
+        )
+    # ─────────────────────────────────────────────────────────────────────────
 
     # Record certificate issuance (idempotent)
     try:
@@ -76,6 +89,7 @@ async def download_certificate(student_id: int, batch_id: int):
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
 
 
 # ─── Admin: issue certificate for a student ───

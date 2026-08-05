@@ -410,7 +410,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       // 1. Create Razorpay order on backend
-      const orderRes = await fetch('${API}/api/payments/create-order', {
+      const orderRes = await fetch(`${API}/api/payments/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ student_id: studentId, batch_id: batchId })
@@ -465,7 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const verifyBtn = document.getElementById('pay-btn');
           if (verifyBtn) { verifyBtn.textContent = 'Verifying…'; }
           try {
-            const verifyRes = await fetch('${API}/api/payments/verify', {
+            const verifyRes = await fetch(`${API}/api/payments/verify`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
