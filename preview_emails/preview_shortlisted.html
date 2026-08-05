@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}SkillMe{% endblock %}</title>
+  <title>Shortlist Notification — SkillMe</title>
   <style>
     /* Reset */
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -311,7 +311,42 @@
 
   <!-- Body -->
   <div class="body">
-    {% block body %}{% endblock %}
+    
+<p class="greeting">Dear Saksham,</p>
+<p class="lead">
+  We are pleased to inform you that your application has been <strong>shortlisted</strong> for the
+  <strong>Web Development</strong> internship program at SkillMe.
+</p>
+
+<div class="divider"></div>
+
+<p class="section-label">Next Steps</p>
+
+<div class="steps">
+  <div class="step">
+    <div class="step-num" style="background:#059669;">&check;</div>
+    <div class="step-text"><strong>Shortlisted</strong><br />Your application has successfully passed the initial review.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-text"><strong>Offer Letter</strong><br />You will shortly receive a formal offer letter containing your batch details, repository access, and joining date.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-text"><strong>Program Commencement</strong><br />Begin your 4-week internship, resolving real GitHub issues and earning open-source contributions.</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="note">
+  Please monitor your inbox for your official offer letter.
+</div>
+
+<div class="cta-wrap">
+  <a href="https://skill-me-intern.in" class="cta-btn">Visit SkillMe</a>
+</div>
+
   </div>
 
   <!-- Footer — Dark navy with gold top-border -->

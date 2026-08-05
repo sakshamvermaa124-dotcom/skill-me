@@ -11,3 +11,8 @@ Thumbs.db
 
 # Node (http-server local dev)
 node_modules/
+
+# Local automation secrets and state
+.env
+tools/.linkedin_token.json
+tools/linkedin_post_history.json

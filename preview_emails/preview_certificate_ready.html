@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}SkillMe{% endblock %}</title>
+  <title>Certificate & Letter of Recommendation — SkillMe</title>
   <style>
     /* Reset */
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -311,7 +311,49 @@
 
   <!-- Body -->
   <div class="body">
-    {% block body %}{% endblock %}
+    
+<p class="greeting">Dear Saksham,</p>
+<p class="lead">
+  Congratulations on the successful completion of the <strong>Web Development</strong> internship program at SkillMe.
+  Your verified certificate of completion and Letter of Recommendation have been issued.
+</p>
+
+<div class="cert-id-box">
+  <div class="cert-id-label">Credential ID</div>
+  <div class="cert-id-value">SKM-WEB-12345</div>
+</div>
+
+<p class="section-label">Credential Details</p>
+<div class="info-table">
+  <div class="info-row">
+    <span class="info-label">Name</span>
+    <span class="info-value">Saksham Verma</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Domain</span>
+    <span class="info-value">Web Development</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Batch</span>
+    <span class="info-value">Batch #42</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Date of Issue</span>
+    <span class="info-value">10 September 2026</span>
+  </div>
+</div>
+
+<div class="cta-wrap">
+  <a href="https://skill-me-intern.in/certificate.html?email=saksham@example.com" class="cta-btn">View Certificate</a><br />
+  
+  <a href="https://skill-me-intern.in/certificate.html?cert_id=SKM-WEB-12345" class="cta-btn-secondary" style="margin-top:16px;">Verify Authenticity</a>
+</div>
+
+<div class="note">
+  <strong>Verification Link:</strong><br />
+  <a href="https://skill-me-intern.in/certificate.html?cert_id=SKM-WEB-12345">https://skill-me-intern.in/certificate.html?cert_id=SKM-WEB-12345</a>
+</div>
+
   </div>
 
   <!-- Footer — Dark navy with gold top-border -->

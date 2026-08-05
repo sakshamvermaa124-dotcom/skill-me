@@ -503,7 +503,7 @@
         <div class="verify-icon">✓</div>
         <div class="verify-text">
           <strong>Recommendation Verified</strong>
-          <span>This letter is genuine and is backed by certificate <strong>${data.cert_id}</strong>. Issued to <strong>${data.holder || data.first_name || ''}</strong> on ${new Date(data.issued_at).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' })} by SkillMe Technologies Pvt. Ltd.</span>
+          <span>This letter is genuine and is backed by certificate <strong>${data.cert_id}</strong>, issued to <strong>${data.holder || data.first_name || 'the candidate'}</strong> on ${new Date(data.issued_at).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' })} by SkillMe Technologies Pvt. Ltd.</span>
         </div>
       `;
     } else {

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}SkillMe{% endblock %}</title>
+  <title>Offer Letter — SkillMe</title>
   <style>
     /* Reset */
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -311,7 +311,88 @@
 
   <!-- Body -->
   <div class="body">
-    {% block body %}{% endblock %}
+    
+<p class="greeting">Dear Saksham,</p>
+<p class="lead">
+  We are pleased to formally offer you an internship position at <strong>SkillMe</strong> in the <strong>Web Development</strong> program.
+</p>
+
+<div class="divider"></div>
+
+<p class="section-label">Internship Details</p>
+<div class="info-table">
+  <div class="info-row">
+    <span class="info-label">Name</span>
+    <span class="info-value">Saksham Verma</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Domain</span>
+    <span class="info-value">Web Development</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Batch</span>
+    <span class="info-value">Batch #42</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Duration</span>
+    <span class="info-value">4 Weeks</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Date of Joining</span>
+    <span class="info-value">10 August 2026</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Mode</span>
+    <span class="info-value">Remote (GitHub-based)</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Status</span>
+    <span class="info-value"><span class="badge badge-green">Enrolled</span></span>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<p class="section-label">Program Structure</p>
+
+<div class="steps">
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-text"><strong>Weekly Assignments</strong><br />You will be assigned specific issues on your batch's GitHub repository each week.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-text"><strong>Pull Requests</strong><br />Resolve the assigned issues and submit pull requests. Ensure all automated tests pass for approval.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-text"><strong>Progress Tracking</strong><br />Monitor your task completion and overall progress through the SkillMe dashboard.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-text"><strong>Certification</strong><br />Upon successful completion of the 4-week program, a verified certificate will be issued.</div>
+  </div>
+</div>
+
+
+<div class="repo-box">
+  <p><strong>Batch Repository Access</strong></p>
+  <p>You have been granted access to your batch repository. Please accept the GitHub invitation to proceed:</p>
+  <a href="https://github.com/skillme-interns/web-dev-batch-42">https://github.com/skillme-interns/web-dev-batch-42</a>
+</div>
+
+
+<div class="cta-wrap">
+  <a href="https://skill-me-intern.in/dashboard.html" class="cta-btn">Access Dashboard</a><br />
+  
+  <a href="https://github.com/skillme-interns/web-dev-batch-42" class="cta-btn-secondary">View Repository</a>
+  
+</div>
+
+<div class="note">
+  By participating in this internship, you agree to adhere to professional standards, submit genuine contributions, and abide by the community code of conduct.
+</div>
+
   </div>
 
   <!-- Footer — Dark navy with gold top-border -->

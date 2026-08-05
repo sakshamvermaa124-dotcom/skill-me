@@ -1,0 +1,122 @@
+[
+  {
+    "id": "student-proof-001",
+    "text": "The biggest problem with most student portfolios is not a lack of skills.\n\nIt is a lack of proof.\n\n'Know HTML, CSS, JavaScript' is a claim.\nA deployed project, a GitHub repository, and a well-written README are proof.\n\nIf you are a student developer, spend less time collecting course certificates and more time shipping one small thing every month.\n\n#StudentDeveloper #Portfolio #GitHub"
+  },
+  {
+    "id": "github-first-pr-002",
+    "text": "Your first GitHub PR does not need to be impressive.\n\nIt needs to be real.\n\nFix a typo. Improve a README. Add a missing test. Repair a small UI issue.\n\nThe goal is to learn the workflow: fork → branch → change → test → pull request → review.\n\nThat workflow is more valuable than waiting for the 'perfect' project idea.\n\n#OpenSource #GitHub #LearningInPublic"
+  },
+  {
+    "id": "resume-003",
+    "text": "A stronger fresher resume has fewer buzzwords and more evidence.\n\nInstead of:\n'I know React'\n\nWrite:\n'Built a responsive student dashboard in React, connected it to an API, and deployed it.'\n\nThen add the project and GitHub links.\n\nSpecific work is memorable. Generic skills are not.\n\n#Freshers #ResumeTips #SoftwareDevelopment"
+  },
+  {
+    "id": "builder-story-004",
+    "text": "I am building SkillMe around one simple belief:\n\nstudents learn faster when they ship work that other people can inspect.\n\nThat means issues, pull requests, reviews, tests, and public progress—not only videos and assignments hidden in a classroom portal.\n\nStill early. Building it one useful workflow at a time.\n\n#BuildInPublic #EdTech #OpenSource"
+  },
+  {
+    "id": "question-005",
+    "text": "Student developers: what stops you from contributing to open source?\n\n1. Git/GitHub feels confusing\n2. I cannot find beginner-friendly issues\n3. I am afraid of breaking something\n4. I do not know what to write in a PR\n\nComment the number. I will turn the top answer into a practical guide.\n\n#Students #OpenSource #GitHub"
+  },
+  {
+    "id": "pr-description-006",
+    "text": "One habit that instantly makes a student PR look more professional:\n\nWrite three lines:\n• What changed?\n• Why did it change?\n• How did you test it?\n\nReviewers do not need a long essay. They need enough context to trust the change.\n\n#GitHub #CodeReview #DeveloperTips"
+  },
+  {
+    "id": "internship-outcome-007",
+    "text": "A good internship should leave a student with something they can show.\n\nA repository.\nA shipped feature.\nA merged pull request.\nA clear explanation of the problem they solved.\n\nThe title matters less than the work you can stand behind.\n\n#Internships #CareerGrowth #Students"
+  },
+  {
+    "id": "start-before-ready-008",
+    "text": "If you are in 2nd, 3rd, or final year: start building your online proof before placements begin.\n\nOne project.\nOne useful README.\nOne GitHub update a week.\nOne post explaining what you learned.\n\nSmall public progress compounds faster than private preparation.\n\n#BTech #BCA #CareerAdvice"
+  },
+  {
+    "id": "workflow-009",
+    "text": "A beginner-friendly open-source workflow:\n\n1. Read the contribution guide\n2. Pick one focused issue\n3. Create a branch with a clear name\n4. Make the smallest useful change\n5. Test it\n6. Open a PR with context\n\nYou do not become confident before doing this. You become confident by doing it repeatedly.\n\n#OpenSource #Git #StudentDeveloper"
+  },
+  {
+    "id": "student-pain-010",
+    "text": "Many students do not need more motivation.\n\nThey need a clearer path:\n\nWhat should I build?\nHow do I know it is good enough?\nWhat does real collaboration look like?\nHow do I explain the work on my resume?\n\nGood internship experiences answer those questions through actual work.\n\n#Education #Internships #CareerDevelopment"
+  },
+  {
+    "id": "github-timeline-011",
+    "text": "Your GitHub profile is not a scorecard for experts.\n\nIt is a timeline of your learning.\n\nAn empty profile tells no story.\nA profile with small, consistent work says: this person starts, learns, and finishes.\n\nStart before you feel advanced enough.\n\n#GitHub #LearningInPublic #Students"
+  },
+  {
+    "id": "project-finish-012",
+    "text": "The best beginner project is rarely the most ambitious one.\n\nIt is the one you can finish, explain, improve after feedback, and show without making excuses.\n\nFinish one small product before starting five bigger ideas.\n\n#Projects #Portfolio #BuildInPublic"
+  },
+  {
+    "id": "git-now-013",
+    "text": "The best time to learn Git is before your first team project.\n\nThe second-best time is this week.\n\nLearn these first: status, add, commit, branch, pull, push, and pull request.\n\nYou do not need to master every command. You need enough confidence to collaborate.\n\n#Git #GitHub #CareerSkills"
+  },
+  {
+    "id": "first-issue-014",
+    "text": "Before choosing an open-source issue, check four things:\n\n• Is the problem clearly described?\n• Is there a contribution guide?\n• Has someone already claimed it?\n• Can you reproduce or understand the issue locally?\n\nFive minutes of reading can save five hours of confusion.\n\n#OpenSource #DeveloperTips"
+  },
+  {
+    "id": "portfolio-audit-015",
+    "text": "Quick portfolio audit for student developers:\n\nCan a stranger answer these in 30 seconds?\n\n1. What do you build?\n2. What is your best project?\n3. Where can I see it live?\n4. Where can I see the code?\n5. What problem did you solve?\n\nIf not, improve clarity before adding another project.\n\n#Portfolio #Students #WebDevelopment"
+  },
+  {
+    "id": "consistency-016",
+    "text": "Most career progress looks boring in the beginning.\n\nOne commit.\nOne README improvement.\nOne project section on a resume.\nOne post explaining a lesson.\n\nDo that long enough and people call it momentum.\n\n#Consistency #StudentDeveloper #CareerGrowth"
+  },
+  {
+    "id": "task-quality-017",
+    "text": "A task becomes valuable when it has a clear outcome.\n\nBad task: 'Learn React this week.'\n\nBetter task: 'Build a responsive task dashboard, handle empty states, and document how to run it.'\n\nClarity makes progress measurable—and makes feedback possible.\n\n#LearningByDoing #SoftwareEngineering"
+  },
+  {
+    "id": "code-before-cert-018",
+    "text": "A certificate may open a conversation.\n\nYour work is what keeps the conversation going.\n\nWhen someone asks, 'What did you do?', be ready with a repository, a demo, a PR, and the story behind your decisions.\n\nBuild proof first. Everything else becomes easier.\n\n#CareerAdvice #Portfolio #Students"
+  },
+  {
+    "id": "feedback-019",
+    "text": "Feedback is not a sign that your code is bad.\n\nIt is how professional code gets better.\n\nThe useful response to review feedback is:\n1. understand the concern\n2. ask a question if needed\n3. make the change\n4. explain what changed\n\nThat is a skill students can start practicing today.\n\n#CodeReview #GrowthMindset #Developers"
+  },
+  {
+    "id": "application-020",
+    "text": "Before applying to an internship, prepare this small evidence pack:\n\n• one-page resume\n• GitHub profile\n• two best projects\n• short introduction\n• one sentence on what you want to learn\n\nMost students wait until an opportunity appears. Prepare before it does.\n\n#InternshipTips #Freshers #Students"
+  },
+  {
+    "id": "skillme-mission-021",
+    "text": "The long-term goal for SkillMe is not to become another course library.\n\nIt is to give students a structured way to practice real development workflows: tasks, collaboration, PRs, testing, and public proof of work.\n\nIf you are building your developer profile from scratch, follow along.\n\n#SkillMe #BuildInPublic #StudentDeveloper"
+  },
+  {
+    "id": "clean-readme-022",
+    "text": "A README is part of your project—not an afterthought.\n\nAt minimum, include:\n• what the project does\n• screenshots or demo link\n• setup steps\n• key features\n• technologies used\n\nA reviewer should not have to guess why your project matters.\n\n#GitHub #PortfolioTips #Developers"
+  },
+  {
+    "id": "small-pr-023",
+    "text": "Small pull requests are underrated.\n\nThey are easier to review, easier to test, easier to explain, and easier to fix if something goes wrong.\n\nOne focused PR is a better learning experience than one giant change with ten unrelated ideas inside it.\n\n#SoftwareEngineering #GitHub #OpenSource"
+  },
+  {
+    "id": "developer-confidence-024",
+    "text": "Confidence in development does not come from knowing every framework.\n\nIt comes from facing a problem, reading documentation, trying something, debugging, and finally shipping.\n\nThe fastest way to build confidence is to build things that occasionally break.\n\n#Developers #Learning #Students"
+  },
+  {
+    "id": "public-learning-025",
+    "text": "You do not need to be an expert to share what you are learning.\n\nA simple post like 'Today I learned why this bug happened and how I fixed it' can help another beginner—and creates a record of your growth.\n\nShare lessons, not fake expertise.\n\n#LearningInPublic #LinkedInForStudents"
+  },
+  {
+    "id": "internship-readiness-026",
+    "text": "Internship-ready does not mean perfect.\n\nIt means you can:\n• read an existing codebase\n• ask useful questions\n• use Git without panic\n• complete a scoped task\n• communicate your progress\n\nThese are learnable skills. Start practicing them before someone gives you the title.\n\n#Internship #CareerReadiness #Students"
+  },
+  {
+    "id": "opportunity-soft-027",
+    "text": "I am documenting the build of a practical, GitHub-first internship experience for students.\n\nThe focus is real tasks, visible progress, and a portfolio outcome—not vague completion claims.\n\nIf that is the kind of experience you want to see more of, follow SkillMe's journey.\n\n#BuildInPublic #Internship #OpenSource"
+  },
+  {
+    "id": "debugging-028",
+    "text": "A debugging habit that saves time:\n\nBefore changing code, make the bug reproducible.\n\nWrite down what you expected, what actually happened, and the smallest steps that trigger it.\n\nClear reproduction is half the solution—and it makes asking for help much easier.\n\n#Debugging #DeveloperTips #Programming"
+  },
+  {
+    "id": "skillme-cta-029",
+    "text": "Students who want stronger developer portfolios usually need three things: a real task, a deadline, and a place to show the finished work.\n\nThat is the problem I am working on with SkillMe.\n\nWhat would make an internship genuinely useful for you?\n\n#Students #Internships #CareerGrowth"
+  },
+  {
+    "id": "founder-journey-030",
+    "text": "Early-stage building lesson: do not wait until the product is perfect to start talking about the problem.\n\nThe conversations teach you what to build next.\n\nI am sharing SkillMe's journey here—what works, what does not, and how we can make student experience more practical.\n\n#FounderJourney #BuildInPublic #EdTech"
+  }
+]
