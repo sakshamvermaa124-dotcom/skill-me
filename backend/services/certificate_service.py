@@ -26,21 +26,21 @@ logger = logging.getLogger("skillme.certificates")
 PAGE_W, PAGE_H = landscape(A4)
 
 # Color palette
-C_BG_DARK    = HexColor("#060c1a")
-C_BG_SURFACE = HexColor("#0b1222")
-C_NAVY       = HexColor("#0a1628")
-C_NAVY_LIGHT = HexColor("#121e36")
-C_PURPLE     = HexColor("#7c84f3")
-C_BLUE       = HexColor("#38bdf8")
-C_EMERALD    = HexColor("#34d399")
-C_GOLD       = HexColor("#c9a84c")
-C_GOLD_LIGHT = HexColor("#e8cc73")
+C_BG_DARK    = HexColor("#e8e4dc")
+C_BG_SURFACE = HexColor("#ffffff")
+C_NAVY       = HexColor("#1a2340")
+C_NAVY_LIGHT = HexColor("#2a3560")
+C_PURPLE     = HexColor("#4f46e5")
+C_BLUE       = HexColor("#2563eb")
+C_EMERALD    = HexColor("#059669")
+C_GOLD       = HexColor("#b8860b")
+C_GOLD_LIGHT = HexColor("#d4a853")
 C_GOLD_DARK  = HexColor("#8b6914")
-C_TEXT       = HexColor("#f0ebe0")
-C_TEXT_SEC   = HexColor("#a0a8b8")
-C_MUTED      = HexColor("#6b7a90")
+C_TEXT       = HexColor("#1a1a2e")
+C_TEXT_SEC   = HexColor("#3d4663")
+C_MUTED      = HexColor("#64748b")
 C_BORDER     = HexColor("#1f2937")
-C_BORDER_GOLD = HexColor("#332a13")
+C_BORDER_GOLD = Color(0.72, 0.53, 0.04, alpha=0.25)
 
 
 def _cert_id_from_student(student_id: int, batch_id: int) -> str:
@@ -124,8 +124,6 @@ def _draw_company_header(c: rl_canvas.Canvas, w: float, h: float):
     c.setFillColor(C_MUTED)
     c.setFont("Helvetica", 6.5)
     c.drawString(18 * mm, header_y - 5, "India's Open Source Internship Platform")
-    c.setFont("Helvetica", 5.5)
-    c.drawString(18 * mm, header_y - 12, "CIN: U72900DL2024PTC123456  ·  GSTIN: 07AABCS1234A1Z5")
 
     # Right: contact
     c.setFillColor(C_MUTED)
@@ -230,7 +228,7 @@ def _draw_details_row(c: rl_canvas.Canvas, w: float, h: float, batch: dict):
     items = [
         ("DURATION", "4 Weeks"),
         ("BATCH", f"#{batch_num}"),
-        ("MODE", "Remote · GitHub"),
+        ("MODE", "Remote"),
         ("STATUS", "Completed"),
     ]
     col_w = (w - 36 * mm) / 4
