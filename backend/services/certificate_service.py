@@ -129,7 +129,7 @@ def _draw_company_header(c: rl_canvas.Canvas, w: float, h: float):
     c.setFillColor(C_MUTED)
     c.setFont("Helvetica", 6.5)
     c.drawRightString(w - 18 * mm, header_y + 4, "www.skill-me-intern.in")
-    c.drawRightString(w - 18 * mm, header_y - 4, "support@skillme.in")
+    c.drawRightString(w - 18 * mm, header_y - 4, "skillmeintern@gmail.com")
     c.drawRightString(w - 18 * mm, header_y - 12, "New Delhi, India")
 
     # Divider
