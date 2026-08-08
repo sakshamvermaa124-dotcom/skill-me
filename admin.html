@@ -1014,7 +1014,7 @@ async function loadEmailLogs(offset = 0) {
   if (recipient) params.set('recipient',  recipient);
   if (status)    params.set('status',     status);
 
-  const BASE = window.API_BASE || 'http://localhost:8000';
+  const BASE = window.SKILLME_API || 'http://localhost:8000';
   const KEY  = window.ADMIN_KEY || localStorage.getItem('adminKey') || '';
 
   try {
