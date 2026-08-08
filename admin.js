@@ -388,6 +388,10 @@ async function loadBatches(silent = false) {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
                 Assign Tasks
               </button>
+              <button class="btn btn-ghost btn-sm" onclick="openAnalyticsModal(${b.id}, '${b.domain} Batch #${b.batch_number}')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
+                Analytics
+              </button>
             </div>
           </div>
           <div class="progress-bar"><div class="progress-fill" style="width:${fill}%"></div></div>
@@ -628,6 +632,73 @@ async function sendTestEmail() {
   } finally {
     btn.textContent = 'Send Test';
     btn.disabled = false;
+  }
+}
+
+async function openAnalyticsModal(batchId, batchName) {
+  const modal = document.getElementById('modal-analytics');
+  if (!modal) return;
+  modal.style.display = 'flex';
+  document.getElementById('analytics-modal-title').textContent = `${batchName} Analytics`;
+  const contentEl = document.getElementById('analytics-modal-content');
+  contentEl.innerHTML = '<div class="loading-overlay"><div class="spinner"></div> Loading analytics...</div>';
+  
+  try {
+    const data = await api(`/api/admin/batches/${batchId}/analytics`);
+    const enrollments = data.enrollments || {};
+    const prs = data.pr_stats || {};
+    const revenue = data.revenue || {};
+    const students = data.student_grid || [];
+    
+    let html = `
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:24px;">
+        <div style="background:var(--bg-card); padding:16px; border-radius:8px; border:1px solid var(--border);">
+          <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">Enrollments</div>
+          <div style="font-size:1.5rem; font-weight:700;">${enrollments.active || 0} <span style="font-size:1rem; color:var(--text-muted); font-weight:normal;">active</span></div>
+          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:4px;">${enrollments.dropped || 0} dropped, ${enrollments.completed || 0} completed</div>
+        </div>
+        <div style="background:var(--bg-card); padding:16px; border-radius:8px; border:1px solid var(--border);">
+          <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">Pull Requests</div>
+          <div style="font-size:1.5rem; font-weight:700;">${prs.merged || 0} <span style="font-size:1rem; color:var(--text-muted); font-weight:normal;">merged</span></div>
+          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:4px;">${prs.total_prs || 0} total submitted</div>
+        </div>
+        <div style="background:var(--bg-card); padding:16px; border-radius:8px; border:1px solid var(--border);">
+          <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">Revenue</div>
+          <div style="font-size:1.5rem; font-weight:700;">₹${revenue.total_inr || 0}</div>
+          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:4px;">${revenue.total_payments || 0} certificates paid</div>
+        </div>
+      </div>
+      
+      <h3 style="margin-bottom:12px; font-size:1rem;">Student Progress Grid</h3>
+      <div class="table-wrap" style="max-height: 400px; overflow-y: auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+          <thead style="position:sticky; top:0; background:var(--bg-surface); z-index:1;">
+            <tr>
+              <th style="text-align:left; padding:10px; border-bottom:1px solid var(--border);">Student</th>
+              <th style="text-align:left; padding:10px; border-bottom:1px solid var(--border);">Status</th>
+              <th style="text-align:center; padding:10px; border-bottom:1px solid var(--border);">Tasks</th>
+              <th style="text-align:center; padding:10px; border-bottom:1px solid var(--border);">PRs Merged</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${students.map(s => `
+              <tr>
+                <td style="padding:10px; border-bottom:1px solid var(--border);">
+                  <div style="font-weight:500;">${s.first_name} ${s.last_name}</div>
+                  <div style="font-size:0.8rem; color:var(--text-muted);">${s.github_username || '—'}</div>
+                </td>
+                <td style="padding:10px; border-bottom:1px solid var(--border);">${statusBadge(s.enrollment_status)}</td>
+                <td style="padding:10px; border-bottom:1px solid var(--border); text-align:center;">${s.tasks_completed || 0} / ${s.tasks_assigned || 0}</td>
+                <td style="padding:10px; border-bottom:1px solid var(--border); text-align:center;">${s.prs_merged || 0}</td>
+              </tr>
+            `).join('') || '<tr><td colspan="4" style="padding:20px; text-align:center; color:var(--text-muted);">No student data available.</td></tr>'}
+          </tbody>
+        </table>
+      </div>
+    `;
+    contentEl.innerHTML = html;
+  } catch(e) {
+    contentEl.innerHTML = `<div class="empty-state"><div class="empty-state-text">Failed to load analytics: ${e.message}</div></div>`;
   }
 }
 
