@@ -852,7 +852,12 @@
             <table class="students-table" id="email-log-table">
               <thead>
                 <tr>
-                  <th>Time</th><th>Type</th><th>Recipient</th><th>Subject</th><th>Student</th><th>Status</th>
+                  <th style="width:130px;">Time</th>
+                  <th style="width:140px;">Type</th>
+                  <th style="min-width:200px;">Recipient</th>
+                  <th>Subject</th>
+                  <th style="width:140px;">Student</th>
+                  <th style="width:80px;">Status</th>
                 </tr>
               </thead>
               <tbody id="email-log-tbody">
@@ -1056,7 +1061,7 @@ async function loadEmailLogs(offset = 0) {
         return `<tr>
           <td style="font-size:0.78rem;color:var(--text-secondary);white-space:nowrap;">${timeStr}</td>
           <td><span style="padding:3px 10px;border-radius:10px;background:${t.bg};color:${t.color};font-size:0.72rem;font-weight:600;white-space:nowrap;">${t.label}</span></td>
-          <td style="font-size:0.82rem;">${log.recipient_email || '—'}</td>
+          <td style="font-size:0.82rem;word-break:break-all;" title="${log.recipient_email || ''}">${log.recipient_email || '—'}</td>
           <td style="font-size:0.78rem;color:var(--text-secondary);" title="${log.subject || ''}">${subject}</td>
           <td style="font-size:0.82rem;">${log.student_name || '—'}</td>
           <td>${statusBadge}</td>
