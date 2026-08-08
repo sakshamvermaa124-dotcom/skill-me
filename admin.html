@@ -991,10 +991,23 @@
   </div>
 </div>
 
+<!-- ─── EMAIL BODY MODAL ─── -->
+<div class="modal-overlay" id="email-body-modal">
+  <div class="modal" style="max-width:800px; width:90%; max-height:85vh; display:flex; flex-direction:column;">
+    <div class="modal-header">
+      <div class="modal-title">Email Content</div>
+      <button class="modal-close" onclick="closeModal('email-body-modal')">&times;</button>
+    </div>
+    <div class="modal-body" style="padding:0; flex:1; overflow:hidden; background:#fff; border-bottom-left-radius:var(--radius); border-bottom-right-radius:var(--radius);">
+      <iframe id="email-body-iframe" style="width:100%; height:100%; min-height:500px; border:none; background:#fff;"></iframe>
+    </div>
+  </div>
+</div>
+
 <!-- ─── TOAST CONTAINER ─── -->
 <div id="toast-container"></div>
 
-<script src="admin.js?v=20260808_2"></script>
+<script src="admin.js?v=20260808_3"></script>
 <script>
 // ─── Email Logs ───────────────────────────────────────────────────────────────
 const EMAIL_TYPE_LABELS = {
@@ -1071,11 +1084,17 @@ async function loadEmailLogs(offset = 0) {
         const d = new Date(log.sent_at && !log.sent_at.endsWith('Z') ? log.sent_at.replace(' ', 'T') + 'Z' : log.sent_at);
         const timeStr = isNaN(d) ? log.sent_at : `${d.toLocaleDateString('en-IN')} ${d.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'})}`;
         const subject = log.subject?.length > 50 ? log.subject.slice(0, 50) + '…' : (log.subject || '—');
+        const encodedBody = encodeURIComponent(log.body || 'No body content available.');
+        
         return `<tr>
           <td style="font-size:0.78rem;color:var(--text-secondary);white-space:nowrap;">${timeStr}</td>
           <td><span style="padding:3px 10px;border-radius:10px;background:${t.bg};color:${t.color};font-size:0.72rem;font-weight:600;white-space:nowrap;">${t.label}</span></td>
           <td style="font-size:0.82rem;word-break:break-all;" title="${log.recipient_email || ''}">${log.recipient_email || '—'}</td>
-          <td style="font-size:0.78rem;color:var(--text-secondary);" title="${log.subject || ''}">${subject}</td>
+          <td style="font-size:0.78rem;">
+            <button class="btn btn-ghost btn-sm" style="padding:4px 8px;font-size:0.75rem;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;text-align:left;" title="Click to view body" onclick="openEmailBodyModal('${encodedBody}')">
+              📄 ${subject}
+            </button>
+          </td>
           <td style="font-size:0.82rem;">${log.student_name || '—'}</td>
           <td>${statusBadge}</td>
         </tr>`;
@@ -1114,6 +1133,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+function openEmailBodyModal(encodedBody) {
+  const iframe = document.getElementById('email-body-iframe');
+  if (iframe) {
+    iframe.srcdoc = decodeURIComponent(encodedBody);
+  }
+  openModal('email-body-modal');
+}
 </script>
 </body>
 </html>

@@ -124,10 +124,10 @@ async def _send_and_log(
         from db.database import db
         await db.insert(
             """INSERT INTO email_logs
-               (recipient_email, recipient_name, email_type, subject, student_id, batch_id, status)
-               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+               (recipient_email, recipient_name, email_type, subject, student_id, batch_id, status, body)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
             (to_email, to_name, email_type, subject, student_id, batch_id,
-             "sent" if success else "failed"),
+             "sent" if success else "failed", html_body),
         )
     except Exception as log_exc:
         logger.warning("Failed to log email to DB: %s", log_exc)
