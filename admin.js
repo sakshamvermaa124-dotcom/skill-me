@@ -636,9 +636,7 @@ async function sendTestEmail() {
 }
 
 async function openAnalyticsModal(batchId, batchName) {
-  const modal = document.getElementById('modal-analytics');
-  if (!modal) return;
-  modal.style.display = 'flex';
+  openModal('modal-analytics');
   document.getElementById('analytics-modal-title').textContent = `${batchName} Analytics`;
   const contentEl = document.getElementById('analytics-modal-content');
   contentEl.innerHTML = '<div class="loading-overlay"><div class="spinner"></div> Loading analytics...</div>';
