@@ -8,8 +8,11 @@ Run with:
 
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from config import settings
 from db.database import db
@@ -29,6 +32,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger("skillme")
 
+# Frontend root — one level up from backend/
+FRONTEND_DIR = Path(__file__).parent.parent
 
 # ──────────────────────────────────────────────
 # App Lifecycle
@@ -106,6 +111,39 @@ app.include_router(students_router)
 app.include_router(webhooks_router)
 app.include_router(certificates_router)
 app.include_router(payments_router)
+
+
+# ──────────────────────────────────────────────
+# Clean URL Routes (serve .html files without extension)
+# ──────────────────────────────────────────────
+
+_PAGES = {
+    "admin":       "admin.html",
+    "dashboard":   "dashboard.html",
+    "apply":       "apply.html",
+    "certificate": "certificate.html",
+    "lor":         "lor.html",
+    "contact":     "contact.html",
+    "quiz":        "quiz.html",
+    "privacy":     "privacy.html",
+    "terms":       "terms.html",
+    "refunds":     "refunds.html",
+}
+
+for _slug, _filename in _PAGES.items():
+    _filepath = FRONTEND_DIR / _filename
+    if _filepath.exists():
+        # Create closure to capture the correct filepath
+        def _make_handler(fp):
+            async def _handler():
+                return FileResponse(fp)
+            _handler.__name__ = f"serve_{fp.stem}"
+            return _handler
+        app.get(f"/{_slug}", tags=["pages"], include_in_schema=False)(_make_handler(_filepath))
+
+# Serve static assets (CSS, JS, images) from frontend root
+if FRONTEND_DIR.exists():
+    app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
 
 
 # ──────────────────────────────────────────────

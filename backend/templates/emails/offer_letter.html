@@ -70,12 +70,17 @@
   <p><strong>Batch Repository Access</strong></p>
   <p>You have been granted access to your batch repository. Please accept the GitHub invitation to proceed:</p>
   <a href="{{ repo_url }}">{{ repo_url }}</a>
+  {% if issues_url %}
+  <p style="margin-top:12px;font-size:0.9em;color:#6b7280;">Your assigned tasks: <a href="{{ issues_url }}">{{ issues_url }}</a></p>
+  {% endif %}
 </div>
 {% endif %}
 
 <div class="cta-wrap">
   <a href="https://skill-me-intern.in/dashboard.html" class="cta-btn">Access Dashboard</a><br />
-  {% if repo_url %}
+  {% if issues_url %}
+  <a href="{{ issues_url }}" class="cta-btn-secondary">View Your Tasks on GitHub &rarr;</a>
+  {% elif repo_url %}
   <a href="{{ repo_url }}" class="cta-btn-secondary">View Repository</a>
   {% endif %}
 </div>

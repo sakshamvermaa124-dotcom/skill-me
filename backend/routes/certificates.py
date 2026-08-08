@@ -67,7 +67,7 @@ async def download_certificate(student_id: int, batch_id: int):
     if not payment:
         raise HTTPException(
             status_code=402,
-            detail="Payment required. Please complete the ₹249 payment from your dashboard to download your certificate."
+            detail="Payment required. Please complete the ₹99 payment from your dashboard to download your certificate."
         )
     # ─────────────────────────────────────────────────────────────────────────
 

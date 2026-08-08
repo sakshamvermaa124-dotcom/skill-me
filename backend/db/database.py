@@ -71,6 +71,22 @@ class Database:
             # Run migrations — safe to run on every startup (no-op if already done)
             migrations = [
                 "ALTER TABLE students ADD COLUMN domain TEXT",
+                # email_logs table — added in v2; safe no-op if schema already ran
+                """CREATE TABLE IF NOT EXISTS email_logs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    recipient_email TEXT NOT NULL,
+                    recipient_name  TEXT,
+                    email_type      TEXT NOT NULL,
+                    subject         TEXT NOT NULL,
+                    student_id      INTEGER,
+                    batch_id        INTEGER,
+                    status          TEXT NOT NULL DEFAULT 'sent',
+                    error_message   TEXT,
+                    sent_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )""",
+                "CREATE INDEX IF NOT EXISTS idx_email_logs_recipient ON email_logs(recipient_email)",
+                "CREATE INDEX IF NOT EXISTS idx_email_logs_type ON email_logs(email_type)",
+                "CREATE INDEX IF NOT EXISTS idx_email_logs_sent_at ON email_logs(sent_at)",
             ]
             for migration in migrations:
                 try:

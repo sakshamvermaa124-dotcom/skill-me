@@ -106,6 +106,33 @@ async def _send(to_email: str, to_name: str, subject: str, html_body: str) -> bo
         return False
 
 
+async def _send_and_log(
+    to_email: str,
+    to_name: str,
+    subject: str,
+    html_body: str,
+    email_type: str = "other",
+    student_id: int | None = None,
+    batch_id:   int | None = None,
+) -> bool:
+    """
+    Sends an email and records it in email_logs regardless of success/failure.
+    """
+    success = await _send(to_email, to_name, subject, html_body)
+    # Log to DB (best-effort — never crash the caller)
+    try:
+        from db.database import db
+        await db.insert(
+            """INSERT INTO email_logs
+               (recipient_email, recipient_name, email_type, subject, student_id, batch_id, status)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (to_email, to_name, email_type, subject, student_id, batch_id,
+             "sent" if success else "failed"),
+        )
+    except Exception as log_exc:
+        logger.warning("Failed to log email to DB: %s", log_exc)
+    return success
+
 # ── Domain label helper ───────────────────────────────────────────────────────
 
 def _domain_label(domain: str) -> str:
@@ -121,24 +148,40 @@ def _domain_label(domain: str) -> str:
         "devops": "DevOps / Cloud",
         "DevOps / CI-CD": "DevOps / CI-CD",
         "mobile": "Mobile Development",
+        "flutter": "Flutter / Mobile",
         "Flutter / Mobile": "Flutter / Mobile",
         "ui-ux": "UI/UX Design",
+        "uiux": "UI/UX Design",
         "UI/UX Design": "UI/UX Design",
-        # New domains
+        # New domains — slug and display value mappings
+        "react": "React / Next.js",
         "React / Next.js": "React / Next.js",
+        "node": "Node.js / Express",
         "Node.js / Express": "Node.js / Express",
+        "java": "Java / Spring Boot",
         "Java / Spring Boot": "Java / Spring Boot",
+        "datascience": "Data Science",
+        "data-science": "Data Science",
         "Data Science": "Data Science",
+        "cpp": "C/C++ / DSA",
         "C/C++ / DSA": "C/C++ / DSA",
+        "cyber": "Cybersecurity",
         "Cybersecurity": "Cybersecurity",
+        "cloud": "Cloud / AWS",
         "Cloud / AWS": "Cloud / AWS",
+        "dsa": "DSA / Competitive Programming",
         "DSA / Competitive": "DSA / Competitive Programming",
+        "blockchain": "Blockchain / Web3",
         "Blockchain / Web3": "Blockchain / Web3",
+        "android": "Android / Kotlin",
         "Android / Kotlin": "Android / Kotlin",
+        "sql": "SQL / Databases",
         "SQL / Databases": "SQL / Databases",
+        "genai": "Generative AI",
         "Generative AI": "Generative AI",
     }
     return mapping.get(domain, domain.replace("-", " ").title())
+
 
 
 # ── Public API ────────────────────────────────────────────────────────────────
@@ -163,11 +206,12 @@ class EmailService:
             domain_label=_domain_label(domain),
             github_username=github_username,
         )
-        return await _send(
+        return await _send_and_log(
             email,
             f"{first_name} {last_name}",
             "✅ We received your SkillMe application!",
             html,
+            email_type="application_confirmation",
         )
 
     # 2. Shortlisted
@@ -184,11 +228,12 @@ class EmailService:
             last_name=last_name,
             domain_label=_domain_label(domain),
         )
-        return await _send(
+        return await _send_and_log(
             email,
             f"{first_name} {last_name}",
             "🎉 You've been shortlisted for SkillMe!",
             html,
+            email_type="shortlisted",
         )
 
     # 3. Offer letter / enrollment
@@ -201,9 +246,14 @@ class EmailService:
         batch_number: int,
         joining_date: str | None = None,
         repo_url: str | None = None,
+        github_username: str | None = None,
     ) -> bool:
         if not joining_date:
             joining_date = (datetime.utcnow() + timedelta(days=1)).strftime("%d %B %Y")
+        # Build a filtered issues URL that shows ONLY this student's issues
+        issues_url = None
+        if repo_url and github_username:
+            issues_url = f"{repo_url}/issues?assignee={github_username}"
         html = _render(
             "offer_letter.html",
             first_name=first_name,
@@ -212,13 +262,16 @@ class EmailService:
             batch_number=batch_number,
             joining_date=joining_date,
             repo_url=repo_url or "",
+            issues_url=issues_url or "",
+            github_username=github_username or "",
             dashboard_url=f"{settings.frontend_url}/dashboard.html",
         )
-        return await _send(
+        return await _send_and_log(
             email,
             f"{first_name} {last_name}",
             f"🚀 Your SkillMe Offer Letter — {_domain_label(domain)} Batch #{batch_number}",
             html,
+            email_type="offer_letter",
         )
 
     # 4. Weekly tasks assigned
@@ -232,8 +285,13 @@ class EmailService:
         week_number: int,
         tasks: list[dict],
         repo_url: str | None = None,
+        github_username: str | None = None,
     ) -> bool:
         deadline = (datetime.utcnow() + timedelta(days=7)).strftime("%d %B %Y")
+        # Build filtered issues URL for this student only
+        issues_url = None
+        if repo_url and github_username:
+            issues_url = f"{repo_url}/issues?assignee={github_username}"
         html = _render(
             "weekly_tasks.html",
             first_name=first_name,
@@ -245,13 +303,16 @@ class EmailService:
             task_count=len(tasks),
             deadline=deadline,
             repo_url=repo_url or "",
+            issues_url=issues_url or "",
+            github_username=github_username or "",
             dashboard_url=f"{settings.frontend_url}/dashboard.html",
         )
-        return await _send(
+        return await _send_and_log(
             email,
             f"{first_name} {last_name}",
             f"💻 Week {week_number} Tasks Are Live — SkillMe {_domain_label(domain)}",
             html,
+            email_type="weekly_tasks",
         )
 
     # 5. Certificate ready
@@ -283,11 +344,12 @@ class EmailService:
             verify_url=verify_url,
             lor_url=lor_url,
         )
-        return await _send(
+        return await _send_and_log(
             email,
             f"{first_name} {last_name}",
             f"🏆 Your Certificate & Letter of Recommendation are Ready — {cert_id}",
             html,
+            email_type="certificate_ready",
         )
 
     # Test utility
@@ -301,11 +363,12 @@ class EmailService:
             domain_label="Web Development",
             github_username="testuser",
         )
-        return await _send(
+        return await _send_and_log(
             to_email,
             "Test User",
             "🧪 SkillMe Email Test — SMTP Working!",
             html,
+            email_type="test",
         )
 
 

@@ -141,3 +141,22 @@ CREATE TABLE IF NOT EXISTS payments (
     FOREIGN KEY (batch_id) REFERENCES batches(id)
 );
 CREATE INDEX IF NOT EXISTS idx_payments_student ON payments(student_id);
+
+-- Email Logs — every email attempted, sent or failed
+CREATE TABLE IF NOT EXISTS email_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    recipient_email TEXT NOT NULL,
+    recipient_name  TEXT,
+    email_type      TEXT NOT NULL,  -- application_confirmation | shortlisted | offer_letter | weekly_tasks | certificate_ready | test
+    subject         TEXT NOT NULL,
+    student_id      INTEGER,        -- NULL for non-student emails (e.g. test)
+    batch_id        INTEGER,        -- NULL when not batch-related
+    status          TEXT NOT NULL DEFAULT 'sent',  -- sent | failed
+    error_message   TEXT,           -- populated on failure
+    sent_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES students(id),
+    FOREIGN KEY (batch_id)   REFERENCES batches(id)
+);
+CREATE INDEX IF NOT EXISTS idx_email_logs_recipient ON email_logs(recipient_email);
+CREATE INDEX IF NOT EXISTS idx_email_logs_type      ON email_logs(email_type);
+CREATE INDEX IF NOT EXISTS idx_email_logs_sent_at   ON email_logs(sent_at);

@@ -10,6 +10,13 @@ import hashlib
 import logging
 from datetime import datetime
 
+try:
+    import qrcode
+    from qrcode.image.pil import PilImage
+    _QR_AVAILABLE = True
+except ImportError:
+    _QR_AVAILABLE = False
+
 from reportlab.pdfgen import canvas as rl_canvas
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.units import mm
@@ -291,6 +298,40 @@ def _draw_footer(c: rl_canvas.Canvas, w: float, h: float, cert_id: str, issued_o
     c.drawString(18 * mm, 6, "This is a computer-generated document. Verify at skill-me-intern.in/certificate.html")
     c.drawRightString(w - 18 * mm, 6, "© 2024–2026 SkillMe Technologies Pvt. Ltd. All rights reserved.")
 
+def _draw_qr(c: rl_canvas.Canvas, w: float, h: float, cert_id: str):
+    """Draw a QR code linking to the certificate verification page."""
+    if not _QR_AVAILABLE:
+        return
+    verify_url = f"https://skill-me-intern.in/certificate.html?cert_id={cert_id}"
+    try:
+        qr = qrcode.QRCode(version=1, box_size=4, border=1,
+                           error_correction=qrcode.constants.ERROR_CORRECT_M)
+        qr.add_data(verify_url)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="#1a2340", back_color="white")
+        # Convert PIL image to bytes for ReportLab
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        buf.seek(0)
+        reader = ImageReader(buf)
+
+        # Position: bottom-center, just above footer
+        qr_size = 20 * mm
+        qr_x = w / 2 - qr_size / 2
+        qr_y = 14 * mm
+
+        # White background behind QR
+        c.setFillColor(white)
+        c.rect(qr_x - 1*mm, qr_y - 1*mm, qr_size + 2*mm, qr_size + 2*mm, fill=1, stroke=0)
+        c.drawImage(reader, qr_x, qr_y, width=qr_size, height=qr_size)
+
+        # Label
+        c.setFillColor(C_MUTED)
+        c.setFont("Helvetica", 5)
+        c.drawCentredString(w / 2, qr_y - 4, "Scan to verify")
+    except Exception as e:
+        logger.warning(f"QR code generation failed: {e}")
+
 
 def generate_certificate_pdf(student: dict, batch: dict) -> tuple[bytes, str]:
     """
@@ -313,9 +354,11 @@ def generate_certificate_pdf(student: dict, batch: dict) -> tuple[bytes, str]:
     _draw_body(c, w, h, student, batch, cert_id, issued_on)
     _draw_details_row(c, w, h, batch)
     _draw_footer(c, w, h, cert_id, issued_on)
+    _draw_qr(c, w, h, cert_id)  # QR code for verification
 
     c.save()
     return buffer.getvalue(), cert_id
+
 
 
 class CertificateService:

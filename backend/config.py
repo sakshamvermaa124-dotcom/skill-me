@@ -49,7 +49,7 @@ class Settings(BaseSettings):
     # ── Razorpay (Payment Gateway) ──────────────
     razorpay_key_id: str = ""           # rzp_test_... or rzp_live_...
     razorpay_key_secret: str = ""       # Found in Razorpay Dashboard → Settings → API Keys
-    certificate_price_paise: int = 24900  # ₹249 in paise (1 ₹ = 100 paise)
+    certificate_price_paise: int = 9900  # ₹99 in paise (1 ₹ = 100 paise)
 
     class Config:
         env_file = ".env"

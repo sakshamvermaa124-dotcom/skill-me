@@ -91,16 +91,16 @@ async def run_auto_assign() -> None:
                 f"Batch {batch['id']}: auto-assigned {len(result)} issues for Week {week}."
             )
 
-            # Send weekly task email to all enrolled students
+            # Send weekly task email to each enrolled student
             try:
                 students = await db.fetch_all(
-                    """SELECT s.first_name, s.last_name, s.email
+                    """SELECT s.first_name, s.last_name, s.email, s.github_username
                        FROM students s
                        JOIN enrollments e ON e.student_id = s.id
                        WHERE e.batch_id = ? AND e.status != 'dropped'""",
                     (batch["id"],)
                 )
-                repo_url = (
+                base_repo_url = (
                     f"https://github.com/{batch['repo_name']}"
                     if batch.get("repo_name") else None
                 )
@@ -109,6 +109,12 @@ async def run_auto_assign() -> None:
                     for r in result
                 ]
                 for student in students:
+                    # Build a filtered issues URL — shows only THIS student's issues
+                    gh_user = student.get("github_username")
+                    repo_url = (
+                        f"{base_repo_url}/issues?assignee={gh_user}"
+                        if base_repo_url and gh_user else base_repo_url
+                    )
                     await email_service.send_weekly_tasks_notification(
                         first_name=student["first_name"],
                         last_name=student["last_name"],
@@ -117,7 +123,8 @@ async def run_auto_assign() -> None:
                         batch_number=batch["batch_number"],
                         week_number=week,
                         tasks=tasks_for_email,
-                        repo_url=repo_url,
+                        repo_url=base_repo_url,
+                        github_username=gh_user or None,
                     )
                 logger.info(f"Batch {batch['id']}: sent Week {week} emails to {len(students)} students.")
             except Exception as email_err:

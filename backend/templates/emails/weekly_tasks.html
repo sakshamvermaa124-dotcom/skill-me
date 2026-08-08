@@ -43,7 +43,9 @@
 
 <div class="cta-wrap">
   <a href="https://skill-me-intern.in/dashboard.html" class="cta-btn">Access Dashboard</a><br />
-  {% if repo_url %}
+  {% if issues_url %}
+  <a href="{{ issues_url }}" class="cta-btn-secondary">View Your Assigned Tasks &rarr;</a>
+  {% elif repo_url %}
   <a href="{{ repo_url }}" class="cta-btn-secondary">Open Repository</a>
   {% endif %}
 </div>

@@ -817,7 +817,54 @@
           </div>
         </div>
       </div>
+
+      <!-- ─── EMAIL LOGS ─── -->
+      <div class="panel" style="margin-top:24px;">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">📋 Email Send Log</div>
+            <div class="panel-subtitle">Complete history of every email sent or attempted</div>
+          </div>
+          <button class="btn btn-secondary" onclick="loadEmailLogs()" style="font-size:0.8rem;padding:6px 14px;">↻ Refresh</button>
+        </div>
+        <div class="panel-body">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;">
+            <select id="email-log-type-filter" class="filter-select" onchange="loadEmailLogs()" style="min-width:180px;">
+              <option value="">All Types</option>
+              <option value="application_confirmation">Application Received</option>
+              <option value="shortlisted">Shortlisted</option>
+              <option value="offer_letter">Offer Letter</option>
+              <option value="weekly_tasks">Weekly Tasks</option>
+              <option value="certificate_ready">Certificate Ready</option>
+              <option value="test">Test Email</option>
+            </select>
+            <input type="text" id="email-log-recipient-filter" class="search-input"
+              placeholder="Filter by email address..." oninput="debounceEmailLogs()"
+              style="flex:1;min-width:200px;max-width:320px;" />
+            <select id="email-log-status-filter" class="filter-select" onchange="loadEmailLogs()" style="min-width:120px;">
+              <option value="">All Status</option>
+              <option value="sent">Sent ✅</option>
+              <option value="failed">Failed ❌</option>
+            </select>
+          </div>
+          <div id="email-log-stats" style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;"></div>
+          <div style="overflow-x:auto;">
+            <table class="students-table" id="email-log-table">
+              <thead>
+                <tr>
+                  <th>Time</th><th>Type</th><th>Recipient</th><th>Subject</th><th>Student</th><th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="email-log-tbody">
+                <tr><td colspan="6" style="text-align:center;color:var(--text-secondary);padding:32px;">Click Refresh to load logs</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="email-log-pagination" style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:0.82rem;color:var(--text-secondary);"></div>
+        </div>
+      </div>
     </section>
+
 
   </main>
 </div>
@@ -839,10 +886,18 @@
           <option value="node">Node.js / Express</option>
           <option value="java">Java / Spring Boot</option>
           <option value="ml">Machine Learning</option>
-          <option value="data-science">Data Science</option>
+          <option value="datascience">Data Science</option>
           <option value="flutter">Flutter / Mobile</option>
           <option value="devops">DevOps / CI-CD</option>
           <option value="cpp">C/C++ / DSA</option>
+          <option value="uiux">UI/UX Design</option>
+          <option value="cyber">Cybersecurity</option>
+          <option value="cloud">Cloud / AWS</option>
+          <option value="dsa">DSA / Competitive</option>
+          <option value="blockchain">Blockchain / Web3</option>
+          <option value="android">Android / Kotlin</option>
+          <option value="sql">SQL / Databases</option>
+          <option value="genai">Generative AI</option>
         </select>
       </div>
       <div class="form-group">
@@ -922,5 +977,125 @@
 <div id="toast-container"></div>
 
 <script src="admin.js?v=20260727_2"></script>
+<script>
+// ─── Email Logs ───────────────────────────────────────────────────────────────
+const EMAIL_TYPE_LABELS = {
+  application_confirmation: { label: 'Application', color: '#60a5fa', bg: 'rgba(96,165,250,0.1)' },
+  shortlisted:              { label: 'Shortlisted',  color: '#a78bfa', bg: 'rgba(167,139,250,0.1)' },
+  offer_letter:             { label: 'Offer Letter', color: '#34d399', bg: 'rgba(52,211,153,0.1)' },
+  weekly_tasks:             { label: 'Weekly Tasks', color: '#fbbf24', bg: 'rgba(251,191,36,0.1)'  },
+  certificate_ready:        { label: 'Certificate',  color: '#f87171', bg: 'rgba(248,113,113,0.1)' },
+  test:                     { label: 'Test',          color: '#94a3b8', bg: 'rgba(148,163,184,0.1)' },
+};
+
+let _emailLogOffset = 0;
+const _emailLogLimit = 20;
+let _emailLogDebounce = null;
+
+function debounceEmailLogs() {
+  clearTimeout(_emailLogDebounce);
+  _emailLogDebounce = setTimeout(loadEmailLogs, 300);
+}
+
+async function loadEmailLogs(offset = 0) {
+  _emailLogOffset = offset;
+  const type      = document.getElementById('email-log-type-filter')?.value || '';
+  const recipient = document.getElementById('email-log-recipient-filter')?.value || '';
+  const status    = document.getElementById('email-log-status-filter')?.value || '';
+  const tbody     = document.getElementById('email-log-tbody');
+  const statsEl   = document.getElementById('email-log-stats');
+  const pageEl    = document.getElementById('email-log-pagination');
+  if (!tbody) return;
+
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-secondary);">Loading...</td></tr>';
+
+  const params = new URLSearchParams({ limit: _emailLogLimit, offset });
+  if (type)      params.set('email_type', type);
+  if (recipient) params.set('recipient',  recipient);
+  if (status)    params.set('status',     status);
+
+  const BASE = window.API_BASE || 'http://localhost:8000';
+  const KEY  = window.ADMIN_KEY || localStorage.getItem('adminKey') || '';
+
+  try {
+    const res = await fetch(`${BASE}/api/admin/email/logs?${params}`, {
+      headers: { 'X-Admin-Key': KEY }
+    });
+    if (!res.ok) { throw new Error(`HTTP ${res.status}`); }
+    const data = await res.json();
+    const logs = data.logs || [];
+    const total = data.total || 0;
+
+    // ── Stats bar ──────────────────────────────────────────────────────
+    const sentCount   = logs.filter(l => l.status === 'sent').length;
+    const failedCount = logs.filter(l => l.status === 'failed').length;
+    if (statsEl) {
+      statsEl.innerHTML = [
+        { label: 'Total (page)', val: logs.length, color: '#94a3b8', bg: 'rgba(148,163,184,0.08)' },
+        { label: 'Sent', val: sentCount, color: '#34d399', bg: 'rgba(52,211,153,0.08)' },
+        { label: 'Failed', val: failedCount, color: '#f87171', bg: 'rgba(248,113,113,0.08)' },
+        { label: 'Grand Total', val: total, color: '#a78bfa', bg: 'rgba(167,139,250,0.08)' },
+      ].map(s => `<div style="padding:8px 16px;border-radius:8px;background:${s.bg};border:1px solid ${s.color}33;font-size:0.8rem;">
+        <span style="color:var(--text-secondary);">${s.label}: </span>
+        <strong style="color:${s.color};">${s.val}</strong>
+      </div>`).join('');
+    }
+
+    // ── Table rows ────────────────────────────────────────────────────
+    if (logs.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-secondary);">No email logs found</td></tr>';
+    } else {
+      tbody.innerHTML = logs.map(log => {
+        const t = EMAIL_TYPE_LABELS[log.email_type] || { label: log.email_type, color: '#94a3b8', bg: 'rgba(148,163,184,0.1)' };
+        const statusBadge = log.status === 'sent'
+          ? '<span style="padding:2px 8px;border-radius:10px;background:rgba(52,211,153,0.12);color:#34d399;font-size:0.72rem;font-weight:600;">✅ Sent</span>'
+          : '<span style="padding:2px 8px;border-radius:10px;background:rgba(248,113,113,0.12);color:#f87171;font-size:0.72rem;font-weight:600;">❌ Failed</span>';
+        const d = new Date(log.sent_at);
+        const timeStr = isNaN(d) ? log.sent_at : `${d.toLocaleDateString('en-IN')} ${d.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'})}`;
+        const subject = log.subject?.length > 50 ? log.subject.slice(0, 50) + '…' : (log.subject || '—');
+        return `<tr>
+          <td style="font-size:0.78rem;color:var(--text-secondary);white-space:nowrap;">${timeStr}</td>
+          <td><span style="padding:3px 10px;border-radius:10px;background:${t.bg};color:${t.color};font-size:0.72rem;font-weight:600;white-space:nowrap;">${t.label}</span></td>
+          <td style="font-size:0.82rem;">${log.recipient_email || '—'}</td>
+          <td style="font-size:0.78rem;color:var(--text-secondary);" title="${log.subject || ''}">${subject}</td>
+          <td style="font-size:0.82rem;">${log.student_name || '—'}</td>
+          <td>${statusBadge}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    // ── Pagination ────────────────────────────────────────────────────
+    if (pageEl) {
+      const page = Math.floor(offset / _emailLogLimit) + 1;
+      const totalPages = Math.ceil(total / _emailLogLimit);
+      pageEl.innerHTML = `
+        <span>${total} total emails · Page ${page} of ${Math.max(1, totalPages)}</span>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost" style="padding:4px 12px;font-size:0.78rem;"
+            onclick="loadEmailLogs(${Math.max(0, offset - _emailLogLimit)})" ${offset === 0 ? 'disabled' : ''}>← Prev</button>
+          <button class="btn btn-ghost" style="padding:4px 12px;font-size:0.78rem;"
+            onclick="loadEmailLogs(${offset + _emailLogLimit})" ${offset + _emailLogLimit >= total ? 'disabled' : ''}>Next →</button>
+        </div>`;
+    }
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:#f87171;">Error loading logs: ${err.message}</td></tr>`;
+  }
+}
+
+// Auto-load email logs when navigating to the email page
+const _origNavigate = typeof navigate === 'function' ? navigate : null;
+if (_origNavigate) {
+  window._emailNavigatePatched = true;
+}
+document.addEventListener('DOMContentLoaded', () => {
+  // Patch navigate to auto-load email logs on tab switch
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach(item => {
+    if (item.getAttribute('onclick')?.includes("'email'")) {
+      item.addEventListener('click', () => setTimeout(loadEmailLogs, 100));
+    }
+  });
+});
+</script>
 </body>
 </html>

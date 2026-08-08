@@ -63,20 +63,44 @@ class BatchService:
         if existing:
             raise ValueError(f"Batch {domain} #{batch_number} already exists (id={existing['id']})")
 
-        # Check if repo already exists on GitHub or create from template (non-blocking if GitHub API fails)
+        # Create GitHub repo — try domain template first, then generic fallbacks.
+        # We do NOT silently swallow a full failure; the return value will surface it.
+        github_repo_created = False
+        FALLBACK_TEMPLATES = [template, "ml-template", "web-dev-template"]
+
+        existing_repo = None
         try:
             existing_repo = await github_service.get_repo(repo_name)
-            if existing_repo:
-                logger.warning(f"Repo {repo_name} already exists on GitHub, using existing")
-            else:
-                # Create repo from template
-                await github_service.create_repo_from_template(
-                    template_repo=template,
-                    new_repo_name=repo_name,
-                    description=f"SkillMe {domain.replace('-', ' ').title()} Internship — Batch {batch_number}",
-                )
         except Exception as e:
-            logger.warning(f"GitHub repository check/creation failed for {repo_name} (template: {template}): {e}. Creating batch in DB anyway.")
+            logger.warning(f"GitHub get_repo failed for {repo_name}: {e}")
+
+        if existing_repo:
+            logger.warning(f"Repo {repo_name} already exists on GitHub, using existing")
+            github_repo_created = True
+        else:
+            for tmpl in FALLBACK_TEMPLATES:
+                try:
+                    await github_service.create_repo_from_template(
+                        template_repo=tmpl,
+                        new_repo_name=repo_name,
+                        description=f"SkillMe {domain.replace('-', ' ').title()} Internship — Batch {batch_number}",
+                    )
+                    github_repo_created = True
+                    if tmpl != template:
+                        logger.warning(
+                            f"Domain template '{template}' not found. "
+                            f"Used fallback '{tmpl}' to create {repo_name}."
+                        )
+                    break
+                except Exception as e:
+                    logger.warning(f"Template '{tmpl}' failed for {repo_name}: {e}")
+
+            if not github_repo_created:
+                logger.error(
+                    f"All templates failed for {repo_name}. "
+                    f"Batch will be created in DB but has NO GitHub repo — "
+                    f"enrollment and task assignment will fail until the repo is created manually."
+                )
 
         # Set up webhook if URL provided
         if webhook_url:
@@ -99,7 +123,7 @@ class BatchService:
             (domain, batch_number, repo_name, max_students, start_date, end_date),
         )
 
-        logger.info(f"Created batch: {domain} #{batch_number} (id={batch_id}, repo={repo_name})")
+        logger.info(f"Created batch: {domain} #{batch_number} (id={batch_id}, repo={repo_name}, github_repo_created={github_repo_created})")
 
         return {
             "id": batch_id,
@@ -109,7 +133,9 @@ class BatchService:
             "status": "active",
             "start_date": start_date,
             "end_date": end_date,
+            "github_repo_created": github_repo_created,
         }
+
 
     async def get_batch(self, batch_id: int) -> dict | None:
         """Get a batch by ID."""

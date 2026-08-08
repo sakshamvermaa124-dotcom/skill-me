@@ -103,7 +103,14 @@ async def create_batch(req: CreateBatchRequest, _: str = Depends(require_admin))
             start_date=req.start_date,
             webhook_url=req.webhook_url,
         )
-        return {"status": "created", "batch": batch}
+        response = {"status": "created", "batch": batch}
+        if not batch.get("github_repo_created", True):
+            response["warning"] = (
+                f"⚠️ GitHub repo '{batch['repo_name']}' could NOT be created — "
+                f"no matching template found. Enrollment and task assignment will fail "
+                f"until the repo is manually created on GitHub."
+            )
+        return response
     except ValueError as e:
         raise HTTPException(status_code=409, detail=str(e))
     except Exception as e:
@@ -180,7 +187,7 @@ async def add_student_to_batch(
 
         # Fetch student + batch info for email
         student = await db.fetch_one(
-            "SELECT first_name, last_name, email FROM students WHERE id = ?",
+            "SELECT first_name, last_name, email, github_username FROM students WHERE id = ?",
             (req.student_id,)
         )
         batch = await db.fetch_one(
@@ -200,6 +207,7 @@ async def add_student_to_batch(
                 domain=batch["domain"],
                 batch_number=batch["batch_number"],
                 repo_url=repo_url,
+                github_username=student.get("github_username") or None,
             )
 
         return {"status": "enrolled", **result}
@@ -466,3 +474,56 @@ async def send_test_email(req: TestEmailRequest, _: str = Depends(require_admin)
     if success:
         return {"status": "sent", "to": req.to_email, "message": "Test email sent successfully!"}
     return {"status": "failed", "message": "Email send failed — check SMTP credentials in .env"}
+
+
+@router.get("/email/logs", summary="Get email send history")
+async def get_email_logs(
+    _:           str = Depends(require_admin),
+    email_type:  str | None = None,   # filter by type
+    recipient:   str | None = None,   # filter by email address (partial match)
+    status:      str | None = None,   # sent | failed
+    limit:       int = 50,
+    offset:      int = 0,
+):
+    """
+    Return a paginated list of all emails sent (or attempted) by SkillMe.
+    Useful for auditing delivery, debugging failures, and tracking communication history.
+    """
+    conditions = []
+    params: list = []
+
+    if email_type:
+        conditions.append("email_type = ?")
+        params.append(email_type)
+    if recipient:
+        conditions.append("recipient_email LIKE ?")
+        params.append(f"%{recipient}%")
+    if status:
+        conditions.append("status = ?")
+        params.append(status)
+
+    where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+
+    rows = await db.fetch_all(
+        f"""SELECT el.*,
+                   s.first_name || ' ' || s.last_name AS student_name
+            FROM email_logs el
+            LEFT JOIN students s ON s.id = el.student_id
+            {where}
+            ORDER BY el.sent_at DESC
+            LIMIT ? OFFSET ?""",
+        (*params, limit, offset),
+    )
+
+    total_row = await db.fetch_one(
+        f"SELECT COUNT(*) as total FROM email_logs el {where}",
+        tuple(params),
+    )
+
+    return {
+        "total": total_row["total"] if total_row else 0,
+        "limit": limit,
+        "offset": offset,
+        "logs": rows,
+    }
+
