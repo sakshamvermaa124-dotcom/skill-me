@@ -230,15 +230,13 @@ def _draw_details_row(c: rl_canvas.Canvas, w: float, h: float, batch: dict):
     c.line(18 * mm, row_y + row_h, w - 18 * mm, row_y + row_h)
     c.line(18 * mm, row_y, w - 18 * mm, row_y)
 
-    # 4 columns
-    batch_num = batch.get("batch_number", "1")
+    # 3 columns
     items = [
         ("DURATION", "4 Weeks"),
-        ("BATCH", f"#{batch_num}"),
         ("MODE", "Remote"),
         ("STATUS", "Completed"),
     ]
-    col_w = (w - 36 * mm) / 4
+    col_w = (w - 36 * mm) / 3
     status_colors = {"Completed": C_EMERALD}
 
     for i, (label, value) in enumerate(items):

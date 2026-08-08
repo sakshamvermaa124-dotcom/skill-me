@@ -59,9 +59,28 @@ print(f"Output:   {out_path}")
 print()
 print("Verify URL embedded in QR:")
 print(f"  https://skill-me-intern.in/certificate.html?cert_id={cert_id}")
+
+# ── Save to DB for verification ─────────────────────────────────────
+import sqlite3
+db_path = os.path.join(os.path.dirname(__file__), "..", "data", "skillme.db")
+try:
+    con = sqlite3.connect(db_path)
+    con.execute(
+        """INSERT INTO certificates (student_id, batch_id, cert_id, issued_at)
+           VALUES (?, ?, ?, CURRENT_TIMESTAMP)
+           ON CONFLICT(student_id, batch_id) DO UPDATE SET cert_id=excluded.cert_id""",
+        (student["id"], batch["id"], cert_id)
+    )
+    con.commit()
+    con.close()
+    print("Database: Record inserted successfully. QR code will now work!")
+except Exception as e:
+    print(f"Database: Could not insert record: {e}")
+
 print()
 print("✅ Certificate generated successfully!")
 
 # Open the PDF
 import subprocess
 subprocess.Popen(["start", out_path], shell=True)
+
