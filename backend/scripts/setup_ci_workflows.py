@@ -48,12 +48,13 @@ WORKFLOW_YAML = r"""
 name: "SkillMe Auto-Evaluate"
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, reopened]
 
 permissions:
   contents: write
   pull-requests: write
+  issues: write
 
 jobs:
   evaluate:
@@ -65,6 +66,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
       # ── Language runtimes (all installed; domain logic picks the right one) ──
