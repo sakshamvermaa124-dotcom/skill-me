@@ -87,6 +87,36 @@ class Database:
                 "CREATE INDEX IF NOT EXISTS idx_email_logs_recipient ON email_logs(recipient_email)",
                 "CREATE INDEX IF NOT EXISTS idx_email_logs_type ON email_logs(email_type)",
                 "CREATE INDEX IF NOT EXISTS idx_email_logs_sent_at ON email_logs(sent_at)",
+                # otp_tokens — student OTP login (v3)
+                """CREATE TABLE IF NOT EXISTS otp_tokens (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    email TEXT NOT NULL,
+                    otp_hash TEXT NOT NULL,
+                    expires_at TIMESTAMP NOT NULL,
+                    used INTEGER DEFAULT 0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )""",
+                "CREATE INDEX IF NOT EXISTS idx_otp_email ON otp_tokens(email)",
+                # referral_codes — one per student (v3)
+                """CREATE TABLE IF NOT EXISTS referral_codes (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    student_id INTEGER NOT NULL UNIQUE,
+                    code TEXT NOT NULL UNIQUE,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )""",
+                "CREATE INDEX IF NOT EXISTS idx_referral_codes_code ON referral_codes(code)",
+                # referral_conversions (v3)
+                """CREATE TABLE IF NOT EXISTS referral_conversions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    referrer_student_id INTEGER NOT NULL,
+                    referred_student_id INTEGER,
+                    referred_email TEXT NOT NULL,
+                    status TEXT DEFAULT 'clicked',
+                    discount_applied INTEGER DEFAULT 0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )""",
+                "CREATE INDEX IF NOT EXISTS idx_referral_conv_referrer ON referral_conversions(referrer_student_id)",
             ]
             for migration in migrations:
                 try:

@@ -34,22 +34,31 @@ class Settings(BaseSettings):
     github_api_url: str = "https://api.github.com"
 
     # ── Email (Brevo SMTP relay) ───────────────────
-    email_enabled: bool = True          # Will attempt to send emails if SMTP creds are in .env
+    email_enabled: bool = True
     smtp_host: str = "smtp-relay.brevo.com"
     smtp_port: int = 587
-    smtp_user: str = ""                  # Your Brevo login email
-    smtp_password: str = ""             # Brevo SMTP key (Settings → SMTP & API)
+    smtp_user: str = ""
+    smtp_password: str = ""
     smtp_from_name: str = "SkillMe Team"
-    smtp_from_email: str = ""           # Must match / be verified in Brevo
-    frontend_url: str = "https://skillme.in"  # Base URL for email CTAs
-    # Comma-separated list of allowed CORS origins. Use "*" for dev.
-    # In production set to: https://your-app.vercel.app,https://yourcustom.domain
+    smtp_from_email: str = ""
+    frontend_url: str = "https://skill-me-intern.in"
+    # Comma-separated list of allowed CORS origins.
     allowed_origins: str = "*"
 
     # ── Razorpay (Payment Gateway) ──────────────
-    razorpay_key_id: str = ""           # rzp_test_... or rzp_live_...
-    razorpay_key_secret: str = ""       # Found in Razorpay Dashboard → Settings → API Keys
-    certificate_price_paise: int = 9900  # ₹99 in paise (1 ₹ = 100 paise)
+    razorpay_key_id: str = ""
+    razorpay_key_secret: str = ""
+    certificate_price_paise: int = 9900  # ₹99 in paise
+
+    # ── Student Auth (OTP + JWT) ─────────────────
+    jwt_secret_key: str = "changeme-set-a-strong-secret-in-render"
+    jwt_algorithm: str = "HS256"
+    jwt_expire_days: int = 7
+    otp_expiry_minutes: int = 10
+
+    # ── Referral System ──────────────────────────
+    referral_discount_paise: int = 2000   # ₹20 off certificate per referral
+    referral_ambassador_threshold: int = 5  # referrals needed for Ambassador badge
 
     class Config:
         env_file = ".env"

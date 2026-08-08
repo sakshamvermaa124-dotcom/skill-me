@@ -160,3 +160,39 @@ CREATE TABLE IF NOT EXISTS email_logs (
 CREATE INDEX IF NOT EXISTS idx_email_logs_recipient ON email_logs(recipient_email);
 CREATE INDEX IF NOT EXISTS idx_email_logs_type      ON email_logs(email_type);
 CREATE INDEX IF NOT EXISTS idx_email_logs_sent_at   ON email_logs(sent_at);
+
+-- OTP Tokens — for student magic OTP login
+CREATE TABLE IF NOT EXISTS otp_tokens (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email       TEXT NOT NULL,
+    otp_hash    TEXT NOT NULL,          -- bcrypt / sha256 hash of the 6-digit OTP
+    expires_at  TIMESTAMP NOT NULL,
+    used        INTEGER DEFAULT 0,      -- 0 = unused, 1 = consumed
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_otp_email ON otp_tokens(email);
+
+-- Referral Codes — one per student
+CREATE TABLE IF NOT EXISTS referral_codes (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id  INTEGER NOT NULL UNIQUE,
+    code        TEXT NOT NULL UNIQUE,   -- e.g. SKM-A1B2C3
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES students(id)
+);
+CREATE INDEX IF NOT EXISTS idx_referral_codes_code ON referral_codes(code);
+
+-- Referral Conversions — tracks referral → application → enrollment pipeline
+CREATE TABLE IF NOT EXISTS referral_conversions (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    referrer_student_id INTEGER NOT NULL,
+    referred_student_id INTEGER,        -- NULL until they apply
+    referred_email      TEXT NOT NULL,
+    status              TEXT DEFAULT 'clicked',  -- clicked | applied | enrolled
+    discount_applied    INTEGER DEFAULT 0,  -- paise discount given to referrer
+    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (referrer_student_id) REFERENCES students(id),
+    FOREIGN KEY (referred_student_id) REFERENCES students(id)
+);
+CREATE INDEX IF NOT EXISTS idx_referral_conv_referrer ON referral_conversions(referrer_student_id);

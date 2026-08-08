@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Disallow admin and API routes
+Disallow: /admin
+Disallow: /api/
+
+Sitemap: https://skill-me-intern.in/sitemap.xml

@@ -27,6 +27,7 @@ class ApplicationRequest(BaseModel):
     domain: str = Field(..., description="Preferred domain")
     motivation: str | None = Field(None, max_length=1000)
     referral_source: str | None = Field(None, max_length=100)
+    referred_by: str | None = Field(None, max_length=20)  # referral code e.g. SKM-A1B2C3
 
 
 # ──────────────────────────────────────────────
@@ -89,6 +90,14 @@ async def apply(req: ApplicationRequest, background_tasks: BackgroundTasks):
             domain=req.domain,
             github_username=github_username or "",
         )
+
+        # Track referral if a code was provided
+        if req.referred_by:
+            try:
+                from routes.referrals import record_referral_application
+                await record_referral_application(req.email, student_id, req.referred_by)
+            except Exception:
+                pass  # Referral tracking is best-effort
 
         return {
             "status": "applied",
@@ -173,6 +182,30 @@ async def get_progress(email: str):
             "email": student["email"],
             "github": student["github_username"],
         },
-        "progress": progress,
-        "submissions": submissions,
+        "progress": [dict(p) for p in progress],
+        "submissions": [dict(s) for s in submissions],
+        "summary": {
+            "total_tasks": sum(p["issues_assigned"] for p in progress),
+            "completed_tasks": sum(p["issues_completed"] for p in progress),
+            "prs_merged": sum(p["prs_merged"] for p in progress),
+            "total_prs": len([s for s in submissions]),
+            "completion_pct": round(
+                sum(p["issues_completed"] for p in progress) /
+                max(sum(p["issues_assigned"] for p in progress), 1) * 100
+            ),
+        },
     }
+
+
+@router.get("/progress/id/{student_id}", summary="Get student progress by ID")
+async def get_progress_by_id(student_id: int):
+    """Get a student's internship progress by student ID (used by auth'd dashboard)."""
+    student = await db.fetch_one(
+        "SELECT * FROM students WHERE id = ?", (student_id,)
+    )
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found.")
+
+    # Re-use the same logic via email
+    from fastapi import Request
+    return await get_progress(student["email"])

@@ -527,3 +527,91 @@ async def get_email_logs(
         "logs": rows,
     }
 
+
+# ──────────────────────────────────────────────
+# Batch Analytics
+# ──────────────────────────────────────────────
+
+@router.get("/batches/{batch_id}/analytics", summary="Batch analytics overview")
+async def get_batch_analytics(batch_id: int, _: str = Depends(require_admin)):
+    """
+    Returns aggregated analytics for a batch:
+    - Enrollment counts (total, active, dropped, completed)
+    - Per-week task completion rates
+    - PR stats (submitted, merged, failed)
+    - Revenue from certificate payments
+    """
+    batch = await db.fetch_one("SELECT * FROM batches WHERE id = ?", (batch_id,))
+    if not batch:
+        raise HTTPException(status_code=404, detail="Batch not found")
+
+    # Enrollment stats
+    enrollment_stats = await db.fetch_one(
+        """SELECT
+             COUNT(*) as total,
+             SUM(CASE WHEN e.status = 'enrolled' OR e.status = 'active' THEN 1 ELSE 0 END) as active,
+             SUM(CASE WHEN e.status = 'dropped' THEN 1 ELSE 0 END) as dropped,
+             SUM(CASE WHEN e.status = 'completed' THEN 1 ELSE 0 END) as completed
+           FROM enrollments e WHERE e.batch_id = ?""",
+        (batch_id,)
+    )
+
+    # Per-week progress aggregates
+    weekly_progress = await db.fetch_all(
+        """SELECT week,
+             SUM(issues_assigned) as assigned,
+             SUM(issues_completed) as completed,
+             SUM(prs_submitted) as prs_submitted,
+             SUM(prs_merged) as prs_merged
+           FROM progress WHERE batch_id = ?
+           GROUP BY week ORDER BY week""",
+        (batch_id,)
+    )
+
+    # PR stats from submissions table
+    pr_stats = await db.fetch_one(
+        """SELECT
+             COUNT(*) as total_prs,
+             SUM(CASE WHEN status = 'merged' THEN 1 ELSE 0 END) as merged,
+             SUM(CASE WHEN status = 'tests_failed' THEN 1 ELSE 0 END) as failed,
+             SUM(CASE WHEN status IN ('open','tests_passed') THEN 1 ELSE 0 END) as open_prs
+           FROM submissions WHERE batch_id = ?""",
+        (batch_id,)
+    )
+
+    # Revenue from payments
+    revenue = await db.fetch_one(
+        """SELECT
+             COUNT(*) as total_payments,
+             SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) as total_paise
+           FROM payments WHERE batch_id = ?""",
+        (batch_id,)
+    )
+
+    # Per-student progress grid
+    student_grid = await db.fetch_all(
+        """SELECT s.id, s.first_name, s.last_name, s.github_username,
+                  e.status as enrollment_status,
+                  SUM(p.issues_assigned) as tasks_assigned,
+                  SUM(p.issues_completed) as tasks_completed,
+                  SUM(p.prs_merged) as prs_merged
+           FROM enrollments e
+           JOIN students s ON s.id = e.student_id
+           LEFT JOIN progress p ON p.student_id = s.id AND p.batch_id = e.batch_id
+           WHERE e.batch_id = ?
+           GROUP BY s.id
+           ORDER BY tasks_completed DESC""",
+        (batch_id,)
+    )
+
+    return {
+        "batch": dict(batch),
+        "enrollments": dict(enrollment_stats) if enrollment_stats else {},
+        "weekly_progress": [dict(w) for w in weekly_progress],
+        "pr_stats": dict(pr_stats) if pr_stats else {},
+        "revenue": {
+            "total_payments": revenue["total_payments"] if revenue else 0,
+            "total_inr": (revenue["total_paise"] or 0) // 100 if revenue else 0,
+        },
+        "student_grid": [dict(s) for s in student_grid],
+    }
