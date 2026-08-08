@@ -393,6 +393,9 @@ class BatchService:
                 else:
                     github_issue_number = None
 
+            if github_issue_number is None:
+                logger.error(f"Skipping database insertion for task '{title}' because GitHub issue creation failed.")
+                continue
 
             # Record in database
             issue_id = await db.insert(

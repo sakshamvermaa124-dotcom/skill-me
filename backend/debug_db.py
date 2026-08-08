@@ -18,7 +18,7 @@ def query(sql):
     return rows
 
 print('=== BATCHES ===')
-for r in query('SELECT id, domain, batch_number, status, max_students FROM batches ORDER BY id'):
+for r in query('SELECT id, domain, batch_number, repo_name, status, max_students FROM batches ORDER BY id'):
     print(r)
 
 print()
@@ -27,6 +27,7 @@ for r in query('SELECT id, student_id, batch_id, status FROM enrollments ORDER B
     print(r)
 
 print()
-print('=== ENROLLMENT COUNTS PER BATCH (not dropped) ===')
-for r in query("SELECT batch_id, COUNT(*) as count FROM enrollments WHERE status != 'dropped' GROUP BY batch_id"):
-    print(r)
+print()
+print('=== DELETING ORPHANED ISSUES ===')
+query('DELETE FROM issues WHERE github_issue_number IS NULL')
+print('Deleted.')
