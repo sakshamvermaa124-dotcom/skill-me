@@ -12,6 +12,7 @@ from services.github_service import github_service
 from services.scheduler_service import scheduler_service
 from services.email_service import email_service
 from db.database import db
+from config import settings
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -259,7 +260,7 @@ async def assign_issues(
 
 @router.post("/batches/{batch_id}/assign-from-repo", summary="Assign weekly issues from task repo")
 async def assign_from_repo(
-    batch_id: int, req: AssignFromRepoRequest, _: str = Depends(require_admin)
+    batch_id: int, req: AssignFromRepoRequest, background_tasks: BackgroundTasks, _: str = Depends(require_admin)
 ):
     """
     Fetch tasks from the central task repo for the batch's domain and week,
@@ -270,6 +271,42 @@ async def assign_from_repo(
             batch_id=batch_id,
             week_number=req.week_number,
         )
+
+        # Send weekly task emails if tasks were successfully created
+        if created:
+            batch = await db.fetch_one("SELECT * FROM batches WHERE id = ?", (batch_id,))
+            students = await db.fetch_all(
+                """SELECT s.first_name, s.last_name, s.email, s.github_username
+                   FROM students s
+                   JOIN enrollments e ON e.student_id = s.id
+                   WHERE e.batch_id = ? AND e.status != 'dropped'""",
+                (batch_id,)
+            )
+            base_repo_url = (
+                f"https://github.com/{settings.github_org}/{batch['repo_name']}"
+                if batch and batch.get("repo_name") else None
+            )
+            tasks_for_email = [
+                {"title": r.get("title", "Task"), "issue_url": r.get("html_url")}
+                for r in created
+            ]
+            
+            # Send emails in background
+            for student in students:
+                gh_user = student.get("github_username")
+                background_tasks.add_task(
+                    email_service.send_weekly_tasks_notification,
+                    first_name=student["first_name"],
+                    last_name=student["last_name"],
+                    email=student["email"],
+                    domain=batch["domain"],
+                    batch_number=batch["batch_number"],
+                    week_number=req.week_number,
+                    tasks=tasks_for_email,
+                    repo_url=base_repo_url,
+                    github_username=gh_user or None,
+                )
+
         return {
             "status": "assigned",
             "week": req.week_number,
