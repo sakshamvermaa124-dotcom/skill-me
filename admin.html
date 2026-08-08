@@ -1055,7 +1055,7 @@ async function loadEmailLogs(offset = 0) {
         const statusBadge = log.status === 'sent'
           ? '<span style="padding:2px 8px;border-radius:10px;background:rgba(52,211,153,0.12);color:#34d399;font-size:0.72rem;font-weight:600;">✅ Sent</span>'
           : '<span style="padding:2px 8px;border-radius:10px;background:rgba(248,113,113,0.12);color:#f87171;font-size:0.72rem;font-weight:600;">❌ Failed</span>';
-        const d = new Date(log.sent_at);
+        const d = new Date(log.sent_at && !log.sent_at.endsWith('Z') ? log.sent_at.replace(' ', 'T') + 'Z' : log.sent_at);
         const timeStr = isNaN(d) ? log.sent_at : `${d.toLocaleDateString('en-IN')} ${d.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'})}`;
         const subject = log.subject?.length > 50 ? log.subject.slice(0, 50) + '…' : (log.subject || '—');
         return `<tr>
