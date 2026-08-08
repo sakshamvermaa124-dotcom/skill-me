@@ -1015,7 +1015,7 @@ async function loadEmailLogs(offset = 0) {
   if (status)    params.set('status',     status);
 
   const BASE = window.SKILLME_API || 'http://localhost:8000';
-  const KEY  = window.ADMIN_KEY || localStorage.getItem('adminKey') || '';
+  const KEY  = (typeof adminKey !== 'undefined' && adminKey) || sessionStorage.getItem('skillme_admin_key') || '';
 
   try {
     const res = await fetch(`${BASE}/api/admin/email/logs?${params}`, {
