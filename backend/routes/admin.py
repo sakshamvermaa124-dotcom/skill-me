@@ -167,6 +167,35 @@ async def get_batch_progress(batch_id: int, _: str = Depends(require_admin)):
     }
 
 
+@router.delete("/batches/{batch_id}", summary="Delete a batch and all related data")
+async def delete_batch(batch_id: int, _: str = Depends(require_admin)):
+    """
+    Delete a batch entirely. Also cascades to all related progress, submissions, enrollments, etc.
+    Does NOT delete the actual GitHub repository or the Students themselves.
+    """
+    batch = await batch_service.get_batch(batch_id)
+    if not batch:
+        raise HTTPException(status_code=404, detail="Batch not found")
+
+    try:
+        # Delete related data manually if no foreign key ON DELETE CASCADE is set
+        await db.execute("DELETE FROM progress WHERE batch_id = ?", (batch_id,))
+        await db.execute("DELETE FROM submissions WHERE batch_id = ?", (batch_id,))
+        await db.execute("DELETE FROM issues WHERE batch_id = ?", (batch_id,))
+        await db.execute("DELETE FROM enrollments WHERE batch_id = ?", (batch_id,))
+        await db.execute("DELETE FROM certificates WHERE batch_id = ?", (batch_id,))
+        await db.execute("DELETE FROM payments WHERE batch_id = ?", (batch_id,))
+        await db.execute("DELETE FROM email_logs WHERE batch_id = ?", (batch_id,))
+        
+        # Finally delete the batch
+        await db.execute("DELETE FROM batches WHERE id = ?", (batch_id,))
+        
+        return {"status": "success", "message": f"Batch {batch_id} completely deleted from database."}
+    except Exception as e:
+        logger.error(f"Failed to delete batch {batch_id}: {e}")
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+
 # ──────────────────────────────────────────────
 # Student Enrollment
 # ──────────────────────────────────────────────

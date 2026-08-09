@@ -392,6 +392,10 @@ async function loadBatches(silent = false) {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
                 Analytics
               </button>
+              <button class="btn btn-ghost btn-sm" style="color:#f87171;" onclick="deleteBatch(${b.id}, '${b.domain} Batch #${b.batch_number}')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                Delete
+              </button>
             </div>
           </div>
           <div class="progress-bar"><div class="progress-fill" style="width:${fill}%"></div></div>
@@ -439,6 +443,20 @@ async function toggleAutoAssign(batchId, enabled) {
     toast(`Auto-assign ${enabled ? 'enabled' : 'disabled'} for batch ${batchId}`);
     loadBatches(true);
   } catch(e) { toast(e.message, 'error'); }
+}
+
+async function deleteBatch(batchId, batchName) {
+  if (!confirm(`Are you sure you want to permanently delete "${batchName}"?\n\nThis will instantly wipe all progress, submissions, email logs, and enrollments associated with this batch. This action cannot be undone.`)) {
+    return;
+  }
+  try {
+    await api(`/api/admin/batches/${batchId}`, { method: 'DELETE' });
+    toast(`Batch ${batchName} deleted successfully`);
+    loadBatches(true);
+    loadOverviewBatches(true);
+  } catch(e) {
+    toast(`Failed to delete batch: ${e.message}`, 'error');
+  }
 }
 
 async function triggerNow(batchId) {
