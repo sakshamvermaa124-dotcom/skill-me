@@ -8,22 +8,25 @@ const API = window.SKILLME_API || '${API}';
 const FRONTEND = window.SKILLME_FRONTEND || '${FRONTEND}';
 
 // --- Lenis Smooth Scrolling (from darkroomengineering/lenis) ---
-const lenis = new Lenis({
-  duration: 1.2,
-  easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-  orientation: 'vertical',
-  gestureOrientation: 'vertical',
-  smoothWheel: true,
-  wheelMultiplier: 1,
-  touchMultiplier: 2,
-  infinite: false,
-});
+let lenis;
+if (typeof Lenis !== 'undefined') {
+  lenis = new Lenis({
+    duration: 1.2,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    orientation: 'vertical',
+    gestureOrientation: 'vertical',
+    smoothWheel: true,
+    wheelMultiplier: 1,
+    touchMultiplier: 2,
+    infinite: false,
+  });
 
-function raf(time) {
-  lenis.raf(time);
+  function raf(time) {
+    lenis.raf(time);
+    requestAnimationFrame(raf);
+  }
   requestAnimationFrame(raf);
 }
-requestAnimationFrame(raf);
 
 // --- DOM Ready ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -215,9 +218,9 @@ document.addEventListener('DOMContentLoaded', () => {
         maxWeek = Math.max(maxWeek, p.week || 1);
       });
 
-      // Store batch_id for certificate download
-      data._batch_id = latest.batch_id;
-    }
+        // Store batch_id for certificate download
+        data._batch_id = latest.batch_id || data._batch_id;
+      }
 
     document.getElementById('stat-completed').textContent = totalCompleted;
     document.getElementById('stat-assigned').textContent = totalAssigned;
