@@ -60,15 +60,22 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    try {
-      const meRes = await fetch(`${API}/api/auth/me`);
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error("No token");
+        
+        const meRes = await fetch(`${API}/api/auth/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
       if (meRes.ok) {
         const me = await meRes.json();
         if (me.email) {
           loginBtn.disabled = true;
-          loginBtn.textContent = 'Restoring Session...';
-          const progressRes = await fetch(`${API}/api/students/progress/${encodeURIComponent(me.email)}`);
-          if (progressRes.ok) {
+            loginBtn.textContent = 'Restoring Session...';
+            const progressRes = await fetch(`${API}/api/students/progress/${encodeURIComponent(me.email)}`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (progressRes.ok) {
             const data = await progressRes.json();
             data._email = me.email;
             renderDashboard(data);
@@ -149,7 +156,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Successfully verified and cookie set. Now load dashboard data.
-        const res = await fetch(`${API}/api/students/progress/${encodeURIComponent(email)}`);
+        const res = await fetch(`${API}/api/students/progress/${encodeURIComponent(email)}`, {
+          headers: { 'Authorization': `Bearer ${authData.token}` }
+        });
         
         if (!res.ok) {
           const errData = await res.json().catch(() => ({ detail: 'Something went wrong loading dashboard' }));
