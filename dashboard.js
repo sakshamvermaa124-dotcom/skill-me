@@ -33,48 +33,85 @@ document.addEventListener('DOMContentLoaded', () => {
   const errorEl = document.getElementById('login-error');
   const loginBtn = document.getElementById('login-btn');
 
+  let loginState = 'email';
+
   // Login handler
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const email = document.getElementById('login-email').value.trim();
+    const emailInput = document.getElementById('login-email');
+    const otpInput = document.getElementById('login-otp');
+    const email = emailInput.value.trim();
+    const otp = otpInput.value.trim();
 
     errorEl.style.display = 'none';
-    const originalText = loginBtn.textContent;
-    loginBtn.textContent = 'Loading...';
     loginBtn.disabled = true;
     loginBtn.style.opacity = '0.7';
+    loginBtn.textContent = 'Loading...';
 
     try {
-      const res = await fetch(`${API}/api/students/progress/${encodeURIComponent(email)}`);
-      
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({ detail: 'Something went wrong' }));
-        throw new Error(errData.detail || 'Failed to load dashboard');
+      if (loginState === 'email') {
+        const res = await fetch(`${API}/api/auth/request-otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({ detail: 'Failed to request OTP' }));
+          throw new Error(errData.detail || 'Failed to request OTP');
+        }
+        
+        // Show OTP field
+        document.getElementById('otp-wrap').style.display = 'block';
+        emailInput.readOnly = true;
+        loginState = 'otp';
+        otpInput.focus();
+        
+      } else if (loginState === 'otp') {
+        if (!otp) throw new Error('Please enter the 6-digit OTP');
+        
+        const authRes = await fetch(`${API}/api/auth/verify-otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, otp })
+        });
+        
+        if (!authRes.ok) {
+          const errData = await authRes.json().catch(() => ({ detail: 'Invalid OTP' }));
+          throw new Error(errData.detail || 'Invalid or expired OTP');
+        }
+
+        // Successfully verified and cookie set. Now load dashboard data.
+        const res = await fetch(`${API}/api/students/progress/${encodeURIComponent(email)}`);
+        
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({ detail: 'Something went wrong loading dashboard' }));
+          throw new Error(errData.detail || 'Failed to load dashboard data');
+        }
+
+        const data = await res.json();
+        data._email = email;  // store for cert URL
+        renderDashboard(data);
+
+        // Transition
+        loginView.style.opacity = '0';
+        loginView.style.transform = 'translateY(-20px)';
+        loginView.style.transition = 'all 0.4s ease';
+
+        setTimeout(() => {
+          loginView.style.display = 'none';
+          dashView.style.display = 'block';
+          lenis.resize();
+          animateDashboardEntrance();
+        }, 400);
       }
-
-      const data = await res.json();
-      data._email = email;  // store for cert URL
-      renderDashboard(data);
-
-      // Transition
-      loginView.style.opacity = '0';
-      loginView.style.transform = 'translateY(-20px)';
-      loginView.style.transition = 'all 0.4s ease';
-
-      setTimeout(() => {
-        loginView.style.display = 'none';
-        dashView.style.display = 'block';
-        lenis.resize();
-        animateDashboardEntrance();
-      }, 400);
-
     } catch (err) {
       errorEl.textContent = err.message;
       errorEl.style.display = 'block';
     } finally {
-      loginBtn.textContent = originalText;
       loginBtn.disabled = false;
       loginBtn.style.opacity = '1';
+      loginBtn.textContent = loginState === 'email' ? 'Get Login Code' : 'Verify & Login';
     }
   });
 
@@ -91,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('dash-name').textContent = `Welcome back, ${firstName}`;
 
     if (student.github) {
-      document.getElementById('dash-github').href = student.github;
+      document.getElementById('dash-github').href = `https://github.com/${student.github}`;
     }
 
     // Progress

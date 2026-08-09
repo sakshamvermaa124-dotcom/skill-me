@@ -1044,11 +1044,14 @@
         <p>Enter the email you used to apply</p>
         
         <form id="dash-login-form" autocomplete="off">
-          <div class="login-input-wrap">
+          <div class="login-input-wrap" id="email-wrap">
             <input type="email" id="login-email" placeholder="you@example.com" required>
           </div>
+          <div class="login-input-wrap" id="otp-wrap" style="display: none;">
+            <input type="text" id="login-otp" placeholder="6-digit code" pattern="[0-9]{6}" maxlength="6">
+          </div>
           <button type="submit" class="login-btn" id="login-btn">
-            View Dashboard
+            Get Login Code
           </button>
           <div id="login-error" class="login-error"></div>
         </form>
