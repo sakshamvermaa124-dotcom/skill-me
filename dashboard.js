@@ -35,6 +35,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let loginState = 'email';
 
+  // --- Auto-Login via existing HTTP-Only Cookie ---
+  async function checkExistingSession() {
+    try {
+      const meRes = await fetch(`${API}/api/auth/me`);
+      if (meRes.ok) {
+        const me = await meRes.json();
+        if (me.email) {
+          loginBtn.disabled = true;
+          loginBtn.textContent = 'Restoring Session...';
+          const progressRes = await fetch(`${API}/api/students/progress/${encodeURIComponent(me.email)}`);
+          if (progressRes.ok) {
+            const data = await progressRes.json();
+            data._email = me.email;
+            renderDashboard(data);
+            
+            // Transition directly to dashboard
+            loginView.style.opacity = '0';
+            setTimeout(() => {
+              loginView.style.display = 'none';
+              dashView.style.display = 'block';
+              setTimeout(() => {
+                dashView.style.opacity = '1';
+                dashView.style.transform = 'translateY(0)';
+              }, 50);
+            }, 400);
+          } else {
+              loginBtn.disabled = false;
+              loginBtn.textContent = 'Continue';
+          }
+        }
+      }
+    } catch (e) {
+      console.log("No active session found.");
+    }
+  }
+
+  // Check on load
+  checkExistingSession();
+
   // Login handler
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
