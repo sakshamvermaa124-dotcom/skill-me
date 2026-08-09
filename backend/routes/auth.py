@@ -75,7 +75,7 @@ async def request_login_otp(request: Request, req: OTPRequest):
 @router.post("/verify-otp", summary="Verify OTP and get session token")
 async def verify_login_otp(req: OTPVerify, response: Response):
     """
-    Verify the OTP and issue a 7-day JWT session.
+    Verify the OTP and issue a 30-day JWT session.
     Sets an httpOnly cookie AND returns the token in the response body.
     """
     token = await verify_otp(req.email, req.otp)

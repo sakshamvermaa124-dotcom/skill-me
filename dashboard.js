@@ -181,27 +181,35 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       const circumference = 2 * Math.PI * 52; // r=52
       const offset = circumference - (pct / 100) * circumference;
+      const urlParams = new URLSearchParams(window.location.search);
+      const isPreview = urlParams.get('preview') === '1';
+      const isPaidPreview = urlParams.get('preview') === 'paid';
+      
       document.getElementById('progress-ring').style.strokeDashoffset = offset;
       document.getElementById('progress-bar-inner').style.width = `${pct}%`;
-    }, 600);
-
-    // ─── Certificate Banner (Payment Gated) ───
-    const certSection = document.getElementById('cert-section');
-    if (certSection) {
-      if (pct === 100 && student.id && data._batch_id) {
-        // Check if already paid
-        try {
-          const payStatus = await fetch(`${API}/api/payments/status/${student.id}/${data._batch_id}`);
-          const payData = await payStatus.json();
-          if (payData.status === 'paid') {
-            renderCertReady(certSection, student, data);
+      
+      // ─── Certificate Banner (Payment Gated) ───
+      const certSection = document.getElementById('cert-section');
+      if (certSection) {
+        if ((pct === 100 || isPreview || isPaidPreview) && student.id && data._batch_id) {
+          if (isPaidPreview) {
+              renderCertReady(certSection, student, data);
+          } else if (isPreview) {
+              renderPaymentBanner(certSection, student, data);
           } else {
-            renderPaymentBanner(certSection, student, data);
+            // Check if already paid
+            try {
+              const payStatus = await fetch(`${API}/api/payments/status/${student.id}/${data._batch_id}`);
+              const payData = await payStatus.json();
+              if (payData.status === 'paid') {
+                renderCertReady(certSection, student, data);
+              } else {
+                renderPaymentBanner(certSection, student, data);
+              }
+            } catch(e) {
+              renderPaymentBanner(certSection, student, data);
+            }
           }
-        } catch(e) {
-          renderPaymentBanner(certSection, student, data);
-        }
-      } else if (pct > 0) {
         certSection.style.display = 'block';
         certSection.innerHTML = `
           <div class="cert-progress-hint">

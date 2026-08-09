@@ -53,7 +53,7 @@ class Settings(BaseSettings):
     # ── Student Auth (OTP + JWT) ─────────────────
     jwt_secret_key: str = "changeme-set-a-strong-secret-in-render"
     jwt_algorithm: str = "HS256"
-    jwt_expire_days: int = 7
+    jwt_expire_days: int = 30
     otp_expiry_minutes: int = 10
 
     # ── Referral System ──────────────────────────

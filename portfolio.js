@@ -23,15 +23,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   const container = document.getElementById('content-container');
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const isPreview = urlParams.get('preview') === '1';
+
   if (!username || username === 'p') {
-    container.innerHTML = `
-      <div class="locked-state">
-        <div class="locked-icon">😕</div>
-        <div class="locked-title">Invalid Profile Link</div>
-        <div class="locked-text">We couldn't find a GitHub username in the URL. Make sure you're using a valid link.</div>
-      </div>
-    `;
-    return;
+    if (!isPreview) {
+      container.innerHTML = `
+        <div class="locked-state">
+          <div class="locked-icon">😕</div>
+          <div class="locked-title">Invalid Profile Link</div>
+          <div class="locked-text">We couldn't find a GitHub username in the URL. Make sure you're using a valid link.</div>
+        </div>
+      `;
+      return;
+    }
+  }
+
+  if (isPreview) {
+      renderPortfolio({
+          profile: { name: "Saksham Verma", github_username: "sakshamverma124", college: "IIT Delhi" },
+          stats: { total_tasks_completed: 12, total_prs_merged: 12, total_score: 300 },
+          domains: ["web-dev", "machine-learning"],
+          submissions: [
+              { title: "Implemented OAuth2 Login", merged_at: "2026-08-01T12:00:00Z", pr_url: "#", domain: "web-dev" },
+              { title: "Fixed Memory Leak in ML Pipeline", merged_at: "2026-08-05T12:00:00Z", pr_url: "#", domain: "machine-learning" }
+          ]
+      });
+      return;
   }
 
   try {
