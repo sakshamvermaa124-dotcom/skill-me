@@ -68,6 +68,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
+          allow-unsafe-pr-checkout: true
 
       # ── Language runtimes (all installed; domain logic picks the right one) ──
       - name: Setup Python 3.11
