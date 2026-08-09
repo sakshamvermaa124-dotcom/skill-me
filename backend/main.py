@@ -28,6 +28,7 @@ from routes.certificates import router as certificates_router
 from routes.payments import router as payments_router
 from routes.auth import router as auth_router
 from routes.referrals import router as referrals_router
+from routes.portfolio import router as portfolio_router
 
 # Rate limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -125,6 +126,7 @@ app.include_router(certificates_router)
 app.include_router(payments_router)
 app.include_router(auth_router)
 app.include_router(referrals_router)
+app.include_router(portfolio_router)
 
 
 # ──────────────────────────────────────────────
@@ -154,6 +156,10 @@ for _slug, _filename in _PAGES.items():
             _handler.__name__ = f"serve_{fp.stem}"
             return _handler
         app.get(f"/{_slug}", tags=["pages"], include_in_schema=False)(_make_handler(_filepath))
+
+@app.get("/p/{username}", tags=["pages"], include_in_schema=False)
+async def serve_portfolio(username: str):
+    return FileResponse(FRONTEND_DIR / "portfolio.html")
 
 # Serve static assets (CSS, JS, images) from frontend root
 if FRONTEND_DIR.exists():

@@ -362,7 +362,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const current = Math.round(start + range * eased);
       el.textContent = current;
       if (progress < 1) requestAnimationFrame(update);
-    }
     requestAnimationFrame(update);
   }
 
@@ -376,12 +375,11 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="cert-banner" id="payment-banner">
         <div class="cert-banner-glow"></div>
         <div class="cert-banner-content">
-          <div class="cert-banner-icon">🎓</div>
+          <div class="cert-banner-icon">✨</div>
           <div class="cert-banner-text">
-            <div class="cert-banner-title">Internship Complete! Get Your Certificate</div>
+            <div class="cert-banner-title">Internship Complete! Activate Your Profile</div>
             <div class="cert-banner-sub">
-              Unlock your official Certificate of Completion — shareable on LinkedIn &amp; GitHub.
-              <br><span style="color:#d4a853;font-weight:700;">₹249 one-time payment · instant download</span>
+              A small fee of ₹1249 is required to compensate for personalized LORs, verified certificate generation, automated task assignment infrastructure, and hosting your lifetime Proof of Work portfolio link.
             </div>
           </div>
           <div class="cert-banner-actions">
@@ -389,7 +387,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
                 <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
               </svg>
-              Pay ₹249 &amp; Get Certificate
+              Pay ₹1249 &amp; Activate Everything
             </button>
             <div style="font-size:11px;color:var(--text-3,#666);margin-top:4px;text-align:center;">
               Secured by Razorpay · UPI / Card / NetBanking
@@ -404,40 +402,47 @@ document.addEventListener('DOMContentLoaded', () => {
     const domain = (data.progress[0] && data.progress[0].domain) || 'web-dev';
     const certUrl = `${FRONTEND}/certificate.html?email=${encodeURIComponent(email)}&student_id=${student.id}&batch_id=${data._batch_id}&name=${encodeURIComponent(student.name)}&domain=${encodeURIComponent(domain)}`;
     const dlUrl   = `${API}/api/certificates/download/${student.id}/${data._batch_id}`;
+    const portfolioUrl = `${FRONTEND}/p/${student.github || ''}`;
+    
     certSection.style.display = 'block';
     certSection.innerHTML = `
       <div class="cert-banner">
-        <div class="cert-banner-glow"></div>
         <div class="cert-banner-content">
-          <div class="cert-banner-icon">🏆</div>
+          <div class="cert-banner-icon">✨</div>
           <div class="cert-banner-text">
-            <div class="cert-banner-title">Congratulations! Your certificate is ready.</div>
-            <div class="cert-banner-sub">Payment confirmed · Share it on LinkedIn to show off your skills!</div>
+            <div class="cert-banner-title">Congratulations! Everything is activated.</div>
+            <div class="cert-banner-sub">Payment confirmed • Access your Proof of Work Portfolio, LOR, and Certificate below!</div>
           </div>
-          <div class="cert-banner-actions">
+          <div class="cert-banner-actions" style="flex-wrap: wrap; gap: 8px;">
+            <a href="${portfolioUrl}" target="_blank" class="cert-btn" style="background:var(--accent-indigo); color:#111; border:none; font-weight:700;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line>
+              </svg>
+              View Public Portfolio
+            </a>
             <a href="${certUrl}" target="_blank" class="cert-btn cert-btn-primary">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
                 <rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
                 <polyline points="9 12 11 14 15 10"/>
               </svg>
-              View Certificate
-            </a>
-            <a href="${dlUrl}" target="_blank" class="cert-btn cert-btn-secondary">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              Download PDF
+              Certificate
             </a>
             <a href="${FRONTEND}/lor.html?cert_id=SM-${String(student.id).padStart(4,'0')}-${String(data._batch_id).padStart(4,'0')}" target="_blank" class="cert-btn cert-btn-secondary" style="border-color:#818cf8; color:#818cf8;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
               </svg>
-              Letter of Recommendation
+              LOR
+            </a>
+            <a href="${dlUrl}" target="_blank" class="cert-btn cert-btn-secondary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Download PDF
             </a>
           </div>
         </div>
-      </div>`;
+      </div>
+    `;
   }
 
   // Exposed globally so the onclick in the banner HTML can call it
