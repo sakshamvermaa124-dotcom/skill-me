@@ -37,6 +37,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Auto-Login via existing HTTP-Only Cookie ---
   async function checkExistingSession() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isPreview = urlParams.get('preview') === '1' || urlParams.get('preview') === 'paid';
+    
+    // Bypass login entirely for preview mode
+    if (isPreview) {
+        const mockData = {
+            student: { id: 999, name: "Saksham Verma", github: "sakshamverma124", domain: "Web Development" },
+            progress: [{ week_number: 1, issues_completed: 4, total_issues: 4, prs_merged: 4, score: 100 }],
+            submissions: [],
+            _batch_id: 1,
+            _email: "test@example.com"
+        };
+        renderDashboard(mockData);
+        loginView.style.display = 'none';
+        dashView.style.display = 'block';
+        dashView.style.opacity = '1';
+        dashView.style.transform = 'translateY(0)';
+        return;
+    }
+
     try {
       const meRes = await fetch(`${API}/api/auth/me`);
       if (meRes.ok) {
