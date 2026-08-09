@@ -49,15 +49,15 @@ async def request_login_otp(request: Request, req: OTPRequest):
     student = result["student"]
     otp = result["otp"]
     html_body = f"""
-    <div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#0f1117;color:#e2e8f0;border-radius:16px;">
+    <div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#ffffff;color:#1e293b;border-radius:16px;border:1px solid #e2e8f0;">
       <div style="font-size:2rem;text-align:center;margin-bottom:8px;">🔐</div>
-      <h2 style="text-align:center;color:#a78bfa;margin-bottom:4px;">Your SkillMe Login Code</h2>
-      <p style="text-align:center;color:#94a3b8;margin-bottom:24px;">Hi {student['first_name']}, use this OTP to sign in to your dashboard.</p>
-      <div style="background:#1e2433;border:2px solid #4f46e5;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
-        <div style="font-size:2.5rem;font-weight:700;letter-spacing:0.4em;color:#a78bfa;font-family:monospace;">{otp}</div>
+      <h2 style="text-align:center;color:#4f46e5;margin-bottom:4px;">Your SkillMe Login Code</h2>
+      <p style="text-align:center;color:#64748b;margin-bottom:24px;">Hi {student['first_name']}, use this OTP to sign in to your dashboard.</p>
+      <div style="background:#f8fafc;border:2px solid #e0e7ff;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
+        <div style="font-size:2.5rem;font-weight:700;letter-spacing:0.4em;color:#4f46e5;font-family:monospace;">{otp}</div>
         <div style="color:#64748b;font-size:0.8rem;margin-top:8px;">Expires in {settings.otp_expiry_minutes} minutes</div>
       </div>
-      <p style="color:#64748b;font-size:0.8rem;text-align:center;">If you didn't request this, you can safely ignore this email.</p>
+      <p style="color:#94a3b8;font-size:0.8rem;text-align:center;">If you didn't request this, you can safely ignore this email.</p>
     </div>
     """
     await _send_and_log(
