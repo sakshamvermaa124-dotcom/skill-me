@@ -102,10 +102,11 @@ class BatchService:
                     f"enrollment and task assignment will fail until the repo is created manually."
                 )
 
-        # Set up webhook if URL provided
+        github_webhook_created = False
         if webhook_url:
             try:
                 await github_service.create_webhook(repo_name, webhook_url)
+                github_webhook_created = True
             except Exception as e:
                 logger.error(f"Failed to create webhook for {repo_name}: {e}")
 
@@ -134,6 +135,7 @@ class BatchService:
             "start_date": start_date,
             "end_date": end_date,
             "github_repo_created": github_repo_created,
+            "github_webhook_created": github_webhook_created,
         }
 
 

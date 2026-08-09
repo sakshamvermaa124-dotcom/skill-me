@@ -105,12 +105,26 @@ async def create_batch(req: CreateBatchRequest, _: str = Depends(require_admin))
             webhook_url=req.webhook_url,
         )
         response = {"status": "created", "batch": batch}
+        warnings = []
         if not batch.get("github_repo_created", True):
-            response["warning"] = (
-                f"⚠️ GitHub repo '{batch['repo_name']}' could NOT be created — "
-                f"no matching template found. Enrollment and task assignment will fail "
-                f"until the repo is manually created on GitHub."
+            warnings.append(
+                f"⚠️ GitHub repo '{batch['repo_name']}' could NOT be created. "
+                f"Enrollment and task assignment will fail until the repo is manually created."
             )
+        if not batch.get("github_webhook_created", False):
+            if req.webhook_url:
+                warnings.append(
+                    f"⚠️ GitHub webhook could NOT be attached to '{batch['repo_name']}'. "
+                    f"PR tracking will fail until the webhook is manually attached."
+                )
+            else:
+                warnings.append(
+                    f"⚠️ No webhook URL provided. "
+                    f"PR tracking will fail until a webhook is manually attached to '{batch['repo_name']}'."
+                )
+            
+        if warnings:
+            response["warning"] = " | ".join(warnings)
         return response
     except ValueError as e:
         raise HTTPException(status_code=409, detail=str(e))

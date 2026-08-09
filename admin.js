@@ -572,11 +572,15 @@ async function createBatch() {
   try {
     const btn = document.querySelector('#create-batch-modal .btn-primary');
     btn.textContent = 'Creating...'; btn.disabled = true;
-    await api('/api/admin/batches', {
+    const res = await api('/api/admin/batches', {
       method: 'POST',
       body: JSON.stringify({ domain, batch_number: batchNum, max_students: maxStudents })
     });
-    toast(`Batch ${domain} #${batchNum} created!`);
+    if (res.warning) {
+      toast(`Batch created, but: ${res.warning}`, 'error');
+    } else {
+      toast(`Batch ${domain} #${batchNum} created!`);
+    }
     closeModal('create-batch-modal');
     if (currentPage === 'overview') {
       loadOverviewBatches(true);
