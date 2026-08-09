@@ -263,6 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
               renderCertReady(certSection, student, data);
           } else if (isPreview) {
               renderPaymentBanner(certSection, student, data);
+              showPaymentModal(student, data);
           } else {
             // Check if already paid
             try {
@@ -272,9 +273,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderCertReady(certSection, student, data);
               } else {
                 renderPaymentBanner(certSection, student, data);
+                showPaymentModal(student, data);
               }
             } catch(e) {
               renderPaymentBanner(certSection, student, data);
+              showPaymentModal(student, data);
             }
           }
         } else if (pct > 0) {
@@ -444,7 +447,31 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ─────────────────────────────────────────────────────────────
-  // ─── Razorpay Payment Helpers ─────────────────────────────────
+    // 🏆🏆🏆 Payment Modal Helpers 🏆🏆🏆
+    window.closePaymentModal = function() {
+      const modal = document.getElementById('payment-modal');
+      if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => modal.style.display = 'none', 400); // match transition duration
+      }
+    };
+    
+    function showPaymentModal(student, data) {
+      const modal = document.getElementById('payment-modal');
+      if (modal) {
+        // Wire up the pay button dynamically
+        const payBtn = document.getElementById('modal-pay-btn');
+        if (payBtn) {
+          payBtn.onclick = () => window.initiatePayment(student.id, data._batch_id);
+        }
+        modal.style.display = 'flex';
+        // Force reflow
+        void modal.offsetWidth;
+        modal.classList.add('active');
+      }
+    }
+
+    // 🏆🏆🏆 Razorpay Payment Helpers 🏆🏆🏆─────────────────────────────────
   // ─────────────────────────────────────────────────────────────
 
   function renderPaymentBanner(certSection, student, data) {
@@ -526,7 +553,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Exposed globally so the onclick in the banner HTML can call it
   window.initiatePayment = async function(studentId, batchId) {
     const btn = document.getElementById('pay-btn');
-    if (btn) { btn.disabled = true; btn.textContent = 'Creating order…'; }
+    const modalBtn = document.getElementById('modal-pay-btn');
+    
+    if (btn) { btn.disabled = true; btn.textContent = 'Creating order...'; }
+    if (modalBtn) { modalBtn.disabled = true; modalBtn.textContent = 'Creating order...'; }
 
     try {
       // 1. Create Razorpay order on backend
@@ -539,7 +569,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!orderRes.ok) {
         alert(orderData.detail || 'Could not create payment order. Try again.');
-        if (btn) { btn.disabled = false; btn.innerHTML = '💳 Pay ₹249 &amp; Get Certificate'; }
+        if (btn) { btn.disabled = false; btn.innerHTML = 'Pay ₹129 &amp; Activate Everything'; }
+        if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = 'Pay ₹129 &amp; Activate Everything'; }
         return;
       }
 
@@ -547,6 +578,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (orderData.already_paid) {
         const certSection = document.getElementById('cert-section');
         renderCertReady(certSection, window._dashStudent, window._dashData);
+        window.closePaymentModal();
         return;
       }
 
@@ -566,34 +598,30 @@ document.addEventListener('DOMContentLoaded', () => {
         key: orderData.key_id,
         amount: orderData.amount,
         currency: orderData.currency,
-        name: 'SkillMe',
-        description: 'Certificate of Completion',
-        image: '',
+        name: "SkillMe Internship",
+        description: "Verified Certificate & Portfolio Activation",
         order_id: orderData.order_id,
         prefill: {
-          name: orderData.student_name || '',
-          email: orderData.student_email || '',
+          name: orderData.student_name,
+          email: window._dashData._email || ''
         },
-        theme: { color: '#d4a853' },
-        modal: {
-          ondismiss: () => {
-            if (btn) { btn.disabled = false; btn.innerHTML = '💳 Pay ₹249 &amp; Get Certificate'; }
-          }
+        theme: {
+          color: "#4f46e5"
         },
-        handler: async function(response) {
+        handler: async function (response) {
           // 4. Verify payment on backend
-          const verifyBtn = document.getElementById('pay-btn');
-          if (verifyBtn) { verifyBtn.textContent = 'Verifying…'; }
+          if (btn) { btn.textContent = 'Verifying...'; }
+          if (modalBtn) { modalBtn.textContent = 'Verifying...'; }
           try {
             const verifyRes = await fetch(`${API}/api/payments/verify`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
+                student_id: studentId,
+                batch_id: batchId,
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                student_id: studentId,
-                batch_id: batchId
+                razorpay_signature: response.razorpay_signature
               })
             });
             const verifyData = await verifyRes.json();
@@ -601,11 +629,16 @@ document.addEventListener('DOMContentLoaded', () => {
               // 5. Show download banner!
               const certSection = document.getElementById('cert-section');
               renderCertReady(certSection, window._dashStudent, window._dashData);
+              window.closePaymentModal();
             } else {
               alert('Payment verification failed: ' + (verifyData.detail || 'Please contact support.'));
+              if (btn) { btn.disabled = false; btn.innerHTML = 'Pay ₹129 &amp; Activate Everything'; }
+              if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = 'Pay ₹129 &amp; Activate Everything'; }
             }
           } catch(err) {
             alert('Network error during verification. Your payment may have been processed — please refresh.');
+            if (btn) { btn.disabled = false; btn.innerHTML = 'Pay ₹129 &amp; Activate Everything'; }
+            if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = 'Pay ₹129 &amp; Activate Everything'; }
           }
         }
       };
