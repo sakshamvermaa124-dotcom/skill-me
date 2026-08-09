@@ -140,6 +140,11 @@ document.addEventListener('DOMContentLoaded', () => {
           throw new Error(errData.detail || 'Invalid or expired OTP');
         }
 
+        const authData = await authRes.json();
+        if (authData.token) {
+          localStorage.setItem('token', authData.token);
+        }
+
         // Successfully verified and cookie set. Now load dashboard data.
         const res = await fetch(`${API}/api/students/progress/${encodeURIComponent(email)}`);
         
@@ -237,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Animate ring after render
-    setTimeout(() => {
+    setTimeout(async () => {
       const circumference = 2 * Math.PI * 52; // r=52
       const offset = circumference - (pct / 100) * circumference;
       const urlParams = new URLSearchParams(window.location.search);
@@ -269,20 +274,22 @@ document.addEventListener('DOMContentLoaded', () => {
               renderPaymentBanner(certSection, student, data);
             }
           }
-        certSection.style.display = 'block';
-        certSection.innerHTML = `
-          <div class="cert-progress-hint">
-            <div style="display:flex;align-items:center;gap:12px;">
-              <div style="font-size:1.4rem;">&#128196;</div>
-              <div>
-                <div style="font-weight:600;font-size:0.88rem;margin-bottom:2px;">Certificate unlocks at 100%</div>
-                <div style="font-size:0.78rem;color:var(--text-3);">${100-pct}% more to go — finish all your assigned issues to earn your certificate.</div>
+        } else if (pct > 0) {
+          certSection.style.display = 'block';
+          certSection.innerHTML = `
+            <div class="cert-progress-hint">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div style="font-size:1.4rem;">&#128196;</div>
+                <div>
+                  <div style="font-weight:600;font-size:0.88rem;margin-bottom:2px;">Certificate unlocks at 100%</div>
+                  <div style="font-size:0.78rem;color:var(--text-3);">${100-pct}% more to go — finish all your assigned issues to earn your certificate.</div>
+                </div>
               </div>
-            </div>
-            <div class="cert-mini-bar"><div class="cert-mini-fill" style="width:${pct}%"></div></div>
-          </div>`;
+              <div class="cert-mini-bar"><div class="cert-mini-fill" style="width:${pct}%"></div></div>
+            </div>`;
+        }
       }
-    }
+    }, 600);
 
 
     // Submissions
@@ -429,6 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const current = Math.round(start + range * eased);
       el.textContent = current;
       if (progress < 1) requestAnimationFrame(update);
+    }
     requestAnimationFrame(update);
   }
 
