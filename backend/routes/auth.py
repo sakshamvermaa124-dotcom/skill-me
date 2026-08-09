@@ -9,7 +9,7 @@ from pydantic import BaseModel, EmailStr
 from typing import Optional
 
 from services.auth_service import request_otp, verify_otp, decode_jwt
-from services.email_service import email_service
+from services.email_service import email_service, _send_and_log
 from middleware.student_auth import require_student
 from db.database import db
 from config import settings
@@ -60,7 +60,7 @@ async def request_login_otp(request: Request, req: OTPRequest):
       <p style="color:#64748b;font-size:0.8rem;text-align:center;">If you didn't request this, you can safely ignore this email.</p>
     </div>
     """
-    await email_service._send_and_log(
+    await _send_and_log(
         req.email.lower().strip(),
         f"{student['first_name']} {student['last_name']}",
         "🔐 Your SkillMe Login Code",
