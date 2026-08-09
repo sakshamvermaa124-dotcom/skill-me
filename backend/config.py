@@ -48,7 +48,7 @@ class Settings(BaseSettings):
     # ── Razorpay (Payment Gateway) ──────────────
     razorpay_key_id: str = ""
     razorpay_key_secret: str = ""
-    certificate_price_paise: int = 9900  # ₹99 in paise
+    certificate_price_paise: int = 12900  # ₹129 in paise
 
     # ── Student Auth (OTP + JWT) ─────────────────
     jwt_secret_key: str = "changeme-set-a-strong-secret-in-render"

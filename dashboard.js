@@ -55,8 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
         renderDashboard(mockData);
         loginView.style.display = 'none';
         dashView.style.display = 'block';
-        dashView.style.opacity = '1';
-        dashView.style.transform = 'translateY(0)';
+        if (lenis) lenis.resize();
+        animateDashboardEntrance();
         return;
     }
 
@@ -457,7 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="cert-banner-text">
             <div class="cert-banner-title">Internship Complete! Activate Your Profile</div>
             <div class="cert-banner-sub">
-              A small fee of ₹1249 is required to compensate for personalized LORs, verified certificate generation, automated task assignment infrastructure, and hosting your lifetime Proof of Work portfolio link.
+              A small fee of ₹129 is required to compensate for personalized LORs, verified certificate generation, automated task assignment infrastructure, and hosting your lifetime Proof of Work portfolio link.
             </div>
           </div>
           <div class="cert-banner-actions">
@@ -465,7 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
                 <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
               </svg>
-              Pay ₹1249 &amp; Activate Everything
+              Pay ₹129 &amp; Activate Everything
             </button>
             <div style="font-size:11px;color:var(--text-3,#666);margin-top:4px;text-align:center;">
               Secured by Razorpay · UPI / Card / NetBanking
