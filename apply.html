@@ -948,7 +948,12 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       })
-      .then(res => res.json())
+      .then(async res => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || data.detail || 'Submission failed');
+        if (data.error) throw new Error(data.error);
+        return data;
+      })
       .then(data => {
         document.getElementById('apply-form').style.display = 'none';
         document.getElementById('form-progress').style.display = 'none';
@@ -964,7 +969,7 @@
       })
       .catch(err => {
         console.error('Error submitting form:', err);
-        alert('Something went wrong. Please try again.');
+        alert('Error: ' + err.message);
         submitBtn.disabled = false;
         submitBtn.innerHTML = `Submit Application <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
       });
