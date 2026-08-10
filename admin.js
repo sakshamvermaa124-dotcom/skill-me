@@ -489,6 +489,8 @@ let intLavaScene, intLavaCamera, intLavaRenderer, intLavaMesh, intLavaParticles;
 function initInteriorLavaRock() {
   const canvas = document.getElementById('interior-lava-canvas');
   if (!canvas || typeof THREE === 'undefined') return;
+  canvas.style.display = 'none';
+  return;
 
   const container = canvas.parentElement;
   const W = () => container.offsetWidth || Math.floor(window.innerWidth * 0.45);
@@ -603,6 +605,8 @@ let admin3DScene, admin3DCamera, admin3DRenderer, admin3DMesh, admin3DParticles;
 function initAdmin3DCrystalEngine() {
   const canvas = document.getElementById('admin-3d-canvas');
   if (!canvas || typeof THREE === 'undefined') return;
+  canvas.style.display = 'none';
+  return;
 
   const W = () => Math.floor(window.innerWidth - 280);
   const H = () => window.innerHeight;
