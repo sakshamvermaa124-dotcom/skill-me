@@ -219,6 +219,28 @@ document.addEventListener('DOMContentLoaded', () => {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
         Batch ${latest.batch_number}`;
 
+      // Calculate week based on batch start_date if available
+      if (latest.start_date) {
+        try {
+          const startDate = new Date(latest.start_date);
+          const diffDays = Math.floor((new Date() - startDate) / (1000 * 60 * 60 * 24));
+          const calculatedWeek = Math.min(4, Math.max(1, Math.floor(diffDays / 7) + 1));
+          maxWeek = Math.max(maxWeek, calculatedWeek);
+        } catch(e) {}
+      }
+
+      // Update dynamic GitHub Repo Link in Beginner Guide Step 1
+      if (latest.repo_name) {
+        const org = 'skill-me-intern';
+        const repoUrl = `https://github.com/${org}/${latest.repo_name}/issues`;
+        const guideLink = document.querySelector('.guide-repo-link');
+        if (guideLink) {
+          guideLink.href = repoUrl;
+          const subText = guideLink.querySelector('.guide-repo-link-sub');
+          if (subText) subText.textContent = `github.com/${org}/${latest.repo_name}`;
+        }
+      }
+
       progress.forEach(p => {
         totalAssigned += p.issues_assigned || 0;
         totalCompleted += p.issues_completed || 0;
@@ -227,9 +249,9 @@ document.addEventListener('DOMContentLoaded', () => {
         maxWeek = Math.max(maxWeek, p.week || 1);
       });
 
-        // Store batch_id for certificate download
-        data._batch_id = latest.batch_id || data._batch_id;
-      }
+      // Store batch_id for certificate download
+      data._batch_id = latest.batch_id || data._batch_id;
+    }
 
     document.getElementById('stat-completed').textContent = totalCompleted;
     document.getElementById('stat-assigned').textContent = totalAssigned;
@@ -347,7 +369,56 @@ document.addEventListener('DOMContentLoaded', () => {
       subEmpty.style.display = 'block';
       subCount.textContent = '0 PRs';
     }
+
+    // Render Assigned Tasks
+    renderTasks(data.issues || []);
   }
+
+  function renderTasks(issues) {
+    const tasksList = document.getElementById('tasks-list');
+    const tasksEmpty = document.getElementById('tasks-empty');
+    const tasksCount = document.getElementById('tasks-count');
+    if (!tasksList) return;
+
+    tasksList.innerHTML = '';
+    if (issues && issues.length > 0) {
+      if (tasksEmpty) tasksEmpty.style.display = 'none';
+      if (tasksCount) tasksCount.textContent = `${issues.length} Task${issues.length !== 1 ? 's' : ''}`;
+
+      issues.forEach((task, i) => {
+        const status = (task.status || 'open').toLowerCase();
+        const diffColor = task.difficulty === 'easy' ? '#34d399' : (task.difficulty === 'medium' ? '#fbbf24' : '#f87171');
+        const card = document.createElement('div');
+        card.className = 'sub-card task-card';
+        card.style.transitionDelay = `${i * 0.08}s`;
+        card.innerHTML = `
+          <div class="sub-dot ${status === 'completed' ? 'merged' : 'open'}"></div>
+          <div class="sub-info">
+            <div class="sub-title">${task.title || `Task #${task.github_issue_number || task.id}`}</div>
+            <div class="sub-meta">
+              <span>Week ${task.week_number || 1}</span>
+              <span style="color:${diffColor};font-weight:600;">${(task.difficulty || 'medium').toUpperCase()}</span>
+            </div>
+          </div>
+          <span class="sub-status ${status === 'completed' ? 'merged' : 'open'}">${status}</span>
+          ${task.github_url ? `<a href="${task.github_url}" target="_blank" class="sub-link" title="Open GitHub Issue">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>` : ''}
+        `;
+        tasksList.appendChild(card);
+      });
+    } else {
+      if (tasksEmpty) tasksEmpty.style.display = 'block';
+      if (tasksCount) tasksCount.textContent = '0 Tasks';
+    }
+  }
+
+  function signOut() {
+    localStorage.removeItem('token');
+    fetch(`${API}/api/auth/logout`, { method: 'POST' }).catch(() => {});
+    window.location.reload();
+  }
+  window.signOut = signOut;
 
   // --- Staggered Entrance Animations ---
   function animateDashboardEntrance() {

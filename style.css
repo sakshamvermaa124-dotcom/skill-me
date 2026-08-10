@@ -1361,3 +1361,59 @@ section { position: relative; padding: var(--section-padding); overflow: hidden;
   .cta-box { padding: 36px 16px; }
   .cta-box .section-title { font-size: 1.6rem; }
 }
+
+/* ============================================================
+   LIGHT MODE DASHBOARD COMPONENT STYLES (Issue 6 Fix)
+   ============================================================ */
+[data-theme="light"] .dash-header,
+[data-theme="light"] .progress-card,
+[data-theme="light"] .login-card,
+[data-theme="light"] .stat-card,
+[data-theme="light"] .submissions-section,
+[data-theme="light"] .guide-section,
+[data-theme="light"] .guide-card,
+[data-theme="light"] .guide-panel,
+[data-theme="light"] .cert-banner,
+[data-theme="light"] .cert-progress-hint,
+[data-theme="light"] .navbar {
+  background: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme="light"] .sub-card,
+[data-theme="light"] .task-card {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="light"] .sub-title,
+[data-theme="light"] .stat-value,
+[data-theme="light"] .guide-step-title,
+[data-theme="light"] .section-header h2 {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .sub-meta,
+[data-theme="light"] .stat-label,
+[data-theme="light"] .guide-step-desc {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .guide-repo-link {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+
+[data-theme="light"] .guide-repo-link-title {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .guide-repo-link-sub {
+  color: #64748b !important;
+}
+
+[data-theme="light"] .guide-code {
+  background: #0f172a !important;
+  color: #f8fafc !important;
+}

@@ -518,6 +518,11 @@ class BatchService:
 
         now = datetime.utcnow().isoformat()
 
+        # Idempotency guard: if submission is already in the target status, skip
+        # This prevents score inflation from duplicate webhook deliveries
+        if submission["status"] == status:
+            return True
+
         if status == "merged":
             await db.execute(
                 "UPDATE submissions SET status = 'merged', merged_at = ? WHERE id = ?",

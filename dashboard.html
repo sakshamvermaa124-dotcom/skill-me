@@ -1106,6 +1106,9 @@
         <div class="nav-links">
           <a href="index.html">Home</a>
           <a href="apply.html">Apply</a>
+          <button onclick="signOut()" class="btn btn-ghost btn-sm" id="signout-btn" style="padding: 6px 14px; font-size: 0.8rem; border-radius: 8px; border: var(--border-subtle); color: var(--text-secondary); cursor: pointer;" title="Sign Out">
+            Sign Out
+          </button>
         </div>
       </div>
     </div>
@@ -1469,6 +1472,26 @@
             </div>
 
           </div>
+        </div>
+      </div>
+
+      <!-- Assigned Tasks Section (Feature 1) -->
+      <div class="submissions-section" id="tasks-section-el" style="margin-bottom: 32px;">
+        <div class="section-header">
+          <h2>Assigned Tasks</h2>
+          <span class="count-badge" id="tasks-count">0 Tasks</span>
+        </div>
+
+        <div class="sub-list" id="tasks-list">
+          <!-- Task cards injected by JS -->
+        </div>
+
+        <div id="tasks-empty" class="empty-state" style="display: none;">
+          <div class="empty-icon">
+            <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.2)" stroke-width="1"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <h3>No assigned tasks yet</h3>
+          <p>Tasks will appear here as soon as your weekly batch issues are released.</p>
         </div>
       </div>
 
