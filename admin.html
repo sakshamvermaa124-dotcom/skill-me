@@ -903,12 +903,17 @@
       </div>
     </nav>
     <div class="sidebar-footer">
-      <div class="sidebar-footer-info">
-        <div class="sidebar-footer-avatar">A</div>
-        <div>
-          <div class="sidebar-footer-name">Administrator</div>
-          <div class="sidebar-footer-role">Full Access</div>
+      <div class="sidebar-footer-info" style="justify-content: space-between;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div class="sidebar-footer-avatar">A</div>
+          <div>
+            <div class="sidebar-footer-name">Administrator</div>
+            <div class="sidebar-footer-role">Full Access</div>
+          </div>
         </div>
+        <button onclick="logoutAdmin()" title="Sign Out" style="background:transparent; border:none; color:rgba(255,255,255,0.6); cursor:pointer; padding:6px; border-radius:6px; display:flex; align-items:center; transition:color 0.2s;" onmouseover="this.style.color='#ff2a4b'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
       </div>
     </div>
   </aside>

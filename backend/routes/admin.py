@@ -181,6 +181,52 @@ async def get_batch_progress(batch_id: int, _: str = Depends(require_admin)):
     }
 
 
+@router.post("/batches/{batch_id}/sync-prs", summary="Sync merged PRs from GitHub API")
+async def sync_batch_prs(batch_id: int, _: str = Depends(require_admin)):
+    """
+    Fetches all closed/merged PRs directly from GitHub API for this batch repo
+    and updates database submissions and student scores.
+    """
+    batch = await db.fetch_one("SELECT * FROM batches WHERE id = ?", (batch_id,))
+    if not batch:
+        raise HTTPException(status_code=404, detail="Batch not found")
+    
+    repo_name = batch["repo_name"]
+    prs = await github_service.list_pull_requests(repo_name, state="closed")
+    merged_count = 0
+    skipped_count = 0
+    for pr in prs:
+        if pr.get("merged_at"):
+            pr_number = pr.get("number")
+            pr_user = pr.get("user", {}).get("login", "")
+            pr_url = pr.get("html_url", "")
+            
+            # Check if this PR already has a merged submission — skip to avoid score inflation
+            existing = await db.fetch_one(
+                "SELECT id, status FROM submissions WHERE batch_id = ? AND pr_number = ?",
+                (batch_id, pr_number)
+            )
+            if existing and existing["status"] == "merged":
+                skipped_count += 1
+                continue
+            
+            if not existing:
+                await batch_service.record_submission(
+                    batch_id=batch_id,
+                    student_github_username=pr_user,
+                    pr_number=pr_number,
+                    pr_url=pr_url
+                )
+            await batch_service.update_submission_status(
+                batch_id=batch_id,
+                pr_number=pr_number,
+                status="merged"
+            )
+            merged_count += 1
+            
+    return {"status": "synced", "batch_id": batch_id, "merged_prs_processed": merged_count, "already_synced": skipped_count}
+
+
 @router.delete("/batches/{batch_id}", summary="Delete a batch and all related data")
 async def delete_batch(batch_id: int, _: str = Depends(require_admin)):
     """

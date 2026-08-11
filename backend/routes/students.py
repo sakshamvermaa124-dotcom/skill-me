@@ -144,7 +144,7 @@ async def get_progress(email: str):
 
     progress = await db.fetch_all(
         """SELECT p.week, p.issues_assigned, p.issues_completed, p.prs_merged, p.score,
-                  b.domain, b.batch_number, b.id as batch_id
+                  b.domain, b.batch_number, b.id as batch_id, b.repo_name, b.start_date
            FROM progress p
            JOIN batches b ON p.batch_id = b.id
            WHERE p.student_id = ?
@@ -156,7 +156,7 @@ async def get_progress(email: str):
         # Fallback to enrollments table if no progress rows exist yet
         enrollments = await db.fetch_all(
             """SELECT 1 as week, 0 as issues_assigned, 0 as issues_completed, 0 as prs_merged, 0 as score,
-                      b.domain, b.batch_number, b.id as batch_id
+                      b.domain, b.batch_number, b.id as batch_id, b.repo_name, b.start_date
                FROM enrollments e
                JOIN batches b ON e.batch_id = b.id
                WHERE e.student_id = ? AND e.status != 'dropped'""",
@@ -175,6 +175,30 @@ async def get_progress(email: str):
         (student["id"],),
     )
 
+    # Fetch assigned issues for the student
+    assigned_issues = await db.fetch_all(
+        """SELECT i.id, i.github_issue_number, i.title, i.description, i.week_number,
+                  i.difficulty, i.status, i.created_at, b.repo_name, b.domain, b.start_date
+           FROM issues i
+           JOIN batches b ON i.batch_id = b.id
+           WHERE i.assigned_to = ?
+           ORDER BY i.week_number ASC, i.id ASC""",
+        (student["id"],),
+    )
+
+    from config import settings
+    org = settings.github_org or "skill-me-intern"
+    formatted_issues = []
+    for iss in assigned_issues:
+        iss_dict = dict(iss)
+        repo_name = iss_dict.get("repo_name", "")
+        issue_num = iss_dict.get("github_issue_number")
+        if repo_name and issue_num:
+            iss_dict["github_url"] = f"https://github.com/{org}/{repo_name}/issues/{issue_num}"
+        else:
+            iss_dict["github_url"] = f"https://github.com/{org}/{repo_name}/issues" if repo_name else "#"
+        formatted_issues.append(iss_dict)
+
     return {
         "student": {
             "id": student["id"],
@@ -184,6 +208,7 @@ async def get_progress(email: str):
         },
         "progress": [dict(p) for p in progress],
         "submissions": [dict(s) for s in submissions],
+        "issues": formatted_issues,
         "summary": {
             "total_tasks": sum(p["issues_assigned"] for p in progress),
             "completed_tasks": sum(p["issues_completed"] for p in progress),

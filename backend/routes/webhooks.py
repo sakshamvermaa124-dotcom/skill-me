@@ -123,6 +123,15 @@ async def _handle_check_suite(data: dict) -> dict:
     # Find associated PRs
     pull_requests = check_suite.get("pull_requests", [])
     if not pull_requests:
+        head_branch = check_suite.get("head_branch")
+        if head_branch and repo_name:
+            try:
+                open_prs = await github_service.list_pull_requests(repo_name, state="open")
+                pull_requests = [pr for pr in open_prs if pr.get("head", {}).get("ref") == head_branch]
+            except Exception as e:
+                logger.error(f"Fallback PR lookup failed for branch {head_branch}: {e}")
+
+    if not pull_requests:
         return {"status": "ignored", "reason": "no associated PRs"}
 
     # Look up batch

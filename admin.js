@@ -468,7 +468,7 @@ async function adminLogin() {
     }
     if (!res.ok) throw new Error('Server error');
     adminKey = key;
-    sessionStorage.setItem('skillme_admin_key', key);
+    localStorage.setItem('skillme_admin_key', key);
 
     playUnzipTransition(() => {
       showApp();
@@ -478,6 +478,12 @@ async function adminLogin() {
     if (errEl) errEl.textContent = 'Could not connect to backend.';
     if (btn) { btn.disabled = false; btn.textContent = 'ACCESS CONSOLE →'; }
   }
+}
+
+function logoutAdmin() {
+  localStorage.removeItem('skillme_admin_key');
+  sessionStorage.removeItem('skillme_admin_key');
+  window.location.reload();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -739,6 +745,7 @@ function showApp() {
 }
 
 function logoutAdmin() {
+  localStorage.removeItem('skillme_admin_key');
   sessionStorage.removeItem('skillme_admin_key');
   adminKey = '';
   const overlay = document.getElementById('login-overlay');
@@ -761,7 +768,7 @@ function logoutAdmin() {
 
 document.addEventListener('DOMContentLoaded', () => {
   initRunnerLoopCanvas();
-  const saved = sessionStorage.getItem('skillme_admin_key');
+  const saved = localStorage.getItem('skillme_admin_key') || sessionStorage.getItem('skillme_admin_key');
   if (saved) {
     adminKey = saved;
     showApp();
@@ -1455,7 +1462,7 @@ window.addEventListener('keydown', e => {
   if (e.key === 'Enter' && document.getElementById('login-overlay').style.display !== 'none') adminLogin();
 });
 
-const savedKey = sessionStorage.getItem('skillme_admin_key');
+const savedKey = localStorage.getItem('skillme_admin_key') || sessionStorage.getItem('skillme_admin_key');
 if (savedKey) {
   const input = document.getElementById('admin-key-input') || document.getElementById('api-key-input');
   if (input) input.value = savedKey;
