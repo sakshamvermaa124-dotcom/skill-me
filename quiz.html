@@ -7,27 +7,27 @@
   <meta name="description" content="Take the SkillMe screening quiz to check your eligibility for our open-source internship program." />
   <link rel="icon" href="assets/logo.webp" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #07070f;
-      --surface: #0f0f1e;
-      --surface2: #14142a;
-      --border: rgba(255,255,255,0.07);
-      --border-gold: rgba(212,168,83,0.3);
-      --gold: #d4a853;
-      --gold-light: #f0c97a;
-      --purple: #818cf8;
-      --blue: #38bdf8;
-      --green: #34d399;
-      --red: #f87171;
-      --text: #e8e8f0;
-      --text-muted: #8a8aaa;
-      --text-dim: #555575;
+      --bg: #0c0b0b;
+      --surface: #141313;
+      --surface2: #181717;
+      --border: rgba(235,230,224,0.07);
+      --border-gold: rgba(201,154,78,0.25);
+      --gold: #c99a4e;
+      --gold-light: #d8ac63;
+      --purple: #c99a4e;
+      --blue: #b5873d;
+      --green: #4fa36b;
+      --red: #c85555;
+      --text: #eae6e1;
+      --text-muted: #969089;
+      --text-dim: #5e5852;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
@@ -43,9 +43,9 @@
       z-index: 0;
       animation: orb-drift 12s ease-in-out infinite alternate;
     }
-    .orb-1 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(129,140,248,0.12) 0%, transparent 70%); top: -150px; left: -100px; }
-    .orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(56,189,248,0.08) 0%, transparent 70%); bottom: 0; right: -100px; animation-delay: -6s; }
-    .orb-3 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(212,168,83,0.07) 0%, transparent 70%); top: 50%; left: 50%; transform: translate(-50%,-50%); }
+    .orb-1 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(201,154,78,0.06) 0%, transparent 70%); top: -150px; left: -100px; }
+    .orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(181,135,61,0.05) 0%, transparent 70%); bottom: 0; right: -100px; animation-delay: -6s; }
+    .orb-3 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(201,154,78,0.04) 0%, transparent 70%); top: 50%; left: 50%; transform: translate(-50%,-50%); }
     @keyframes orb-drift { from { transform: translateY(0) scale(1); } to { transform: translateY(-30px) scale(1.05); } }
 
     /* ── Layout ── */
@@ -69,6 +69,7 @@
     }
     .logo { font-size: 20px; font-weight: 800; color: var(--text); text-decoration: none; }
     .logo span { color: var(--gold); }
+    .brand-logo-img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--gold); flex-shrink: 0; }
     .nav-badge { font-size: 12px; padding: 4px 12px; border-radius: 20px; background: rgba(212,168,83,0.1); border: 1px solid var(--border-gold); color: var(--gold); font-weight: 600; letter-spacing: 0.06em; }
 
     /* ── Main container ── */
@@ -95,7 +96,7 @@
     }
     @keyframes pulse-soft { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
     .welcome-title { font-size: 36px; font-weight: 800; text-align: center; margin-bottom: 12px; line-height: 1.2; }
-    .welcome-title .hl { background: linear-gradient(135deg, var(--purple), var(--blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .welcome-title .hl { color: var(--gold); }
     .welcome-sub { font-size: 16px; color: var(--text-muted); text-align: center; margin-bottom: 36px; line-height: 1.7; max-width: 520px; }
     .info-chips { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 40px; }
     .chip { display: flex; align-items: center; gap: 7px; padding: 8px 16px; background: var(--surface2); border: 1px solid var(--border); border-radius: 40px; font-size: 13px; color: var(--text-muted); }
@@ -311,15 +312,11 @@
 </head>
 <body>
 
-<div class="orb orb-1"></div>
-<div class="orb orb-2"></div>
-<div class="orb orb-3"></div>
-
 <div class="shell">
   <nav>
-    <a href="index.html" class="logo" style="display: flex; align-items: center; gap: 8px; text-decoration: none; color: #fff;">
-      <img src="assets/logo.webp" alt="SkillMe Logo" style="height: 28px; width: 28px; border-radius: 50%; object-fit: cover;">
-      <span style="font-weight: 800; font-size: 1.25rem;">Skill<span style="color:#6366f1;">Me</span></span>
+    <a href="index.html" class="logo" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+      <img src="assets/logo.webp" alt="SkillMe Logo" class="brand-logo-img">
+      <span style="font-weight: 800; font-size: 1.25rem; color: var(--text);">SkillMe</span>
     </a>
     <div class="nav-badge">🎯 Screening Quiz</div>
   </nav>
@@ -685,19 +682,22 @@ function showScreen(id) {
 }
 
 // ──────────────────────────────────────────────────────────────
-// Check if quiz already completed — don't re-do it
+// Check if quiz already completed — redirect returning candidates directly to apply.html
 // ──────────────────────────────────────────────────────────────
 (function () {
   const existing = localStorage.getItem('skillme_quiz_result');
-  if (existing) {
-    try {
-      const r = JSON.parse(existing);
-      // Show a small banner if they already did it
-      const banner = document.createElement('div');
-      banner.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#14142a;border:1px solid rgba(212,168,83,0.3);padding:12px 20px;border-radius:10px;font-size:13px;color:#d4a853;z-index:999;cursor:pointer;';
-      banner.innerHTML = `✅ Quiz done (${r.score}/${r.total}) · <u onclick="localStorage.removeItem('skillme_quiz_result');location.reload()">Retake</u> · <a href="apply.html" style="color:#818cf8;text-decoration:underline;">Apply →</a>`;
-      document.body.appendChild(banner);
-    } catch (e) {}
+  const urlParams = new URLSearchParams(window.location.search);
+  const isRetake = urlParams.get('retake') === '1' || urlParams.get('retake') === 'true';
+
+  // If quiz is already completed and user is NOT explicitly retaking, REDIRECT IMMEDIATELY to apply.html!
+  if (existing && !isRetake) {
+    window.location.href = 'apply.html';
+    return;
+  }
+
+  // If explicitly retaking via ?retake=1, clear existing result so user can start fresh
+  if (isRetake) {
+    localStorage.removeItem('skillme_quiz_result');
   }
 })();
 </script>

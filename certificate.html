@@ -7,37 +7,37 @@
   <meta name="description" content="Verified Certificate of Internship Completion issued by SkillMe — India's Open Source Internship Platform." />
   <link rel="icon" href="assets/logo.webp" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --gold: #b8860b;
-      --gold-light: #d4a853;
-      --gold-dark: #8b6914;
-      --navy: #1a2340;
-      --navy-light: #2a3560;
-      --purple: #4f46e5;
-      --blue: #2563eb;
-      --emerald: #059669;
-      --bg: #faf8f4;
+      --gold: #c99a4e;
+      --gold-light: #d8ac63;
+      --gold-dark: #b5873d;
+      --navy: #181717;
+      --navy-light: #1f1e1e;
+      --purple: #c99a4e;
+      --blue: #b5873d;
+      --emerald: #4fa36b;
+      --bg: #0c0b0b;
       --surface: #ffffff;
-      --border-gold: rgba(184,134,11,0.25);
-      --border-faint: rgba(184,134,11,0.1);
-      --text: #1a1a2e;
-      --text-secondary: #3d4663;
-      --muted: #64748b;
+      --border-gold: rgba(201,154,78,0.25);
+      --border-faint: rgba(201,154,78,0.1);
+      --text: #eae6e1;
+      --text-secondary: #969089;
+      --muted: #5e5852;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: #e8e4dc;
+      background: #0c0b0b;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
       padding: 32px 16px;
-      font-family: 'Inter', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       color: var(--text);
     }
 
@@ -152,7 +152,8 @@
       display: flex; align-items: center; gap: 10px;
     }
     .cert-company-logo {
-      height: 36px; width: 36px; border-radius: 50%; object-fit: cover;
+      height: 38px; width: 38px; border-radius: 50%; object-fit: cover; object-position: center;
+      border: 1px solid rgba(201,154,78,0.3); background: #181717; flex-shrink: 0;
     }
     .cert-company-info { display: flex; flex-direction: column; }
     .cert-company-name {
@@ -416,9 +417,7 @@
 <!-- Certificate -->
 <div class="cert-wrap">
   <div class="certificate" id="certificate">
-    <!-- Background layers -->
-    <div class="cert-glow-1"></div>
-    <div class="cert-glow-2"></div>
+    <!-- Background watermark -->
     <div class="cert-watermark"></div>
 
     <!-- Borders -->

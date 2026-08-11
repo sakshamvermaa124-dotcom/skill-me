@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Official Internship Offer Letter — SkillMe</title>
+  <meta name="description" content="Official Internship Offer Letter — SkillMe Open Source Program">
+
+  <!-- Favicon & Fonts -->
+  <link rel="icon" type="image/png" href="assets/logo.webp">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+
+  <!-- QR Code Generator -->
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+
+  <style>
+    :root {
+      --gold: #c99a4e;
+      --gold-dark: #b5873d;
+      --gold-subtle: rgba(201, 154, 78, 0.12);
+      --dark-text: #1c1917;
+      --muted-text: #57534e;
+      --border-color: rgba(201, 154, 78, 0.35);
+      --bg-canvas: #0c0b0b;
+      --paper: #ffffff;
+      --emerald: #10b981;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--bg-canvas);
+      background-image: radial-gradient(ellipse 80% 40% at 50% -5%, rgba(201, 154, 78, 0.08), transparent 70%);
+      color: var(--dark-text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 16px 60px;
+    }
+
+    /* Actions Bar */
+    .actions-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(235, 230, 224, 0.16);
+      border-radius: 9999px;
+      color: #eae6e1;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-action:hover {
+      background: rgba(201, 154, 78, 0.15);
+      border-color: rgba(201, 154, 78, 0.4);
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    .btn-action.btn-primary {
+      background: linear-gradient(135deg, #c99a4e 0%, #b5873d 100%);
+      color: #0c0b0b;
+      border: none;
+    }
+
+    .btn-action.btn-primary:hover {
+      box-shadow: 0 4px 16px rgba(201, 154, 78, 0.25);
+    }
+
+    /* Paper Document Container */
+    .offer-paper {
+      width: 100%;
+      max-width: 820px;
+      background: var(--paper);
+      border-radius: 12px;
+      padding: 56px 60px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(201, 154, 78, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Watermark background */
+    .watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-25deg);
+      font-family: 'Cinzel', serif;
+      font-size: 8.5rem;
+      font-weight: 800;
+      color: rgba(201, 154, 78, 0.035);
+      pointer-events: none;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    /* Header Letterhead */
+    .letterhead {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo-img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--gold);
+      box-shadow: 0 2px 10px rgba(201, 154, 78, 0.2);
+    }
+
+    .brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-title .brand-skill { color: #2563eb; }
+    .brand-title .brand-me { color: var(--gold-dark); }
+
+    .brand-sub {
+      font-size: 0.8rem;
+      color: var(--muted-text);
+      font-weight: 500;
+    }
+
+    .doc-meta {
+      text-align: right;
+      font-size: 0.82rem;
+      color: var(--muted-text);
+      line-height: 1.6;
+    }
+
+    .doc-meta strong { color: var(--dark-text); }
+
+    /* Title section */
+    .title-section {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .doc-badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--gold-dark);
+      background: var(--gold-subtle);
+      border: 1px solid var(--border-color);
+      padding: 4px 12px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .doc-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: #0c0b0b;
+      letter-spacing: -0.01em;
+    }
+
+    /* Salutation & Lead */
+    .body-content {
+      font-size: 0.95rem;
+      line-height: 1.75;
+      color: #292524;
+    }
+
+    .salutation {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0c0b0b;
+      margin-bottom: 12px;
+    }
+
+    /* Details Grid Table */
+    .details-table {
+      background: #fafaf9;
+      border: 1px solid rgba(201, 154, 78, 0.25);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin: 24px 0 32px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px 24px;
+    }
+
+    .detail-cell {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cell-label {
+      font-size: 0.74rem;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #78716c;
+      margin-bottom: 3px;
+    }
+
+    .cell-value {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #0c0b0b;
+    }
+
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #047857;
+      background: #d1fae5;
+      padding: 2px 8px;
+      border-radius: 4px;
+      width: fit-content;
+    }
+
+    /* Section Headers */
+    .section-head {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0c0b0b;
+      margin: 28px 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-head::before {
+      content: '';
+      width: 4px;
+      height: 16px;
+      background: var(--gold-dark);
+      border-radius: 2px;
+    }
+
+    /* Terms List */
+    .terms-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .terms-list li {
+      position: relative;
+      padding-left: 20px;
+      font-size: 0.9rem;
+      color: #44403c;
+    }
+
+    .terms-list li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: var(--gold-dark);
+      font-weight: 800;
+    }
+
+    /* Signatures Section */
+    .signature-row {
+      margin-top: 44px;
+      padding-top: 24px;
+      border-top: 1px solid #e7e5e4;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .sig-block {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sig-line {
+      width: 180px;
+      height: 1px;
+      background: var(--dark-text);
+      margin-bottom: 8px;
+    }
+
+    .sig-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #0c0b0b;
+    }
+
+    .sig-title {
+      font-size: 0.78rem;
+      color: var(--muted-text);
+    }
+
+    /* QR Code Box */
+    .qr-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #fafaf9;
+      border: 1px solid #e7e5e4;
+      padding: 10px 14px;
+      border-radius: 8px;
+    }
+
+    .qr-canvas {
+      width: 52px;
+      height: 52px;
+    }
+
+    .qr-info {
+      display: flex;
+      flex-direction: column;
+      font-size: 0.72rem;
+      color: var(--muted-text);
+    }
+
+    .qr-info strong {
+      color: #0c0b0b;
+      font-size: 0.78rem;
+    }
+
+    /* Print Styles */
+    @media print {
+      body { background: #fff; padding: 0; }
+      .actions-bar { display: none; }
+      .offer-paper { box-shadow: none; max-width: 100%; border-radius: 0; padding: 40px; }
+    }
+
+    @media (max-width: 640px) {
+      .offer-paper { padding: 32px 24px; }
+      .letterhead { flex-direction: column; gap: 16px; }
+      .doc-meta { text-align: left; }
+      .details-table { grid-template-columns: 1fr; }
+      .signature-row { flex-direction: column; gap: 24px; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Actions -->
+  <div class="actions-bar">
+    <a href="dashboard.html" class="btn-action">← Return to Dashboard</a>
+    <button class="btn-action btn-primary" onclick="window.print()">
+      🖨️ Print Offer Letter
+    </button>
+  </div>
+
+  <!-- Offer Paper -->
+  <div class="offer-paper">
+    <div class="watermark">SKILLME</div>
+
+    <!-- Letterhead -->
+    <div class="letterhead">
+      <div class="brand-group">
+        <img src="assets/logo.webp" alt="SkillMe" class="brand-logo-img" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+        <div style="display:none; width:48px; height:48px; border-radius:50%; background:#0c0b0b; border:2px solid #c99a4e; align-items:center; justify-content:center; color:#2563eb; font-weight:800; font-size:1.2rem;" class="brand-logo-fallback">SM</div>
+        <div>
+          <div class="brand-title"><span class="brand-skill">Skill</span><span class="brand-me">Me</span></div>
+          <div class="brand-sub">India's Open Source Internship Platform</div>
+        </div>
+      </div>
+      <div class="doc-meta">
+        <strong>Doc Ref:</strong> <span id="ref-id">SKM-OFFER-2026-0812</span><br>
+        <strong>Issued Date:</strong> <span id="doc-date">August 12, 2026</span><br>
+        <strong>Verification:</strong> Verified Official
+      </div>
+    </div>
+
+    <!-- Title Section -->
+    <div class="title-section">
+      <span class="doc-badge">Official Document</span>
+      <h1 class="doc-title">Internship Offer Letter</h1>
+    </div>
+
+    <!-- Body -->
+    <div class="body-content">
+      <p class="salutation">Dear <span id="candidate-name">Candidate Name</span>,</p>
+      <p>
+        We are pleased to formally offer you an internship position at <strong>SkillMe</strong> under the 
+        <strong><span id="domain-name">Web Development</span></strong> engineering program. 
+        Based on your application and screening evaluation, we are confident in your technical capabilities and readiness to contribute to open-source software.
+      </p>
+
+      <!-- Details Table -->
+      <div class="details-table">
+        <div class="detail-cell">
+          <span class="cell-label">Intern Name</span>
+          <span class="cell-value" id="cell-name">Candidate Name</span>
+        </div>
+        <div class="detail-cell">
+          <span class="cell-label">Assigned Track</span>
+          <span class="cell-value" id="cell-domain">Web Development</span>
+        </div>
+        <div class="detail-cell">
+          <span class="cell-label">Batch Identifier</span>
+          <span class="cell-value" id="cell-batch">Batch #1 (Sprint)</span>
+        </div>
+        <div class="detail-cell">
+          <span class="cell-label">Program Duration</span>
+          <span class="cell-value">4 Weeks (Remote)</span>
+        </div>
+        <div class="detail-cell">
+          <span class="cell-label">Date of Joining</span>
+          <span class="cell-value" id="cell-joining">Upcoming Monday</span>
+        </div>
+        <div class="detail-cell">
+          <span class="cell-label">Enrollment Status</span>
+          <div class="cell-value"><span class="badge-status">● Verified &amp; Confirmed</span></div>
+        </div>
+      </div>
+
+      <!-- Guidelines -->
+      <div class="section-head">Program Terms &amp; Proof-of-Work Standards</div>
+      <ul class="terms-list">
+        <li><strong>GitHub Issue Resolutions:</strong> You will be assigned real production issues on your batch GitHub repository each week.</li>
+        <li><strong>Pull Request Workflow:</strong> All code contributions must be submitted as Pull Requests (PRs) passing automated build checks and code review.</li>
+        <li><strong>Authentic Performance Evaluation:</strong> Your completion and certificate eligibility will be evaluated strictly on verified merged code.</li>
+        <li><strong>Flexible Remote Schedule:</strong> The 4-week sprint is 100% remote with async collaboration on GitHub.</li>
+      </ul>
+
+      <!-- Signatures & QR -->
+      <div class="signature-row">
+        <div class="sig-block">
+          <div class="sig-line"></div>
+          <div class="sig-name">Saksham Verma</div>
+          <div class="sig-title">Founder &amp; Technical Director</div>
+          <div class="sig-title">SkillMe Open Source Foundation</div>
+        </div>
+
+        <div class="qr-box">
+          <canvas id="offer-qr" class="qr-canvas"></canvas>
+          <div class="qr-info">
+            <strong>Verified Document</strong>
+            <span>Scan to verify validity</span>
+            <span>Ref: SKM-VERIFIED-OFFER</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Extract query params if available
+    const urlParams = new URLSearchParams(window.location.search);
+    const name = urlParams.get('name') || localStorage.getItem('student_name') || "Saksham Verma";
+    const domain = urlParams.get('domain') || localStorage.getItem('student_domain') || "Web Development";
+    const batch = urlParams.get('batch') || "Batch #1";
+    const dateStr = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+    document.getElementById('candidate-name').textContent = name;
+    document.getElementById('cell-name').textContent = name;
+    document.getElementById('domain-name').textContent = domain;
+    document.getElementById('cell-domain').textContent = domain;
+    document.getElementById('cell-batch').textContent = batch;
+    document.getElementById('doc-date').textContent = dateStr;
+
+    // Generate QR Code
+    new QRious({
+      element: document.getElementById('offer-qr'),
+      value: window.location.href,
+      size: 100,
+      background: '#fafaf9',
+      foreground: '#0c0b0b'
+    });
+  </script>
+
+</body>
+</html>

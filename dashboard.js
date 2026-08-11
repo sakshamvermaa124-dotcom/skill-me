@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let loginState = 'email';
 
-  // --- Auto-Login via existing HTTP-Only Cookie ---
+  // --- Auto-Login via Saved Session ---
   async function checkExistingSession() {
     const urlParams = new URLSearchParams(window.location.search);
     const isPreview = urlParams.get('preview') === '1' || urlParams.get('preview') === 'paid';
@@ -55,49 +55,53 @@ document.addEventListener('DOMContentLoaded', () => {
         renderDashboard(mockData);
         loginView.style.display = 'none';
         dashView.style.display = 'block';
+        dashView.style.opacity = '1';
+        dashView.style.transform = 'translateY(0)';
         if (lenis) lenis.resize();
-        animateDashboardEntrance();
         return;
     }
 
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) throw new Error("No token");
+    try {
+      const token = localStorage.getItem('token');
+      const savedEmail = localStorage.getItem('skillme_email');
+      
+      // If we have a saved email in localStorage, restore progress directly
+      const emailToUse = savedEmail || (async () => {
+        if (!token) return null;
+        const meRes = await fetch(`${API}/api/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (meRes.ok) { const me = await meRes.json(); return me.email; }
+        return null;
+      })();
+
+      const resolvedEmail = await Promise.resolve(emailToUse);
+      if (resolvedEmail) {
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Restoring Session...';
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        const progressRes = await fetch(`${API}/api/students/progress/${encodeURIComponent(resolvedEmail)}`, { headers });
         
-        const meRes = await fetch(`${API}/api/auth/me`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-      if (meRes.ok) {
-        const me = await meRes.json();
-        if (me.email) {
-          loginBtn.disabled = true;
-            loginBtn.textContent = 'Restoring Session...';
-            const progressRes = await fetch(`${API}/api/students/progress/${encodeURIComponent(me.email)}`, {
-              headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (progressRes.ok) {
-            const data = await progressRes.json();
-            data._email = me.email;
-            renderDashboard(data);
-            
-            // Transition directly to dashboard
-            loginView.style.opacity = '0';
-            setTimeout(() => {
-              loginView.style.display = 'none';
-              dashView.style.display = 'block';
-              setTimeout(() => {
-                dashView.style.opacity = '1';
-                dashView.style.transform = 'translateY(0)';
-              }, 50);
-            }, 400);
-          } else {
-              loginBtn.disabled = false;
-              loginBtn.textContent = 'Continue';
-          }
+        if (progressRes.ok) {
+          const data = await progressRes.json();
+          data._email = resolvedEmail;
+          renderDashboard(data);
+          
+          loginView.style.display = 'none';
+          dashView.style.display = 'block';
+          dashView.style.opacity = '1';
+          dashView.style.transform = 'translateY(0)';
+          if (lenis) lenis.resize();
+          return;
+        } else {
+          // If session email fails to load, clear saved session so user can re-login
+          localStorage.removeItem('skillme_email');
         }
       }
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'Get Login Code';
     } catch (e) {
       console.log("No active session found.");
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'Get Login Code';
     }
   }
 
@@ -113,32 +117,42 @@ document.addEventListener('DOMContentLoaded', () => {
     const otp = otpInput.value.trim();
 
     errorEl.style.display = 'none';
-    loginBtn.disabled = true;
-    loginBtn.style.opacity = '0.7';
-    loginBtn.textContent = 'Loading...';
 
     try {
       if (loginState === 'email') {
-        const res = await fetch(`${API}/api/auth/request-otp`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email })
-        });
+        if (!email) throw new Error('Please enter a valid email address');
         
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({ detail: 'Failed to request OTP' }));
-          throw new Error(errData.detail || 'Failed to request OTP');
-        }
-        
-        // Show OTP field
+        // INSTANT OPTIMISTIC UI: Reveal OTP field immediately on click
         document.getElementById('otp-wrap').style.display = 'block';
         emailInput.readOnly = true;
         loginState = 'otp';
+        loginBtn.textContent = 'Verify OTP & Enter →';
+        loginBtn.disabled = false;
+        loginBtn.style.opacity = '1';
         otpInput.focus();
-        
+
+        // Dispatch background request for OTP code
+        fetch(`${API}/api/auth/request-otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        }).then(async (res) => {
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({ detail: 'Failed to send OTP email' }));
+            errorEl.textContent = errData.detail || 'Failed to send OTP. Please try again.';
+            errorEl.style.display = 'block';
+          }
+        }).catch((err) => {
+          console.warn("Background OTP request notice:", err);
+        });
+
       } else if (loginState === 'otp') {
-        if (!otp) throw new Error('Please enter the 6-digit OTP');
+        if (!otp) throw new Error('Please enter the 6-digit OTP code sent to your email');
         
+        loginBtn.disabled = true;
+        loginBtn.style.opacity = '0.7';
+        loginBtn.textContent = 'Verifying Code...';
+
         const authRes = await fetch(`${API}/api/auth/verify-otp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -146,6 +160,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         if (!authRes.ok) {
+          loginBtn.disabled = false;
+          loginBtn.style.opacity = '1';
+          loginBtn.textContent = 'Verify OTP & Enter →';
           const errData = await authRes.json().catch(() => ({ detail: 'Invalid OTP' }));
           throw new Error(errData.detail || 'Invalid or expired OTP');
         }
@@ -154,8 +171,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (authData.token) {
           localStorage.setItem('token', authData.token);
         }
+        localStorage.setItem('skillme_email', email);
 
-        // Successfully verified and cookie set. Now load dashboard data.
+        // Successfully verified. Now load student dashboard data.
         const res = await fetch(`${API}/api/students/progress/${encodeURIComponent(email)}`, {
           headers: { 'Authorization': `Bearer ${authData.token}` }
         });
@@ -166,10 +184,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const data = await res.json();
-        data._email = email;  // store for cert URL
+        data._email = email;
         renderDashboard(data);
 
-        // Transition
+        // Transition to dashboard view
         loginView.style.opacity = '0';
         loginView.style.transform = 'translateY(-20px)';
         loginView.style.transition = 'all 0.4s ease';
@@ -177,17 +195,14 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
           loginView.style.display = 'none';
           dashView.style.display = 'block';
-          lenis.resize();
-          animateDashboardEntrance();
+          dashView.style.opacity = '1';
+          dashView.style.transform = 'translateY(0)';
+          if (lenis) lenis.resize();
         }, 400);
       }
     } catch (err) {
-      errorEl.textContent = err.message;
+      errorEl.textContent = err.message || 'An error occurred';
       errorEl.style.display = 'block';
-    } finally {
-      loginBtn.disabled = false;
-      loginBtn.style.opacity = '1';
-      loginBtn.textContent = loginState === 'email' ? 'Get Login Code' : 'Verify & Login';
     }
   });
 
@@ -198,6 +213,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Store globally for Razorpay callback
     window._dashData = data;
     window._dashStudent = student;
+
+    // Show Sign Out button in navbar when logged into dashboard
+    const signoutBtn = document.getElementById('signout-btn');
+    if (signoutBtn) signoutBtn.style.display = 'inline-flex';
 
     // Header
     const firstName = student.name.split(' ')[0];
@@ -293,8 +312,9 @@ document.addEventListener('DOMContentLoaded', () => {
           if (isPaidPreview) {
               renderCertReady(certSection, student, data);
           } else if (isPreview) {
+              // Non-blocking Dev Preview Drop Box
               renderPaymentBanner(certSection, student, data);
-              showPaymentModal(student, data);
+              renderDevPreviewBox(certSection, student, data);
           } else {
             // Check if already paid
             try {
@@ -304,11 +324,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderCertReady(certSection, student, data);
               } else {
                 renderPaymentBanner(certSection, student, data);
-                showPaymentModal(student, data);
               }
             } catch(e) {
               renderPaymentBanner(certSection, student, data);
-              showPaymentModal(student, data);
             }
           }
         } else if (pct > 0) {
@@ -327,7 +345,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     }, 600);
-
 
     // Submissions
     const subList = document.getElementById('sub-list');
@@ -424,13 +441,14 @@ document.addEventListener('DOMContentLoaded', () => {
   function animateDashboardEntrance() {
     const delays = [
       ['dash-header-el', 0],
-      ['stat-card-1', 100],
-      ['stat-card-2', 180],
-      ['stat-card-3', 260],
-      ['stat-card-4', 340],
-      ['progress-section-el', 450],
-      ['guide-section-el', 600],
-      ['submissions-section-el', 700],
+      ['stat-card-1', 40],
+      ['stat-card-2', 80],
+      ['stat-card-3', 120],
+      ['stat-card-4', 160],
+      ['progress-section-el', 200],
+      ['guide-section-el', 240],
+      ['tasks-section-el', 280],
+      ['submissions-section-el', 320],
     ];
 
     delays.forEach(([id, delay]) => {
@@ -612,7 +630,7 @@ document.addEventListener('DOMContentLoaded', () => {
               </svg>
               Certificate
             </a>
-            <a href="${FRONTEND}/lor.html?cert_id=SM-${String(student.id).padStart(4,'0')}-${String(data._batch_id).padStart(4,'0')}" target="_blank" class="cert-btn cert-btn-secondary" style="border-color:#818cf8; color:#818cf8;">
+            <a href="${FRONTEND}/lor.html?cert_id=SM-${String(student.id).padStart(4,'0')}-${String(data._batch_id).padStart(4,'0')}" target="_blank" class="cert-btn cert-btn-secondary" style="border-color:rgba(201,154,78,0.4); color:var(--accent-indigo);">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
               </svg>
@@ -729,6 +747,58 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('Payment error:', err);
       alert('Payment service unavailable. Please try again.');
       if (btn) { btn.disabled = false; btn.innerHTML = '💳 Pay ₹249 &amp; Get Certificate'; }
+    }
+  };
+
+  function renderDevPreviewBox(container, student, data) {
+    if (!container) return;
+    const devBox = document.createElement('div');
+    devBox.className = 'dev-preview-box-container';
+    devBox.style.marginBottom = '20px';
+    devBox.innerHTML = `
+      <details style="background: rgba(201, 154, 78, 0.08); border: 1px solid rgba(201, 154, 78, 0.3); border-radius: 10px; padding: 12px 18px; color: var(--text-primary);">
+        <summary style="font-weight: 700; font-size: 0.88rem; cursor: pointer; color: var(--accent-indigo); display: flex; align-items: center; justify-content: space-between;">
+          <span>⚙️ Developer Testing &amp; Preview Controls</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">Click to Expand</span>
+        </summary>
+        <div style="margin-top: 12px; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6;">
+          <p style="margin-bottom: 10px;">You are testing in <strong>Developer Preview Mode</strong> (<code>?preview=1</code>). Select an action below to test UI states on-demand without blocking the dashboard:</p>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button onclick="showPaymentModal(window._dashStudent, window._dashData)" style="padding: 7px 15px; background: linear-gradient(135deg, #c99a4e, #b5873d); border: none; border-radius: 6px; color: #000; font-weight: 700; font-size: 0.8rem; cursor: pointer;">
+              💳 Open Payment Modal Preview
+            </button>
+            <button onclick="renderCertReady(document.getElementById('cert-section'), window._dashStudent, window._dashData)" style="padding: 7px 15px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(235, 230, 224, 0.2); border-radius: 6px; color: #fff; font-weight: 600; font-size: 0.8rem; cursor: pointer;">
+              📜 Test Issued Certificate Banner
+            </button>
+          </div>
+        </div>
+      </details>
+    `;
+    container.prepend(devBox);
+  }
+
+  window.signOut = function() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('skillme_email');
+    const dashView = document.getElementById('dashboard-view');
+    const loginView = document.getElementById('login-view');
+    const signoutBtn = document.getElementById('signout-btn');
+    
+    if (dashView && loginView) {
+      dashView.style.display = 'none';
+      loginView.style.display = 'flex';
+      loginView.style.opacity = '1';
+      loginView.style.transform = 'translateY(0)';
+      if (signoutBtn) signoutBtn.style.display = 'none';
+      // Reset login form inputs
+      const emailInput = document.getElementById('login-email');
+      const otpWrap = document.getElementById('otp-wrap');
+      const loginBtn = document.getElementById('login-btn');
+      if (emailInput) emailInput.value = '';
+      if (otpWrap) otpWrap.style.display = 'none';
+      if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Get Login Code'; }
+    } else {
+      window.location.href = 'dashboard.html';
     }
   };
 
