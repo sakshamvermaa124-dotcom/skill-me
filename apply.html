@@ -454,7 +454,7 @@
   <nav class="navbar scrolled" id="navbar">
     <div class="container">
       <a href="index.html" class="nav-logo" id="nav-logo">
-        <img src="assets/logo.webp" alt="SkillMe Logo" style="height: 28px; width: 28px; border-radius: 50%; object-fit: cover;">
+        <img src="assets/logo.webp" alt="SkillMe Logo" class="brand-logo-img">
         <span>SkillMe</span>
       </a>
       <div class="nav-links" id="nav-links">
@@ -471,25 +471,18 @@
 
   <!-- Apply Page -->
   <section class="apply-page">
-        <!-- Background Decor (Consistent across all pages) -->
-    <div class="aurora-bg" aria-hidden="true">
-      <div class="aurora-blob"></div>
-      <div class="aurora-blob"></div>
-      <div class="aurora-blob"></div>
-    </div>
-    <div class="dot-grid" aria-hidden="true"></div>
-    
     <div class="apply-wrapper">
-      <div class="apply-header reveal">
+      <div class="apply-header">
         <a href="index.html" class="back-link">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           Back to Home
         </a>
         <h1>Apply for <span class="gradient-text">Internship</span></h1>
         <p>Fill out the form below and we'll get back to you within 48 hours.</p>
+
       </div>
       
-      <div class="apply-card reveal reveal-delay-1">
+      <div class="apply-card">
         <!-- Progress -->
         <div class="form-progress" id="form-progress">
           <div class="progress-step active" data-step="1"></div>
@@ -500,6 +493,27 @@
         <form id="apply-form" novalidate>
           <!-- Step 1: Personal Info -->
           <div class="form-step active" data-step="1" id="step-1">
+
+            <!-- 🎯 Permanent Professional Quiz Status & Retake Card -->
+            <div id="quiz-status-banner" style="margin-bottom: 24px; background: rgba(201, 154, 78, 0.07); border: 1px solid rgba(201, 154, 78, 0.3); border-radius: 16px; padding: 16px 20px; backdrop-filter: blur(10px);">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(201, 154, 78, 0.15); border: 1px solid rgba(201, 154, 78, 0.4); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;" id="quiz-status-icon">🎯</div>
+                  <div>
+                    <div style="font-weight: 700; font-size: 0.95rem; color: #ffffff;" id="quiz-status-title">
+                      Screening Quiz Completed: <span id="quiz-score-display" style="color: #c99a4e; font-weight: 800;">7/8 Score</span>
+                    </div>
+                    <div style="font-size: 0.8rem; color: #a1a1aa; margin-top: 2px;" id="quiz-domain-display">
+                      Domain: Web Development
+                    </div>
+                  </div>
+                </div>
+                <a href="quiz.html?retake=1" id="quiz-action-btn" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: linear-gradient(135deg, #c99a4e 0%, #b5873d 100%); border: none; border-radius: 9999px; color: #0c0b0b; font-size: 0.84rem; font-weight: 700; text-decoration: none; transition: all 0.2s ease; box-shadow: 0 4px 14px rgba(201, 154, 78, 0.25);">
+                  🔄 Retake Screening Quiz
+                </a>
+              </div>
+            </div>
+
             <h3 class="form-step-title">Personal Information</h3>
             <p class="form-step-subtitle">Tell us about yourself</p>
             
@@ -729,12 +743,15 @@
     (function () {
       const quizRaw = localStorage.getItem('skillme_quiz_result');
       if (!quizRaw) {
-        // No quiz taken — redirect to quiz first
         window.location.href = 'quiz.html';
         return;
       }
       try {
         const quiz = JSON.parse(quizRaw);
+        const domainLabels = {
+          'web-dev':'Web Development','python':'Python','ml':'Machine Learning',
+          'devops':'DevOps / Cloud','mobile':'Mobile Dev','ui-ux':'UI/UX Design'
+        };
 
         // Show score badge at top of form
         const badge = document.createElement('div');
@@ -743,16 +760,12 @@
           background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.25);
           border-radius:10px;padding:12px 18px;margin-bottom:20px;
           font-size:14px;color:#34d399;font-weight:600;`;
-        const domainLabels = {
-          'web-dev':'Web Development','python':'Python','ml':'Machine Learning',
-          'devops':'DevOps / Cloud','mobile':'Mobile Dev','ui-ux':'UI/UX Design'
-        };
         badge.innerHTML = `<span style="font-size:18px;">✅</span>
           Screening quiz completed · <strong>${quiz.score}/${quiz.total}</strong> correct ·
           Domain: <strong>${domainLabels[quiz.domain] || quiz.domain}</strong>
-          <a href="quiz.html" style="margin-left:auto;font-size:12px;color:#8a8aaa;text-decoration:underline;">Retake</a>`;
+          <a href="quiz.html" style="margin-left:auto;font-size:12px;color:#8a8aaa;text-decoration:underline;">Retake Quiz</a>`;
 
-        const formCard = document.querySelector('.form-card') || document.querySelector('form');
+        const formCard = document.querySelector('.apply-card') || document.querySelector('form');
         if (formCard) formCard.insertBefore(badge, formCard.firstChild);
 
         // Pre-select domain from quiz
@@ -774,10 +787,12 @@
     // Mobile menu
     const navToggle = document.getElementById('nav-toggle');
     const navLinks = document.getElementById('nav-links');
-    navToggle.addEventListener('click', () => {
-      navToggle.classList.toggle('active');
-      navLinks.classList.toggle('open');
-    });
+    if (navToggle && navLinks) {
+      navToggle.addEventListener('click', () => {
+        navToggle.classList.toggle('active');
+        navLinks.classList.toggle('open');
+      });
+    }
 
     // Scroll reveal
     const revealElements = document.querySelectorAll('.reveal');
@@ -973,6 +988,54 @@
         submitBtn.disabled = false;
         submitBtn.innerHTML = `Submit Application <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
       });
+    });
+
+    // Check for previous quiz completion and update Quiz status component dynamically
+    document.addEventListener('DOMContentLoaded', () => {
+      const rawResult = localStorage.getItem('skillme_quiz_result');
+      const titleEl = document.getElementById('quiz-status-title');
+      const scoreDisplay = document.getElementById('quiz-score-display');
+      const domainDisplay = document.getElementById('quiz-domain-display');
+      const actionBtn = document.getElementById('quiz-action-btn');
+      const iconEl = document.getElementById('quiz-status-icon');
+
+      if (rawResult) {
+        try {
+          const quizRes = JSON.parse(rawResult);
+          const score = quizRes.score !== undefined ? quizRes.score : 7;
+          const total = quizRes.total || 8;
+          const domain = quizRes.domain || 'Web Development';
+
+          if (titleEl && scoreDisplay) {
+            titleEl.innerHTML = `Screening Quiz Completed: <span style="color: #c99a4e; font-weight: 800;">${score}/${total} Score</span>`;
+          }
+          if (domainDisplay) {
+            domainDisplay.textContent = `Track: ${domain} (Verified Status)`;
+          }
+          if (actionBtn) {
+            actionBtn.innerHTML = `🔄 Retake Screening Quiz`;
+          }
+          if (iconEl) {
+            iconEl.textContent = `🎯`;
+          }
+        } catch (e) {
+          console.error("Error reading quiz result:", e);
+        }
+      } else {
+        // Show clean prompt for applicants who haven't taken the quiz
+        if (titleEl) {
+          titleEl.innerHTML = `Screening Quiz: <span style="color: #c99a4e; font-weight: 800;">Optional Assessment</span>`;
+        }
+        if (domainDisplay) {
+          domainDisplay.textContent = `Take the 2-min quiz to boost your application selection ranking.`;
+        }
+        if (actionBtn) {
+          actionBtn.innerHTML = `🎯 Take Screening Quiz →`;
+        }
+        if (iconEl) {
+          iconEl.textContent = `🧠`;
+        }
+      }
     });
   </script>
 

@@ -16,6 +16,23 @@ document.addEventListener('DOMContentLoaded', () => {
     smoothWheel: true,
   });
 
+  // ═══════════════════════════════════════════════════════════
+  // SMART APPLY HANDLER (Quiz Gated vs Direct Application)
+  // ═══════════════════════════════════════════════════════════
+  window.handleApplyClick = function(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const quizDone = localStorage.getItem('skillme_quiz_result');
+    if (quizDone) {
+      window.location.href = 'apply.html';
+    } else {
+      window.location.href = 'quiz.html';
+    }
+  };
+
+  document.querySelectorAll('#nav-apply-btn, #hero-apply-btn, #cta-apply-btn, .nav-cta').forEach(btn => {
+    btn.addEventListener('click', window.handleApplyClick);
+  });
+
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', (e) => {
       const href = anchor.getAttribute('href');
@@ -96,429 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ═══════════════════════════════════════════════════════════
-  // LAYER 2a: THREE.JS — HERO Particle Galaxy
-  // Restored from v1 style — colored floating particles
-  // with mouse parallax, much denser and more dramatic
-  // ═══════════════════════════════════════════════════════════
-  (function initHeroParticles() {
-    const canvas = document.getElementById('hero-canvas');
-    if (!canvas || typeof THREE === 'undefined') return;
-
-    const hero = document.getElementById('hero');
-    const W = () => hero.offsetWidth;
-    const H = () => hero.offsetHeight;
-
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(W(), H());
-    renderer.setClearColor(0x000000, 0);
-
-    const scene  = new THREE.Scene();
-    // Theme-aware fog
-    const isDark = () => html.getAttribute('data-theme') !== 'light';
-    scene.fog = new THREE.FogExp2(isDark() ? 0x111111 : 0xfafafa, 0.08);
-
-    const camera = new THREE.PerspectiveCamera(60, W() / H(), 0.1, 100);
-    camera.position.z = 5;
-
-    // ── Elegant TorusKnot wireframe centerpiece ──
-    const knotGeo = new THREE.TorusKnotGeometry(1.6, 0.45, 200, 32, 2, 3);
-    const knotMat = new THREE.MeshBasicMaterial({
-      color: 0xf59e0b,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.15,
-    });
-    const knot = new THREE.Mesh(knotGeo, knotMat);
-    knot.position.set(1.5, 0, -1);
-    scene.add(knot);
-
-    // Second smaller knot — cyan accent
-    const knot2Geo = new THREE.TorusKnotGeometry(0.8, 0.25, 128, 20, 3, 5);
-    const knot2Mat = new THREE.MeshBasicMaterial({
-      color: 0x22d3ee,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.1,
-    });
-    const knot2 = new THREE.Mesh(knot2Geo, knot2Mat);
-    knot2.position.set(-2, -0.5, -2);
-    scene.add(knot2);
-
-    // Sparse ambient particles for subtle depth
-    const COUNT = 600;
-    const positions = new Float32Array(COUNT * 3);
-    const colors = new Float32Array(COUNT * 3);
-    const palette = [
-      new THREE.Color('#f59e0b'),
-      new THREE.Color('#22d3ee'),
-      new THREE.Color('#34d399'),
-    ];
-
-    for (let i = 0; i < COUNT; i++) {
-      const i3 = i * 3;
-      const radius = 3 + Math.random() * 10;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      positions[i3]     = radius * Math.sin(phi) * Math.cos(theta);
-      positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta) * 0.5;
-      positions[i3 + 2] = radius * Math.cos(phi) - 2;
-      const c = palette[Math.floor(Math.random() * palette.length)];
-      colors[i3] = c.r; colors[i3 + 1] = c.g; colors[i3 + 2] = c.b;
-    }
-
-    const particleGeo = new THREE.BufferGeometry();
-    particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    particleGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    const particleMat = new THREE.PointsMaterial({
-      size: 0.02,
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.4,
-      sizeAttenuation: true,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    });
-    const particles = new THREE.Points(particleGeo, particleMat);
-    scene.add(particles);
-
-    // Mouse parallax
-    let mouseX = 0, mouseY = 0;
-    let targetX = 0, targetY = 0;
-    window.addEventListener('mousemove', (e) => {
-      mouseX = (e.clientX / window.innerWidth  - 0.5);
-      mouseY = (e.clientY / window.innerHeight - 0.5);
-    });
-
-    let scrollProgress = 0;
-    lenis.on('scroll', ({ progress }) => { scrollProgress = progress; });
-
-    const clock = new THREE.Clock();
-    function animate() {
-      requestAnimationFrame(animate);
-      const t = clock.getElapsedTime();
-
-      // Slow, graceful rotation
-      knot.rotation.x = t * 0.06;
-      knot.rotation.y = t * 0.08;
-      knot2.rotation.x = -t * 0.05;
-      knot2.rotation.y = t * 0.1;
-
-      particles.rotation.y = t * 0.02;
-
-      // Mouse parallax with smooth damping
-      targetX += (mouseX - targetX) * 0.03;
-      targetY += (mouseY - targetY) * 0.03;
-      knot.rotation.y += targetX * 0.3;
-      knot.rotation.x += targetY * 0.15;
-      particles.rotation.y += targetX * 0.15;
-
-      // Fade as user scrolls away from hero
-      const fadeOpacity = Math.max(0, 1 - scrollProgress * 3);
-      knotMat.opacity = 0.15 * fadeOpacity;
-      knot2Mat.opacity = 0.1 * fadeOpacity;
-      particleMat.opacity = 0.4 * fadeOpacity;
-
-      renderer.render(scene, camera);
-    }
-
-    animate();
-
-    window.addEventListener('resize', () => {
-      renderer.setSize(W(), H());
-      camera.aspect = W() / H();
-      camera.updateProjectionMatrix();
-    });
-
-    // Update fog on theme switch
-    window.addEventListener('themechange', (e) => {
-      scene.fog.color.set(e.detail.theme === 'light' ? 0xfafafa : 0x111111);
-    });
-  })();
-
-  // ═══════════════════════════════════════════════════════════
-  // LAYER 2b: THREE.JS — INTERLUDE Wireframe Shapes
-  // ═══════════════════════════════════════════════════════════
-  (function initFloatingOrbs() {
-    const canvas = document.getElementById('float-canvas');
-    if (!canvas || typeof THREE === 'undefined') return;
-
-    const section = canvas.parentElement;
-    const W = () => section.offsetWidth;
-    const H = () => section.offsetHeight || 280;
-
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-    renderer.setSize(W(), H());
-    renderer.setClearColor(0x000000, 0);
-
-    const scene  = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(50, W() / H(), 0.1, 100);
-    camera.position.z = 6;
-
-    // Uniform dodecahedron wireframes — fewer but more impactful
-    const wireColors = [0xf59e0b, 0x22d3ee, 0x34d399];
-    const orbs = [];
-
-    for (let i = 0; i < 10; i++) {
-      const geo = new THREE.DodecahedronGeometry(0.5, 0);
-      const col = wireColors[i % wireColors.length];
-      const mat = new THREE.MeshBasicMaterial({
-        color: col, wireframe: true, transparent: true,
-        opacity: 0.12 + Math.random() * 0.12,
-      });
-
-      const mesh = new THREE.Mesh(geo, mat);
-      mesh.position.set(
-        (Math.random() - 0.5) * 14,
-        (Math.random() - 0.5) * 3,
-        (Math.random() - 0.5) * 3,
-      );
-      mesh.scale.setScalar(0.6 + Math.random() * 0.8);
-      mesh.userData = {
-        rx: (Math.random() - 0.5) * 0.008,
-        ry: (Math.random() - 0.5) * 0.012,
-        rz: (Math.random() - 0.5) * 0.006,
-        baseY: mesh.position.y,
-        floatOff: Math.random() * Math.PI * 2,
-        floatSpd: 0.25 + Math.random() * 0.45,
-      };
-      scene.add(mesh);
-      orbs.push(mesh);
-    }
-
-    let mouseX = 0;
-    window.addEventListener('mousemove', (e) => { mouseX = (e.clientX / window.innerWidth - 0.5) * 2; });
-
-    const clock = new THREE.Clock();
-    function animate() {
-      requestAnimationFrame(animate);
-      const t = clock.getElapsedTime();
-      orbs.forEach(o => {
-        o.rotation.x += o.userData.rx;
-        o.rotation.y += o.userData.ry;
-        o.rotation.z += o.userData.rz;
-        o.position.y = o.userData.baseY + Math.sin(t * o.userData.floatSpd + o.userData.floatOff) * 0.4;
-      });
-      camera.position.x += (mouseX * 0.7 - camera.position.x) * 0.03;
-      renderer.render(scene, camera);
-    }
-
-    animate();
-
-    window.addEventListener('resize', () => {
-      renderer.setSize(W(), H());
-      camera.aspect = W() / H();
-      camera.updateProjectionMatrix();
-    });
-  })();
-
-  // ═══════════════════════════════════════════════════════════
-  // LAYER 2c: THREE.JS — BENEFITS Sphere with Orbit Rings
-  // ═══════════════════════════════════════════════════════════
-  (function initBenefitSphere() {
-    const canvas = document.getElementById('sphere-canvas');
-    if (!canvas || typeof THREE === 'undefined') return;
-
-    const section = document.getElementById('benefits');
-    const W = () => section.offsetWidth;
-    const H = () => section.offsetHeight;
-
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-    renderer.setSize(W(), H());
-    renderer.setClearColor(0x000000, 0);
-
-    const scene  = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, W() / H(), 0.1, 100);
-    camera.position.set(7, 3, 9);
-    camera.lookAt(0, 0, 0);
-
-    // Outer wireframe sphere — denser IcosahedronGeometry
-    const sphereGeo = new THREE.IcosahedronGeometry(1.8, 2);
-    const sphereMat = new THREE.MeshBasicMaterial({
-      color: 0xf59e0b, wireframe: true, transparent: true, opacity: 0.08,
-    });
-    const sphere = new THREE.Mesh(sphereGeo, sphereMat);
-    scene.add(sphere);
-
-    // Inner point cloud — IcosahedronGeometry for denser, more uniform distribution
-    const innerGeo = new THREE.IcosahedronGeometry(1.2, 3);
-    const innerMat = new THREE.PointsMaterial({
-      color: 0x22d3ee, size: 0.035, transparent: true, opacity: 0.35,
-      sizeAttenuation: true, blending: THREE.AdditiveBlending, depthWrite: false,
-    });
-    const innerPoints = new THREE.Points(innerGeo, innerMat);
-    scene.add(innerPoints);
-
-    // Orbit rings — sleeker with thinner tubes
-    const ringData = [
-      { tiltX: 0,    tiltZ: 0,    color: 0xf59e0b, speed: 0.004, radius: 2.5, tube: 0.008 },
-      { tiltX: 1.1,  tiltZ: 0.4,  color: 0x22d3ee, speed: -0.006, radius: 3.0, tube: 0.007 },
-      { tiltX: 0.6,  tiltZ: -0.8, color: 0x34d399, speed: 0.005, radius: 3.5, tube: 0.006 },
-    ];
-
-    const rings = ringData.map(d => {
-      const geo = new THREE.TorusGeometry(d.radius, d.tube, 4, 80);
-      const mat = new THREE.MeshBasicMaterial({
-        color: d.color, transparent: true, opacity: 0.25,
-      });
-      const mesh = new THREE.Mesh(geo, mat);
-      mesh.rotation.x = d.tiltX;
-      mesh.rotation.z = d.tiltZ;
-      mesh.userData.speed = d.speed;
-      scene.add(mesh);
-      return mesh;
-    });
-
-    // Satellite dots on each ring
-    rings.forEach((ring, ri) => {
-      const dotGeo = new THREE.SphereGeometry(0.07, 8, 8);
-      const dotMat = new THREE.MeshBasicMaterial({
-        color: ringData[ri].color, transparent: true, opacity: 0.9,
-      });
-      const dot = new THREE.Mesh(dotGeo, dotMat);
-      dot.userData.radius = ringData[ri].radius;
-      dot.userData.speed  = ringData[ri].speed * 3;
-      dot.userData.angle  = Math.random() * Math.PI * 2;
-      ring.add(dot);
-    });
-
-    let scrollY = 0;
-    lenis.on('scroll', ({ scroll }) => { scrollY = scroll; });
-
-    const clock = new THREE.Clock();
-    function animate() {
-      requestAnimationFrame(animate);
-      const t = clock.getElapsedTime();
-
-      sphere.rotation.y = t * 0.05;
-      sphere.rotation.x = t * 0.025;
-      innerPoints.rotation.y = -t * 0.06;
-
-      rings.forEach(ring => {
-        ring.rotation.y += ring.userData.speed;
-        ring.children.forEach(dot => {
-          dot.userData.angle += dot.userData.speed;
-          dot.position.x = Math.cos(dot.userData.angle) * dot.userData.radius;
-          dot.position.z = Math.sin(dot.userData.angle) * dot.userData.radius;
-        });
-      });
-
-      // Parallax on scroll
-      const section = document.getElementById('benefits');
-      if (section) {
-        const rect = section.getBoundingClientRect();
-        const progress = Math.max(0, Math.min(1, -rect.top / rect.height + 0.5));
-        camera.position.y = 2 + progress * 1.5;
-      }
-
-      renderer.render(scene, camera);
-    }
-
-    animate();
-
-    window.addEventListener('resize', () => {
-      renderer.setSize(W(), H());
-      camera.aspect = W() / H();
-      camera.updateProjectionMatrix();
-    });
-  })();
-
-  // ═══════════════════════════════════════════════════════════
-  // LAYER 2d: THREE.JS — CTA Section DNA Double Helix
-  // ═══════════════════════════════════════════════════════════
-  (function initDNAHelix() {
-    // Insert canvas into CTA section dynamically
-    const ctaSection = document.querySelector('.cta-section');
-    if (!ctaSection || typeof THREE === 'undefined') return;
-
-    const canvas = document.createElement('canvas');
-    canvas.style.cssText = 'position:absolute;inset:0;z-index:0;pointer-events:none;width:100%;height:100%;';
-    canvas.setAttribute('aria-hidden', 'true');
-    ctaSection.insertBefore(canvas, ctaSection.firstChild);
-
-    const W = () => ctaSection.offsetWidth;
-    const H = () => ctaSection.offsetHeight;
-
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-    renderer.setSize(W(), H());
-    renderer.setClearColor(0x000000, 0);
-
-    const scene  = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(50, W() / H(), 0.1, 100);
-    camera.position.set(0, 0, 7);
-
-    // DNA double helix using points — dense for smooth strands
-    const helixCount = 300;
-    const strand1Pos = [];
-    const strand2Pos = [];
-    const connectors = [];
-
-    for (let i = 0; i < helixCount; i++) {
-      const t = (i / helixCount) * Math.PI * 8 - Math.PI * 4;
-      const y = (i / helixCount) * 10 - 5;
-
-      strand1Pos.push(Math.cos(t) * 1.5, y, Math.sin(t) * 0.4);
-      strand2Pos.push(Math.cos(t + Math.PI) * 1.5, y, Math.sin(t + Math.PI) * 0.4);
-
-      // Add connector rung every 8 points
-      if (i % 8 === 0) {
-        const pts = [
-          new THREE.Vector3(Math.cos(t) * 1.5, y, Math.sin(t) * 0.4),
-          new THREE.Vector3(Math.cos(t + Math.PI) * 1.5, y, Math.sin(t + Math.PI) * 0.4),
-        ];
-        const geo = new THREE.BufferGeometry().setFromPoints(pts);
-        const mat = new THREE.LineBasicMaterial({ color: 0x34d399, transparent: true, opacity: 0.12 });
-        connectors.push(new THREE.Line(geo, mat));
-        scene.add(connectors[connectors.length - 1]);
-      }
-    }
-
-    const s1Geo = new THREE.BufferGeometry();
-    s1Geo.setAttribute('position', new THREE.Float32BufferAttribute(strand1Pos, 3));
-    const s1Mat = new THREE.PointsMaterial({
-      color: 0xf59e0b, size: 0.04, transparent: true, opacity: 0.45,
-      sizeAttenuation: true, blending: THREE.AdditiveBlending, depthWrite: false,
-    });
-    const strand1 = new THREE.Points(s1Geo, s1Mat);
-    scene.add(strand1);
-
-    const s2Geo = new THREE.BufferGeometry();
-    s2Geo.setAttribute('position', new THREE.Float32BufferAttribute(strand2Pos, 3));
-    const s2Mat = new THREE.PointsMaterial({
-      color: 0x22d3ee, size: 0.04, transparent: true, opacity: 0.45,
-      sizeAttenuation: true, blending: THREE.AdditiveBlending, depthWrite: false,
-    });
-    const strand2 = new THREE.Points(s2Geo, s2Mat);
-    scene.add(strand2);
-
-    const group = new THREE.Group();
-    group.add(strand1, strand2, ...connectors);
-    scene.add(group);
-
-    const clock = new THREE.Clock();
-    function animate() {
-      requestAnimationFrame(animate);
-      const t = clock.getElapsedTime();
-      group.rotation.y = t * 0.2;
-      group.position.y = Math.sin(t * 0.35) * 0.15;
-      renderer.render(scene, camera);
-    }
-
-    animate();
-
-    window.addEventListener('resize', () => {
-      renderer.setSize(W(), H());
-      camera.aspect = W() / H();
-      camera.updateProjectionMatrix();
-    });
-  })();
-
-  // ═══════════════════════════════════════════════════════════
-  // LAYER 3: GSAP + ScrollTrigger (Web3D Pattern 1)
-  // Scroll-driven 3D text reveals, parallax, and section animations
+  // LAYER 3: GSAP + ScrollTrigger (Taste-Skill Motion)
+  // Fast, sub-300ms entrances without layout reflows or 3D blur
   // ═══════════════════════════════════════════════════════════
   (function initGSAP() {
     if (typeof gsap === 'undefined') return;
@@ -532,58 +128,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── 1. Horizontal stagger reveal for step cards ──
     gsap.fromTo('.step-card', {
-      opacity: 0, y: 60, rotateX: 15,
+      opacity: 0, y: 24,
     }, {
-      opacity: 1, y: 0, rotateX: 0,
-      duration: 0.9,
-      ease: 'power3.out',
-      stagger: 0.12,
+      opacity: 1, y: 0,
+      duration: 0.3,
+      ease: 'power2.out',
+      stagger: 0.08,
       scrollTrigger: {
         trigger: '.steps-grid',
-        start: 'top 80%',
-        end: 'bottom 60%',
+        start: 'top 85%',
         toggleActions: 'play none none none',
       },
     });
 
-    // ── 2. Benefit cards — cascade from left ──
+    // ── 2. Benefit cards ──
     gsap.fromTo('.benefit-card', {
-      opacity: 0, x: -40, scale: 0.95,
+      opacity: 0, y: 24,
     }, {
-      opacity: 1, x: 0, scale: 1,
-      duration: 0.8,
+      opacity: 1, y: 0,
+      duration: 0.3,
       ease: 'power2.out',
-      stagger: 0.1,
+      stagger: 0.06,
       scrollTrigger: {
         trigger: '.benefits-grid',
-        start: 'top 75%',
+        start: 'top 85%',
         toggleActions: 'play none none none',
       },
     });
 
-    // ── 3. Domain cards — scale in ──
+    // ── 3. Domain cards ──
     gsap.fromTo('.domain-card', {
-      opacity: 0, scale: 0.85, y: 30,
+      opacity: 0, y: 20,
     }, {
-      opacity: 1, scale: 1, y: 0,
-      duration: 0.6,
-      ease: 'back.out(1.5)',
-      stagger: 0.04,
+      opacity: 1, y: 0,
+      duration: 0.25,
+      ease: 'power2.out',
+      stagger: 0.03,
       scrollTrigger: {
         trigger: '.domains-grid',
-        start: 'top 80%',
+        start: 'top 85%',
         toggleActions: 'play none none none',
       },
     });
 
-    // ── 4. Section headers — slide up with blur ──
+    // ── 4. Section headers ──
     gsap.utils.toArray('.section-header').forEach(header => {
       gsap.fromTo(header, {
-        opacity: 0, y: 50, filter: 'blur(8px)',
+        opacity: 0, y: 20,
       }, {
-        opacity: 1, y: 0, filter: 'blur(0px)',
-        duration: 1.0,
-        ease: 'power3.out',
+        opacity: 1, y: 0,
+        duration: 0.35,
+        ease: 'power2.out',
         scrollTrigger: {
           trigger: header,
           start: 'top 85%',
@@ -592,31 +187,31 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // ── 5. Testimonials — 3D flip in ──
+    // ── 5. Testimonials ──
     gsap.fromTo('.testimonial-card', {
-      opacity: 0, rotateY: 20, z: -60, transformOrigin: 'left center',
+      opacity: 0, y: 24,
     }, {
-      opacity: 1, rotateY: 0, z: 0,
-      duration: 0.9,
-      ease: 'power3.out',
-      stagger: 0.15,
+      opacity: 1, y: 0,
+      duration: 0.3,
+      ease: 'power2.out',
+      stagger: 0.08,
       scrollTrigger: {
         trigger: '.testimonials-grid',
-        start: 'top 80%',
+        start: 'top 85%',
         toggleActions: 'play none none none',
       },
     });
 
-    // ── 6. CTA box — scale + glow entrance ──
+    // ── 6. CTA box ──
     gsap.fromTo('.cta-box', {
-      opacity: 0, scale: 0.92,
+      opacity: 0, y: 24,
     }, {
-      opacity: 1, scale: 1,
-      duration: 1.2,
-      ease: 'expo.out',
+      opacity: 1, y: 0,
+      duration: 0.35,
+      ease: 'power2.out',
       scrollTrigger: {
         trigger: '.cta-section',
-        start: 'top 75%',
+        start: 'top 80%',
         toggleActions: 'play none none none',
       },
     });
@@ -702,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { type: 'command', prompt: '$ ', text: 'git push origin fix/navbar-bug', delay: 5100 },
     { type: 'output',  text: 'PR → https://github.com/skillme-oss/.../pull/42', class: 'url', delay: 5800 },
     { type: 'empty',   delay: 6100 },
-    { type: 'output',  text: '✅ PR merged! +₹350 stipend points added.', class: 'success', delay: 6600 },
+    { type: 'output',  text: '✅ PR merged! +350 contribution score added.', class: 'success', delay: 6600 },
   ];
 
   let terminalDone = false;
@@ -817,72 +412,5 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
-
-  // ═══════════════════════════════════════════════════════════
-  // STAT COUNTERS
-  // ═══════════════════════════════════════════════════════════
-  const statData = [
-    { end: 500, prefix: '', suffix: '+' },
-    { end: 10,  prefix: '₹', suffix: 'K' },
-    { end: 12,  prefix: '', suffix: '+' },
-    { end: 100, prefix: '', suffix: '%' },
-  ];
-
-  new IntersectionObserver((entries) => {
-    if (!entries[0].isIntersecting) return;
-    document.querySelectorAll('.stat-number').forEach((el, i) => {
-      if (!statData[i]) return;
-      const { end, prefix, suffix } = statData[i];
-      const start = performance.now();
-      const duration = 1800;
-      function tick(now) {
-        const t = Math.min((now - start) / duration, 1);
-        const ease = 1 - Math.pow(1 - t, 3);
-        el.textContent = prefix + Math.floor(end * ease) + suffix;
-        if (t < 1) requestAnimationFrame(tick);
-      }
-      setTimeout(() => requestAnimationFrame(tick), i * 120);
-    });
-    entries[0].target._obs?.unobserve(entries[0].target);
-  }, { threshold: 0.7 }).observe(document.querySelector('.hero-stats') || document.body);
-
-  // ═══════════════════════════════════════════════════════════
-  // CURSOR GLOW (subtle ambient glow following cursor)
-  // ═══════════════════════════════════════════════════════════
-  const cursorGlow = document.createElement('div');
-  cursorGlow.style.cssText = `
-    position: fixed; pointer-events: none; z-index: 9999;
-    width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%);
-    border-radius: 50%; transform: translate(-50%, -50%);
-    transition: opacity 0.3s ease;
-    top: 0; left: 0;
-  `;
-  document.body.appendChild(cursorGlow);
-
-  // Update cursor glow on theme switch
-  function updateGlowTheme(theme) {
-    const color = theme === 'light'
-      ? 'radial-gradient(circle, rgba(0,0,0,0.02) 0%, transparent 70%)'
-      : 'radial-gradient(circle, rgba(245,158,11,0.04) 0%, transparent 70%)';
-    cursorGlow.style.background = color;
-  }
-  updateGlowTheme(html.getAttribute('data-theme'));
-  window.addEventListener('themechange', (e) => updateGlowTheme(e.detail.theme));
-
-  let glowX = 0, glowY = 0, glowTargetX = 0, glowTargetY = 0;
-
-  document.addEventListener('mousemove', (e) => {
-    glowTargetX = e.clientX;
-    glowTargetY = e.clientY;
-  });
-
-  (function animateGlow() {
-    glowX += (glowTargetX - glowX) * 0.08;
-    glowY += (glowTargetY - glowY) * 0.08;
-    cursorGlow.style.left = glowX + 'px';
-    cursorGlow.style.top  = glowY + 'px';
-    requestAnimationFrame(animateGlow);
-  })();
 
 });

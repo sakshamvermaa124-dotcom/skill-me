@@ -865,10 +865,10 @@ async function loadStats() {
   try {
     const data = await api('/api/admin/stats');
     grid.innerHTML = `
-      ${statCard('👥', data.total_students, 'Total Students', 'rgba(129,140,248,0.15)', '#818cf8')}
-      ${statCard('🟢', data.active_batches, 'Active Batches', 'rgba(52,211,153,0.15)', '#34d399')}
-      ${statCard('📋', data.pending_applications, 'Pending Applications', 'rgba(251,191,36,0.15)', '#fbbf24')}
-      ${statCard('🎯', data.total_issues_assigned, 'Issues Assigned', 'rgba(56,189,248,0.15)', '#38bdf8')}
+      ${statCard('👥', data.total_students, 'Total Students', 'rgba(201,154,78,0.12)', '#c99a4e')}
+      ${statCard('🟢', data.active_batches, 'Active Batches', 'rgba(79,163,107,0.15)', '#4fa36b')}
+      ${statCard('📋', data.pending_applications, 'Pending Applications', 'rgba(201,154,78,0.15)', '#d8ac63')}
+      ${statCard('🎯', data.total_issues_assigned, 'Issues Assigned', 'rgba(181,135,61,0.15)', '#b5873d')}
     `;
     const badge = document.getElementById('pending-badge');
     if (data.pending_applications > 0) {
@@ -999,7 +999,7 @@ function renderStudents(students) {
     <tr>
       <td>
         <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#818cf8,#38bdf8);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;flex-shrink:0;">${(s.first_name[0]||'?').toUpperCase()}</div>
+          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#c99a4e,#b5873d);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;flex-shrink:0;">${(s.first_name[0]||'?').toUpperCase()}</div>
           <div>
             <div style="font-weight:500;">${s.first_name} ${s.last_name}</div>
             ${s.github_username ? `<div style="font-size:0.72rem;color:var(--text-muted);">@${s.github_username}</div>` : ''}
@@ -1012,7 +1012,7 @@ function renderStudents(students) {
       <td style="color:var(--text-muted);font-size:0.82rem;">${fmtDate(s.created_at)}</td>
       <td>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          ${s.status === 'applied' ? `<button class="btn btn-sm" style="background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid rgba(56,189,248,0.25);" onclick="updateStatus(${s.id},'shortlisted')">Shortlist</button>` : ''}
+          ${s.status === 'applied' ? `<button class="btn btn-sm" style="background:rgba(201,154,78,0.12);color:#c99a4e;border:1px solid rgba(201,154,78,0.22);" onclick="updateStatus(${s.id},'shortlisted')">Shortlist</button>` : ''}
           ${s.status === 'shortlisted' ? `<button class="btn btn-sm" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.25);" onclick="openEnrollModal(${s.id},'${s.first_name} ${s.last_name}')">Enroll</button>` : ''}
           ${(s.status === 'completed' || s.status === 'enrolled') && s.batch_id ? `<button class="btn btn-sm" style="background:rgba(212,168,83,0.15);color:#d4a853;border:1px solid rgba(212,168,83,0.3);" onclick="issueCertificate(${s.id},${s.batch_id},'${s.first_name} ${s.last_name}')">🏅 Certificate</button>` : ''}
           ${s.status !== 'dropped' ? `<button class="btn btn-sm" style="background:rgba(251,113,133,0.12);color:#fb7185;border:1px solid rgba(251,113,133,0.2);" onclick="updateStatus(${s.id},'dropped')">Drop</button>` : ''}
