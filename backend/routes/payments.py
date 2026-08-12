@@ -111,7 +111,7 @@ async def create_order(req: CreateOrderRequest):
     amount = settings.certificate_price_paise
     
     # Handle special discount code for 5 INR (500 paise)
-    if req.discount_code and req.discount_code.strip().upper() == "SPECIAL5":
+    if req.discount_code and req.discount_code.strip().upper() == "BLACKYY":
         amount = 500
 
     # Create order via Razorpay API

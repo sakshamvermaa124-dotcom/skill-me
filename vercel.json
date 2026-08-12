@@ -1,5 +1,8 @@
 {
   "cleanUrls": true,
+  "rewrites": [
+    { "source": "/p/:github", "destination": "/portfolio.html" }
+  ],
   "headers": [
     {
       "source": "/config.js",

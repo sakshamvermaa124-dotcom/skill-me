@@ -299,6 +299,11 @@ document.addEventListener('DOMContentLoaded', () => {
       descEl.textContent = `Impressive progress! ${totalCompleted} of ${totalAssigned} issues done. You're on track for a strong finish.`;
     } else {
       descEl.textContent = `Outstanding! You've completed all ${totalAssigned} assigned issues. You're a star intern!`;
+      // Show 100% completion celebration popup (only once per session)
+      if (!sessionStorage.getItem('completion_popup_shown')) {
+        sessionStorage.setItem('completion_popup_shown', '1');
+        setTimeout(() => showCompletionPopup(student), 800);
+      }
     }
 
     // Animate ring after render
@@ -616,7 +621,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const domain = (data.progress[0] && data.progress[0].domain) || 'web-dev';
     const certUrl = `${FRONTEND}/certificate.html?email=${encodeURIComponent(email)}&student_id=${student.id}&batch_id=${data._batch_id}&name=${encodeURIComponent(student.name)}&domain=${encodeURIComponent(domain)}`;
     const dlUrl   = `${API}/api/certificates/download/${student.id}/${data._batch_id}`;
-    const portfolioUrl = `${FRONTEND}/p/${student.github || ''}`;
+    // Portfolio URL: /p/{github_username} — served from the same frontend domain
+    const portfolioUrl = student.github ? `${FRONTEND}/p/${student.github}` : '#';
     
     certSection.style.display = 'block';
     certSection.innerHTML = `
@@ -817,3 +823,98 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
+
+// ─── 100% Completion Celebration Popup ──────────────────────────────────────
+function showCompletionPopup(student) {
+  // Create overlay
+  const overlay = document.createElement('div');
+  overlay.id = 'completion-overlay';
+  overlay.style.cssText = `
+    position:fixed;inset:0;z-index:9999;
+    background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;transition:opacity 0.4s;
+  `;
+
+  const firstName = (student && student.name) ? student.name.split(' ')[0] : 'Intern';
+
+  overlay.innerHTML = `
+    <div style="
+      background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);
+      border:1px solid rgba(201,154,78,0.3);
+      border-radius:24px;padding:48px 40px;max-width:480px;width:90%;
+      text-align:center;position:relative;overflow:hidden;
+      box-shadow:0 0 80px rgba(201,154,78,0.15);
+    ">
+      <div style="font-size:3.5rem;margin-bottom:16px;">🏆</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:800;color:#fff;margin-bottom:8px;">
+        Congratulations, ${firstName}!
+      </div>
+      <div style="font-size:0.95rem;color:rgba(255,255,255,0.7);line-height:1.6;margin-bottom:28px;">
+        You've completed <strong style="color:#c99a4e;">100%</strong> of your internship tasks!<br>
+        Your certificate and LOR are now unlocked.
+      </div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <button onclick="document.getElementById('completion-overlay').remove()" style="
+          background:linear-gradient(135deg,#c99a4e,#e8b96e);color:#000;
+          border:none;border-radius:10px;padding:12px 28px;
+          font-weight:700;font-size:0.95rem;cursor:pointer;
+        ">View My Certificate 🎓</button>
+        <button onclick="document.getElementById('completion-overlay').remove()" style="
+          background:rgba(255,255,255,0.08);color:#fff;
+          border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px 28px;
+          font-weight:600;font-size:0.95rem;cursor:pointer;
+        ">Close</button>
+      </div>
+      <canvas id="confetti-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"></canvas>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.style.opacity = '1');
+
+  // Confetti burst
+  const canvas = overlay.querySelector('#confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+
+  const particles = Array.from({length: 80}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height * -1,
+    r: Math.random() * 5 + 2,
+    d: Math.random() * 30 + 10,
+    color: ['#c99a4e','#e8b96e','#fff','#4f46e5','#34d399'][Math.floor(Math.random()*5)],
+    tilt: Math.floor(Math.random() * 10) - 10,
+    tiltAngle: 0, tiltAngleInc: (Math.random() * 0.07) + 0.05
+  }));
+
+  let angle = 0, tick = 0;
+  function drawConfetti() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    angle += 0.01; tick++;
+    particles.forEach(p => {
+      p.tiltAngle += p.tiltAngleInc;
+      p.y += (Math.cos(angle + p.d) + 1 + p.r/2) * 1.2;
+      p.x += Math.sin(angle);
+      p.tilt = Math.sin(p.tiltAngle) * 12;
+      ctx.beginPath();
+      ctx.lineWidth = p.r;
+      ctx.strokeStyle = p.color;
+      ctx.moveTo(p.x + p.tilt + p.r/3, p.y);
+      ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r/5);
+      ctx.stroke();
+      if (p.y > canvas.height) { p.y = -10; p.x = Math.random() * canvas.width; }
+    });
+    if (tick < 300 && document.getElementById('completion-overlay')) requestAnimationFrame(drawConfetti);
+  }
+  requestAnimationFrame(drawConfetti);
+
+  // Auto-close after 8 seconds
+  setTimeout(() => {
+    if (document.getElementById('completion-overlay')) {
+      overlay.style.opacity = '0';
+      setTimeout(() => overlay.remove(), 400);
+    }
+  }, 8000);
+}
