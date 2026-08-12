@@ -562,32 +562,29 @@
     cert_id: 'Verifying...',
   });
 
+  async function generateCertId(studentId, batchId) {
+    const raw = `skillme-${studentId}-${batchId}`;
+    const encoder = new TextEncoder();
+    const data = encoder.encode(raw);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+    return `SM-${hashHex.substring(0,4)}-${hashHex.substring(4,8)}-${hashHex.substring(8,12)}`;
+  }
+
   async function loadCertificate() {
     // FAST PATH: if we have name + student_id + batch_id from URL, render immediately
-    // then fetch cert_id in background — no blocking API calls
+    // Calculate the real deterministic cert_id locally (no API calls)
     if (nameParam && studentId && batchId) {
+      const realCertId = await generateCertId(studentId, batchId);
       populateCertificate({
         holder: nameParam,
         domain: domainParam || 'web-dev',
         batch_number: batchId,
         issued_at: new Date().toISOString(),
-        cert_id: `SM-${String(studentId).padStart(4,'0')}-${String(batchId).padStart(4,'0')}`,
+        cert_id: realCertId,
       });
       showVerifyBadge(true, { holder: nameParam, issued_at: new Date().toISOString() });
-      // Background: try to get real cert_id from metadata (non-blocking)
-      fetch(`${API}/api/certificates/metadata/${studentId}/${batchId}`)
-        .then(r => r.ok ? r.json() : null)
-        .then(meta => {
-          if (meta && meta.cert_id) {
-            populateCertificate({
-              holder: nameParam,
-              domain: meta.domain || domainParam || 'web-dev',
-              batch_number: meta.batch_number || batchId,
-              issued_at: meta.issued_at || new Date().toISOString(),
-              cert_id: meta.cert_id,
-            });
-          }
-        }).catch(() => {});
       return;
     }
 
