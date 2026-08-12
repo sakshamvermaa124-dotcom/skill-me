@@ -222,11 +222,15 @@
     .cert-name {
       font-family: 'DM Serif Display', serif;
       font-weight: 400;
-      font-size: clamp(1.6rem, 4.5vw, 3rem);
+      font-size: clamp(1.2rem, 3.5vw, 2.4rem);
       color: var(--text);
       line-height: 1.1;
       margin: 4px 0 2px;
       text-shadow: 0 2px 20px rgba(201,168,76,0.1);
+      max-width: 90%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .cert-name-underline {
       height: 1.5px;
@@ -1017,7 +1021,16 @@
   }
 
   function populateCertificate(data) {
-    const name   = data.holder || data.student_name || 'Student';
+    // Properly title-case the name (handles ALL CAPS, all lowercase, GitHub usernames etc)
+    const rawName = data.holder || data.student_name || 'Student';
+    const name = rawName
+      .replace(/([a-z])([A-Z])/g, '$1 $2') // split camelCase
+      .replace(/[_-]/g, ' ')               // replace underscores/hyphens
+      .replace(/\s+/g, ' ').trim()
+      .split(' ')
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(' ');
+
     const domain = (data.domain || 'Web Development').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     const batch  = data.batch_number || '1';
     const id     = data.cert_id || '';
@@ -1025,8 +1038,13 @@
       ? new Date(data.issued_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
       : new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 
+    // Build domain label (avoid double 'Internship' if already present)
+    const domainLabel = domain.toLowerCase().includes('internship')
+      ? domain
+      : `${domain} Internship`;
+
     document.getElementById('cert-name').textContent = name;
-    document.getElementById('cert-domain').textContent = `${domain} Developer Internship`;
+    document.getElementById('cert-domain').textContent = domainLabel;
     document.getElementById('cert-batch-info').textContent = `#${batch}`;
     document.getElementById('cert-date').textContent = date;
     document.getElementById('cert-id').textContent = id;
