@@ -49,6 +49,11 @@ document.addEventListener('DOMContentLoaded', () => {
             student: { id: 999, name: "Saksham Verma", github: "sakshamverma124", domain: "Web Development" },
             progress: [{ week: 1, issues_completed: 4, issues_assigned: 4, prs_merged: 4, score: 100 }],
             submissions: [],
+            issues: [
+              { id: 1, github_issue_number: 7, title: "Build the Navigation Bar", week_number: 1, difficulty: "easy", status: "completed", github_url: "https://github.com/sakshamvermaa124-dotcom/web-dev-batch-1/issues/7" },
+              { id: 2, github_issue_number: 8, title: "Hero Section with Animation", week_number: 1, difficulty: "easy", status: "completed", github_url: "https://github.com/sakshamvermaa124-dotcom/web-dev-batch-1/issues/8" },
+              { id: 3, github_issue_number: 9, title: "Responsive Card Grid", week_number: 1, difficulty: "medium", status: "open", github_url: "https://github.com/sakshamvermaa124-dotcom/web-dev-batch-1/issues/9" }
+            ],
             _batch_id: 1,
             _email: "test@example.com"
         };
@@ -423,6 +428,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </a>` : ''}
         `;
         tasksList.appendChild(card);
+        if (typeof subObserver !== 'undefined') subObserver.observe(card);
       });
     } else {
       if (tasksEmpty) tasksEmpty.style.display = 'block';
