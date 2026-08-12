@@ -407,13 +407,6 @@
     </svg>
     Download PDF
   </button>
-  <button class="btn-verify" onclick="window.print()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
-      <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-      <rect x="6" y="14" width="12" height="8"/>
-    </svg>
-    Print
-  </button>
 </div>
 
 <!-- Certificate -->
@@ -570,14 +563,42 @@
   });
 
   async function loadCertificate() {
+    // FAST PATH: if we have name + student_id + batch_id from URL, render immediately
+    // then fetch cert_id in background — no blocking API calls
+    if (nameParam && studentId && batchId) {
+      populateCertificate({
+        holder: nameParam,
+        domain: domainParam || 'web-dev',
+        batch_number: batchId,
+        issued_at: new Date().toISOString(),
+        cert_id: `SM-${String(studentId).padStart(4,'0')}-${String(batchId).padStart(4,'0')}`,
+      });
+      showVerifyBadge(true, { holder: nameParam, issued_at: new Date().toISOString() });
+      // Background: try to get real cert_id from metadata (non-blocking)
+      fetch(`${API}/api/certificates/metadata/${studentId}/${batchId}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(meta => {
+          if (meta && meta.cert_id) {
+            populateCertificate({
+              holder: nameParam,
+              domain: meta.domain || domainParam || 'web-dev',
+              batch_number: meta.batch_number || batchId,
+              issued_at: meta.issued_at || new Date().toISOString(),
+              cert_id: meta.cert_id,
+            });
+          }
+        }).catch(() => {});
+      return;
+    }
+
     // Mode 1: direct cert_id verification
     if (certId) {
       await verifyCert(certId);
       return;
     }
 
-    // Mode 2: email-based lookup (most reliable)
-    if (email) {
+    // Mode 2: email-based lookup — only if we have no student_id
+    if (email && !studentId) {
       try {
         const res = await fetch(`${API}/api/students/progress/${encodeURIComponent(email)}`);
         if (!res.ok) throw new Error('Student not found');
@@ -595,14 +616,6 @@
     if (!studentId) {
       showError('No student identified. Use ?email=you@example.com or ?student_id=X&batch_id=Y');
       return;
-    }
-
-    // Resolve batchId from enrollment if still missing
-    if (!batchId) {
-      try {
-        const r = await fetch(`${API}/api/certificates/download/${studentId}/0`);
-        if (r.ok) { /* batch resolved server-side */ }
-      } catch(_) {}
     }
 
     await triggerAndDisplay();
