@@ -124,12 +124,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const submissionsHtml = data.submissions.length > 0 
       ? data.submissions.map(sub => {
-          // Use merged_at, fall back to submitted_at, fall back to 'N/A'
+          // Use merged_at, fall back to submitted_at
           const rawTs = sub.merged_at || sub.submitted_at || null;
           const rawDate = rawTs ? (rawTs.includes('T') ? rawTs.split('T')[0] : rawTs.split(' ')[0]) : null;
           const dateStr = rawDate
             ? new Date(rawDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-            : 'N/A';
+            : '';
           const repoUrl = sub.pr_url ? sub.pr_url.split('/pull/')[0] : '#';
           const repoName = repoUrl !== '#' ? repoUrl.split('/').slice(-2).join('/') : 'Repository';
           return `

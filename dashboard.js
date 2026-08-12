@@ -255,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Update dynamic GitHub Repo Link in Beginner Guide Step 1
       if (latest.repo_name) {
-        const org = 'skill-me-intern';
+        const org = 'sakshamvermaa124-dotcom';
         const repoUrl = `https://github.com/${org}/${latest.repo_name}/issues`;
         const guideLink = document.querySelector('.guide-repo-link');
         if (guideLink) {

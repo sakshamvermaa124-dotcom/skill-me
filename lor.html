@@ -12,6 +12,7 @@
   <script src="config.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjust: exact; }
 
     body {
       background: #0c0b0b;
@@ -56,6 +57,9 @@
     /* ─── LETTERHEAD ─── */
     .letterhead {
       background: linear-gradient(135deg, #0f1e5c 0%, #1a2d8a 60%, #0f1e5c 100%);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      color-adjust: exact;
       padding: 28px 48px 22px;
       display: flex;
       justify-content: space-between;
