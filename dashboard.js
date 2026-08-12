@@ -299,11 +299,8 @@ document.addEventListener('DOMContentLoaded', () => {
       descEl.textContent = `Impressive progress! ${totalCompleted} of ${totalAssigned} issues done. You're on track for a strong finish.`;
     } else {
       descEl.textContent = `Outstanding! You've completed all ${totalAssigned} assigned issues. You're a star intern!`;
-      // Show 100% completion celebration popup (only once per session)
-      if (!sessionStorage.getItem('completion_popup_shown')) {
-        sessionStorage.setItem('completion_popup_shown', '1');
-        setTimeout(() => showCompletionPopup(student), 800);
-      }
+      // Show 100% completion celebration popup every time
+      setTimeout(() => showCompletionPopup(student), 800);
     }
 
     // Animate ring after render
