@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       descEl.textContent = `Outstanding! You've completed all ${totalAssigned} assigned issues. You're a star intern!`;
       // Show 100% completion celebration popup every time
-      setTimeout(() => showCompletionPopup(student), 800);
+      setTimeout(() => showCompletionPopup(student, data), 800);
     }
 
     // Animate ring after render
@@ -823,7 +823,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // ─── 100% Completion Celebration Popup ──────────────────────────────────────
-function showCompletionPopup(student) {
+function showCompletionPopup(student, data) {
+  // Build certificate URL from available data
+  const FRONTEND = window.SKILLME_FRONTEND || window.location.origin;
+  const email    = (data && data._email) || '';
+  const domain   = (data && data.progress && data.progress[0] && data.progress[0].domain) || 'web-dev';
+  const batchId  = (data && data._batch_id) || '';
+  const certUrl  = `${FRONTEND}/certificate.html?email=${encodeURIComponent(email)}&student_id=${student ? student.id : ''}&batch_id=${batchId}&name=${encodeURIComponent(student ? student.name : '')}&domain=${encodeURIComponent(domain)}`;
+
   // Create overlay
   const overlay = document.createElement('div');
   overlay.id = 'completion-overlay';
@@ -853,7 +860,7 @@ function showCompletionPopup(student) {
         Your certificate and LOR are now unlocked.
       </div>
       <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-        <button onclick="document.getElementById('completion-overlay').remove()" style="
+        <button onclick="window.open('${certUrl}','_blank');document.getElementById('completion-overlay').remove()" style="
           background:linear-gradient(135deg,#c99a4e,#e8b96e);color:#000;
           border:none;border-radius:10px;padding:12px 28px;
           font-weight:700;font-size:0.95rem;cursor:pointer;
