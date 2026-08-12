@@ -33,6 +33,7 @@ router = APIRouter(prefix="/api/payments", tags=["payments"])
 class CreateOrderRequest(BaseModel):
     student_id: int = Field(..., description="Student database ID")
     batch_id: int = Field(..., description="Batch database ID")
+    discount_code: str | None = Field(None, description="Optional discount code")
 
 
 class VerifyPaymentRequest(BaseModel):
@@ -108,6 +109,10 @@ async def create_order(req: CreateOrderRequest):
         }
 
     amount = settings.certificate_price_paise
+    
+    # Handle special discount code for 5 INR (500 paise)
+    if req.discount_code and req.discount_code.strip().upper() == "SPECIAL5":
+        amount = 500
 
     # Create order via Razorpay API
     async with httpx.AsyncClient(timeout=15) as client:

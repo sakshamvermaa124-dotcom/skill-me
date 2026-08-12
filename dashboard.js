@@ -593,14 +593,17 @@ document.addEventListener('DOMContentLoaded', () => {
               A small fee of ₹129 is required to compensate for personalized LORs, verified certificate generation, automated task assignment infrastructure, and hosting your lifetime Proof of Work portfolio link.
             </div>
           </div>
-          <div class="cert-banner-actions">
-            <button id="pay-btn" class="cert-btn cert-btn-primary" onclick="initiatePayment(${student.id}, ${data._batch_id})">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
-                <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
-              </svg>
-              Pay ₹129 &amp; Activate Everything
-            </button>
-            <div style="font-size:11px;color:var(--text-3,#666);margin-top:4px;text-align:center;">
+          <div class="cert-banner-actions" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+            <div style="display: flex; gap: 8px; width: 100%;">
+              <input type="text" id="discount-code" placeholder="Discount Code (Optional)" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.5); color: #fff; outline: none; font-size: 14px; width: 180px;">
+              <button id="pay-btn" class="cert-btn cert-btn-primary" onclick="initiatePayment(${student.id}, ${data._batch_id})" style="flex: 1;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
+                  <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+                </svg>
+                Pay &amp; Activate Everything
+              </button>
+            </div>
+            <div style="font-size:11px;color:var(--text-3,#666);margin-top:4px;text-align:center; width: 100%;">
               Secured by Razorpay · UPI / Card / NetBanking
             </div>
           </div>
@@ -660,6 +663,8 @@ document.addEventListener('DOMContentLoaded', () => {
   window.initiatePayment = async function(studentId, batchId) {
     const btn = document.getElementById('pay-btn');
     const modalBtn = document.getElementById('modal-pay-btn');
+    const discountInput = document.getElementById('discount-code');
+    const discountCode = discountInput ? discountInput.value.trim() : null;
     
     if (btn) { btn.disabled = true; btn.textContent = 'Creating order...'; }
     if (modalBtn) { modalBtn.disabled = true; modalBtn.textContent = 'Creating order...'; }
@@ -669,14 +674,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const orderRes = await fetch(`${API}/api/payments/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ student_id: studentId, batch_id: batchId })
+        body: JSON.stringify({ student_id: studentId, batch_id: batchId, discount_code: discountCode })
       });
       const orderData = await orderRes.json();
 
       if (!orderRes.ok) {
         alert(orderData.detail || 'Could not create payment order. Try again.');
-        if (btn) { btn.disabled = false; btn.innerHTML = 'Pay ₹129 &amp; Activate Everything'; }
-        if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = 'Pay ₹129 &amp; Activate Everything'; }
+        if (btn) { btn.disabled = false; btn.innerHTML = 'Pay &amp; Activate Everything'; }
+        if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = 'Pay &amp; Activate Everything'; }
         return;
       }
 
