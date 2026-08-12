@@ -621,8 +621,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const domain = (data.progress[0] && data.progress[0].domain) || 'web-dev';
     const certUrl = `${FRONTEND}/certificate.html?email=${encodeURIComponent(email)}&student_id=${student.id}&batch_id=${data._batch_id}&name=${encodeURIComponent(student.name)}&domain=${encodeURIComponent(domain)}`;
     const dlUrl   = `${API}/api/certificates/download/${student.id}/${data._batch_id}`;
-    // Portfolio URL: /p/{github_username} — served from the same frontend domain
-    const portfolioUrl = student.github ? `${FRONTEND}/p/${student.github}` : '#';
+    // Portfolio URL: /portfolio.html?gh={github_username}
+    // (Vercel cleanUrls will automatically serve this as /portfolio?gh=...)
+    const portfolioUrl = student.github ? `${FRONTEND}/portfolio.html?gh=${student.github}` : '#';
     
     certSection.style.display = 'block';
     certSection.innerHTML = `

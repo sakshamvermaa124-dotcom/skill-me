@@ -17,16 +17,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     localStorage.setItem('skillme_portfolio_theme', newTheme);
   });
 
-  // Extract username from /p/{username}
+  // Extract username from ?gh=username (priority) or /p/{username}
+  const urlParams = new URLSearchParams(window.location.search);
   const pathParts = window.location.pathname.split('/');
-  const username = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+  const username = urlParams.get('gh') || pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
   
   const container = document.getElementById('content-container');
-
-  const urlParams = new URLSearchParams(window.location.search);
   const isPreview = urlParams.get('preview') === '1';
 
-  if (!username || username === 'p') {
+  if (!username || username === 'p' || username === 'portfolio.html') {
     if (!isPreview) {
       container.innerHTML = `
         <div class="locked-state">
