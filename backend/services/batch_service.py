@@ -103,10 +103,18 @@ class BatchService:
                 )
 
         github_webhook_created = False
-        if webhook_url:
+        # Resolve the webhook URL: prefer the explicitly passed value, then
+        # auto-build from BACKEND_URL env var so admins don't have to type it.
+        resolved_webhook_url = webhook_url
+        if not resolved_webhook_url and settings.backend_url:
+            resolved_webhook_url = settings.backend_url.rstrip("/") + "/api/webhooks/github"
+            logger.info(f"Auto-derived webhook URL: {resolved_webhook_url}")
+
+        if resolved_webhook_url:
             try:
-                await github_service.create_webhook(repo_name, webhook_url)
+                await github_service.create_webhook(repo_name, resolved_webhook_url)
                 github_webhook_created = True
+                logger.info(f"Webhook registered on {repo_name} → {resolved_webhook_url}")
             except Exception as e:
                 logger.error(f"Failed to create webhook for {repo_name}: {e}")
 

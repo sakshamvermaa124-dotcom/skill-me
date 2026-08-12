@@ -215,7 +215,8 @@ async def sync_batch_prs(batch_id: int, _: str = Depends(require_admin)):
                     batch_id=batch_id,
                     student_github_username=pr_user,
                     pr_number=pr_number,
-                    pr_url=pr_url
+                    pr_url=pr_url,
+                    pr_head_branch=pr.get("head", {}).get("ref") or None,
                 )
             await batch_service.update_submission_status(
                 batch_id=batch_id,
@@ -225,6 +226,48 @@ async def sync_batch_prs(batch_id: int, _: str = Depends(require_admin)):
             merged_count += 1
             
     return {"status": "synced", "batch_id": batch_id, "merged_prs_processed": merged_count, "already_synced": skipped_count}
+
+
+@router.post("/batches/{batch_id}/setup-webhook", summary="Attach GitHub webhook to an existing batch")
+async def setup_batch_webhook(batch_id: int, _: str = Depends(require_admin)):
+    """
+    Register a GitHub webhook on the batch's repo pointing to this backend.
+    Use this to fix batches that were created before BACKEND_URL was configured,
+    or where webhook registration failed during batch creation.
+    Requires BACKEND_URL to be set in the environment.
+    """
+    if not settings.backend_url:
+        raise HTTPException(
+            status_code=400,
+            detail="BACKEND_URL is not configured. Set it in your Render environment variables to enable auto-webhook registration."
+        )
+
+    batch = await db.fetch_one("SELECT * FROM batches WHERE id = ?", (batch_id,))
+    if not batch:
+        raise HTTPException(status_code=404, detail="Batch not found")
+
+    repo_name = batch["repo_name"]
+    webhook_url = settings.backend_url.rstrip("/") + "/api/webhooks/github"
+
+    try:
+        result = await github_service.create_webhook(repo_name, webhook_url)
+        return {
+            "status": "webhook_created",
+            "repo": repo_name,
+            "webhook_url": webhook_url,
+            "webhook_id": result.get("id"),
+        }
+    except Exception as e:
+        error_msg = str(e)
+        # GitHub returns 422 if a webhook with the same URL already exists
+        if "already exists" in error_msg or "422" in error_msg:
+            return {
+                "status": "already_exists",
+                "repo": repo_name,
+                "webhook_url": webhook_url,
+                "message": "A webhook pointing to this URL already exists on the repo.",
+            }
+        raise HTTPException(status_code=502, detail=f"Failed to create webhook on GitHub: {error_msg}")
 
 
 @router.delete("/batches/{batch_id}", summary="Delete a batch and all related data")

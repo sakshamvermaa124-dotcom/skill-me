@@ -1119,6 +1119,10 @@ async function loadBatches(silent = false) {
             </div>
             <div class="batch-card-actions">
               ${statusBadge(b.status)}
+              <button class="btn btn-ghost btn-sm" onclick="setupWebhook(${b.id}, this)" title="Register GitHub webhook so PRs are tracked in real-time">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                Setup Webhook
+              </button>
               <button class="btn btn-ghost btn-sm" onclick="syncBatchPRs(${b.id}, this)" title="Fetch all merged PRs from GitHub and update student scores">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
                 Sync PRs
@@ -1174,6 +1178,30 @@ function formatWeeksAssigned(raw) {
     if (!arr.length) return 'None';
     return arr.map(w => `W${w}`).join(', ');
   } catch { return 'None'; }
+}
+
+async function setupWebhook(batchId, btnEl) {
+  const btn = btnEl || event.currentTarget;
+  const origContent = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg> Setting up...`;
+  try {
+    const result = await api(`/api/admin/batches/${batchId}/setup-webhook`, { method: 'POST' });
+    if (result.status === 'already_exists') {
+      toast(`Webhook already active on this repo — PRs are being tracked ✅`);
+    } else {
+      toast(`✅ Webhook registered! Future merged PRs will auto-update student scores.`);
+    }
+  } catch(e) {
+    if (e.message && e.message.includes('BACKEND_URL')) {
+      toast(`Set BACKEND_URL in Render env vars first (your API public URL)`, 'error');
+    } else {
+      toast(`Webhook setup failed: ${e.message}`, 'error');
+    }
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = origContent;
+  }
 }
 
 async function syncBatchPRs(batchId, btnEl) {

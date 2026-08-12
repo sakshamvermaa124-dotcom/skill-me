@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     # Server
     port: int = 8000
     host: str = "0.0.0.0"
+    # The public URL of this backend — used to auto-register GitHub webhooks.
+    # Set this to your Render service URL, e.g. https://skill-me-api.onrender.com
+    backend_url: str = ""
 
     # Webhook
     webhook_secret: str = ""
