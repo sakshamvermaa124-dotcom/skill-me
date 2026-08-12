@@ -50,12 +50,12 @@ async def get_portfolio(github_username: str):
 
     # 5. Fetch their recent merged submissions to act as "Proof of Work"
     submissions = await db.fetch_all(
-        """SELECT s.pr_url, s.pr_number, s.merged_at, i.title, b.domain 
+        """SELECT s.pr_url, s.pr_number, s.merged_at, s.submitted_at, i.title, b.domain 
            FROM submissions s
            JOIN issues i ON s.issue_id = i.id
            JOIN batches b ON s.batch_id = b.id
            WHERE s.student_id = ? AND s.status = 'merged'
-           ORDER BY s.merged_at DESC
+           ORDER BY COALESCE(s.merged_at, s.submitted_at) DESC
            LIMIT 10""",
         (student_id,)
     )

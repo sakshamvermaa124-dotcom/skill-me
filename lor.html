@@ -270,10 +270,11 @@
     .loading-state { color: #64748b; font-size: 0.88rem; }
 
     /* ─── PRINT ─── */
+    @page { size: A4 portrait; margin: 0; }
     @media print {
       body { background: #fff !important; padding: 0 !important; margin: 0 !important; }
       .action-bar, .verify-section { display: none !important; }
-      .doc-wrap { max-width: 100% !important; }
+      .doc-wrap { max-width: 100% !important; width: 100% !important; }
       .document {
         box-shadow: none !important;
         border-radius: 0 !important;
@@ -554,37 +555,13 @@
 
   loadLOR();
 
-  // Download PDF using html2pdf (preserves colors, single page)
-  document.getElementById('btn-download-pdf').addEventListener('click', async function() {
-    const btn = this;
-    btn.disabled = true;
-    btn.textContent = 'Generating...';
-
-    const el = document.getElementById('lor-document');
-    const studentName = document.getElementById('lb-name')?.textContent || 'LOR';
-    const filename = `SkillMe_LOR_${studentName.replace(/\s+/g,'_')}.pdf`;
-
-    await html2pdf().set({
-      margin: 0,
-      filename: filename,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        logging: false
-      },
-      jsPDF: {
-        unit: 'mm',
-        format: 'a4',
-        orientation: 'portrait'
-      },
-      pagebreak: { mode: 'avoid-all' }
-    }).from(el).save();
-
-    btn.disabled = false;
-    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download PDF`;
+  // Download PDF — instant browser print-to-PDF (no heavy canvas rendering)
+  document.getElementById('btn-download-pdf').addEventListener('click', function() {
+    // Add class to force dark colors in print (in case browser strips backgrounds)
+    document.body.classList.add('force-print-colors');
+    window.print();
+    // Remove class after print dialog closes
+    setTimeout(() => document.body.classList.remove('force-print-colors'), 1000);
   });
 </script>
 </body>
