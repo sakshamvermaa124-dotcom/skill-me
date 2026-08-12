@@ -618,10 +618,42 @@ document.addEventListener('DOMContentLoaded', () => {
     const domain = (data.progress[0] && data.progress[0].domain) || 'web-dev';
     const certUrl = `${FRONTEND}/certificate.html?email=${encodeURIComponent(email)}&student_id=${student.id}&batch_id=${data._batch_id}&name=${encodeURIComponent(student.name)}&domain=${encodeURIComponent(domain)}`;
     const dlUrl   = `${API}/api/certificates/download/${student.id}/${data._batch_id}`;
-    // Portfolio URL: /portfolio.html?gh={github_username}
-    // (Vercel cleanUrls will automatically serve this as /portfolio?gh=...)
+    const lorUrl  = `${FRONTEND}/lor.html?student_id=${student.id}&batch_id=${data._batch_id}&name=${encodeURIComponent(student.name)}&domain=${encodeURIComponent(domain)}`;
     const portfolioUrl = student.github ? `${FRONTEND}/portfolio.html?gh=${student.github}` : '#';
-    
+
+    // ── Credential quick-strip (above banner) ─────────────────────────────────
+    const credStrip = document.getElementById('cred-strip');
+    if (credStrip) {
+      credStrip.className = 'cred-strip visible';
+      credStrip.innerHTML = `
+        <a href="${certUrl}" target="_blank" class="cred-pill" style="border-color:rgba(212,168,83,0.25);">
+          <div class="cred-pill-icon" style="background:rgba(212,168,83,0.12);color:#d4a853;">🎓</div>
+          <div class="cred-pill-text">
+            <div class="cred-pill-label">Certificate</div>
+            <div class="cred-pill-name">View &amp; Download</div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.4;flex-shrink:0;"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="${lorUrl}" target="_blank" class="cred-pill" style="border-color:rgba(99,102,241,0.2);">
+          <div class="cred-pill-icon" style="background:rgba(99,102,241,0.12);color:#a5b4fc;">📄</div>
+          <div class="cred-pill-text">
+            <div class="cred-pill-label">Letter of Recommendation</div>
+            <div class="cred-pill-name">View LOR</div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.4;flex-shrink:0;"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="${portfolioUrl}" target="${portfolioUrl !== '#' ? '_blank' : '_self'}" class="cred-pill" style="border-color:rgba(52,211,153,0.2);${portfolioUrl === '#' ? 'opacity:0.5;pointer-events:none;' : ''}">
+          <div class="cred-pill-icon" style="background:rgba(52,211,153,0.12);color:#34d399;">🌐</div>
+          <div class="cred-pill-text">
+            <div class="cred-pill-label">Proof of Work</div>
+            <div class="cred-pill-name">Public Portfolio</div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.4;flex-shrink:0;"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      `;
+    }
+
+    // ── Certificate banner ────────────────────────────────────────────────────
     certSection.style.display = 'block';
     certSection.innerHTML = `
       <div class="cert-banner">
@@ -632,11 +664,11 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="cert-banner-sub">Payment confirmed • Access your Proof of Work Portfolio, LOR, and Certificate below!</div>
           </div>
           <div class="cert-banner-actions" style="flex-wrap: wrap; gap: 8px;">
-            <a href="${portfolioUrl}" target="_blank" class="cert-btn" style="background:var(--accent-indigo); color:#111; border:none; font-weight:700;">
+            <a href="${portfolioUrl}" target="_blank" class="cert-btn" style="background:var(--accent-indigo); color:#fff; border:none; font-weight:700;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line>
               </svg>
-              View Public Portfolio
+              Portfolio
             </a>
             <a href="${certUrl}" target="_blank" class="cert-btn cert-btn-primary">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
@@ -645,9 +677,9 @@ document.addEventListener('DOMContentLoaded', () => {
               </svg>
               Certificate
             </a>
-            <a href="${FRONTEND}/lor.html?student_id=${student.id}&batch_id=${data._batch_id}&name=${encodeURIComponent(student.name)}&domain=${encodeURIComponent(domain)}" target="_blank" class="cert-btn cert-btn-secondary" style="border-color:rgba(201,154,78,0.4); color:var(--accent-indigo);">
+            <a href="${lorUrl}" target="_blank" class="cert-btn cert-btn-secondary" style="border-color:rgba(201,154,78,0.4);">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
               </svg>
               LOR
             </a>
@@ -662,6 +694,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `;
   }
+
 
   // Exposed globally so the onclick in the banner HTML can call it
   window.initiatePayment = async function(studentId, batchId) {
@@ -824,12 +857,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ─── 100% Completion Celebration Popup ──────────────────────────────────────
 function showCompletionPopup(student, data) {
-  // Build certificate URL from available data
+  // Build credential URLs from available data
   const FRONTEND = window.SKILLME_FRONTEND || window.location.origin;
   const email    = (data && data._email) || '';
   const domain   = (data && data.progress && data.progress[0] && data.progress[0].domain) || 'web-dev';
   const batchId  = (data && data._batch_id) || '';
-  const certUrl  = `${FRONTEND}/certificate.html?email=${encodeURIComponent(email)}&student_id=${student ? student.id : ''}&batch_id=${batchId}&name=${encodeURIComponent(student ? student.name : '')}&domain=${encodeURIComponent(domain)}`;
+  const name     = (student && student.name) || '';
+  const certUrl  = `${FRONTEND}/certificate.html?email=${encodeURIComponent(email)}&student_id=${student ? student.id : ''}&batch_id=${batchId}&name=${encodeURIComponent(name)}&domain=${encodeURIComponent(domain)}`;
+  const lorUrl   = `${FRONTEND}/lor.html?student_id=${student ? student.id : ''}&batch_id=${batchId}&name=${encodeURIComponent(name)}&domain=${encodeURIComponent(domain)}`;
+  const portfolioUrl = (student && student.github) ? `${FRONTEND}/portfolio.html?gh=${student.github}` : '#';
 
   // Create overlay
   const overlay = document.createElement('div');
@@ -847,31 +883,65 @@ function showCompletionPopup(student, data) {
     <div style="
       background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);
       border:1px solid rgba(201,154,78,0.3);
-      border-radius:24px;padding:48px 40px;max-width:480px;width:90%;
+      border-radius:24px;padding:44px 36px 36px;max-width:500px;width:92%;
       text-align:center;position:relative;overflow:hidden;
-      box-shadow:0 0 80px rgba(201,154,78,0.15);
+      box-shadow:0 0 80px rgba(201,154,78,0.15), 0 24px 64px rgba(0,0,0,0.5);
     ">
-      <div style="font-size:3.5rem;margin-bottom:16px;">🏆</div>
-      <div style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:800;color:#fff;margin-bottom:8px;">
+      <!-- Glow -->
+      <div style="position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:200px;height:200px;background:radial-gradient(circle,rgba(201,154,78,0.18) 0%,transparent 70%);pointer-events:none;"></div>
+
+      <div style="font-size:3.2rem;margin-bottom:12px;position:relative;">🏆</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:1.55rem;font-weight:800;color:#fff;margin-bottom:8px;position:relative;">
         Congratulations, ${firstName}!
       </div>
-      <div style="font-size:0.95rem;color:rgba(255,255,255,0.7);line-height:1.6;margin-bottom:28px;">
+      <div style="font-size:0.9rem;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:28px;position:relative;">
         You've completed <strong style="color:#c99a4e;">100%</strong> of your internship tasks!<br>
-        Your certificate and LOR are now unlocked.
+        Your credentials are now unlocked and ready to share.
       </div>
-      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+
+      <!-- Credential buttons grid -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;position:relative;">
         <button onclick="window.open('${certUrl}','_blank');document.getElementById('completion-overlay').remove()" style="
           background:linear-gradient(135deg,#c99a4e,#e8b96e);color:#000;
-          border:none;border-radius:10px;padding:12px 28px;
-          font-weight:700;font-size:0.95rem;cursor:pointer;
-        ">View My Certificate 🎓</button>
-        <button onclick="document.getElementById('completion-overlay').remove()" style="
-          background:rgba(255,255,255,0.08);color:#fff;
-          border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px 28px;
-          font-weight:600;font-size:0.95rem;cursor:pointer;
-        ">Close</button>
+          border:none;border-radius:12px;padding:13px 8px;
+          font-weight:700;font-size:0.78rem;cursor:pointer;
+          display:flex;flex-direction:column;align-items:center;gap:6px;
+          transition:transform 0.2s,opacity 0.2s;
+        " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+          <span style="font-size:1.3rem;">🎓</span>
+          Certificate
+        </button>
+        <button onclick="window.open('${lorUrl}','_blank');document.getElementById('completion-overlay').remove()" style="
+          background:rgba(99,102,241,0.2);color:#a5b4fc;
+          border:1px solid rgba(99,102,241,0.35);border-radius:12px;padding:13px 8px;
+          font-weight:700;font-size:0.78rem;cursor:pointer;
+          display:flex;flex-direction:column;align-items:center;gap:6px;
+          transition:transform 0.2s,opacity 0.2s;
+        " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+          <span style="font-size:1.3rem;">📄</span>
+          View LOR
+        </button>
+        <button onclick="${portfolioUrl !== '#' ? `window.open('${portfolioUrl}','_blank');` : ''}document.getElementById('completion-overlay').remove()" style="
+          background:rgba(52,211,153,0.15);color:#34d399;
+          border:1px solid rgba(52,211,153,0.3);border-radius:12px;padding:13px 8px;
+          font-weight:700;font-size:0.78rem;cursor:pointer;
+          display:flex;flex-direction:column;align-items:center;gap:6px;
+          transition:transform 0.2s,opacity 0.2s;
+          ${portfolioUrl === '#' ? 'opacity:0.5;cursor:not-allowed;' : ''}
+        " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+          <span style="font-size:1.3rem;">🌐</span>
+          Portfolio
+        </button>
       </div>
-      <canvas id="confetti-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"></canvas>
+
+      <button onclick="document.getElementById('completion-overlay').remove()" style="
+        background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);
+        border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 28px;
+        font-weight:500;font-size:0.85rem;cursor:pointer;width:100%;
+        position:relative;transition:background 0.2s;
+      " onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">Dismiss</button>
+
+      <canvas id="confetti-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;border-radius:24px;"></canvas>
     </div>
   `;
 

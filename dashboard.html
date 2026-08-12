@@ -9,7 +9,7 @@
   
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
   <style>
     /* Global dashboard background override */
@@ -279,66 +279,85 @@
     /* Stats Grid */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 32px;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 14px;
+      margin-bottom: 28px;
     }
     .stat-card {
       background: var(--bg-card);
       border: var(--border-glass);
-      border-radius: 20px;
-      padding: 28px;
+      border-radius: 18px;
+      padding: 24px 24px 22px;
       backdrop-filter: blur(15px);
       -webkit-backdrop-filter: blur(15px);
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      opacity: 1;
-      transform: none;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
     }
-    .stat-card.visible {
-      opacity: 1;
-      transform: translateY(0);
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      border-radius: 18px 0 0 18px;
+      background: var(--stat-accent, rgba(255,255,255,0.1));
     }
     .stat-card:hover {
-      transform: translateY(-4px);
+      transform: translateY(-3px);
       border-color: rgba(255,255,255,0.12);
-      box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.2);
+    }
+    .stat-card-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
     }
     .stat-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
-      margin-bottom: 16px;
-      background: rgba(212, 160, 67, 0.1);
-      border: 1px solid rgba(212, 160, 67, 0.2);
-      color: var(--accent-indigo);
+      font-size: 17px;
+      background: var(--stat-icon-bg, rgba(255,255,255,0.05));
+      border: 1px solid var(--stat-icon-border, rgba(255,255,255,0.08));
+    }
+    .stat-trend {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: rgba(52,211,153,0.1);
+      color: #34d399;
+      border: 1px solid rgba(52,211,153,0.15);
     }
     .stat-label {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: var(--text-secondary);
       text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 8px;
+      letter-spacing: 1.2px;
+      margin-bottom: 6px;
+      font-weight: 600;
     }
     .stat-value {
-      font-size: 2.4rem;
+      font-size: 2.2rem;
       font-weight: 800;
       color: var(--text-primary);
       line-height: 1;
       font-variant-numeric: tabular-nums;
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
     }
     .stat-value .stat-unit {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       font-weight: 500;
       color: var(--text-muted);
     }
 
     /* Progress Ring */
     .progress-section {
-      margin-bottom: 32px;
+      margin-bottom: 28px;
       opacity: 1;
       transform: none;
     }
@@ -349,17 +368,23 @@
       background: var(--bg-card);
       border: var(--border-glass);
       border-radius: 20px;
-      padding: 32px;
+      padding: 28px 32px;
       backdrop-filter: blur(15px);
       display: flex;
       align-items: center;
-      gap: 40px;
+      gap: 36px;
+      position: relative;
+      overflow: hidden;
+    }
+    .progress-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(201,154,78,0.4), transparent);
     }
     @media (max-width: 600px) {
-      .progress-card {
-        flex-direction: column;
-        text-align: center;
-      }
+      .progress-card { flex-direction: column; text-align: center; gap: 20px; }
     }
     .progress-ring-wrap {
       position: relative;
@@ -374,41 +399,83 @@
       justify-content: center;
     }
     .progress-ring-pct {
-      font-size: 2.2rem;
+      font-size: 2rem;
       font-weight: 800;
       color: var(--text-primary);
+      font-family: 'Space Grotesk', sans-serif;
     }
     .progress-ring-sub {
-      font-size: 0.75rem;
+      font-size: 0.68rem;
       color: var(--text-secondary);
       text-transform: uppercase;
       letter-spacing: 1px;
     }
+    .progress-details { flex: 1; }
     .progress-details h3 {
-      font-size: 1.3rem;
+      font-size: 1.15rem;
       font-weight: 700;
       color: var(--text-primary);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
+      font-family: 'Space Grotesk', sans-serif;
     }
     .progress-details p {
       color: var(--text-secondary);
-      font-size: 0.95rem;
+      font-size: 0.88rem;
       line-height: 1.6;
+      margin-bottom: 14px;
     }
     .progress-bar-track {
-      height: 6px;
+      height: 5px;
       background: var(--bg-card-hover);
       border-radius: 3px;
       overflow: hidden;
-      margin-top: 16px;
     }
     .progress-bar-inner {
       height: 100%;
       border-radius: 3px;
-      background: linear-gradient(90deg, #c99a4e, #b5873d, #d8ac63);
+      background: linear-gradient(90deg, #c99a4e, #d8ac63);
       width: 0%;
       transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
+    /* Credential quick-strip (shown when paid) */
+    .cred-strip {
+      display: none;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .cred-strip.visible { display: grid; }
+    .cred-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      background: var(--bg-card);
+      border: var(--border-glass);
+      border-radius: 14px;
+      text-decoration: none;
+      color: var(--text-primary);
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: all 0.25s;
+      cursor: pointer;
+    }
+    .cred-pill:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,0.15);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+    .cred-pill-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .cred-pill-text { flex: 1; }
+    .cred-pill-label { font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 1px; text-transform: uppercase; letter-spacing: 0.8px; }
+    .cred-pill-name { font-size: 0.85rem; font-weight: 700; }
+    @media (max-width: 600px) { .cred-strip { grid-template-columns: 1fr; } }
 
     /* Submissions Section */
     .submissions-section {
@@ -422,21 +489,33 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
     .section-header h2 {
-      font-size: 1.4rem;
+      font-size: 1.15rem;
       font-weight: 700;
       color: var(--text-primary);
+      font-family: 'Space Grotesk', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-header h2::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 16px;
+      border-radius: 2px;
+      background: linear-gradient(180deg, #c99a4e, #d8ac63);
     }
     .section-header .count-badge {
       padding: 4px 12px;
       border-radius: 100px;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 600;
-      background: rgba(99,102,241,0.15);
+      background: rgba(99,102,241,0.12);
       color: #a5b4fc;
-      border: 1px solid rgba(99,102,241,0.2);
+      border: 1px solid rgba(99,102,241,0.18);
     }
 
     /* Submission Cards */
@@ -516,23 +595,26 @@
     /* Empty State */
     .empty-state {
       text-align: center;
-      padding: 60px 20px;
-      background: rgba(255,255,255,0.02);
-      border: 1px dashed rgba(255,255,255,0.08);
-      border-radius: 20px;
+      padding: 48px 20px;
+      background: rgba(255,255,255,0.015);
+      border: 1px dashed rgba(255,255,255,0.07);
+      border-radius: 16px;
     }
     .empty-state .empty-icon {
-      font-size: 48px;
-      margin-bottom: 16px;
+      font-size: 40px;
+      margin-bottom: 14px;
+      opacity: 0.6;
     }
     .empty-state h3 {
-      font-size: 1.2rem;
-      color: rgba(255,255,255,0.6);
-      margin-bottom: 8px;
+      font-size: 1rem;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 6px;
+      font-weight: 600;
     }
     .empty-state p {
-      color: rgba(255,255,255,0.35);
-      font-size: 0.9rem;
+      color: rgba(255,255,255,0.28);
+      font-size: 0.85rem;
+      line-height: 1.5;
     }
 
     /* Animations */
@@ -1147,30 +1229,38 @@
 
       <!-- Stats Row -->
       <div class="stats-grid" id="stats-grid-el">
-        <div class="stat-card" id="stat-card-1">
-          <div class="stat-icon purple">
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#a78bfa" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+        <div class="stat-card" id="stat-card-1" style="--stat-accent:linear-gradient(180deg,#a78bfa,#7c3aed);--stat-icon-bg:rgba(167,139,250,0.1);--stat-icon-border:rgba(167,139,250,0.2);">
+          <div class="stat-card-row">
+            <div class="stat-icon">
+              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#a78bfa" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
           </div>
           <div class="stat-label">Issues Done</div>
-          <div class="stat-value"><span id="stat-completed">0</span> <span class="stat-unit">/ <span id="stat-assigned">0</span></span></div>
+          <div class="stat-value"><span id="stat-completed">0</span><span class="stat-unit"> / <span id="stat-assigned">0</span></span></div>
         </div>
-        <div class="stat-card" id="stat-card-2">
-          <div class="stat-icon green">
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#34d399" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+        <div class="stat-card" id="stat-card-2" style="--stat-accent:linear-gradient(180deg,#34d399,#059669);--stat-icon-bg:rgba(52,211,153,0.1);--stat-icon-border:rgba(52,211,153,0.2);">
+          <div class="stat-card-row">
+            <div class="stat-icon">
+              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#34d399" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+            </div>
           </div>
           <div class="stat-label">PRs Merged</div>
           <div class="stat-value" id="stat-prs">0</div>
         </div>
-        <div class="stat-card" id="stat-card-3">
-          <div class="stat-icon blue">
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#60a5fa" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        <div class="stat-card" id="stat-card-3" style="--stat-accent:linear-gradient(180deg,#60a5fa,#2563eb);--stat-icon-bg:rgba(96,165,250,0.1);--stat-icon-border:rgba(96,165,250,0.2);">
+          <div class="stat-card-row">
+            <div class="stat-icon">
+              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#60a5fa" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </div>
           </div>
           <div class="stat-label">Current Week</div>
           <div class="stat-value" id="stat-week">1</div>
         </div>
-        <div class="stat-card" id="stat-card-4">
-          <div class="stat-icon amber">
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#d8ac63" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <div class="stat-card" id="stat-card-4" style="--stat-accent:linear-gradient(180deg,#d8ac63,#b5873d);--stat-icon-bg:rgba(216,172,99,0.1);--stat-icon-border:rgba(216,172,99,0.2);">
+          <div class="stat-card-row">
+            <div class="stat-icon">
+              <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#d8ac63" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
           </div>
           <div class="stat-label">Score</div>
           <div class="stat-value" id="stat-score">0</div>
@@ -1208,6 +1298,9 @@
           </div>
         </div>
       </div>
+
+      <!-- Credential Quick-Access Strip (visible when paid) -->
+      <div class="cred-strip" id="cred-strip"></div>
 
       <!-- Certificate Section -->
       <div id="cert-section" style="display:none;"></div>
