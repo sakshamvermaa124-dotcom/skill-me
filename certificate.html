@@ -269,7 +269,7 @@
     .cert-details-row {
       width: 100%;
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 8px;
       padding: 8px 2%;
       margin: 4px 0;
@@ -711,10 +711,6 @@
           <div class="cert-detail-value" id="cert-duration">4 Weeks</div>
         </div>
         <div class="cert-detail-item">
-          <div class="cert-detail-label">Batch</div>
-          <div class="cert-detail-value" id="cert-batch-info">#1</div>
-        </div>
-        <div class="cert-detail-item">
           <div class="cert-detail-label">Mode</div>
           <div class="cert-detail-value">Remote</div>
         </div>
@@ -1051,7 +1047,8 @@
 
     document.getElementById('cert-name').textContent = name;
     document.getElementById('cert-domain').textContent = domainLabel;
-    document.getElementById('cert-batch-info').textContent = `#${batch}`;
+    const batchEl = document.getElementById('cert-batch-info');
+    if (batchEl) batchEl.textContent = `#${batch}`;
     document.getElementById('cert-date').textContent = date;
     document.getElementById('cert-id').textContent = id;
     document.getElementById('cert-id-badge').textContent = id || 'PREVIEW';
