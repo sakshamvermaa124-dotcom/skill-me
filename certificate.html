@@ -9,6 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root {
       --gold: #b8860b;
@@ -390,6 +392,7 @@
       .certificate { min-width: 500px; }
       .verify-section { flex-direction: column; align-items: flex-start; gap: 10px; }
     }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <script src="config.js"></script>
@@ -477,6 +480,10 @@
         <div class="cert-detail-item">
           <div class="cert-detail-label">Duration</div>
           <div class="cert-detail-value" id="cert-duration">4 Weeks</div>
+        </div>
+        <div class="cert-detail-item">
+          <div class="cert-detail-label">Batch</div>
+          <div class="cert-detail-value" id="cert-batch-info">#1</div>
         </div>
         <div class="cert-detail-item">
           <div class="cert-detail-label">Mode</div>
@@ -729,18 +736,52 @@
     document.getElementById('cert-id-badge').textContent = 'INVALID';
   }
 
-  function generateCertId(studentId, batchId) {
-    return `SM-PREV-${String(studentId).padStart(4, '0')}-${String(batchId).padStart(4, '0')}`;
-  }
+  async function downloadPDF() {
+    const btn = document.querySelector('.btn-download');
+    const originalText = btn ? btn.innerHTML : '';
+    try {
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Generating...`;
+      }
 
-  function downloadPDF() {
-    if (!studentId) {
-      alert('Cannot download: missing student_id in URL.');
-      return;
+      const certEl = document.getElementById('certificate');
+
+      // Save and remove border-radius / box-shadow for clean capture
+      const origBR = certEl.style.borderRadius;
+      const origBS = certEl.style.boxShadow;
+      certEl.style.borderRadius = '0';
+      certEl.style.boxShadow = 'none';
+
+      const canvas = await html2canvas(certEl, {
+        scale: 3,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+      });
+
+      // Restore styles
+      certEl.style.borderRadius = origBR;
+      certEl.style.boxShadow = origBS;
+
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+      const pdfW = pdf.internal.pageSize.getWidth();
+      const pdfH = pdf.internal.pageSize.getHeight();
+
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
+
+      const holderName = (document.getElementById('cert-name').textContent || 'certificate').replace(/\s+/g, '_');
+      pdf.save(`SkillMe_Certificate_${holderName}.pdf`);
+    } catch(e) {
+      console.error('PDF download failed:', e);
+      alert('Download failed. Please try again.');
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
     }
-    const bid = batchId || 0;
-    const url = `${API}/api/certificates/download/${studentId}/${bid}`;
-    window.open(url, '_blank');
   }
 
   loadCertificate();
