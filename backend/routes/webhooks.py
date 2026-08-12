@@ -63,6 +63,10 @@ async def _handle_pull_request(data: dict) -> dict:
     pr_number = pr.get("number")
     pr_url = pr.get("html_url", "")
     pr_user = pr.get("user", {}).get("login", "")
+    # Branch name used to detect which issue this PR belongs to.
+    # When a student uses the 'Development' button on an issue, GitHub names the
+    # branch '{issue_number}-{slug}', e.g. '5-add-login-page'.
+    pr_head_branch = pr.get("head", {}).get("ref", "")
 
     # Look up the batch by repo name
     batch = await db.fetch_one(
@@ -73,15 +77,16 @@ async def _handle_pull_request(data: dict) -> dict:
         return {"status": "ignored", "reason": "repo not tracked"}
 
     if action == "opened" or action == "reopened":
-        # Record the submission
+        # Record the submission, passing the branch name for precise issue matching
         result = await batch_service.record_submission(
             batch_id=batch["id"],
             student_github_username=pr_user,
             pr_number=pr_number,
             pr_url=pr_url,
+            pr_head_branch=pr_head_branch or None,
         )
         if result:
-            logger.info(f"Recorded PR #{pr_number} by {pr_user} in {repo_name}")
+            logger.info(f"Recorded PR #{pr_number} by {pr_user} in {repo_name} (branch: {pr_head_branch})")
             return {"status": "submission_recorded", **result}
         else:
             return {"status": "ignored", "reason": "student not found or not enrolled"}

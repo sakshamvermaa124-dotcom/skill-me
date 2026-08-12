@@ -453,10 +453,20 @@ class BatchService:
         student_github_username: str,
         pr_number: int,
         pr_url: str,
+        pr_head_branch: str | None = None,
     ) -> dict | None:
         """
         Record a PR submission from a student.
         Called by the webhook handler when a PR is opened.
+
+        Args:
+            batch_id: Batch database ID
+            student_github_username: GitHub username from the PR author
+            pr_number: GitHub PR number
+            pr_url: Full URL to the pull request
+            pr_head_branch: The branch name of the PR head (e.g. '5-add-login-page').
+                            Used to identify which issue the PR is solving via the
+                            GitHub 'Development' button convention: {issue_number}-{slug}.
         """
         # Find the student
         student = await db.fetch_one(
@@ -476,13 +486,40 @@ class BatchService:
             logger.warning(f"Student {student_github_username} not enrolled in batch {batch_id}")
             return None
 
-        # Find an assigned issue for this student in this batch
-        issue = await db.fetch_one(
-            """SELECT * FROM issues 
-               WHERE batch_id = ? AND assigned_to = ? AND status IN ('assigned', 'open')
-               ORDER BY week_number ASC LIMIT 1""",
-            (batch_id, student["id"]),
-        )
+        # Try to match the PR to the correct issue via the branch name convention:
+        # When a student clicks the 'Development' button on an issue, GitHub names
+        # the branch '{issue_number}-{issue-title-slug}', e.g. '5-add-login-page'.
+        # We parse the leading number to find the exact issue.
+        issue = None
+        if pr_head_branch:
+            parts = pr_head_branch.split("-", 1)
+            if parts[0].isdigit():
+                linked_issue_number = int(parts[0])
+                issue = await db.fetch_one(
+                    """SELECT * FROM issues
+                       WHERE batch_id = ? AND assigned_to = ? AND github_issue_number = ?
+                       LIMIT 1""",
+                    (batch_id, student["id"], linked_issue_number),
+                )
+                if issue:
+                    logger.info(
+                        f"Matched PR #{pr_number} branch '{pr_head_branch}' "
+                        f"→ issue #{linked_issue_number} for {student_github_username}"
+                    )
+
+        # Fallback: pick the oldest open/assigned issue for this student in this batch
+        if not issue:
+            issue = await db.fetch_one(
+                """SELECT * FROM issues 
+                   WHERE batch_id = ? AND assigned_to = ? AND status IN ('assigned', 'open')
+                   ORDER BY week_number ASC LIMIT 1""",
+                (batch_id, student["id"]),
+            )
+            if issue:
+                logger.info(
+                    f"Fallback: linked PR #{pr_number} to oldest open issue "
+                    f"#{issue['github_issue_number']} for {student_github_username}"
+                )
 
         issue_id = issue["id"] if issue else None
 
@@ -534,20 +571,45 @@ class BatchService:
                     "UPDATE issues SET status = 'completed' WHERE id = ?",
                     (submission["issue_id"],),
                 )
-                # Update progress
+                # Update progress — UPSERT to handle missing progress rows gracefully.
+                # A progress row may not exist if the student was enrolled after issues
+                # were assigned, or if the webhook fired before the row was created.
                 issue = await db.fetch_one(
                     "SELECT week_number FROM issues WHERE id = ?", (submission["issue_id"],)
                 )
                 if issue:
-                    await db.execute(
-                        """UPDATE progress 
-                           SET issues_completed = issues_completed + 1, 
-                               prs_merged = prs_merged + 1,
-                               score = score + 25,
-                               updated_at = CURRENT_TIMESTAMP
-                           WHERE student_id = ? AND batch_id = ? AND week = ?""",
-                        (submission["student_id"], batch_id, issue["week_number"]),
+                    week = issue["week_number"]
+                    student_id = submission["student_id"]
+                    existing_progress = await db.fetch_one(
+                        "SELECT id FROM progress WHERE student_id = ? AND batch_id = ? AND week = ?",
+                        (student_id, batch_id, week),
                     )
+                    if existing_progress:
+                        # Row exists — increment counters
+                        await db.execute(
+                            """UPDATE progress 
+                               SET issues_completed = issues_completed + 1, 
+                                   prs_merged = prs_merged + 1,
+                                   score = score + 25,
+                                   updated_at = CURRENT_TIMESTAMP
+                               WHERE student_id = ? AND batch_id = ? AND week = ?""",
+                            (student_id, batch_id, week),
+                        )
+                        logger.info(
+                            f"Updated progress for student {student_id}, batch {batch_id}, week {week}: +25 score"
+                        )
+                    else:
+                        # Row missing — create it now so the score isn't lost
+                        await db.insert(
+                            """INSERT INTO progress
+                               (student_id, batch_id, week, issues_assigned, issues_completed, prs_merged, score)
+                               VALUES (?, ?, ?, 1, 1, 1, 25)""",
+                            (student_id, batch_id, week),
+                        )
+                        logger.info(
+                            f"Created progress row for student {student_id}, batch {batch_id}, week {week} "
+                            f"(was missing — seeded with completed=1, score=25)"
+                        )
         else:
             await db.execute(
                 "UPDATE submissions SET status = ?, reviewed_at = ? WHERE id = ?",

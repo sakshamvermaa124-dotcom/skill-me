@@ -1119,6 +1119,10 @@ async function loadBatches(silent = false) {
             </div>
             <div class="batch-card-actions">
               ${statusBadge(b.status)}
+              <button class="btn btn-ghost btn-sm" onclick="syncBatchPRs(${b.id}, this)" title="Fetch all merged PRs from GitHub and update student scores">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+                Sync PRs
+              </button>
               <button class="btn btn-ghost btn-sm" onclick="openAssignModal(${b.id}, '${b.domain} Batch #${b.batch_number}')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
                 Assign Tasks
@@ -1170,6 +1174,29 @@ function formatWeeksAssigned(raw) {
     if (!arr.length) return 'None';
     return arr.map(w => `W${w}`).join(', ');
   } catch { return 'None'; }
+}
+
+async function syncBatchPRs(batchId, btnEl) {
+  const btn = btnEl || event.currentTarget;
+  const origContent = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg> Syncing...`;
+  try {
+    const result = await api(`/api/admin/batches/${batchId}/sync-prs`, { method: 'POST' });
+    const synced = result.merged_prs_processed || 0;
+    const skipped = result.already_synced || 0;
+    if (synced > 0) {
+      toast(`✅ Synced ${synced} merged PR${synced !== 1 ? 's' : ''}! (${skipped} already up to date)`);
+    } else {
+      toast(`All PRs already synced (${skipped} up to date)`);
+    }
+    loadBatches(true);
+  } catch(e) {
+    toast(`Sync failed: ${e.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = origContent;
+  }
 }
 
 async function toggleAutoAssign(batchId, enabled) {
@@ -1392,6 +1419,28 @@ async function sendTestEmail() {
   }
 }
 
+async function syncAndRefreshAnalytics(batchId, batchName) {
+  const btn = document.getElementById(`analytics-sync-btn-${batchId}`);
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg> Syncing...`;
+  }
+  try {
+    const result = await api(`/api/admin/batches/${batchId}/sync-prs`, { method: 'POST' });
+    const synced = result.merged_prs_processed || 0;
+    const skipped = result.already_synced || 0;
+    toast(synced > 0
+      ? `✅ Synced ${synced} PR${synced !== 1 ? 's' : ''}! Refreshing analytics...`
+      : `All PRs already synced (${skipped} up to date)`
+    );
+    // Reload the analytics modal with fresh data
+    openAnalyticsModal(batchId, batchName);
+  } catch(e) {
+    toast(`Sync failed: ${e.message}`, 'error');
+    if (btn) { btn.disabled = false; }
+  }
+}
+
 async function openAnalyticsModal(batchId, batchName) {
   openModal('modal-analytics');
   document.getElementById('analytics-modal-title').textContent = `${batchName} Analytics`;
@@ -1405,7 +1454,14 @@ async function openAnalyticsModal(batchId, batchName) {
     const revenue = data.revenue || {};
     const students = data.student_grid || [];
     
+    // Add a "Sync PRs" button at the top of the modal for quick refresh
     let html = `
+      <div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
+        <button id="analytics-sync-btn-${batchId}" class="btn btn-ghost btn-sm" onclick="syncAndRefreshAnalytics(${batchId}, '${batchName}')" title="Fetch latest merged PRs from GitHub and refresh analytics">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+          Sync PRs &amp; Refresh
+        </button>
+      </div>
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:24px;">
         <div style="background:var(--bg-card); padding:16px; border-radius:8px; border:1px solid var(--border);">
           <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">Enrollments</div>
