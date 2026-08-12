@@ -181,7 +181,7 @@ async def get_progress(email: str):
                   i.difficulty, i.status, i.created_at, b.repo_name, b.domain, b.start_date
            FROM issues i
            JOIN batches b ON i.batch_id = b.id
-           WHERE i.assigned_to = ? OR i.batch_id IN (SELECT batch_id FROM enrollments WHERE student_id = ?)
+           WHERE i.assigned_to = ? OR (i.batch_id IN (SELECT batch_id FROM enrollments WHERE student_id = ?) AND i.assigned_to IS NULL)
            ORDER BY i.week_number ASC, i.id ASC""",
         (student["id"], student["id"]),
     )
@@ -219,6 +219,7 @@ async def get_progress(email: str):
                 sum(int(p["issues_completed"]) for p in progress) /
                 max(sum(int(p["issues_assigned"]) for p in progress), 1) * 100
             ),
+            "github_org": org,
         },
     }
 

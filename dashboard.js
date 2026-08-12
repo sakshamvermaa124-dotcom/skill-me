@@ -255,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Update dynamic GitHub Repo Link in Beginner Guide Step 1
       if (latest.repo_name) {
-        const org = data.github_org || 'sakshamvermaa124-dotcom';
+        const org = data.github_org || data.summary?.github_org || 'sakshamvermaa124-dotcom';
         const repoUrl = `https://github.com/${org}/${latest.repo_name}/issues`;
         const guideLink = document.querySelector('.guide-repo-link');
         if (guideLink) {
@@ -432,7 +432,8 @@ document.addEventListener('DOMContentLoaded', () => {
           </a>` : ''}
         `;
         tasksList.appendChild(card);
-        if (typeof subObserver !== 'undefined') subObserver.observe(card);
+        // Add visible class immediately for the initial fade-in to prevent invisible cards
+        setTimeout(() => card.classList.add('visible'), 50 * i);
       });
     } else {
       if (tasksEmpty) tasksEmpty.style.display = 'block';

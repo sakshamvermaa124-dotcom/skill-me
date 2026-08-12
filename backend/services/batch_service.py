@@ -480,7 +480,7 @@ class BatchService:
         """
         # Find the student
         student = await db.fetch_one(
-            "SELECT * FROM students WHERE github_username = ?",
+            "SELECT * FROM students WHERE LOWER(github_username) = LOWER(?)",
             (student_github_username,),
         )
         if not student:

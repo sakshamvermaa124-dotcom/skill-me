@@ -418,14 +418,16 @@ async def assign_from_repo(
                 f"https://github.com/{settings.github_org}/{batch['repo_name']}"
                 if batch and batch.get("repo_name") else None
             )
-            tasks_for_email = [
-                {"title": r.get("title", "Task"), "issue_url": r.get("html_url")}
-                for r in created
-            ]
-            
             # Send emails in background
             for student in students:
                 gh_user = student.get("github_username")
+                tasks_for_email = [
+                    {
+                        "title": r.get("title", "Task"), 
+                        "issue_url": f"{base_repo_url}/issues/{r.get('github_issue_number')}" if r.get("github_issue_number") else base_repo_url
+                    }
+                    for r in created if r.get('assigned_to') == student['id']
+                ]
                 background_tasks.add_task(
                     email_service.send_weekly_tasks_notification,
                     first_name=student["first_name"],

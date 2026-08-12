@@ -759,6 +759,7 @@
   </style>
   <script src="config.js"></script>
   <style>.brand-logo-img, .logo img, .nav-logo img, .cert-company-logo, .lh-logo { width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important; flex-shrink: 0 !important; }</style>
+<script src="theme.js"></script>
 </head>
 <body>
 
@@ -856,11 +857,11 @@
 
   <!-- Sidebar -->
   <aside class="sidebar">
-    <div class="sidebar-brand" onclick="navigate('overview')" style="cursor: pointer;" title="Go to Admin Overview">
+    <a href="index.html" class="sidebar-brand" style="cursor: pointer; text-decoration: none;" title="Go to Home Page">
       <div class="sidebar-brand-icon"><img src="assets/logo.webp" alt="SkillMe Logo" width="34" height="34" style="width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important;"></div>
       <div class="sidebar-brand-text" style="color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; background: none !important;">SkillMe</div>
       <div class="sidebar-brand-badge">ADMIN</div>
-    </div>
+    </a>
     <nav class="sidebar-nav">
       <div class="nav-section-label">Platform</div>
       <div class="nav-item active" id="nav-overview" onclick="navigate('overview')">
@@ -1467,3 +1468,4 @@ function openEmailBodyModal(encodedBody) {
 
 </body>
 </html>
+
