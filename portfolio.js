@@ -124,7 +124,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const submissionsHtml = data.submissions.length > 0 
       ? data.submissions.map(sub => {
-          const dateStr = new Date(sub.merged_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          const rawDate = sub.merged_at ? sub.merged_at.split('T')[0] : null;
+          const dateStr = rawDate
+            ? new Date(rawDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+            : 'Date N/A';
           const repoUrl = sub.pr_url ? sub.pr_url.split('/pull/')[0] : '#';
           const repoName = repoUrl !== '#' ? repoUrl.split('/').slice(-2).join('/') : 'Repository';
           return `
