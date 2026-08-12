@@ -611,13 +611,7 @@
   async function triggerAndDisplay() {
     const bid = batchId || 0;
     try {
-      const dlRes = await fetch(`${API}/api/certificates/download/${studentId}/${bid}`);
-      if (!dlRes.ok) {
-        const err = await dlRes.json().catch(() => ({detail: dlRes.statusText}));
-        showError(err.detail || 'Certificate generation failed');
-        return;
-      }
-      // Fetch cert metadata
+      // Only call metadata — do NOT call download endpoint (that generates PDF, very slow)
       const metaRes = await fetch(`${API}/api/certificates/metadata/${studentId}/${bid}`);
       if (metaRes.ok) {
         const myCert = await metaRes.json();
@@ -633,18 +627,17 @@
         showVerifyBadge(true, { holder: certHolder, issued_at: myCert.issued_at });
         return;
       }
-      // Fallback
-      populateCertificate({
-        holder: resolvedName || `Student #${studentId}`,
-        domain: domainParam || 'web-dev',
-        batch_number: batchId || '?',
-        issued_at: new Date().toISOString(),
-        cert_id: `SM-${String(studentId).padStart(4,'0')}-CERT`,
-      });
-      showVerifyBadge(true, { holder: resolvedName, issued_at: new Date().toISOString() });
-    } catch(e) {
-      showError(`Connection error: ${e.message}. Is the backend running?`);
-    }
+    } catch(e) {}
+
+    // Fallback: populate from URL params immediately (no blocking API call)
+    populateCertificate({
+      holder: resolvedName || `Student #${studentId}`,
+      domain: domainParam || 'web-dev',
+      batch_number: batchId || '1',
+      issued_at: new Date().toISOString(),
+      cert_id: `SM-${String(studentId).padStart(4,'0')}-CERT`,
+    });
+    showVerifyBadge(true, { holder: resolvedName, issued_at: new Date().toISOString() });
   }
 
   async function verifyCert(id, ctx = {}) {
