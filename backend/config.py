@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     # GitHub
     skillme_github_token: str = ""
-    github_org: str = "skill-me-intern"
+    github_org: str = "sakshamvermaa124-dotcom"
 
     # Server
     port: int = 8000

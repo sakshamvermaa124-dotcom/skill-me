@@ -209,6 +209,7 @@ async def get_progress(email: str):
         "progress": [dict(p) for p in progress],
         "submissions": [dict(s) for s in submissions],
         "issues": formatted_issues,
+        "github_org": org,
         "summary": {
             "total_tasks": sum(int(p["issues_assigned"]) for p in progress),
             "completed_tasks": sum(int(p["issues_completed"]) for p in progress),
