@@ -5,6 +5,7 @@ issue assignment, and progress tracking.
 """
 
 import logging
+import re
 from datetime import datetime, timedelta
 from db.database import db
 from services.github_service import github_service
@@ -462,6 +463,7 @@ class BatchService:
         pr_number: int,
         pr_url: str,
         pr_head_branch: str | None = None,
+        pr_body: str | None = None,
     ) -> dict | None:
         """
         Record a PR submission from a student.
@@ -472,9 +474,9 @@ class BatchService:
             student_github_username: GitHub username from the PR author
             pr_number: GitHub PR number
             pr_url: Full URL to the pull request
-            pr_head_branch: The branch name of the PR head (e.g. '5-add-login-page').
-                            Used to identify which issue the PR is solving via the
-                            GitHub 'Development' button convention: {issue_number}-{slug}.
+            pr_head_branch: The branch name of the PR head (e.g. '7-build-navbar').
+            pr_body: The PR description text. Checked for closing keywords like
+                     'Fixes #7', 'Closes #7', 'Resolves #7'.
         """
         # Find the student
         student = await db.fetch_one(
@@ -494,12 +496,16 @@ class BatchService:
             logger.warning(f"Student {student_github_username} not enrolled in batch {batch_id}")
             return None
 
-        # Try to match the PR to the correct issue via the branch name convention:
-        # When a student clicks the 'Development' button on an issue, GitHub names
-        # the branch '{issue_number}-{issue-title-slug}', e.g. '5-add-login-page'.
-        # We parse the leading number to find the exact issue.
+        # ── Issue Resolution: 4-strategy cascade ─────────────────────────────
+        # Each strategy is tried in order. We stop at the first successful match.
+        # This makes PR→issue linking robust against non-standard branch names.
         issue = None
-        if pr_head_branch:
+        match_strategy = None
+
+        # Strategy 1: Branch prefix matches github_issue_number exactly.
+        # Covers the happy path: student used GitHub's "Create a branch" button,
+        # which names the branch '{github_issue_number}-{slug}'.
+        if pr_head_branch and not issue:
             parts = pr_head_branch.split("-", 1)
             if parts[0].isdigit():
                 linked_issue_number = int(parts[0])
@@ -510,12 +516,65 @@ class BatchService:
                     (batch_id, student["id"], linked_issue_number),
                 )
                 if issue:
-                    logger.info(
-                        f"Matched PR #{pr_number} branch '{pr_head_branch}' "
-                        f"→ issue #{linked_issue_number} for {student_github_username}"
-                    )
+                    match_strategy = f"branch-prefix #{linked_issue_number}"
 
-        # Fallback: pick the oldest open/assigned issue for this student in this batch
+        # Strategy 2: PR title keyword match against issue titles.
+        # Handles cases like branch='4-week-1-build-navigation-bar' where the
+        # prefix '4' is a local counter, not the GitHub issue number.
+        # We tokenize both the PR title and each open issue title and find the
+        # one with the most word overlap (minimum 2 words must match).
+        if not issue and pr_head_branch:
+            pr_slug = pr_head_branch.lower().replace("-", " ").replace("_", " ")
+            open_issues = await db.fetch_all(
+                """SELECT * FROM issues
+                   WHERE batch_id = ? AND assigned_to = ? AND status IN ('assigned', 'open', 'in_progress')
+                   ORDER BY week_number ASC""",
+                (batch_id, student["id"]),
+            )
+            best_score = 0
+            best_issue = None
+            stop_words = {"a", "an", "the", "with", "and", "or", "of", "to", "in",
+                          "for", "on", "by", "at", "is", "it", "week", "build",
+                          "create", "add", "feat", "feature", "week1", "week2",
+                          "week3", "week4"}
+            pr_words = {w for w in pr_slug.split() if w not in stop_words and len(w) > 2}
+            for candidate in open_issues:
+                title_words = {
+                    w for w in candidate["title"].lower().replace("-", " ").split()
+                    if w not in stop_words and len(w) > 2
+                }
+                score = len(pr_words & title_words)
+                if score > best_score:
+                    best_score = score
+                    best_issue = candidate
+            if best_issue and best_score >= 2:
+                issue = best_issue
+                match_strategy = f"title-keyword-match (score={best_score}, issue #{issue['github_issue_number']})"
+
+        # Strategy 3: PR body closing keyword — looks for "Fixes #N", "Closes #N",
+        # "Resolves #N" in the PR description, which GitHub itself uses to auto-close issues.
+        if not issue and pr_body:
+            pattern = re.compile(
+                r"(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)",
+                re.IGNORECASE,
+            )
+            for m in pattern.finditer(pr_body):
+                closing_issue_num = int(m.group(1))
+                candidate = await db.fetch_one(
+                    """SELECT * FROM issues
+                       WHERE batch_id = ? AND assigned_to = ? AND github_issue_number = ?
+                       LIMIT 1""",
+                    (batch_id, student["id"], closing_issue_num),
+                )
+                if candidate:
+                    issue = candidate
+                    match_strategy = f"pr-body-closes #{closing_issue_num}"
+                    break
+
+        # Strategy 4: Last-resort — oldest unfinished issue for this student in the batch.
+        # This guarantees we never store a NULL issue_id for an enrolled student.
+        # It may be wrong, but it's better than losing the submission entirely;
+        # admins can correct it via the Sync PRs flow if needed.
         if not issue:
             issue = await db.fetch_one(
                 """SELECT * FROM issues 
@@ -524,10 +583,19 @@ class BatchService:
                 (batch_id, student["id"]),
             )
             if issue:
-                logger.info(
-                    f"Fallback: linked PR #{pr_number} to oldest open issue "
-                    f"#{issue['github_issue_number']} for {student_github_username}"
-                )
+                match_strategy = f"fallback-oldest-open (issue #{issue['github_issue_number']})"
+
+        if issue:
+            logger.info(
+                f"PR #{pr_number} by {student_github_username} → issue #{issue['github_issue_number']} "
+                f"[strategy: {match_strategy}]"
+            )
+        else:
+            logger.warning(
+                f"PR #{pr_number} by {student_github_username} in batch {batch_id}: "
+                f"no matching issue found — submission recorded without issue_id"
+            )
+        # ─────────────────────────────────────────────────────────────────────
 
         issue_id = issue["id"] if issue else None
 

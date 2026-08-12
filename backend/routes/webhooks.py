@@ -67,6 +67,7 @@ async def _handle_pull_request(data: dict) -> dict:
     # When a student uses the 'Development' button on an issue, GitHub names the
     # branch '{issue_number}-{slug}', e.g. '5-add-login-page'.
     pr_head_branch = pr.get("head", {}).get("ref", "")
+    pr_body = pr.get("body") or ""  # PR description — may contain 'Fixes #N'
 
     # Look up the batch by repo name
     batch = await db.fetch_one(
@@ -84,6 +85,7 @@ async def _handle_pull_request(data: dict) -> dict:
             pr_number=pr_number,
             pr_url=pr_url,
             pr_head_branch=pr_head_branch or None,
+            pr_body=pr_body or None,
         )
         if result:
             logger.info(f"Recorded PR #{pr_number} by {pr_user} in {repo_name} (branch: {pr_head_branch})")
