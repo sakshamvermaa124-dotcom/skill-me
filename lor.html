@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,21 +7,10 @@
   <meta name="description" content="Official Letter of Recommendation issued by SkillMe Technologies — India's Open Source Internship Platform." />
   <link rel="icon" href="assets/logo.webp" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+  <script src="config.js"></script>
   <style>
-    :root {
-      --primary: #c99a4e;
-      --primary-light: #d8ac63;
-      --text: #eae6e1;
-      --text-secondary: #969089;
-      --muted: #5e5852;
-      --border: rgba(235,230,224,0.07);
-      --border-light: rgba(235,230,224,0.1);
-      --bg: #0c0b0b;
-      --accent: #c99a4e;
-    }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
@@ -32,8 +21,8 @@
       align-items: center;
       justify-content: flex-start;
       padding: 40px 16px;
-      font-family: 'DM Sans', sans-serif;
-      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      color: #e0ddd8;
     }
 
     /* ─── ACTION BAR ─── */
@@ -43,271 +32,261 @@
     }
     .btn-print {
       display: flex; align-items: center; gap: 8px;
-      background: var(--primary); color: #fff;
-      font-weight: 600; font-size: 0.9rem;
+      background: #c99a4e; color: #fff;
+      font-weight: 600; font-size: 0.9rem; font-family: 'Inter', sans-serif;
       border: none; padding: 10px 24px; border-radius: 8px;
       cursor: pointer; transition: background 0.2s, transform 0.2s;
     }
-    .btn-print:hover { background: #232e6e; transform: translateY(-1px); }
+    .btn-print:hover { background: #a07c38; transform: translateY(-1px); }
 
-    /* ─── DOCUMENT CARD ─── */
-    .doc-wrap { width: 100%; max-width: 800px; position: relative; }
+    /* ─── DOCUMENT WRAP ─── */
+    .doc-wrap { width: 100%; max-width: 800px; }
 
     .document {
       width: 100%;
-      aspect-ratio: 1 / 1.4142;
       background: #ffffff;
-      position: relative;
-      overflow: hidden;
-      border-radius: 2px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.04);
-      padding: 0;
+      border-radius: 3px;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,0,0,0.08);
       display: flex;
       flex-direction: column;
+      overflow: hidden;
+      min-height: 1100px;
     }
 
-    /* ─── LETTERHEAD HEADER ─── */
-    .letterhead-top {
-      background: linear-gradient(135deg, #1a2563, #2d3a8c);
-      padding: 3.5% 7% 2.8%;
+    /* ─── LETTERHEAD ─── */
+    .letterhead {
+      background: linear-gradient(135deg, #0f1e5c 0%, #1a2d8a 60%, #0f1e5c 100%);
+      padding: 28px 48px 22px;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       position: relative;
     }
-    .letterhead-top::after {
+    .letterhead::after {
       content: '';
       position: absolute; bottom: 0; left: 0; right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, var(--accent), #d4a853, var(--accent));
+      height: 4px;
+      background: linear-gradient(90deg, #8b6914, #c99a4e, #e8c56b, #c99a4e, #8b6914);
     }
-    .lh-brand {
-      display: flex; align-items: center; gap: 12px;
-    }
+    .lh-left { display: flex; align-items: center; gap: 14px; }
     .lh-logo {
-      height: 44px; width: 44px; border-radius: 50%; object-fit: cover;
+      width: 46px; height: 46px; border-radius: 50%;
+      object-fit: cover; border: 2px solid rgba(201,154,78,0.5);
     }
-    .lh-brand-info { display: flex; flex-direction: column; }
-    .lh-title {
+    .lh-org-name {
+      font-family: 'Inter', sans-serif;
       font-weight: 800; font-size: 22px; color: #ffffff;
       letter-spacing: -0.3px;
     }
-    .lh-subtitle {
-      font-size: 9px; color: rgba(255,255,255,0.65);
-      text-transform: uppercase; letter-spacing: 2px; margin-top: 2px;
+    .lh-org-sub {
+      font-size: 9px; color: rgba(255,255,255,0.6);
+      text-transform: uppercase; letter-spacing: 2px; margin-top: 3px;
     }
-    .lh-company-detail {
-      font-size: 8px; color: rgba(255,255,255,0.45);
-      margin-top: 4px; line-height: 1.5;
-    }
-    .lh-meta {
+    .lh-right {
       text-align: right;
+      font-family: 'Inter', sans-serif;
       font-size: 10px; color: rgba(255,255,255,0.7);
-      line-height: 1.7;
+      line-height: 1.8;
     }
-    .lh-meta a { color: rgba(255,255,255,0.85); text-decoration: none; }
+    .lh-right a { color: rgba(255,255,255,0.85); text-decoration: none; }
 
     /* ─── LETTER BODY ─── */
-    .letter-content {
+    .letter-body {
       flex: 1;
-      padding: 3.5% 7% 2%;
-      display: flex; flex-direction: column;
-      font-family: 'Cormorant Garamond', serif;
+      padding: 36px 52px 28px;
+      display: flex;
+      flex-direction: column;
     }
-    .letter-ref-row {
+
+    .ref-row {
       display: flex; justify-content: space-between; align-items: baseline;
-      margin-bottom: 16px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border-light);
-    }
-    .letter-ref {
-      font-family: 'Inter', sans-serif;
-      font-size: 10px; color: var(--muted);
-    }
-    .letter-ref strong { color: var(--text-secondary); font-weight: 600; }
-    .letter-date {
-      font-family: 'Inter', sans-serif;
-      font-size: 11px; font-weight: 500; color: var(--text-secondary);
-    }
-    .letter-title {
-      text-align: center;
-      font-family: 'DM Serif Display', serif;
-      font-weight: 400;
-      font-size: 20px;
-      letter-spacing: 1px;
       margin-bottom: 20px;
-      color: var(--primary);
-      position: relative;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #e2e8f0;
     }
-    .letter-title::after {
-      content: '';
-      display: block;
-      width: 60px; height: 2px;
-      background: var(--accent);
-      margin: 8px auto 0;
+    .ref-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px; color: #64748b; font-weight: 500;
     }
-    .letter-salutation {
-      font-size: 1.08rem;
-      font-weight: 600;
-      margin-bottom: 16px;
-      color: var(--text);
+    .ref-label strong { color: #334155; font-weight: 700; }
+    .ref-date {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px; font-weight: 600; color: #334155;
     }
-    .letter-paragraph {
-      font-size: 1.05rem;
-      line-height: 1.85;
-      color: var(--text-secondary);
+
+    .lor-title {
+      text-align: center;
+      font-family: 'EB Garamond', serif;
+      font-weight: 400;
+      font-size: 22px;
+      letter-spacing: 2px;
+      margin-bottom: 4px;
+      color: #0f1e5c;
+      text-transform: uppercase;
+    }
+    .lor-title-bar {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      margin-bottom: 24px;
+    }
+    .lor-title-line { flex: 1; max-width: 120px; height: 1px; background: #c99a4e; }
+    .lor-title-diamond { width: 6px; height: 6px; background: #c99a4e; transform: rotate(45deg); }
+
+    .salutation {
+      font-family: 'EB Garamond', serif;
+      font-size: 16px; font-weight: 600;
+      color: #1a1a2e;
+      margin-bottom: 18px;
+    }
+
+    .para {
+      font-family: 'EB Garamond', serif;
+      font-size: 15.5px;
+      line-height: 1.9;
+      color: #1e2433;
       text-align: justify;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
+      hyphens: auto;
     }
-    .highlight {
-      font-weight: 700;
-      color: var(--text);
-    }
-    .domain-highlight {
-      font-weight: 700;
-      color: var(--primary);
-    }
+    .para .name { font-weight: 700; color: #0f1e5c; }
+    .para .domain-hl { font-weight: 700; color: #b8860b; font-style: italic; }
 
-    /* Skills section */
-    .skills-section {
-      margin: 6px 0 14px;
-      padding: 10px 16px;
+    /* Skills box */
+    .skills-box {
+      margin: 4px 0 18px;
+      padding: 14px 20px;
       background: #f0f4ff;
-      border-left: 3px solid var(--primary);
-      border-radius: 0 4px 4px 0;
+      border-left: 4px solid #1a2d8a;
+      border-radius: 0 6px 6px 0;
     }
-    .skills-title {
+    .skills-box-title {
       font-family: 'Inter', sans-serif;
-      font-size: 10px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 1.5px;
-      color: var(--primary); margin-bottom: 6px;
+      font-size: 9px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 2px;
+      color: #0f1e5c; margin-bottom: 10px;
     }
-    .skills-list {
+    .skills-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 24px;
+    }
+    .skill-item {
       font-family: 'Inter', sans-serif;
-      font-size: 10.5px; line-height: 1.7;
-      color: var(--text-secondary);
-      columns: 2; column-gap: 24px;
+      font-size: 11px; color: #1e2433; line-height: 1.6;
+      display: flex; align-items: center; gap: 6px;
     }
-    .skills-list span {
-      display: block;
-    }
-    .skills-list span::before {
-      content: '✓ ';
-      color: var(--primary); font-weight: 700;
+    .skill-item::before {
+      content: '✓';
+      color: #0f1e5c; font-weight: 800; font-size: 10px;
+      flex-shrink: 0;
     }
 
-    /* ─── SIGNATURE AREA ─── */
-    .signature-area {
+    /* ─── SIGNATURE ─── */
+    .sig-area {
       margin-top: auto;
-      display: flex; justify-content: space-between; align-items: flex-end;
-      padding-top: 16px;
+      padding-top: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
     }
-    .sig-block { display: flex; flex-direction: column; }
-    .sig-line {
-      width: 180px; height: 1px;
-      background: var(--border); margin-bottom: 8px;
+    .sig-block { display: flex; flex-direction: column; gap: 0; }
+    .sig-cursive {
+      font-family: 'Dancing Script', cursive;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #0f1e5c;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .sig-underline {
+      width: 200px; height: 1px;
+      background: #cbd5e1;
+      margin-bottom: 6px;
     }
     .sig-name {
       font-family: 'Inter', sans-serif;
-      font-weight: 700; font-size: 12px; color: var(--text);
+      font-weight: 700; font-size: 12px; color: #1a1a2e;
     }
-    .sig-title {
+    .sig-designation {
       font-family: 'Inter', sans-serif;
-      font-size: 10px; color: var(--muted); margin-top: 1px;
+      font-size: 10px; color: #475569; margin-top: 2px;
     }
     .sig-company {
       font-family: 'Inter', sans-serif;
-      font-size: 9px; color: var(--muted); margin-top: 2px;
+      font-size: 9px; color: #64748b; margin-top: 2px;
     }
-    /* QR + stamp */
-    .sig-verify {
-      display: flex; align-items: flex-end; gap: 12px;
-    }
-    .sig-qr {
-      display: flex; flex-direction: column; align-items: center; gap: 3px;
-    }
-    .sig-qr-box {
-      width: 56px; height: 56px;
-      background: #fff; border: 1px solid var(--border-light);
+
+    .sig-right { display: flex; align-items: flex-end; gap: 14px; }
+    .qr-block { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .qr-box {
+      width: 60px; height: 60px;
+      background: #fff; border: 1px solid #e2e8f0;
       border-radius: 4px; padding: 3px;
-      display: flex; align-items: center; justify-content: center;
     }
-    .sig-qr-box canvas { width: 100% !important; height: 100% !important; }
-    .sig-qr-text {
+    .qr-box canvas { width: 100% !important; height: 100% !important; }
+    .qr-label {
       font-family: 'Inter', sans-serif;
-      font-size: 7px; color: var(--muted); text-align: center;
+      font-size: 7px; color: #94a3b8; text-align: center;
     }
-    .sig-stamp {
-      width: 56px; height: 56px;
-      border: 2px solid var(--primary);
-      border-radius: 50%;
+    .seal {
+      width: 60px; height: 60px;
+      border: 2px solid #c99a4e; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       text-align: center;
       font-family: 'Inter', sans-serif;
-      font-size: 6px; font-weight: 800;
-      color: var(--primary); text-transform: uppercase;
-      letter-spacing: 0.5px;
-      line-height: 1.2;
-      opacity: 0.7;
+      font-size: 6.5px; font-weight: 800;
+      color: #c99a4e; text-transform: uppercase;
+      letter-spacing: 0.5px; line-height: 1.3;
+      opacity: 0.85;
     }
 
     /* ─── FOOTER ─── */
-    .letter-footer {
-      background: #f8f9fc;
-      border-top: 1px solid var(--border-light);
-      padding: 10px 7%;
+    .doc-footer {
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      padding: 10px 52px;
       display: flex; justify-content: space-between; align-items: center;
       font-family: 'Inter', sans-serif;
       font-size: 8px; color: #94a3b8;
     }
-    .footer-legal {
-      max-width: 60%; line-height: 1.5;
-    }
-    .footer-page {
-      font-weight: 600; color: var(--muted);
-    }
+    .doc-footer-legal { max-width: 65%; line-height: 1.6; }
+    .doc-footer-page { font-weight: 600; color: #64748b; }
 
-    /* ─── VERIFY SECTION ─── */
+    /* ─── VERIFY BADGE ─── */
     .verify-section {
-      margin-top: 24px; width: 100%; max-width: 800px;
-      background: #ffffff;
-      border: 1px solid var(--border-light);
-      border-radius: 8px; padding: 16px 20px;
-      display: flex; align-items: center; gap: 16px;
+      margin-top: 20px; width: 100%; max-width: 800px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 16px 20px;
+      display: flex; align-items: center; gap: 14px;
     }
-    .loading-state { color: var(--muted); font-size: 0.9rem; }
     .verify-icon {
       width: 36px; height: 36px; border-radius: 50%;
-      background: #dcfce7; color: #16a34a;
+      background: rgba(52,211,153,0.15); color: #34d399;
       display: flex; align-items: center; justify-content: center;
-      font-size: 18px; flex-shrink: 0;
+      font-size: 17px; flex-shrink: 0;
     }
-    .verify-text strong { display: block; font-size: 0.9rem; margin-bottom: 2px; color: var(--text); }
-    .verify-text span { font-size: 0.8rem; color: var(--muted); }
+    .verify-text strong { display: block; font-size: 0.88rem; margin-bottom: 2px; color: #e0ddd8; }
+    .verify-text span { font-size: 0.78rem; color: #94a3b8; }
+    .loading-state { color: #64748b; font-size: 0.88rem; }
 
     /* ─── PRINT ─── */
     @media print {
       body { background: #fff; padding: 0; }
       .action-bar, .verify-section { display: none !important; }
       .doc-wrap { max-width: 100%; }
-      .document { box-shadow: none; border-radius: 0; aspect-ratio: auto; height: 100vh; }
+      .document { box-shadow: none; border-radius: 0; }
     }
 
-    /* ─── MOBILE ─── */
     @media (max-width: 768px) {
       body { padding: 20px 12px; }
       .doc-wrap { overflow-x: auto; }
-      .document { min-width: 620px; }
+      .document { min-width: 640px; }
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-  <script src="config.js"></script>
-  <style>.brand-logo-img, .logo img, .nav-logo img, .cert-company-logo, .lh-logo { width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important; flex-shrink: 0 !important; }</style>
 </head>
 <body>
 
-<!-- Action Bar -->
-<div class="action-bar" id="action-bar">
+<div class="action-bar">
   <button class="btn-print" onclick="window.print()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
       <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
@@ -317,131 +296,120 @@
   </button>
 </div>
 
-<!-- LOR Document -->
 <div class="doc-wrap">
   <div class="document" id="lor-document">
-    
-    <!-- Letterhead Header (Dark) -->
-    <div class="letterhead-top">
-      <div class="lh-brand">
-        <img width="36" height="36" src="assets/logo.webp" alt="SkillMe Logo" class="lh-logo" style="width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important;">
-        <div class="lh-brand-info">
-          <div class="lh-title">SkillMe</div>
-          <div class="lh-subtitle">India's Open Source Internship Platform</div>
+
+    <!-- Letterhead -->
+    <div class="letterhead">
+      <div class="lh-left">
+        <img src="assets/logo.webp" alt="SkillMe" class="lh-logo">
+        <div>
+          <div class="lh-org-name">SkillMe</div>
+          <div class="lh-org-sub">India's Open Source Internship Platform</div>
         </div>
       </div>
-      <div class="lh-meta">
+      <div class="lh-right">
         <a href="https://skill-me-intern.in">www.skill-me-intern.in</a><br>
         skillmeintern@gmail.com<br>
         New Delhi, India
       </div>
     </div>
 
-    <!-- Letter Content -->
-    <div class="letter-content">
+    <!-- Letter Body -->
+    <div class="letter-body">
 
-      <!-- Ref & Date Row -->
-      <div class="letter-ref-row">
-        <div class="letter-ref">Ref: <strong id="lh-cert-id">Loading...</strong></div>
-        <div class="letter-date" id="lb-date">Date: Loading...</div>
+      <div class="ref-row">
+        <div class="ref-label">Ref: <strong id="lh-cert-id">Loading...</strong></div>
+        <div class="ref-date" id="lb-date">Date: Loading...</div>
       </div>
 
-      <!-- Title -->
-      <div class="letter-title">Letter of Recommendation</div>
-      
-      <!-- Salutation -->
-      <div class="letter-salutation">To Whom It May Concern,</div>
-      
-      <!-- Body paragraphs -->
-      <div class="letter-paragraph">
-        It is with great pleasure and confidence that I write this letter of recommendation for 
-        <span class="highlight" id="lb-name">________</span>, who has successfully completed a rigorous 
-        4-week internship program at SkillMe in the domain of 
-        <span class="domain-highlight" id="lb-domain">________</span> 
-        (Batch <span id="lb-batch">___</span>). During their tenure, 
-        <span class="highlight" id="lb-name-2">________</span> reported directly to the program 
-        leadership team and was evaluated against industry-standard benchmarks.
-      </div>
-      
-      <div class="letter-paragraph">
-        Our internship program is designed to mirror real-world software engineering workflows. Interns are 
-        required to work on production-grade GitHub repositories, submit code via pull requests, respond to 
-        code review feedback, and adhere to strict coding standards and documentation practices. 
-        <span class="highlight" id="lb-name-3">________</span> navigated these challenges with distinction, 
-        consistently demonstrating strong technical proficiency, a proactive approach to problem-solving, 
-        and an exceptional ability to learn and adapt under pressure.
+      <div class="lor-title">Letter of Recommendation</div>
+      <div class="lor-title-bar">
+        <div class="lor-title-line"></div>
+        <div class="lor-title-diamond"></div>
+        <div class="lor-title-line"></div>
       </div>
 
-      <!-- Skills box -->
-      <div class="skills-section">
-        <div class="skills-title">Key Competencies Demonstrated</div>
-        <div class="skills-list" id="lb-skills">
-          <span>Git & GitHub Workflows</span>
-          <span>Code Review Practices</span>
-          <span>Pull Request Collaboration</span>
-          <span>Technical Documentation</span>
-          <span>Problem-Solving Aptitude</span>
-          <span>Self-Directed Learning</span>
+      <div class="salutation">To Whom It May Concern,</div>
+
+      <div class="para">
+        It is with great pleasure and confidence that I write this letter of recommendation for
+        <span class="name" id="lb-name">________</span>, who has successfully completed a rigorous
+        4-week internship program at SkillMe in the domain of
+        <span class="domain-hl" id="lb-domain">________</span>.
+        During this tenure, <span class="name" id="lb-name-2">________</span> reported directly to the program
+        leadership team and was evaluated against industry-standard benchmarks through real-world project deliverables.
+      </div>
+
+      <div class="para">
+        Our internship program is designed to mirror real-world software engineering workflows. Interns are required
+        to contribute to production-grade GitHub repositories, submit code via pull requests, respond to code review
+        feedback, and adhere to strict coding standards and documentation practices.
+        <span class="name" id="lb-name-3">________</span> navigated these challenges with distinction, consistently
+        demonstrating strong technical proficiency, a proactive approach to problem-solving, and an exceptional
+        ability to learn and adapt under pressure.
+      </div>
+
+      <!-- Skills Box -->
+      <div class="skills-box">
+        <div class="skills-box-title">Key Competencies Demonstrated</div>
+        <div class="skills-grid" id="lb-skills">
+          <div class="skill-item">Git &amp; GitHub Workflows</div>
+          <div class="skill-item">Code Review Practices</div>
+          <div class="skill-item">Pull Request Collaboration</div>
+          <div class="skill-item">Technical Documentation</div>
+          <div class="skill-item">Problem-Solving Aptitude</div>
+          <div class="skill-item">Self-Directed Learning</div>
         </div>
       </div>
 
-      <div class="letter-paragraph">
-        Beyond their technical contributions, they exhibited excellent communication skills, 
-        a collaborative mindset, and a genuine passion for open-source development. Their commitment 
-        to continuous improvement and quality output makes them a valuable asset to any 
-        engineering team.
+      <div class="para">
+        Beyond their technical contributions, <span class="name" id="lb-name-4">________</span> exhibited excellent
+        communication skills, a collaborative mindset, and a genuine passion for open-source development.
+        Their commitment to continuous improvement and quality output makes them a valuable asset to any
+        engineering team or academic institution.
       </div>
 
-      <div class="letter-paragraph">
-        I highly and unreservedly recommend <span class="highlight" id="lb-name-4">________</span> 
-        for any future academic or professional endeavours in technology and software development. 
-        We are confident they will continue to excel and deliver significant value in their 
-        career.
+      <div class="para">
+        I highly and unreservedly recommend <span class="name" id="lb-name-5">________</span> for any future academic
+        or professional endeavours in technology and software development. We are confident they will continue
+        to excel and deliver significant value in their career ahead.
       </div>
 
       <!-- Signature Area -->
-      <div class="signature-area">
+      <div class="sig-area">
         <div class="sig-block">
-          <div style="
-            font-family:'Dancing Script',cursive;
-            font-size:1.5rem;
-            font-weight:700;
-            color:#1a2340;
-            line-height:1;
-            margin-bottom:2px;
-          ">Saksham Verma</div>
-          <div class="sig-line"></div>
+          <div class="sig-cursive">Saksham Verma</div>
+          <div class="sig-underline"></div>
           <div class="sig-name">Saksham Verma</div>
-          <div class="sig-title">Founder &amp; CEO</div>
+          <div class="sig-designation">Founder &amp; CEO</div>
           <div class="sig-company">SkillMe Technologies Pvt. Ltd.</div>
         </div>
-        <div class="sig-verify">
-          <div class="sig-qr">
-            <div class="sig-qr-box"><canvas id="qr-canvas"></canvas></div>
-            <div class="sig-qr-text">Scan to verify</div>
+        <div class="sig-right">
+          <div class="qr-block">
+            <div class="qr-box"><canvas id="qr-canvas"></canvas></div>
+            <div class="qr-label">Scan to verify</div>
           </div>
-          <div class="sig-stamp">
-            Verified<br>SkillMe<br>Official
-          </div>
+          <div class="seal">Verified<br>SkillMe<br>Official</div>
         </div>
       </div>
 
-    </div>
+    </div><!-- /letter-body -->
 
-    <!-- Footer -->
-    <div class="letter-footer">
-      <div class="footer-legal">
-        This is a computer-generated document issued by SkillMe Technologies Pvt. Ltd. 
-        The authenticity of this letter can be verified using the QR code or the reference number above 
-        at skill-me-intern.in. © 2024–2026 SkillMe Technologies Pvt. Ltd. All rights reserved.
+    <!-- Doc Footer -->
+    <div class="doc-footer">
+      <div class="doc-footer-legal">
+        This is a computer-generated document issued by SkillMe Technologies Pvt. Ltd. Authenticity of this letter
+        can be verified using the QR code or reference number above at skill-me-intern.in.
+        © 2024–2026 SkillMe Technologies Pvt. Ltd. All rights reserved.
       </div>
-      <div class="footer-page">Page 1 of 1</div>
+      <div class="doc-footer-page">Page 1 of 1</div>
     </div>
 
   </div>
 </div>
 
-<!-- Verify Section -->
+<!-- Verify Badge -->
 <div class="verify-section" id="verify-section">
   <div class="loading-state">Loading recommendation data...</div>
 </div>
@@ -452,118 +420,103 @@
   let studentId  = params.get('student_id');
   let batchId    = params.get('batch_id');
   const certId   = params.get('cert_id');
-  const email    = params.get('email');
   const nameParam   = params.get('name');
   const domainParam = params.get('domain');
 
-  // Domain-specific skills mapping
   const domainSkills = {
     'web-dev': ['HTML5 & CSS3', 'JavaScript (ES6+)', 'Responsive Design', 'Git & GitHub Workflows', 'Code Review Practices', 'Technical Documentation'],
     'python': ['Python 3.x', 'Data Structures & Algorithms', 'Unit Testing (pytest)', 'Git & GitHub Workflows', 'Code Review Practices', 'Technical Documentation'],
     'ml': ['Python & NumPy/Pandas', 'Machine Learning Fundamentals', 'Data Analysis & Visualization', 'Git & GitHub Workflows', 'Model Evaluation', 'Technical Documentation'],
     'react': ['React.js & Hooks', 'Component Architecture', 'State Management', 'Git & GitHub Workflows', 'Code Review Practices', 'Responsive UI Development'],
     'uiux': ['User Research & Personas', 'Wireframing & Prototyping', 'Design Systems', 'Figma / Design Tools', 'Usability Testing', 'Visual Design Principles'],
+    'android': ['Kotlin / Java', 'Android SDK', 'UI/UX for Mobile', 'Git & GitHub Workflows', 'Code Review Practices', 'API Integration'],
   };
 
-  function showError(msg) {
-    document.getElementById('verify-section').innerHTML = `<div style="color:red;font-size:0.9rem;">Error: ${msg}</div>`;
-  }
-
-  function populateLOR(data) {
-    const name = data.holder || data.student_name || (data.first_name ? `${data.first_name} ${data.last_name}` : nameParam || 'Student');
-    const rawDomain = data.domain || domainParam || 'web-dev';
-    const domain = rawDomain.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    const batch = data.batch_number || batchId || '1';
-    const id = data.cert_id || certId || 'Pending';
-    const dateStr = data.issued_at 
-      ? new Date(data.issued_at).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' }) 
+  function populateLOR(name, rawDomain, batch, id, issuedAt) {
+    const domain = (rawDomain || 'web-dev').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const dateStr = issuedAt
+      ? new Date(issuedAt).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' })
       : new Date().toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' });
+    const firstName = name.split(' ')[0];
 
-    document.getElementById('lh-cert-id').textContent = id;
+    document.getElementById('lh-cert-id').textContent = id || 'Pending';
     document.getElementById('lb-date').textContent = `Date: ${dateStr}`;
-    document.getElementById('lb-name').textContent = name;
-    document.getElementById('lb-name-2').textContent = name.split(' ')[0];
-    document.getElementById('lb-name-3').textContent = name.split(' ')[0];
-    document.getElementById('lb-name-4').textContent = name;
+    ['lb-name','lb-name-2','lb-name-3','lb-name-5'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = (id === 'lb-name-2' || id === 'lb-name-3') ? firstName : name;
+    });
+    document.getElementById('lb-name-4').textContent = firstName;
     document.getElementById('lb-domain').textContent = domain;
-    document.getElementById('lb-batch').textContent = `#${batch}`;
     document.title = `LOR — ${name} — SkillMe`;
 
-    // Populate domain-specific skills
-    const skills = domainSkills[rawDomain.toLowerCase()] || domainSkills['web-dev'];
+    const skills = domainSkills[(rawDomain || 'web-dev').toLowerCase()] || domainSkills['web-dev'];
     const skillsEl = document.getElementById('lb-skills');
-    skillsEl.innerHTML = skills.map(s => `<span>${s}</span>`).join('');
+    skillsEl.innerHTML = skills.map(s => `<div class="skill-item">${s}</div>`).join('');
 
-    // Generate QR code for verification
-    const verifyUrl = `${window.location.origin}/certificate.html?cert_id=${id}`;
+    const verifyUrl = `${window.location.origin}/certificate.html?cert_id=${id || 'PREVIEW'}`;
     try {
-      new QRious({
-        element: document.getElementById('qr-canvas'),
-        value: verifyUrl,
-        size: 100,
-        background: '#ffffff',
-        foreground: '#1a2563'
-      });
-    } catch(e) { console.error('QR code error:', e); }
+      new QRious({ element: document.getElementById('qr-canvas'), value: verifyUrl, size: 120, background: '#ffffff', foreground: '#0f1e5c' });
+    } catch(e) {}
   }
 
-  function showVerifyBadge(isValid, data) {
+  function showVerify(ok, name, certId, issuedAt) {
     const vs = document.getElementById('verify-section');
-    if (isValid) {
+    if (ok) {
       vs.innerHTML = `
         <div class="verify-icon">✓</div>
         <div class="verify-text">
           <strong>Recommendation Verified</strong>
-          <span>This letter is genuine and is backed by certificate <strong>${data.cert_id}</strong>, issued to <strong>${data.holder || data.first_name || 'the candidate'}</strong> on ${new Date(data.issued_at).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' })} by SkillMe Technologies Pvt. Ltd.</span>
-        </div>
-      `;
+          <span>This letter is genuine and was issued to <strong>${name}</strong>${issuedAt ? ' on ' + new Date(issuedAt).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}) : ''} by SkillMe Technologies Pvt. Ltd. Ref: ${certId || 'N/A'}</span>
+        </div>`;
     } else {
       vs.innerHTML = `
-        <div class="verify-icon" style="background:#fef3c7; color:#d97706;">!</div>
+        <div class="verify-icon" style="background:rgba(251,191,36,0.15);color:#fbbf24;">!</div>
         <div class="verify-text">
-          <strong>Preview Mode</strong>
-          <span>This is a preview. Complete your internship and payment to receive the official Letter of Recommendation.</span>
-        </div>
-      `;
+          <strong>Issued</strong>
+          <span>This letter was issued to <strong>${name}</strong>. Verified copy available on completion of internship.</span>
+        </div>`;
     }
   }
 
   async function loadLOR() {
-    // Mode 1: direct cert_id verification
+    // Mode 1: cert_id in URL — try API verification
     if (certId) {
       try {
         const res = await fetch(`${API}/api/certificates/verify/${certId}`);
-        if (!res.ok) throw new Error('Recommendation letter not found');
-        const data = await res.json();
-        populateLOR(data);
-        showVerifyBadge(true, data);
-        return;
-      } catch (e) {
-        showError(e.message);
-        return;
-      }
+        if (res.ok) {
+          const d = await res.json();
+          const name = d.holder || d.student_name || nameParam || 'Student';
+          populateLOR(name, d.domain || domainParam, d.batch_number, d.cert_id, d.issued_at);
+          showVerify(true, name, d.cert_id, d.issued_at);
+          return;
+        }
+      } catch(e) {}
+      // cert_id given but API failed — still show with URL params
+      const name = nameParam || 'Student';
+      populateLOR(name, domainParam, batchId, certId, null);
+      showVerify(false, name, certId, null);
+      return;
     }
 
-    // Mode 2: fetch via studentId & batchId metadata
+    // Mode 2: student_id + batch_id — try metadata API
     if (studentId && batchId) {
       try {
-        const metaRes = await fetch(`${API}/api/certificates/metadata/${studentId}/${batchId}`);
-        if (metaRes.ok) {
-          const myCert = await metaRes.json();
-          populateLOR(myCert);
-          showVerifyBadge(true, myCert);
+        const res = await fetch(`${API}/api/certificates/metadata/${studentId}/${batchId}`);
+        if (res.ok) {
+          const d = await res.json();
+          const name = d.holder || nameParam || `${d.first_name||''} ${d.last_name||''}`.trim() || 'Student';
+          populateLOR(name, d.domain || domainParam, d.batch_number, d.cert_id, d.issued_at);
+          showVerify(true, name, d.cert_id, d.issued_at);
           return;
         }
       } catch(e) {}
     }
 
-    // Fallback: Populate from URL params
-    if (nameParam || studentId) {
-      populateLOR({});
-      showVerifyBadge(false);
-    } else {
-      showError('No identifying information provided. Use ?cert_id=X or ?email=Y');
-    }
+    // Mode 3 (always works): populate directly from URL params
+    const name = nameParam || 'Student';
+    const domain = domainParam || 'web-dev';
+    populateLOR(name, domain, batchId, null, null);
+    showVerify(false, name, null, null);
   }
 
   loadLOR();
