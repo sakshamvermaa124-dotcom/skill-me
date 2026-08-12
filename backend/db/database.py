@@ -8,7 +8,10 @@ import logging
 from pathlib import Path
 from config import settings
 
-import libsql_experimental as libsql
+try:
+    import libsql_experimental as libsql
+except ImportError:
+    import sqlite3 as libsql
 
 logger = logging.getLogger("skillme.database")
 
@@ -16,7 +19,7 @@ SCHEMA_PATH = Path(__file__).parent / "schema.sql"
 
 
 class Database:
-    """Async LibSQL (Turso) database wrapper — API-compatible with the old aiosqlite wrapper.
+    """Async LibSQL (Turso) database wrapper with sqlite3 fallback — API-compatible.
     
     Includes automatic reconnect logic to handle Turso stream expiry errors
     (error: 'stream not found') that occur after periods of inactivity.
@@ -28,11 +31,14 @@ class Database:
         self._conn: libsql.Connection | None = None
 
     def _make_connection(self) -> libsql.Connection:
-        """Create a fresh libsql connection."""
-        if self._auth_token:
+        """Create a fresh libsql / sqlite3 connection."""
+        if self._auth_token and getattr(libsql, "__name__", "") == "libsql_experimental":
             return libsql.connect(self._url, auth_token=self._auth_token)
         else:
-            return libsql.connect(self._url)
+            url = self._url
+            if url.startswith("libsql://") or url.startswith("https://"):
+                url = "local.db"
+            return libsql.connect(url)
 
     def _reconnect(self):
         """Drop the stale connection and open a fresh one (no schema re-run needed)."""
@@ -133,6 +139,57 @@ class Database:
         """No-op since connections are created per-query."""
         pass
 
+    def _run_turso_http(self, query: str, params: tuple = ()):
+        """Query Turso Cloud DB via HTTP Pipeline API when libsql_experimental native driver is unavailable."""
+        import httpx
+        http_url = self._url.replace("libsql://", "https://")
+        if not http_url.startswith("http"):
+            http_url = "https://" + http_url
+        if not http_url.endswith("/v2/pipeline"):
+            http_url = http_url.rstrip("/") + "/v2/pipeline"
+
+        formatted_args = []
+        for p in params:
+            if isinstance(p, int):
+                formatted_args.append({"type": "integer", "value": str(p)})
+            elif isinstance(p, float):
+                formatted_args.append({"type": "float", "value": p})
+            elif p is None:
+                formatted_args.append({"type": "null"})
+            else:
+                formatted_args.append({"type": "text", "value": str(p)})
+
+        payload = {
+            "requests": [
+                {
+                    "type": "execute",
+                    "stmt": {
+                        "sql": query,
+                        "args": formatted_args
+                    }
+                },
+                {"type": "close"}
+            ]
+        }
+        headers = {"Authorization": f"Bearer {self._auth_token}", "Content-Type": "application/json"}
+        with httpx.Client(timeout=10.0) as client:
+            res = client.post(http_url, headers=headers, json=payload)
+            res.raise_for_status()
+            data = res.json()
+            results = data.get("results", [])
+            if not results or "response" not in results[0]:
+                return [], None
+            result = results[0]["response"].get("result", {})
+            cols = [c["name"] for c in result.get("cols", [])]
+            rows = []
+            for r in result.get("rows", []):
+                row_vals = [v.get("value") if isinstance(v, dict) else v for v in r]
+                rows.append(dict(zip(cols, row_vals)))
+            last_id = result.get("last_insert_rowid")
+            if last_id is not None and str(last_id).isdigit():
+                last_id = int(last_id)
+            return rows, last_id
+
     # ── Query helpers ──────────────────────────────────────────────
 
     def _run_query(self, fn):
@@ -156,6 +213,9 @@ class Database:
 
     async def execute(self, query: str, params: tuple = ()):
         """Execute a single write query."""
+        if self._auth_token and getattr(libsql, "__name__", "") != "libsql_experimental":
+            self._run_turso_http(query, params)
+            return
         def _run(conn):
             conn.execute(query, params)
             conn.commit()
@@ -163,6 +223,9 @@ class Database:
 
     async def fetch_one(self, query: str, params: tuple = ()) -> dict | None:
         """Fetch a single row as a dict."""
+        if self._auth_token and getattr(libsql, "__name__", "") != "libsql_experimental":
+            rows, _ = self._run_turso_http(query, params)
+            return rows[0] if rows else None
         def _run(conn):
             cursor = conn.execute(query, params)
             row = cursor.fetchone()
@@ -174,6 +237,9 @@ class Database:
 
     async def fetch_all(self, query: str, params: tuple = ()) -> list[dict]:
         """Fetch all rows as a list of dicts."""
+        if self._auth_token and getattr(libsql, "__name__", "") != "libsql_experimental":
+            rows, _ = self._run_turso_http(query, params)
+            return rows
         def _run(conn):
             cursor = conn.execute(query, params)
             rows = cursor.fetchall()
@@ -183,6 +249,9 @@ class Database:
 
     async def insert(self, query: str, params: tuple = ()) -> int:
         """Insert a row and return the last inserted ID."""
+        if self._auth_token and getattr(libsql, "__name__", "") != "libsql_experimental":
+            _, last_id = self._run_turso_http(query, params)
+            return last_id or 0
         def _run(conn):
             cursor = conn.execute(query, params)
             conn.commit()

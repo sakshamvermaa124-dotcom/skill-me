@@ -354,11 +354,35 @@
       font-size: 0.78rem;
     }
 
-    /* Print Styles */
+    /* Print & Single-Page Layout Styles */
     @media print {
-      body { background: #fff; padding: 0; }
-      .actions-bar { display: none; }
-      .offer-paper { box-shadow: none; max-width: 100%; border-radius: 0; padding: 40px; }
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+      html, body {
+        background: #ffffff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 210mm !important;
+        height: 297mm !important;
+        overflow: hidden !important;
+      }
+      .actions-bar {
+        display: none !important;
+      }
+      .offer-paper {
+        box-shadow: none !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        height: 100vh !important;
+        border-radius: 0 !important;
+        padding: 36px 44px !important;
+        margin: 0 !important;
+        border: none !important;
+        page-break-inside: avoid !important;
+        page-break-after: avoid !important;
+      }
     }
 
     @media (max-width: 640px) {
@@ -387,7 +411,7 @@
     <!-- Letterhead -->
     <div class="letterhead">
       <div class="brand-group">
-        <img src="assets/logo.webp" alt="SkillMe" class="brand-logo-img" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+        <img width="36" height="36" src="assets/logo.webp" alt="SkillMe" class="brand-logo-img" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='inline-flex';" style="width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important;">
         <div style="display:none; width:48px; height:48px; border-radius:50%; background:#0c0b0b; border:2px solid #c99a4e; align-items:center; justify-content:center; color:#2563eb; font-weight:800; font-size:1.2rem;" class="brand-logo-fallback">SM</div>
         <div>
           <div class="brand-title"><span class="brand-skill">Skill</span><span class="brand-me">Me</span></div>

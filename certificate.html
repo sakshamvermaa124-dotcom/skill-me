@@ -8,23 +8,24 @@
   <link rel="icon" href="assets/logo.webp" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <style>
     :root {
-      --gold: #c99a4e;
-      --gold-light: #d8ac63;
-      --gold-dark: #b5873d;
-      --navy: #181717;
-      --navy-light: #1f1e1e;
-      --purple: #c99a4e;
-      --blue: #b5873d;
-      --emerald: #4fa36b;
-      --bg: #0c0b0b;
+      --gold: #b8860b;
+      --gold-light: #d4a853;
+      --gold-dark: #8b6914;
+      --navy: #1a2340;
+      --navy-light: #2a3560;
+      --purple: #4f46e5;
+      --blue: #2563eb;
+      --emerald: #059669;
+      --bg: #faf8f4;
       --surface: #ffffff;
-      --border-gold: rgba(201,154,78,0.25);
-      --border-faint: rgba(201,154,78,0.1);
-      --text: #eae6e1;
-      --text-secondary: #969089;
-      --muted: #5e5852;
+      --border-gold: rgba(184,134,11,0.25);
+      --border-faint: rgba(184,134,11,0.1);
+      --text: #1a1a2e;
+      --text-secondary: #3d4663;
+      --muted: #64748b;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -74,11 +75,11 @@
     .certificate {
       width: 100%;
       aspect-ratio: 1.4142 / 1;
-      background: var(--bg);
+      background: #ffffff;
       position: relative;
       overflow: hidden;
       border-radius: 4px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.12), 0 0 0 1px var(--border-gold);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px var(--border-gold);
     }
 
     /* Subtle background glows */
@@ -392,6 +393,7 @@
   </style>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <script src="config.js"></script>
+  <style>.brand-logo-img, .logo img, .nav-logo img, .cert-company-logo, .lh-logo { width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important; flex-shrink: 0 !important; }</style>
 </head>
 <body>
 
@@ -436,7 +438,7 @@
       <!-- Top Bar: Company Info -->
       <div class="cert-top-bar">
         <div class="cert-company">
-          <img src="assets/logo.webp" alt="SkillMe" class="cert-company-logo">
+          <img width="36" height="36" src="assets/logo.webp" alt="SkillMe" class="cert-company-logo" style="width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important;">
           <div class="cert-company-info">
             <div class="cert-company-name">Skill<span>Me</span></div>
             <div class="cert-company-detail">
@@ -683,13 +685,14 @@
     // Generate QR code for verification
     const verifyUrl = `${window.location.origin}/certificate.html?cert_id=${id}`;
     try {
-      const canvas = document.getElementById('qr-canvas');
-      QRCode.toCanvas(canvas, verifyUrl, {
-        width: 120,
-        margin: 0,
-        color: { dark: '#0a1628', light: '#ffffff' }
+      new QRious({
+        element: document.getElementById('qr-canvas'),
+        value: verifyUrl,
+        size: 120,
+        background: '#ffffff',
+        foreground: '#0a1628'
       });
-    } catch(e) { /* QR lib not loaded */ }
+    } catch(e) { console.error('Cert QR error:', e); }
   }
 
   function showVerifyBadge(valid, data = {}) {
