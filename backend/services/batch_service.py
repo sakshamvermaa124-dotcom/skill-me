@@ -573,27 +573,33 @@ class BatchService:
                 "UPDATE submissions SET status = 'merged', merged_at = ? WHERE id = ?",
                 (now, submission["id"]),
             )
-            # Mark issue as completed
+            # Mark issue as completed — but only increment progress if it wasn't
+            # already completed. This prevents duplicate PRs for the same issue
+            # (e.g. a student opens multiple PRs) from inflating the score.
             if submission["issue_id"]:
+                issue_row = await db.fetch_one(
+                    "SELECT week_number, status FROM issues WHERE id = ?",
+                    (submission["issue_id"],),
+                )
+                issue_already_completed = (
+                    issue_row and issue_row["status"] == "completed"
+                )
+
+                # Always mark the issue completed
                 await db.execute(
                     "UPDATE issues SET status = 'completed' WHERE id = ?",
                     (submission["issue_id"],),
                 )
-                # Update progress — UPSERT to handle missing progress rows gracefully.
-                # A progress row may not exist if the student was enrolled after issues
-                # were assigned, or if the webhook fired before the row was created.
-                issue = await db.fetch_one(
-                    "SELECT week_number FROM issues WHERE id = ?", (submission["issue_id"],)
-                )
-                if issue:
-                    week = issue["week_number"]
+
+                # Only update progress if this is the FIRST time this issue is completed
+                if not issue_already_completed and issue_row:
+                    week = issue_row["week_number"]
                     student_id = submission["student_id"]
                     existing_progress = await db.fetch_one(
                         "SELECT id FROM progress WHERE student_id = ? AND batch_id = ? AND week = ?",
                         (student_id, batch_id, week),
                     )
                     if existing_progress:
-                        # Row exists — increment counters
                         await db.execute(
                             """UPDATE progress 
                                SET issues_completed = issues_completed + 1, 
@@ -607,7 +613,6 @@ class BatchService:
                             f"Updated progress for student {student_id}, batch {batch_id}, week {week}: +25 score"
                         )
                     else:
-                        # Row missing — create it now so the score isn't lost
                         await db.insert(
                             """INSERT INTO progress
                                (student_id, batch_id, week, issues_assigned, issues_completed, prs_merged, score)
@@ -618,6 +623,11 @@ class BatchService:
                             f"Created progress row for student {student_id}, batch {batch_id}, week {week} "
                             f"(was missing — seeded with completed=1, score=25)"
                         )
+                elif issue_already_completed:
+                    logger.info(
+                        f"Issue {submission['issue_id']} already completed — skipping progress increment "
+                        f"(duplicate PR #{pr_number} for student {submission['student_id']})"
+                    )
         else:
             await db.execute(
                 "UPDATE submissions SET status = ?, reviewed_at = ? WHERE id = ?",

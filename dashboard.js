@@ -284,7 +284,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('stat-score').textContent = totalScore;
 
     // Progress ring + bar
-    const pct = totalAssigned > 0 ? Math.round((totalCompleted / totalAssigned) * 100) : 0;
+    // Cap completed at assigned so we never show >100% (e.g. if duplicate PRs were counted)
+    const cappedCompleted = Math.min(totalCompleted, totalAssigned);
+    const pct = totalAssigned > 0 ? Math.min(100, Math.round((cappedCompleted / totalAssigned) * 100)) : 0;
     document.getElementById('progress-pct').textContent = `${pct}%`;
 
     // Update description based on progress
