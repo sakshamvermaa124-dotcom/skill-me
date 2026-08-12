@@ -175,15 +175,15 @@ async def get_progress(email: str):
         (student["id"],),
     )
 
-    # Fetch assigned issues for the student
+    # Fetch assigned issues for the student (assigned directly or via batch enrollment)
     assigned_issues = await db.fetch_all(
-        """SELECT i.id, i.github_issue_number, i.title, i.description, i.week_number,
+        """SELECT DISTINCT i.id, i.github_issue_number, i.title, i.description, i.week_number,
                   i.difficulty, i.status, i.created_at, b.repo_name, b.domain, b.start_date
            FROM issues i
            JOIN batches b ON i.batch_id = b.id
-           WHERE i.assigned_to = ?
+           WHERE i.assigned_to = ? OR i.batch_id IN (SELECT batch_id FROM enrollments WHERE student_id = ?)
            ORDER BY i.week_number ASC, i.id ASC""",
-        (student["id"],),
+        (student["id"], student["id"]),
     )
 
     from config import settings
@@ -210,13 +210,13 @@ async def get_progress(email: str):
         "submissions": [dict(s) for s in submissions],
         "issues": formatted_issues,
         "summary": {
-            "total_tasks": sum(p["issues_assigned"] for p in progress),
-            "completed_tasks": sum(p["issues_completed"] for p in progress),
-            "prs_merged": sum(p["prs_merged"] for p in progress),
+            "total_tasks": sum(int(p["issues_assigned"]) for p in progress),
+            "completed_tasks": sum(int(p["issues_completed"]) for p in progress),
+            "prs_merged": sum(int(p["prs_merged"]) for p in progress),
             "total_prs": len([s for s in submissions]),
             "completion_pct": round(
-                sum(p["issues_completed"] for p in progress) /
-                max(sum(p["issues_assigned"] for p in progress), 1) * 100
+                sum(int(p["issues_completed"]) for p in progress) /
+                max(sum(int(p["issues_assigned"]) for p in progress), 1) * 100
             ),
         },
     }
