@@ -3,12 +3,13 @@ SkillMe Backend — Configuration
 Loads environment variables with pydantic-settings for validation.
 """
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
 
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
+    model_config = SettingsConfigDict(extra="ignore", env_file=".env", env_file_encoding="utf-8")
 
     # GitHub
     skillme_github_token: str = ""
@@ -59,10 +60,6 @@ class Settings(BaseSettings):
     # ── Referral System ──────────────────────────
     referral_discount_paise: int = 2000   # ₹20 off certificate per referral
     referral_ambassador_threshold: int = 5  # referrals needed for Ambassador badge
-
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
 
     @property
     def db_path(self) -> str:

@@ -488,11 +488,15 @@ section { position: relative; padding: var(--section-padding); overflow: hidden;
 .navbar {
   position: fixed; top: 0; left: 0; width: 100%;
   z-index: 1000; padding: 18px 0;
-  transition: background var(--transition-base), border-color var(--transition-base), backdrop-filter var(--transition-base);
+  transition: background var(--transition-base), border-color var(--transition-base), backdrop-filter var(--transition-base), padding var(--transition-base);
   border-bottom: 1px solid transparent;
+  will-change: background-color, border-color, backdrop-filter;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .navbar.scrolled {
+  padding: 14px 0;
   background: rgba(11, 11, 14, 0.88);
   backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   border-bottom-color: rgba(255,255,255,0.05);
@@ -503,13 +507,26 @@ section { position: relative; padding: var(--section-padding); overflow: hidden;
 .nav-logo {
   display: flex; align-items: center; gap: 10px;
   font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; letter-spacing: -0.02em;
-  color: #ffffff !important; text-decoration: none;
+  color: var(--text-primary) !important; text-decoration: none;
 }
 
 .nav-logo span, .logo-text, .sidebar-brand-text {
+  color: var(--text-primary);
+  background: none;
+}
+
+[data-theme="dark"] .nav-logo span,
+[data-theme="dark"] .logo-text,
+[data-theme="dark"] .sidebar-brand-text {
   color: #ffffff !important;
-  background: none !important;
   -webkit-text-fill-color: #ffffff !important;
+}
+
+[data-theme="light"] .nav-logo span,
+[data-theme="light"] .logo-text,
+[data-theme="light"] .sidebar-brand-text {
+  color: #0f172a !important;
+  -webkit-text-fill-color: #0f172a !important;
 }
 
 .nav-logo .logo-icon {
@@ -519,17 +536,24 @@ section { position: relative; padding: var(--section-padding); overflow: hidden;
   font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; color: #fff;
 }
 
-.brand-logo-img {
-  height: 36px;
-  width: 36px;
-  border-radius: 50%;
-  object-fit: cover;
-  object-position: center;
-  background: var(--bg-card);
-  border: 1px solid rgba(201, 154, 78, 0.25);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-  display: block;
-  flex-shrink: 0;
+.brand-logo-img,
+img.brand-logo-img,
+.nav-logo img,
+.logo img,
+.sidebar-brand img,
+.cert-company-logo,
+.lh-logo {
+  width: 36px !important;
+  height: 36px !important;
+  max-width: 36px !important;
+  max-height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  display: inline-block !important;
+  flex-shrink: 0 !important;
 }
 
 .nav-links { display: flex; align-items: center; gap: 28px; }
@@ -1512,4 +1536,51 @@ section { position: relative; padding: var(--section-padding); overflow: hidden;
 [data-theme="light"] .guide-code {
   background: #0f172a !important;
   color: #f8fafc !important;
+}
+
+/* Light Mode — Form Inputs, Apply Card & Quiz Components */
+[data-theme="light"] .apply-card,
+[data-theme="light"] .form-step-title,
+[data-theme="light"] .modal-content,
+[data-theme="light"] .quiz-card {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+
+[data-theme="light"] .form-group label {
+  color: #334155 !important;
+}
+
+[data-theme="light"] .form-input,
+[data-theme="light"] select,
+[data-theme="light"] textarea {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+[data-theme="light"] .form-input:focus,
+[data-theme="light"] select:focus,
+[data-theme="light"] textarea:focus {
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 0 3px rgba(201, 154, 78, 0.15) !important;
+}
+
+[data-theme="light"] .form-input::placeholder {
+  color: #94a3b8 !important;
+}
+
+[data-theme="light"] .domain-card,
+[data-theme="light"] .question-card,
+[data-theme="light"] .option-card {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+
+[data-theme="light"] .option-card:hover,
+[data-theme="light"] .domain-card:hover {
+  background: #f8fafc !important;
+  border-color: var(--gold) !important;
 }

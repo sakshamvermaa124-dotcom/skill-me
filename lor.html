@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Letter of Recommendation — SkillMe</title>
   <meta name="description" content="Official Letter of Recommendation issued by SkillMe Technologies — India's Open Source Internship Platform." />
+  <link rel="icon" href="assets/logo.webp" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <style>
     :root {
       --primary: #c99a4e;
@@ -300,6 +302,7 @@
   </style>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <script src="config.js"></script>
+  <style>.brand-logo-img, .logo img, .nav-logo img, .cert-company-logo, .lh-logo { width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important; flex-shrink: 0 !important; }</style>
 </head>
 <body>
 
@@ -321,7 +324,7 @@
     <!-- Letterhead Header (Dark) -->
     <div class="letterhead-top">
       <div class="lh-brand">
-        <img src="assets/logo.webp" alt="SkillMe Logo" class="lh-logo">
+        <img width="36" height="36" src="assets/logo.webp" alt="SkillMe Logo" class="lh-logo" style="width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important;">
         <div class="lh-brand-info">
           <div class="lh-title">SkillMe</div>
           <div class="lh-subtitle">India's Open Source Internship Platform</div>
@@ -486,13 +489,14 @@
     // Generate QR code for verification
     const verifyUrl = `${window.location.origin}/certificate.html?cert_id=${id}`;
     try {
-      const canvas = document.getElementById('qr-canvas');
-      QRCode.toCanvas(canvas, verifyUrl, {
-        width: 100,
-        margin: 0,
-        color: { dark: '#1a2563', light: '#ffffff' }
+      new QRious({
+        element: document.getElementById('qr-canvas'),
+        value: verifyUrl,
+        size: 100,
+        background: '#ffffff',
+        foreground: '#1a2563'
       });
-    } catch(e) { /* QR lib not loaded */ }
+    } catch(e) { console.error('QR code error:', e); }
   }
 
   function showVerifyBadge(isValid, data) {

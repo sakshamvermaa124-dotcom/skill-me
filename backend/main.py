@@ -104,6 +104,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Cache-Control middleware to prevent deployment stale caching
+@app.middleware("http")
+async def add_cache_control_header(request: Request, call_next):
+    response = await call_next(request)
+    path = request.url.path
+    if path.endswith((".html", ".js", ".css")) or path in ["/admin", "/dashboard", "/apply", "/quiz", "/certificate", "/lor", "/offer"]:
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
+
 # Rate limiting
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -130,15 +141,17 @@ app.include_router(portfolio_router)
 
 
 # ──────────────────────────────────────────────
-# Clean URL Routes (serve .html files without extension)
+# Clean & Legacy URL Page Routes
 # ──────────────────────────────────────────────
 
 _PAGES = {
+    "index":       "index.html",
     "admin":       "admin.html",
     "dashboard":   "dashboard.html",
     "apply":       "apply.html",
     "certificate": "certificate.html",
     "lor":         "lor.html",
+    "offer":       "offer.html",
     "contact":     "contact.html",
     "quiz":        "quiz.html",
     "privacy":     "privacy.html",
@@ -149,36 +162,26 @@ _PAGES = {
 for _slug, _filename in _PAGES.items():
     _filepath = FRONTEND_DIR / _filename
     if _filepath.exists():
-        # Create closure to capture the correct filepath
         def _make_handler(fp):
             async def _handler():
                 return FileResponse(fp)
             _handler.__name__ = f"serve_{fp.stem}"
             return _handler
+        # Serve both /slug and /slug.html
         app.get(f"/{_slug}", tags=["pages"], include_in_schema=False)(_make_handler(_filepath))
+        app.get(f"/{_filename}", tags=["pages"], include_in_schema=False)(_make_handler(_filepath))
 
 @app.get("/p/{username}", tags=["pages"], include_in_schema=False)
 async def serve_portfolio(username: str):
     return FileResponse(FRONTEND_DIR / "portfolio.html")
 
-# Serve static assets (CSS, JS, images) from frontend root
-if FRONTEND_DIR.exists():
-    app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
-
-
-# ──────────────────────────────────────────────
-# Root Endpoint
-# ──────────────────────────────────────────────
-
-@app.get("/", tags=["health"])
-async def root():
-    """Health check endpoint."""
-    return {
-        "service": "SkillMe API",
-        "version": "0.1.0",
-        "status": "running",
-        "docs": "/docs",
-    }
+@app.get("/", tags=["pages"], include_in_schema=False)
+async def root_page():
+    """Serve index.html at root."""
+    index_file = FRONTEND_DIR / "index.html"
+    if index_file.exists():
+        return FileResponse(index_file)
+    return {"service": "SkillMe API", "status": "running"}
 
 
 @app.get("/health", tags=["health"])
@@ -195,3 +198,8 @@ async def health():
         "github": "connected" if github_ok else "disconnected",
         "org": settings.github_org,
     }
+
+
+# Serve static assets (CSS, JS, images) from root fallback
+if FRONTEND_DIR.exists():
+    app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
