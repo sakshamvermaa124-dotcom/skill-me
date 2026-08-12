@@ -72,16 +72,21 @@
     .btn-verify:hover { background: rgba(0,0,0,0.08); }
 
     /* ─── CERTIFICATE CARD ─── */
-    .cert-wrap { width: 100%; max-width: 960px; position: relative; }
+    .cert-wrap {
+      width: 100%;
+      max-width: 960px;
+      position: relative;
+    }
 
     .certificate {
-      width: 100%;
-      aspect-ratio: 1.4142 / 1;
+      width: 960px;
+      height: 680px;
       background: #ffffff;
       position: relative;
       overflow: hidden;
       border-radius: 4px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px var(--border-gold);
+      transform-origin: top left;
     }
 
     /* Subtle background glows */
@@ -380,20 +385,21 @@
     }
 
     /* ─── RESPONSIVE ─── */
+    @media (max-width: 960px) {
+      .cert-wrap {
+        overflow: visible;
+      }
+    }
     @media (max-width: 768px) {
       body { padding: 20px 12px; }
       .action-bar { gap: 8px; margin-bottom: 20px; }
       .btn-download, .btn-verify { padding: 9px 16px; font-size: 0.82rem; }
-      .cert-wrap { overflow-x: auto; }
-      .certificate { min-width: 580px; }
       .verify-section { padding: 16px 18px; gap: 12px; margin-top: 16px; }
     }
     @media (max-width: 480px) {
       body { padding: 16px 8px; }
       .action-bar { flex-direction: column; align-items: stretch; gap: 8px; }
       .btn-download, .btn-verify { width: 100%; justify-content: center; }
-      .cert-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-      .certificate { min-width: 500px; }
       .verify-section { flex-direction: column; align-items: flex-start; gap: 10px; }
     }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -1101,11 +1107,16 @@
 
       const certEl = document.getElementById('certificate');
 
-      // Save and remove border-radius / box-shadow for clean capture
+      // Save and remove border-radius / box-shadow / scale for clean capture
       const origBR = certEl.style.borderRadius;
       const origBS = certEl.style.boxShadow;
+      const origTransform = certEl.style.transform;
       certEl.style.borderRadius = '0';
       certEl.style.boxShadow = 'none';
+      certEl.style.transform = 'scale(1)';  // full resolution capture
+      const wrap = document.querySelector('.cert-wrap');
+      const origWrapH = wrap ? wrap.style.height : '';
+      if (wrap) wrap.style.height = '680px';
 
       const canvas = await html2canvas(certEl, {
         scale: 3,
@@ -1118,6 +1129,9 @@
       // Restore styles
       certEl.style.borderRadius = origBR;
       certEl.style.boxShadow = origBS;
+      certEl.style.transform = origTransform;
+      if (wrap) wrap.style.height = origWrapH;
+      scaleCertificate(); // re-apply viewport scale
 
       const imgData = canvas.toDataURL('image/jpeg', 1.0);
       const { jsPDF } = window.jspdf;
@@ -1137,6 +1151,23 @@
       if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
     }
   }
+
+  // ─── Scale certificate to fit viewport ───
+  function scaleCertificate() {
+    const cert = document.querySelector('.certificate');
+    const wrap = document.querySelector('.cert-wrap');
+    if (!cert || !wrap) return;
+    const wrapWidth = wrap.clientWidth;
+    const certWidth = 960;
+    const scale = Math.min(1, wrapWidth / certWidth);
+    cert.style.transform = `scale(${scale})`;
+    // Adjust wrapper height to match scaled certificate
+    wrap.style.height = `${680 * scale}px`;
+  }
+  window.addEventListener('resize', scaleCertificate);
+  window.addEventListener('DOMContentLoaded', scaleCertificate);
+  // Run immediately too
+  scaleCertificate();
 
   if (hasParams) loadCertificate();
 </script>
