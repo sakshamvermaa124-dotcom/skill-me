@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     // We assume the API runs on the same origin (FastAPI serving static files + API)
-    const baseUrl = window.location.origin;
+    const baseUrl = window.SKILLME_API || window.location.origin;
     const res = await fetch(`${baseUrl}/api/portfolio/${username}`);
     
     if (res.status === 403) {
