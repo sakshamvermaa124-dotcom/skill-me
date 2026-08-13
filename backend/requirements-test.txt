@@ -1,0 +1,7 @@
+"""
+SkillMe — Test Suite
+Requirements for running the test suite.
+"""
+pytest==8.3.2
+pytest-asyncio==0.24.0
+httpx==0.28.1
