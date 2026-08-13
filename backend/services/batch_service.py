@@ -246,7 +246,34 @@ class BatchService:
                 weeks_to_assign = [1]
             for w in weeks_to_assign:
                 logger.info(f"Auto-assigning Week {w} tasks for newly enrolled student {student_id}")
-                await self.assign_week_from_task_repo(batch_id=batch_id, week_number=w)
+                created = await self.assign_week_from_task_repo(batch_id=batch_id, week_number=w)
+                if created:
+                    from services.email_service import email_service
+                    import asyncio
+                    from config import settings
+                    base_repo_url = f"https://github.com/{settings.github_org}/{batch['repo_name']}" if batch.get("repo_name") else None
+                    gh_user = student.get("github_username")
+                    tasks_for_email = [
+                        {
+                            "title": r.get("title", "Task"), 
+                            "issue_url": f"{base_repo_url}/issues/{r.get('github_issue_number')}" if r.get("github_issue_number") else base_repo_url
+                        }
+                        for r in created if r.get("assigned_to") == student_id
+                    ]
+                    if tasks_for_email:
+                        asyncio.create_task(
+                            email_service.send_weekly_tasks_notification(
+                                first_name=student["first_name"],
+                                last_name=student["last_name"],
+                                email=student["email"],
+                                domain=batch["domain"],
+                                batch_number=batch["batch_number"],
+                                week_number=w,
+                                tasks=tasks_for_email,
+                                repo_url=base_repo_url,
+                                github_username=gh_user or None,
+                            )
+                        )
         except Exception as e:
             logger.warning(f"Could not auto-assign tasks on enrollment for student {student_id}: {e}")
 
