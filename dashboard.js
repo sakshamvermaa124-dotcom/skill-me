@@ -284,9 +284,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('stat-score').textContent = totalScore;
 
     // Progress ring + bar
-    // Cap completed at assigned so we never show >100% (e.g. if duplicate PRs were counted)
-    const cappedCompleted = Math.min(totalCompleted, totalAssigned);
-    const pct = totalAssigned > 0 ? Math.min(100, Math.round((cappedCompleted / totalAssigned) * 100)) : 0;
+    // Always divide by 12 (3 tasks × 4 weeks = full internship).
+    // This prevents showing 100% when only Week 1 (3 tasks) is done.
+    const cappedCompleted = Math.min(totalCompleted, 12);
+    const pct = Math.min(100, Math.round((cappedCompleted / 12) * 100));
     document.getElementById('progress-pct').textContent = `${pct}%`;
 
     // Update description based on progress
@@ -561,7 +562,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     };
     
-    function showPaymentModal(student, data) {
+    window.showPaymentModal = function(student, data) {
       const modal = document.getElementById('payment-modal');
       if (modal) {
         // Wire up the pay button dynamically
@@ -574,7 +575,7 @@ document.addEventListener('DOMContentLoaded', () => {
         void modal.offsetWidth;
         modal.classList.add('active');
       }
-    }
+    };
 
     // 🏆🏆🏆 Razorpay Payment Helpers 🏆🏆🏆─────────────────────────────────
   // ─────────────────────────────────────────────────────────────
