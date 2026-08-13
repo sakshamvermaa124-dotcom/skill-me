@@ -446,6 +446,7 @@
     }
   </script>
   <style>.brand-logo-img, .logo img, .nav-logo img, .cert-company-logo, .lh-logo { width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important; flex-shrink: 0 !important; }</style>
+  <script src="theme.js"></script>
 </head>
 
 <body>
@@ -464,6 +465,24 @@
         <a href="index.html#faq">FAQ</a>
         <a href="dashboard.html" class="nav-link-dashboard">Student Dashboard →</a>
       </div>
+      
+      <!-- Theme Toggle -->
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle light/dark mode" title="Toggle theme">
+        <svg class="theme-icon" id="sun-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg class="theme-icon" id="moon-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+        </svg>
+      </button>
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu">
         <span></span><span></span><span></span>
       </button>
@@ -495,22 +514,22 @@
           <!-- Step 1: Personal Info -->
           <div class="form-step active" data-step="1" id="step-1">
 
-            <!-- 🎯 Permanent Professional Quiz Status & Retake Card -->
+            <!-- 🎯 Dynamic Quiz Status & Retake Card -->
             <div id="quiz-status-banner" style="margin-bottom: 24px; background: rgba(201, 154, 78, 0.07); border: 1px solid rgba(201, 154, 78, 0.3); border-radius: 16px; padding: 16px 20px; backdrop-filter: blur(10px);">
               <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
                 <div style="display: flex; align-items: center; gap: 12px;">
-                  <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(201, 154, 78, 0.15); border: 1px solid rgba(201, 154, 78, 0.4); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;" id="quiz-status-icon">🎯</div>
+                  <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(201, 154, 78, 0.15); border: 1px solid rgba(201, 154, 78, 0.4); display: flex; align-items: center; justify-content: center; font-size: 1.3rem;" id="quiz-status-icon">🧠</div>
                   <div>
                     <div style="font-weight: 700; font-size: 0.95rem; color: #ffffff;" id="quiz-status-title">
-                      Screening Quiz Completed: <span id="quiz-score-display" style="color: #c99a4e; font-weight: 800;">7/8 Score</span>
+                      Screening Quiz: <span id="quiz-score-display" style="color: #c99a4e; font-weight: 800;">Optional Assessment</span>
                     </div>
                     <div style="font-size: 0.8rem; color: #a1a1aa; margin-top: 2px;" id="quiz-domain-display">
-                      Domain: Web Development
+                      Take the 2-min quiz to boost your application selection ranking.
                     </div>
                   </div>
                 </div>
                 <a href="quiz.html?retake=1" id="quiz-action-btn" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: linear-gradient(135deg, #c99a4e 0%, #b5873d 100%); border: none; border-radius: 9999px; color: #0c0b0b; font-size: 0.84rem; font-weight: 700; text-decoration: none; transition: all 0.2s ease; box-shadow: 0 4px 14px rgba(201, 154, 78, 0.25);">
-                  🔄 Retake Screening Quiz
+                  🎯 Take Screening Quiz →
                 </a>
               </div>
             </div>
@@ -597,88 +616,10 @@
             </div>
           </div>
           
-          <!-- Step 3: Domain Selection -->
+          <!-- Step 3: Motivation -->
           <div class="form-step" data-step="3" id="step-3">
-            <h3 class="form-step-title">Choose Your Domain</h3>
-            <p class="form-step-subtitle">Select the track you want to intern in</p>
-            
-            <div class="form-group">
-              <div class="domain-select-grid" id="domain-grid">
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-webdev" value="Web Development" required>
-                  <label for="dom-webdev"><span class="domain-emoji">🌐</span> Web Dev</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-python" value="Python">
-                  <label for="dom-python"><span class="domain-emoji">🐍</span> Python</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-react" value="React / Next.js">
-                  <label for="dom-react"><span class="domain-emoji">⚛️</span> React</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-node" value="Node.js / Express">
-                  <label for="dom-node"><span class="domain-emoji">🟢</span> Node.js</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-java" value="Java / Spring Boot">
-                  <label for="dom-java"><span class="domain-emoji">☕</span> Java</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-ml" value="Machine Learning">
-                  <label for="dom-ml"><span class="domain-emoji">🤖</span> ML / AI</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-ds" value="Data Science">
-                  <label for="dom-ds"><span class="domain-emoji">📊</span> Data Sci</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-flutter" value="Flutter / Mobile">
-                  <label for="dom-flutter"><span class="domain-emoji">📱</span> Flutter</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-devops" value="DevOps / CI-CD">
-                  <label for="dom-devops"><span class="domain-emoji">🔧</span> DevOps</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-cpp" value="C/C++ / DSA">
-                  <label for="dom-cpp"><span class="domain-emoji">⚡</span> C/C++</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-uiux" value="UI/UX Design">
-                  <label for="dom-uiux"><span class="domain-emoji">🎨</span> UI/UX</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-cyber" value="Cybersecurity">
-                  <label for="dom-cyber"><span class="domain-emoji">🔐</span> Cyber Sec</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-cloud" value="Cloud / AWS">
-                  <label for="dom-cloud"><span class="domain-emoji">☁️</span> Cloud</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-dsa" value="DSA / Competitive">
-                  <label for="dom-dsa"><span class="domain-emoji">🧩</span> DSA / CP</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-blockchain" value="Blockchain / Web3">
-                  <label for="dom-blockchain"><span class="domain-emoji">⛓️</span> Blockchain</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-android" value="Android / Kotlin">
-                  <label for="dom-android"><span class="domain-emoji">🤖</span> Android</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-sql" value="SQL / Databases">
-                  <label for="dom-sql"><span class="domain-emoji">🗄️</span> SQL / DB</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-genai" value="Generative AI">
-                  <label for="dom-genai"><span class="domain-emoji">✨</span> Gen AI</label>
-                </div>
-              </div>
-              <div class="form-error" id="domain-error">Please select a domain</div>
-            </div>
+            <h3 class="form-step-title">Final Details</h3>
+            <p class="form-step-subtitle">Almost there! Tell us a bit more.</p>
             
             <div class="form-group">
               <label for="motivation">Why do you want to join? <span class="required">*</span></label>
@@ -701,7 +642,7 @@
             
             <div class="form-actions">
               <button type="button" class="btn-back" onclick="prevStep(3)">Back</button>
-              <button type="submit" class="btn-submit" id="btn-submit">
+              <button type="button" class="btn-submit" id="btn-submit" onclick="submitApplication()">
                 Submit Application
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
               </button>
@@ -714,18 +655,18 @@
           <div class="success-icon">🎉</div>
           <h2>Application Submitted!</h2>
           <p>We've received your application. You'll hear from us within <strong>48 hours</strong> with a screening quiz link.</p>
-          <div class="success-detail">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
-            Check your email for confirmation
-          </div>
-          <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-            <a href="index.html" class="btn-primary">
-              Back to Home
-            </a>
-            <a href="dashboard.html" class="btn-primary" style="background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.5);color:#fff;">
-              Student Dashboard
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
+          <div class="success-actions">
+            <div class="success-badge">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              Check your email for confirmation
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 24px; justify-content: center; flex-wrap: wrap;">
+              <a href="index.html" class="btn-secondary" style="border-radius: var(--radius-full);">Back to Home</a>
+              <a href="dashboard.html" class="btn-primary" style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1);">Student Dashboard →</a>
+            </div>
+            <div style="margin-top: 20px;">
+              <button type="button" onclick="localStorage.removeItem('skillme_student_applied'); location.reload();" style="background: none; border: none; color: var(--text-muted); font-size: 0.85rem; text-decoration: underline; cursor: pointer;">Submit another application</button>
+            </div>
           </div>
         </div>
       </div>
@@ -745,13 +686,10 @@
       }
     });
 
-    // ── Quiz Guard ─────────────────────────────────────────────
+    // ── Quiz Integration & Optional Prefill ─────────────────────
     (function () {
       const quizRaw = localStorage.getItem('skillme_quiz_result');
-      if (!quizRaw) {
-        window.location.href = 'quiz.html';
-        return;
-      }
+      if (!quizRaw) return;
       try {
         const quiz = JSON.parse(quizRaw);
         const domainLabels = {
@@ -786,7 +724,7 @@
           const domainSelect = document.getElementById('domain') || document.querySelector('[name="domain"]');
           if (domainSelect) domainSelect.value = quiz.domain;
         }
-      } catch (e) { /* corrupted quiz data — let them through */ }
+      } catch (e) { /* corrupted quiz data — skip */ }
     })();
 
 
@@ -828,21 +766,29 @@
       currentStep = step;
       updateProgress();
       // Scroll to top of form
-      lenis.scrollTo('.apply-card', { offset: -100, duration: 0.8 });
+      if (typeof lenis !== 'undefined' && lenis) {
+        lenis.scrollTo('.apply-card', { offset: -100, duration: 0.8 });
+      } else {
+        document.querySelector('.apply-card').scrollIntoView({ behavior: 'smooth' });
+      }
     }
 
     function validateStep(step) {
-      let valid = true;
-
       if (step === 1) {
-        valid = validateField('firstName') & validateField('lastName') & validateEmail('email') & validateField('phone');
+        const v1 = validateField('firstName');
+        const v2 = validateField('lastName');
+        const v3 = validateEmail('email');
+        const v4 = validateField('phone');
+        return v1 && v2 && v3 && v4;
       } else if (step === 2) {
-        valid = validateField('college') & validateSelect('year') & validateGithub('github');
+        const v1 = validateField('college');
+        const v2 = validateSelect('year');
+        const v3 = validateGithub('github');
+        return v1 && v2 && v3;
       } else if (step === 3) {
-        valid = validateDomain() & validateField('motivation');
+        return validateField('motivation');
       }
-
-      return valid;
+      return true;
     }
 
     function validateField(id) {
@@ -889,7 +835,7 @@
       const input = document.getElementById(id);
       const error = document.getElementById(`${id}-error`);
       const val = input.value.trim();
-      if (!val || !val.includes('github.com/')) {
+      if (!val) {
         input.classList.add('error');
         if (error) error.classList.add('visible');
         return false;
@@ -899,16 +845,7 @@
       return true;
     }
 
-    function validateDomain() {
-      const checked = document.querySelector('input[name="domain"]:checked');
-      const error = document.getElementById('domain-error');
-      if (!checked) {
-        if (error) error.classList.add('visible');
-        return false;
-      }
-      if (error) error.classList.remove('visible');
-      return true;
-    }
+
 
     function nextStep(step) {
       if (validateStep(step)) {
@@ -929,18 +866,17 @@
       });
     });
 
-    document.querySelectorAll('input[name="domain"]').forEach(radio => {
-      radio.addEventListener('change', () => {
-        const error = document.getElementById('domain-error');
-        if (error) error.classList.remove('visible');
-      });
-    });
-
     // Form Submit
     document.getElementById('apply-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      
-      if (!validateStep(3)) return;
+      e.preventDefault(); // Catch any accidental enter-key submits
+      submitApplication();
+    });
+
+    window.submitApplication = function() {
+      if (!validateStep(3)) {
+        alert('Validation failed! Please make sure you completed the form.');
+        return;
+      }
 
       const submitBtn = document.getElementById('btn-submit');
       submitBtn.disabled = true;
@@ -949,55 +885,112 @@
         Submitting...
       `;
 
+      // Extract clean GitHub username
+      let rawGithub = document.getElementById('github').value.trim();
+      let cleanGithub = '';
+      if (rawGithub) {
+        const match = rawGithub.match(/github\.com\/([^\/]+)/);
+        cleanGithub = match ? match[1] : rawGithub.replace(/^@/, '');
+      }
+
+      // Implicitly determine domain from Quiz, default to "General"
+      let finalDomain = "General";
+      try {
+        const quizRaw = localStorage.getItem('skillme_quiz_result');
+        if (quizRaw) {
+          const quiz = JSON.parse(quizRaw);
+          if (quiz && quiz.domain) {
+            const domainLabels = {
+              'web-dev':'Web Development','python':'Python','ml':'Machine Learning',
+              'devops':'DevOps / CI-CD','mobile':'Flutter / Mobile','react':'React / Next.js',
+              'nodejs':'Node.js / Express','java':'Java / Spring Boot','data-science':'Data Science',
+              'cpp':'C/C++ / DSA','cybersecurity':'Cybersecurity','cloud':'Cloud / AWS'
+            };
+            finalDomain = domainLabels[quiz.domain] || quiz.domain;
+          }
+        }
+      } catch(e) {}
+
       // Collect form data
       const formData = {
         first_name: document.getElementById('firstName').value.trim(),
         last_name: document.getElementById('lastName').value.trim(),
         email: document.getElementById('email').value.trim(),
         phone: document.getElementById('phone').value.trim(),
-        github_username: document.getElementById('github').value.trim(),
+        github_username: cleanGithub || rawGithub,
         linkedin_url: document.getElementById('linkedin').value.trim(),
         college: document.getElementById('college').value.trim(),
         year_of_study: document.getElementById('year').value,
-        domain: document.querySelector('input[name="domain"]:checked').value,
+        domain: finalDomain,
         motivation: document.getElementById('motivation').value.trim(),
       };
 
+      console.log("Submitting formData:", formData);
+
       // Call API
-      fetch((window.SKILLME_API || 'http://localhost:8000') + '/api/students/apply', {
+      fetch((window.SKILLME_API || 'http://127.0.0.1:8000') + '/api/students/apply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       })
       .then(async res => {
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || data.detail || 'Submission failed');
-        if (data.error) throw new Error(data.error);
+        if (!res.ok) {
+          let msg = 'Submission failed';
+          if (typeof data.detail === 'string') msg = data.detail;
+          else if (Array.isArray(data.detail) && data.detail[0] && data.detail[0].msg) msg = data.detail[0].msg;
+          else if (data.error) msg = data.error;
+          throw new Error(msg);
+        }
         return data;
       })
       .then(data => {
         document.getElementById('apply-form').style.display = 'none';
-        document.getElementById('form-progress').style.display = 'none';
+        const progressEl = document.getElementById('form-progress');
+        if (progressEl) progressEl.style.display = 'none';
+        
+        // Persist applied state
+        localStorage.setItem('skillme_student_applied', 'true');
+        
+        if (typeof lenis !== 'undefined' && lenis) {
+          lenis.scrollTo(0, { immediate: true });
+        } else {
+          window.scrollTo(0, 0);
+        }
         
         // Show success state
         const successState = document.getElementById('success-state');
         if (data.status === 'already_applied') {
           successState.querySelector('h2').textContent = 'Already Applied!';
-          successState.querySelector('p').textContent = 'An application with this email already exists. We will get back to you soon.';
+          successState.querySelector('p').innerHTML = 'An application with this email already exists. We will get back to you soon.';
         }
         successState.classList.add('active');
-        lenis.scrollTo('.apply-card', { offset: -100, duration: 0.8 });
       })
       .catch(err => {
         console.error('Error submitting form:', err);
-        alert('Error: ' + err.message);
+        alert('Application Error: ' + err.message);
         submitBtn.disabled = false;
         submitBtn.innerHTML = `Submit Application <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
       });
-    });
+    };
 
-    // Check for previous quiz completion and update Quiz status component dynamically
+    // Dynamic Quiz status banner & Applied state restoration
     document.addEventListener('DOMContentLoaded', () => {
+      // Check if student has already submitted application on this device
+      if (localStorage.getItem('skillme_student_applied') === 'true') {
+        const applyForm = document.getElementById('apply-form');
+        const progressEl = document.getElementById('form-progress');
+        const successState = document.getElementById('success-state');
+        if (applyForm) applyForm.style.display = 'none';
+        if (progressEl) progressEl.style.display = 'none';
+        if (successState) {
+          successState.querySelector('h2').textContent = 'Application Received!';
+          successState.querySelector('p').innerHTML = 'Your application has been received. Check your email for screening updates.';
+          successState.classList.add('active');
+        }
+        return;
+      }
+
       const rawResult = localStorage.getItem('skillme_quiz_result');
       const titleEl = document.getElementById('quiz-status-title');
       const scoreDisplay = document.getElementById('quiz-score-display');
@@ -1008,39 +1001,39 @@
       if (rawResult) {
         try {
           const quizRes = JSON.parse(rawResult);
-          const score = quizRes.score !== undefined ? quizRes.score : 7;
-          const total = quizRes.total || 8;
-          const domain = quizRes.domain || 'Web Development';
-
-          if (titleEl && scoreDisplay) {
-            titleEl.innerHTML = `Screening Quiz Completed: <span style="color: #c99a4e; font-weight: 800;">${score}/${total} Score</span>`;
-          }
-          if (domainDisplay) {
-            domainDisplay.textContent = `Track: ${domain} (Verified Status)`;
-          }
-          if (actionBtn) {
-            actionBtn.innerHTML = `🔄 Retake Screening Quiz`;
-          }
-          if (iconEl) {
-            iconEl.textContent = `🎯`;
+          if (quizRes && quizRes.score !== undefined && quizRes.total && quizRes.domain) {
+            const domainLabel = (quizRes.domain || 'web-dev').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+            if (titleEl && scoreDisplay) {
+              titleEl.innerHTML = `Screening Quiz Completed: <span style="color: #c99a4e; font-weight: 800;">${quizRes.score}/${quizRes.total} Score</span>`;
+            }
+            if (domainDisplay) {
+              domainDisplay.textContent = `Track: ${domainLabel} · Want to score higher? Retake to boost your selection ranking.`;
+            }
+            if (actionBtn) {
+              actionBtn.innerHTML = `🔄 Retake Quiz to Score Higher →`;
+            }
+            if (iconEl) {
+              iconEl.textContent = `🎯`;
+            }
+            return;
           }
         } catch (e) {
           console.error("Error reading quiz result:", e);
         }
-      } else {
-        // Show clean prompt for applicants who haven't taken the quiz
-        if (titleEl) {
-          titleEl.innerHTML = `Screening Quiz: <span style="color: #c99a4e; font-weight: 800;">Optional Assessment</span>`;
-        }
-        if (domainDisplay) {
-          domainDisplay.textContent = `Take the 2-min quiz to boost your application selection ranking.`;
-        }
-        if (actionBtn) {
-          actionBtn.innerHTML = `🎯 Take Screening Quiz →`;
-        }
-        if (iconEl) {
-          iconEl.textContent = `🧠`;
-        }
+      }
+
+      // Show clean prompt for applicants who haven't taken the quiz
+      if (titleEl) {
+        titleEl.innerHTML = `Screening Quiz: <span style="color: #c99a4e; font-weight: 800;">Optional Assessment</span>`;
+      }
+      if (domainDisplay) {
+        domainDisplay.textContent = `Take the 2-min quiz to boost your application selection ranking.`;
+      }
+      if (actionBtn) {
+        actionBtn.innerHTML = `🎯 Take Screening Quiz →`;
+      }
+      if (iconEl) {
+        iconEl.textContent = `🧠`;
       }
     });
   </script>

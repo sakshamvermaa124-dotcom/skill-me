@@ -245,6 +245,29 @@
       line-height: 1.6;
     }
 
+
+    .portfolio-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(10,10,20,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    [data-theme="light"] .portfolio-nav {
+      background: rgba(250,250,250,0.95);
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    .portfolio-theme-btn {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px; width: 36px; height: 36px;
+      display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary);
+    }
+    [data-theme="light"] .portfolio-theme-btn {
+      background: rgba(0,0,0,0.05);
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+    [data-theme="light"] .portfolio-theme-btn:hover {
+      background: rgba(0,0,0,0.1);
+    }
   </style>
   <style>.brand-logo-img, .logo img, .nav-logo img, .cert-company-logo, .lh-logo { width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important; flex-shrink: 0 !important; }</style>
 <script src="theme.js"></script>
@@ -256,13 +279,13 @@
   <div class="aurora-blob" style="top: -10%; left: -10%; background: var(--accent-indigo);"></div>
   <div class="aurora-blob" style="bottom: -10%; right: -10%; background: var(--accent-emerald);"></div>
 
-  <nav style="position:fixed; top:0; left:0; right:0; z-index:100; background:rgba(10,10,20,0.85); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-bottom:1px solid rgba(255,255,255,0.06);">
+  <nav class="portfolio-nav">
     <div style="max-width:900px; margin:0 auto; padding:0 24px; height:64px; display:flex; align-items:center; justify-content:space-between;">
       <a href="index.html" style="display:flex; align-items:center; gap:10px; text-decoration:none;">
         <img width="32" height="32" src="assets/logo.webp" alt="SkillMe" style="width:32px; height:32px; border-radius:50%; object-fit:cover; flex-shrink:0;">
         <span style="font-family:var(--font-display); font-weight:700; font-size:1.1rem; color:var(--text-primary); letter-spacing:-0.3px;">SkillMe</span>
       </a>
-      <button class="theme-toggle" id="theme-btn" aria-label="Toggle Theme" style="background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.1); border-radius:8px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-secondary);">
+      <button id="theme-btn" aria-label="Toggle Theme" class="theme-toggle portfolio-theme-btn">
         <svg id="sun-icon" class="theme-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         <svg id="moon-icon" class="theme-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>

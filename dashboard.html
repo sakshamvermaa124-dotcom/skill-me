@@ -218,7 +218,7 @@
       display: none;
       max-width: 1200px;
       margin: 0 auto;
-      padding: 0 24px 80px;
+      padding: 120px 24px 80px;
     }
 
     /* Header */
@@ -1235,7 +1235,7 @@
     [data-theme="light"] .theme-toggle:hover { background: rgba(99, 102, 241, 0.1); }
     @media (max-width: 768px) {
       .nav-container { padding: 0 16px; height: 60px; }
-      #dashboard-view { padding: 0 16px 60px; }
+      #dashboard-view { padding: 100px 16px 60px; }
       .dash-header { margin-bottom: 28px; }
       .dash-header h1 { font-size: clamp(1.6rem, 6vw, 2.4rem); }
       .dash-tags { gap: 8px; }
@@ -1454,7 +1454,6 @@
 
       <!-- Header -->
       <div class="dash-header" id="dash-header-el">
-        <div class="dash-greeting">Your Internship</div>
         <h1 id="dash-name">Welcome back!</h1>
         <div class="dash-tags">
           <span class="dash-tag accent" id="dash-domain">
@@ -1842,24 +1841,7 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       // Theme toggle logic specific for dashboard
-      const themeToggle = document.getElementById('theme-toggle');
-      const html = document.documentElement;
       
-      // We already set data-theme via localStorage or 'dark' earlier if possible, 
-      // but let's ensure it's applied correctly.
-      const savedTheme = localStorage.getItem('skillme-theme') || 'dark';
-      html.setAttribute('data-theme', savedTheme);
-      
-      if (themeToggle) {
-        themeToggle.addEventListener('click', () => {
-          const current = html.getAttribute('data-theme');
-          const next = current === 'dark' ? 'light' : 'dark';
-          html.setAttribute('data-theme', next);
-          localStorage.setItem('skillme-theme', next);
-          themeToggle.style.transform = 'rotate(360deg) scale(1.1)';
-          setTimeout(() => { themeToggle.style.transform = ''; }, 300);
-        });
-      }
       });
     </script>
 

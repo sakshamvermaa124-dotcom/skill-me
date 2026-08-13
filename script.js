@@ -91,26 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ═══════════════════════════════════════════════════════════
   // THEME TOGGLE — Light / Dark with localStorage persistence
   // ═══════════════════════════════════════════════════════════
-  const themeToggle = document.getElementById('theme-toggle');
-  const html = document.documentElement;
-
-  // Restore saved preference
-  const savedTheme = localStorage.getItem('skillme-theme') || 'dark';
-  html.setAttribute('data-theme', savedTheme);
-
-  themeToggle && themeToggle.addEventListener('click', () => {
-    const current = html.getAttribute('data-theme');
-    const next = current === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-theme', next);
-    localStorage.setItem('skillme-theme', next);
-
-    // Notify Three.js scenes of theme change
-    window.dispatchEvent(new CustomEvent('themechange', { detail: { theme: next } }));
-
-    // Animate the toggle button
-    themeToggle.style.transform = 'rotate(360deg) scale(1.15)';
-    setTimeout(() => { themeToggle.style.transform = ''; }, 500);
-  });
+  
 
   // ═══════════════════════════════════════════════════════════
   // LAYER 3: GSAP + ScrollTrigger (Taste-Skill Motion)

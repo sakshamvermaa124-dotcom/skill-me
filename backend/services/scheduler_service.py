@@ -94,7 +94,7 @@ async def run_auto_assign() -> None:
             # Send weekly task email to each enrolled student
             try:
                 students = await db.fetch_all(
-                    """SELECT s.first_name, s.last_name, s.email, s.github_username
+                    """SELECT s.id, s.first_name, s.last_name, s.email, s.github_username
                        FROM students s
                        JOIN enrollments e ON e.student_id = s.id
                        WHERE e.batch_id = ? AND e.status != 'dropped'""",
@@ -104,11 +104,16 @@ async def run_auto_assign() -> None:
                     f"https://github.com/{batch['repo_name']}"
                     if batch.get("repo_name") else None
                 )
-                tasks_for_email = [
-                    {"title": r.get("title", "Task"), "issue_url": r.get("html_url")}
-                    for r in result
-                ]
                 for student in students:
+                    # Filter tasks so we only email the tasks specifically assigned to THIS student
+                    tasks_for_email = [
+                        {"title": r.get("title", "Task"), "issue_url": r.get("html_url") or r.get("issue_url")}
+                        for r in result if r.get('assigned_to') == student['id']
+                    ]
+                    
+                    if not tasks_for_email:
+                        continue
+                        
                     # Build a filtered issues URL — shows only THIS student's issues
                     gh_user = student.get("github_username")
                     repo_url = (
