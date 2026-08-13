@@ -265,12 +265,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
+      totalAssigned = (data.issues && data.issues.length) || 0;
+
       progress.forEach(p => {
-        totalAssigned += p.issues_assigned || 0;
-        totalCompleted += p.issues_completed || 0;
-        totalPrs += p.prs_merged || 0;
-        totalScore += p.score || 0;
-        maxWeek = Math.max(maxWeek, p.week || 1);
+        totalCompleted += parseInt(p.issues_completed || 0, 10);
+        totalPrs += parseInt(p.prs_merged || 0, 10);
+        totalScore += parseInt(p.score || 0, 10);
+        maxWeek = Math.max(maxWeek, parseInt(p.week || 1, 10));
       });
 
       // Store batch_id for certificate download

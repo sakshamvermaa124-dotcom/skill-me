@@ -567,7 +567,7 @@ section { position: relative; padding: var(--section-padding); overflow: hidden;
   border-bottom-color: rgba(255,255,255,0.05);
 }
 
-.navbar .container { display: flex; align-items: center; justify-content: space-between; }
+.navbar .container { display: flex; align-items: center; justify-content: space-between; max-width: 100% !important; padding-left: 24px; padding-right: 24px; }
 
 .nav-logo {
   display: flex; align-items: center; gap: 10px;
@@ -630,13 +630,13 @@ img.brand-logo-img,
 }
 
 /* Buttons inside nav must NOT inherit the 'padding: 6px 0' from .nav-links a */
-.nav-links .nav-link-dashboard,
-.nav-links .nav-cta {
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
-  padding-left: 52px !important;
-  padding-right: 52px !important;
-}
+  .nav-links .nav-link-dashboard,
+  .nav-links .nav-cta {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
 
 .nav-links a:hover { color: var(--text-primary); }
 
@@ -649,7 +649,7 @@ img.brand-logo-img,
 .nav-links a:not(.nav-cta):not(.nav-link-dashboard):hover::after { width: 100%; }
 
 .nav-link-dashboard {
-  padding: 8px 52px; border-radius: var(--radius-full);
+  padding: 8px 24px; border-radius: var(--radius-full);
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(235, 230, 224, 0.14);
   color: var(--text-primary) !important;
@@ -665,7 +665,7 @@ img.brand-logo-img,
 }
 
 .nav-cta {
-  padding: 9px 50px; border-radius: var(--radius-full);
+  padding: 9px 24px; border-radius: var(--radius-full);
   background: linear-gradient(135deg, #c99a4e 0%, #b5873d 100%);
   color: #0c0b0b !important;
   font-weight: 700; font-size: 0.86rem;
@@ -1611,7 +1611,6 @@ img.brand-logo-img,
 
 /* Light Mode — Form Inputs, Apply Card & Quiz Components */
 [data-theme="light"] .apply-card,
-[data-theme="light"] .form-step-title,
 [data-theme="light"] .modal-content,
 [data-theme="light"] .quiz-card {
   background: #ffffff !important;
@@ -1654,4 +1653,59 @@ img.brand-logo-img,
 [data-theme="light"] .domain-card:hover {
   background: #f8fafc !important;
   border-color: var(--gold) !important;
+}
+
+/* ============================================================
+   GLOBAL LIGHT MODE TEXT VISIBILITY FIXES
+   ============================================================ */
+[data-theme="light"] body {
+  color-scheme: light;
+  color: #334155 !important;
+}
+[data-theme="light"] h1, 
+[data-theme="light"] h2, 
+[data-theme="light"] h3, 
+[data-theme="light"] h4, 
+[data-theme="light"] h5, 
+[data-theme="light"] h6,
+[data-theme="light"] .form-step-title,
+[data-theme="light"] .hero-title,
+[data-theme="light"] .section-title {
+  color: #0f172a !important;
+  -webkit-text-fill-color: initial !important; /* Overrides any dark mode text gradients if causing issues */
+}
+
+/* Gradients text overrides for light mode */
+[data-theme="light"] .hero-title .accent,
+[data-theme="light"] .section-title .accent {
+  background: var(--gradient-indigo);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent !important;
+}
+
+[data-theme="light"] p,
+[data-theme="light"] .form-step-subtitle,
+[data-theme="light"] label,
+[data-theme="light"] .hero-subtitle,
+[data-theme="light"] .benefit-card p,
+[data-theme="light"] .step-card p,
+[data-theme="light"] .faq-answer {
+  color: #475569 !important;
+}
+
+[data-theme="light"] .nav-links a:not(.nav-cta) {
+  color: #334155 !important;
+}
+[data-theme="light"] .nav-links a:not(.nav-cta):hover {
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .terminal-body {
+  color: #0f172a !important;
+}
+[data-theme="light"] .terminal-line .command {
+  color: #0f172a !important;
+}
+[data-theme="light"] .terminal-line .output {
+  color: #475569 !important;
 }

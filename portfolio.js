@@ -1,21 +1,4 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  // Theme Toggle Logic
-  const themeBtn = document.getElementById('theme-btn');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const savedTheme = localStorage.getItem('skillme_portfolio_theme');
-  
-  if (savedTheme === 'light' || (!savedTheme && !prefersDark)) {
-    document.documentElement.setAttribute('data-theme', 'light');
-  } else {
-    document.documentElement.setAttribute('data-theme', 'dark');
-  }
-
-  themeBtn.addEventListener('click', () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('skillme_portfolio_theme', newTheme);
-  });
 
   // Extract username from ?gh=username (priority) or /p/{username}
   const urlParams = new URLSearchParams(window.location.search);
