@@ -451,10 +451,7 @@
           <span class="cell-label">Assigned Track</span>
           <span class="cell-value" id="cell-domain">Web Development</span>
         </div>
-        <div class="detail-cell">
-          <span class="cell-label">Batch Identifier</span>
-          <span class="cell-value" id="cell-batch">Batch #1 (Sprint)</span>
-        </div>
+
         <div class="detail-cell">
           <span class="cell-label">Program Duration</span>
           <span class="cell-value">4 Weeks (Remote)</span>
@@ -505,14 +502,14 @@
     const urlParams = new URLSearchParams(window.location.search);
     const name = urlParams.get('name') || localStorage.getItem('student_name') || "Saksham Verma";
     const domain = urlParams.get('domain') || localStorage.getItem('student_domain') || "Web Development";
-    const batch = urlParams.get('batch') || "Batch #1";
+
     const dateStr = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
     document.getElementById('candidate-name').textContent = name;
     document.getElementById('cell-name').textContent = name;
     document.getElementById('domain-name').textContent = domain;
     document.getElementById('cell-domain').textContent = domain;
-    document.getElementById('cell-batch').textContent = batch;
+
     document.getElementById('doc-date').textContent = dateStr;
 
     // Generate QR Code
