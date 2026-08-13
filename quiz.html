@@ -21,10 +21,29 @@
       --blue: #b5873d;
       --green: #4fa36b;
       --red: #c85555;
-      --text: #eae6e1;
-      --text-muted: #969089;
+      --text: #ebe6e0;
+      --text-muted: #a39f99;
       --text-dim: #5e5852;
     }
+    
+    [data-theme="light"] {
+      --bg: #fafafa;
+      --surface: #ffffff;
+      --surface2: #f4f4f5;
+      --border: rgba(0,0,0,0.1);
+      --border-gold: rgba(201,154,78,0.4);
+      --text: #171717;
+      --text-muted: #525252;
+    }
+
+    [data-theme="light"] .theme-icon#sun-icon { display: none; }
+    [data-theme="dark"] .theme-icon#moon-icon { display: none; }
+    
+    .theme-toggle {
+      background: none; border: none; padding: 8px; cursor: pointer; color: var(--text); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-left: auto;
+    }
+    .theme-toggle:hover { background: var(--surface2); }
+    
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'DM Sans', sans-serif;
@@ -61,7 +80,7 @@
     /* ── Nav ── */
     nav {
       width: 100%;
-      padding: 20px 40px;
+      padding: 14px 32px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -76,8 +95,8 @@
     .main {
       flex: 1;
       width: 100%;
-      max-width: 720px;
-      padding: 48px 24px 80px;
+      max-width: 780px;
+      padding: 20px 24px 40px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -90,35 +109,51 @@
 
     /* ── Screen: Welcome ── */
     .welcome-icon {
-      font-size: 56px;
-      margin-bottom: 20px;
+      font-size: 36px;
+      margin-bottom: 8px;
       animation: pulse-soft 3s ease-in-out infinite;
     }
     @keyframes pulse-soft { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
-    .welcome-title { font-size: 36px; font-weight: 800; text-align: center; margin-bottom: 12px; line-height: 1.2; }
+    .welcome-title { font-size: 26px; font-weight: 800; text-align: center; margin-bottom: 6px; line-height: 1.2; }
     .welcome-title .hl { color: var(--gold); }
-    .welcome-sub { font-size: 16px; color: var(--text-muted); text-align: center; margin-bottom: 36px; line-height: 1.7; max-width: 520px; }
-    .info-chips { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 40px; }
-    .chip { display: flex; align-items: center; gap: 7px; padding: 8px 16px; background: var(--surface2); border: 1px solid var(--border); border-radius: 40px; font-size: 13px; color: var(--text-muted); }
-    .chip span { font-size: 15px; }
+    .welcome-sub { font-size: 13px; color: var(--text-muted); text-align: center; margin-bottom: 14px; line-height: 1.6; max-width: 480px; }
+    .info-chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 16px; }
+    .chip { display: flex; align-items: center; gap: 5px; padding: 5px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 40px; font-size: 11px; color: var(--text-muted); }
+    .chip span { font-size: 13px; }
 
     /* ── Domain picker ── */
-    .section-label { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); font-weight: 600; margin-bottom: 16px; text-align: center; }
-    .domain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; margin-bottom: 32px; }
+    .section-label { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); font-weight: 600; margin-bottom: 10px; text-align: center; }
+    .domain-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+      width: 100%;
+    }
     .domain-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 18px 14px;
+      border-radius: 10px;
+      padding: 10px 6px;
       text-align: center;
       cursor: pointer;
       transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 72px;
     }
-    .domain-card:hover { border-color: rgba(129,140,248,0.4); background: rgba(129,140,248,0.06); transform: translateY(-2px); }
-    .domain-card.selected { border-color: var(--purple); background: rgba(129,140,248,0.1); box-shadow: 0 0 20px rgba(129,140,248,0.15); }
-    .domain-card .icon { font-size: 26px; margin-bottom: 8px; }
-    .domain-card .label { font-size: 13px; font-weight: 600; color: var(--text); }
-    .domain-card .sublabel { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+    .domain-card:hover { border-color: rgba(201,154,78,0.5); background: rgba(201,154,78,0.06); transform: translateY(-2px); }
+    .domain-card.selected { border-color: var(--gold); background: rgba(201,154,78,0.12); box-shadow: 0 0 16px rgba(201,154,78,0.2); }
+    .domain-card .icon { font-size: 20px; margin-bottom: 4px; }
+    .domain-card .label { font-size: 11px; font-weight: 600; color: var(--text); line-height: 1.2; }
+.domain-card .sublabel { font-size: 9px; color: var(--text-muted); margin-top: 2px; }
+    .domain-card .status-badge { font-size: 8px; font-weight: 700; padding: 2px 7px; border-radius: 10px; margin-top: 4px; letter-spacing: 0.06em; text-transform: uppercase; }
+    .domain-card .status-badge.open { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+    .domain-card .status-badge.soon { background: rgba(100,116,139,0.15); color: #94a3b8; border: 1px solid rgba(100,116,139,0.3); }
+    .domain-card.disabled { opacity: 0.55; cursor: not-allowed; }
+    .domain-card.disabled:hover { transform: none; border-color: var(--border); background: var(--surface); }
 
     /* ── Start button ── */
     .btn-primary {
@@ -306,25 +341,38 @@
       .breakdown-item { flex-direction: column; gap: 6px; }
       .breakdown-q { margin-right: 0; }
     }
-
   </style>
   <script src="config.js"></script>
+  <script src="theme.js"></script>
 </head>
 <body>
 
-<div class="shell">
-  <nav>
-    <a href="index.html" class="logo" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
-      <img width="36" height="36" src="assets/logo.webp" alt="SkillMe Logo" class="brand-logo-img" style="width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important;">
-      <span style="font-weight: 800; font-size: 1.25rem; color: var(--text);">SkillMe</span>
-    </a>
-    <div class="nav-badge">🎯 Screening Quiz</div>
-  </nav>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
 
-  <div class="main">
+  <div class="shell">
 
-    <!-- ══ SCREEN 1: Welcome ══ -->
-    <div class="screen active" id="screen-welcome">
+    <!-- Nav -->
+    <nav>
+      <a href="index.html" class="logo" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+        <img src="assets/logo.webp" alt="SkillMe" class="brand-logo-img" />
+        <span>Skill<span>Me</span></span>
+      </a>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span class="nav-badge">Screening Quiz</span>
+        <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'" title="Toggle theme">
+          <svg id="sun-icon" class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <svg id="moon-icon" class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main -->
+    <div class="main">
+
+      <!-- Screen 1: Welcome -->
+      <div class="screen active" id="screen-welcome">
       <div class="welcome-icon">🧠</div>
       <h1 class="welcome-title">The <span class="hl">Screening Quiz</span></h1>
       <p class="welcome-sub">
@@ -339,36 +387,78 @@
       </div>
 
       <p class="section-label">Select Your Domain</p>
-      <div class="domain-grid" id="domain-grid">
+            <div class="domain-grid" id="domain-grid">
         <div class="domain-card" data-domain="web-dev" onclick="selectDomain(this)">
           <div class="icon">🌐</div>
-          <div class="label">Web Dev</div>
-          <div class="sublabel">HTML, CSS, JS</div>
+          <div class="label">Web Development</div>
+          <div class="sublabel">HTML5 &bull; CSS3 &bull; JavaScript</div>
+          <div class="status-badge open">Open</div>
         </div>
         <div class="domain-card" data-domain="python" onclick="selectDomain(this)">
           <div class="icon">🐍</div>
-          <div class="label">Python</div>
-          <div class="sublabel">Scripts & Automation</div>
+          <div class="label">Python Engineering</div>
+          <div class="sublabel">Python 3 &bull; OOP &bull; APIs</div>
+          <div class="status-badge open">Open</div>
+        </div>
+        <div class="domain-card" data-domain="react" onclick="selectDomain(this)">
+          <div class="icon">⚛️</div>
+          <div class="label">React / Next.js</div>
+          <div class="sublabel">React 18 &bull; Next.js &bull; TypeScript</div>
+          <div class="status-badge open">Open</div>
+        </div>
+        <div class="domain-card" data-domain="nodejs" onclick="selectDomain(this)">
+          <div class="icon">🟩</div>
+          <div class="label">Node.js / Express</div>
+          <div class="sublabel">Node &bull; Express &bull; REST APIs</div>
+          <div class="status-badge open">Open</div>
+        </div>
+        <div class="domain-card" data-domain="java" onclick="selectDomain(this)">
+          <div class="icon">☕</div>
+          <div class="label">Java / Spring Boot</div>
+          <div class="sublabel">Java 17 &bull; Spring Boot &bull; Maven</div>
+          <div class="status-badge open">Open</div>
         </div>
         <div class="domain-card" data-domain="ml" onclick="selectDomain(this)">
           <div class="icon">🤖</div>
           <div class="label">Machine Learning</div>
-          <div class="sublabel">Data & Models</div>
+          <div class="sublabel">PyTorch &bull; Scikit-Learn &bull; Pandas</div>
+          <div class="status-badge open">Open</div>
+        </div>
+        <div class="domain-card" data-domain="data-science" onclick="selectDomain(this)">
+          <div class="icon">📊</div>
+          <div class="label">Data Science</div>
+          <div class="sublabel">Python &bull; SQL &bull; Data Viz</div>
+          <div class="status-badge open">Open</div>
+        </div>
+        <div class="domain-card" data-domain="flutter" onclick="selectDomain(this)">
+          <div class="icon">📱</div>
+          <div class="label">Flutter / Mobile</div>
+          <div class="sublabel">Dart &bull; Flutter &bull; Cross-Platform</div>
+          <div class="status-badge open">Open</div>
         </div>
         <div class="domain-card" data-domain="devops" onclick="selectDomain(this)">
           <div class="icon">⚙️</div>
-          <div class="label">DevOps</div>
-          <div class="sublabel">CI/CD & Cloud</div>
+          <div class="label">DevOps / CI-CD</div>
+          <div class="sublabel">Docker &bull; GitHub Actions &bull; CI/CD</div>
+          <div class="status-badge open">Open</div>
         </div>
-        <div class="domain-card" data-domain="mobile" onclick="selectDomain(this)">
-          <div class="icon">📱</div>
-          <div class="label">Mobile Dev</div>
-          <div class="sublabel">Flutter / RN</div>
+        <div class="domain-card" data-domain="cpp" onclick="selectDomain(this)">
+          <div class="icon">🔷</div>
+          <div class="label">C++ / Algorithms</div>
+          <div class="sublabel">C++20 &bull; DSA &bull; Problem Solving</div>
+          <div class="status-badge open">Open</div>
         </div>
-        <div class="domain-card" data-domain="ui-ux" onclick="selectDomain(this)">
-          <div class="icon">🎨</div>
-          <div class="label">UI/UX Design</div>
-          <div class="sublabel">Figma & Research</div>
+        <div class="domain-card disabled" data-domain="cloud">
+          <div class="icon">☁️</div>
+          <div class="label">Cloud / AWS</div>
+          <div class="sublabel">AWS &bull; Cloud Architecture</div>
+          <div class="status-badge soon">Coming Soon</div>
+        </div>
+        <div class="domain-card disabled" data-domain="cybersecurity">
+          <div class="icon">🔒</div>
+          <div class="label">Cybersecurity</div>
+          <div class="sublabel">SecOps &bull; Penetration Testing</div>
+          <div class="status-badge soon">Coming Soon</div>
         </div>
       </div>
 
@@ -460,7 +550,7 @@ const DOMAIN_QUESTIONS = {
   "web-dev": [
     { category: "Web Development", text: "What does HTML stand for?", options: ["Hyper Text Markup Language", "High Tech Machine Learning", "Home Tool Markup Language", "Hybrid Text Management Language"], answer: 0 },
     { category: "Web Development", text: "CSS is primarily used for:", options: ["Handling database queries", "Styling the appearance of web pages", "Making API requests", "Managing server configurations"], answer: 1 },
-    { category: "Web Development", text: "Which of these is a JavaScript framework?", options: ["Django", "Flask", "React", "Laravel"], answer: 2 },
+    { category: "Web Development", text: "Which of these is a JavaScript framework/library?", options: ["Django", "Flask", "React", "Laravel"], answer: 2 },
     { category: "Web Development", text: "\"Responsive design\" means:", options: ["Fast-loading websites", "Websites that adapt to different screen sizes", "Websites with many animations", "Websites built with AI assistance"], answer: 1 }
   ],
   "python": [
@@ -469,11 +559,47 @@ const DOMAIN_QUESTIONS = {
     { category: "Python", text: "A Python \"list\" is:", options: ["An ordered, mutable collection of items", "A key-value pair data structure", "A function definition", "A module import statement"], answer: 0 },
     { category: "Python", text: "What is the output of print(2 ** 3)?", options: ["6", "8", "23", "An error"], answer: 1 }
   ],
+  "react": [
+    { category: "React / Next.js", text: "React uses what syntax extension to write UI HTML in JavaScript?", options: ["JSX", "HTML5", "TypeScript", "XML-JS"], answer: 0 },
+    { category: "React / Next.js", text: "In React, what hook is used to manage local component state?", options: ["useEffect", "useState", "useContext", "useRef"], answer: 1 },
+    { category: "React / Next.js", text: "What is a key benefit of Next.js over vanilla React?", options: ["Zero CSS support", "Built-in Server-Side Rendering (SSR) & SSG", "Replaces JavaScript with Python", "Only runs in mobile apps"], answer: 1 },
+    { category: "React / Next.js", text: "Why do list items in React require a unique \"key\" prop?", options: ["To style each element differently", "To help React optimize DOM diffing and re-rendering", "To enable CSS grid", "To pass props to parent components"], answer: 1 }
+  ],
+  "nodejs": [
+    { category: "Node.js", text: "Node.js is built on top of which JavaScript engine?", options: ["SpiderMonkey", "V8", "JavaScriptCore", "Chakra"], answer: 1 },
+    { category: "Node.js", text: "Express.js is primarily used for:", options: ["Styling React components", "Building web servers & RESTful APIs", "Managing MongoDB databases", "Compiling TypeScript"], answer: 1 },
+    { category: "Node.js", text: "What type of architecture does Node.js use for asynchronous operations?", options: ["Multi-threaded synchronous", "Single-threaded Non-blocking Event Loop", "Parallel CPU process pool", "Sequential blocking I/O"], answer: 1 },
+    { category: "Node.js", text: "Which file defines project dependencies and scripts in Node.js?", options: ["index.js", "package.json", "node_modules", "config.xml"], answer: 1 }
+  ],
+  "java": [
+    { category: "Java / Spring Boot", text: "What is the primary compilation output of Java source code?", options: ["Native Machine Code", "Bytecode (.class files)", "JavaScript source", "Assembly code"], answer: 1 },
+    { category: "Java / Spring Boot", text: "What does Spring Boot provide out of the box?", options: ["Embedded HTTP servers (like Tomcat) and auto-configuration", "CSS framework for UI", "Frontend React rendering", "Mobile app SDK"], answer: 0 },
+    { category: "Java / Spring Boot", text: "Which annotation marks a class as a REST Controller in Spring Boot?", options: ["@Component", "@Service", "@RestController", "@Entity"], answer: 2 },
+    { category: "Java / Spring Boot", text: "Maven and Gradle are primarily used for:", options: ["UI layout design", "Dependency management & build automation", "Database indexing", "Code obfuscation"], answer: 1 }
+  ],
   "ml": [
     { category: "Machine Learning", text: "\"Training\" a model means:", options: ["Writing the algorithm manually", "Learning patterns from data", "Testing the model on new data", "Deploying the model to production"], answer: 1 },
     { category: "Machine Learning", text: "\"Overfitting\" refers to:", options: ["Training on too little data", "Performing well on training data but poorly on new data", "Using too many features", "A type of neural network layer"], answer: 1 },
     { category: "Machine Learning", text: "\"Supervised learning\" requires:", options: ["Learning with no data at all", "Labeled training data", "Only reward signals", "Unsupervised pattern detection"], answer: 1 },
-    { category: "Machine Learning", text: "The most common ML library in Python is:", options: ["NumPy", "Pandas", "scikit-learn", "Matplotlib"], answer: 2 }
+    { category: "Machine Learning", text: "The most common ML library in Python for classical algorithms is:", options: ["NumPy", "Pandas", "scikit-learn", "Matplotlib"], answer: 2 }
+  ],
+  "data-science": [
+    { category: "Data Science", text: "In Python, which library is designed for data manipulation and DataFrame structures?", options: ["NumPy", "Pandas", "Requests", "Flask"], answer: 1 },
+    { category: "Data Science", text: "What SQL statement is used to aggregate data by group?", options: ["ORDER BY", "GROUP BY", "WHERE", "HAVING"], answer: 1 },
+    { category: "Data Science", text: "What is a histogram used to visualize?", options: ["Relationships between two numerical variables", "Distribution of a continuous numerical variable", "Categorical hierarchy", "Network graph nodes"], answer: 1 },
+    { category: "Data Science", text: "What does CSV stand for?", options: ["Comma-Separated Values", "Computer System Vector", "Centralized Storage Variable", "Code Syntax Verification"], answer: 0 }
+  ],
+  "flutter": [
+    { category: "Flutter / Mobile", text: "Flutter apps are written in which programming language?", options: ["Java", "Kotlin", "Swift", "Dart"], answer: 3 },
+    { category: "Flutter / Mobile", text: "In Flutter, almost everything on the UI is a:", options: ["Component", "Widget", "Element", "Module"], answer: 1 },
+    { category: "Flutter / Mobile", text: "What is the difference between StatelessWidget and StatefulWidget?", options: ["StatelessWidget can change state dynamically; StatefulWidget cannot", "StatelessWidget is immutable; StatefulWidget maintains mutable state", "StatelessWidget runs on iOS; StatefulWidget runs on Android", "There is no difference"], answer: 1 },
+    { category: "Flutter / Mobile", text: "\"Hot Reload\" in Flutter allows developers to:", options: ["Reboot the mobile device", "Instantly inject updated code into a running app without losing state", "Publish the app to Play Store automatically", "Compile Dart to C++"], answer: 1 }
+  ],
+  "mobile": [
+    { category: "Mobile Dev", text: "Flutter is primarily used for:", options: ["Web development", "Cross-platform mobile app development", "Machine learning", "Database management"], answer: 1 },
+    { category: "Mobile Dev", text: "React Native allows developers to:", options: ["Build web apps only", "Build mobile apps using JavaScript", "Build desktop applications", "Build AI models"], answer: 1 },
+    { category: "Mobile Dev", text: "APK in Android development is:", options: ["Android Programming Kit", "Android Package file", "Application Processing Key", "Advanced Programming Kernel"], answer: 1 },
+    { category: "Mobile Dev", text: "\"Hot reload\" in Flutter means:", options: ["Restarting the app completely", "Seeing code changes instantly without full restart", "Reloading the database", "Updating app assets from the server"], answer: 1 }
   ],
   "devops": [
     { category: "DevOps", text: "CI/CD stands for:", options: ["Code Integration / Code Deployment", "Continuous Integration / Continuous Delivery", "Cloud Infrastructure / Cloud Development", "Container Instance / Container Deployment"], answer: 1 },
@@ -481,11 +607,23 @@ const DOMAIN_QUESTIONS = {
     { category: "DevOps", text: "Kubernetes is:", options: ["A programming language", "A container orchestration platform", "A cloud provider", "A monitoring tool"], answer: 1 },
     { category: "DevOps", text: "\"Infrastructure as Code\" means:", options: ["Writing infrastructure documentation", "Managing infrastructure through code files", "Coding in cloud environments", "Testing infrastructure manually"], answer: 1 }
   ],
-  "mobile": [
-    { category: "Mobile Dev", text: "Flutter is primarily used for:", options: ["Web development", "Cross-platform mobile app development", "Machine learning", "Database management"], answer: 1 },
-    { category: "Mobile Dev", text: "React Native allows developers to:", options: ["Build web apps only", "Build mobile apps using JavaScript", "Build desktop applications", "Build AI models"], answer: 1 },
-    { category: "Mobile Dev", text: "APK in Android development is:", options: ["Android Programming Kit", "Android Package file", "Application Processing Key", "Advanced Programming Kernel"], answer: 1 },
-    { category: "Mobile Dev", text: "\"Hot reload\" in Flutter means:", options: ["Restarting the app completely", "Seeing code changes instantly without full restart", "Reloading the database", "Updating app assets from the server"], answer: 1 }
+  "cpp": [
+    { category: "C++ / Algorithms", text: "What is a key difference between C++ and C?", options: ["C++ supports Object-Oriented Programming (OOP)", "C++ does not use pointers", "C++ cannot run on Linux", "C is faster than C++ in all cases"], answer: 0 },
+    { category: "C++", text: "What keyword is used to allocate memory dynamically in C++?", options: ["malloc", "alloc", "new", "create"], answer: 2 },
+    { category: "Algorithms", text: "What is the time complexity of Binary Search on a sorted array?", options: ["O(N)", "O(N log N)", "O(log N)", "O(1)"], answer: 2 },
+    { category: "C++", text: "Which header file is required for std::cout and std::cin?", options: ["<stdio.h>", "<iostream>", "<vector>", "<stdlib.h>"], answer: 1 }
+  ],
+  "cloud": [
+    { category: "Cloud / AWS", text: "What is Amazon EC2 primarily used for?", options: ["Database storage", "Virtual server computing capacity in the cloud", "DNS management", "Email notification service"], answer: 1 },
+    { category: "Cloud / AWS", text: "What does S3 stand for in AWS?", options: ["Simple Storage Service", "Secure Server System", "Shared Software Solution", "Synchronized System Storage"], answer: 0 },
+    { category: "Cloud", text: "What is Serverless Computing?", options: ["Computing without any hardware servers anywhere", "Executing code on-demand without managing server infrastructure", "Running code only on client web browsers", "Offline local computing"], answer: 1 },
+    { category: "Cloud", text: "What does IAM manage in cloud platforms?", options: ["Image and Media storage", "Identity & Access Management for users and permissions", "Internet Address Allocation", "Infrastructure Asset Monitoring"], answer: 1 }
+  ],
+  "cybersecurity": [
+    { category: "Cybersecurity", text: "What does HTTPS use to encrypt communications?", options: ["SSH", "TLS / SSL", "FTP", "DNSSEC"], answer: 1 },
+    { category: "Cybersecurity", text: "What is SQL Injection?", options: ["Injecting CSS styles into a database", "Exploiting vulnerable input fields to execute arbitrary SQL commands", "Encrypting database passwords", "Validating form fields"], answer: 1 },
+    { category: "Cybersecurity", text: "What is Phishing?", options: ["Interpreting server log files", "Social engineering attack attempting to trick users into revealing sensitive data", "Scanning open ports on a network", "Brute-forcing password hashes"], answer: 1 },
+    { category: "Cybersecurity", text: "A Firewall is designed to:", options: ["Backup files automatically", "Monitor and filter incoming and outgoing network traffic based on security rules", "Speed up internet connections", "Detect hard drive errors"], answer: 1 }
   ],
   "ui-ux": [
     { category: "UI/UX", text: "\"UX\" stands for:", options: ["Ultimate Experience", "User Experience", "Unified Extension", "User Execution"], answer: 1 },
@@ -519,7 +657,8 @@ function selectDomain(el) {
 // ──────────────────────────────────────────────────────────────
 function startQuiz() {
   if (!selectedDomain) return;
-  questions = [...GENERAL_QUESTIONS, ...DOMAIN_QUESTIONS[selectedDomain]];
+  const domainQs = DOMAIN_QUESTIONS[selectedDomain] || DOMAIN_QUESTIONS["web-dev"] || [];
+  questions = [...GENERAL_QUESTIONS, ...domainQs];
   currentQ = 0;
   score = 0;
   answers = [];
@@ -703,3 +842,4 @@ function showScreen(id) {
 </script>
 </body>
 </html>
+

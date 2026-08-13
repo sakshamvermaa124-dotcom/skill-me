@@ -96,6 +96,19 @@ async def _handle_pull_request(data: dict) -> dict:
     elif action == "closed":
         merged = pr.get("merged", False)
         if merged:
+            # Ensure submission exists before updating (lazy creation)
+            submission = await db.fetch_one(
+                "SELECT id FROM submissions WHERE batch_id = ? AND pr_number = ?",
+                (batch["id"], pr_number)
+            )
+            if not submission:
+                await batch_service.record_submission(
+                    batch_id=batch["id"],
+                    student_github_username=pr_user,
+                    pr_number=pr_number,
+                    pr_url=pr_url,
+                )
+
             # PR was merged — update progress
             await batch_service.update_submission_status(
                 batch_id=batch["id"],

@@ -408,7 +408,7 @@ async def assign_from_repo(
         if created:
             batch = await db.fetch_one("SELECT * FROM batches WHERE id = ?", (batch_id,))
             students = await db.fetch_all(
-                """SELECT s.first_name, s.last_name, s.email, s.github_username
+                """SELECT s.id, s.first_name, s.last_name, s.email, s.github_username
                    FROM students s
                    JOIN enrollments e ON e.student_id = s.id
                    WHERE e.batch_id = ? AND e.status != 'dropped'""",
@@ -418,14 +418,21 @@ async def assign_from_repo(
                 f"https://github.com/{settings.github_org}/{batch['repo_name']}"
                 if batch and batch.get("repo_name") else None
             )
-            tasks_for_email = [
-                {"title": r.get("title", "Task"), "issue_url": r.get("html_url")}
-                for r in created
-            ]
-            
             # Send emails in background
             for student in students:
                 gh_user = student.get("github_username")
+                tasks_for_email = [
+                    {
+                        "title": r.get("title", "Task"), 
+                        "issue_url": f"{base_repo_url}/issues/{r.get('github_issue_number')}" if r.get("github_issue_number") else base_repo_url
+                    }
+                    for r in created if r.get('assigned_to') == student['id']
+                ]
+                
+                # BUGFIX: Only send email if they actually received tasks in this exact assignment batch
+                if not tasks_for_email:
+                    continue
+
                 background_tasks.add_task(
                     email_service.send_weekly_tasks_notification,
                     first_name=student["first_name"],
@@ -761,7 +768,7 @@ async def get_batch_analytics(batch_id: int, _: str = Depends(require_admin)):
     student_grid = await db.fetch_all(
         """SELECT s.id, s.first_name, s.last_name, s.github_username,
                   e.status as enrollment_status,
-                  SUM(p.issues_assigned) as tasks_assigned,
+                  (SELECT COUNT(*) FROM issues i WHERE i.batch_id = e.batch_id AND (i.assigned_to = s.id OR i.assigned_to IS NULL)) as tasks_assigned,
                   SUM(p.issues_completed) as tasks_completed,
                   SUM(p.prs_merged) as prs_merged
            FROM enrollments e

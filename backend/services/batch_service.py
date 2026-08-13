@@ -366,6 +366,24 @@ class BatchService:
             student = None
             assignee_username = None
 
+            # Task assignment deduplication guard: skip creating duplicate GitHub issues if already assigned
+            if student_id:
+                existing_issue = await db.fetch_one(
+                    """SELECT id, github_issue_number FROM issues 
+                       WHERE batch_id = ? AND week_number = ? AND assigned_to = ? AND title = ?""",
+                    (batch_id, week_number, student_id, issue_def["title"])
+                )
+                if existing_issue:
+                    logger.info(f"Skipping duplicate task assignment '{issue_def['title']}' for student {student_id} in batch {batch_id}.")
+                    created_issues.append({
+                        "id": existing_issue["id"],
+                        "github_issue_number": existing_issue["github_issue_number"],
+                        "title": issue_def["title"],
+                        "assigned_to": student_id,
+                        "week": week_number,
+                    })
+                    continue
+
             if student_id:
                 student = await db.fetch_one("SELECT * FROM students WHERE id = ?", (student_id,))
                 if student:
@@ -480,7 +498,7 @@ class BatchService:
         """
         # Find the student
         student = await db.fetch_one(
-            "SELECT * FROM students WHERE github_username = ?",
+            "SELECT * FROM students WHERE LOWER(github_username) = LOWER(?)",
             (student_github_username,),
         )
         if not student:
