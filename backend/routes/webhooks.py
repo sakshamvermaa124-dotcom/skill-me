@@ -107,6 +107,8 @@ async def _handle_pull_request(data: dict) -> dict:
                     student_github_username=pr_user,
                     pr_number=pr_number,
                     pr_url=pr_url,
+                    pr_head_branch=pr_head_branch or None,
+                    pr_body=pr_body or None,
                 )
 
             # PR was merged — update progress

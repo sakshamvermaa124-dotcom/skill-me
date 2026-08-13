@@ -6,6 +6,7 @@ import hashlib
 import hmac
 import json
 import pytest
+from tests.conftest import test_db
 
 
 def _make_signature(payload: dict, secret: str = "my_super_secret_webhook_key_123") -> str:
@@ -150,4 +151,65 @@ class TestWebhookEvents:
             headers={"X-GitHub-Event": "pull_request", "X-Hub-Signature-256": "sha256=mocked"},
         )
         assert r.status_code == 200
+
+    async def test_pr_merged_multiple_issues_updates_all(self, client, enrolled_student):
+        """
+        Verify that a single PR merged with multiple issue-closing keywords
+        (e.g., Fixes #10, Fixes #11, Fixes #12) completes all issues and updates progress.
+        """
+        student_id = enrolled_student["id"]
+        batch_id = enrolled_student["batch_id"]
+
+        # Seed 3 issues for this student
+        for issue_num in (10, 11, 12):
+            await test_db.insert(
+                """INSERT INTO issues (batch_id, week_number, title, github_issue_number, assigned_to, status)
+                   VALUES (?, 1, ?, ?, ?, 'assigned')""",
+                (batch_id, f"Task {issue_num}", issue_num, student_id),
+            )
+
+        multi_pr_event = {
+            "action": "closed",
+            "pull_request": {
+                "number": 99,
+                "merged": True,
+                "html_url": "https://github.com/test-org/web-dev-batch-1/pull/99",
+                "user": {"login": "testuser"},
+                "head": {"ref": "multi-fix"},
+                "body": "Fixes #10, Closes #11, and Resolves #12 in one PR!",
+            },
+            "repository": {"name": "web-dev-batch-1"},
+        }
+
+        r = await client.post(
+            "/api/webhooks/github",
+            json=multi_pr_event,
+            headers={
+                "X-GitHub-Event": "pull_request",
+                "X-Hub-Signature-256": "sha256=mocked",
+            },
+        )
+        assert r.status_code == 200
+
+        # Verify all 3 issues are marked completed
+        completed_issues = await test_db.fetch_all(
+            "SELECT github_issue_number, status FROM issues WHERE assigned_to = ? AND status = 'completed'",
+            (student_id,),
+        )
+        assert len(completed_issues) == 3
+
+        # Verify 3 submissions recorded
+        submissions = await test_db.fetch_all(
+            "SELECT id, status FROM submissions WHERE pr_number = 99",
+        )
+        assert len(submissions) == 3
+        assert all(s["status"] == "merged" for s in submissions)
+
+        # Verify progress has 3 issues completed and 75 score (3 * 25)
+        progress = await test_db.fetch_one(
+            "SELECT issues_completed, score FROM progress WHERE student_id = ? AND batch_id = ?",
+            (student_id, batch_id),
+        )
+        assert progress["issues_completed"] == 3
+        assert progress["score"] == 75
 
