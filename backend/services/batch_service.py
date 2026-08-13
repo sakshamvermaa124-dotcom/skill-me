@@ -548,10 +548,11 @@ class BatchService:
         issue = None
         match_strategy = None
 
+        matched_issues = []
+        match_strategies = []
+
         # Strategy 1: Branch prefix matches github_issue_number exactly.
-        # Covers the happy path: student used GitHub's "Create a branch" button,
-        # which names the branch '{github_issue_number}-{slug}'.
-        if pr_head_branch and not issue:
+        if pr_head_branch:
             parts = pr_head_branch.split("-", 1)
             if parts[0].isdigit():
                 linked_issue_number = int(parts[0])
@@ -562,14 +563,12 @@ class BatchService:
                     (batch_id, student["id"], linked_issue_number),
                 )
                 if issue:
-                    match_strategy = f"branch-prefix #{linked_issue_number}"
+                    matched_issues.append(issue)
+                    match_strategies.append(f"branch-prefix #{linked_issue_number}")
 
         # Strategy 2: PR title keyword match against issue titles.
-        # Handles cases like branch='4-week-1-build-navigation-bar' where the
-        # prefix '4' is a local counter, not the GitHub issue number.
-        # We tokenize both the PR title and each open issue title and find the
-        # one with the most word overlap (minimum 2 words must match).
-        if not issue and pr_head_branch:
+        # Only run if no matches yet.
+        if not matched_issues and pr_head_branch:
             pr_slug = pr_head_branch.lower().replace("-", " ").replace("_", " ")
             open_issues = await db.fetch_all(
                 """SELECT * FROM issues
@@ -594,18 +593,22 @@ class BatchService:
                     best_score = score
                     best_issue = candidate
             if best_issue and best_score >= 2:
-                issue = best_issue
-                match_strategy = f"title-keyword-match (score={best_score}, issue #{issue['github_issue_number']})"
+                matched_issues.append(best_issue)
+                match_strategies.append(f"title-keyword-match (score={best_score}, issue #{best_issue['github_issue_number']})")
 
         # Strategy 3: PR body closing keyword — looks for "Fixes #N", "Closes #N",
-        # "Resolves #N" in the PR description, which GitHub itself uses to auto-close issues.
-        if not issue and pr_body:
+        # "Resolves #N" in the PR description. We ALWAYS run this because a single
+        # PR can close multiple issues.
+        if pr_body:
             pattern = re.compile(
                 r"(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)",
                 re.IGNORECASE,
             )
             for m in pattern.finditer(pr_body):
                 closing_issue_num = int(m.group(1))
+                # Skip if already matched via branch or title
+                if any(i["github_issue_number"] == closing_issue_num for i in matched_issues):
+                    continue
                 candidate = await db.fetch_one(
                     """SELECT * FROM issues
                        WHERE batch_id = ? AND assigned_to = ? AND github_issue_number = ?
@@ -613,15 +616,11 @@ class BatchService:
                     (batch_id, student["id"], closing_issue_num),
                 )
                 if candidate:
-                    issue = candidate
-                    match_strategy = f"pr-body-closes #{closing_issue_num}"
-                    break
+                    matched_issues.append(candidate)
+                    match_strategies.append(f"pr-body-closes #{closing_issue_num}")
 
         # Strategy 4: Last-resort — oldest unfinished issue for this student in the batch.
-        # This guarantees we never store a NULL issue_id for an enrolled student.
-        # It may be wrong, but it's better than losing the submission entirely;
-        # admins can correct it via the Sync PRs flow if needed.
-        if not issue:
+        if not matched_issues:
             issue = await db.fetch_one(
                 """SELECT * FROM issues 
                    WHERE batch_id = ? AND assigned_to = ? AND status IN ('assigned', 'open')
@@ -629,26 +628,26 @@ class BatchService:
                 (batch_id, student["id"]),
             )
             if issue:
-                match_strategy = f"fallback-oldest-open (issue #{issue['github_issue_number']})"
+                matched_issues.append(issue)
+                match_strategies.append(f"fallback-oldest-open (issue #{issue['github_issue_number']})")
 
-        if issue:
+        if matched_issues:
+            strategy_str = ", ".join(match_strategies)
             logger.info(
-                f"PR #{pr_number} by {student_github_username} → issue #{issue['github_issue_number']} "
-                f"[strategy: {match_strategy}]"
+                f"PR #{pr_number} by {student_github_username} → issues {[i['github_issue_number'] for i in matched_issues]} "
+                f"[strategies: {strategy_str}]"
             )
         else:
             logger.warning(
                 f"PR #{pr_number} by {student_github_username} in batch {batch_id}: "
-                f"no matching issue found — submission recorded without issue_id"
+                f"no matching issue found — submission not recorded"
             )
         # ─────────────────────────────────────────────────────────────────────
-
-        issue_id = issue["id"] if issue else None
 
         # Guard: submissions.issue_id is NOT NULL — skip insert if no issue matched.
         # This prevents an IntegrityError when the PR branch name doesn't follow
         # the expected '{issue_number}-description' convention.
-        if issue_id is None:
+        if not matched_issues:
             logger.warning(
                 f"PR #{pr_number} by {student_github_username} in batch {batch_id}: "
                 f"no matching issue found — submission NOT recorded to avoid NOT NULL violation. "
@@ -656,21 +655,26 @@ class BatchService:
             )
             return {"submission_id": None, "issue_id": None, "status": "ignored_no_issue_match"}
 
-        # Record the submission
-        submission_id = await db.insert(
-            """INSERT INTO submissions (issue_id, student_id, batch_id, pr_url, pr_number, status)
-               VALUES (?, ?, ?, ?, ?, 'open')""",
-            (issue_id, student["id"], batch_id, pr_url, pr_number),
-        )
+        submission_ids = []
+        issue_ids = []
+        for issue in matched_issues:
+            # Record the submission for each issue
+            submission_id = await db.insert(
+                """INSERT INTO submissions (issue_id, student_id, batch_id, pr_url, pr_number, status)
+                   VALUES (?, ?, ?, ?, ?, 'open')""",
+                (issue["id"], student["id"], batch_id, pr_url, pr_number),
+            )
+            submission_ids.append(submission_id)
+            issue_ids.append(issue["id"])
 
-        # Update issue status
-        if issue:
+            # Update issue status
             await db.execute(
                 "UPDATE issues SET status = 'in_progress' WHERE id = ?", (issue["id"],)
             )
 
-        logger.info(f"Recorded submission: PR #{pr_number} by {student_github_username} in batch {batch_id}")
-        return {"submission_id": submission_id, "issue_id": issue_id}
+        logger.info(f"Recorded {len(submission_ids)} submissions for PR #{pr_number} by {student_github_username} in batch {batch_id}")
+        # Return first submission for backwards compatibility with legacy callers
+        return {"submission_id": submission_ids[0], "issue_id": issue_ids[0]}
 
     async def update_submission_status(
         self, batch_id: int, pr_number: int, status: str
@@ -678,86 +682,85 @@ class BatchService:
         """
         Update the status of a PR submission.
         Called by webhook when check_suite completes or PR is merged.
+        If a PR matches multiple submissions (closed multiple issues), updates all.
         """
-        submission = await db.fetch_one(
+        submissions = await db.fetch_all(
             "SELECT * FROM submissions WHERE batch_id = ? AND pr_number = ?",
             (batch_id, pr_number),
         )
-        if not submission:
+        if not submissions:
             return False
 
         now = datetime.utcnow().isoformat()
+        
+        for submission in submissions:
+            # Idempotency guard: if submission is already in the target status, skip
+            if submission["status"] == status:
+                continue
 
-        # Idempotency guard: if submission is already in the target status, skip
-        # This prevents score inflation from duplicate webhook deliveries
-        if submission["status"] == status:
-            return True
-
-        if status == "merged":
-            await db.execute(
-                "UPDATE submissions SET status = 'merged', merged_at = ? WHERE id = ?",
-                (now, submission["id"]),
-            )
-            # Mark issue as completed — but only increment progress if it wasn't
-            # already completed. This prevents duplicate PRs for the same issue
-            # (e.g. a student opens multiple PRs) from inflating the score.
-            if submission["issue_id"]:
-                issue_row = await db.fetch_one(
-                    "SELECT week_number, status FROM issues WHERE id = ?",
-                    (submission["issue_id"],),
-                )
-                issue_already_completed = (
-                    issue_row and issue_row["status"] == "completed"
-                )
-
-                # Always mark the issue completed
+            if status == "merged":
                 await db.execute(
-                    "UPDATE issues SET status = 'completed' WHERE id = ?",
-                    (submission["issue_id"],),
+                    "UPDATE submissions SET status = 'merged', merged_at = ? WHERE id = ?",
+                    (now, submission["id"]),
                 )
+                
+                if submission["issue_id"]:
+                    issue_row = await db.fetch_one(
+                        "SELECT week_number, status FROM issues WHERE id = ?",
+                        (submission["issue_id"],),
+                    )
+                    issue_already_completed = (
+                        issue_row and issue_row["status"] == "completed"
+                    )
 
-                # Only update progress if this is the FIRST time this issue is completed
-                if not issue_already_completed and issue_row:
-                    week = issue_row["week_number"]
-                    student_id = submission["student_id"]
-                    existing_progress = await db.fetch_one(
-                        "SELECT id FROM progress WHERE student_id = ? AND batch_id = ? AND week = ?",
-                        (student_id, batch_id, week),
+                    # Always mark the issue completed
+                    await db.execute(
+                        "UPDATE issues SET status = 'completed' WHERE id = ?",
+                        (submission["issue_id"],),
                     )
-                    if existing_progress:
-                        await db.execute(
-                            """UPDATE progress 
-                               SET issues_completed = issues_completed + 1, 
-                                   prs_merged = prs_merged + 1,
-                                   score = score + 25,
-                                   updated_at = CURRENT_TIMESTAMP
-                               WHERE student_id = ? AND batch_id = ? AND week = ?""",
+
+                    # Only update progress if this is the FIRST time this issue is completed
+                    if not issue_already_completed and issue_row:
+                        week = issue_row["week_number"]
+                        student_id = submission["student_id"]
+                        existing_progress = await db.fetch_one(
+                            "SELECT id FROM progress WHERE student_id = ? AND batch_id = ? AND week = ?",
                             (student_id, batch_id, week),
                         )
+                        if existing_progress:
+                            await db.execute(
+                                """UPDATE progress 
+                                   SET issues_completed = issues_completed + 1, 
+                                       prs_merged = prs_merged + 1,
+                                       score = score + 25,
+                                       updated_at = CURRENT_TIMESTAMP
+                                   WHERE student_id = ? AND batch_id = ? AND week = ?""",
+                                (student_id, batch_id, week),
+                            )
+                            logger.info(
+                                f"Updated progress for student {student_id}, batch {batch_id}, week {week}: +25 score"
+                            )
+                        else:
+                            await db.insert(
+                                """INSERT INTO progress
+                                   (student_id, batch_id, week, issues_assigned, issues_completed, prs_merged, score)
+                                   VALUES (?, ?, ?, 1, 1, 1, 25)""",
+                                (student_id, batch_id, week),
+                            )
+                            logger.info(
+                                f"Created progress row for student {student_id}, batch {batch_id}, week {week} "
+                                f"(was missing — seeded with completed=1, score=25)"
+                            )
+                    elif issue_already_completed:
                         logger.info(
-                            f"Updated progress for student {student_id}, batch {batch_id}, week {week}: +25 score"
+                            f"Issue {submission['issue_id']} already completed — skipping progress increment "
+                            f"(duplicate PR #{pr_number} for student {submission['student_id']})"
                         )
-                    else:
-                        await db.insert(
-                            """INSERT INTO progress
-                               (student_id, batch_id, week, issues_assigned, issues_completed, prs_merged, score)
-                               VALUES (?, ?, ?, 1, 1, 1, 25)""",
-                            (student_id, batch_id, week),
-                        )
-                        logger.info(
-                            f"Created progress row for student {student_id}, batch {batch_id}, week {week} "
-                            f"(was missing — seeded with completed=1, score=25)"
-                        )
-                elif issue_already_completed:
-                    logger.info(
-                        f"Issue {submission['issue_id']} already completed — skipping progress increment "
-                        f"(duplicate PR #{pr_number} for student {submission['student_id']})"
-                    )
-        else:
-            await db.execute(
-                "UPDATE submissions SET status = ?, reviewed_at = ? WHERE id = ?",
-                (status, now, submission["id"]),
-            )
+            else:
+                await db.execute(
+                    "UPDATE submissions SET status = ?, reviewed_at = ? WHERE id = ?",
+                    (status, now, submission["id"]),
+                )
 
         return True
 
