@@ -113,25 +113,15 @@ class TestUpdateStudentStatus:
         assert r.status_code == 422
 
     async def test_drop_student_updates_enrollments(self, client, admin_headers, enrolled_student):
-        """
-        BUG: Dropping a student causes a NameError: 'logger' is not defined.
-        admin.py line 563 uses `logger.info(...)` but `logger` is never imported.
-        EXPECTED FIX: Add `import logging; logger = logging.getLogger("skillme.admin")` to admin.py.
-        """
-        try:
-            r = await client.patch(
-                f"/api/admin/students/{enrolled_student['id']}/status",
-                json={"status": "dropped"},
-                headers=admin_headers,
-            )
-            assert r.status_code == 500, (
-                f"Got {r.status_code} — if 200, the logger bug has been fixed. Update assertion."
-            )
-        except NameError as e:
-            assert "logger" in str(e), f"Unexpected NameError: {e}"
-        except Exception as e:
-            # Some other exception also confirms the bug
-            pass  # Bug confirmed
+        """Dropping a student cascades to active enrollments and revokes GitHub access."""
+        r = await client.patch(
+            f"/api/admin/students/{enrolled_student['id']}/status",
+            json={"status": "dropped"},
+            headers=admin_headers,
+        )
+        assert r.status_code == 200
+        data = r.json()
+        assert data["new_status"] == "dropped"
 
 
 @pytest.mark.admin

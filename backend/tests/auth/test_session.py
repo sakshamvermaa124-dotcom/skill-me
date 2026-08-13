@@ -2,9 +2,9 @@
 Auth Tests — Session Management
 Tests /me endpoint and logout.
 
-NOTE (BUG DOCUMENTED): /me endpoint ONLY reads from the `skillme_token` cookie.
-It does NOT accept the Authorization: Bearer header. See routes/auth.py:99.
-This is a design limitation — the tests use cookies accordingly.
+/me accepts BOTH:
+- Cookie: skillme_token  (browser sessions)
+- Header: Authorization: Bearer <token>  (API clients / mobile)
 """
 import pytest
 from tests.conftest import make_jwt, test_db, seed_student
@@ -12,28 +12,28 @@ from tests.conftest import make_jwt, test_db, seed_student
 
 @pytest.mark.auth
 class TestGetMe:
-    async def test_get_me_valid_cookie(self, client, test_student, student_token):
-        """/me should return student profile for a valid cookie."""
+    async def test_get_me_authenticated_via_bearer(self, client, student_token):
+        """GET /me returns student data when authenticated via Authorization: Bearer header."""
+        r = await client.get(
+            "/api/auth/me",
+            headers={"Authorization": f"Bearer {student_token}"},
+        )
+        assert r.status_code == 200
+        data = r.json()
+        assert "email" in data
+        assert "first_name" in data
+        assert "last_name" in data
+
+    async def test_get_me_authenticated_via_cookie(self, client, student_token):
+        """GET /me also works with the skillme_token cookie (browser sessions)."""
         client.cookies.set("skillme_token", student_token)
         r = await client.get("/api/auth/me")
         client.cookies.clear()
         assert r.status_code == 200
-        data = r.json()
-        assert data["email"] == test_student["email"]
-        assert data["first_name"] == test_student["first_name"]
-
-    async def test_get_me_bearer_token_not_supported(self, client, test_student, student_headers):
-        """
-        BUG: /me does not support Authorization: Bearer header.
-        It only reads the skillme_token cookie.
-        This test documents the current (limited) behavior.
-        """
-        r = await client.get("/api/auth/me", headers=student_headers)
-        # Currently returns 401 because it ignores the Bearer header
-        assert r.status_code == 401  # Known limitation of /me endpoint
+        assert "email" in r.json()
 
     async def test_get_me_no_token(self, client):
-        """/me without cookie should return 401."""
+        """/me without any auth should return 401."""
         r = await client.get("/api/auth/me")
         assert r.status_code == 401
 
@@ -42,6 +42,11 @@ class TestGetMe:
         client.cookies.set("skillme_token", "this.is.not.a.real.jwt")
         r = await client.get("/api/auth/me")
         client.cookies.clear()
+        assert r.status_code == 401
+
+    async def test_get_me_invalid_bearer(self, client):
+        """/me with garbage Bearer token should return 401."""
+        r = await client.get("/api/auth/me", headers={"Authorization": "Bearer not.a.real.jwt"})
         assert r.status_code == 401
 
     async def test_get_me_wrong_token_type(self, client):

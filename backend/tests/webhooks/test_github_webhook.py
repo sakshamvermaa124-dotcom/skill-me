@@ -128,27 +128,20 @@ class TestWebhookEvents:
 
     async def test_pr_opened_for_tracked_repo_no_crash(self, client, enrolled_student):
         """
-        PR opened in a tracked repo should not crash.
-        BUG: The webhook handler tries to INSERT into submissions without issue_id
-        (which has a NOT NULL constraint) when the PR branch doesn't map to a valid issue.
-        EXPECTED FIX: Parse issue_id from PR branch name or body before inserting.
+        PR opened in a tracked repo with a non-standard branch name should gracefully
+        return 'ignored' instead of crashing on the submissions.issue_id NOT NULL constraint.
+        Fixed: batch_service now returns early with 'ignored_no_issue_match' when no issue found.
         """
-        import sqlite3 as _sqlite
-        try:
-            r = await client.post(
-                "/api/webhooks/github",
-                json=PR_OPENED_EVENT,
-                headers={
-                    "X-GitHub-Event": "pull_request",
-                    "X-Hub-Signature-256": "sha256=mocked",
-                },
-            )
-            assert r.status_code in (200, 500)
-            if r.status_code == 200:
-                assert r.json()["status"] in ("submission_recorded", "ignored")
-        except (_sqlite.IntegrityError, Exception) as e:
-            # Bug confirmed: NOT NULL constraint on submissions.issue_id
-            assert "NOT NULL" in str(e) or "issue_id" in str(e) or True, str(e)
+        r = await client.post(
+            "/api/webhooks/github",
+            json=PR_OPENED_EVENT,
+            headers={
+                "X-GitHub-Event": "pull_request",
+                "X-Hub-Signature-256": "sha256=mocked",
+            },
+        )
+        assert r.status_code == 200
+        assert r.json()["status"] in ("submission_recorded", "ignored", "ignored_no_issue_match")
 
     async def test_pr_closed_not_merged_handled(self, client, enrolled_student):
         r = await client.post(

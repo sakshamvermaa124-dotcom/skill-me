@@ -17,9 +17,7 @@ class TestPagesLoad:
         "/dashboard",
         "/admin",
         "/certificate",
-        # NOTE: /verify returns 404 - the page is served as /verify.html directly.
-        # This is a potential routing gap - documented as a known issue.
-        # "/verify",
+        "/verify",
         "/lor",
         "/offer",
         "/contact",
@@ -46,16 +44,6 @@ class TestPagesLoad:
         """Portfolio page route /p/{username} should return 200."""
         r = await client.get("/p/anyuser")
         assert r.status_code == 200
-
-    async def test_verify_route_bug_documented(self, client):
-        """
-        BUG: /verify page returns 404 even though verify.html exists.
-        The route is not registered in main.py unlike the other pages.
-        See main.py — /verify is missing from the static route list.
-        This test DOCUMENTS the known routing gap (expected 404 until fixed).
-        """
-        r = await client.get("/verify")
-        assert r.status_code == 404  # Expected failing route — routing gap
 
     async def test_unknown_route_returns_4xx_or_200(self, client):
         """A completely unknown route should not crash the server (returns 404 or index fallback)."""

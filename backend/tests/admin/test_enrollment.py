@@ -29,8 +29,7 @@ class TestAddStudentToBatch:
             (test_student["id"], test_batch["id"]),
         )
         assert enrollment is not None
-        # NOTE: batch_service sets enrollment status to 'active' (not 'enrolled')
-        assert enrollment["status"] == "active"
+        assert enrollment["status"] == "enrolled"
 
     async def test_enroll_nonexistent_student(self, client, admin_headers, test_batch):
         r = await client.post(

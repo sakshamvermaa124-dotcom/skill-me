@@ -150,6 +150,7 @@ _PAGES = {
     "dashboard":   "dashboard.html",
     "apply":       "apply.html",
     "certificate": "certificate.html",
+    "verify":      "verify.html",
     "lor":         "lor.html",
     "offer":       "offer.html",
     "contact":     "contact.html",

@@ -33,25 +33,10 @@ class TestEmailLogs:
         r = await client.get("/api/admin/email/logs?email_type=otp_login", headers=admin_headers)
         assert r.status_code == 200
 
-    async def test_email_logs_filter_by_status_bug(self, client, admin_headers):
-        """
-        BUG: Filtering by ?status= causes sqlite3.OperationalError: ambiguous column name: status.
-        The email_logs query does `LEFT JOIN students s ... WHERE status = ?` but both
-        email_logs and students tables have a `status` column.
-        EXPECTED FIX: Qualify as `el.status = ?` in routes/admin.py:678.
-        """
-        import sqlite3 as _sqlite
-        try:
-            r = await client.get("/api/admin/email/logs?status=sent", headers=admin_headers)
-            # FastAPI global handler converts to 500
-            assert r.status_code == 500, (
-                f"Got {r.status_code} — if 200, the bug has been fixed. Update to assert 200."
-            )
-        except (_sqlite.OperationalError, Exception) as e:
-            # Bug confirmed: the exception bubbles through the ASGI transport
-            assert "ambiguous column name" in str(e).lower() or "status" in str(e).lower(), (
-                f"Unexpected exception: {e}"
-            )
+    async def test_email_logs_filter_by_status(self, client, admin_headers):
+        """Filtering by ?status= works now that el.status SQL ambiguity is fixed."""
+        r = await client.get("/api/admin/email/logs?status=sent", headers=admin_headers)
+        assert r.status_code == 200
     async def test_email_logs_pagination(self, client, admin_headers):
         r = await client.get("/api/admin/email/logs?limit=10&offset=0", headers=admin_headers)
         assert r.status_code == 200

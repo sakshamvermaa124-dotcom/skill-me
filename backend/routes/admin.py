@@ -6,6 +6,7 @@ and issue assignment. Requires X-Admin-Key header.
 
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from pydantic import BaseModel, Field
+import logging
 from middleware.auth import require_admin
 from services.batch_service import batch_service
 from services.github_service import github_service
@@ -14,6 +15,7 @@ from services.email_service import email_service
 from db.database import db
 from config import settings
 
+logger = logging.getLogger("skillme.admin")
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
 
@@ -675,7 +677,7 @@ async def get_email_logs(
         conditions.append("recipient_email LIKE ?")
         params.append(f"%{recipient}%")
     if status:
-        conditions.append("status = ?")
+        conditions.append("el.status = ?")
         params.append(status)
 
     where = f"WHERE {' AND '.join(conditions)}" if conditions else ""

@@ -96,14 +96,27 @@ async def verify_login_otp(req: OTPVerify, response: Response):
 
 
 @router.get("/me", summary="Get current student from session")
-async def get_me(skillme_token: Optional[str] = Cookie(None)):
+async def get_me(
+    request: Request,
+    skillme_token: Optional[str] = Cookie(None),
+):
     """
     Return the currently authenticated student's profile.
+    Accepts authentication via:
+    - Cookie: skillme_token (browser sessions)
+    - Header: Authorization: Bearer <token> (API clients / mobile)
     """
-    if not skillme_token:
+    # Prefer cookie; fall back to Authorization: Bearer header
+    token = skillme_token
+    if not token:
+        auth_header = request.headers.get("Authorization", "")
+        if auth_header.startswith("Bearer "):
+            token = auth_header[len("Bearer "):].strip()
+
+    if not token:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
-    payload = decode_jwt(skillme_token)
+    payload = decode_jwt(token)
     if not payload:
         raise HTTPException(status_code=401, detail="Session expired. Please log in again.")
 

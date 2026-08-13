@@ -127,7 +127,7 @@ async def issue_cert(
         return {
             "status": "issued",
             "cert_id": cert_data["cert_id"],
-            "issued_at": cert_data["issued_at"],
+            "issued_at": cert_data.get("issued_on", ""),  # service returns 'issued_on'
         }
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

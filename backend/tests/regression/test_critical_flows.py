@@ -100,25 +100,26 @@ class TestAuthenticationFlow:
 
     async def test_otp_login_full_flow(self, client, test_student):
         """
-        Complete OTP flow: request → verify → /me (via cookie).
-        NOTE: /me only accepts the skillme_token cookie, not Bearer token.
+        Complete OTP flow: request → verify → /me via Bearer token.
+        /me now accepts both cookie and Authorization: Bearer header.
         """
         email = test_student["email"]
-
-        # Seed OTP directly (email is mocked, so we can't receive real OTP)
         await seed_otp(test_db, email, otp="112233")
 
-        # Verify OTP
         r = await client.post("/api/auth/verify-otp", json={"email": email, "otp": "112233"})
         assert r.status_code == 200
         token = r.json()["token"]
 
-        # Use cookie to access /me (NOT Bearer header - /me only reads cookies)
-        client.cookies.set("skillme_token", token)
-        r2 = await client.get("/api/auth/me")
-        client.cookies.clear()
+        # Test Bearer token auth (Bug 6 fixed)
+        r2 = await client.get("/api/auth/me", headers={"Authorization": f"Bearer {token}"})
         assert r2.status_code == 200
         assert r2.json()["email"] == email
+
+        # Also verify cookie still works
+        client.cookies.set("skillme_token", token)
+        r3 = await client.get("/api/auth/me")
+        client.cookies.clear()
+        assert r3.status_code == 200
 
     async def test_logout_invalidates_session(self, client, test_student):
         """After logout, /me should fail (when using cookie-based auth)."""

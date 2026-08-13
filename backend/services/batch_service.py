@@ -223,7 +223,7 @@ class BatchService:
         # Create enrollment
         enrollment_id = await db.insert(
             """INSERT INTO enrollments (student_id, batch_id, status, github_invite_status)
-               VALUES (?, ?, 'active', ?)""",
+               VALUES (?, ?, 'enrolled', ?)""",
             (student_id, batch_id, invite_status),
         )
 
@@ -297,7 +297,7 @@ class BatchService:
         # 2. Get enrolled students who haven't received tasks for this week yet
         enrollments = await db.fetch_all(
             """SELECT e.student_id FROM enrollments e 
-               WHERE e.batch_id = ? AND e.status = 'active' 
+               WHERE e.batch_id = ? AND e.status IN ('enrolled', 'active')
                AND NOT EXISTS (
                    SELECT 1 FROM issues i WHERE i.batch_id = e.batch_id AND i.week_number = ? AND i.assigned_to = e.student_id
                )""",
@@ -617,6 +617,17 @@ class BatchService:
         # ─────────────────────────────────────────────────────────────────────
 
         issue_id = issue["id"] if issue else None
+
+        # Guard: submissions.issue_id is NOT NULL — skip insert if no issue matched.
+        # This prevents an IntegrityError when the PR branch name doesn't follow
+        # the expected '{issue_number}-description' convention.
+        if issue_id is None:
+            logger.warning(
+                f"PR #{pr_number} by {student_github_username} in batch {batch_id}: "
+                f"no matching issue found — submission NOT recorded to avoid NOT NULL violation. "
+                f"Admin can manually link this PR via the Sync PRs flow."
+            )
+            return {"submission_id": None, "issue_id": None, "status": "ignored_no_issue_match"}
 
         # Record the submission
         submission_id = await db.insert(
