@@ -266,10 +266,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       progress.forEach(p => {
-        totalAssigned += p.issues_assigned || 0;
-        totalCompleted += p.issues_completed || 0;
-        totalPrs += p.prs_merged || 0;
-        totalScore += p.score || 0;
+        totalAssigned += Number(p.issues_assigned) || 0;
+        totalCompleted += Number(p.issues_completed) || 0;
+        totalPrs += Number(p.prs_merged) || 0;
+        totalScore += Number(p.score) || 0;
         maxWeek = Math.max(maxWeek, p.week || 1);
       });
 
