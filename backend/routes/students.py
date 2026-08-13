@@ -215,10 +215,11 @@ async def get_progress(email: str):
             "completed_tasks": sum(int(p["issues_completed"]) for p in progress),
             "prs_merged": sum(int(p["prs_merged"]) for p in progress),
             "total_prs": len([s for s in submissions]),
-            "completion_pct": round(
-                sum(int(p["issues_completed"]) for p in progress) /
-                max(len(formatted_issues), 1) * 100
-            ),
+            # Always divide by 12 (3 tasks × 4 weeks) so that completing
+            # only week-1 tasks never shows 100%. Cap at 100 for safety.
+            "completion_pct": min(100, round(
+                sum(int(p["issues_completed"]) for p in progress) / 12 * 100
+            )),
             "github_org": org,
         },
     }

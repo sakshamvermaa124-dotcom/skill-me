@@ -309,7 +309,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const offset = circumference - (pct / 100) * circumference;
       const urlParams = new URLSearchParams(window.location.search);
       const isPreview = urlParams.get('preview') === '1';
-      const isPaidPreview = urlParams.get('preview') === 'paid';
       
       document.getElementById('progress-ring').style.strokeDashoffset = offset;
       document.getElementById('progress-bar-inner').style.width = `${pct}%`;
@@ -317,15 +316,12 @@ document.addEventListener('DOMContentLoaded', () => {
       // ─── Certificate Banner (Payment Gated) ───
       const certSection = document.getElementById('cert-section');
       if (certSection) {
-        if ((pct === 100 || isPreview || isPaidPreview) && student.id && data._batch_id) {
-          if (isPaidPreview) {
-              renderCertReady(certSection, student, data);
-          } else if (isPreview) {
-              // Non-blocking Dev Preview Drop Box
+        if ((pct === 100 || isPreview) && student.id && data._batch_id) {
+          if (isPreview) {
+              // Dev preview: show payment banner only (never bypass payment)
               renderPaymentBanner(certSection, student, data);
-              renderDevPreviewBox(certSection, student, data);
           } else {
-            // Check if already paid
+            // Production: ALWAYS verify payment server-side
             try {
               const payStatus = await fetch(`${API}/api/payments/status/${student.id}/${data._batch_id}`);
               const payData = await payStatus.json();
@@ -900,39 +896,11 @@ function showCompletionPopup(student, data) {
         Your credentials are now unlocked and ready to share.
       </div>
 
-      <!-- Credential buttons grid -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;position:relative;">
-        <button onclick="window.open('${certUrl}','_blank');document.getElementById('completion-overlay').remove()" style="
-          background:linear-gradient(135deg,#c99a4e,#e8b96e);color:#000;
-          border:none;border-radius:12px;padding:13px 8px;
-          font-weight:700;font-size:0.78rem;cursor:pointer;
-          display:flex;flex-direction:column;align-items:center;gap:6px;
-          transition:transform 0.2s,opacity 0.2s;
-        " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
-          <span style="font-size:1.3rem;">🎓</span>
-          Certificate
-        </button>
-        <button onclick="window.open('${lorUrl}','_blank');document.getElementById('completion-overlay').remove()" style="
-          background:rgba(99,102,241,0.2);color:#a5b4fc;
-          border:1px solid rgba(99,102,241,0.35);border-radius:12px;padding:13px 8px;
-          font-weight:700;font-size:0.78rem;cursor:pointer;
-          display:flex;flex-direction:column;align-items:center;gap:6px;
-          transition:transform 0.2s,opacity 0.2s;
-        " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
-          <span style="font-size:1.3rem;">📄</span>
-          View LOR
-        </button>
-        <button onclick="${portfolioUrl !== '#' ? `window.open('${portfolioUrl}','_blank');` : ''}document.getElementById('completion-overlay').remove()" style="
-          background:rgba(52,211,153,0.15);color:#34d399;
-          border:1px solid rgba(52,211,153,0.3);border-radius:12px;padding:13px 8px;
-          font-weight:700;font-size:0.78rem;cursor:pointer;
-          display:flex;flex-direction:column;align-items:center;gap:6px;
-          transition:transform 0.2s,opacity 0.2s;
-          ${portfolioUrl === '#' ? 'opacity:0.5;cursor:not-allowed;' : ''}
-        " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
-          <span style="font-size:1.3rem;">🌐</span>
-          Portfolio
-        </button>
+      <!-- Credential buttons — rendered by JS after payment check -->
+      <div id="completion-cred-area" style="margin-bottom:12px;position:relative;">
+        <div style="color:rgba(255,255,255,0.4);font-size:0.8rem;text-align:center;padding:16px;">
+          Checking payment status…
+        </div>
       </div>
 
       <button onclick="document.getElementById('completion-overlay').remove()" style="
@@ -948,6 +916,34 @@ function showCompletionPopup(student, data) {
 
   document.body.appendChild(overlay);
   requestAnimationFrame(() => overlay.style.opacity = '1');
+
+  // Payment-gated credential area in popup
+  (async () => {
+    const credArea = overlay.querySelector('#completion-cred-area');
+    if (!credArea || !student || !student.id || !batchId) return;
+    try {
+      const payStatus = await fetch(`${API}/api/payments/status/${student.id}/${batchId}`);
+      const payData = await payStatus.json();
+      if (payData.status === 'paid') {
+        // Paid — show real credential links
+        credArea.innerHTML = `
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+            <button onclick="window.open('${certUrl}','_blank');document.getElementById('completion-overlay').remove()" style="background:linear-gradient(135deg,#c99a4e,#e8b96e);color:#000;border:none;border-radius:12px;padding:13px 8px;font-weight:700;font-size:0.78rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''"><span style="font-size:1.3rem;">🎓</span>Certificate</button>
+            <button onclick="window.open('${lorUrl}','_blank');document.getElementById('completion-overlay').remove()" style="background:rgba(99,102,241,0.2);color:#a5b4fc;border:1px solid rgba(99,102,241,0.35);border-radius:12px;padding:13px 8px;font-weight:700;font-size:0.78rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''"><span style="font-size:1.3rem;">📄</span>View LOR</button>
+            <button onclick="${portfolioUrl !== '#' ? `window.open('${portfolioUrl}','_blank');` : ''}document.getElementById('completion-overlay').remove()" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.3);border-radius:12px;padding:13px 8px;font-weight:700;font-size:0.78rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:transform 0.2s;${portfolioUrl === '#' ? 'opacity:0.5;cursor:not-allowed;' : ''}" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''"><span style="font-size:1.3rem;">🌐</span>Portfolio</button>
+          </div>`;
+      } else {
+        // Not paid — show pay CTA
+        credArea.innerHTML = `
+          <div style="background:rgba(201,154,78,0.08);border:1px solid rgba(201,154,78,0.2);border-radius:14px;padding:18px;text-align:center;">
+            <div style="font-size:0.85rem;color:rgba(255,255,255,0.6);margin-bottom:12px;">Activate your Certificate, LOR & Portfolio with a one-time fee of <strong style="color:#c99a4e;">₹129</strong></div>
+            <button onclick="document.getElementById('completion-overlay').remove();setTimeout(()=>showPaymentModal(window._dashStudent,window._dashData),200);" style="background:linear-gradient(135deg,#c99a4e,#e8b96e);color:#000;border:none;border-radius:10px;padding:12px 28px;font-weight:700;font-size:0.88rem;cursor:pointer;width:100%;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">💳 Pay & Activate Everything</button>
+          </div>`;
+      }
+    } catch(e) {
+      credArea.innerHTML = `<div style="color:rgba(255,255,255,0.4);font-size:0.8rem;text-align:center;padding:16px;">Could not load credentials. <a href="javascript:void(0)" onclick="document.getElementById('completion-overlay').remove()" style="color:#c99a4e;">Close</a> and check the dashboard.</div>`;
+    }
+  })();
 
   // Confetti burst
   const canvas = overlay.querySelector('#confetti-canvas');
