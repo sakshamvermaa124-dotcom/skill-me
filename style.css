@@ -82,242 +82,10 @@
 /* ============================================================
    LIGHT THEME OVERRIDES — Warm Alabaster & Ivory Stone
    ============================================================ */
-[data-theme="light"] {
-  --bg-primary:    #f7f4ef;
-  --bg-secondary:  #eee9e2;
-  --bg-card:       #ffffff;
-  --bg-card-hover: #f5f1eb;
-
-  --text-primary:   #1a1714;
-  --text-secondary: #5e5852;
-  --text-muted:     #969089;
-  --text-accent:    #ab7c32;
-
-  --border-subtle:  1px solid rgba(26, 23, 20, 0.08);
-  --border-glass:   1px solid rgba(26, 23, 20, 0.1);
-  --border-indigo:  1px solid rgba(171, 124, 50, 0.22);
-  --border-cyan:    1px solid rgba(181, 135, 61, 0.18);
-  --border-emerald: 1px solid rgba(79, 163, 107, 0.2);
-
-  --shadow-card:          0 4px 20px rgba(0, 0, 0, 0.04);
-  --shadow-glow-indigo:   0 4px 20px rgba(171, 124, 50, 0.04);
-  --shadow-glow-cyan:     0 4px 20px rgba(181, 135, 61, 0.03);
-  --shadow-glow-emerald:  0 4px 20px rgba(79, 163, 107, 0.03);
-
-  --gradient-hero-glow: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(171, 124, 50, 0.03) 0%, transparent 65%);
-}
-
 /* Light theme component overrides */
-[data-theme="light"] body {
-  background: var(--bg-primary);
-}
-
-[data-theme="light"] .dot-grid {
-  background-image: radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px);
-}
-
-[data-theme="light"] .aurora-blob {
-  opacity: 0.03;
-  filter: blur(140px);
-}
-
-/* ── Universal Premium Light Theme Navbar ── */
-[data-theme="light"] .navbar {
-  background: rgba(255, 255, 255, 0.0) !important;
-  backdrop-filter: blur(0px) saturate(100%) !important;
-  -webkit-backdrop-filter: blur(0px) saturate(100%) !important;
-  border-bottom: 1px solid transparent !important;
-  box-shadow: none !important;
-}
-
-[data-theme="light"] .navbar.scrolled {
-  background: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(24px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.07) !important;
-}
-
-[data-theme="light"] #sun-icon { display: none !important; }
-[data-theme="dark"]  #moon-icon { display: none !important; }
-
-[data-theme="light"] .nav-brand,
-[data-theme="light"] .nav-logo span,
-[data-theme="light"] .logo-text {
-  color: #0f172a !important;
-  font-weight: 700;
-}
-
-[data-theme="light"] .nav-links a {
-  color: #475569 !important;
-  font-weight: 500;
-  transition: color 0.2s ease, opacity 0.2s ease;
-}
-
-[data-theme="light"] .nav-links a:hover {
-  color: #0f172a !important;
-}
+/* ── Universal Premium Light Theme Navbar ── */[data-theme="dark"]  #moon-icon { display: none !important; }
 
 /* Light Theme Buttons & Accents with Lighter Soft Gold Shade */
-[data-theme="light"] .nav-links a:not(.nav-cta):not(.nav-link-dashboard)::after {
-  background: #c99a4e !important;
-}
-
-[data-theme="light"] .nav-link-dashboard {
-  background: rgba(201, 154, 78, 0.1) !important;
-  border: 1.5px solid rgba(201, 154, 78, 0.35) !important;
-  color: #8b6914 !important;
-  font-weight: 600 !important;
-}
-
-[data-theme="light"] .nav-link-dashboard:hover {
-  background: rgba(201, 154, 78, 0.2) !important;
-  border-color: rgba(201, 154, 78, 0.6) !important;
-  color: #6d520e !important;
-  box-shadow: 0 4px 14px rgba(201, 154, 78, 0.2) !important;
-}
-
-[data-theme="light"] .nav-cta,
-[data-theme="light"] .btn-primary {
-  background: linear-gradient(135deg, #e6c587 0%, #d4a556 100%) !important;
-  color: #0c0b0b !important;
-  font-weight: 700 !important;
-  box-shadow: 0 4px 16px rgba(201, 154, 78, 0.28) !important;
-  border: 1px solid rgba(201, 154, 78, 0.4) !important;
-}
-
-[data-theme="light"] .nav-cta:hover,
-[data-theme="light"] .btn-primary:hover {
-  transform: translateY(-1.5px) !important;
-  box-shadow: 0 6px 22px rgba(201, 154, 78, 0.4) !important;
-  color: #000000 !important;
-  background: linear-gradient(135deg, #ebd096 0%, #dbae60 100%) !important;
-}
-
-[data-theme="light"] .theme-toggle {
-  background: rgba(0, 0, 0, 0.03) !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  color: #475569 !important;
-}
-
-[data-theme="light"] .theme-toggle:hover {
-  background: rgba(0, 0, 0, 0.07) !important;
-  color: #0f172a !important;
-}
-
-[data-theme="light"] .terminal-card {
-  background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.08);
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
-}
-
-[data-theme="light"] .terminal-line .command { color: #1a1a1a; }
-[data-theme="light"] .terminal-line .comment { color: #999; }
-[data-theme="light"] .terminal-body { background: #ffffff; }
-
-[data-theme="light"] .step-card {
-  background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.06);
-}
-[data-theme="light"] .step-card:hover { box-shadow: 0 8px 28px rgba(0, 0, 0, 0.06); }
-
-[data-theme="light"] .domain-card {
-  background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
-[data-theme="light"] .benefit-card {
-  background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
-[data-theme="light"] .benefit-card.featured {
-  background: linear-gradient(145deg, rgba(52,211,153,0.04), #ffffff);
-  border-color: rgba(52, 211, 153, 0.15);
-}
-
-[data-theme="light"] .benefit-card.placement {
-  background: linear-gradient(145deg, rgba(245,158,11,0.04), #ffffff);
-  border-color: rgba(245, 158, 11, 0.15);
-}
-
-[data-theme="light"] .testimonial-card {
-  background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
-[data-theme="light"] .faq-item {
-  background: #ffffff;
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
-[data-theme="light"] .faq-question { color: var(--text-primary); }
-
-[data-theme="light"] .cta-box {
-  background: linear-gradient(145deg, rgba(245,158,11,0.03), rgba(34,211,238,0.02));
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
-[data-theme="light"] .credibility-strip {
-  background: rgba(0, 0, 0, 0.015);
-  border-color: rgba(0, 0, 0, 0.04);
-}
-
-[data-theme="light"] .shapes-section { background: var(--bg-secondary); }
-
-[data-theme="light"] .nav-toggle span { background: var(--text-primary); }
-
-[data-theme="light"] .nav-links {
-  background: rgba(250, 250, 250, 0.97);
-}
-
-[data-theme="light"] .hero-stat .stat-number {
-  -webkit-text-fill-color: transparent;
-}
-
-[data-theme="light"] .hero-line-1 {
-  color: #1a1a1a;
-}
-
-[data-theme="light"] .stipend-pill {
-  background: rgba(52, 211, 153, 0.06);
-}
-
-[data-theme="light"] .placement-pill {
-  background: rgba(245, 158, 11, 0.05);
-}
-
-[data-theme="light"] .theme-toggle {
-  background: rgba(0, 0, 0, 0.04);
-  border-color: rgba(0, 0, 0, 0.08);
-}
-
-[data-theme="light"] .theme-toggle:hover {
-  background: rgba(245, 158, 11, 0.08);
-}
-
-[data-theme="light"] .footer {
-  background: var(--bg-secondary);
-  border-top-color: rgba(0, 0, 0, 0.06);
-}
-
-[data-theme="light"] .footer-social a {
-  background: rgba(0, 0, 0, 0.03);
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
-[data-theme="light"] ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.15);
-}
-[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.25);
-}
-
-[data-theme="light"] ::selection {
-  background: rgba(245, 158, 11, 0.15);
-  color: #1a1a1a;
-}
-
 /* ============================================================
    BASE
    ============================================================ */
@@ -534,15 +302,6 @@ section { position: relative; padding: var(--section-padding); overflow: hidden;
 
 .theme-icon { display: block; transition: opacity 0.2s ease; }
 
-[data-theme="light"] .theme-toggle {
-  background: rgba(0, 0, 0, 0.05);
-  border-color: rgba(0, 0, 0, 0.1);
-}
-
-[data-theme="light"] .theme-toggle:hover {
-  background: rgba(245, 158, 11, 0.1);
-}
-
 /* navbar right group */
 .nav-right {
   display: flex;
@@ -593,13 +352,6 @@ section { position: relative; padding: var(--section-padding); overflow: hidden;
 [data-theme="dark"] .sidebar-brand-text {
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
-}
-
-[data-theme="light"] .nav-logo span,
-[data-theme="light"] .logo-text,
-[data-theme="light"] .sidebar-brand-text {
-  color: #0f172a !important;
-  -webkit-text-fill-color: #0f172a !important;
 }
 
 .nav-logo .logo-icon {
@@ -841,9 +593,6 @@ img.brand-logo-img,
 .placement-pill .pill-icon { font-size: 1.1rem; }
 
 /* Light theme pill overrides */
-[data-theme="light"] .stipend-pill { background: rgba(52,211,153,0.1); }
-[data-theme="light"] .placement-pill { background: rgba(245,158,11,0.08); }
-
 
 /* ── Buttons ── */
 .btn-primary {
@@ -1506,11 +1255,7 @@ img.brand-logo-img,
   .footer-column h4 { grid-column: 1 / -1; }
   .footer-bottom { flex-direction: column; text-align: center; gap: 8px; }
 
-  /* Light theme nav menu */
-  [data-theme="light"] .nav-links {
-    background: rgba(250, 250, 250, 0.97);
-  }
-}
+  /* Light theme nav menu */}
 
 /* ============================================================
    RESPONSIVE — Small Mobile (≤ 480px)
@@ -1572,101 +1317,4 @@ img.brand-logo-img,
 /* ============================================================
    LIGHT MODE DASHBOARD COMPONENT STYLES (Issue 6 Fix)
    ============================================================ */
-[data-theme="light"] .dash-header,
-[data-theme="light"] .progress-card,
-[data-theme="light"] .login-card,
-[data-theme="light"] .stat-card,
-[data-theme="light"] .submissions-section,
-[data-theme="light"] .guide-section,
-[data-theme="light"] .guide-card,
-[data-theme="light"] .guide-panel,
-[data-theme="light"] .cert-banner,
-[data-theme="light"] .cert-progress-hint {
-  background: #ffffff !important;
-  border-color: rgba(0, 0, 0, 0.1) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
-}
-
-[data-theme="light"] .sub-card,
-[data-theme="light"] .task-card {
-  background: #f8fafc !important;
-  border: 1px solid #e2e8f0 !important;
-}
-
-[data-theme="light"] .sub-title,
-[data-theme="light"] .stat-value,
-[data-theme="light"] .guide-step-title,
-[data-theme="light"] .section-header h2 {
-  color: #0f172a !important;
-}
-
-[data-theme="light"] .sub-meta,
-[data-theme="light"] .stat-label,
-[data-theme="light"] .guide-step-desc {
-  color: #475569 !important;
-}
-
-[data-theme="light"] .guide-repo-link {
-  background: #f1f5f9 !important;
-  border-color: #cbd5e1 !important;
-}
-
-[data-theme="light"] .guide-repo-link-title {
-  color: #0f172a !important;
-}
-
-[data-theme="light"] .guide-repo-link-sub {
-  color: #64748b !important;
-}
-
-[data-theme="light"] .guide-code {
-  background: #0f172a !important;
-  color: #f8fafc !important;
-}
-
 /* Light Mode — Form Inputs, Apply Card & Quiz Components */
-[data-theme="light"] .apply-card,
-[data-theme="light"] .form-step-title,
-[data-theme="light"] .modal-content,
-[data-theme="light"] .quiz-card {
-  background: #ffffff !important;
-  color: #0f172a !important;
-  border-color: rgba(0, 0, 0, 0.12) !important;
-}
-
-[data-theme="light"] .form-group label {
-  color: #334155 !important;
-}
-
-[data-theme="light"] .form-input,
-[data-theme="light"] select,
-[data-theme="light"] textarea {
-  background: #ffffff !important;
-  color: #0f172a !important;
-  border-color: #cbd5e1 !important;
-}
-
-[data-theme="light"] .form-input:focus,
-[data-theme="light"] select:focus,
-[data-theme="light"] textarea:focus {
-  border-color: var(--gold) !important;
-  box-shadow: 0 0 0 3px rgba(201, 154, 78, 0.15) !important;
-}
-
-[data-theme="light"] .form-input::placeholder {
-  color: #94a3b8 !important;
-}
-
-[data-theme="light"] .domain-card,
-[data-theme="light"] .question-card,
-[data-theme="light"] .option-card {
-  background: #ffffff !important;
-  color: #0f172a !important;
-  border-color: #e2e8f0 !important;
-}
-
-[data-theme="light"] .option-card:hover,
-[data-theme="light"] .domain-card:hover {
-  background: #f8fafc !important;
-  border-color: var(--gold) !important;
-}

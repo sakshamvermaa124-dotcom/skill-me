@@ -20,7 +20,7 @@
     [data-theme="dark"] #moon-icon { display: none; }
     
     /* Overrides */
-    .theme-toggle:hover { border-color: var(--border-indigo); color: var(--accent-indigo); }
+    
 
     /* ======== Lenis Base ======== */
     html.lenis, html.lenis body { height: auto; }
@@ -1233,21 +1233,11 @@
       align-items: center;
       gap: 16px;
     }
-    .theme-toggle {
-      display: flex; align-items: center; justify-content: center;
-      width: 38px; height: 38px; border-radius: 50%;
-      background: rgba(255, 255, 255, 0.05); border: var(--border-glass);
-      color: var(--text-secondary); cursor: pointer;
-      transition: background 0.3s, color 0.3s, transform 0.3s, border-color 0.3s;
-      margin-right: 10px; position: relative; overflow: hidden;
-    }
-    .theme-toggle:hover {
-      background: rgba(99, 102, 241, 0.12); color: var(--accent-indigo);
-      border-color: var(--border-indigo); transform: rotate(15deg) scale(1.08);
-    }
+    
+    
     .theme-icon { transition: opacity 0.2s ease; }
-    [data-theme="light"] .theme-toggle { background: rgba(0, 0, 0, 0.05); border-color: rgba(0, 0, 0, 0.1); }
-    [data-theme="light"] .theme-toggle:hover { background: rgba(99, 102, 241, 0.1); }
+    [data-theme="light"] 
+    [data-theme="light"] 
     @media (max-width: 768px) {
       .nav-container { padding: 0 16px; height: 60px; }
       #dashboard-view { padding: 0 16px 60px; }
@@ -1378,7 +1368,6 @@
   </style>
   <script src="config.js" defer></script>
   <style>.brand-logo-img, .logo img, .nav-logo img, .cert-company-logo, .lh-logo { width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important; flex-shrink: 0 !important; }</style>
-<script src="theme.js"></script>
 </head>
 <body>
   <!-- Navigation -->
@@ -1401,10 +1390,6 @@
 
       <div style="display: flex; align-items: center; gap: 12px;">
         <!-- Theme Toggle -->
-        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle light/dark mode">
-          <svg class="theme-icon" id="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-          <svg class="theme-icon" id="moon-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-        </button>
         <!-- Mobile Menu Toggle -->
         <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu">
           <span></span>
@@ -1857,23 +1842,7 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       // Theme toggle logic specific for dashboard
-      const themeToggle = document.getElementById('theme-toggle');
-      const html = document.documentElement;
       
-      // We already set data-theme via localStorage or 'dark' earlier if possible, 
-      // but let's ensure it's applied correctly.
-      const savedTheme = localStorage.getItem('skillme-theme') || 'dark';
-      html.setAttribute('data-theme', savedTheme);
-      
-      if (themeToggle) {
-        themeToggle.addEventListener('click', () => {
-          const current = html.getAttribute('data-theme');
-          const next = current === 'dark' ? 'light' : 'dark';
-          html.setAttribute('data-theme', next);
-          localStorage.setItem('skillme-theme', next);
-          themeToggle.style.transform = 'rotate(360deg) scale(1.1)';
-          setTimeout(() => { themeToggle.style.transform = ''; }, 300);
-        });
       }
       });
     </script>
