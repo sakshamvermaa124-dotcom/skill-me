@@ -737,8 +737,13 @@
   <script src="https://unpkg.com/lenis@1.3.25/dist/lenis.min.js" defer></script>
   
   <script>
-    // Lenis
-    const lenis = new Lenis({ autoRaf: true, duration: 1.2 });
+    // Lenis — init after deferred scripts load to avoid "Lenis is not defined" crash
+    let lenis;
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof Lenis !== 'undefined') {
+        lenis = new Lenis({ autoRaf: true, duration: 1.2 });
+      }
+    });
 
     // ── Quiz Guard ─────────────────────────────────────────────
     (function () {
@@ -764,7 +769,7 @@
         badge.innerHTML = `<span style="font-size:18px;">✅</span>
           Screening quiz completed · <strong>${quiz.score}/${quiz.total}</strong> correct ·
           Domain: <strong>${domainLabels[quiz.domain] || quiz.domain}</strong>
-          <a href="quiz.html" style="margin-left:auto;font-size:12px;color:#8a8aaa;text-decoration:underline;">Retake Quiz</a>`;
+          <a href="quiz.html?retake=1" style="margin-left:auto;font-size:12px;color:#8a8aaa;text-decoration:underline;">Retake Quiz</a>`;
 
         const formCard = document.querySelector('.apply-card') || document.querySelector('form');
         if (formCard) formCard.insertBefore(badge, formCard.firstChild);
