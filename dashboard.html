@@ -634,11 +634,231 @@
       from { stroke-dashoffset: 502; }
     }
 
-    /* Navbar override for dashboard */
-    .navbar {
+    /* Navbar override for dashboard — dark mode only */
+    [data-theme="dark"] .navbar {
       background: rgba(6, 8, 15, 0.8) !important;
       backdrop-filter: blur(20px) !important;
       -webkit-backdrop-filter: blur(20px) !important;
+    }
+
+    /* ======================================================
+       LIGHT MODE — Dashboard-specific overrides
+       All the dark-mode-only hardcoded colors fixed here
+    ====================================================== */
+
+    /* Navbar: solid white so content can't bleed through */
+    [data-theme="light"] .navbar {
+      background: rgba(255, 255, 255, 0.95) !important;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+      box-shadow: 0 2px 16px rgba(0, 0, 0, 0.05) !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
+    }
+
+    /* Dash header h1 — white gradient is invisible on light bg */
+    [data-theme="light"] .dash-header h1 {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #92700a 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* "Your Internship" label */
+    [data-theme="light"] .dash-greeting {
+      color: #64748b !important;
+    }
+
+    /* Dash tags — invisible border on white */
+    [data-theme="light"] .dash-tag {
+      border-color: rgba(0, 0, 0, 0.1) !important;
+      background: #f1f5f9 !important;
+      color: #334155 !important;
+    }
+    [data-theme="light"] .dash-tag.accent {
+      background: rgba(99, 102, 241, 0.08) !important;
+      border-color: rgba(99, 102, 241, 0.2) !important;
+      color: #4f46e5 !important;
+    }
+
+    /* Login input — invisible border on white */
+    [data-theme="light"] .login-input-wrap input {
+      background: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+    }
+    [data-theme="light"] .login-input-wrap input::placeholder {
+      color: #94a3b8 !important;
+    }
+    [data-theme="light"] .login-input-wrap input:focus {
+      border-color: rgba(99, 102, 241, 0.5) !important;
+      background: #ffffff !important;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1) !important;
+    }
+
+    /* Guide subtitle — rgba(255,255,255,0.45) = invisible on white */
+    [data-theme="light"] .guide-subtitle {
+      color: #64748b !important;
+    }
+
+    /* Guide steps */
+    [data-theme="light"] .guide-step {
+      background: #f8fafc !important;
+      border-color: #e2e8f0 !important;
+    }
+    [data-theme="light"] .guide-step:hover {
+      background: #f1f5f9 !important;
+      border-color: #cbd5e1 !important;
+    }
+    [data-theme="light"] .guide-step-desc strong {
+      color: #0f172a !important;
+    }
+
+    /* Guide tip callout — rgba(255,255,255,0.55) = invisible on white */
+    [data-theme="light"] .guide-tip {
+      background: rgba(52, 211, 153, 0.06) !important;
+      border-color: rgba(52, 211, 153, 0.2) !important;
+    }
+    [data-theme="light"] .guide-tip-text {
+      color: #334155 !important;
+    }
+    [data-theme="light"] .guide-tip-text strong {
+      color: #059669 !important;
+    }
+
+    /* Guide warning callout */
+    [data-theme="light"] .guide-warning {
+      background: rgba(251, 191, 36, 0.06) !important;
+      border-color: rgba(251, 191, 36, 0.2) !important;
+    }
+    [data-theme="light"] .guide-warning .guide-tip-text {
+      color: #334155 !important;
+    }
+
+    /* Guide toggle button */
+    [data-theme="light"] .guide-toggle {
+      border-color: #e2e8f0 !important;
+      color: #64748b !important;
+    }
+    [data-theme="light"] .guide-toggle:hover {
+      border-color: #cbd5e1 !important;
+      color: #334155 !important;
+    }
+
+    /* Guide tabs */
+    [data-theme="light"] .guide-tabs {
+      background: #f1f5f9 !important;
+      border-color: #e2e8f0 !important;
+    }
+    [data-theme="light"] .guide-tab {
+      color: #64748b !important;
+    }
+    [data-theme="light"] .guide-tab:hover {
+      color: #334155 !important;
+      background: #e2e8f0 !important;
+    }
+    [data-theme="light"] .guide-tab.active {
+      background: rgba(99, 102, 241, 0.1) !important;
+      color: #4338ca !important;
+      border-color: rgba(99, 102, 241, 0.2) !important;
+    }
+    [data-theme="light"] .guide-tab:not(.active) .tab-badge {
+      background: #e2e8f0 !important;
+      color: #64748b !important;
+    }
+    [data-theme="light"] .guide-tab.active .tab-badge {
+      background: rgba(52, 211, 153, 0.12) !important;
+      color: #059669 !important;
+    }
+
+    /* Progress ring text */
+    [data-theme="light"] .progress-ring-sub {
+      color: #64748b !important;
+    }
+    [data-theme="light"] .progress-bar-track {
+      background: #e2e8f0 !important;
+    }
+
+    /* Cert mini progress bar track */
+    [data-theme="light"] .cert-mini-bar {
+      background: rgba(0, 0, 0, 0.08) !important;
+    }
+
+    /* Sub-card hover */
+    [data-theme="light"] .sub-card:hover {
+      background: #f1f5f9 !important;
+      border-color: #cbd5e1 !important;
+    }
+
+    /* Sub-link icon */
+    [data-theme="light"] .sub-link {
+      color: #94a3b8 !important;
+    }
+    [data-theme="light"] .sub-link:hover {
+      color: #4f46e5 !important;
+    }
+
+    /* Count badge on section headers */
+    [data-theme="light"] .section-header .count-badge {
+      background: rgba(99, 102, 241, 0.08) !important;
+      color: #4338ca !important;
+      border-color: rgba(99, 102, 241, 0.15) !important;
+    }
+
+    /* Empty state — white text on white bg */
+    [data-theme="light"] .empty-state {
+      background: #f8fafc !important;
+      border-color: #e2e8f0 !important;
+    }
+    [data-theme="light"] .empty-state h3 {
+      color: #475569 !important;
+    }
+    [data-theme="light"] .empty-state p {
+      color: #94a3b8 !important;
+    }
+
+    /* Cred pills */
+    [data-theme="light"] .cred-pill {
+      background: #f8fafc !important;
+      border-color: #e2e8f0 !important;
+      color: #334155 !important;
+    }
+    [data-theme="light"] .cred-pill:hover {
+      border-color: #cbd5e1 !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+    }
+    [data-theme="light"] .cred-pill-label {
+      color: #94a3b8 !important;
+    }
+
+    /* Cert banner secondary button */
+    [data-theme="light"] .cert-btn-secondary {
+      background: #f1f5f9 !important;
+      border: 1px solid #e2e8f0 !important;
+      color: #334155 !important;
+    }
+
+    /* Payment modal */
+    [data-theme="light"] .payment-modal-card {
+      background: #ffffff !important;
+      border-color: rgba(0, 0, 0, 0.08) !important;
+    }
+    [data-theme="light"] .payment-modal-title {
+      color: #0f172a !important;
+    }
+    [data-theme="light"] .payment-modal-list {
+      background: #f8fafc !important;
+      border-color: rgba(0, 0, 0, 0.05) !important;
+    }
+    [data-theme="light"] .payment-modal-list li {
+      color: #334155 !important;
+    }
+    [data-theme="light"] .payment-modal-close {
+      background: rgba(0, 0, 0, 0.04) !important;
+      color: #64748b !important;
+    }
+    [data-theme="light"] .payment-modal-close:hover {
+      background: rgba(0, 0, 0, 0.08) !important;
+      color: #0f172a !important;
     }
 
     /* ======== Beginner Guide Section ======== */

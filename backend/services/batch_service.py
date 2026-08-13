@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from db.database import db
 from services.github_service import github_service
 from services.task_service import task_service
+from config import settings
 
 logger = logging.getLogger("skillme.batch")
 

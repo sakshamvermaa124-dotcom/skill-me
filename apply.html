@@ -678,15 +678,13 @@
   <script src="https://unpkg.com/lenis@1.3.25/dist/lenis.min.js" defer></script>
   
   <script>
-    // Lenis (Wrap in try-catch in case CDN is blocked by tracking prevention)
+    // Lenis — init after deferred scripts load to avoid "Lenis is not defined" crash
     let lenis;
-    try {
+    document.addEventListener('DOMContentLoaded', function () {
       if (typeof Lenis !== 'undefined') {
         lenis = new Lenis({ autoRaf: true, duration: 1.2 });
       }
-    } catch (e) {
-      console.warn('Lenis failed to load, skipping smooth scroll', e);
-    }
+    });
 
     // ── Quiz Integration & Optional Prefill ─────────────────────
     (function () {
@@ -694,35 +692,37 @@
       if (!quizRaw) return;
       try {
         const quiz = JSON.parse(quizRaw);
-        if (quiz && quiz.domain) {
-          // Display the prefilled domain from quiz
-          const domainLabels = {
-            'web-dev':'Web Development','python':'Python','ml':'Machine Learning',
-            'devops':'DevOps / CI-CD','mobile':'Flutter / Mobile','react':'React / Next.js',
-            'nodejs':'Node.js / Express','java':'Java / Spring Boot','data-science':'Data Science',
-            'cpp':'C++ / Algorithms','cybersecurity':'Cybersecurity','cloud':'Cloud / AWS'
-          };
-          const expectedLabel = domainLabels[quiz.domain] || quiz.domain;
-          
-          const titleBadge = document.getElementById('quiz-status-title');
-          const domainBadge = document.getElementById('quiz-domain-display');
-          const iconBadge = document.getElementById('quiz-status-icon');
-          const actionBtn = document.getElementById('quiz-action-btn');
-          
-          if (titleBadge && domainBadge && iconBadge) {
-            titleBadge.innerHTML = `Screening Quiz: <span style="color: #10b981;">Score ${quiz.score}/8</span>`;
-            domainBadge.textContent = `${expectedLabel} Track`;
-            iconBadge.textContent = "✅";
-            iconBadge.style.background = "rgba(16, 185, 129, 0.15)";
-            iconBadge.style.borderColor = "rgba(16, 185, 129, 0.4)";
-          }
-          if (actionBtn) {
-            actionBtn.innerHTML = "Retake Quiz ↺";
-            actionBtn.style.background = "rgba(255, 255, 255, 0.05)";
-            actionBtn.style.color = "#a1a1aa";
-            actionBtn.style.boxShadow = "none";
-            actionBtn.style.border = "1px solid rgba(255,255,255,0.1)";
-          }
+        const domainLabels = {
+          'web-dev':'Web Development','python':'Python','ml':'Machine Learning',
+          'devops':'DevOps / Cloud','mobile':'Mobile Dev','ui-ux':'UI/UX Design'
+        };
+
+        // Show score badge at top of form
+        const badge = document.createElement('div');
+        badge.style.cssText = `
+          display:flex;align-items:center;gap:10px;
+          background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.25);
+          border-radius:10px;padding:12px 18px;margin-bottom:20px;
+          font-size:14px;color:#34d399;font-weight:600;`;
+        badge.innerHTML = `<span style="font-size:18px;">✅</span>
+          Screening quiz completed · <strong>${quiz.score}/${quiz.total}</strong> correct ·
+          Domain: <strong>${domainLabels[quiz.domain] || quiz.domain}</strong>
+          <a href="quiz.html?retake=1" style="margin-left:auto;font-size:12px;color:#8a8aaa;text-decoration:underline;">Retake Quiz</a>`;
+
+        const formCard = document.querySelector('.apply-card') || document.querySelector('form');
+        if (formCard) formCard.insertBefore(badge, formCard.firstChild);
+
+        // Pre-select domain from quiz
+        if (quiz.domain) {
+          const domainCards = document.querySelectorAll('.domain-option');
+          domainCards.forEach(card => {
+            if (card.dataset.value === quiz.domain || card.getAttribute('data-value') === quiz.domain) {
+              card.click();
+            }
+          });
+          // Also try a select element
+          const domainSelect = document.getElementById('domain') || document.querySelector('[name="domain"]');
+          if (domainSelect) domainSelect.value = quiz.domain;
         }
       } catch (e) { /* corrupted quiz data — skip */ }
     })();
