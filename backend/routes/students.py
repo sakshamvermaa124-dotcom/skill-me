@@ -211,13 +211,13 @@ async def get_progress(email: str):
         "issues": formatted_issues,
         "github_org": org,
         "summary": {
-            "total_tasks": sum(int(p["issues_assigned"]) for p in progress),
+            "total_tasks": len(formatted_issues),
             "completed_tasks": sum(int(p["issues_completed"]) for p in progress),
             "prs_merged": sum(int(p["prs_merged"]) for p in progress),
             "total_prs": len([s for s in submissions]),
             "completion_pct": round(
                 sum(int(p["issues_completed"]) for p in progress) /
-                max(sum(int(p["issues_assigned"]) for p in progress), 1) * 100
+                max(len(formatted_issues), 1) * 100
             ),
             "github_org": org,
         },

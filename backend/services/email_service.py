@@ -117,7 +117,30 @@ async def _send_and_log(
 ) -> bool:
     """
     Sends an email and records it in email_logs regardless of success/failure.
+    Deduplicates non-OTP emails (welcome, certificate_ready, task_assigned) to prevent duplicate emails.
     """
+    # Deduplication guard for single-event emails
+    if email_type in ("certificate_ready", "welcome", "task_assigned"):
+        try:
+            from db.database import db
+            query = """SELECT id FROM email_logs 
+                       WHERE recipient_email = ? AND email_type = ? AND status = 'sent'"""
+            params = [to_email, email_type]
+            if student_id is not None:
+                query += " AND student_id = ?"
+                params.append(student_id)
+            if batch_id is not None:
+                query += " AND batch_id = ?"
+                params.append(batch_id)
+            query += " LIMIT 1"
+
+            existing = await db.fetch_one(query, tuple(params))
+            if existing:
+                logger.info("Skipping duplicate %s email to %s (already sent).", email_type, to_email)
+                return True
+        except Exception as dedup_exc:
+            logger.warning("Email deduplication check warning: %s", dedup_exc)
+
     success = await _send(to_email, to_name, subject, html_body)
     # Log to DB (best-effort — never crash the caller)
     try:
