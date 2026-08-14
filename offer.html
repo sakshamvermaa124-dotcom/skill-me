@@ -457,7 +457,7 @@
         </div>
         <div class="detail-cell">
           <span class="cell-label">Date of Joining</span>
-          <span class="cell-value" id="cell-joining">Upcoming Monday</span>
+          <span class="cell-value" id="cell-joining"></span>
         </div>
         <div class="detail-cell">
           <span class="cell-label">Enrollment Status</span>
@@ -510,6 +510,7 @@
     document.getElementById('cell-domain').textContent = domain;
 
     document.getElementById('doc-date').textContent = dateStr;
+    document.getElementById('cell-joining').textContent = dateStr;
 
     // Generate QR Code
     new QRious({
