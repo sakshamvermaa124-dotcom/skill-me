@@ -871,11 +871,13 @@ async function loadStats() {
       ${statCard('🎯', data.total_issues_assigned, 'Issues Assigned', 'rgba(181,135,61,0.15)', '#b5873d')}
     `;
     const badge = document.getElementById('pending-badge');
-    if (data.pending_applications > 0) {
-      badge.style.display = 'inline-flex';
-      badge.textContent = data.pending_applications;
-    } else {
-      badge.style.display = 'none';
+    if (badge) {
+      if (data.pending_applications > 0) {
+        badge.style.display = 'inline-flex';
+        badge.textContent = data.pending_applications;
+      } else {
+        badge.style.display = 'none';
+      }
     }
   } catch (e) {
     grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-text">${e.message}</div></div>`;
