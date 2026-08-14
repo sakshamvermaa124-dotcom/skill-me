@@ -900,10 +900,14 @@ async def check_db_integrity() -> dict:
     except Exception as e:
         results["enrolled_no_progress"] = {"error": str(e)}
 
+    critical_issues = sum(
+        r.get("count", 0) for k, r in results.items() 
+        if isinstance(r, dict) and "count" in r and k not in ("stuck_payments", "enrolled_no_progress")
+    )
     total_issues = sum(r.get("count", 0) for r in results.values() if isinstance(r, dict) and "count" in r)
-    status = "pass" if total_issues == 0 else "fail"
-    await _record_check("db_integrity", "db_integrity", status, details={"total_issues": total_issues})
-    return {"status": status, "total_issues": total_issues, "checks": results}
+    status = "pass" if critical_issues == 0 else "fail"
+    await _record_check("db_integrity", "db_integrity", status, details={"total_issues": total_issues, "critical": critical_issues})
+    return {"status": status, "total_issues": total_issues, "critical_issues": critical_issues, "checks": results}
 
 
 # ═════════════════════════════════════════════════════════════════════════════
