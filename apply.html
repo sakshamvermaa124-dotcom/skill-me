@@ -807,8 +807,11 @@
       document.querySelectorAll('.progress-step').forEach(step => {
         const s = parseInt(step.dataset.step);
         step.classList.remove('active', 'completed');
-        if (s === currentStep) step.classList.add('active');
-        else if (s < currentStep) step.classList.add('completed');
+        if (s === currentStep) {
+          step.classList.add('active');
+        } else if (validateStep(s, true)) {
+          step.classList.add('completed');
+        }
       });
     }
 
@@ -821,71 +824,87 @@
       lenis.scrollTo('.apply-card', { offset: -100, duration: 0.8 });
     }
 
-    function validateStep(step) {
+    function validateStep(step, silent = false) {
       let valid = true;
 
       if (step === 1) {
-        valid = validateField('firstName') & validateField('lastName') & validateEmail('email') & validateField('phone');
+        valid = validateField('firstName', silent) & validateField('lastName', silent) & validateEmail('email', silent) & validateField('phone', silent);
       } else if (step === 2) {
-        valid = validateField('college') & validateSelect('year') & validateGithub('github');
+        valid = validateField('college', silent) & validateSelect('year', silent) & validateGithub('github', silent);
       } else if (step === 3) {
-        valid = validateDomain() & validateField('motivation');
+        valid = validateDomain() & validateField('motivation', silent);
       }
 
       return valid;
     }
 
-    function validateField(id) {
+    function validateField(id, silent = false) {
       const input = document.getElementById(id);
       const error = document.getElementById(`${id}-error`);
       if (!input.value.trim()) {
-        input.classList.add('error');
-        if (error) error.classList.add('visible');
+        if (!silent) {
+          input.classList.add('error');
+          if (error) error.classList.add('visible');
+        }
         return false;
       }
-      input.classList.remove('error');
-      if (error) error.classList.remove('visible');
+      if (!silent) {
+        input.classList.remove('error');
+        if (error) error.classList.remove('visible');
+      }
       return true;
     }
 
-    function validateEmail(id) {
+    function validateEmail(id, silent = false) {
       const input = document.getElementById(id);
       const error = document.getElementById(`${id}-error`);
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(input.value.trim())) {
-        input.classList.add('error');
-        if (error) error.classList.add('visible');
+        if (!silent) {
+          input.classList.add('error');
+          if (error) error.classList.add('visible');
+        }
         return false;
       }
-      input.classList.remove('error');
-      if (error) error.classList.remove('visible');
+      if (!silent) {
+        input.classList.remove('error');
+        if (error) error.classList.remove('visible');
+      }
       return true;
     }
 
-    function validateSelect(id) {
+    function validateSelect(id, silent = false) {
       const select = document.getElementById(id);
       const error = document.getElementById(`${id}-error`);
       if (!select.value) {
-        select.classList.add('error');
-        if (error) error.classList.add('visible');
+        if (!silent) {
+          select.classList.add('error');
+          if (error) error.classList.add('visible');
+        }
         return false;
       }
-      select.classList.remove('error');
-      if (error) error.classList.remove('visible');
+      if (!silent) {
+        select.classList.remove('error');
+        if (error) error.classList.remove('visible');
+      }
       return true;
     }
 
-    function validateGithub(id) {
+    function validateGithub(id, silent = false) {
       const input = document.getElementById(id);
       const error = document.getElementById(`${id}-error`);
       const val = input.value.trim();
       if (!val || !val.includes('github.com/')) {
-        input.classList.add('error');
-        if (error) error.classList.add('visible');
+        if (!silent) {
+          input.classList.add('error');
+          if (error) error.classList.add('visible');
+        }
         return false;
       }
-      input.classList.remove('error');
-      if (error) error.classList.remove('visible');
+      if (!silent) {
+        input.classList.remove('error');
+        if (error) error.classList.remove('visible');
+      }
       return true;
     }
 
@@ -929,8 +948,9 @@
     // Form Submit
     document.getElementById('apply-form').addEventListener('submit', (e) => {
       e.preventDefault();
-      
-      if (!validateStep(3)) return;
+      if (!validateStep(1)) return showStep(1);
+      if (!validateStep(2)) return showStep(2);
+      if (!validateStep(3)) return showStep(3);
 
       const submitBtn = document.getElementById('btn-submit');
       submitBtn.disabled = true;
@@ -985,8 +1005,16 @@
         submitBtn.innerHTML = `Submit Application <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>`;
       });
     });
-
     
+    // Make progress bars clickable for quick navigation
+    document.querySelectorAll('.progress-step').forEach(stepEl => {
+      stepEl.style.cursor = 'pointer';
+      stepEl.addEventListener('click', () => {
+        const targetStep = parseInt(stepEl.getAttribute('data-step'));
+        showStep(targetStep);
+      });
+    });
+
   </script>
 
   <style>
