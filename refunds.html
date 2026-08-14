@@ -74,6 +74,30 @@
       </div>
     </div>
   </footer>
-</body>
+<script>
+  // Mobile nav toggle
+  (function() {
+    var t = document.getElementById('nav-toggle');
+    var n = document.getElementById('nav-links-center');
+    if (!t || !n) return;
+    t.addEventListener('click', function() {
+      var o = n.classList.toggle('open');
+      t.classList.toggle('active', o);
+      document.body.style.overflow = o ? 'hidden' : '';
+    });
+    n.querySelectorAll('a').forEach(function(l) {
+      l.addEventListener('click', function() {
+        n.classList.remove('open'); t.classList.remove('active');
+        document.body.style.overflow = '';
+      });
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && n.classList.contains('open')) {
+        n.classList.remove('open'); t.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+  })();
+</script></body>
 </html>
 
