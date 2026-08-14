@@ -411,7 +411,7 @@ img.brand-logo-img,
 .nav-links a:not(.nav-cta):not(.nav-link-dashboard):hover::after { width: 100%; }
 
 .nav-link-dashboard {
-  padding: 8px 52px; border-radius: var(--radius-full);
+  padding: 8px 20px; border-radius: var(--radius-full);
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(235, 230, 224, 0.14);
   color: var(--text-primary) !important;
@@ -1342,4 +1342,86 @@ img.brand-logo-img,
 /* Light Mode — Form Inputs, Apply Card & Quiz Components */
 @media (max-width: 350px) {
   .hero-stats { grid-template-columns: 1fr !important; }
+}
+
+/* Desktop 3-Column Split Nav */
+@media (min-width: 769px) {
+  .navbar .container {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    width: 100%;
+  }
+  .nav-left { justify-self: start; }
+  .nav-links-center {
+    display: flex;
+    gap: 32px;
+    justify-self: center;
+    align-items: center;
+  }
+  .nav-actions-right {
+    display: flex;
+    gap: 16px;
+    justify-self: end;
+    align-items: center;
+  }
+  .nav-links-center a {
+    color: var(--text-secondary);
+    font-size: 0.94rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+  .nav-links-center a:hover,
+  .nav-links-center a.active {
+    color: var(--text-primary);
+  }
+  .nav-toggle { display: none; }
+}
+
+/* Mobile Split Nav Adjustments */
+@media (max-width: 768px) {
+  .navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .nav-links-center {
+    display: none; /* hidden by default */
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100dvh;
+    background: rgba(11, 11, 14, 0.97);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 28px;
+    z-index: 999;
+    text-align: center;
+    overflow-y: auto;
+    padding-top: max(80px, env(safe-area-inset-top));
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+    padding-left: max(24px, env(safe-area-inset-left));
+    padding-right: max(24px, env(safe-area-inset-right));
+  }
+  
+  .nav-links-center.open {
+    display: flex;
+  }
+  
+  .nav-links-center a {
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    padding: 8px 0;
+  }
+  
+  .nav-actions-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 1001;
+  }
 }

@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ═══════════════════════════════════════════════════════════
   const navbar    = document.getElementById('navbar');
   const navToggle = document.getElementById('nav-toggle');
-  const navLinks  = document.getElementById('nav-links');
+  const navLinks  = document.getElementById('nav-links-center');
 
   if (navbar) {
     lenis.on('scroll', ({ scroll }) => navbar.classList.toggle('scrolled', scroll > 50));

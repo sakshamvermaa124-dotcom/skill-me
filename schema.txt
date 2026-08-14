@@ -1,0 +1,155 @@
+CREATE TABLE students (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    phone TEXT,
+    github_username TEXT,
+    linkedin_url TEXT,
+    college TEXT,
+    year_of_study TEXT,
+    domain TEXT,                          -- e.g. 'web-dev', 'python', 'ml'
+    motivation TEXT,
+    referral_source TEXT,
+    referred_by TEXT,
+    status TEXT NOT NULL DEFAULT 'applied',  -- applied | shortlisted | enrolled | completed | dropped
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+CREATE TABLE sqlite_sequence(name,seq)
+CREATE TABLE batches (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    domain TEXT NOT NULL,              -- web-dev, python, react, etc.
+    batch_number INTEGER NOT NULL,
+    repo_name TEXT,                    -- GitHub repo name (e.g., web-dev-batch-1)
+    status TEXT NOT NULL DEFAULT 'provisioning',  -- provisioning | active | completed | archived
+    max_students INTEGER DEFAULT 30,
+    start_date TEXT,
+    end_date TEXT,
+    auto_assign INTEGER DEFAULT 0,     -- 1 = auto-assign tasks each week
+    weeks_assigned TEXT DEFAULT '[]',  -- JSON array of week numbers already assigned
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(domain, batch_number)
+)
+CREATE TABLE enrollments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER NOT NULL,
+    batch_id INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'enrolled',  -- enrolled | active | completed | dropped
+    github_invite_status TEXT DEFAULT 'pending',  -- pending | accepted | failed
+    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES students(id),
+    FOREIGN KEY (batch_id) REFERENCES batches(id),
+    UNIQUE(student_id, batch_id)
+)
+CREATE TABLE issues (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    batch_id INTEGER NOT NULL,
+    github_issue_number INTEGER,        -- The issue number on GitHub
+    title TEXT NOT NULL,
+    description TEXT,
+    week_number INTEGER NOT NULL,       -- 1, 2, 3, or 4
+    difficulty TEXT DEFAULT 'medium',   -- easy | medium | hard
+    assigned_to INTEGER,                -- student_id
+    status TEXT NOT NULL DEFAULT 'open',  -- open | assigned | in_progress | completed
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (batch_id) REFERENCES batches(id),
+    FOREIGN KEY (assigned_to) REFERENCES students(id)
+)
+CREATE TABLE submissions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    issue_id INTEGER NOT NULL,
+    student_id INTEGER NOT NULL,
+    batch_id INTEGER NOT NULL,
+    pr_url TEXT,
+    pr_number INTEGER,
+    status TEXT NOT NULL DEFAULT 'open',  -- open | tests_passed | tests_failed | merged | closed
+    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    reviewed_at TIMESTAMP,
+    merged_at TIMESTAMP,
+    FOREIGN KEY (issue_id) REFERENCES issues(id),
+    FOREIGN KEY (student_id) REFERENCES students(id),
+    FOREIGN KEY (batch_id) REFERENCES batches(id)
+)
+CREATE TABLE progress (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER NOT NULL,
+    batch_id INTEGER NOT NULL,
+    week INTEGER NOT NULL,              -- 1, 2, 3, or 4
+    issues_assigned INTEGER DEFAULT 0,
+    issues_completed INTEGER DEFAULT 0,
+    prs_submitted INTEGER DEFAULT 0,
+    prs_merged INTEGER DEFAULT 0,
+    score INTEGER DEFAULT 0,            -- Calculated score for this week
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES students(id),
+    FOREIGN KEY (batch_id) REFERENCES batches(id),
+    UNIQUE(student_id, batch_id, week)
+)
+CREATE TABLE certificates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER NOT NULL,
+    batch_id INTEGER NOT NULL,
+    cert_id TEXT NOT NULL UNIQUE,           -- e.g. SM-A1B2-C3D4-E5F6
+    issued_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES students(id),
+    FOREIGN KEY (batch_id) REFERENCES batches(id),
+    UNIQUE(student_id, batch_id)
+)
+CREATE TABLE payments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER NOT NULL,
+    batch_id INTEGER NOT NULL,
+    razorpay_order_id TEXT UNIQUE,         -- rzp order id from Razorpay
+    razorpay_payment_id TEXT,              -- filled on successful payment
+    amount INTEGER NOT NULL,               -- amount in paise (24900 = ₹249)
+    currency TEXT DEFAULT 'INR',
+    status TEXT DEFAULT 'pending',         -- pending | paid | failed
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES students(id),
+    FOREIGN KEY (batch_id) REFERENCES batches(id)
+)
+CREATE TABLE email_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    recipient_email TEXT NOT NULL,
+    recipient_name  TEXT,
+    email_type      TEXT NOT NULL,  -- application_confirmation | shortlisted | offer_letter | weekly_tasks | certificate_ready | test
+    subject         TEXT NOT NULL,
+    student_id      INTEGER,        -- NULL for non-student emails (e.g. test)
+    batch_id        INTEGER,        -- NULL when not batch-related
+    status          TEXT NOT NULL DEFAULT 'sent',  -- sent | failed
+    error_message   TEXT,           -- populated on failure
+    sent_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP, body TEXT,
+    FOREIGN KEY (student_id) REFERENCES students(id),
+    FOREIGN KEY (batch_id)   REFERENCES batches(id)
+)
+CREATE TABLE otp_tokens (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email       TEXT NOT NULL,
+    otp_hash    TEXT NOT NULL,          -- bcrypt / sha256 hash of the 6-digit OTP
+    expires_at  TIMESTAMP NOT NULL,
+    used        INTEGER DEFAULT 0,      -- 0 = unused, 1 = consumed
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+CREATE TABLE referral_codes (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id  INTEGER NOT NULL UNIQUE,
+    code        TEXT NOT NULL UNIQUE,   -- e.g. SKM-A1B2C3
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES students(id)
+)
+CREATE TABLE referral_conversions (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    referrer_student_id INTEGER NOT NULL,
+    referred_student_id INTEGER,        -- NULL until they apply
+    referred_email      TEXT NOT NULL,
+    status              TEXT DEFAULT 'clicked',  -- clicked | applied | enrolled
+    discount_applied    INTEGER DEFAULT 0,  -- paise discount given to referrer
+    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (referrer_student_id) REFERENCES students(id),
+    FOREIGN KEY (referred_student_id) REFERENCES students(id)
+)
