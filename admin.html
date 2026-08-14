@@ -756,6 +756,15 @@
     }
     .toggle-switch input:checked + .toggle-slider { background: rgba(52,211,153,0.2); border-color: rgba(52,211,153,0.4); }
     .toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px); background: #34d399; }
+
+    @media (max-width: 768px) {
+      #login-overlay { flex-direction: column; overflow-y: auto; overflow-x: hidden; }
+      .split-left { width: 100%; min-height: auto; padding: 32px 24px; order: 1; border-right: none; }
+      .center-login-card { position: relative; top: auto; left: auto; transform: none; width: 90%; margin: 0 auto 32px auto; order: 2; z-index: 25; }
+      .split-right { width: 100%; min-height: 350px; order: 3; }
+      .laser-seam { display: none; }
+      .display-headline { font-size: 2.2rem; }
+    }
   </style>
   <script src="config.js"></script>
   <style>.brand-logo-img, .logo img, .nav-logo img, .cert-company-logo, .lh-logo { width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important; flex-shrink: 0 !important; }</style>
@@ -861,31 +870,7 @@
       <div class="sidebar-brand-text" style="color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; background: none !important;">SkillMe</div>
       <div class="sidebar-brand-badge">ADMIN</div>
     </a>
-      <nav class="navbar scrolled" id="navbar">
-    <div class="container">
-    <div class="nav-left">
-      <a href="index.html" class="nav-logo" id="nav-logo">
-        <img src="assets/logo.webp" alt="SkillMe Logo" class="brand-logo-img" width="36" height="36" style="width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important;">
-        <span>SkillMe</span>
-      </a>
-    </div>
-    <div class="nav-links-center" id="nav-links-center">
-      <a href="index.html#how-it-works">How It Works</a>
-      <a href="index.html#domains">Domains</a>
-      <a href="index.html#benefits">Benefits</a>
-      <a href="index.html#faq">FAQ</a>
-    </div>
-    <div class="nav-actions-right">
-      <a href="dashboard.html" class="nav-link-dashboard" id="nav-dashboard-btn">Student Dashboard &rarr;</a>
-      <a href="quiz.html" class="nav-cta" id="nav-apply-btn">Apply Now &rarr;</a>
-      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-    </div>
-  </div>
-  </nav>
+
     
     <!-- COLLAPSIBLE DEVELOPER PREVIEWS DROP BOX -->
     <div style="padding: 0 20px 20px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
