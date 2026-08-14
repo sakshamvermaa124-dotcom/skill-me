@@ -261,21 +261,45 @@ async def probe_email_smtp() -> dict:
         import smtplib
         import ssl
         ctx = ssl.create_default_context()
-        with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=10) as server:
-            server.ehlo()
-            server.starttls(context=ctx)
-            server.login(settings.smtp_user, settings.smtp_password)
+        
+        ports_to_try = [settings.smtp_port]
+        for p in [587, 2525, 465]:
+            if p not in ports_to_try:
+                ports_to_try.append(p)
+                
+        last_err = None
+        success_port = None
+        
+        for port in ports_to_try:
+            try:
+                if port == 465:
+                    with smtplib.SMTP_SSL(settings.smtp_host, port, context=ctx, timeout=10) as server:
+                        server.login(settings.smtp_user, settings.smtp_password)
+                else:
+                    with smtplib.SMTP(settings.smtp_host, port, timeout=10) as server:
+                        server.ehlo()
+                        server.starttls(context=ctx)
+                        server.login(settings.smtp_user, settings.smtp_password)
+                success_port = port
+                break
+            except Exception as e:
+                last_err = e
+                continue
+                
+        if not success_port:
+            raise last_err or Exception("All SMTP ports failed")
+            
         elapsed = int((time.time() - start) * 1000)
-        await _record_check(check_name, "probe", "pass", elapsed)
-        return {"status": "pass", "time_ms": elapsed}
+        await _record_check(check_name, "probe", "pass", elapsed, {"port_used": success_port})
+        return {"status": "pass", "time_ms": elapsed, "port": success_port}
     except Exception as e:
         elapsed = int((time.time() - start) * 1000)
         is_reg = await _check_regression(check_name, "fail")
         await _record_check(check_name, "probe", "fail", elapsed, {"error": str(e)})
         await _create_alert(
             "synthetic", "warning", "api_health",
-            "SMTP connection failed",
-            f"Could not connect to {settings.smtp_host}:{settings.smtp_port}: {e}",
+            "SMTP connection failed on all ports",
+            f"Could not connect to {settings.smtp_host} on ports {ports_to_try}: {e}",
             component="backend/services/email_service.py",
             is_regression=int(is_reg),
         )
