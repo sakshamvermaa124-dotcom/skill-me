@@ -132,7 +132,7 @@ async def probe_health_endpoint() -> dict:
     start = time.time()
     try:
         async with httpx.AsyncClient(timeout=15) as client:
-            url = settings.backend_url or "http://localhost:8000"
+            url = (settings.backend_url or "http://localhost:8000").strip()
             resp = await client.get(f"{url}/health")
             elapsed = int((time.time() - start) * 1000)
 
