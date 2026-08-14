@@ -71,7 +71,9 @@ async def download_certificate(student_id: int, batch_id: int):
         )
     # ─────────────────────────────────────────────────────────────────────────
 
-    # Record certificate issuance (idempotent)
+    # Record certificate issuance (idempotent).
+    # suppress_email=False (default): if this is the student's first download
+    # and the payment flow somehow didn't send the email, this will catch it.
     try:
         await certificate_service.issue_certificate(student["id"], batch["id"])
     except Exception:
@@ -101,7 +103,7 @@ async def issue_cert(
 ):
     """Issue a new certificate and send certificate-ready email to the student."""
     try:
-        cert_data = await certificate_service.issue_certificate(student_id, batch_id)
+        cert_data = await certificate_service.issue_certificate(student_id, batch_id, suppress_email=True)
 
         # Fetch student + batch for email
         student = await db.fetch_one(

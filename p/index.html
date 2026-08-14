@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script>
+    // Extract username from referrer or redirect to portfolio.html with github param
+    // This file is served when /p/ is accessed without a username
+    // The real routing for /p/:username is handled by vercel.json routes
+    const path = window.location.pathname; // /p/username
+    const parts = path.split('/').filter(Boolean); // ['p', 'username']
+    const username = parts[1];
+    if (username) {
+      window.location.replace('/portfolio.html?gh=' + encodeURIComponent(username));
+    } else {
+      window.location.replace('/');
+    }
+  </script>
+</head>
+<body></body>
+</html>

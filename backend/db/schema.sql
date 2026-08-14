@@ -196,3 +196,66 @@ CREATE TABLE IF NOT EXISTS referral_conversions (
     FOREIGN KEY (referred_student_id) REFERENCES students(id)
 );
 CREATE INDEX IF NOT EXISTS idx_referral_conv_referrer ON referral_conversions(referrer_student_id);
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- Monitoring & Automated QA System Tables
+-- ═══════════════════════════════════════════════════════════════════════════
+
+-- Monitoring alerts (synthetic test failures + real student errors + system issues)
+CREATE TABLE IF NOT EXISTS monitor_alerts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    alert_type TEXT NOT NULL,           -- synthetic | real_student | system
+    severity TEXT NOT NULL,             -- critical | warning | info
+    category TEXT NOT NULL,             -- api_health | db_integrity | workflow_stuck | frontend_error | regression | e2e_test
+    workflow TEXT,                      -- application | quiz | enrollment | github | certificate | lor | portfolio | verify | payment | auth | scheduler
+    failed_step TEXT,                   -- exact step that failed
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    expected TEXT,
+    actual TEXT,
+    student_id INTEGER,                 -- NULL for synthetic tests
+    student_email TEXT,
+    api_response TEXT,
+    error_details TEXT,                 -- stack trace, console error, etc.
+    component TEXT,                     -- file/service to investigate
+    is_regression INTEGER DEFAULT 0,    -- 1 = was working before
+    is_resolved INTEGER DEFAULT 0,
+    resolved_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_monitor_alerts_severity ON monitor_alerts(severity);
+CREATE INDEX IF NOT EXISTS idx_monitor_alerts_category ON monitor_alerts(category);
+CREATE INDEX IF NOT EXISTS idx_monitor_alerts_created ON monitor_alerts(created_at);
+CREATE INDEX IF NOT EXISTS idx_monitor_alerts_resolved ON monitor_alerts(is_resolved);
+
+-- Monitoring check results (health probe + synthetic test history)
+CREATE TABLE IF NOT EXISTS monitor_checks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    check_name TEXT NOT NULL,           -- e.g. 'health_endpoint', 'db_connectivity', 'github_api'
+    check_type TEXT NOT NULL,           -- probe | synthetic_e2e | db_integrity | stuck_detection
+    status TEXT NOT NULL,               -- pass | fail | degraded
+    response_time_ms INTEGER,
+    details TEXT,                       -- JSON blob with check-specific data
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_monitor_checks_name ON monitor_checks(check_name);
+CREATE INDEX IF NOT EXISTS idx_monitor_checks_created ON monitor_checks(created_at);
+
+-- Frontend error reports from real student browser sessions
+CREATE TABLE IF NOT EXISTS frontend_errors (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    page TEXT NOT NULL,                 -- quiz.html, dashboard.html, verify.html, etc.
+    error_type TEXT NOT NULL,           -- js_error | network_error | ui_interaction
+    message TEXT NOT NULL,
+    stack_trace TEXT,
+    url TEXT,
+    user_agent TEXT,
+    student_email TEXT,
+    session_id TEXT,
+    request_url TEXT,                   -- for network errors: the URL that failed
+    request_status INTEGER,             -- for network errors: HTTP status code
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_frontend_errors_page ON frontend_errors(page);
+CREATE INDEX IF NOT EXISTS idx_frontend_errors_created ON frontend_errors(created_at);
+CREATE INDEX IF NOT EXISTS idx_frontend_errors_email ON frontend_errors(student_email);

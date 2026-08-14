@@ -124,6 +124,59 @@ class Database:
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )""",
                 "CREATE INDEX IF NOT EXISTS idx_referral_conv_referrer ON referral_conversions(referrer_student_id)",
+                # ── Monitoring & QA tables (v4) ──
+                """CREATE TABLE IF NOT EXISTS monitor_alerts (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    alert_type TEXT NOT NULL,
+                    severity TEXT NOT NULL,
+                    category TEXT NOT NULL,
+                    workflow TEXT,
+                    failed_step TEXT,
+                    title TEXT NOT NULL,
+                    description TEXT NOT NULL,
+                    expected TEXT,
+                    actual TEXT,
+                    student_id INTEGER,
+                    student_email TEXT,
+                    api_response TEXT,
+                    error_details TEXT,
+                    component TEXT,
+                    is_regression INTEGER DEFAULT 0,
+                    is_resolved INTEGER DEFAULT 0,
+                    resolved_at TIMESTAMP,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )""",
+                "CREATE INDEX IF NOT EXISTS idx_monitor_alerts_severity ON monitor_alerts(severity)",
+                "CREATE INDEX IF NOT EXISTS idx_monitor_alerts_created ON monitor_alerts(created_at)",
+                "CREATE INDEX IF NOT EXISTS idx_monitor_alerts_resolved ON monitor_alerts(is_resolved)",
+                """CREATE TABLE IF NOT EXISTS monitor_checks (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    check_name TEXT NOT NULL,
+                    check_type TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    response_time_ms INTEGER,
+                    details TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )""",
+                "CREATE INDEX IF NOT EXISTS idx_monitor_checks_name ON monitor_checks(check_name)",
+                "CREATE INDEX IF NOT EXISTS idx_monitor_checks_created ON monitor_checks(created_at)",
+                """CREATE TABLE IF NOT EXISTS frontend_errors (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    page TEXT NOT NULL,
+                    error_type TEXT NOT NULL,
+                    message TEXT NOT NULL,
+                    stack_trace TEXT,
+                    url TEXT,
+                    user_agent TEXT,
+                    student_email TEXT,
+                    session_id TEXT,
+                    request_url TEXT,
+                    request_status INTEGER,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )""",
+                "CREATE INDEX IF NOT EXISTS idx_frontend_errors_page ON frontend_errors(page)",
+                "CREATE INDEX IF NOT EXISTS idx_frontend_errors_created ON frontend_errors(created_at)",
+                "CREATE INDEX IF NOT EXISTS idx_frontend_errors_email ON frontend_errors(student_email)",
             ]
             for migration in migrations:
                 try:

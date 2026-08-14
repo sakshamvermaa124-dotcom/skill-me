@@ -9,6 +9,14 @@ Thumbs.db
 .idea/
 *.swp
 
+# Python virtual environment
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
 # Node (http-server local dev)
 node_modules/
 
@@ -16,3 +24,26 @@ node_modules/
 .env
 tools/.linkedin_token.json
 tools/linkedin_post_history.json
+
+# Local databases (never commit — production is Turso)
+local.db
+stashed_local.db
+*.db-shm
+*.db-wal
+
+# Temp / scratch files
+temp.js
+temp2.js
+temp3.js
+temp_render.txt
+nesting.txt
+full_code.txt
+main_diff.txt
+my_diff.txt
+schema.txt
+
+# Server log files
+*.out.log
+*.err.log
+backend-server.*.log
+frontend-server.*.log

@@ -1129,6 +1129,10 @@ async function loadBatches(silent = false) {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
                 Sync PRs
               </button>
+              <button class="btn btn-ghost btn-sm" onclick="fixAssignees(${b.id}, this)" title="Re-assign GitHub issues to students who have since accepted their collaborator invite">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+                Fix Assignees
+              </button>
               <button class="btn btn-ghost btn-sm" onclick="openAssignModal(${b.id}, '${b.domain} Batch #${b.batch_number}')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
                 Assign Tasks
@@ -1229,6 +1233,31 @@ async function syncBatchPRs(batchId, btnEl) {
   }
 }
 
+async function fixAssignees(batchId, btnEl) {
+  const btn = btnEl || event.currentTarget;
+  const origContent = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg> Fixing...`;
+  try {
+    const result = await api(`/api/admin/batches/${batchId}/fix-assignees`, { method: 'POST' });
+    const fixed = result.fixed || 0;
+    const errors = result.errors || 0;
+    const skipped = result.skipped || 0;
+    if (errors > 0) {
+      toast(`Fixed ${fixed} issue${fixed !== 1 ? 's' : ''}, ${errors} failed (students may not have accepted invite yet), ${skipped} skipped`, 'error');
+    } else if (fixed > 0) {
+      toast(`✅ Fixed ${fixed} issue${fixed !== 1 ? 's' : ''} — students are now assigned on GitHub!`);
+    } else {
+      toast(`All issues already have assignees (${skipped} skipped — no GitHub username)`);
+    }
+  } catch(e) {
+    toast(`Fix assignees failed: ${e.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = origContent;
+  }
+}
+
 async function toggleAutoAssign(batchId, enabled) {
   try {
     await api(`/api/admin/batches/${batchId}/auto-assign?enabled=${enabled}`, { method: 'PATCH' });
@@ -1236,6 +1265,7 @@ async function toggleAutoAssign(batchId, enabled) {
     loadBatches(true);
   } catch(e) { toast(e.message, 'error'); }
 }
+
 
 async function deleteBatch(batchId, batchName) {
   if (!confirm(`Are you sure you want to permanently delete "${batchName}"?\n\nThis will instantly wipe all progress, submissions, email logs, and enrollments associated with this batch. This action cannot be undone.`)) {

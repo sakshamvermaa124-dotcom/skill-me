@@ -238,12 +238,11 @@ class BatchService:
             f"(id={student_id}) in batch {batch['domain']} #{batch['batch_number']}"
         )
 
-        # Automatically assign tasks if the batch has assigned weeks, or default to Week 1 if active
+        # Automatically assign tasks only for weeks the admin has explicitly assigned previously.
+        # Do NOT default to Week 1 — issue assignment must always be triggered manually by the admin.
         import json
         try:
             weeks_to_assign = json.loads(batch.get("weeks_assigned") or "[]")
-            if not weeks_to_assign and batch.get("status") == "active":
-                weeks_to_assign = [1]
             for w in weeks_to_assign:
                 logger.info(f"Auto-assigning Week {w} tasks for newly enrolled student {student_id}")
                 created = await self.assign_week_from_task_repo(batch_id=batch_id, week_number=w)

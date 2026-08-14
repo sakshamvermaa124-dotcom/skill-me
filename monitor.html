@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monitoring Dashboard — SkillMe</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="assets/logo.webp" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="config.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a0f; --surface: #12121a; --surface-2: #1a1a26;
+      --border: #2a2a3a; --border-light: #3a3a4f;
+      --text: #e8e6f0; --text-muted: #8b8a9e; --text-dim: #5a5970;
+      --green: #22c55e; --green-bg: rgba(34,197,94,0.08); --green-border: rgba(34,197,94,0.2);
+      --yellow: #f59e0b; --yellow-bg: rgba(245,158,11,0.08); --yellow-border: rgba(245,158,11,0.2);
+      --red: #ef4444; --red-bg: rgba(239,68,68,0.08); --red-border: rgba(239,68,68,0.2);
+      --blue: #3b82f6; --blue-bg: rgba(59,130,246,0.08); --blue-border: rgba(59,130,246,0.2);
+      --purple: #a855f7; --purple-bg: rgba(168,85,247,0.08);
+      --gold: #c9a84c;
+      --radius: 10px; --radius-lg: 14px;
+      --mono: 'JetBrains Mono', monospace;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; }
+
+    /* ── Header ── */
+    .header { padding: 20px 32px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 100; background: rgba(10,10,15,0.85); }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .header-logo { width: 32px; height: 32px; border-radius: 50%; }
+    .header-title { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; }
+    .header-title span { color: var(--gold); }
+    .header-badge { font-size: 0.7rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .header-right { display: flex; gap: 10px; align-items: center; }
+    .header-time { font-family: var(--mono); font-size: 0.75rem; color: var(--text-muted); }
+    .btn-action { background: var(--surface-2); border: 1px solid var(--border); color: var(--text); padding: 7px 16px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; }
+    .btn-action:hover { border-color: var(--gold); color: var(--gold); }
+    .btn-danger { border-color: var(--red); color: var(--red); }
+    .btn-danger:hover { background: var(--red-bg); }
+
+    /* ── Auth overlay ── */
+    .auth-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+    .auth-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 40px; max-width: 400px; width: 90%; text-align: center; }
+    .auth-box h2 { font-size: 1.2rem; margin-bottom: 8px; }
+    .auth-box p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; }
+    .auth-input { width: 100%; padding: 10px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: var(--mono); font-size: 0.85rem; margin-bottom: 12px; }
+    .auth-input:focus { outline: none; border-color: var(--gold); }
+    .auth-submit { width: 100%; padding: 10px; background: var(--gold); color: #000; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.9rem; }
+    .auth-error { color: var(--red); font-size: 0.8rem; margin-top: 8px; display: none; }
+
+    /* ── Layout ── */
+    .container { max-width: 1400px; margin: 0 auto; padding: 24px 24px 60px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+    @media (max-width: 1100px) { .grid-6 { grid-template-columns: repeat(3, 1fr); } .grid-3 { grid-template-columns: 1fr; } }
+    @media (max-width: 700px) { .grid-6 { grid-template-columns: repeat(2, 1fr); } .grid-2 { grid-template-columns: 1fr; } .container { padding: 16px 12px; } }
+
+    /* ── Section ── */
+    .section { margin-bottom: 24px; }
+    .section-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .section-title .count { background: var(--surface-2); padding: 2px 8px; border-radius: 10px; font-family: var(--mono); font-size: 0.7rem; }
+
+    /* ── Health Cards ── */
+    .health-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; display: flex; flex-direction: column; gap: 8px; transition: border-color 0.3s; }
+    .health-card.pass { border-color: var(--green-border); }
+    .health-card.fail { border-color: var(--red-border); }
+    .health-card.degraded { border-color: var(--yellow-border); }
+    .health-header { display: flex; justify-content: space-between; align-items: center; }
+    .health-name { font-size: 0.8rem; font-weight: 600; }
+    .health-status { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .health-status.pass { color: var(--green); background: var(--green-bg); }
+    .health-status.fail { color: var(--red); background: var(--red-bg); }
+    .health-status.degraded { color: var(--yellow); background: var(--yellow-bg); }
+    .health-meta { font-size: 0.7rem; color: var(--text-dim); font-family: var(--mono); }
+
+    /* ── Regression Banner ── */
+    .regression-banner { background: linear-gradient(135deg, var(--red-bg) 0%, rgba(239,68,68,0.03) 100%); border: 1px solid var(--red-border); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 20px; display: none; }
+    .regression-banner.show { display: block; }
+    .regression-banner h3 { color: var(--red); font-size: 0.9rem; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+    .regression-banner p { font-size: 0.8rem; color: var(--text-muted); }
+
+    /* ── Alert List ── */
+    .alert-list { display: flex; flex-direction: column; gap: 8px; max-height: 500px; overflow-y: auto; }
+    .alert-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start; transition: border-color 0.2s; }
+    .alert-item:hover { border-color: var(--border-light); }
+    .alert-item.critical { border-left: 3px solid var(--red); }
+    .alert-item.warning { border-left: 3px solid var(--yellow); }
+    .alert-item.info { border-left: 3px solid var(--blue); }
+    .alert-severity { font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 6px; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; }
+    .alert-severity.critical { color: var(--red); background: var(--red-bg); }
+    .alert-severity.warning { color: var(--yellow); background: var(--yellow-bg); }
+    .alert-severity.info { color: var(--blue); background: var(--blue-bg); }
+    .alert-content { flex: 1; min-width: 0; }
+    .alert-title { font-size: 0.82rem; font-weight: 600; margin-bottom: 3px; }
+    .alert-desc { font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; word-break: break-word; }
+    .alert-meta { font-size: 0.65rem; color: var(--text-dim); margin-top: 4px; font-family: var(--mono); display: flex; gap: 12px; flex-wrap: wrap; }
+    .alert-resolve-btn { background: none; border: 1px solid var(--border); color: var(--text-muted); padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; cursor: pointer; flex-shrink: 0; transition: all 0.2s; }
+    .alert-resolve-btn:hover { border-color: var(--green); color: var(--green); }
+
+    /* ── Student Lookup ── */
+    .search-bar { display: flex; gap: 10px; margin-bottom: 16px; }
+    .search-input { flex: 1; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 0.85rem; font-family: 'Inter', sans-serif; }
+    .search-input:focus { outline: none; border-color: var(--gold); }
+    .search-btn { padding: 10px 20px; background: var(--gold); color: #000; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.85rem; }
+    .journey-result { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: none; }
+    .journey-result.show { display: block; }
+    .journey-stage { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+    .journey-section { margin-top: 16px; }
+    .journey-section-title { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+    .journey-table { width: 100%; font-size: 0.75rem; border-collapse: collapse; }
+    .journey-table th { text-align: left; padding: 6px 8px; color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--border); }
+    .journey-table td { padding: 6px 8px; border-bottom: 1px solid rgba(42,42,58,0.4); color: var(--text); }
+
+    /* ── Stuck Students ── */
+    .stuck-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+    .stuck-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .stuck-title { font-size: 0.8rem; font-weight: 700; }
+    .stuck-count { font-family: var(--mono); font-size: 0.85rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
+    .stuck-list { font-size: 0.75rem; color: var(--text-muted); }
+    .stuck-item { padding: 6px 0; border-bottom: 1px solid rgba(42,42,58,0.3); display: flex; justify-content: space-between; }
+    .stuck-item:last-child { border: none; }
+
+    /* ── Aggregate ── */
+    .agg-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; text-align: center; }
+    .agg-value { font-size: 2rem; font-weight: 800; font-family: var(--mono); margin: 8px 0 4px; }
+    .agg-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .agg-value.green { color: var(--green); }
+    .agg-value.yellow { color: var(--yellow); }
+    .agg-value.red { color: var(--red); }
+
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: 2px; background: var(--surface); border-radius: 8px; padding: 3px; margin-bottom: 16px; border: 1px solid var(--border); }
+    .tab { padding: 8px 16px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; color: var(--text-muted); transition: all 0.2s; border: none; background: none; }
+    .tab.active { background: var(--surface-2); color: var(--text); }
+    .tab:hover:not(.active) { color: var(--text); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Loading ── */
+    .loading { text-align: center; padding: 40px; color: var(--text-muted); }
+    .spinner { display: inline-block; width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty { text-align: center; padding: 30px; color: var(--text-dim); font-size: 0.85rem; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- Auth Overlay -->
+<div class="auth-overlay" id="auth-overlay">
+  <div class="auth-box">
+    <h2>🔒 Monitoring Dashboard</h2>
+    <p>Enter your admin API key to access the monitoring system.</p>
+    <input type="password" class="auth-input" id="auth-key" placeholder="X-Admin-Key" autocomplete="off" />
+    <button class="auth-submit" id="auth-submit">Access Dashboard</button>
+    <div class="auth-error" id="auth-error">Invalid API key. Access denied.</div>
+  </div>
+</div>
+
+<!-- Header -->
+<header class="header" id="main-header" style="display:none;">
+  <div class="header-left">
+    <img src="assets/logo.webp" class="header-logo" alt="SkillMe" onerror="this.style.display='none'">
+    <div class="header-title"><span>SkillMe</span> Monitor</div>
+    <div class="header-badge" id="overall-badge">—</div>
+  </div>
+  <div class="header-right">
+    <span class="header-time" id="last-updated">—</span>
+    <button class="btn-action" id="btn-refresh" onclick="refreshAll()">↻ Refresh</button>
+    <button class="btn-action" id="btn-trigger" onclick="triggerAll()">▶ Run All Checks</button>
+    <button class="btn-action" id="btn-audit" onclick="runAudit()">📋 Run Audit</button>
+  </div>
+</header>
+
+<!-- Main Content -->
+<div class="container" id="main-content" style="display:none;">
+
+  <!-- Regression Banner -->
+  <div class="regression-banner" id="regression-banner">
+    <h3>⚠ Regression Detected</h3>
+    <p id="regression-text">A check that was previously passing is now failing.</p>
+  </div>
+
+  <!-- Health Cards -->
+  <div class="section">
+    <div class="section-title">System Health</div>
+    <div class="grid-6" id="health-grid">
+      <div class="loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- Aggregate Stats -->
+  <div class="section">
+    <div class="section-title">Overview <span class="count">7 days</span></div>
+    <div class="grid-6" id="agg-grid">
+      <div class="loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs" id="main-tabs">
+    <button class="tab active" data-tab="alerts">Active Alerts</button>
+    <button class="tab" data-tab="stuck">Stuck Students</button>
+    <button class="tab" data-tab="search">Student Lookup</button>
+    <button class="tab" data-tab="checks">Check History</button>
+    <button class="tab" data-tab="frontend">Frontend Errors</button>
+  </div>
+
+  <!-- Alerts Tab -->
+  <div class="tab-panel active" id="tab-alerts">
+    <div class="alert-list" id="alert-list">
+      <div class="loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- Stuck Students Tab -->
+  <div class="tab-panel" id="tab-stuck">
+    <div class="grid-2" id="stuck-grid">
+      <div class="loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- Student Lookup Tab -->
+  <div class="tab-panel" id="tab-search">
+    <div class="search-bar">
+      <input type="email" class="search-input" id="search-email" placeholder="Enter student email..." />
+      <button class="search-btn" onclick="searchStudent()">Search</button>
+    </div>
+    <div class="journey-result" id="journey-result"></div>
+  </div>
+
+  <!-- Check History Tab -->
+  <div class="tab-panel" id="tab-checks">
+    <div class="alert-list" id="checks-list">
+      <div class="loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- Frontend Errors Tab -->
+  <div class="tab-panel" id="tab-frontend">
+    <div class="alert-list" id="frontend-list">
+      <div class="loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const API = window.SKILLME_API || 'https://skill-me.onrender.com';
+  let ADMIN_KEY = '';
+  let autoRefreshTimer = null;
+
+  // ── Auth ──
+  document.getElementById('auth-submit').addEventListener('click', authenticate);
+  document.getElementById('auth-key').addEventListener('keydown', e => { if (e.key === 'Enter') authenticate(); });
+
+  async function authenticate() {
+    ADMIN_KEY = document.getElementById('auth-key').value.trim();
+    if (!ADMIN_KEY) return;
+
+    try {
+      const resp = await fetch(`${API}/api/monitor/status`, { headers: { 'X-Admin-Key': ADMIN_KEY } });
+      if (resp.status === 403) {
+        document.getElementById('auth-error').style.display = 'block';
+        return;
+      }
+      document.getElementById('auth-overlay').style.display = 'none';
+      document.getElementById('main-header').style.display = 'flex';
+      document.getElementById('main-content').style.display = 'block';
+      refreshAll();
+      autoRefreshTimer = setInterval(refreshAll, 30000);
+    } catch (e) {
+      document.getElementById('auth-error').textContent = 'Could not reach API: ' + e.message;
+      document.getElementById('auth-error').style.display = 'block';
+    }
+  }
+
+  function headers() { return { 'X-Admin-Key': ADMIN_KEY, 'Content-Type': 'application/json' }; }
+
+  // ── Tabs ──
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ── Refresh ──
+  async function refreshAll() {
+    loadStatus();
+    loadAlerts();
+    loadStuckStudents();
+    loadChecks();
+    loadFrontendErrors();
+    loadAggregate();
+    document.getElementById('last-updated').textContent = new Date().toLocaleTimeString('en-IN');
+  }
+
+  // ── Status ──
+  async function loadStatus() {
+    try {
+      const resp = await fetch(`${API}/api/monitor/status`, { headers: headers() });
+      const data = await resp.json();
+
+      const badge = document.getElementById('overall-badge');
+      badge.textContent = data.overall.toUpperCase();
+      badge.className = 'header-badge';
+      badge.style.color = data.overall === 'healthy' ? 'var(--green)' : data.overall === 'degraded' ? 'var(--yellow)' : 'var(--red)';
+      badge.style.background = data.overall === 'healthy' ? 'var(--green-bg)' : data.overall === 'degraded' ? 'var(--yellow-bg)' : 'var(--red-bg)';
+
+      const grid = document.getElementById('health-grid');
+      if (!data.latest_checks || data.latest_checks.length === 0) {
+        grid.innerHTML = '<div class="empty">No checks have run yet. Click "Run All Checks" to start.</div>';
+        return;
+      }
+      grid.innerHTML = data.latest_checks.map(c => {
+        const details = c.details ? (() => { try { return JSON.parse(c.details); } catch { return {}; } })() : {};
+        const timeAgo = c.created_at ? timeSince(c.created_at) : '—';
+        return `<div class="health-card ${c.status}">
+          <div class="health-header">
+            <span class="health-name">${formatCheckName(c.check_name)}</span>
+            <span class="health-status ${c.status}">${c.status}</span>
+          </div>
+          <div class="health-meta">${c.response_time_ms ? c.response_time_ms + 'ms' : '—'} · ${timeAgo}</div>
+        </div>`;
+      }).join('');
+
+      // Regression banner
+      if (data.active_alerts && data.active_alerts.critical > 0) {
+        const regResp = await fetch(`${API}/api/monitor/regression`, { headers: headers() });
+        const regData = await regResp.json();
+        if (regData.count > 0) {
+          document.getElementById('regression-banner').classList.add('show');
+          document.getElementById('regression-text').textContent =
+            `${regData.count} check(s) regressed: ${regData.regressions.slice(0, 3).map(r => r.title).join('; ')}`;
+        } else {
+          document.getElementById('regression-banner').classList.remove('show');
+        }
+      } else {
+        document.getElementById('regression-banner').classList.remove('show');
+      }
+    } catch (e) {
+      document.getElementById('health-grid').innerHTML = `<div class="empty" style="color:var(--red)">Error loading status: ${e.message}</div>`;
+    }
+  }
+
+  // ── Alerts ──
+  async function loadAlerts() {
+    try {
+      const resp = await fetch(`${API}/api/monitor/alerts/active`, { headers: headers() });
+      const data = await resp.json();
+      const list = document.getElementById('alert-list');
+
+      if (!data.alerts || data.alerts.length === 0) {
+        list.innerHTML = '<div class="empty">✓ No active alerts — all systems operational.</div>';
+        return;
+      }
+      list.innerHTML = data.alerts.map(a => `
+        <div class="alert-item ${a.severity}">
+          <span class="alert-severity ${a.severity}">${a.severity}</span>
+          <div class="alert-content">
+            <div class="alert-title">${esc(a.title)}${a.is_regression ? ' 🔄 REGRESSION' : ''}</div>
+            <div class="alert-desc">${esc(a.description).substring(0, 300)}</div>
+            <div class="alert-meta">
+              ${a.workflow ? `<span>Workflow: ${a.workflow}</span>` : ''}
+              ${a.component ? `<span>File: ${a.component}</span>` : ''}
+              <span>${timeSince(a.created_at)}</span>
+            </div>
+          </div>
+          <button class="alert-resolve-btn" onclick="resolveAlert(${a.id}, this)">Resolve</button>
+        </div>
+      `).join('');
+    } catch (e) {
+      document.getElementById('alert-list').innerHTML = `<div class="empty" style="color:var(--red)">Error: ${e.message}</div>`;
+    }
+  }
+
+  async function resolveAlert(id, btn) {
+    btn.textContent = '...';
+    await fetch(`${API}/api/monitor/alerts/${id}/resolve`, { method: 'POST', headers: headers() });
+    btn.closest('.alert-item').style.opacity = '0.3';
+    setTimeout(() => loadAlerts(), 500);
+  }
+
+  // ── Stuck Students ──
+  async function loadStuckStudents() {
+    try {
+      const resp = await fetch(`${API}/api/monitor/stuck-students`, { headers: headers() });
+      const data = await resp.json();
+      const grid = document.getElementById('stuck-grid');
+
+      if (data.total_stuck === 0) {
+        grid.innerHTML = '<div class="empty" style="grid-column: 1/-1;">✓ No stuck students detected.</div>';
+        return;
+      }
+
+      grid.innerHTML = Object.entries(data.categories).map(([key, cat]) => {
+        if (!cat.students || cat.students.length === 0) return '';
+        const color = key.includes('paid') || key.includes('certificate') ? 'var(--red)' : 'var(--yellow)';
+        return `<div class="stuck-card">
+          <div class="stuck-header">
+            <span class="stuck-title">${cat.description || key}</span>
+            <span class="stuck-count" style="color:${color};background:${color}15">${cat.count}</span>
+          </div>
+          <div class="stuck-list">
+            ${cat.students.slice(0, 8).map(s => `
+              <div class="stuck-item">
+                <span>${esc(s.first_name || '')} ${esc(s.last_name || '')} (${esc(s.email || '')})</span>
+                <span style="color:var(--text-dim)">${s.created_at ? timeSince(s.created_at) : ''}</span>
+              </div>
+            `).join('')}
+            ${cat.count > 8 ? `<div style="padding:6px 0;color:var(--text-dim)">...and ${cat.count - 8} more</div>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+    } catch (e) {
+      document.getElementById('stuck-grid').innerHTML = `<div class="empty" style="color:var(--red)">Error: ${e.message}</div>`;
+    }
+  }
+
+  // ── Search ──
+  async function searchStudent() {
+    const email = document.getElementById('search-email').value.trim();
+    if (!email) return;
+    const result = document.getElementById('journey-result');
+    result.className = 'journey-result show';
+    result.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+    try {
+      const resp = await fetch(`${API}/api/monitor/student/${encodeURIComponent(email)}`, { headers: headers() });
+      if (resp.status === 404) { result.innerHTML = '<div class="empty">Student not found.</div>'; return; }
+      const data = await resp.json();
+      const s = data.student;
+      const stageColors = { applied: 'var(--blue)', enrolled: 'var(--yellow)', paid: 'var(--purple)', certificate_issued: 'var(--green)', completed: 'var(--green)', shortlisted: 'var(--yellow)' };
+      const stageColor = stageColors[data.current_stage] || 'var(--text-muted)';
+
+      result.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div>
+            <div style="font-size:1.1rem;font-weight:700;">${esc(s.first_name)} ${esc(s.last_name)}</div>
+            <div style="font-size:0.8rem;color:var(--text-muted);">${esc(s.email)} · ${s.domain || 'N/A'} · ID: ${s.id}</div>
+          </div>
+          <span class="journey-stage" style="color:${stageColor};background:${stageColor}15">${data.current_stage}</span>
+        </div>
+        ${renderJourneySection('Enrollments', data.enrollments, ['batch_id', 'domain', 'batch_number', 'status', 'batch_status'])}
+        ${renderJourneySection('Progress', data.progress, ['week', 'issues_assigned', 'issues_completed', 'prs_merged', 'score'])}
+        ${renderJourneySection('Payments', data.payments, ['status', 'amount', 'razorpay_order_id', 'created_at'])}
+        ${renderJourneySection('Certificates', data.certificates, ['cert_id', 'issued_at'])}
+        ${renderJourneySection('Emails', data.emails, ['email_type', 'subject', 'status', 'sent_at'])}
+        ${data.alerts && data.alerts.length ? renderJourneySection('Alerts', data.alerts, ['severity', 'title', 'created_at']) : ''}
+        ${data.frontend_errors && data.frontend_errors.length ? renderJourneySection('Frontend Errors', data.frontend_errors, ['page', 'error_type', 'message', 'created_at']) : ''}
+      `;
+    } catch (e) {
+      result.innerHTML = `<div class="empty" style="color:var(--red)">Error: ${e.message}</div>`;
+    }
+  }
+
+  function renderJourneySection(title, rows, cols) {
+    if (!rows || rows.length === 0) return `<div class="journey-section"><div class="journey-section-title">${title}</div><div style="font-size:0.75rem;color:var(--text-dim);padding:4px 0;">None</div></div>`;
+    return `<div class="journey-section">
+      <div class="journey-section-title">${title} (${rows.length})</div>
+      <table class="journey-table"><thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>
+      <tbody>${rows.slice(0, 20).map(r => `<tr>${cols.map(c => `<td>${esc(String(r[c] ?? '—'))}</td>`).join('')}</tr>`).join('')}</tbody></table>
+    </div>`;
+  }
+
+  document.getElementById('search-email').addEventListener('keydown', e => { if (e.key === 'Enter') searchStudent(); });
+
+  // ── Checks ──
+  async function loadChecks() {
+    try {
+      const resp = await fetch(`${API}/api/monitor/checks?limit=50`, { headers: headers() });
+      const data = await resp.json();
+      const list = document.getElementById('checks-list');
+
+      if (!data.checks || data.checks.length === 0) {
+        list.innerHTML = '<div class="empty">No check results yet.</div>';
+        return;
+      }
+      list.innerHTML = data.checks.map(c => `
+        <div class="alert-item ${c.status === 'fail' ? 'critical' : c.status === 'degraded' ? 'warning' : 'info'}">
+          <span class="alert-severity ${c.status === 'fail' ? 'critical' : c.status === 'degraded' ? 'warning' : 'info'}">${c.status}</span>
+          <div class="alert-content">
+            <div class="alert-title">${formatCheckName(c.check_name)}</div>
+            <div class="alert-meta">
+              <span>Type: ${c.check_type}</span>
+              ${c.response_time_ms ? `<span>${c.response_time_ms}ms</span>` : ''}
+              <span>${timeSince(c.created_at)}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    } catch (e) {
+      document.getElementById('checks-list').innerHTML = `<div class="empty" style="color:var(--red)">Error: ${e.message}</div>`;
+    }
+  }
+
+  // ── Frontend Errors ──
+  async function loadFrontendErrors() {
+    try {
+      const resp = await fetch(`${API}/api/monitor/frontend-errors?limit=30`, { headers: headers() });
+      const data = await resp.json();
+      const list = document.getElementById('frontend-list');
+
+      if (!data.errors || data.errors.length === 0) {
+        list.innerHTML = '<div class="empty">No frontend errors reported.</div>';
+        return;
+      }
+      list.innerHTML = data.errors.map(e => `
+        <div class="alert-item ${e.error_type === 'js_error' ? 'critical' : 'warning'}">
+          <span class="alert-severity ${e.error_type === 'js_error' ? 'critical' : 'warning'}">${e.error_type}</span>
+          <div class="alert-content">
+            <div class="alert-title">${esc(e.page)}: ${esc(e.message).substring(0, 120)}</div>
+            ${e.stack_trace ? `<div class="alert-desc" style="font-family:var(--mono);font-size:0.65rem;white-space:pre-wrap;">${esc(e.stack_trace).substring(0, 300)}</div>` : ''}
+            <div class="alert-meta">
+              ${e.student_email ? `<span>${esc(e.student_email)}</span>` : '<span>Anonymous</span>'}
+              <span>${timeSince(e.created_at)}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    } catch (e) {
+      document.getElementById('frontend-list').innerHTML = `<div class="empty" style="color:var(--red)">Error: ${e.message}</div>`;
+    }
+  }
+
+  // ── Aggregate ──
+  async function loadAggregate() {
+    try {
+      const [aggResp, statusResp] = await Promise.all([
+        fetch(`${API}/api/monitor/aggregate?days=7`, { headers: headers() }),
+        fetch(`${API}/api/monitor/status`, { headers: headers() }),
+      ]);
+      const agg = await aggResp.json();
+      const status = await statusResp.json();
+
+      const totalFE = (agg.frontend_errors_by_page || []).reduce((s, r) => s + r.cnt, 0);
+      const totalAlerts = (agg.alerts_by_category || []).reduce((s, r) => s + r.cnt, 0);
+      const criticals = status.active_alerts?.critical || 0;
+      const warnings = status.active_alerts?.warning || 0;
+      const checks = (status.latest_checks || []).length;
+      const passing = (status.latest_checks || []).filter(c => c.status === 'pass').length;
+
+      document.getElementById('agg-grid').innerHTML = `
+        <div class="agg-card"><div class="agg-label">Active Critical</div><div class="agg-value ${criticals > 0 ? 'red' : 'green'}">${criticals}</div></div>
+        <div class="agg-card"><div class="agg-label">Active Warnings</div><div class="agg-value ${warnings > 0 ? 'yellow' : 'green'}">${warnings}</div></div>
+        <div class="agg-card"><div class="agg-label">Checks Passing</div><div class="agg-value ${passing === checks ? 'green' : 'yellow'}">${passing}/${checks}</div></div>
+        <div class="agg-card"><div class="agg-label">Frontend Errors (7d)</div><div class="agg-value ${totalFE > 10 ? 'red' : totalFE > 0 ? 'yellow' : 'green'}">${totalFE}</div></div>
+        <div class="agg-card"><div class="agg-label">Total Alerts (7d)</div><div class="agg-value">${totalAlerts}</div></div>
+        <div class="agg-card"><div class="agg-label">FE Errors (24h)</div><div class="agg-value ${status.frontend_errors_24h > 5 ? 'red' : 'green'}">${status.frontend_errors_24h || 0}</div></div>
+      `;
+    } catch (e) {
+      document.getElementById('agg-grid').innerHTML = `<div class="empty" style="color:var(--red);grid-column:1/-1">Error: ${e.message}</div>`;
+    }
+  }
+
+  // ── Trigger + Audit ──
+  async function triggerAll() {
+    const btn = document.getElementById('btn-trigger');
+    btn.textContent = '⏳ Running...';
+    btn.disabled = true;
+    try {
+      await fetch(`${API}/api/monitor/trigger`, { method: 'POST', headers: headers() });
+      setTimeout(refreshAll, 1000);
+    } catch(e) { alert('Error: ' + e.message); }
+    btn.textContent = '▶ Run All Checks';
+    btn.disabled = false;
+  }
+
+  async function runAudit() {
+    const btn = document.getElementById('btn-audit');
+    btn.textContent = '⏳ Auditing...';
+    btn.disabled = true;
+    try {
+      const resp = await fetch(`${API}/api/monitor/audit`, { method: 'POST', headers: headers() });
+      const data = await resp.json();
+      // Show audit results in alerts tab
+      document.querySelector('[data-tab="alerts"]').click();
+      setTimeout(refreshAll, 1000);
+      alert('Audit complete. Check Active Alerts for findings.');
+    } catch(e) { alert('Audit error: ' + e.message); }
+    btn.textContent = '📋 Run Audit';
+    btn.disabled = false;
+  }
+
+  // ── Helpers ──
+  function esc(str) { const d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
+
+  function formatCheckName(name) {
+    return (name || '').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()).replace('E2e', 'E2E').replace('Db', 'DB');
+  }
+
+  function timeSince(dateStr) {
+    if (!dateStr) return '—';
+    const seconds = Math.floor((Date.now() - new Date(dateStr + (dateStr.includes('Z') ? '' : 'Z')).getTime()) / 1000);
+    if (seconds < 60) return 'just now';
+    if (seconds < 3600) return Math.floor(seconds / 60) + 'm ago';
+    if (seconds < 86400) return Math.floor(seconds / 3600) + 'h ago';
+    return Math.floor(seconds / 86400) + 'd ago';
+  }
+</script>
+</body>
+</html>

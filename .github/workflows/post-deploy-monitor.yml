@@ -1,0 +1,66 @@
+name: Post-Deploy Monitor Trigger
+
+# Fires after every push to main (Render deploys from main)
+on:
+  push:
+    branches: [main]
+
+jobs:
+  trigger-monitor:
+    name: Trigger monitoring checks
+    runs-on: ubuntu-latest
+    # Only run after Render has had time to fully deploy
+    # Render typically takes 2-5 minutes for a Python service
+    steps:
+      - name: Wait for Render deployment
+        run: |
+          echo "Waiting 3 minutes for Render to finish deploying..."
+          sleep 180
+
+      - name: Verify service is up
+        run: |
+          echo "Checking /health endpoint..."
+          for attempt in 1 2 3 4 5; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+              --max-time 30 \
+              "https://skill-me.onrender.com/health")
+            echo "Attempt $attempt: HTTP $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "Service is healthy."
+              break
+            fi
+            if [ "$attempt" = "5" ]; then
+              echo "Service did not become healthy after 5 attempts."
+              exit 1
+            fi
+            echo "Retrying in 30s..."
+            sleep 30
+          done
+
+      - name: Trigger all monitoring checks
+        run: |
+          echo "Triggering POST /api/monitor/trigger..."
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
+            -X POST \
+            -H "X-Admin-Key: ${{ secrets.SKILLME_ADMIN_KEY }}" \
+            -H "Content-Type: application/json" \
+            --max-time 120 \
+            "https://skill-me.onrender.com/api/monitor/trigger")
+          
+          BODY=$(echo "$RESPONSE" | sed -n '1p')
+          STATUS=$(echo "$RESPONSE" | grep "HTTP_STATUS" | cut -d: -f2)
+          
+          echo "Response status: $STATUS"
+          echo "Response body: $BODY"
+          
+          if [ "$STATUS" != "200" ]; then
+            echo "Monitor trigger failed with HTTP $STATUS"
+            exit 1
+          fi
+          echo "Monitor checks triggered successfully."
+
+      - name: Report result
+        if: always()
+        run: |
+          echo "Post-deploy monitoring trigger completed."
+          echo "View results at: https://skill-me-intern.in/monitor"

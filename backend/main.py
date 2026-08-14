@@ -29,6 +29,8 @@ from routes.payments import router as payments_router
 from routes.auth import router as auth_router
 from routes.referrals import router as referrals_router
 from routes.portfolio import router as portfolio_router
+from routes.monitor import router as monitor_router
+from services.monitor_scheduler import register_monitor_jobs
 
 # Rate limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -69,6 +71,13 @@ async def lifespan(app: FastAPI):
 
     # Start the task scheduler
     scheduler_service.start()
+
+    # Register monitoring jobs on the existing scheduler
+    try:
+        register_monitor_jobs(scheduler_service._scheduler)
+        logger.info("Monitoring jobs registered on scheduler")
+    except Exception as e:
+        logger.warning(f"Failed to register monitoring jobs: {e}")
 
     yield
 
@@ -138,6 +147,7 @@ app.include_router(payments_router)
 app.include_router(auth_router)
 app.include_router(referrals_router)
 app.include_router(portfolio_router)
+app.include_router(monitor_router)
 
 
 # ──────────────────────────────────────────────
@@ -158,6 +168,7 @@ _PAGES = {
     "privacy":     "privacy.html",
     "terms":       "terms.html",
     "refunds":     "refunds.html",
+    "monitor":     "monitor.html",
 }
 
 for _slug, _filename in _PAGES.items():

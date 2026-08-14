@@ -21,10 +21,6 @@
     <span class="info-value">{{ domain_label }}</span>
   </div>
   <div class="info-row">
-    <span class="info-label">Batch</span>
-    <span class="info-value">Batch #{{ batch_number }}</span>
-  </div>
-  <div class="info-row">
     <span class="info-label">Duration</span>
     <span class="info-value">4 Weeks</span>
   </div>
@@ -67,8 +63,8 @@
 
 {% if repo_url %}
 <div class="repo-box">
-  <p><strong>Batch Repository Access</strong></p>
-  <p>You have been granted access to your batch repository. Please accept the GitHub invitation to proceed:</p>
+  <p><strong>Repository Access</strong></p>
+  <p>You have been granted access to your GitHub repository. Please accept the GitHub invitation to proceed:</p>
   <a href="{{ repo_url }}">{{ repo_url }}</a>
   {% if issues_url %}
   <p style="margin-top:12px;font-size:0.9em;color:#6b7280;">Your assigned tasks: <a href="{{ issues_url }}">{{ issues_url }}</a></p>
@@ -77,7 +73,7 @@
 {% endif %}
 
 <div class="cta-wrap">
-  <a href="https://skill-me-intern.in/offer.html?name={{ first_name }}+{{ last_name }}&domain={{ domain_label }}&batch=Batch+%23{{ batch_number }}" class="cta-btn">View Official Offer Letter Online &rarr;</a><br />
+  <a href="https://skill-me-intern.in/offer.html?name={{ first_name }}+{{ last_name }}&domain={{ domain_label }}" class="cta-btn">View Official Offer Letter Online &rarr;</a><br />
   <a href="https://skill-me-intern.in/dashboard.html" class="cta-btn-secondary">Access Student Dashboard</a>
   {% if issues_url %}
   <br /><a href="{{ issues_url }}" class="cta-btn-secondary" style="margin-top: 8px;">View Your Tasks on GitHub &rarr;</a>

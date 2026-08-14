@@ -26,6 +26,15 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.utils import ImageReader
 
 from db.database import db
+# Import lazily to avoid circular imports at module level
+_email_service = None
+
+def _get_email_service():
+    global _email_service
+    if _email_service is None:
+        from services.email_service import email_service as _es
+        _email_service = _es
+    return _email_service
 
 logger = logging.getLogger("skillme.certificates")
 
@@ -362,10 +371,24 @@ def generate_certificate_pdf(student: dict, batch: dict) -> tuple[bytes, str]:
 class CertificateService:
     """Manages certificate generation and records."""
 
-    async def issue_certificate(self, student_id: int, batch_id: int) -> dict:
+    async def issue_certificate(
+        self,
+        student_id: int,
+        batch_id: int,
+        suppress_email: bool = False,
+    ) -> dict:
         """
         Issue a certificate for a student who completed a batch.
-        Checks completion status, generates PDF, and records it.
+        Records the certificate and — on first issuance only — sends the
+        certificate_ready notification email.
+
+        Args:
+            student_id: The student's DB id.
+            batch_id:   The batch's DB id.
+            suppress_email: Set True when the caller will send the email
+                            itself (e.g. payments.py, admin issue endpoint).
+                            Defaults to False so that any code path that
+                            records a certificate always triggers the email.
         """
         student = await db.fetch_one("SELECT * FROM students WHERE id = ?", (student_id,))
         if not student:
@@ -383,14 +406,32 @@ class CertificateService:
 
         cert_id = _cert_id_from_student(student_id, batch_id)
         issued_on = datetime.utcnow().strftime("%d %B %Y")
+        is_new = not existing
 
-        if not existing:
+        if is_new:
             await db.insert(
                 """INSERT INTO certificates (student_id, batch_id, cert_id, issued_at)
                    VALUES (?, ?, ?, CURRENT_TIMESTAMP)""",
                 (student_id, batch_id, cert_id),
             )
             logger.info(f"Issued certificate {cert_id} to student {student_id} for batch {batch_id}")
+
+            # Send notification email unless the caller handles it themselves.
+            if not suppress_email:
+                try:
+                    await _get_email_service().send_certificate_ready(
+                        first_name=student["first_name"],
+                        last_name=student["last_name"],
+                        email=student["email"],
+                        domain=batch["domain"],
+                        batch_number=batch["batch_number"],
+                        cert_id=cert_id,
+                        issued_date=issued_on,
+                    )
+                    logger.info(f"Certificate-ready email sent to {student['email']} for {cert_id}")
+                except Exception as email_err:
+                    # Log but never let email failure block certificate issuance
+                    logger.error(f"Failed to send certificate-ready email for {cert_id}: {email_err}")
 
         return {
             "cert_id": cert_id,

@@ -186,7 +186,7 @@ async def verify_payment(req: VerifyPaymentRequest, background_tasks: Background
 
     # Issue certificate (or return existing if already issued)
     try:
-        cert_data = await certificate_service.issue_certificate(req.student_id, req.batch_id)
+        cert_data = await certificate_service.issue_certificate(req.student_id, req.batch_id, suppress_email=True)
     except ValueError:
         # May already exist — fetch it
         cert = await db.fetch_one(

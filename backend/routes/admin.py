@@ -458,6 +458,82 @@ async def assign_from_repo(
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@router.post("/batches/{batch_id}/fix-assignees", summary="Re-assign GitHub issue assignees for all enrolled students")
+async def fix_assignees(batch_id: int, _: str = Depends(require_admin)):
+    """
+    Iterates all open/assigned GitHub issues for this batch that have a student
+    assigned in the DB but may be missing the GitHub assignee (e.g. because the
+    student hadn't accepted their collaborator invite when the issue was created).
+
+    For each such issue, calls the GitHub API to add the student's GitHub username
+    as an assignee. Safe to call multiple times — GitHub ignores duplicates.
+    """
+    batch = await db.fetch_one("SELECT * FROM batches WHERE id = ?", (batch_id,))
+    if not batch:
+        raise HTTPException(status_code=404, detail="Batch not found")
+
+    repo_name = batch.get("repo_name")
+    if not repo_name:
+        raise HTTPException(status_code=400, detail="Batch has no GitHub repo configured")
+
+    # Fetch all issues that have a student assigned in the DB
+    issues = await db.fetch_all(
+        """SELECT i.id, i.github_issue_number, i.title, i.status,
+                  s.github_username, s.first_name, s.last_name
+           FROM issues i
+           JOIN students s ON i.assigned_to = s.id
+           WHERE i.batch_id = ?
+             AND i.assigned_to IS NOT NULL
+             AND i.github_issue_number IS NOT NULL
+             AND i.status NOT IN ('completed')""",
+        (batch_id,),
+    )
+
+    fixed = []
+    skipped = []
+    errors = []
+
+    for issue in issues:
+        gh_username = issue.get("github_username")
+        if not gh_username:
+            skipped.append({
+                "issue_number": issue["github_issue_number"],
+                "reason": "student has no github_username",
+            })
+            continue
+
+        try:
+            await github_service.add_assignees_to_issue(
+                repo_name=repo_name,
+                issue_number=issue["github_issue_number"],
+                assignees=[gh_username],
+            )
+            fixed.append({
+                "issue_number": issue["github_issue_number"],
+                "title": issue["title"],
+                "assigned_to": gh_username,
+            })
+        except Exception as e:
+            logger.error(
+                f"Failed to add assignee {gh_username} to issue #{issue['github_issue_number']}: {e}"
+            )
+            errors.append({
+                "issue_number": issue["github_issue_number"],
+                "github_username": gh_username,
+                "error": str(e),
+            })
+
+    return {
+        "status": "done",
+        "batch_id": batch_id,
+        "repo": repo_name,
+        "fixed": len(fixed),
+        "skipped": len(skipped),
+        "errors": len(errors),
+        "details": {"fixed": fixed, "skipped": skipped, "errors": errors},
+    }
+
+
 # ──────────────────────────────────────────────
 # Student Management
 # ──────────────────────────────────────────────

@@ -179,6 +179,29 @@ class GitHubService:
         response.raise_for_status()
         return response.json()
 
+    async def add_assignees_to_issue(
+        self, repo_name: str, issue_number: int, assignees: list[str]
+    ) -> dict:
+        """
+        Add assignees to an existing GitHub issue.
+
+        Args:
+            repo_name: Repository name
+            issue_number: The GitHub issue number
+            assignees: List of GitHub usernames to assign
+
+        Returns the updated issue data, or an empty dict if the request failed.
+        """
+        response = await self.client.post(
+            f"/repos/{self.org}/{repo_name}/issues/{issue_number}/assignees",
+            json={"assignees": assignees},
+        )
+        response.raise_for_status()
+        logger.info(
+            f"Added assignees {assignees} to issue #{issue_number} in {repo_name}"
+        )
+        return response.json()
+
     async def list_issues(
         self, repo_name: str, state: str = "open", labels: str | None = None
     ) -> list[dict]:

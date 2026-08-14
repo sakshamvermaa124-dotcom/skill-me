@@ -272,7 +272,7 @@ class EmailService:
         github_username: str | None = None,
     ) -> bool:
         if not joining_date:
-            joining_date = (datetime.utcnow() + timedelta(days=1)).strftime("%d %B %Y")
+            joining_date = datetime.utcnow().strftime("%d %B %Y")
         # Build a filtered issues URL that shows ONLY this student's issues
         issues_url = None
         if repo_url and github_username:
