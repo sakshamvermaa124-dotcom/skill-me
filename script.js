@@ -54,24 +54,29 @@ document.addEventListener('DOMContentLoaded', () => {
   const navToggle = document.getElementById('nav-toggle');
   const navLinks  = document.getElementById('nav-links');
 
-  lenis.on('scroll', ({ scroll }) => navbar.classList.toggle('scrolled', scroll > 50));
+  if (navbar) {
+    lenis.on('scroll', ({ scroll }) => navbar.classList.toggle('scrolled', scroll > 50));
+  }
 
-  navToggle.addEventListener('click', () => {
-    const isOpen = navLinks.classList.toggle('open');
-    navToggle.classList.toggle('active', isOpen);
-    document.body.style.overflow = isOpen ? 'hidden' : '';
-  });
+  if (navToggle && navLinks) {
+    navToggle.addEventListener('click', () => {
+      const isOpen = navLinks.classList.toggle('open');
+      navToggle.classList.toggle('active', isOpen);
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+    });
+  }
 
-  navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
-    navToggle.classList.remove('active');
-    navLinks.classList.remove('open');
-    document.body.style.overflow = '';
-  }));
-
+  if (navLinks) {
+    navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
+      if (navToggle) navToggle.classList.remove('active');
+      navLinks.classList.remove('open');
+      document.body.style.overflow = '';
+    }));
+  }
   // Close mobile menu on Escape key
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && navLinks.classList.contains('open')) {
-      navToggle.classList.remove('active');
+    if (e.key === 'Escape' && navLinks && navLinks.classList.contains('open')) {
+      if (navToggle) navToggle.classList.remove('active');
       navLinks.classList.remove('open');
       document.body.style.overflow = '';
     }
@@ -79,10 +84,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Close mobile menu when clicking outside of it
   document.addEventListener('click', (e) => {
-    if (navLinks.classList.contains('open') &&
+    if (navLinks && navLinks.classList.contains('open') &&
         !navLinks.contains(e.target) &&
-        !navToggle.contains(e.target)) {
-      navToggle.classList.remove('active');
+        (!navToggle || !navToggle.contains(e.target))) {
+      if (navToggle) navToggle.classList.remove('active');
       navLinks.classList.remove('open');
       document.body.style.overflow = '';
     }
@@ -302,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let terminalDone = false;
   function animateTerminal() {
-    if (terminalDone) return;
+    if (terminalDone || !terminalBody) return;
     terminalDone = true;
     terminalBody.innerHTML = '';
     terminalLines.forEach(line => {
