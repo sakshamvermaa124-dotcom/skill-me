@@ -842,9 +842,9 @@
     }
 
     function validateDomain() {
-      const checked = document.querySelector('input[name="domain"]:checked');
+      const hiddenDomain = document.getElementById('hidden-domain');
       const error = document.getElementById('domain-error');
-      if (!checked) {
+      if (!hiddenDomain || !hiddenDomain.value.trim()) {
         if (error) error.classList.add('visible');
         return false;
       }
