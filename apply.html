@@ -581,86 +581,7 @@
           
           <!-- Step 3: Domain Selection -->
           <div class="form-step" data-step="3" id="step-3">
-            <h3 class="form-step-title">Choose Your Domain</h3>
-            <p class="form-step-subtitle">Select the track you want to intern in</p>
-            
-            <div class="form-group">
-              <div class="domain-select-grid" id="domain-grid">
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-webdev" value="Web Development" required>
-                  <label for="dom-webdev"><span class="domain-emoji">🌐</span> Web Dev</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-python" value="Python">
-                  <label for="dom-python"><span class="domain-emoji">🐍</span> Python</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-react" value="React / Next.js">
-                  <label for="dom-react"><span class="domain-emoji">⚛️</span> React</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-node" value="Node.js / Express">
-                  <label for="dom-node"><span class="domain-emoji">🟢</span> Node.js</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-java" value="Java / Spring Boot">
-                  <label for="dom-java"><span class="domain-emoji">☕</span> Java</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-ml" value="Machine Learning">
-                  <label for="dom-ml"><span class="domain-emoji">🤖</span> ML / AI</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-ds" value="Data Science">
-                  <label for="dom-ds"><span class="domain-emoji">📊</span> Data Sci</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-flutter" value="Flutter / Mobile">
-                  <label for="dom-flutter"><span class="domain-emoji">📱</span> Flutter</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-devops" value="DevOps / CI-CD">
-                  <label for="dom-devops"><span class="domain-emoji">🔧</span> DevOps</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-cpp" value="C/C++ / DSA">
-                  <label for="dom-cpp"><span class="domain-emoji">⚡</span> C/C++</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-uiux" value="UI/UX Design">
-                  <label for="dom-uiux"><span class="domain-emoji">🎨</span> UI/UX</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-cyber" value="Cybersecurity">
-                  <label for="dom-cyber"><span class="domain-emoji">🔐</span> Cyber Sec</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-cloud" value="Cloud / AWS">
-                  <label for="dom-cloud"><span class="domain-emoji">☁️</span> Cloud</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-dsa" value="DSA / Competitive">
-                  <label for="dom-dsa"><span class="domain-emoji">🧩</span> DSA / CP</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-blockchain" value="Blockchain / Web3">
-                  <label for="dom-blockchain"><span class="domain-emoji">⛓️</span> Blockchain</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-android" value="Android / Kotlin">
-                  <label for="dom-android"><span class="domain-emoji">🤖</span> Android</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-sql" value="SQL / Databases">
-                  <label for="dom-sql"><span class="domain-emoji">🗄️</span> SQL / DB</label>
-                </div>
-                <div class="domain-option">
-                  <input type="radio" name="domain" id="dom-genai" value="Generative AI">
-                  <label for="dom-genai"><span class="domain-emoji">✨</span> Gen AI</label>
-                </div>
-              </div>
-              <div class="form-error" id="domain-error">Please select a domain</div>
-            </div>
+            <input type="hidden" name="domain" id="hidden-domain" value="Web Development">
             
             <div class="form-group">
               <label for="motivation">Why do you want to join? <span class="required">*</span></label>
@@ -743,6 +664,10 @@
           'web-dev':'Web Development','python':'Python','ml':'Machine Learning',
           'devops':'DevOps / Cloud','mobile':'Mobile Dev','ui-ux':'UI/UX Design'
         };
+        const hiddenDomain = document.getElementById('hidden-domain');
+        if (hiddenDomain && quiz.domain) {
+          hiddenDomain.value = domainLabels[quiz.domain] || quiz.domain;
+        }
 
         // Show score badge at top of form
         const badge = document.createElement('div');
@@ -969,7 +894,7 @@
         linkedin_url: document.getElementById('linkedin').value.trim(),
         college: document.getElementById('college').value.trim(),
         year_of_study: document.getElementById('year').value,
-        domain: document.querySelector('input[name="domain"]:checked').value,
+        domain: document.getElementById('hidden-domain').value,
         motivation: document.getElementById('motivation').value.trim(),
       };
 
