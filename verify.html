@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify Certificate — SkillMe</title>
+  <meta name="description" content="Verify the authenticity of a SkillMe internship certificate instantly using the Certificate ID." />
+  <link rel="icon" href="assets/logo.webp" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@1,400;1,500&display=swap" rel="stylesheet" />
+  <script src="config.js"></script>
+  <style>
+    :root {
+      --gold: #c9a84c;
+      --gold-light: #e2c07a;
+      --gold-dark: #8b6914;
+      --emerald: #10b981;
+      --emerald-dim: rgba(16,185,129,0.12);
+      --red: #f87171;
+      --red-dim: rgba(248,113,113,0.12);
+      --amber: #fbbf24;
+      --amber-dim: rgba(251,191,36,0.12);
+      --bg: #090a0f;
+      --surface: rgba(255,255,255,0.04);
+      --surface-hover: rgba(255,255,255,0.07);
+      --border: rgba(255,255,255,0.08);
+      --border-gold: rgba(201,168,76,0.25);
+      --text: #f0f0f5;
+      --text-secondary: #a0a8c0;
+      --muted: #5a6080;
+      --purple: #7c3aed;
+      --blue: #3b82f6;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    /* ─── BACKGROUND ─── */
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(201,168,76,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,168,76,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+    .bg-glow-1 {
+      position: fixed; top: -200px; left: 50%; transform: translateX(-50%);
+      width: 600px; height: 500px;
+      background: radial-gradient(ellipse, rgba(124,58,237,0.12) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+    .bg-glow-2 {
+      position: fixed; bottom: -200px; right: -100px;
+      width: 500px; height: 500px;
+      background: radial-gradient(ellipse, rgba(201,168,76,0.06) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ─── NAV ─── */
+    .nav {
+      width: 100%; max-width: 900px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 24px 32px;
+      position: relative; z-index: 10;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none;
+    }
+    .nav-brand img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+    .nav-brand-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700; font-size: 1.1rem; color: var(--text);
+    }
+    .nav-brand-name span { color: var(--purple); }
+    .nav-back {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.82rem; color: var(--text-secondary);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .nav-back:hover { color: var(--text); }
+
+    /* ─── MAIN ─── */
+    main {
+      width: 100%; max-width: 640px;
+      padding: 20px 24px 80px;
+      position: relative; z-index: 10;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 40px;
+    }
+
+    /* ─── HERO ─── */
+    .hero { text-align: center; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--amber-dim); border: 1px solid rgba(251,191,36,0.2);
+      color: var(--amber); padding: 5px 14px; border-radius: 20px;
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; margin-bottom: 20px;
+    }
+    .hero-badge::before {
+      content: ''; width: 6px; height: 6px;
+      background: var(--amber); border-radius: 50%;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+    .hero h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 700; line-height: 1.15;
+      color: var(--text); margin-bottom: 12px;
+    }
+    .hero h1 .accent {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 0.95rem; color: var(--text-secondary);
+      line-height: 1.7; max-width: 440px; margin: 0 auto;
+    }
+
+    /* ─── SEARCH BOX ─── */
+    .search-card {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px 28px 24px;
+      backdrop-filter: blur(10px);
+      transition: border-color 0.3s;
+    }
+    .search-card:focus-within {
+      border-color: var(--border-gold);
+    }
+    .search-label {
+      font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--text-secondary);
+      margin-bottom: 10px; display: block;
+    }
+    .search-input-row {
+      display: flex; gap: 10px;
+    }
+    .search-input {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem; font-weight: 500;
+      color: var(--text);
+      letter-spacing: 0.04em;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .search-input::placeholder { color: var(--muted); letter-spacing: 0.06em; font-weight: 400; }
+    .search-input:focus {
+      border-color: var(--gold);
+      background: rgba(201,168,76,0.05);
+    }
+    .search-btn {
+      display: flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+      border: none; border-radius: 12px;
+      padding: 14px 24px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.9rem; font-weight: 700;
+      color: #000; cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      white-space: nowrap;
+    }
+    .search-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .search-btn:active { transform: translateY(0); }
+    .search-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .search-hint {
+      margin-top: 10px;
+      font-size: 0.75rem; color: var(--muted);
+    }
+    .search-hint code {
+      background: rgba(255,255,255,0.06); border-radius: 4px;
+      padding: 1px 6px; font-family: 'Space Grotesk', monospace;
+      color: var(--gold); font-size: 0.72rem;
+    }
+
+    /* ─── RESULT AREA ─── */
+    #result-area {
+      width: 100%;
+      animation: fadeUp 0.4s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── VERIFIED CARD ─── */
+    .verified-card {
+      background: rgba(16,185,129,0.06);
+      border: 1.5px solid rgba(16,185,129,0.25);
+      border-radius: 20px; overflow: hidden;
+      animation: fadeUp 0.4s ease;
+    }
+    .verified-header {
+      background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.06));
+      border-bottom: 1px solid rgba(16,185,129,0.15);
+      padding: 20px 24px;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .verified-icon-wrap {
+      width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(16,185,129,0.2);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .verified-icon-wrap svg { width: 24px; height: 24px; color: var(--emerald); }
+    .verified-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.1rem; font-weight: 700; color: var(--emerald);
+      margin-bottom: 2px;
+    }
+    .verified-sub { font-size: 0.8rem; color: var(--text-secondary); }
+
+    .verified-body { padding: 24px; }
+    .student-name-display {
+      text-align: center;
+      padding: 20px 0 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+    .student-name-label {
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--text-secondary); margin-bottom: 6px;
+    }
+    .student-name-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 2.2rem; font-weight: 500;
+      color: var(--text);
+      letter-spacing: 0.01em;
+    }
+
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .detail-item {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 16px;
+    }
+    .detail-item-label {
+      font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
+    }
+    .detail-item-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.92rem; font-weight: 600; color: var(--text);
+    }
+    .detail-item-value.gold { color: var(--gold); letter-spacing: 0.04em; }
+    .detail-item-value.emerald { color: var(--emerald); }
+
+    .verified-footer {
+      background: rgba(255,255,255,0.02);
+      border-top: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .verified-footer svg { width: 14px; height: 14px; color: var(--emerald); flex-shrink: 0; }
+    .verified-footer span { font-size: 0.75rem; color: var(--text-secondary); }
+
+    /* ─── ERROR CARD ─── */
+    .error-card {
+      background: rgba(248,113,113,0.06);
+      border: 1.5px solid rgba(248,113,113,0.25);
+      border-radius: 20px; padding: 24px;
+      display: flex; align-items: flex-start; gap: 16px;
+      animation: fadeUp 0.4s ease;
+    }
+    .error-icon-wrap {
+      width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+      background: var(--red-dim);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .error-icon-wrap svg { width: 22px; height: 22px; color: var(--red); }
+    .error-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem; font-weight: 700; color: var(--red); margin-bottom: 4px;
+    }
+    .error-desc { font-size: 0.83rem; color: var(--text-secondary); line-height: 1.6; }
+
+    /* ─── LOADING SPINNER ─── */
+    .loading-card {
+      display: flex; align-items: center; justify-content: center;
+      gap: 14px; padding: 32px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px;
+      animation: fadeUp 0.3s ease;
+    }
+    .spinner {
+      width: 24px; height: 24px;
+      border: 2px solid rgba(201,168,76,0.2);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 0.88rem; color: var(--text-secondary); }
+
+    /* ─── HOW IT WORKS ─── */
+    .how-section {
+      width: 100%; text-align: center;
+    }
+    .how-title {
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 20px;
+    }
+    .how-steps {
+      display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+    }
+    .how-step {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px 18px;
+      flex: 1; min-width: 160px; max-width: 200px;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      text-align: center;
+    }
+    .how-step-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: rgba(201,168,76,0.1); border: 1px solid var(--border-gold);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.8rem; font-weight: 700; color: var(--gold);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .how-step-text { font-size: 0.78rem; color: var(--text-secondary); line-height: 1.5; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 600px) {
+      .nav { padding: 20px 20px; }
+      main { padding: 12px 16px 60px; gap: 28px; }
+      .search-card { padding: 20px 18px; }
+      .search-input-row { flex-direction: column; }
+      .details-grid { grid-template-columns: 1fr; }
+      .verified-header { padding: 16px 18px; }
+      .verified-body { padding: 18px; }
+      .verified-footer { padding: 12px 18px; }
+      .student-name-value { font-size: 1.7rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <!-- NAV -->
+    <nav class="navbar scrolled" id="navbar">
+    <div class="container">
+    <div class="nav-left">
+      <a href="index.html" class="nav-logo" id="nav-logo">
+        <img src="assets/logo.webp" alt="SkillMe Logo" class="brand-logo-img" width="36" height="36" style="width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important;">
+        <span>SkillMe</span>
+      </a>
+    </div>
+    <div class="nav-links-center" id="nav-links-center">
+      <a href="index.html#how-it-works">How It Works</a>
+      <a href="index.html#domains">Domains</a>
+      <a href="index.html#benefits">Benefits</a>
+      <a href="index.html#faq">FAQ</a>
+    </div>
+    <div class="nav-actions-right">
+      <a href="dashboard.html" class="nav-link-dashboard" id="nav-dashboard-btn">Student Dashboard &rarr;</a>
+      <a href="quiz.html" class="nav-cta" id="nav-apply-btn">Apply Now &rarr;</a>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </div>
+  </nav>
+
+  <main>
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-badge">Certificate Verification</div>
+      <h1>Verify a <span class="accent">Certificate</span></h1>
+      <p>Enter the Certificate ID found on the document to instantly verify its authenticity and view the intern's details.</p>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="search-card">
+      <label class="search-label" for="cert-id-input">Certificate ID</label>
+      <div class="search-input-row">
+        <input
+          type="text"
+          id="cert-id-input"
+          class="search-input"
+          placeholder="e.g. SM-0012-0003-CERT"
+          autocomplete="off"
+          autocapitalize="characters"
+          spellcheck="false"
+          maxlength="40"
+        />
+        <button class="search-btn" id="verify-btn" onclick="verifyCertificate()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          Verify
+        </button>
+      </div>
+      <p class="search-hint">
+        The Certificate ID is printed at the bottom-left of the certificate — it looks like <code>SM-XXXX-XXXX-XXXX</code>
+      </p>
+    </div>
+
+    <!-- RESULT AREA (filled by JS) -->
+    <div id="result-area"></div>
+
+    <!-- HOW IT WORKS -->
+    <div class="how-section">
+      <p class="how-title">How verification works</p>
+      <div class="how-steps">
+        <div class="how-step">
+          <div class="how-step-num">1</div>
+          <p class="how-step-text">Find the Certificate ID on the bottom-left of the certificate</p>
+        </div>
+        <div class="how-step">
+          <div class="how-step-num">2</div>
+          <p class="how-step-text">Enter the ID in the search box above and click Verify</p>
+        </div>
+        <div class="how-step">
+          <div class="how-step-num">3</div>
+          <p class="how-step-text">Instantly see the intern's verified details from our records</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const API = window.SKILLME_API || 'http://localhost:8000';
+
+    // Auto-fill from URL param ?cert_id=...
+    const params = new URLSearchParams(window.location.search);
+    const paramCertId = params.get('cert_id');
+    if (paramCertId) {
+      document.getElementById('cert-id-input').value = paramCertId.toUpperCase();
+      verifyCertificate();
+    }
+
+    // Enter key support
+    document.getElementById('cert-id-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') verifyCertificate();
+    });
+
+    // Auto uppercase as user types
+    document.getElementById('cert-id-input').addEventListener('input', e => {
+      const pos = e.target.selectionStart;
+      e.target.value = e.target.value.toUpperCase();
+      e.target.setSelectionRange(pos, pos);
+    });
+
+    async function verifyCertificate() {
+      const input = document.getElementById('cert-id-input');
+      const btn   = document.getElementById('verify-btn');
+      const area  = document.getElementById('result-area');
+      const certId = input.value.trim().toUpperCase();
+
+      if (!certId) {
+        input.focus();
+        input.style.borderColor = 'rgba(248,113,133,0.6)';
+        setTimeout(() => input.style.borderColor = '', 2000);
+        return;
+      }
+
+      // Show loader
+      btn.disabled = true;
+      area.innerHTML = `
+        <div class="loading-card">
+          <div class="spinner"></div>
+          <span class="loading-text">Verifying certificate ID <strong>${certId}</strong>…</span>
+        </div>`;
+
+      try {
+        const res = await fetch(`${API}/api/certificates/verify/${encodeURIComponent(certId)}`);
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({ detail: 'Certificate not found.' }));
+          showError(certId, errData.detail || 'No certificate found for this ID.');
+          return;
+        }
+
+        const data = await res.json();
+        showVerified(data);
+
+      } catch (e) {
+        showError(certId, `Unable to connect to the verification server. Please try again. (${e.message})`);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function showVerified(data) {
+      const area = document.getElementById('result-area');
+      const name = data.holder || '—';
+      const domain = (data.domain || 'Internship').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      const batch = data.batch_number ? `Batch #${data.batch_number}` : '—';
+      const certId = data.cert_id || '—';
+      const issuedDate = data.issued_at
+        ? new Date(data.issued_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+        : '—';
+
+      area.innerHTML = `
+        <div class="verified-card">
+          <div class="verified-header">
+            <div class="verified-icon-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <polyline points="9 12 11 14 15 10"/>
+              </svg>
+            </div>
+            <div>
+              <div class="verified-title">✓ Certificate Verified</div>
+              <div class="verified-sub">This is a genuine SkillMe internship certificate</div>
+            </div>
+          </div>
+
+          <div class="verified-body">
+            <div class="student-name-display">
+              <div class="student-name-label">Intern Name</div>
+              <div class="student-name-value">${escapeHtml(name)}</div>
+            </div>
+
+            <div class="details-grid">
+              <div class="detail-item">
+                <div class="detail-item-label">Domain</div>
+                <div class="detail-item-value">${escapeHtml(domain)} Internship</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-item-label">Batch</div>
+                <div class="detail-item-value">${escapeHtml(batch)}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-item-label">Date of Issue</div>
+                <div class="detail-item-value">${escapeHtml(issuedDate)}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-item-label">Duration</div>
+                <div class="detail-item-value">4 Weeks · Remote</div>
+              </div>
+              <div class="detail-item" style="grid-column: 1 / -1;">
+                <div class="detail-item-label">Certificate ID</div>
+                <div class="detail-item-value gold">${escapeHtml(certId)}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="verified-footer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span>Verified against SkillMe's internal certificate registry on ${new Date().toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' })}. Issued by <strong>Saksham Verma</strong>, Founder &amp; CEO, SkillMe Technologies Pvt. Ltd.</span>
+          </div>
+        </div>`;
+    }
+
+    function showError(certId, message) {
+      const area = document.getElementById('result-area');
+      area.innerHTML = `
+        <div class="error-card">
+          <div class="error-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="15" y1="9" x2="9" y2="15"/>
+              <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+          </div>
+          <div>
+            <div class="error-title">Certificate Not Found</div>
+            <div class="error-desc">
+              No certificate was found for ID <strong style="color:#f0f0f5">${escapeHtml(certId)}</strong>.<br>
+              ${escapeHtml(message)}<br><br>
+              Please double-check the ID on the document. If you believe this is an error, contact
+              <a href="mailto:skillmeintern@gmail.com" style="color:var(--gold)">skillmeintern@gmail.com</a>.
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+  </script>
+  <script>
+    // Mobile nav toggle
+    (function() {
+      var t = document.getElementById('nav-toggle');
+      var n = document.getElementById('nav-links-center');
+      if (!t || !n) return;
+      t.addEventListener('click', function() {
+        var o = n.classList.toggle('open');
+        t.classList.toggle('active', o);
+        document.body.style.overflow = o ? 'hidden' : '';
+      });
+      n.querySelectorAll('a').forEach(function(l) {
+        l.addEventListener('click', function() {
+          n.classList.remove('open'); t.classList.remove('active');
+          document.body.style.overflow = '';
+        });
+      });
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && n.classList.contains('open')) {
+          n.classList.remove('open'); t.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
