@@ -1104,7 +1104,7 @@ window.openMilestoneShareModal = function(customData) {
   // Format LinkedIn Post
   const linkedInPost = `🚀 Milestone ${week} Sprint Completed on SkillMe (@skill-me-intern)!
 
-Proud to share that I have merged ${prs} verified Pull Requests and resolved core engineering tasks for the ${domain} cohort (Batch #${batchNum})!
+Proud to share that I have merged ${prs} verified Pull Requests and resolved core engineering tasks for the ${domain} technical program!
 
 📊 Verified Proof of Work Stats:
 • PRs Merged to Open Source: ${prs}
@@ -1117,10 +1117,12 @@ Every single contribution is tested, peer-reviewed, and merged directly into rea
 Explore my live Proof of Work portfolio & codebase here:
 👉 ${portfolioUrl}
 
+Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
+
 #SkillMe #OpenSource #ProofOfWork #WebDevelopment #SoftwareEngineering #TechInternship #GitHub`;
 
   // Format WhatsApp Squad Invite
-  const whatsAppInvite = `🚀 Hey! I just completed Milestone ${week} on SkillMe with ${prs} verified open-source PRs merged!
+  const whatsAppInvite = `🚀 Hey! I just completed Milestone ${week} on the SkillMe ${domain} internship with ${prs} verified open-source PRs merged!
 
 Collaborate with me on real open-source repositories and earn verified Proof of Work for your resume:
 👉 Join my SkillMe Sprint Squad: ${referralLink}`;
