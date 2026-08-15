@@ -1,49 +1,53 @@
 {% extends "base.html" %}
 
-{% block title %}Certificate & Letter of Recommendation — SkillMe{% endblock %}
+{% block title %}🎓 Certificate &amp; LOR Issued — SkillMe{% endblock %}
 
 {% block body %}
-<p class="greeting">Dear {{ first_name }},</p>
+<p class="greeting">Congratulations, {{ first_name }}! 🎓</p>
 <p class="lead">
-  Congratulations on the successful completion of the <strong>{{ domain_label }}</strong> internship program at SkillMe.
-  Your verified certificate of completion and Letter of Recommendation have been issued.
+  You have successfully completed the 4-week <strong>{{ domain_label }}</strong> internship program at <strong>SkillMe</strong>.
+  Your official, cryptographically verified Certificate of Completion and Letter of Recommendation (LOR) have been generated and published.
 </p>
 
 <div class="cert-id-box">
-  <div class="cert-id-label">Credential ID</div>
+  <div class="cert-id-label">Official Credential ID</div>
   <div class="cert-id-value">{{ cert_id }}</div>
 </div>
 
-<p class="section-label">Credential Details</p>
+<p class="section-label">📜 Credential Summary</p>
 <div class="info-table">
   <div class="info-row">
-    <span class="info-label">Name</span>
+    <span class="info-label">Candidate Name</span>
     <span class="info-value">{{ first_name }} {{ last_name }}</span>
   </div>
   <div class="info-row">
-    <span class="info-label">Domain</span>
+    <span class="info-label">Domain Program</span>
     <span class="info-value">{{ domain_label }}</span>
   </div>
   <div class="info-row">
-    <span class="info-label">Batch</span>
+    <span class="info-label">Cohort Batch</span>
     <span class="info-value">Batch #{{ batch_number }}</span>
   </div>
   <div class="info-row">
-    <span class="info-label">Date of Issue</span>
+    <span class="info-label">Date of Issuance</span>
     <span class="info-value">{{ issued_date }}</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Verification Status</span>
+    <span class="info-value"><span class="badge badge-green">Cryptographically Verified</span></span>
   </div>
 </div>
 
 <div class="cta-wrap">
-  <a href="{{ certificate_url }}" class="cta-btn">View Certificate</a><br />
+  <a href="{{ certificate_url }}" target="_blank" class="cta-btn">View Official Certificate &rarr;</a><br />
   {% if lor_url %}
-  <a href="{{ lor_url }}" class="cta-btn-secondary" style="margin-top:10px;">View Letter of Recommendation</a><br />
+  <a href="{{ lor_url }}" target="_blank" class="cta-btn-secondary" style="margin-top:10px;">View Letter of Recommendation ↗</a><br />
   {% endif %}
-  <a href="{{ verify_url }}" class="cta-btn-secondary" style="margin-top:16px;">Verify Authenticity</a>
+  <a href="{{ verify_url }}" target="_blank" class="cta-btn-secondary" style="margin-top:8px;">Open Public Verification Page ↗</a>
 </div>
 
 <div class="note">
-  <strong>Verification Link:</strong><br />
-  <a href="{{ verify_url }}">{{ verify_url }}</a>
+  🔗 <strong>Public Verification Link:</strong><br />
+  <a href="{{ verify_url }}" target="_blank" style="color:#2563eb; word-break:break-all; font-weight:600;">{{ verify_url }}</a>
 </div>
 {% endblock %}

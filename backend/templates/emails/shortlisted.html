@@ -1,40 +1,39 @@
 {% extends "base.html" %}
 
-{% block title %}Shortlist Notification — SkillMe{% endblock %}
+{% block title %}🎉 You've Been Shortlisted — SkillMe{% endblock %}
 
 {% block body %}
-<p class="greeting">Dear {{ first_name }},</p>
+<p class="greeting">Congratulations, {{ first_name }}! 🎉</p>
 <p class="lead">
-  We are pleased to inform you that your application has been <strong>shortlisted</strong> for the
-  <strong>{{ domain_label }}</strong> internship program at SkillMe.
+  We are thrilled to inform you that your application has been <strong>shortlisted</strong> for the 
+  <strong>{{ domain_label }}</strong> internship program at <strong>SkillMe</strong>.
 </p>
 
 <div class="divider"></div>
 
-<p class="section-label">Next Steps</p>
+<p class="section-label">⚡ Next Milestone</p>
 
 <div class="steps">
-  <div class="step">
-    <div class="step-num" style="background:#059669;">&check;</div>
-    <div class="step-text"><strong>Shortlisted</strong><br />Your application has successfully passed the initial review.</div>
+  <div class="step" style="border-left: 4px solid #10b981; background: #f0fdf4;">
+    <div class="step-num" style="background:#10b981;">&check;</div>
+    <div class="step-text"><strong style="color:#15803d;">Application Shortlisted</strong><br />Your profile successfully passed initial technical review and cohort eligibility.</div>
   </div>
   <div class="step">
     <div class="step-num">2</div>
-    <div class="step-text"><strong>Offer Letter</strong><br />You will shortly receive a formal offer letter containing your batch details, repository access, and joining date.</div>
+    <div class="step-text"><strong>Official Offer Letter &amp; Repository Access</strong><br />You will receive your formal digital Offer Letter and GitHub repository invitation in your inbox shortly.</div>
   </div>
   <div class="step">
     <div class="step-num">3</div>
-    <div class="step-text"><strong>Program Commencement</strong><br />Begin your 4-week internship, resolving real GitHub issues and earning open-source contributions.</div>
+    <div class="step-text"><strong>4-Week Production Sprint</strong><br />Begin solving assigned issues, submitting PRs, and earning verifiable Proof of Work.</div>
   </div>
 </div>
 
-<div class="divider"></div>
-
 <div class="note">
-  Please monitor your inbox for your official offer letter.
+  📩 <strong>Please check your inbox:</strong> Your official offer letter will be dispatched with batch schedule, joining date, and repository access links.
 </div>
 
 <div class="cta-wrap">
-  <a href="https://skill-me-intern.in" class="cta-btn">Visit SkillMe</a>
+  <a href="https://skill-me-intern.in/dashboard.html" target="_blank" class="cta-btn">Access Student Dashboard &rarr;</a><br />
+  <a href="https://www.linkedin.com/company/skill-me-intern/" target="_blank" class="cta-btn-secondary">Join the SkillMe Network on LinkedIn ↗</a>
 </div>
 {% endblock %}

@@ -1,52 +1,67 @@
 {% extends "base.html" %}
 
-{% block title %}Week {{ week_number }} Tasks Assigned — SkillMe{% endblock %}
+{% block title %}💻 Week {{ week_number }} Tasks Are Live — SkillMe{% endblock %}
 
 {% block body %}
 <p class="greeting">Hello {{ first_name }},</p>
 <p class="lead">
-  Your tasks for <strong>Week {{ week_number }}</strong> of the <strong>{{ domain_label }}</strong> internship program have been assigned.
+  Your tasks for <strong>Week {{ week_number }} of 4</strong> in the <strong>{{ domain_label }}</strong> program (Batch #{{ batch_number }}) are now live on GitHub.
 </p>
 
 <div class="divider"></div>
 
-<p class="section-label">Task Details</p>
+<p class="section-label">⚡ Sprint Overview</p>
 <div class="info-table">
   <div class="info-row">
-    <span class="info-label">Week</span>
-    <span class="info-value">{{ week_number }} of 4</span>
+    <span class="info-label">Sprint Milestone</span>
+    <span class="info-value">Week {{ week_number }} of 4</span>
   </div>
   <div class="info-row">
     <span class="info-label">Tasks Assigned</span>
-    <span class="info-value">{{ task_count }}</span>
+    <span class="info-value">{{ task_count }} Issues</span>
   </div>
   <div class="info-row">
-    <span class="info-label">Submission Deadline</span>
+    <span class="info-label">Submission Target</span>
     <span class="info-value">{{ deadline }}</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Review Mechanism</span>
+    <span class="info-value"><span class="badge badge-blue">Automated CI/CD + Mentor</span></span>
   </div>
 </div>
 
-<p class="section-label">Assigned Issues</p>
+<div class="divider"></div>
 
-{% for task in tasks %}
-<div class="task-item">
-  <div class="task-item-title">{{ loop.index }}. {{ task.title }}</div>
-  {% if task.issue_url %}
-  <a href="{{ task.issue_url }}" class="task-item-link">View Issue on GitHub &rarr;</a>
-  {% endif %}
-</div>
-{% endfor %}
+<p class="section-label">📌 Assigned Issues for This Sprint</p>
+
+{% if tasks %}
+  {% for task in tasks %}
+  <div class="task-item">
+    <div class="task-item-title">{{ loop.index }}. {{ task.title }}</div>
+    {% if task.issue_url %}
+    <a href="{{ task.issue_url }}" target="_blank" class="task-item-link">Solve Issue on GitHub &rarr;</a>
+    {% endif %}
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="task-item">
+    <div class="task-item-title">Assigned Cohort Tasks</div>
+    {% if issues_url %}
+    <a href="{{ issues_url }}" target="_blank" class="task-item-link">View Your Issues on GitHub &rarr;</a>
+    {% endif %}
+  </div>
+{% endif %}
 
 <div class="cta-wrap">
-  <a href="https://skill-me-intern.in/dashboard.html" class="cta-btn">Access Dashboard</a><br />
+  <a href="https://skill-me-intern.in/dashboard.html" target="_blank" class="cta-btn">Open Student Dashboard &rarr;</a><br />
   {% if issues_url %}
-  <a href="{{ issues_url }}" class="cta-btn-secondary">View Your Assigned Tasks &rarr;</a>
+  <a href="{{ issues_url }}" target="_blank" class="cta-btn-secondary">View Your Assigned Tasks on GitHub ↗</a>
   {% elif repo_url %}
-  <a href="{{ repo_url }}" class="cta-btn-secondary">Open Repository</a>
+  <a href="{{ repo_url }}" target="_blank" class="cta-btn-secondary">Open Cohort Repository ↗</a>
   {% endif %}
 </div>
 
 <div class="note">
-  Please ensure your pull requests are submitted prior to the deadline: <strong>{{ deadline }}</strong>.
+  💡 <strong>Reminder:</strong> When opening your Pull Request on GitHub, remember to include <strong><code>Closes #&lt;issue_number&gt;</code></strong> in your PR description. This automatically links your contribution and updates your live dashboard score upon merge!
 </div>
 {% endblock %}

@@ -1,86 +1,90 @@
 {% extends "base.html" %}
 
-{% block title %}Offer Letter — SkillMe{% endblock %}
+{% block title %}🚀 Official Internship Offer Letter — SkillMe{% endblock %}
 
 {% block body %}
 <p class="greeting">Dear {{ first_name }},</p>
 <p class="lead">
-  We are pleased to formally offer you an internship position at <strong>SkillMe</strong> in the <strong>{{ domain_label }}</strong> program.
+  We are pleased to formally offer you an internship position at <strong>SkillMe</strong> under the 
+  <strong>{{ domain_label }}</strong> technical program for <strong>Batch #{{ batch_number }}</strong>.
 </p>
 
 <div class="divider"></div>
 
-<p class="section-label">Internship Details</p>
+<p class="section-label">📋 Internship Parameters</p>
 <div class="info-table">
   <div class="info-row">
-    <span class="info-label">Name</span>
+    <span class="info-label">Candidate Name</span>
     <span class="info-value">{{ first_name }} {{ last_name }}</span>
   </div>
   <div class="info-row">
-    <span class="info-label">Domain</span>
+    <span class="info-label">Assigned Track</span>
     <span class="info-value">{{ domain_label }}</span>
   </div>
   <div class="info-row">
-    <span class="info-label">Duration</span>
-    <span class="info-value">4 Weeks</span>
+    <span class="info-label">Cohort Batch</span>
+    <span class="info-value">Batch #{{ batch_number }}</span>
   </div>
   <div class="info-row">
     <span class="info-label">Date of Joining</span>
     <span class="info-value">{{ joining_date }}</span>
   </div>
   <div class="info-row">
-    <span class="info-label">Mode</span>
-    <span class="info-value">Remote (GitHub-based)</span>
+    <span class="info-label">Program Duration</span>
+    <span class="info-value">4 Weeks (Remote / Async)</span>
   </div>
   <div class="info-row">
-    <span class="info-label">Status</span>
-    <span class="info-value"><span class="badge badge-green">Enrolled</span></span>
+    <span class="info-label">Enrollment Status</span>
+    <span class="info-value"><span class="badge badge-green">Enrolled &amp; Verified</span></span>
   </div>
 </div>
 
 <div class="divider"></div>
 
-<p class="section-label">Program Structure</p>
+<p class="section-label">⚡ 4-Week Milestone Roadmap</p>
 
 <div class="steps">
   <div class="step">
     <div class="step-num">1</div>
-    <div class="step-text"><strong>Weekly Assignments</strong><br />You will be assigned specific issues on your batch's GitHub repository each week.</div>
+    <div class="step-text"><strong>Weekly Issue Assignments</strong><br />Curated production tasks are assigned on your cohort repository at the beginning of each sprint week.</div>
   </div>
   <div class="step">
     <div class="step-num">2</div>
-    <div class="step-text"><strong>Pull Requests</strong><br />Resolve the assigned issues and submit pull requests. Ensure all automated tests pass for approval.</div>
+    <div class="step-text"><strong>Pull Requests &amp; CI/CD Testing</strong><br />Submit PRs linked with <code>Closes #&lt;issue_id&gt;</code>. Automated tests and mentors review each contribution.</div>
   </div>
   <div class="step">
     <div class="step-num">3</div>
-    <div class="step-text"><strong>Progress Tracking</strong><br />Monitor your task completion and overall progress through the SkillMe dashboard.</div>
+    <div class="step-text"><strong>Live Command Deck Tracking</strong><br />Track your merged PRs, points, and milestones in real-time on your SkillMe Student Dashboard.</div>
   </div>
   <div class="step">
     <div class="step-num">4</div>
-    <div class="step-text"><strong>Certification</strong><br />Upon successful completion of the 4-week program, a verified certificate will be issued.</div>
+    <div class="step-text"><strong>Verifiable Credentials &amp; LOR</strong><br />Upon completion, receive your cryptographically verified Certificate of Completion and Letter of Recommendation.</div>
   </div>
 </div>
 
 {% if repo_url %}
 <div class="repo-box">
-  <p><strong>Repository Access</strong></p>
-  <p>You have been granted access to your GitHub repository. Please accept the GitHub invitation to proceed:</p>
-  <a href="{{ repo_url }}">{{ repo_url }}</a>
+  <div style="font-weight: 700; font-size: 14px; color: #0f172a; margin-bottom: 6px;">📂 Your GitHub Repository Access</div>
+  <p>You have been invited to collaborate on your cohort repository. Please accept the GitHub invitation to start your tasks:</p>
+  <a href="{{ repo_url }}" target="_blank">{{ repo_url }}</a>
   {% if issues_url %}
-  <p style="margin-top:12px;font-size:0.9em;color:#6b7280;">Your assigned tasks: <a href="{{ issues_url }}">{{ issues_url }}</a></p>
+  <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0;">
+    <span style="font-size: 12.5px; color: #64748b;">Direct link to your assigned tasks:</span><br />
+    <a href="{{ issues_url }}" target="_blank" style="font-size: 13px; font-weight: 700;">{{ issues_url }} &rarr;</a>
+  </div>
   {% endif %}
 </div>
 {% endif %}
 
 <div class="cta-wrap">
-  <a href="https://skill-me-intern.in/offer.html?name={{ first_name }}+{{ last_name }}&domain={{ domain_label }}" class="cta-btn">View Official Offer Letter Online &rarr;</a><br />
-  <a href="https://skill-me-intern.in/dashboard.html" class="cta-btn-secondary">Access Student Dashboard</a>
+  <a href="https://skill-me-intern.in/offer.html?name={{ first_name }}+{{ last_name }}&domain={{ domain_label }}" target="_blank" class="cta-btn">View &amp; Print Official Offer Letter Online &rarr;</a><br />
+  <a href="https://skill-me-intern.in/dashboard.html" target="_blank" class="cta-btn-secondary">Open Student Dashboard</a>
   {% if issues_url %}
-  <br /><a href="{{ issues_url }}" class="cta-btn-secondary" style="margin-top: 8px;">View Your Tasks on GitHub &rarr;</a>
+  <br /><a href="{{ issues_url }}" target="_blank" class="cta-btn-secondary" style="margin-top: 8px;">View Your Tasks on GitHub &rarr;</a>
   {% endif %}
 </div>
 
 <div class="note">
-  By participating in this internship, you agree to adhere to professional standards, submit genuine contributions, and abide by the community code of conduct.
+  🏛️ <strong>College NOC / HOD Verification:</strong> If you require college department or placement cell compliance, you can download the <strong>HOD Verification Pack (Letter + 4-Week Syllabus + Evaluation Rubric)</strong> directly from your online offer letter view.
 </div>
 {% endblock %}

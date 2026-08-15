@@ -1,64 +1,65 @@
 {% extends "base.html" %}
 
-{% block title %}Application Received — SkillMe{% endblock %}
+{% block title %}Application Confirmed — SkillMe{% endblock %}
 
 {% block body %}
 <p class="greeting">Hello {{ first_name }},</p>
 <p class="lead">
-  We have received your application for the <strong>{{ domain_label }}</strong> internship program at SkillMe.
-  Your profile is currently under review by our team.
+  We have officially received your application for the <strong>{{ domain_label }}</strong> internship program at <strong>SkillMe</strong>.
+  Our engineering review committee is currently screening your profile and GitHub activity.
 </p>
 
 <div class="divider"></div>
 
-<p class="section-label">Next Steps</p>
-
-<div class="steps">
-  <div class="step">
-    <div class="step-num">1</div>
-    <div class="step-text"><strong>Review Process</strong><br />Our team evaluates all applications and selects candidates based on the cohort requirements.</div>
+<p class="section-label">📌 Application Summary</p>
+<div class="info-table">
+  <div class="info-row">
+    <span class="info-label">Candidate Name</span>
+    <span class="info-value">{{ first_name }} {{ last_name }}</span>
   </div>
-  <div class="step">
-    <div class="step-num">2</div>
-    <div class="step-text"><strong>Shortlist Status</strong><br />If selected, you will receive a notification email detailing the next steps.</div>
+  <div class="info-row">
+    <span class="info-label">Registered Email</span>
+    <span class="info-value">{{ email }}</span>
   </div>
-  <div class="step">
-    <div class="step-num">3</div>
-    <div class="step-text"><strong>Offer Letter</strong><br />Shortlisted candidates will receive a formal offer letter with their joining date and repository access.</div>
+  <div class="info-row">
+    <span class="info-label">Selected Track</span>
+    <span class="info-value">{{ domain_label }}</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">GitHub Profile</span>
+    <span class="info-value">{% if github_username %}@{{ github_username }}{% else %}&mdash;{% endif %}</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Application Status</span>
+    <span class="info-value"><span class="badge badge-amber">Under Active Review</span></span>
   </div>
 </div>
 
 <div class="divider"></div>
 
-<p class="section-label">Application Details</p>
-<div class="info-table">
-  <div class="info-row">
-    <span class="info-label">Name</span>
-    <span class="info-value">{{ first_name }} {{ last_name }}</span>
+<p class="section-label">🗺️ What Happens Next</p>
+
+<div class="steps">
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-text"><strong>Technical Screening</strong><br />Our mentors evaluate your track preference and open-source readiness based on cohort capacity.</div>
   </div>
-  <div class="info-row">
-    <span class="info-label">Email</span>
-    <span class="info-value">{{ email }}</span>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-text"><strong>Shortlist Notification &amp; Batch Allocation</strong><br />If selected, you'll receive a shortlist notice followed by your formal Offer Letter.</div>
   </div>
-  <div class="info-row">
-    <span class="info-label">Domain</span>
-    <span class="info-value">{{ domain_label }}</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">GitHub</span>
-    <span class="info-value">@{{ github_username or '—' }}</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">Status</span>
-    <span class="info-value"><span class="badge badge-amber">Under Review</span></span>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-text"><strong>GitHub Repository Access &amp; Sprint Kickoff</strong><br />You'll be added to the production batch repo with curated weekly issues to solve and merge.</div>
   </div>
 </div>
 
 <div class="note">
-  <strong>Note:</strong> We recommend keeping your GitHub profile active and updated during the review period. Consistent public activity is highly valued.
+  💡 <strong>Pro Tip:</strong> Keep your GitHub contribution graph active and ensure your profile details are up to date during the screening phase.
 </div>
 
 <div class="cta-wrap">
-  <a href="https://skill-me-intern.in" class="cta-btn">Visit SkillMe</a>
+  <a href="https://skill-me-intern.in" target="_blank" class="cta-btn">Visit SkillMe Portal &rarr;</a><br />
+  <a href="https://www.linkedin.com/company/skill-me-intern/" target="_blank" class="cta-btn-secondary">Follow SkillMe on LinkedIn ↗</a>
 </div>
 {% endblock %}
