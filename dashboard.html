@@ -1347,6 +1347,66 @@
       pointer-events: none;
     }
 
+    /* 🏛️ Prominent HOD & College NOC Banner */
+    .dash-hod-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(201, 154, 78, 0.08) 100%);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-left: 4px solid #3b82f6;
+      border-radius: var(--radius-md);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      flex-wrap: wrap;
+    }
+    .dash-hod-banner-content {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+      min-width: 260px;
+    }
+    .dash-hod-icon {
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+    .dash-hod-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #93c5fd;
+      letter-spacing: -0.2px;
+    }
+    .dash-hod-sub {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+      line-height: 1.45;
+    }
+    .dash-hod-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 18px;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.8rem;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    }
+    .dash-hod-btn:hover {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.5);
+      transform: translateY(-1px);
+    }
+
     /* 🛠️ Live PR Helper & Safety Checklist Styles */
     .pr-helper-container {
       margin-top: 22px;
@@ -2056,6 +2116,20 @@
           <div class="stat-label">Score &amp; Proof</div>
           <div class="stat-value"><span id="stat-score">0</span><span class="stat-unit"> pts</span></div>
         </div>
+      </div>
+
+      <!-- 🏛️ Prominent Institutional HOD & College NOC Compliance Banner -->
+      <div class="dash-hod-banner" id="dash-hod-banner-el">
+        <div class="dash-hod-banner-content">
+          <div class="dash-hod-icon">🏛️</div>
+          <div class="dash-hod-text">
+            <div class="dash-hod-title">Need College NOC or HOD Department Verification?</div>
+            <div class="dash-hod-sub">Download your official institutional compliance pack with official acceptance letter, 4-week structured syllabus, grading rubric, and live QR code.</div>
+          </div>
+        </div>
+        <a href="offer.html?view=hod" id="dash-banner-hod-btn" target="_blank" class="dash-hod-btn">
+          Download HOD Pack ↗
+        </a>
       </div>
 
       <!-- Progress Bar & Milestones -->

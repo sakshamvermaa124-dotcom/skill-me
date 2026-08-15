@@ -235,10 +235,12 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('dash-github').href = `https://github.com/${student.github}`;
     }
 
+    const hodUrl = `offer.html?view=hod&student_id=${student.id || ''}&name=${encodeURIComponent(student.name || '')}&domain=${encodeURIComponent(student.domain || '')}&college=${encodeURIComponent(student.college || '')}`;
     const hodQuickLink = document.getElementById('dash-quick-hod');
-    if (hodQuickLink) {
-      hodQuickLink.href = `offer.html?view=hod&student_id=${student.id || ''}&name=${encodeURIComponent(student.name || '')}&domain=${encodeURIComponent(student.domain || '')}&college=${encodeURIComponent(student.college || '')}`;
-    }
+    if (hodQuickLink) hodQuickLink.href = hodUrl;
+
+    const hodBannerBtn = document.getElementById('dash-banner-hod-btn');
+    if (hodBannerBtn) hodBannerBtn.href = hodUrl;
 
     // Progress
     let totalAssigned = 0, totalCompleted = 0, totalPrs = 0, totalScore = 0, maxWeek = 1;
