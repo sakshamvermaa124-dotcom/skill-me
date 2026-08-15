@@ -1100,6 +1100,7 @@ window.openMilestoneShareModal = function(customData) {
   const referralLink = `${PROD_BASE}/apply.html?ref=${studentRefCode}`;
   const ghUser = (student.github || '').trim().replace(/^@/, '');
   const portfolioUrl = ghUser ? `${PROD_BASE}/portfolio.html?gh=${encodeURIComponent(ghUser)}` : PROD_BASE;
+  const offerUrl = `${PROD_BASE}/offer.html?name=${encodeURIComponent(student.name || '')}&domain=${encodeURIComponent(student.domain || '')}`;
 
   // Format LinkedIn Post
   const linkedInPost = `🚀 Milestone ${week} Sprint Completed on SkillMe (@skill-me-intern)!
@@ -1107,31 +1108,36 @@ window.openMilestoneShareModal = function(customData) {
 Proud to share that I have merged ${prs} verified Pull Requests and resolved core engineering tasks for the ${domain} technical program!
 
 📊 Verified Proof of Work Stats:
-• PRs Merged to Open Source: ${prs}
+• Pull Requests Merged: ${prs}
 • Engineering Score: ${score} pts
 • Sprint Milestone: Week ${week} Complete
-• Cryptographic QR Verification: Active
+• Cryptographic Verification: Active
 
-Every single contribution is tested, peer-reviewed, and merged directly into real GitHub repositories.
+📄 View my verified digital Offer Letter:
+👉 ${offerUrl}
 
 Explore my live Proof of Work portfolio & codebase here:
 👉 ${portfolioUrl}
 
 Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
 
-#SkillMe #OpenSource #ProofOfWork #WebDevelopment #SoftwareEngineering #TechInternship #GitHub`;
+#SkillMe #ProofOfWork #WebDevelopment #SoftwareEngineering #TechInternship #GitHub`;
 
   // Format WhatsApp Squad Invite
-  const whatsAppInvite = `🚀 Hey! I just completed Milestone ${week} on the SkillMe ${domain} internship with ${prs} verified open-source PRs merged!
+  const whatsAppInvite = `🚀 Hey! I just completed Milestone ${week} on the SkillMe ${domain} internship with ${prs} verified PRs merged!
 
-Collaborate with me on real open-source repositories and earn verified Proof of Work for your resume:
+Check out my verified offer letter:
+👉 ${offerUrl}
+
+Collaborate with me on real repositories and earn verified Proof of Work for your resume:
 👉 Join my SkillMe Sprint Squad: ${referralLink}`;
 
   milestoneShareData = {
     linkedInText: linkedInPost,
     whatsAppText: whatsAppInvite,
     referralLink: referralLink,
-    portfolioUrl: portfolioUrl
+    portfolioUrl: portfolioUrl,
+    offerUrl: offerUrl
   };
 
   // Populate DOM elements
