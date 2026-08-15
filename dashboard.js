@@ -40,19 +40,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Auto-Login via Saved Session ---
   async function checkExistingSession() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const isPreview = urlParams.get('preview') === '1' || urlParams.get('preview') === 'paid';
+    const isPreview = urlParams.get('preview') === '1' || urlParams.get('preview') === 'paid' || urlParams.get('preview') === 'progress';
     
     // Bypass login entirely for preview mode
     if (isPreview) {
+        const isProgress = urlParams.get('preview') === 'progress';
+        const completedCount = isProgress ? 4 : 12;
         const mockData = {
             student: { id: 999, name: "Saksham Verma", github: "sakshamverma124", domain: "Web Development" },
-            progress: [{ week: 1, issues_completed: 4, issues_assigned: 4, prs_merged: 4, score: 100 }],
+            progress: [{ week: isProgress ? 1 : 4, issues_completed: completedCount, issues_assigned: 12, prs_merged: completedCount, score: isProgress ? 100 : 300 }],
             submissions: [],
             issues: [
               { id: 1, github_issue_number: 7, title: "Build the Navigation Bar", week_number: 1, difficulty: "easy", status: "completed", github_url: "https://github.com/sakshamvermaa124-dotcom/web-dev-batch-1/issues/7" },
               { id: 2, github_issue_number: 8, title: "Hero Section with Animation", week_number: 1, difficulty: "easy", status: "completed", github_url: "https://github.com/sakshamvermaa124-dotcom/web-dev-batch-1/issues/8" },
-              { id: 3, github_issue_number: 9, title: "Responsive Card Grid", week_number: 1, difficulty: "medium", status: "open", github_url: "https://github.com/sakshamvermaa124-dotcom/web-dev-batch-1/issues/9" }
+              { id: 3, github_issue_number: 9, title: "Responsive Card Grid", week_number: 1, difficulty: "medium", status: isProgress ? "open" : "completed", github_url: "https://github.com/sakshamvermaa124-dotcom/web-dev-batch-1/issues/9" }
             ],
             _batch_id: 1,
             _email: "test@example.com"
@@ -317,9 +318,10 @@ document.addEventListener('DOMContentLoaded', () => {
       // ─── Certificate Banner (Payment Gated) ───
       const certSection = document.getElementById('cert-section');
       if (certSection) {
-        if ((pct === 100 || isPreview) && student.id && data._batch_id) {
-          if (isPreview) {
-              // Dev preview: show payment banner only (never bypass payment)
+        if (pct === 100 && student.id && data._batch_id) {
+          if (isPreview && urlParams.get('preview') === 'paid') {
+              renderCertReady(certSection, student, data);
+          } else if (isPreview) {
               renderPaymentBanner(certSection, student, data);
           } else {
             // Production: ALWAYS verify payment server-side

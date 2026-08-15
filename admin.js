@@ -919,7 +919,10 @@ async function loadRecentApplications(silent = false) {
               <td>${s.domain || '—'}</td>
               <td>${fmtDate(s.created_at)}</td>
               <td>
-                <button class="btn btn-sm" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.25);" onclick="updateStatus(${s.id},'shortlisted')">Shortlist</button>
+                <div style="display:flex;gap:6px;">
+                  <button class="btn btn-sm" style="background:rgba(201,154,78,0.12);color:#c99a4e;border:1px solid rgba(201,154,78,0.22);" onclick="updateStatus(${s.id},'shortlisted')">Shortlist</button>
+                  <button class="btn btn-sm" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.25);" onclick="autoEnrollStudent(${s.id},'${s.first_name} ${s.last_name}', this)">Enroll</button>
+                </div>
               </td>
             </tr>`).join('')}
         </tbody>
@@ -1015,7 +1018,7 @@ function renderStudents(students) {
       <td>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           ${s.status === 'applied' ? `<button class="btn btn-sm" style="background:rgba(201,154,78,0.12);color:#c99a4e;border:1px solid rgba(201,154,78,0.22);" onclick="updateStatus(${s.id},'shortlisted')">Shortlist</button>` : ''}
-          ${s.status === 'shortlisted' ? `<button class="btn btn-sm" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.25);" onclick="openEnrollModal(${s.id},'${s.first_name} ${s.last_name}')">Enroll</button>` : ''}
+          ${(s.status === 'shortlisted' || s.status === 'applied') ? `<button class="btn btn-sm" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.25);" onclick="autoEnrollStudent(${s.id},'${s.first_name} ${s.last_name}', this)">Enroll</button>` : ''}
           ${(s.status === 'completed' || s.status === 'enrolled') && s.batch_id ? `<button class="btn btn-sm" style="background:rgba(212,168,83,0.15);color:#d4a853;border:1px solid rgba(212,168,83,0.3);" onclick="issueCertificate(${s.id},${s.batch_id},'${s.first_name} ${s.last_name}')">🏅 Certificate</button>` : ''}
           ${s.status !== 'dropped' ? `<button class="btn btn-sm" style="background:rgba(251,113,133,0.12);color:#fb7185;border:1px solid rgba(251,113,133,0.2);" onclick="updateStatus(${s.id},'dropped')">Drop</button>` : ''}
         </div>
@@ -1053,46 +1056,33 @@ async function issueCertificate(studentId, batchId, name) {
   }
 }
 
-async function openEnrollModal(studentId, name) {
-  document.getElementById('enroll-student-id').value = studentId;
-  document.getElementById('enroll-student-name').textContent = `Enrolling: ${name}`;
-  const select = document.getElementById('enroll-batch-select');
-  select.innerHTML = '<option>Loading batches...</option>';
-  openModal('enroll-modal');
-  try {
-    const data = await api('/api/admin/batches');
-    allBatches = data.batches || [];
-    if (!allBatches.length) {
-      select.innerHTML = '<option value="">⚠️ No batches yet — create one in the Batches tab first!</option>';
-      document.getElementById('enroll-confirm-btn').disabled = true;
-    } else {
-      select.innerHTML = allBatches.map(b => `<option value="${b.id}">${b.domain} — Batch #${b.batch_number}</option>`).join('');
-      document.getElementById('enroll-confirm-btn').disabled = false;
-    }
-  } catch(e) {
-    select.innerHTML = '<option>Failed to load batches</option>';
+async function autoEnrollStudent(studentId, name, btnEl) {
+  const btn = btnEl || (typeof event !== 'undefined' ? event.currentTarget : null);
+  const origHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<span style="display:inline-block;width:11px;height:11px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:4px;"></span> Enrolling...`;
   }
-}
-
-
-async function enrollStudent() {
-  const studentId = document.getElementById('enroll-student-id').value;
-  const batchId = document.getElementById('enroll-batch-select').value;
-  if (!batchId) { toast('Please select a batch', 'error'); return; }
   try {
-    await api(`/api/admin/batches/${batchId}/students`, {
-      method: 'POST',
-      body: JSON.stringify({ student_id: parseInt(studentId) })
+    const data = await api(`/api/admin/students/${studentId}/enroll`, {
+      method: 'POST'
     });
-    toast('Student enrolled successfully!');
-    closeModal('enroll-modal');
+    toast(`✅ Enrolled ${name}! Created repo ${data.repo_name} & configured webhook.`);
     if (currentPage === 'overview') {
+      loadRecentApplications(true);
       loadOverviewBatches(true);
     }
     loadStudents(true);
     loadStats(true);
+    if (currentPage === 'batches') {
+      loadBatches(true);
+    }
   } catch(e) {
-    toast(e.message, 'error');
+    toast(`Enrollment failed: ${e.message}`, 'error');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = origHtml;
+    }
   }
 }
 

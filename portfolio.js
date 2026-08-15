@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const username = urlParams.get('gh') || pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
   
   const container = document.getElementById('content-container');
+  if (!container) return;
   const isPreview = urlParams.get('preview') === '1';
 
   if (!username || username === 'p' || username === 'portfolio.html') {

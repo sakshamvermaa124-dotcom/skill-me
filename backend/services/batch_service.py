@@ -283,6 +283,167 @@ class BatchService:
             "github_invite_status": invite_status,
         }
 
+    async def auto_enroll_student(self, student_id: int) -> dict:
+        """
+        Automated 1-repo-per-student enrollment:
+        1. Validates student and GitHub username.
+        2. Determines domain slug and unique student repository name.
+        3. Creates personal repository from domain template.
+        4. Registers GitHub webhook on the new repository.
+        5. Adds student as collaborator with push permissions.
+        6. Creates dedicated batch record in DB and enrolls student.
+        7. Auto-assigns Week 1 tasks from central tasks repo.
+        """
+        # 1. Fetch student
+        student = await db.fetch_one("SELECT * FROM students WHERE id = ?", (student_id,))
+        if not student:
+            raise ValueError(f"Student #{student_id} not found")
+
+        # 2. Check if already actively enrolled
+        existing = await db.fetch_one(
+            """SELECT e.id, e.batch_id, b.repo_name, b.domain, b.batch_number 
+               FROM enrollments e 
+               JOIN batches b ON e.batch_id = b.id 
+               WHERE e.student_id = ? AND e.status != 'dropped'""",
+            (student_id,),
+        )
+        if existing:
+            raise ValueError(
+                f"Student is already enrolled in {existing['domain']} Batch #{existing['batch_number']} "
+                f"(Repository: {existing['repo_name']})"
+            )
+
+        # 3. Check GitHub username
+        raw_gh = (student.get("github_username") or "").strip()
+        if "github.com/" in raw_gh:
+            raw_gh = raw_gh.rstrip("/").split("/")[-1]
+        raw_gh = raw_gh.lstrip("@").strip()
+        if not raw_gh:
+            raise ValueError("Student has no GitHub username specified. Please update their profile before enrolling.")
+        
+        # Clean username for repo naming
+        gh_clean = re.sub(r"[^a-zA-Z0-9_-]", "", raw_gh.lower())
+        if not gh_clean:
+            gh_clean = f"student-{student_id}"
+
+        # 4. Resolve domain and slug
+        raw_domain = student.get("domain") or "web-dev"
+        slug = task_service.DOMAIN_SLUG_MAP.get(raw_domain, raw_domain.lower().replace(" ", "-").replace("/", "-"))
+
+        # Determine next batch number for this domain
+        batch_count_row = await db.fetch_one(
+            "SELECT COALESCE(MAX(batch_number), 0) + 1 AS next_batch FROM batches WHERE domain = ?",
+            (slug,),
+        )
+        batch_number = batch_count_row["next_batch"] if batch_count_row else 1
+
+        # Formulate unique repo name: e.g. web-dev-sakshamvermaa124
+        # If collision exists, use web-dev-b{batch_number}-sakshamvermaa124
+        repo_name = f"{slug}-{gh_clean}"
+        existing_batch_repo = await db.fetch_one("SELECT id FROM batches WHERE repo_name = ?", (repo_name,))
+        if existing_batch_repo:
+            repo_name = f"{slug}-b{batch_number}-{gh_clean}"
+
+        # 5. Create GitHub Repository from Template
+        template_name = f"{slug}-template"
+        FALLBACK_TEMPLATES = [template_name, "web-dev-template", "ml-template"]
+        github_repo_created = False
+
+        existing_repo = None
+        try:
+            existing_repo = await github_service.get_repo(repo_name)
+        except Exception as e:
+            logger.warning(f"GitHub get_repo check failed for {repo_name}: {e}")
+
+        if existing_repo:
+            logger.warning(f"Repo {repo_name} already exists on GitHub, reusing existing repo")
+            github_repo_created = True
+        else:
+            for tmpl in FALLBACK_TEMPLATES:
+                try:
+                    await github_service.create_repo_from_template(
+                        template_repo=tmpl,
+                        new_repo_name=repo_name,
+                        description=f"SkillMe {raw_domain} Internship — {student['first_name']} {student['last_name']} (@{raw_gh})",
+                    )
+                    github_repo_created = True
+                    break
+                except Exception as e:
+                    logger.warning(f"Template '{tmpl}' failed for {repo_name}: {e}")
+
+        # 6. Configure Webhook on new repository
+        github_webhook_created = False
+        resolved_webhook_url = None
+        if settings.backend_url:
+            resolved_webhook_url = settings.backend_url.rstrip("/") + "/api/webhooks/github"
+            try:
+                await github_service.create_webhook(repo_name, resolved_webhook_url)
+                github_webhook_created = True
+                logger.info(f"Webhook registered on {repo_name} → {resolved_webhook_url}")
+            except Exception as e:
+                logger.error(f"Failed to create webhook for {repo_name}: {e}")
+
+        # 7. Add Student as Collaborator
+        invite_status = "pending"
+        try:
+            await github_service.add_collaborator(repo_name, raw_gh, permission="push")
+            invite_status = "accepted"
+        except Exception as e:
+            logger.error(f"Failed to add {raw_gh} as collaborator to {repo_name}: {e}")
+            invite_status = "failed"
+
+        # 8. Create Batch in DB (1 student capacity for dedicated repo)
+        start_date = datetime.utcnow().strftime("%Y-%m-%d")
+        end_date = (datetime.utcnow() + timedelta(weeks=4)).strftime("%Y-%m-%d")
+
+        batch_id = await db.insert(
+            """INSERT INTO batches (domain, batch_number, repo_name, status, max_students, start_date, end_date, auto_assign)
+               VALUES (?, ?, ?, 'active', 1, ?, ?, 0)""",
+            (slug, batch_number, repo_name, start_date, end_date),
+        )
+
+        # 9. Create Enrollment Record
+        enrollment_id = await db.insert(
+            """INSERT INTO enrollments (student_id, batch_id, status, github_invite_status)
+               VALUES (?, ?, 'enrolled', ?)""",
+            (student_id, batch_id, invite_status),
+        )
+
+        # Update student status to 'enrolled'
+        await db.execute(
+            "UPDATE students SET status = 'enrolled', updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+            (student_id,),
+        )
+
+        logger.info(
+            f"Auto-enrolled student {student['first_name']} {student['last_name']} "
+            f"(id={student_id}) into dedicated batch {slug} #{batch_number} (repo: {repo_name})"
+        )
+
+        # 10. Automatically assign Week 1 tasks into their new repo
+        created_tasks = []
+        try:
+            created_tasks = await self.assign_week_from_task_repo(batch_id=batch_id, week_number=1)
+            logger.info(f"Auto-assigned {len(created_tasks)} Week 1 tasks for student {student_id} in {repo_name}")
+        except Exception as e:
+            logger.warning(f"Could not auto-assign Week 1 tasks for student {student_id}: {e}")
+
+        repo_url = f"https://github.com/{github_service.org}/{repo_name}"
+
+        return {
+            "enrollment_id": enrollment_id,
+            "student_id": student_id,
+            "batch_id": batch_id,
+            "domain": slug,
+            "batch_number": batch_number,
+            "repo_name": repo_name,
+            "repo_url": repo_url,
+            "github_repo_created": github_repo_created,
+            "github_webhook_created": github_webhook_created,
+            "github_invite_status": invite_status,
+            "week_1_tasks": created_tasks,
+        }
+
     async def remove_student_from_batch(self, student_id: int, batch_id: int) -> bool:
         """Remove a student from a batch and revoke GitHub access."""
         student = await db.fetch_one("SELECT * FROM students WHERE id = ?", (student_id,))

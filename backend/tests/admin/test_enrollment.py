@@ -58,6 +58,53 @@ class TestAddStudentToBatch:
 
 
 @pytest.mark.admin
+class TestAutoEnrollStudent:
+    async def test_auto_enroll_student_creates_batch_repo_and_enrolls(self, client, admin_headers, test_student):
+        """1-click auto-enroll creates personal batch/repo and enrolls student."""
+        r = await client.post(
+            f"/api/admin/students/{test_student['id']}/enroll",
+            headers=admin_headers,
+        )
+        assert r.status_code == 200
+        data = r.json()
+        assert data["status"] == "enrolled"
+        assert "batch_id" in data
+        assert "repo_name" in data
+        assert data["student_id"] == test_student["id"]
+
+        # Verify DB batch record created
+        batch = await test_db.fetch_one("SELECT * FROM batches WHERE id = ?", (data["batch_id"],))
+        assert batch is not None
+        assert batch["repo_name"] == data["repo_name"]
+
+        # Verify enrollment record created
+        enrollment = await test_db.fetch_one(
+            "SELECT * FROM enrollments WHERE student_id = ? AND batch_id = ?",
+            (test_student["id"], data["batch_id"]),
+        )
+        assert enrollment is not None
+        assert enrollment["status"] == "enrolled"
+
+        # Verify student status updated in DB
+        student = await test_db.fetch_one("SELECT status FROM students WHERE id = ?", (test_student["id"],))
+        assert student["status"] == "enrolled"
+
+    async def test_auto_enroll_nonexistent_student(self, client, admin_headers):
+        r = await client.post(
+            "/api/admin/students/99999/enroll",
+            headers=admin_headers,
+        )
+        assert r.status_code in (400, 404, 500)
+
+    async def test_auto_enroll_already_enrolled_student(self, client, admin_headers, enrolled_student):
+        r = await client.post(
+            f"/api/admin/students/{enrolled_student['id']}/enroll",
+            headers=admin_headers,
+        )
+        assert r.status_code in (400, 409)
+
+
+@pytest.mark.admin
 class TestRemoveStudentFromBatch:
     async def test_remove_enrolled_student(self, client, admin_headers, enrolled_student):
         r = await client.delete(

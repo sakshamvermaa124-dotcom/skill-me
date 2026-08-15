@@ -305,6 +305,77 @@ async def delete_batch(batch_id: int, _: str = Depends(require_admin)):
 # Student Enrollment
 # ──────────────────────────────────────────────
 
+@router.post("/students/{student_id}/enroll", summary="Auto-enroll student with dedicated repo and webhook")
+async def auto_enroll_student_endpoint(
+    student_id: int,
+    background_tasks: BackgroundTasks,
+    _: str = Depends(require_admin),
+):
+    """
+    Automated 1-repo-per-student enrollment:
+    1. Creates a dedicated GitHub repository from the domain template.
+    2. Attaches GitHub webhook for PR tracking.
+    3. Adds student as collaborator.
+    4. Creates batch and enrollment records in DB.
+    5. Auto-assigns Week 1 tasks.
+    6. Sends Offer Letter and Week 1 tasks emails.
+    """
+    try:
+        result = await batch_service.auto_enroll_student(student_id)
+
+        # Fetch student details for emails
+        student = await db.fetch_one(
+            "SELECT first_name, last_name, email, github_username, domain FROM students WHERE id = ?",
+            (student_id,)
+        )
+
+        if student:
+            repo_url = result.get("repo_url")
+            gh_user = student.get("github_username")
+
+            # 1. Dispatch Offer Letter email
+            background_tasks.add_task(
+                email_service.send_offer_letter,
+                first_name=student["first_name"],
+                last_name=student["last_name"],
+                email=student["email"],
+                domain=result["domain"],
+                batch_number=result["batch_number"],
+                repo_url=repo_url,
+                github_username=gh_user or None,
+            )
+
+            # 2. Dispatch Week 1 Tasks email if tasks were created
+            week_1_tasks = result.get("week_1_tasks", [])
+            if week_1_tasks:
+                tasks_for_email = [
+                    {
+                        "title": r.get("title", "Task"),
+                        "issue_url": f"{repo_url}/issues/{r.get('github_issue_number')}" if r.get("github_issue_number") else repo_url
+                    }
+                    for r in week_1_tasks
+                ]
+                background_tasks.add_task(
+                    email_service.send_weekly_tasks_notification,
+                    first_name=student["first_name"],
+                    last_name=student["last_name"],
+                    email=student["email"],
+                    domain=result["domain"],
+                    batch_number=result["batch_number"],
+                    week_number=1,
+                    tasks=tasks_for_email,
+                    repo_url=repo_url,
+                    github_username=gh_user or None,
+                )
+
+        return {"status": "enrolled", **result}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error auto-enrolling student {student_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to auto-enroll student: {str(e)}")
+
+
 @router.post("/batches/{batch_id}/students", summary="Add a student to a batch")
 async def add_student_to_batch(
     batch_id: int, req: AddStudentRequest,
