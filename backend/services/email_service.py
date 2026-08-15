@@ -292,7 +292,7 @@ class EmailService:
         return await _send_and_log(
             email,
             f"{first_name} {last_name}",
-            f"🚀 Your SkillMe Offer Letter — {_domain_label(domain)} Batch #{batch_number}",
+            f"🚀 Your SkillMe Offer Letter — {_domain_label(domain)} Program",
             html,
             email_type="offer_letter",
         )
