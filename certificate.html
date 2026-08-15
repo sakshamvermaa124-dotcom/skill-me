@@ -704,7 +704,7 @@
             <img src="assets/logo.webp" alt="SkillMe Logo" class="cert-brand-logo" onerror="this.src='assets/logo.png'">
             <div>
               <div class="cert-brand-title">Skill<span>Me</span></div>
-              <div class="cert-brand-sub">Technical Internship Program</div>
+              <div class="cert-brand-sub">Technical Internship</div>
             </div>
           </div>
           <div class="cert-header-meta">
@@ -730,9 +730,9 @@
           <div class="cert-recipient-name" id="cert-name">Candidate Name</div>
           <div class="cert-name-line"></div>
           <div class="cert-completion-text">for successful completion and exemplary technical performance in the</div>
-          <div class="cert-track-name" id="cert-domain">Web Development Engineering Program</div>
+          <div class="cert-track-name" id="cert-domain">Web Development Engineering Internship</div>
           <p class="cert-narrative" id="cert-description">
-            A rigorous 4-week industry-standard software engineering internship program. The candidate demonstrated competency in real-world GitHub repositories, successfully implemented modular architecture, resolved assigned issues, passed automated CI/CD test pipelines, and adhered to professional engineering standards.
+            A rigorous 4-week industry-standard software engineering internship. The candidate demonstrated competency in real-world GitHub repositories, successfully implemented modular architecture, resolved assigned issues, passed automated CI/CD test pipelines, and adhered to professional engineering standards.
           </p>
         </div>
 
@@ -784,7 +784,7 @@
               <div class="cert-sig-line"></div>
               <div class="cert-sig-name">Saksham Verma</div>
               <div class="cert-sig-title">Founder &amp; Technical Director</div>
-              <div class="cert-meta-label" style="margin-top:2px;">SkillMe Technical Program</div>
+              <div class="cert-meta-label" style="margin-top:2px;">SkillMe Technical Internship</div>
             </div>
 
             <div class="cert-qr-holder">
@@ -942,9 +942,9 @@
       .join(' ');
 
     const rawDomain = (data.domain || 'Web Development').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    const domainLabel = rawDomain.toLowerCase().includes('program') || rawDomain.toLowerCase().includes('internship')
+    const domainLabel = rawDomain.toLowerCase().includes('internship')
       ? rawDomain
-      : `${rawDomain} Engineering Program`;
+      : `${rawDomain} Engineering Internship`;
 
     const id = data.cert_id || 'SM-2026-WD-1001';
     const date = data.issued_at

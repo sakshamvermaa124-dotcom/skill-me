@@ -312,7 +312,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       </section>
 
       <footer style="margin-top:50px; text-align:center; font-size:0.8rem; color:#64748b; border-top:1px solid rgba(255,255,255,0.06); padding-top:24px;">
-        SkillMe Proof of Work Registry &bull; Verified Technical Internship Program &bull; <a href="https://www.linkedin.com/company/skill-me-intern/" target="_blank" style="color:#94a3b8; text-decoration:none;">LinkedIn Community ↗</a>
+        SkillMe Proof of Work Registry &bull; Verified Technical Internship &bull; <a href="https://www.linkedin.com/company/skill-me-intern/" target="_blank" style="color:#94a3b8; text-decoration:none;">LinkedIn Community ↗</a>
       </footer>
     `;
 

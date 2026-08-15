@@ -21,7 +21,7 @@ class TestEmailTemplatesRendering:
         )
         assert "SkillMe" in html
         assert "https://www.linkedin.com/company/skill-me-intern/" in html
-        assert "Technical Internship Program" in html
+        assert "Technical Internship" in html
         # Ensure 'Open-Source Technical Program' has been cleaned from base subtitle
         assert "Open-Source Technical Program" not in html
         assert "Production Open Source" not in html

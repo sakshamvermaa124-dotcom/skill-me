@@ -1105,7 +1105,7 @@ window.openMilestoneShareModal = function(customData) {
   // Format LinkedIn Post
   const linkedInPost = `🚀 Milestone ${week} Sprint Completed on SkillMe (@skill-me-intern)!
 
-Proud to share that I have merged ${prs} verified Pull Requests and resolved core engineering tasks for the ${domain} technical program!
+Proud to share that I have merged ${prs} verified Pull Requests and resolved core engineering tasks for the ${domain} technical internship!
 
 📊 Verified Proof of Work Stats:
 • Pull Requests Merged: ${prs}
