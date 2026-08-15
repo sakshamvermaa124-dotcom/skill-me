@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
             <div class="hero-meta">
               <div class="hero-badges-row">
-                <span class="badge-verified-eng">✓ Verified Open-Source Contributor</span>
+                <span class="badge-verified-eng">✓ Verified Engineering Contributor</span>
                 ${college ? `<span class="badge-college"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg> ${college}</span>` : ''}
               </div>
               <h1 class="hero-name">${name}</h1>
@@ -285,7 +285,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       <section>
         <div class="section-header-row">
           <div class="section-title">
-            <span>⚡</span> Verified Open-Source Contributions
+            <span>⚡</span> Verified Engineering Contributions
             <span class="feed-count-pill">${submissions.length} Merged PRs</span>
           </div>
           <div style="font-size:0.8rem; color:#64748b;">Live GitHub Sync &bull; Automated CI/CD</div>
@@ -303,7 +303,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <span>🛡️</span> Recruiter &amp; Employer Verification Notice
           </div>
           <div class="trust-desc">
-            All engineering contributions, Pull Requests, and commits displayed on this portfolio are cryptographically validated by SkillMe maintainers. Every PR passed continuous integration testing before merging into real-world open-source codebases.
+            All engineering contributions, Pull Requests, and commits displayed on this portfolio are cryptographically validated by SkillMe maintainers. Every PR passed continuous integration testing before merging into real-world production codebases.
           </div>
         </div>
         <div class="trust-actions">
@@ -312,7 +312,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       </section>
 
       <footer style="margin-top:50px; text-align:center; font-size:0.8rem; color:#64748b; border-top:1px solid rgba(255,255,255,0.06); padding-top:24px;">
-        SkillMe Proof of Work Registry &bull; Verified Open Source Engineering Program &bull; <a href="https://www.linkedin.com/company/skill-me-intern/" target="_blank" style="color:#94a3b8; text-decoration:none;">LinkedIn Community ↗</a>
+        SkillMe Proof of Work Registry &bull; Verified Technical Internship Program &bull; <a href="https://www.linkedin.com/company/skill-me-intern/" target="_blank" style="color:#94a3b8; text-decoration:none;">LinkedIn Community ↗</a>
       </footer>
     `;
 
@@ -331,18 +331,18 @@ window.copyPortfolioLink = function(url) {
 
 // 1-Click Share on LinkedIn
 window.shareOnLinkedIn = function(name, domains, prCount, url) {
-  const text = `🚀 Excited to share my verified open-source engineering Proof of Work portfolio on SkillMe (@skill-me-intern)!
+  const text = `🚀 Excited to share my verified engineering Proof of Work portfolio on SkillMe (@skill-me-intern)!
 
 I have contributed and merged ${prCount} verified Pull Requests across real-world GitHub repositories in ${domains}.
 
-Every contribution is tested via CI/CD, peer-reviewed, and merged into production open source.
+Every contribution is tested via CI/CD, peer-reviewed, and merged into production repositories.
 
 Check out my live portfolio, merged PRs, and codebase here:
 👉 ${url}
 
 Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
 
-#SkillMe #OpenSource #ProofOfWork #SoftwareEngineering #WebDevelopment #GitHub #Tech`;
+#SkillMe #ProofOfWork #SoftwareEngineering #WebDevelopment #GitHub #Tech`;
 
   const shareUrl = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(text)}`;
   window.open(shareUrl, '_blank');

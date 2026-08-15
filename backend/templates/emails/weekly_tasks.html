@@ -5,7 +5,7 @@
 {% block body %}
 <p class="greeting">Hello {{ first_name }},</p>
 <p class="lead">
-  Your tasks for <strong>Week {{ week_number }} of 4</strong> in the <strong>{{ domain_label }}</strong> program (Batch #{{ batch_number }}) are now live on GitHub.
+  Your tasks for <strong>Week {{ week_number }} of 4</strong> in the <strong>{{ domain_label }}</strong> program are now live on GitHub.
 </p>
 
 <div class="divider"></div>
@@ -45,7 +45,7 @@
   {% endfor %}
 {% else %}
   <div class="task-item">
-    <div class="task-item-title">Assigned Cohort Tasks</div>
+    <div class="task-item-title">Assigned Sprint Tasks</div>
     {% if issues_url %}
     <a href="{{ issues_url }}" target="_blank" class="task-item-link">View Your Issues on GitHub &rarr;</a>
     {% endif %}
@@ -57,11 +57,11 @@
   {% if issues_url %}
   <a href="{{ issues_url }}" target="_blank" class="cta-btn-secondary">View Your Assigned Tasks on GitHub ↗</a>
   {% elif repo_url %}
-  <a href="{{ repo_url }}" target="_blank" class="cta-btn-secondary">Open Cohort Repository ↗</a>
+  <a href="{{ repo_url }}" target="_blank" class="cta-btn-secondary">Open Project Repository ↗</a>
   {% endif %}
 </div>
 
-<div class="note">
-  💡 <strong>Reminder:</strong> When opening your Pull Request on GitHub, remember to include <strong><code>Closes #&lt;issue_number&gt;</code></strong> in your PR description. This automatically links your contribution and updates your live dashboard score upon merge!
+<div class="note" style="margin-top: 24px;">
+  💡 <strong>Workflow Reminder:</strong> Create a feature branch, resolve the issue, and open your Pull Request with <code>Closes #N</code> to trigger automated review checks.
 </div>
 {% endblock %}
