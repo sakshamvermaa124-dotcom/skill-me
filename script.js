@@ -382,6 +382,97 @@ document.addEventListener('DOMContentLoaded', () => {
   addTilt('.step-card', 5);
 
   // ═══════════════════════════════════════════════════════════
+  // LIVE REAL-TIME PROOF-OF-WORK ACTIVITY TICKER ENGINE
+  // ═══════════════════════════════════════════════════════════
+  (function initLiveActivityTicker() {
+    const ribbon = document.getElementById('live-activity-ribbon');
+    const item = document.getElementById('live-ticker-item');
+    const avatarEl = document.getElementById('ticker-avatar');
+    const userEl = document.getElementById('ticker-user');
+    const collegeEl = document.getElementById('ticker-college');
+    const actionEl = document.getElementById('ticker-action');
+    const timeEl = document.getElementById('ticker-time');
+    const prCountEl = document.getElementById('ticker-pr-count');
+    const collegeCountEl = document.getElementById('ticker-college-count');
+
+    if (!ribbon || !item) return;
+
+    // Resilient starter pool for instant render without network lag
+    let activities = [
+      { initials: "RS", name: "Rahul S.", college: "AKTU", action: "merged PR for FastAPI Endpoint Auth", time: "3m ago" },
+      { initials: "SM", name: "Sneha M.", college: "VTU", action: "completed 4-Week Python & API Track", time: "11m ago" },
+      { initials: "AV", name: "Aman V.", college: "IPU Delhi", action: "merged Model Evaluation Pipeline", time: "19m ago" },
+      { initials: "PK", name: "Priya K.", college: "Anna Univ", action: "unlocked Verified Full-Stack LOR", time: "34m ago" },
+      { initials: "RD", name: "Rohan D.", college: "Pune Univ", action: "resolved Responsive Grid System issue", time: "52m ago" },
+      { initials: "TG", name: "Tanvi G.", college: "RTU Kota", action: "qualified for Monthly Performance Stipend", time: "1h ago" },
+      { initials: "HN", name: "Harsh N.", college: "GTU", action: "merged PR #33 on SQLite Database Client", time: "1h 15m ago" }
+    ];
+
+    let currentIndex = 0;
+    let isPaused = false;
+    let rotationInterval = null;
+
+    function renderItem(act) {
+      if (!act) return;
+      item.classList.add('switching');
+      setTimeout(() => {
+        if (avatarEl) avatarEl.textContent = act.student_initials || act.initials || "SM";
+        if (userEl) userEl.textContent = act.student_name || act.name || "Student Contributor";
+        if (collegeEl) collegeEl.textContent = act.college || "Engineering College";
+        if (actionEl) actionEl.textContent = act.action_text || act.action || "merged verified PR";
+        if (timeEl) timeEl.textContent = act.time_ago || act.time || "Just now";
+        item.classList.remove('switching');
+      }, 350);
+    }
+
+    function nextActivity() {
+      if (isPaused || activities.length === 0) return;
+      currentIndex = (currentIndex + 1) % activities.length;
+      renderItem(activities[currentIndex]);
+    }
+
+    function startRotation() {
+      if (rotationInterval) clearInterval(rotationInterval);
+      rotationInterval = setInterval(nextActivity, 4500);
+    }
+
+    // Hover pause
+    ribbon.addEventListener('mouseenter', () => { isPaused = true; });
+    ribbon.addEventListener('mouseleave', () => { isPaused = false; });
+    ribbon.addEventListener('touchstart', () => { isPaused = true; }, { passive: true });
+    ribbon.addEventListener('touchend', () => { isPaused = false; }, { passive: true });
+
+    // Fetch live production feed asynchronously from API
+    async function fetchLiveFeed() {
+      try {
+        const apiBase = window.SKILLME_API || (window.location.hostname === 'localhost' ? 'http://localhost:8000' : 'https://skill-me.onrender.com');
+        const res = await fetch(`${apiBase}/api/students/public-activity`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.activities && data.activities.length > 0) {
+            activities = data.activities;
+          }
+          if (data && data.stats) {
+            if (prCountEl && data.stats.total_prs_merged) {
+              prCountEl.textContent = `${data.stats.total_prs_merged}+`;
+            }
+            if (collegeCountEl && data.stats.total_colleges) {
+              collegeCountEl.textContent = `${data.stats.total_colleges}+`;
+            }
+          }
+        }
+      } catch (err) {
+        // Silently preserve offline resilient pool without crashing
+      }
+    }
+
+    fetchLiveFeed();
+    // Poll updates every 60 seconds in the background
+    setInterval(fetchLiveFeed, 60000);
+    startRotation();
+  })();
+
+  // ═══════════════════════════════════════════════════════════
   // BENEFIT CARD SPOTLIGHT
   // ═══════════════════════════════════════════════════════════
   document.querySelectorAll('.benefit-card').forEach(card => {
@@ -418,4 +509,106 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ═══════════════════════════════════════════════════════════
+  // DOMAIN CATEGORY TAB FILTERING
+  // ═══════════════════════════════════════════════════════════
+  const filterTabs = document.querySelectorAll('.filter-tab');
+  const domainCards = document.querySelectorAll('.domain-card');
+
+  filterTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      filterTabs.forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+
+      const selectedCat = tab.getAttribute('data-category');
+
+      domainCards.forEach(card => {
+        const cardCat = card.getAttribute('data-category');
+        if (selectedCat === 'all' || cardCat === selectedCat) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════
+  // FAQ CATEGORY TABS & INSTANT SEARCH
+  // ═══════════════════════════════════════════════════════════
+  const faqFilterPills = document.querySelectorAll('.faq-filter-pill');
+  const faqItems = document.querySelectorAll('.faq-item');
+  const faqSearchInput = document.getElementById('faq-search-input');
+
+  let activeFaqCategory = 'all';
+  let faqSearchQuery = '';
+
+  function updateFaqVisibility() {
+    faqItems.forEach(item => {
+      const itemCat = item.getAttribute('data-category');
+      const itemText = item.textContent.toLowerCase();
+
+      const matchesCat = activeFaqCategory === 'all' || itemCat === activeFaqCategory;
+      const matchesSearch = !faqSearchQuery || itemText.includes(faqSearchQuery);
+
+      if (matchesCat && matchesSearch) {
+        item.classList.remove('hidden');
+      } else {
+        item.classList.add('hidden');
+      }
+    });
+  }
+
+  faqFilterPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      faqFilterPills.forEach(p => {
+        p.classList.remove('active');
+        p.setAttribute('aria-selected', 'false');
+      });
+      pill.classList.add('active');
+      pill.setAttribute('aria-selected', 'true');
+
+      activeFaqCategory = pill.getAttribute('data-category');
+      updateFaqVisibility();
+    });
+  });
+
+  if (faqSearchInput) {
+    faqSearchInput.addEventListener('input', (e) => {
+      faqSearchQuery = e.target.value.trim().toLowerCase();
+      updateFaqVisibility();
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // CTA LAUNCHPAD DOMAIN SELECTOR
+  // ═══════════════════════════════════════════════════════════
+  const ctaTrackPills = document.querySelectorAll('.cta-track-pill');
+  const ctaBtnLabel = document.getElementById('cta-btn-label');
+  const ctaApplyBtn = document.getElementById('cta-apply-btn');
+
+  ctaTrackPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      ctaTrackPills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+
+      const domain = pill.getAttribute('data-domain');
+      const name = pill.getAttribute('data-name');
+
+      if (ctaBtnLabel) {
+        ctaBtnLabel.textContent = `Start Screening for ${name}`;
+      }
+      if (ctaApplyBtn) {
+        ctaApplyBtn.href = `quiz.html?domain=${domain}`;
+      }
+    });
+  });
+
 });
+
+
+

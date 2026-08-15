@@ -317,6 +317,35 @@ document.addEventListener('DOMContentLoaded', () => {
       
       document.getElementById('progress-ring').style.strokeDashoffset = offset;
       document.getElementById('progress-bar-inner').style.width = `${pct}%`;
+
+      // Update Sprint Milestone Step Cards
+      const m1 = document.getElementById('milestone-w1');
+      const m2 = document.getElementById('milestone-w2');
+      const m3 = document.getElementById('milestone-w3');
+      const m4 = document.getElementById('milestone-w4');
+      if (m1 && m2 && m3 && m4) {
+        [m1, m2, m3, m4].forEach(el => el.classList.remove('active', 'completed'));
+        if (pct >= 100) {
+          m1.classList.add('completed');
+          m2.classList.add('completed');
+          m3.classList.add('completed');
+          m4.classList.add('completed');
+        } else if (pct >= 75) {
+          m1.classList.add('completed');
+          m2.classList.add('completed');
+          m3.classList.add('completed');
+          m4.classList.add('active');
+        } else if (pct >= 50) {
+          m1.classList.add('completed');
+          m2.classList.add('completed');
+          m3.classList.add('active');
+        } else if (pct >= 25) {
+          m1.classList.add('completed');
+          m2.classList.add('active');
+        } else {
+          m1.classList.add('active');
+        }
+      }
       
       // ─── Certificate Banner (Payment Gated) ───
       const certSection = document.getElementById('cert-section');
