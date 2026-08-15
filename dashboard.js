@@ -41,11 +41,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Auto-Login via Saved Session ---
   async function checkExistingSession() {
-    const isPreview = urlParams.get('preview') === '1' || urlParams.get('preview') === 'paid' || urlParams.get('preview') === 'progress';
+    const isPreview = urlParams.get('preview') === '1' || urlParams.get('preview') === 'paid' || urlParams.get('preview') === 'progress' || urlParams.get('preview') === 'milestone';
     
     // Bypass login entirely for preview mode
     if (isPreview) {
-        const isProgress = urlParams.get('preview') === 'progress';
+        const isProgress = urlParams.get('preview') === 'progress' || urlParams.get('preview') === 'milestone';
         const completedCount = isProgress ? 4 : 12;
         const mockData = {
             student: { id: 999, name: "Saksham Verma", github: "sakshamverma124", domain: "Web Development" },
@@ -382,6 +382,20 @@ document.addEventListener('DOMContentLoaded', () => {
               </div>
               <div class="cert-mini-bar"><div class="cert-mini-fill" style="width:${pct}%"></div></div>
             </div>`;
+        }
+      }
+
+      // ─── Automated Milestone Celebration Popup Trigger ───
+      if (pct < 100 && (totalPrs > 0 || totalCompleted > 0 || urlParams.get('preview') === 'progress' || urlParams.get('preview') === 'milestone')) {
+        const milestoneNum = Math.max(1, Math.floor(pct / 25) || 1);
+        const milestoneSeenKey = `skillme_milestone_seen_${milestoneNum}_student_${student.id || 'guest'}`;
+        if (!localStorage.getItem(milestoneSeenKey) || urlParams.get('preview') === 'milestone' || urlParams.get('preview') === 'progress') {
+          setTimeout(() => {
+            window.openMilestoneShareModal(data);
+            if (urlParams.get('preview') !== 'milestone' && urlParams.get('preview') !== 'progress') {
+              localStorage.setItem(milestoneSeenKey, 'true');
+            }
+          }, 850);
         }
       }
     }, 600);
@@ -1024,4 +1038,211 @@ function showCompletionPopup(student, data) {
       setTimeout(() => overlay.remove(), 400);
     }
   }, 8000);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 🚀 Automated 1-Click LinkedIn & WhatsApp Milestone Share Engine
+// ═══════════════════════════════════════════════════════════════
+
+let currentShareTab = 'linkedin';
+let milestoneShareData = {
+  linkedInText: '',
+  whatsAppText: '',
+  referralLink: '',
+  portfolioUrl: ''
+};
+
+window.openMilestoneShareModal = function(customData) {
+  const data = customData || window._dashData || {};
+  const student = (data && data.student) || window._dashStudent || { name: 'Intern', github: 'developer' };
+  const progress = (data && data.progress && data.progress[0]) || {};
+  const prs = Number(progress.prs_merged) || 4;
+  const score = Number(progress.score) || 100;
+  const week = Number(progress.week) || 1;
+  const domain = (progress.domain || student.domain || 'Web Development').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const batchNum = progress.batch_number || 1;
+  
+  const studentRefCode = `SKM-${student.id ? String(student.id).padStart(4, '0') : '2026'}`;
+  const FRONTEND = window.SKILLME_FRONTEND || window.location.origin;
+  const referralLink = `https://skill-me-intern.in/apply.html?ref=${studentRefCode}`;
+  const portfolioUrl = student.github ? `${FRONTEND}/portfolio.html?gh=${student.github}` : 'https://skill-me-intern.in';
+
+  // Format LinkedIn Post
+  const linkedInPost = `🚀 Milestone ${week} Sprint Completed on SkillMe (@skill-me-intern)!
+
+Proud to share that I have merged ${prs} verified Pull Requests and resolved core engineering tasks for the ${domain} cohort (Batch #${batchNum})!
+
+📊 Verified Proof of Work Stats:
+• PRs Merged to Open Source: ${prs}
+• Engineering Score: ${score} pts
+• Sprint Milestone: Week ${week} Complete
+• Cryptographic QR Verification: Active
+
+Every single contribution is tested, peer-reviewed, and merged directly into real GitHub repositories.
+
+Explore my live Proof of Work portfolio & codebase here:
+👉 ${portfolioUrl}
+
+#SkillMe #OpenSource #ProofOfWork #WebDevelopment #SoftwareEngineering #TechInternship #GitHub`;
+
+  // Format WhatsApp Squad Invite
+  const whatsAppInvite = `🚀 Hey! I just completed Milestone ${week} on SkillMe with ${prs} verified open-source PRs merged!
+
+Collaborate with me on real open-source repositories and earn verified Proof of Work for your resume:
+👉 Join my SkillMe Sprint Squad: ${referralLink}`;
+
+  milestoneShareData = {
+    linkedInText: linkedInPost,
+    whatsAppText: whatsAppInvite,
+    referralLink: referralLink,
+    portfolioUrl: portfolioUrl
+  };
+
+  // Populate DOM elements
+  const modal = document.getElementById('milestone-modal');
+  if (!modal) return;
+
+  const titleEl = document.getElementById('milestone-title');
+  const badgeEl = document.getElementById('milestone-badge');
+  const prsEl = document.getElementById('modal-stat-prs');
+  const scoreEl = document.getElementById('modal-stat-score');
+  const weekEl = document.getElementById('modal-stat-week');
+
+  if (titleEl) titleEl.textContent = `Milestone ${week} Achieved: ${prs} PRs Merged!`;
+  if (badgeEl) badgeEl.textContent = `🎉 SPRINT MILESTONE ${week} UNLOCKED`;
+  if (prsEl) prsEl.textContent = prs;
+  if (scoreEl) scoreEl.textContent = `${score} pts`;
+  if (weekEl) weekEl.textContent = `Week ${week}`;
+
+  switchShareTab(currentShareTab);
+
+  modal.style.display = 'flex';
+  void modal.offsetWidth;
+  modal.classList.add('active');
+
+  // Trigger Confetti
+  triggerMilestoneConfetti();
+};
+
+window.closeMilestoneModal = function() {
+  const modal = document.getElementById('milestone-modal');
+  if (modal) {
+    modal.classList.remove('active');
+    setTimeout(() => { modal.style.display = 'none'; }, 350);
+  }
+};
+
+window.switchShareTab = function(tab) {
+  currentShareTab = tab;
+  const tabLinkedin = document.getElementById('tab-btn-linkedin');
+  const tabWhatsapp = document.getElementById('tab-btn-whatsapp');
+  const previewBox = document.getElementById('milestone-post-preview');
+  const mainShareBtn = document.getElementById('btn-main-share');
+  const copyBtn = document.getElementById('btn-copy-share');
+
+  if (tab === 'linkedin') {
+    if (tabLinkedin) tabLinkedin.classList.add('active');
+    if (tabWhatsapp) tabWhatsapp.classList.remove('active');
+    if (previewBox) previewBox.textContent = milestoneShareData.linkedInText;
+    if (mainShareBtn) {
+      mainShareBtn.className = 'btn-share-main btn-share-linkedin';
+      mainShareBtn.innerHTML = 'Share on LinkedIn ↗';
+    }
+    if (copyBtn) copyBtn.innerHTML = 'Copy Post Text 📋';
+  } else {
+    if (tabWhatsapp) tabWhatsapp.classList.add('active');
+    if (tabLinkedin) tabLinkedin.classList.remove('active');
+    if (previewBox) previewBox.textContent = milestoneShareData.whatsAppText;
+    if (mainShareBtn) {
+      mainShareBtn.className = 'btn-share-main btn-share-whatsapp';
+      mainShareBtn.innerHTML = 'Invite via WhatsApp 💬';
+    }
+    if (copyBtn) copyBtn.innerHTML = 'Copy Invite Link 🔗';
+  }
+};
+
+window.executeShareAction = function() {
+  if (currentShareTab === 'linkedin') {
+    navigator.clipboard.writeText(milestoneShareData.linkedInText).catch(() => {});
+    const shareUrl = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(milestoneShareData.linkedInText)}`;
+    window.open(shareUrl, '_blank', 'noopener,noreferrer');
+  } else {
+    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(milestoneShareData.whatsAppText)}`;
+    window.open(waUrl, '_blank', 'noopener,noreferrer');
+  }
+};
+
+window.copyShareContent = function() {
+  const textToCopy = currentShareTab === 'linkedin' ? milestoneShareData.linkedInText : milestoneShareData.referralLink;
+  navigator.clipboard.writeText(textToCopy).then(() => {
+    const copyBtn = document.getElementById('btn-copy-share');
+    if (copyBtn) {
+      const orig = copyBtn.innerHTML;
+      copyBtn.innerHTML = 'Copied! ✅';
+      copyBtn.style.borderColor = '#34d399';
+      copyBtn.style.color = '#34d399';
+      setTimeout(() => {
+        copyBtn.innerHTML = orig;
+        copyBtn.style.borderColor = '';
+        copyBtn.style.color = '';
+      }, 2000);
+    }
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = textToCopy;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+};
+
+function triggerMilestoneConfetti() {
+  const canvas = document.getElementById('milestone-confetti-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+
+  const particles = Array.from({ length: 65 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height * -0.5,
+    r: Math.random() * 4 + 2,
+    d: Math.random() * 25 + 10,
+    color: ['#c99a4e', '#e8b96e', '#fff', '#38bdf8', '#34d399'][Math.floor(Math.random() * 5)],
+    tilt: Math.floor(Math.random() * 10) - 10,
+    tiltAngle: 0,
+    tiltAngleInc: Math.random() * 0.08 + 0.04
+  }));
+
+  let angle = 0;
+  let tick = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    angle += 0.01;
+    tick++;
+    particles.forEach(p => {
+      p.tiltAngle += p.tiltAngleInc;
+      p.y += (Math.cos(angle + p.d) + 1 + p.r / 2) * 1.3;
+      p.x += Math.sin(angle);
+      p.tilt = Math.sin(p.tiltAngle) * 10;
+      ctx.beginPath();
+      ctx.lineWidth = p.r;
+      ctx.strokeStyle = p.color;
+      ctx.moveTo(p.x + p.tilt + p.r / 3, p.y);
+      ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 5);
+      ctx.stroke();
+      if (p.y > canvas.height) {
+        p.y = -10;
+        p.x = Math.random() * canvas.width;
+      }
+    });
+    const modal = document.getElementById('milestone-modal');
+    if (tick < 220 && modal && modal.classList.contains('active')) {
+      requestAnimationFrame(draw);
+    }
+  }
+  requestAnimationFrame(draw);
 }
