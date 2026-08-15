@@ -235,6 +235,11 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('dash-github').href = `https://github.com/${student.github}`;
     }
 
+    const hodQuickLink = document.getElementById('dash-quick-hod');
+    if (hodQuickLink) {
+      hodQuickLink.href = `offer.html?view=hod&student_id=${student.id || ''}&name=${encodeURIComponent(student.name || '')}&domain=${encodeURIComponent(student.domain || '')}&college=${encodeURIComponent(student.college || '')}`;
+    }
+
     // Progress
     let totalAssigned = 0, totalCompleted = 0, totalPrs = 0, totalScore = 0, maxWeek = 1;
 
