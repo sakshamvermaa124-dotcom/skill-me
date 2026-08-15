@@ -1347,6 +1347,170 @@
       pointer-events: none;
     }
 
+    /* 🛠️ Live PR Helper & Safety Checklist Styles */
+    .pr-helper-container {
+      margin-top: 22px;
+      padding: 24px 22px;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(201, 154, 78, 0.25);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    }
+    .pr-helper-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .pr-helper-head h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #f0c97a;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .pr-helper-input-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .pr-helper-input-row label {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+    .pr-helper-input {
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      font-size: 0.88rem;
+      font-family: 'JetBrains Mono', monospace;
+      width: 130px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .pr-helper-input:focus {
+      border-color: #c99a4e;
+      box-shadow: 0 0 12px rgba(201, 154, 78, 0.3);
+    }
+    .pr-helper-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+    }
+    .pr-helper-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .pr-helper-item-lbl {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .pr-helper-item-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: #e2e8f0;
+      word-break: break-all;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .pr-btn-copy-mini {
+      background: rgba(201, 154, 78, 0.15);
+      border: 1px solid rgba(201, 154, 78, 0.3);
+      color: #f0c97a;
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    .pr-btn-copy-mini:hover {
+      background: rgba(201, 154, 78, 0.3);
+      color: #fff;
+    }
+
+    /* Do's and Don'ts Checklist */
+    .pr-dos-donts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 20px;
+    }
+    .pr-safety-card {
+      padding: 16px 18px;
+      border-radius: var(--radius-md);
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+    .pr-safety-card.dos {
+      background: rgba(52, 211, 153, 0.05);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+    }
+    .pr-safety-card.donts {
+      background: rgba(239, 68, 68, 0.05);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+    .pr-safety-title {
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pr-safety-card.dos .pr-safety-title { color: #34d399; }
+    .pr-safety-card.donts .pr-safety-title { color: #f87171; }
+    .pr-safety-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .pr-safety-list li {
+      position: relative;
+      padding-left: 18px;
+      color: var(--text-secondary);
+    }
+    .pr-safety-card.dos .pr-safety-list li::before {
+      content: '✔';
+      position: absolute;
+      left: 0;
+      color: #34d399;
+      font-weight: 800;
+    }
+    .pr-safety-card.donts .pr-safety-list li::before {
+      content: '✖';
+      position: absolute;
+      left: 0;
+      color: #f87171;
+      font-weight: 800;
+    }
+    @media (max-width: 640px) {
+      .pr-dos-donts-grid { grid-template-columns: 1fr; }
+    }
+
     .nav-container {
       display: flex;
       align-items: center;
@@ -1970,9 +2134,9 @@
         <div class="guide-card">
           <div class="guide-header">
             <div class="guide-header-icon">🚀</div>
-            <h2>How to Complete Your Tasks</h2>
+            <h2>How to Complete Your Tasks &amp; Submit Pull Requests</h2>
           </div>
-          <p class="guide-subtitle">Choose your path — both methods earn you real open-source contributions on your GitHub profile.</p>
+          <p class="guide-subtitle">Follow these simple steps to solve assigned issues, avoid common Git errors, and earn verified Proof of Work on your GitHub profile.</p>
 
           <!-- Toggle expand/collapse -->
           <button class="guide-toggle expanded" id="guide-toggle-btn" onclick="toggleGuide()">
@@ -1980,22 +2144,36 @@
             <span id="guide-toggle-text">Hide Guide</span>
           </button>
 
-          <div class="guide-body" id="guide-body" style="max-height:3000px; opacity:1;">
+          <div class="guide-body" id="guide-body" style="max-height:3500px; opacity:1;">
+
+            <!-- Direct Batch Repo Link Banner -->
+            <a href="https://github.com/sakshamvermaa124-dotcom/web-dev-batch-1/issues" target="_blank" class="guide-repo-link" style="margin-top:20px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+              <div class="guide-repo-link-text">
+                <div class="guide-repo-link-title">📂 Open Your Batch Repository &amp; View Issues</div>
+                <div class="guide-repo-link-sub">Find your assigned issue labeled with your GitHub username</div>
+              </div>
+              <svg width="16" height="16" class="guide-repo-link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
 
             <!-- Tab Switcher -->
             <div class="guide-tabs" style="margin-top:20px;">
               <button class="guide-tab active" data-tab="beginner" onclick="switchGuideTab('beginner')">
-                🌱 Beginner
-                <span class="tab-badge">Browser Only</span>
+                🌱 Browser Flow
+                <span class="tab-badge">Zero Setup • 3 Mins</span>
               </button>
               <button class="guide-tab" data-tab="advanced" onclick="switchGuideTab('advanced')">
-                ⚡ Advanced
-                <span class="tab-badge">Terminal / VS Code</span>
+                ⚡ VS Code &amp; Git
+                <span class="tab-badge">Local Workflow</span>
+              </button>
+              <button class="guide-tab" data-tab="helper" onclick="switchGuideTab('helper')">
+                🛠️ 1-Click PR Helper
+                <span class="tab-badge" style="background:rgba(201,154,78,0.2);color:#f0c97a;">Generator</span>
               </button>
             </div>
 
             <!-- ═══════════════════════════════════════ -->
-            <!-- BEGINNER PANEL -->
+            <!-- TAB 1: BEGINNER (BROWSER ONLY) -->
             <!-- ═══════════════════════════════════════ -->
             <div class="guide-panel active" id="panel-beginner">
               <div class="guide-steps">
@@ -2003,28 +2181,19 @@
                 <div class="guide-step">
                   <div class="guide-step-num">1</div>
                   <div class="guide-step-content">
-                    <div class="guide-step-title">Open Your Assigned Issue</div>
+                    <div class="guide-step-title">Open Your Assigned Issue &amp; Note the Number</div>
                     <div class="guide-step-desc">
-                      Go to your batch repository on GitHub and click the <strong>"Issues"</strong> tab. 
-                      Find the issue assigned to you (it will have your GitHub username next to it).
+                      Go to your cohort repository, click the <strong>"Issues"</strong> tab, and click on the issue assigned to your GitHub username (e.g. <strong>Issue #5: Build Navigation Bar</strong>). Note down the issue number.
                     </div>
-                    <a href="https://github.com/sakshamvermaa124-dotcom/web-dev-batch-1/issues" target="_blank" class="guide-repo-link" style="margin-top:12px;">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
-                      <div class="guide-repo-link-text">
-                        <div class="guide-repo-link-title">View Your Batch Repository Issues</div>
-                        <div class="guide-repo-link-sub">github.com/sakshamvermaa124-dotcom/web-dev-batch-1</div>
-                      </div>
-                      <svg width="16" height="16" class="guide-repo-link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </a>
                   </div>
                 </div>
 
                 <div class="guide-step">
                   <div class="guide-step-num">2</div>
                   <div class="guide-step-content">
-                    <div class="guide-step-title">Read the Issue Carefully</div>
+                    <div class="guide-step-title">Navigate to the File &amp; Click the ✏️ Edit Icon</div>
                     <div class="guide-step-desc">
-                      Each issue tells you <strong>exactly what to do</strong> — which file to edit, what code to add or change, and what the expected result is. Read the full description before starting.
+                      Click the <strong>"Code"</strong> tab, open the file specified in the issue (e.g. <code>src/navbar.js</code>), and click the <strong>pencil (✏️ Edit)</strong> button in the top-right corner. You can now edit code right in your browser without installing anything!
                     </div>
                   </div>
                 </div>
@@ -2032,9 +2201,9 @@
                 <div class="guide-step">
                   <div class="guide-step-num">3</div>
                   <div class="guide-step-content">
-                    <div class="guide-step-title">Navigate to the File on GitHub</div>
+                    <div class="guide-step-title">Make Changes &amp; Click "Commit changes..."</div>
                     <div class="guide-step-desc">
-                      Go to the repo's <strong>"Code"</strong> tab. Browse the file tree and click on the file mentioned in your issue. For example, if the issue says "Edit <strong>src/index.html</strong>", click through the folders to find it.
+                      Implement the required code changes. When finished, click the green <strong>"Commit changes..."</strong> button in the top-right corner.
                     </div>
                   </div>
                 </div>
@@ -2042,9 +2211,9 @@
                 <div class="guide-step">
                   <div class="guide-step-num">4</div>
                   <div class="guide-step-content">
-                    <div class="guide-step-title">Click the ✏️ Edit Button</div>
+                    <div class="guide-step-title">Select "Create a new branch" &amp; Click Propose Changes</div>
                     <div class="guide-step-desc">
-                      Once you're viewing the file, click the <strong>pencil icon (✏️)</strong> in the top-right corner of the file viewer. This opens GitHub's built-in code editor — <strong>no installation needed!</strong>
+                      In the commit popup dialog, select: <strong>"Create a new branch for this commit and start a pull request"</strong>. Keep or customize the branch name (e.g. <code>fix/navbar-issue-5</code>) and click <strong>"Propose changes"</strong>.
                     </div>
                   </div>
                 </div>
@@ -2052,57 +2221,45 @@
                 <div class="guide-step">
                   <div class="guide-step-num">5</div>
                   <div class="guide-step-content">
-                    <div class="guide-step-title">Make Your Changes</div>
+                    <div class="guide-step-title">Link Your Issue with <code>Closes #&lt;number&gt;</code> (Crucial Step!)</div>
                     <div class="guide-step-desc">
-                      Edit the code directly in your browser. Follow the instructions from the issue. When done, click the green <strong>"Commit changes..."</strong> button at the top right.
-                    </div>
-                  </div>
-                </div>
-
-                <div class="guide-step">
-                  <div class="guide-step-num">6</div>
-                  <div class="guide-step-content">
-                    <div class="guide-step-title">Create a Pull Request</div>
-                    <div class="guide-step-desc">
-                      A popup appears. Select <strong>"Create a new branch for this commit and start a pull request"</strong>. Give your branch a name like <strong>fix/week-1-task-yourname</strong>. Click <strong>"Propose changes"</strong>.
-                    </div>
-                  </div>
-                </div>
-
-                <div class="guide-step">
-                  <div class="guide-step-num">7</div>
-                  <div class="guide-step-content">
-                    <div class="guide-step-title">Link Your Issue & Submit</div>
-                    <div class="guide-step-desc">
-                      In the PR description box, type <strong>Closes #</strong> followed by your issue number (e.g., <strong>Closes #5</strong>). Then click <strong>"Create pull request"</strong>. That's it — you're done! 🎉
+                      In the Pull Request description box, write <strong>Closes #</strong> followed by your issue number (e.g. <strong>Closes #5</strong>). This magic keyword tells GitHub to automatically link your contribution, run automated build checks, and award you points on your dashboard!
                     </div>
                     <div class="guide-code">
-                      <button class="guide-code-copy" onclick="copyCode(this, 'Closes #5')">Copy</button>
-                      <span class="comment">## In the PR description, write:</span><br>
-                      <span class="cmd">Closes #5</span>
+                      <button class="guide-code-copy" onclick="copyCode(this, 'Closes #5\n\n- Implemented responsive navbar\n- Added active link highlights')">Copy</button>
+                      <span class="cmd">Closes #5</span><br><br>
+                      <span class="comment">## Brief summary of changes:</span><br>
+                      - Implemented responsive navbar component<br>
+                      - Added active link highlights
                     </div>
                   </div>
                 </div>
 
               </div>
 
-              <div class="guide-tip">
-                <div class="guide-tip-icon">💡</div>
-                <div class="guide-tip-text">
-                  <strong>Pro tip:</strong> After your PR is created, SkillMe automatically detects it and updates your dashboard progress in real-time. You'll see your "Issues Done" counter go up once the PR is merged!
+              <!-- Safety Matrix Callout -->
+              <div class="pr-dos-donts-grid">
+                <div class="pr-safety-card dos">
+                  <div class="pr-safety-title">✅ Essential Best Practices</div>
+                  <ul class="pr-safety-list">
+                    <li>Always choose <strong>"Create a new branch"</strong> when proposing changes.</li>
+                    <li>Always include <strong><code>Closes #&lt;IssueNumber&gt;</code></strong> in your PR description.</li>
+                    <li>Verify automated test checks turn green after opening the PR.</li>
+                  </ul>
                 </div>
-              </div>
-
-              <div class="guide-tip" style="border-color: rgba(165,180,252,0.15); background: rgba(99,102,241,0.05);">
-                <div class="guide-tip-icon">🏆</div>
-                <div class="guide-tip-text">
-                  <strong style="color:#a5b4fc;">Every merged PR counts as a real open-source contribution</strong> and shows up as a green square on your GitHub profile. Recruiters can see this!
+                <div class="pr-safety-card donts">
+                  <div class="pr-safety-title">❌ Common Mistakes to Avoid</div>
+                  <ul class="pr-safety-list">
+                    <li>Never select <em>"Commit directly to the main branch"</em>.</li>
+                    <li>Never edit files outside of your assigned issue scope.</li>
+                    <li>Don't delete or rename existing project configurations.</li>
+                  </ul>
                 </div>
               </div>
             </div>
 
             <!-- ═══════════════════════════════════════ -->
-            <!-- ADVANCED PANEL -->
+            <!-- TAB 2: ADVANCED (TERMINAL & VS CODE) -->
             <!-- ═══════════════════════════════════════ -->
             <div class="guide-panel" id="panel-advanced">
               <div class="guide-steps">
@@ -2111,9 +2268,7 @@
                   <div class="guide-step-num">1</div>
                   <div class="guide-step-content">
                     <div class="guide-step-title">Clone the Repository</div>
-                    <div class="guide-step-desc">
-                      Open your terminal (Command Prompt, PowerShell, or VS Code terminal) and run:
-                    </div>
+                    <div class="guide-step-desc">Open your terminal or command prompt and clone the cohort repository:</div>
                     <div class="guide-code">
                       <button class="guide-code-copy" onclick="copyCode(this, 'git clone https://github.com/sakshamvermaa124-dotcom/web-dev-batch-1.git\ncd web-dev-batch-1')">Copy</button>
                       <span class="cmd">git</span> clone <span class="url">https://github.com/sakshamvermaa124-dotcom/web-dev-batch-1.git</span><br>
@@ -2125,13 +2280,11 @@
                 <div class="guide-step">
                   <div class="guide-step-num">2</div>
                   <div class="guide-step-content">
-                    <div class="guide-step-title">Create a New Branch</div>
-                    <div class="guide-step-desc">
-                      Always work on a separate branch — <strong>never commit directly to main</strong>. Name it after yourself and the task:
-                    </div>
+                    <div class="guide-step-title">Create a Dedicated Feature Branch</div>
+                    <div class="guide-step-desc">Never commit directly to <code>main</code>. Always checkout a new feature branch:</div>
                     <div class="guide-code">
-                      <button class="guide-code-copy" onclick="copyCode(this, 'git checkout -b feature/week-1-yourname')">Copy</button>
-                      <span class="cmd">git</span> checkout <span class="flag">-b</span> feature/week-1-yourname
+                      <button class="guide-code-copy" onclick="copyCode(this, 'git checkout -b fix/issue-5-solution')">Copy</button>
+                      <span class="cmd">git</span> checkout <span class="flag">-b</span> fix/issue-5-solution
                     </div>
                   </div>
                 </div>
@@ -2139,25 +2292,21 @@
                 <div class="guide-step">
                   <div class="guide-step-num">3</div>
                   <div class="guide-step-content">
-                    <div class="guide-step-title">Make Your Changes</div>
-                    <div class="guide-step-desc">
-                      Open the project in <strong>VS Code</strong> (<code style="background: var(--bg-card-hover);padding:2px 6px;border-radius:4px;font-size:0.8rem;">code .</code>) or any editor. Edit the files as described in your assigned GitHub issue.
-                    </div>
+                    <div class="guide-step-title">Develop &amp; Test Your Changes in VS Code</div>
+                    <div class="guide-step-desc">Open the repository in VS Code (<code>code .</code>), edit the target files, and test your changes locally.</div>
                   </div>
                 </div>
 
                 <div class="guide-step">
                   <div class="guide-step-num">4</div>
                   <div class="guide-step-content">
-                    <div class="guide-step-title">Commit & Push</div>
-                    <div class="guide-step-desc">
-                      Stage your changes, write a clear commit message, and push to GitHub:
-                    </div>
+                    <div class="guide-step-title">Stage, Commit &amp; Push to GitHub</div>
+                    <div class="guide-step-desc">Commit your work with a clear message and push your feature branch:</div>
                     <div class="guide-code">
-                      <button class="guide-code-copy" onclick="copyCode(this, 'git add .\ngit commit -m &quot;feat: complete week 1 task - add header component&quot;\ngit push origin feature/week-1-yourname')">Copy</button>
+                      <button class="guide-code-copy" onclick="copyCode(this, 'git add .\ngit commit -m &quot;feat: complete task - solve issue #5&quot;\ngit push origin fix/issue-5-solution')">Copy</button>
                       <span class="cmd">git</span> add .<br>
-                      <span class="cmd">git</span> commit <span class="flag">-m</span> <span class="url">"feat: complete week 1 task - add header component"</span><br>
-                      <span class="cmd">git</span> push origin feature/week-1-yourname
+                      <span class="cmd">git</span> commit <span class="flag">-m</span> <span class="url">"feat: complete task - solve issue #5"</span><br>
+                      <span class="cmd">git</span> push origin fix/issue-5-solution
                     </div>
                   </div>
                 </div>
@@ -2165,41 +2314,83 @@
                 <div class="guide-step">
                   <div class="guide-step-num">5</div>
                   <div class="guide-step-content">
-                    <div class="guide-step-title">Open a Pull Request</div>
-                    <div class="guide-step-desc">
-                      After pushing, GitHub will show a <strong>"Compare & pull request"</strong> banner. Click it, write <strong>Closes #YOUR_ISSUE_NUMBER</strong> in the description, and click <strong>"Create pull request"</strong>.
-                    </div>
-                    <div class="guide-code">
-                      <button class="guide-code-copy" onclick="copyCode(this, 'Closes #5\n\nWhat I did:\n- Added the header component\n- Implemented responsive navbar\n- Added mobile hamburger menu')">Copy</button>
-                      <span class="comment">## Example PR description:</span><br>
-                      <span class="cmd">Closes #5</span><br><br>
-                      <span class="comment">What I did:</span><br>
-                      - Added the header component<br>
-                      - Implemented responsive navbar<br>
-                      - Added mobile hamburger menu
-                    </div>
+                    <div class="guide-step-title">Open Pull Request on GitHub</div>
+                    <div class="guide-step-desc">Click the <strong>"Compare &amp; pull request"</strong> banner on GitHub and include <strong><code>Closes #5</code></strong> in your description.</div>
                   </div>
                 </div>
 
               </div>
 
-              <div class="guide-warning">
-                <div class="guide-tip-icon">⚠️</div>
-                <div class="guide-tip-text">
-                  <strong>First time using Git?</strong> You'll need to install Git first. Download it from <a href="https://git-scm.com/downloads" target="_blank" style="color:#c99a4e;text-decoration:underline;">git-scm.com</a>. After installing, configure your name and email:
-                </div>
-              </div>
-
-              <div class="guide-code" style="margin-top: 12px;">
-                <button class="guide-code-copy" onclick="copyCode(this, 'git config --global user.name &quot;Your Name&quot;\ngit config --global user.email &quot;your.email@example.com&quot;')">Copy</button>
-                <span class="cmd">git</span> config <span class="flag">--global</span> user.name <span class="url">"Your Name"</span><br>
-                <span class="cmd">git</span> config <span class="flag">--global</span> user.email <span class="url">"your.email@example.com"</span>
-              </div>
-
-              <div class="guide-tip">
+              <div class="guide-tip" style="margin-top:16px;">
                 <div class="guide-tip-icon">💡</div>
                 <div class="guide-tip-text">
-                  <strong>VS Code tip:</strong> Install the <a href="https://marketplace.visualstudio.com/items?itemName=GitHub.vscode-pull-request-github" target="_blank" style="color:#c99a4e;text-decoration:underline;">GitHub Pull Requests</a> extension to create PRs directly from VS Code without switching to the browser.
+                  <strong>Pro Tip:</strong> Install the official <a href="https://marketplace.visualstudio.com/items?itemName=GitHub.vscode-pull-request-github" target="_blank" style="color:#c99a4e;text-decoration:underline;">GitHub Pull Requests extension</a> in VS Code to review and submit PRs directly without switching windows!
+                </div>
+              </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════ -->
+            <!-- TAB 3: INTERACTIVE 1-CLICK PR HELPER -->
+            <!-- ═══════════════════════════════════════ -->
+            <div class="guide-panel" id="panel-helper">
+              <div class="pr-helper-container">
+                <div class="pr-helper-head">
+                  <span style="font-size:1.4rem;">🛠️</span>
+                  <div>
+                    <h3>1-Click PR Helper &amp; Syntax Generator</h3>
+                    <div style="font-size:0.78rem; color:var(--text-secondary); margin-top:2px;">Type your assigned issue number below to generate error-free branch names, commit commands, and PR linking syntax:</div>
+                  </div>
+                </div>
+
+                <!-- Input Row -->
+                <div class="pr-helper-input-row">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <label for="pr-helper-issue-num">Assigned Issue #:</label>
+                    <input type="text" id="pr-helper-issue-num" class="pr-helper-input" value="5" placeholder="e.g. 5" oninput="updatePRHelper()">
+                  </div>
+                  <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:200px;">
+                    <label for="pr-helper-desc">Task Title:</label>
+                    <input type="text" id="pr-helper-desc" class="pr-helper-input" style="width:100%;" value="Navbar Navigation" placeholder="e.g. Navbar Navigation" oninput="updatePRHelper()">
+                  </div>
+                </div>
+
+                <!-- Generated Fields Matrix -->
+                <div class="pr-helper-grid">
+                  <div class="pr-helper-item">
+                    <div class="pr-helper-item-lbl">
+                      <span>1. Feature Branch Name</span>
+                      <button class="pr-btn-copy-mini" onclick="copyHelperVal(this, 'pr-val-branch')">Copy</button>
+                    </div>
+                    <div class="pr-helper-item-val" id="pr-val-branch">fix/issue-5-navbar-navigation</div>
+                  </div>
+
+                  <div class="pr-helper-item">
+                    <div class="pr-helper-item-lbl">
+                      <span>2. Git Commit Command</span>
+                      <button class="pr-btn-copy-mini" onclick="copyHelperVal(this, 'pr-val-commit')">Copy</button>
+                    </div>
+                    <div class="pr-helper-item-val" id="pr-val-commit">git commit -m "fix: resolve issue #5 - Navbar Navigation"</div>
+                  </div>
+
+                  <div class="pr-helper-item">
+                    <div class="pr-helper-item-lbl">
+                      <span>3. Pull Request Title</span>
+                      <button class="pr-btn-copy-mini" onclick="copyHelperVal(this, 'pr-val-title')">Copy</button>
+                    </div>
+                    <div class="pr-helper-item-val" id="pr-val-title">fix: resolve issue #5 - Navbar Navigation</div>
+                  </div>
+
+                  <div class="pr-helper-item" style="border-color:rgba(52,211,153,0.3); background:rgba(52,211,153,0.04);">
+                    <div class="pr-helper-item-lbl">
+                      <span style="color:#34d399;">4. PR Description (Magic Link Keyword)</span>
+                      <button class="pr-btn-copy-mini" style="background:rgba(52,211,153,0.2);color:#34d399;border-color:rgba(52,211,153,0.4);" onclick="copyHelperVal(this, 'pr-val-close')">Copy</button>
+                    </div>
+                    <div class="pr-helper-item-val" id="pr-val-close" style="color:#34d399; font-weight:700;">Closes #5</div>
+                  </div>
+                </div>
+
+                <div style="margin-top:16px; font-size:0.78rem; color:var(--text-secondary); line-height:1.5; background:rgba(255,255,255,0.02); padding:10px 14px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
+                  ✨ <strong>Why "Closes #5" is required:</strong> GitHub uses this keyword to automatically link your Pull Request to your issue. Once the mentor merges your PR, the issue automatically closes and updates your live dashboard score!
                 </div>
               </div>
             </div>
@@ -2252,7 +2443,7 @@
 
   <!-- Lenis JS (from darkroomengineering/lenis) -->
   <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js" defer></script>
-  <script src="dashboard.js?v=5" defer></script>
+  <script src="dashboard.js?v=6" defer></script>
 
 
 

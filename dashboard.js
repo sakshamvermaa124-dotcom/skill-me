@@ -578,6 +578,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  // --- Live PR Helper Interactive Generator ---
+  window.updatePRHelper = function() {
+    const issueInput = document.getElementById('pr-helper-issue-num');
+    const descInput = document.getElementById('pr-helper-desc');
+    const issueNum = (issueInput ? issueInput.value.trim().replace(/^#/, '') : '') || '1';
+    const descText = (descInput ? descInput.value.trim() : '') || 'solve assigned task';
+    const slug = descText.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'feature';
+
+    const branchVal = document.getElementById('pr-val-branch');
+    const commitVal = document.getElementById('pr-val-commit');
+    const titleVal = document.getElementById('pr-val-title');
+    const closeVal = document.getElementById('pr-val-close');
+
+    if (branchVal) branchVal.textContent = `fix/issue-${issueNum}-${slug}`;
+    if (commitVal) commitVal.textContent = `git commit -m "fix: resolve issue #${issueNum} - ${descText}"`;
+    if (titleVal) titleVal.textContent = `fix: resolve issue #${issueNum} - ${descText}`;
+    if (closeVal) closeVal.textContent = `Closes #${issueNum}`;
+  };
+
+  window.copyHelperVal = function(btn, elementId) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    const text = el.textContent.trim();
+    window.copyCode(btn, text);
+  };
+
   // --- Intersection Observer for Submission Cards ---
   const subObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
