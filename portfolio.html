@@ -1,320 +1,724 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Proof of Work Portfolio — SkillMe</title>
-  <meta name="description" content="Verified Open Source Contributions via SkillMe">
+  <meta name="description" content="Verified Open Source Contributions & Engineering Proof of Work via SkillMe">
   <link rel="icon" href="assets/logo.webp" type="image/png">
   
-  <link rel="stylesheet" href="style.css">
-  <script src="config.js"></script>
-  <script src="skillme-monitor.js" defer></script>
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- QR Library -->
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+  <script src="config.js"></script>
+  <script src="skillme-monitor.js" defer></script>
   
   <style>
+    :root {
+      --bg-base: #08090d;
+      --bg-surface: #0f111a;
+      --bg-surface-elevated: #161926;
+      --border-subtle: rgba(255, 255, 255, 0.07);
+      --border-accent: rgba(201, 154, 78, 0.3);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-subtle: #64748b;
+      --gold: #c99a4e;
+      --gold-glow: rgba(201, 154, 78, 0.15);
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.15);
+      --blue: #3b82f6;
+      --indigo: #6366f1;
+      --purple: #a855f7;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      background: var(--bg-primary);
-      color: var(--text-primary);
+      background: var(--bg-base);
+      background-image: 
+        radial-gradient(ellipse 90% 50% at 50% -10%, rgba(99, 102, 241, 0.12), transparent 70%),
+        radial-gradient(ellipse 60% 40% at 85% 30%, rgba(201, 154, 78, 0.08), transparent 70%),
+        radial-gradient(ellipse 50% 50% at 15% 70%, rgba(16, 185, 129, 0.06), transparent 70%);
+      color: var(--text-main);
+      font-family: 'Inter', -apple-system, sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      -webkit-font-smoothing: antialiased;
     }
-    
-    .portfolio-container {
-      max-width: 900px;
+
+    /* Ambient Background Grid */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── Navigation ─── */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(8, 9, 13, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 14px 24px;
+    }
+    .nav-container {
+      max-width: 1100px;
       margin: 0 auto;
-      padding: 100px 24px 60px;
-      width: 100%;
-      flex: 1;
-    }
-
-    .profile-header {
-      text-align: center;
-      margin-bottom: 48px;
-    }
-
-    .profile-avatar {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background: var(--bg-card);
-      border: 2px solid rgba(245, 158, 11, 0.2);
-      margin: 0 auto 24px;
-      overflow: hidden;
       display: flex;
       align-items: center;
-      justify-content: center;
-      box-shadow: 0 8px 32px rgba(245, 158, 11, 0.1);
+      justify-content: space-between;
     }
-    
-    .profile-avatar img {
-      width: 100%;
-      height: 100%;
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: #fff;
+    }
+    .nav-logo-img {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1.5px solid var(--gold);
       object-fit: cover;
     }
-
-    .profile-name {
-      font-family: var(--font-display);
-      font-size: 2.5rem;
+    .nav-brand-text {
+      font-family: 'Space Grotesk', sans-serif;
       font-weight: 800;
-      letter-spacing: -0.5px;
-      margin-bottom: 8px;
-      background: var(--text-primary);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-size: 1.15rem;
+      letter-spacing: -0.2px;
     }
-    [data-theme="light"] .profile-name {
-      -webkit-text-fill-color: initial;
-      color: var(--text-primary);
-    }
-
-    .profile-title {
-      font-size: 1.1rem;
-      color: var(--text-secondary);
-      margin-bottom: 16px;
-    }
-    
-    .profile-title span {
-      color: var(--accent-indigo);
-      font-weight: 500;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 24px;
-      margin-bottom: 48px;
-    }
-
-    .stat-card {
-      background: var(--bg-card);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 16px;
-      padding: 24px;
-      text-align: center;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    
-    [data-theme="light"] .stat-card {
-      border-color: rgba(0, 0, 0, 0.06);
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.03);
-    }
-
-    .stat-card:hover {
-      transform: translateY(-4px);
-      border-color: rgba(245, 158, 11, 0.2);
-    }
-
-    .stat-value {
-      font-family: var(--font-display);
-      font-size: 3rem;
-      font-weight: 800;
-      color: var(--text-primary);
-      margin-bottom: 8px;
-      line-height: 1;
-    }
-
-    .stat-label {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-weight: 600;
-    }
-
-    .section-title {
-      font-family: var(--font-display);
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 24px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--text-primary);
-    }
-    
-    [data-theme="light"] .section-title {
-      border-bottom-color: rgba(0, 0, 0, 0.1);
-    }
-
-    .pr-feed {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .pr-card {
+    .nav-brand-text span { color: var(--gold); }
+    .nav-actions {
       display: flex;
       align-items: center;
-      padding: 20px;
-      background: var(--bg-card);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 12px;
+      gap: 12px;
+    }
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 700;
       text-decoration: none;
       transition: all 0.2s ease;
     }
-
-    [data-theme="light"] .pr-card {
-      border-color: rgba(0, 0, 0, 0.06);
+    .nav-btn-dash {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      color: #cbd5e1;
+    }
+    .nav-btn-dash:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+    .nav-btn-apply {
+      background: linear-gradient(135deg, var(--gold), #b5873d);
+      color: #0c0b0b;
+      box-shadow: 0 2px 10px rgba(201, 154, 78, 0.3);
+    }
+    .nav-btn-apply:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(201, 154, 78, 0.45);
     }
 
-    .pr-card:hover {
-      background: var(--bg-card-hover);
-      border-color: rgba(52, 211, 153, 0.3);
-      transform: translateX(4px);
-    }
-    
-    [data-theme="light"] .pr-card:hover {
-      border-color: rgba(52, 211, 153, 0.6);
-    }
-
-    .pr-icon {
-      font-size: 1.5rem;
-      margin-right: 16px;
-      color: var(--accent-emerald);
-    }
-
-    .pr-content {
+    /* ─── Main Portfolio Content ─── */
+    .portfolio-wrapper {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+      width: 100%;
       flex: 1;
+      position: relative;
+      z-index: 1;
     }
 
-    .pr-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      margin-bottom: 6px;
+    /* ─── Hero Header Bento Card ─── */
+    .profile-hero-card {
+      background: linear-gradient(135deg, rgba(22, 25, 38, 0.9) 0%, rgba(15, 17, 26, 0.95) 100%);
+      border: 1px solid var(--border-accent);
+      border-radius: var(--radius-lg);
+      padding: 36px 32px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(201, 154, 78, 0.06);
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .profile-hero-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, #6366f1, #c99a4e, #10b981);
     }
 
-    .pr-meta {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
+    .hero-top-row {
       display: flex;
-      gap: 12px;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .hero-profile-info {
+      display: flex;
       align-items: center;
+      gap: 22px;
+      flex: 1;
+      min-width: 280px;
     }
 
-    .pr-badge {
-      padding: 2px 8px;
-      background: rgba(52, 211, 153, 0.1);
-      color: var(--accent-emerald);
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
+    /* Initials Monogram Badge */
+    .avatar-monogram {
+      width: 84px;
+      height: 84px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #1e2238 0%, #0c0e17 100%);
+      border: 2px solid var(--gold);
+      box-shadow: 0 8px 24px rgba(201, 154, 78, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 800;
+      font-size: 2rem;
+      color: var(--gold);
+      letter-spacing: -1px;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .avatar-online-dot {
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+      width: 18px;
+      height: 18px;
+      background: #10b981;
+      border: 3px solid var(--bg-surface);
+      border-radius: 50%;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .hero-badges-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .badge-verified-eng {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border-radius: 20px;
+      letter-spacing: 0.3px;
       text-transform: uppercase;
     }
-    
-    .pr-domain {
+    .badge-college {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: #94a3b8;
+      font-size: 0.74rem;
+      font-weight: 600;
+      border-radius: 20px;
+    }
+    .hero-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 800;
+      font-size: 2.1rem;
+      letter-spacing: -0.6px;
+      color: #ffffff;
+      line-height: 1.15;
+    }
+    .hero-role-line {
+      font-size: 0.95rem;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .hero-role-line a {
+      color: var(--gold);
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .hero-role-line a:hover { text-decoration: underline; }
+
+    /* Action Buttons in Hero */
+    .hero-actions-deck {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn-hero-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 0.84rem;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .btn-share-linkedin {
+      background: #0a66c2;
+      color: #fff;
+    }
+    .btn-share-linkedin:hover {
+      box-shadow: 0 4px 16px rgba(10, 102, 194, 0.45);
+      transform: translateY(-1px);
+    }
+    .btn-copy-link {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid var(--border-subtle);
+      color: #e2e8f0;
+    }
+    .btn-copy-link:hover {
+      background: rgba(255, 255, 255, 0.13);
+      color: #fff;
+    }
+
+    /* ─── Domain & Skills Strip ─── */
+    .hero-skills-strip {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .skills-list {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .skill-pill {
+      padding: 5px 12px;
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      color: #a5b4fc;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .domain-tag {
+      padding: 5px 14px;
+      background: rgba(201, 154, 78, 0.1);
+      border: 1px solid rgba(201, 154, 78, 0.3);
+      color: #f0c97a;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ─── Stats Bento Grid ─── */
+    .stats-bento-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .bento-stat-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 22px 20px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+    .bento-stat-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(255, 255, 255, 0.18);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+    .bento-stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      background: var(--card-accent, rgba(255, 255, 255, 0.1));
+    }
+    .bento-stat-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .bento-stat-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--card-accent, #fff);
+    }
+    .bento-stat-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
       padding: 2px 8px;
-      background: rgba(245, 158, 11, 0.1);
-      color: var(--accent-indigo);
-      border-radius: 4px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #94a3b8;
+    }
+    .bento-stat-val {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+    .bento-stat-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ─── Contribution Feed Section ─── */
+    .section-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title span { color: var(--gold); }
+    .feed-count-pill {
       font-size: 0.75rem;
+      padding: 3px 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      color: #cbd5e1;
       font-weight: 600;
     }
 
-    .locked-state {
-      text-align: center;
-      padding: 64px 24px;
-      background: var(--bg-card);
-      border-radius: 16px;
-      border: 1px dashed rgba(255, 255, 255, 0.2);
-      margin-top: 60px;
+    /* PR Cards List */
+    .pr-feed {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
     }
-    [data-theme="light"] .locked-state {
-      border-color: rgba(0, 0, 0, 0.2);
+    .pr-bento-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      color: inherit;
     }
-    
-    .locked-icon {
-      font-size: 3rem;
-      margin-bottom: 24px;
-      opacity: 0.5;
+    .pr-bento-card:hover {
+      background: var(--bg-surface-elevated);
+      border-color: rgba(16, 185, 129, 0.35);
+      transform: translateX(4px);
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
     }
-    
-    .locked-title {
-      font-family: var(--font-display);
-      font-size: 1.8rem;
-      color: var(--text-primary);
-      margin-bottom: 12px;
+    .pr-left-col {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      flex: 1;
     }
-    
-    .locked-text {
-      color: var(--text-secondary);
-      max-width: 500px;
-      margin: 0 auto 24px;
-      line-height: 1.6;
+    .pr-git-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: #10b981;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .pr-main-content {
+      flex: 1;
+    }
+    .pr-title-text {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #f8fafc;
+      line-height: 1.35;
+      margin-bottom: 6px;
+    }
+    .pr-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    .badge-pr-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      font-weight: 700;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-repo-name {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: #93c5fd;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.76rem;
+    }
+    .pr-right-action {
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .pr-bento-card:hover .pr-right-action {
+      color: #34d399;
     }
 
+    /* ─── Recruiter Trust Card ─── */
+    .recruiter-trust-box {
+      margin-top: 40px;
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(201, 154, 78, 0.06) 100%);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      border-radius: var(--radius-lg);
+      padding: 26px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .trust-content {
+      flex: 1;
+      min-width: 280px;
+    }
+    .trust-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #93c5fd;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .trust-desc {
+      font-size: 0.84rem;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+    .trust-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* ─── Toast Notification ─── */
+    .portfolio-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1e293b;
+      border: 1px solid #38bdf8;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .portfolio-toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* ─── Locked / Error States ─── */
+    .locked-card {
+      background: var(--bg-surface);
+      border: 1px dashed rgba(201, 154, 78, 0.35);
+      border-radius: var(--radius-lg);
+      padding: 60px 24px;
+      text-align: center;
+      max-width: 600px;
+      margin: 60px auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+    .locked-icon-wrap {
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      background: rgba(201, 154, 78, 0.12);
+      border: 1px solid rgba(201, 154, 78, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin: 0 auto 20px;
+    }
+    .locked-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+    .locked-desc {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 900px) {
+      .stats-bento-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 640px) {
+      .hero-top-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .hero-actions-deck {
+        width: 100%;
+      }
+      .btn-hero-action {
+        flex: 1;
+        justify-content: center;
+      }
+      .stats-bento-grid {
+        grid-template-columns: 1fr;
+      }
+      .pr-bento-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .pr-right-action {
+        width: 100%;
+        justify-content: flex-end;
+      }
+    }
   </style>
-  <style>.brand-logo-img, .logo img, .nav-logo img, .cert-company-logo, .lh-logo { width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important; flex-shrink: 0 !important; }</style>
 </head>
 <body>
 
-  <!-- Dynamic Theme Backgrounds (matching dashboard) -->
-  <div class="dot-grid"></div>
-  <div class="aurora-blob" style="top: -10%; left: -10%; background: var(--accent-indigo);"></div>
-  <div class="aurora-blob" style="bottom: -10%; right: -10%; background: var(--accent-emerald);"></div>
+  <!-- Ambient Grid Background -->
+  <div class="bg-grid"></div>
 
-    <nav class="navbar scrolled" id="navbar">
-    <div class="container">
-    <div class="nav-left">
-      <a href="index.html" class="nav-logo" id="nav-logo">
-        <img src="assets/logo.webp" alt="SkillMe Logo" class="brand-logo-img" width="36" height="36" style="width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important;">
-        <span>SkillMe</span>
+  <!-- Sticky Navbar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-brand">
+        <img src="assets/logo.webp" alt="SkillMe Logo" class="nav-logo-img" onerror="this.src='assets/logo.png'">
+        <span class="nav-brand-text">Skill<span>Me</span></span>
       </a>
+      <div class="nav-actions">
+        <a href="dashboard.html" class="nav-btn nav-btn-dash">Student Dashboard &rarr;</a>
+        <a href="apply.html" class="nav-btn nav-btn-apply">Apply to Cohort &rarr;</a>
+      </div>
     </div>
-    <div class="nav-links-center" id="nav-links-center">
-      <a href="index.html#how-it-works">How It Works</a>
-      <a href="index.html#domains">Domains</a>
-      <a href="index.html#benefits">Benefits</a>
-      <a href="index.html#faq">FAQ</a>
-    </div>
-    <div class="nav-actions-right">
-      <a href="dashboard.html" class="nav-link-dashboard" id="nav-dashboard-btn">Student Dashboard &rarr;</a>
-      <a href="quiz.html" class="nav-cta" id="nav-apply-btn">Apply Now &rarr;</a>
-      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-    </div>
-  </div>
   </nav>
 
-  <div class="portfolio-container" id="content-container">
-    <!-- Loading State -->
-    <div style="text-align: center; margin-top: 100px; color: var(--text-secondary);" id="loading-state">
-      <div class="spinner" style="margin: 0 auto 20px;"></div>
-      <p>Loading Portfolio...</p>
+  <!-- Main Content Container -->
+  <main class="portfolio-wrapper" id="content-container">
+    <div style="text-align: center; padding: 100px 0; color: #94a3b8;" id="loading-state">
+      <div style="width: 36px; height: 36px; border: 3px solid rgba(201,154,78,0.2); border-top-color: #c99a4e; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px;"></div>
+      <p style="font-weight: 600; font-size: 0.95rem;">Loading Verified Proof of Work...</p>
     </div>
+  </main>
+
+  <!-- Interactive Toast Notification -->
+  <div class="portfolio-toast" id="portfolio-toast">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    <span id="toast-text">Link copied to clipboard!</span>
   </div>
 
-  <script src="portfolio.js"></script>
-<script>
-  // Mobile nav toggle
-  (function() {
-    var t = document.getElementById('nav-toggle');
-    var n = document.getElementById('nav-links-center');
-    if (!t || !n) return;
-    t.addEventListener('click', function() {
-      var o = n.classList.toggle('open');
-      t.classList.toggle('active', o);
-      document.body.style.overflow = o ? 'hidden' : '';
-    });
-    n.querySelectorAll('a').forEach(function(l) {
-      l.addEventListener('click', function() {
-        n.classList.remove('open'); t.classList.remove('active');
-        document.body.style.overflow = '';
-      });
-    });
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && n.classList.contains('open')) {
-        n.classList.remove('open'); t.classList.remove('active');
-        document.body.style.overflow = '';
-      }
-    });
-  })();
-</script></body>
-</html>
+  <style>
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
 
+  <script src="portfolio.js"></script>
+</body>
+</html>
