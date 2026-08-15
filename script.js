@@ -21,9 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // ═══════════════════════════════════════════════════════════
   window.handleApplyClick = function(e) {
     if (e && e.preventDefault) e.preventDefault();
+    const targetUrl = (e && e.currentTarget && e.currentTarget.getAttribute('href')) || '';
     const quizDone = localStorage.getItem('skillme_quiz_result');
     if (quizDone) {
       window.location.href = 'apply.html';
+    } else if (targetUrl && targetUrl.startsWith('quiz.html')) {
+      window.location.href = targetUrl;
     } else {
       window.location.href = 'quiz.html';
     }
