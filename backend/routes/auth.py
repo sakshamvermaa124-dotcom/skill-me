@@ -4,7 +4,7 @@ OTP-based login for students (no passwords).
 """
 
 import logging
-from fastapi import APIRouter, HTTPException, Response, Cookie
+from fastapi import APIRouter, HTTPException, Response, Cookie, BackgroundTasks
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 
@@ -34,7 +34,7 @@ class OTPVerify(BaseModel):
 
 @router.post("/request-otp", summary="Request a login OTP")
 @limiter.limit("3/minute")
-async def request_login_otp(request: Request, req: OTPRequest):
+async def request_login_otp(request: Request, req: OTPRequest, background_tasks: BackgroundTasks):
     """
     Send a 6-digit OTP to the student's registered email.
     The OTP expires in 10 minutes.
@@ -60,7 +60,8 @@ async def request_login_otp(request: Request, req: OTPRequest):
       <p style="color:#94a3b8;font-size:0.8rem;text-align:center;">If you didn't request this, you can safely ignore this email.</p>
     </div>
     """
-    await _send_and_log(
+    background_tasks.add_task(
+        _send_and_log,
         req.email.lower().strip(),
         f"{student['first_name']} {student['last_name']}",
         "🔐 Your SkillMe Login Code",

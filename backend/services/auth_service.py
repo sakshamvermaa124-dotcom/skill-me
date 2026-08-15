@@ -99,39 +99,36 @@ async def verify_otp(email: str, otp: str) -> Optional[str]:
     email = email.lower().strip()
     otp_hash = _hash_otp(otp)
 
-    token_row = await db.fetch_one(
-        """SELECT id, expires_at FROM otp_tokens
-           WHERE email = ? AND otp_hash = ? AND used = 0
-           ORDER BY created_at DESC LIMIT 1""",
+    # Fetch both OTP token and Student info in a single network roundtrip
+    row = await db.fetch_one(
+        """SELECT o.id, o.expires_at, s.id as student_id, s.email as student_email 
+           FROM otp_tokens o
+           JOIN students s ON s.email = o.email
+           WHERE o.email = ? AND o.otp_hash = ? AND o.used = 0
+           ORDER BY o.created_at DESC LIMIT 1""",
         (email, otp_hash),
     )
 
-    if not token_row:
+    if not row:
         return None
 
     # Check expiry
     try:
-        expires_at = datetime.strptime(token_row["expires_at"], "%Y-%m-%d %H:%M:%S")
+        expires_at = datetime.strptime(row["expires_at"], "%Y-%m-%d %H:%M:%S")
     except ValueError:
-        expires_at = datetime.strptime(token_row["expires_at"], "%Y-%m-%dT%H:%M:%S")
+        expires_at = datetime.strptime(row["expires_at"], "%Y-%m-%dT%H:%M:%S")
 
     if datetime.utcnow() > expires_at:
         return None
 
     # Mark OTP as used
+    # We still await this to prevent race conditions on double OTP usage,
+    # but we've eliminated one full sequential DB roundtrip.
     await db.execute(
         "UPDATE otp_tokens SET used = 1 WHERE id = ?",
-        (token_row["id"],)
+        (row["id"],)
     )
 
-    # Get student for JWT
-    student = await db.fetch_one(
-        "SELECT id, email FROM students WHERE email = ?",
-        (email,)
-    )
-    if not student:
-        return None
-
-    jwt_token = _create_jwt(student["id"], student["email"])
+    jwt_token = _create_jwt(row["student_id"], row["student_email"])
     logger.info(f"OTP verified for {email}, JWT issued")
     return jwt_token

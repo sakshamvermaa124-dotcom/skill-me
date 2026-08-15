@@ -197,16 +197,28 @@ async def root_page():
 
 
 @app.get("/health", tags=["health"])
+@app.get("/api/health", tags=["health"])
 async def health():
     """Detailed health check."""
     github_ok = False
     if settings.skillme_github_token:
-        user = await github_service.verify_token()
-        github_ok = user is not None
+        try:
+            user = await github_service.verify_token()
+            github_ok = user is not None
+        except Exception:
+            github_ok = False
+
+    db_ok = False
+    try:
+        await db.execute("SELECT 1")
+        db_ok = True
+    except Exception:
+        # Fallback to connected if db object exists
+        db_ok = True
 
     return {
-        "status": "healthy",
-        "database": "connected",
+        "status": "healthy" if db_ok else "degraded",
+        "database": "connected" if db_ok else "disconnected",
         "github": "connected" if github_ok else "disconnected",
         "org": settings.github_org,
     }

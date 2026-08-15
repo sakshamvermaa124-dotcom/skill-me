@@ -30,6 +30,7 @@ if (typeof Lenis !== 'undefined') {
 
 // --- DOM Ready ---
 document.addEventListener('DOMContentLoaded', () => {
+  const urlParams = new URLSearchParams(window.location.search);
   const loginForm = document.getElementById('dash-login-form');
   const loginView = document.getElementById('login-view');
   const dashView = document.getElementById('dashboard-view');
@@ -112,7 +113,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Check on load
-  checkExistingSession();
+  checkExistingSession().catch(err => {
+    console.warn("Session check notice:", err);
+  });
 
   // Login handler
   loginForm.addEventListener('submit', async (e) => {
