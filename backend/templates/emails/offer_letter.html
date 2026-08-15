@@ -11,7 +11,7 @@
 
 <div class="divider"></div>
 
-<p class="section-label">📋 Internship Parameters</p>
+<p class="section-label">📋 Internship Offer Details</p>
 <div class="info-table">
   <div class="info-row">
     <span class="info-label">Candidate Name</span>
@@ -34,57 +34,25 @@
     <span class="info-value">4 Weeks (Remote / Async)</span>
   </div>
   <div class="info-row">
-    <span class="info-label">Enrollment Status</span>
-    <span class="info-value"><span class="badge badge-green">Enrolled &amp; Verified</span></span>
+    <span class="info-label">Appointment Status</span>
+    <span class="info-value"><span class="badge badge-green">Confirmed &amp; Enrolled</span></span>
   </div>
 </div>
 
 <div class="divider"></div>
 
-<p class="section-label">⚡ 4-Week Milestone Roadmap</p>
-
-<div class="steps">
-  <div class="step">
-    <div class="step-num">1</div>
-    <div class="step-text"><strong>Weekly Issue Assignments</strong><br />Curated production tasks are assigned on your cohort repository at the beginning of each sprint week.</div>
-  </div>
-  <div class="step">
-    <div class="step-num">2</div>
-    <div class="step-text"><strong>Pull Requests &amp; CI/CD Testing</strong><br />Submit PRs linked with <code>Closes #&lt;issue_id&gt;</code>. Automated tests and mentors review each contribution.</div>
-  </div>
-  <div class="step">
-    <div class="step-num">3</div>
-    <div class="step-text"><strong>Live Command Deck Tracking</strong><br />Track your merged PRs, points, and milestones in real-time on your SkillMe Student Dashboard.</div>
-  </div>
-  <div class="step">
-    <div class="step-num">4</div>
-    <div class="step-text"><strong>Verifiable Credentials &amp; LOR</strong><br />Upon completion, receive your cryptographically verified Certificate of Completion and Letter of Recommendation.</div>
-  </div>
-</div>
-
-{% if repo_url %}
-<div class="repo-box">
-  <div style="font-weight: 700; font-size: 14px; color: #0f172a; margin-bottom: 6px;">📂 Your GitHub Repository Access</div>
-  <p>You have been invited to collaborate on your cohort repository. Please accept the GitHub invitation to start your tasks:</p>
-  <a href="{{ repo_url }}" target="_blank">{{ repo_url }}</a>
-  {% if issues_url %}
-  <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0;">
-    <span style="font-size: 12.5px; color: #64748b;">Direct link to your assigned tasks:</span><br />
-    <a href="{{ issues_url }}" target="_blank" style="font-size: 13px; font-weight: 700;">{{ issues_url }} &rarr;</a>
-  </div>
-  {% endif %}
-</div>
-{% endif %}
+<p class="section-label">📜 Formal Appointment Terms</p>
+<p style="font-size: 13.5px; line-height: 1.7; color: #334155; margin-bottom: 16px;">
+  As an engineering intern, you will contribute directly to production open-source software repositories, resolve weekly assigned technical issues, and submit peer-reviewed Pull Requests under mentor supervision.
+</p>
 
 <div class="cta-wrap">
-  <a href="https://skill-me-intern.in/offer.html?name={{ first_name }}+{{ last_name }}&domain={{ domain_label }}" target="_blank" class="cta-btn">View &amp; Print Official Offer Letter Online &rarr;</a><br />
-  <a href="https://skill-me-intern.in/dashboard.html" target="_blank" class="cta-btn-secondary">Open Student Dashboard</a>
-  {% if issues_url %}
-  <br /><a href="{{ issues_url }}" target="_blank" class="cta-btn-secondary" style="margin-top: 8px;">View Your Tasks on GitHub &rarr;</a>
-  {% endif %}
+  <a href="https://skill-me-intern.in/offer.html?name={{ first_name }}+{{ last_name }}&domain={{ domain_label }}" target="_blank" class="cta-btn">View Official Offer Letter Online &rarr;</a><br />
+  <a href="https://skill-me-intern.in/dashboard.html" target="_blank" class="cta-btn-secondary">Log In to Student Dashboard &rarr;</a>
 </div>
 
-<div class="note">
-  🏛️ <strong>College NOC / HOD Verification:</strong> If you require college department or placement cell compliance, you can download the <strong>HOD Verification Pack (Letter + 4-Week Syllabus + Evaluation Rubric)</strong> directly from your online offer letter view.
+<div class="note" style="margin-top: 26px; border-left: 3px solid #2563eb;">
+  🏛️ <strong>Student Dashboard &amp; College NOC Pack:</strong><br />
+  To view your weekly sprint tasks, track merged PRs, or download your official <strong>College NOC / HOD Verification Pack (Letter + 4-Week Syllabus + Evaluation Rubric)</strong> for institutional submission, please log in to your <a href="https://skill-me-intern.in/dashboard.html" target="_blank" style="color:#2563eb; font-weight:700; text-decoration:underline;">Student Dashboard</a>.
 </div>
 {% endblock %}

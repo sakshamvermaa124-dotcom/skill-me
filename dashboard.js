@@ -1094,9 +1094,10 @@ window.openMilestoneShareModal = function(customData) {
   const batchNum = progress.batch_number || 1;
   
   const studentRefCode = `SKM-${student.id ? String(student.id).padStart(4, '0') : '2026'}`;
-  const FRONTEND = window.SKILLME_FRONTEND || window.location.origin;
-  const referralLink = `https://skill-me-intern.in/apply.html?ref=${studentRefCode}`;
-  const portfolioUrl = student.github ? `${FRONTEND}/portfolio.html?gh=${student.github}` : 'https://skill-me-intern.in';
+  const PROD_BASE = 'https://skill-me-intern.in';
+  const referralLink = `${PROD_BASE}/apply.html?ref=${studentRefCode}`;
+  const ghUser = (student.github || '').trim().replace(/^@/, '');
+  const portfolioUrl = ghUser ? `${PROD_BASE}/portfolio.html?gh=${encodeURIComponent(ghUser)}` : PROD_BASE;
 
   // Format LinkedIn Post
   const linkedInPost = `🚀 Milestone ${week} Sprint Completed on SkillMe (@skill-me-intern)!

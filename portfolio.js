@@ -19,10 +19,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Extract username from ?gh=username (priority) or /p/{username}
+  // Extract username from ?gh=username, ?github=, or /p/{username}
   const urlParams = new URLSearchParams(window.location.search);
-  const pathParts = window.location.pathname.split('/');
-  const username = urlParams.get('gh') || pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+  const pathParts = window.location.pathname.split('/').filter(Boolean);
+  const pathUser = (pathParts.length >= 2 && pathParts[0] === 'p') ? pathParts[1] : (pathParts.length === 1 && pathParts[0] !== 'portfolio.html' && pathParts[0] !== 'p' ? pathParts[0] : null);
+  const rawUsername = urlParams.get('gh') || urlParams.get('github') || urlParams.get('u') || pathUser || localStorage.getItem('student_github') || '';
+  const username = rawUsername.trim().replace(/^@/, '');
   
   const container = document.getElementById('content-container');
   if (!container) return;
@@ -34,7 +36,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="locked-state">
           <div class="locked-icon">😕</div>
           <div class="locked-title">Invalid Profile Link</div>
-          <div class="locked-text">We couldn't find a GitHub username in the URL. Make sure you're using a valid link.</div>
+          <div class="locked-text">We couldn't find a GitHub username in the URL. Make sure you're using a valid link like <code>/portfolio.html?gh=YOUR_GITHUB_USERNAME</code>.</div>
+          <a href="dashboard.html" style="display:inline-block; margin-top:16px; padding:10px 22px; background:#c99a4e; color:#0c0b0b; text-decoration:none; border-radius:8px; font-weight:700;">Go to Student Dashboard</a>
         </div>
       `;
       return;
