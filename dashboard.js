@@ -961,9 +961,24 @@ document.addEventListener('DOMContentLoaded', () => {
       const emailInput = document.getElementById('login-email');
       const otpWrap = document.getElementById('otp-wrap');
       const loginBtn = document.getElementById('login-btn');
-      if (emailInput) emailInput.value = '';
+      if (emailInput) { 
+        emailInput.value = ''; 
+        emailInput.readOnly = false; 
+      }
       if (otpWrap) otpWrap.style.display = 'none';
-      if (loginBtn) { loginBtn.disabled = false; loginBtn.textContent = 'Get Login Code'; }
+      if (loginBtn) { 
+        loginBtn.disabled = false; 
+        loginBtn.style.opacity = '1';
+        loginBtn.textContent = 'Get Login Code'; 
+      }
+      
+      const resendBtn = document.getElementById('resend-btn');
+      if (resendBtn) {
+        resendBtn.disabled = false;
+        resendBtn.textContent = 'Resend Code';
+      }
+      
+      loginState = 'email';
     } else {
       window.location.href = 'dashboard.html';
     }
@@ -1098,7 +1113,7 @@ function showCompletionPopup(student, data) {
       ctx.stroke();
       if (p.y > canvas.height) { p.y = -10; p.x = Math.random() * canvas.width; }
     });
-    if (tick < 300 && document.getElementById('completion-overlay')) requestAnimationFrame(drawConfetti);
+    if (document.getElementById('completion-overlay')) requestAnimationFrame(drawConfetti);
   }
   requestAnimationFrame(drawConfetti);
 
