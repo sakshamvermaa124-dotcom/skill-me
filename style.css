@@ -806,6 +806,8 @@ img.brand-logo-img,
   z-index: 2;
   align-self: flex-start;
   margin-top: 0;
+  min-width: 0;
+  width: 100%;
 }
 
 .terminal-card {
@@ -2341,7 +2343,8 @@ img.brand-logo-img,
 
   /* Terminal */
   .terminal-body {
-  overscroll-behavior-x: none; min-height: 220px; font-size: 0.75rem;   word-break: break-word;
+  overscroll-behavior-x: none; min-height: 220px; font-size: 0.75rem;
+  word-break: break-word;
   white-space: pre-wrap;
   overflow-wrap: break-word;
 }
@@ -2452,7 +2455,8 @@ img.brand-logo-img,
   .btn-primary { padding: 13px 22px; font-size: 0.9rem; }
   .btn-secondary { padding: 13px 20px; font-size: 0.9rem; }
   .terminal-body {
-  overscroll-behavior-x: none; font-size: 0.7rem; padding: 16px 14px;   word-break: break-word;
+  overscroll-behavior-x: none; font-size: 0.7rem; padding: 16px 14px;
+  word-break: break-word;
   white-space: pre-wrap;
   overflow-wrap: break-word;
 }
