@@ -71,6 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const token = localStorage.getItem('token');
       const savedEmail = localStorage.getItem('skillme_email');
+      const signoutBtn = document.getElementById('signout-btn');
       
       // If we have a saved email in localStorage, restore progress directly
       const emailToUse = savedEmail || (async () => {
@@ -84,8 +85,18 @@ document.addEventListener('DOMContentLoaded', () => {
       if (resolvedEmail) {
         loginBtn.disabled = true;
         loginBtn.textContent = 'Restoring Session...';
+        
+        // Show Sign Out button so user can abort if stuck
+        if (signoutBtn) signoutBtn.style.display = 'inline-flex';
+        
         const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
         const progressRes = await fetch(`${API}/api/students/progress/${encodeURIComponent(resolvedEmail)}`, { headers });
+        
+        // If user clicked sign out while fetch was pending, abort the restore process
+        if (!localStorage.getItem('skillme_email') && !localStorage.getItem('token')) {
+          if (signoutBtn) signoutBtn.style.display = 'none';
+          return;
+        }
         
         if (progressRes.ok) {
           const data = await progressRes.json();
@@ -101,14 +112,17 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
           // If session email fails to load, clear saved session so user can re-login
           localStorage.removeItem('skillme_email');
+          if (signoutBtn) signoutBtn.style.display = 'none';
         }
       }
       loginBtn.disabled = false;
       loginBtn.textContent = 'Get Login Code';
+      if (document.getElementById('signout-btn')) document.getElementById('signout-btn').style.display = 'none';
     } catch (e) {
       console.log("No active session found.");
       loginBtn.disabled = false;
       loginBtn.textContent = 'Get Login Code';
+      if (document.getElementById('signout-btn')) document.getElementById('signout-btn').style.display = 'none';
     }
   }
 
