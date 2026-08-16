@@ -1,8 +1,21 @@
+# SkillMe (skill-me-intern.in) - Robots Exclusion Protocol
 User-agent: *
 Allow: /
-
-# Disallow admin and API routes
 Disallow: /admin
+Disallow: /admin.html
 Disallow: /api/
+Disallow: /preview_emails/
 
+# Specialized Search Bots
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /assets/
+
+# Host & Sitemap
+Host: https://skill-me-intern.in
 Sitemap: https://skill-me-intern.in/sitemap.xml
