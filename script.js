@@ -291,8 +291,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // ═══════════════════════════════════════════════════════════
   const terminalBody = document.getElementById('terminal-body');
   const terminalLines = [
-    { type: 'command', prompt: '$ ', text: 'git clone https://github.com/skillme-oss/web-project.git', delay: 0 },
-    { type: 'output',  text: 'Cloning into \'web-project\'...', delay: 700 },
+    { type: 'command', prompt: '$ ', text: 'git clone https://github.com/sakshamvermaa124-dotcom/skill-me.git', delay: 0 },
+    { type: 'output',  text: 'Cloning into \'skill-me\'...', delay: 700 },
     { type: 'output',  text: '✓ Done.', class: 'success', delay: 1200 },
     { type: 'empty',   delay: 1500 },
     { type: 'command', prompt: '$ ', text: 'git checkout -b fix/navbar-bug', delay: 1900 },
@@ -303,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { type: 'command', prompt: '$ ', text: 'git add . && git commit -m "fix: resolve navbar overflow"', delay: 3900 },
     { type: 'output',  text: '[fix/navbar-bug 3a2f1c9] fix: resolve navbar overflow', delay: 4600 },
     { type: 'command', prompt: '$ ', text: 'git push origin fix/navbar-bug', delay: 5100 },
-    { type: 'output',  text: 'PR → https://github.com/skillme-oss/.../pull/42', class: 'url', delay: 5800 },
+    { type: 'output',  text: 'PR → https://github.com/sakshamvermaa124-dotcom/skill-me/pull/42', class: 'url', delay: 5800 },
     { type: 'empty',   delay: 6100 },
     { type: 'output',  text: '✅ PR merged! +350 contribution score added.', class: 'success', delay: 6600 },
   ];
