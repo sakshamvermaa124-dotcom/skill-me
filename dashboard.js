@@ -88,6 +88,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Show Sign Out button so user can abort if stuck
         if (signoutBtn) signoutBtn.style.display = 'inline-flex';
+        const cancelWrap = document.getElementById('login-cancel-wrap');
+        if (cancelWrap) cancelWrap.style.display = 'block';
         
         const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
         const progressRes = await fetch(`${API}/api/students/progress/${encodeURIComponent(resolvedEmail)}`, { headers });
@@ -95,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // If user clicked sign out while fetch was pending, abort the restore process
         if (!localStorage.getItem('skillme_email') && !localStorage.getItem('token')) {
           if (signoutBtn) signoutBtn.style.display = 'none';
+          if (document.getElementById('login-cancel-wrap')) document.getElementById('login-cancel-wrap').style.display = 'none';
           return;
         }
         
@@ -113,16 +116,19 @@ document.addEventListener('DOMContentLoaded', () => {
           // If session email fails to load, clear saved session so user can re-login
           localStorage.removeItem('skillme_email');
           if (signoutBtn) signoutBtn.style.display = 'none';
+          if (document.getElementById('login-cancel-wrap')) document.getElementById('login-cancel-wrap').style.display = 'none';
         }
       }
       loginBtn.disabled = false;
       loginBtn.textContent = 'Get Login Code';
       if (document.getElementById('signout-btn')) document.getElementById('signout-btn').style.display = 'none';
+      if (document.getElementById('login-cancel-wrap')) document.getElementById('login-cancel-wrap').style.display = 'none';
     } catch (e) {
       console.log("No active session found.");
       loginBtn.disabled = false;
       loginBtn.textContent = 'Get Login Code';
       if (document.getElementById('signout-btn')) document.getElementById('signout-btn').style.display = 'none';
+      if (document.getElementById('login-cancel-wrap')) document.getElementById('login-cancel-wrap').style.display = 'none';
     }
   }
 
