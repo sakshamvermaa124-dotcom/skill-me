@@ -1182,6 +1182,19 @@ window.openMilestoneShareModal = function(customData) {
   const data = customData || window._dashData || {};
   const student = (data && data.student) || window._dashStudent || { name: 'Intern', github: 'developer' };
   const progress = (data && data.progress && data.progress[0]) || {};
+  
+  // Calculate totals across all weeks
+  let totalAssigned = 0;
+  let totalCompleted = 0;
+  let totalPrs = 0;
+  if (data.progress && Array.isArray(data.progress)) {
+    data.progress.forEach(p => {
+      totalAssigned += Number(p.issues_assigned) || 0;
+      totalCompleted += Number(p.issues_completed) || 0;
+      totalPrs += Number(p.prs_merged) || 0;
+    });
+  }
+
   const prs = progress.prs_merged !== undefined ? Number(progress.prs_merged) : 0;
   const assigned = progress.issues_assigned !== undefined ? Number(progress.issues_assigned) : 0;
   const score = Number(progress.score) || 100;
@@ -1203,7 +1216,31 @@ window.openMilestoneShareModal = function(customData) {
   let titleText = '';
   let subText = '';
 
-  if (prs === 0) {
+  if (totalAssigned > 0 && totalCompleted >= totalAssigned) {
+    badgeText = `?? INTERNSHIP COMPLETED`;
+    titleText = `100% Completed!`;
+    subText = `You've completed your internship. Share your achievement:`;
+    
+    linkedInPost = `I'm thrilled to announce that I have successfully completed the 4-week ${domain} Virtual Internship at SkillMe (@skill-me-intern)! ??
+  
+Over the past month, I merged ${totalPrs} Pull Requests, solved real-world engineering issues, and built verifiable Proof of Work. It was an incredible learning experience! ????
+
+?? View my verified portfolio and credentials:
+?? ${portfolioUrl}
+
+Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
+
+#SkillMe #ProofOfWork #${domainHashtag} #SoftwareEngineering #TechInternship #GitHub`;
+
+    whatsAppInvite = `?? I just completed the SkillMe ${domain} internship!
+  
+I successfully merged ${totalPrs} PRs and earned my verified credentials. Check out my Proof of Work portfolio:
+?? ${portfolioUrl}
+
+Join me and earn verified Proof of Work for your resume:
+?? Join my SkillMe Squad: ${referralLink}`;
+
+  } else if (prs === 0) {
     badgeText = `🎉 OFFER LETTER UNLOCKED`;
     titleText = `You're Enrolled!`;
     subText = `Your official internship offer letter is ready. Share it with your network:`;
