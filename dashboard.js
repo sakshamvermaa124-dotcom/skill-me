@@ -1335,7 +1335,7 @@ function triggerMilestoneConfetti() {
       }
     });
     const modal = document.getElementById('milestone-modal');
-    if (tick < 220 && modal && modal.classList.contains('active')) {
+    if (modal && modal.classList.contains('active')) {
       requestAnimationFrame(draw);
     }
   }
