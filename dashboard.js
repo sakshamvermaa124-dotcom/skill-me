@@ -117,6 +117,44 @@ document.addEventListener('DOMContentLoaded', () => {
     console.warn("Session check notice:", err);
   });
 
+  const resendBtn = document.getElementById('resend-btn');
+  if (resendBtn) {
+    resendBtn.addEventListener('click', () => {
+      const emailInput = document.getElementById('login-email');
+      const email = emailInput.value.trim();
+      if (!email) return;
+      
+      resendBtn.disabled = true;
+      resendBtn.textContent = 'Sending...';
+      errorEl.style.display = 'none';
+      
+      fetch(`${API}/api/auth/request-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      }).then(async (res) => {
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({ detail: 'Failed to resend OTP email' }));
+          errorEl.textContent = errData.detail || 'Failed to resend OTP.';
+          errorEl.style.display = 'block';
+          resendBtn.textContent = 'Resend Code';
+          resendBtn.disabled = false;
+        } else {
+          resendBtn.textContent = 'Code Sent!';
+          setTimeout(() => {
+            resendBtn.textContent = 'Resend Code';
+            resendBtn.disabled = false;
+          }, 30000); // 30 seconds cooldown
+        }
+      }).catch((err) => {
+        errorEl.textContent = 'Network error while resending code.';
+        errorEl.style.display = 'block';
+        resendBtn.textContent = 'Resend Code';
+        resendBtn.disabled = false;
+      });
+    });
+  }
+
   // Login handler
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
