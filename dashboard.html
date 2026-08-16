@@ -2038,19 +2038,19 @@
         
         <form id="dash-login-form" autocomplete="off">
           <div class="login-input-wrap" id="email-wrap">
-            <input type="email" id="login-email" placeholder="you@example.com" required>
+            <input type="email" id="login-email" placeholder="you@example.com" required style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
           </div>
           <div class="login-input-wrap" id="otp-wrap" style="display: none;">
             <input type="text" id="login-otp" placeholder="6-digit code" pattern="[0-9]{6}" maxlength="6">
             <div style="text-align: right; margin-top: 8px;">
-              <button type="button" id="resend-btn" style="background:none; border:none; color:#a5b4fc; cursor:pointer; font-size:13px; padding:0; text-decoration:underline;">Resend Code</button>
+              <button type="button" id="resend-btn" style="background:none; border:none; color:#a5b4fc; cursor:pointer; font-size:14px; padding:8px 12px; margin-right: -12px; text-decoration:underline;">Resend Code</button>
             </div>
           </div>
           <button type="submit" class="login-btn" id="login-btn">
             Get Login Code
           </button>
-          <div id="login-cancel-wrap" style="display: none; text-align: center; margin-top: 12px;">
-            <button type="button" onclick="signOut()" style="background:none; border:none; color:rgba(255,255,255,0.5); cursor:pointer; font-size:13px; text-decoration:underline;">Cancel / Sign Out</button>
+          <div id="login-cancel-wrap" style="display: none; text-align: center; margin-top: 16px;">
+            <button type="button" onclick="signOut()" style="background:none; border:none; color:rgba(255,255,255,0.6); cursor:pointer; font-size:14px; padding: 12px; text-decoration:underline;">Cancel / Sign Out</button>
           </div>
           <div id="login-error" class="login-error"></div>
         </form>
@@ -2653,6 +2653,11 @@
             Secured by Razorpay • UPI / Card / NetBanking
           </div>
         </div>
+      </div>
+
+      <!-- Footer Actions -->
+      <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.05); text-align: center;">
+        <button onclick="signOut()" style="background:none; border:none; color:rgba(255,255,255,0.4); cursor:pointer; font-size:14px; padding: 12px; text-decoration:underline;">Sign Out of Dashboard</button>
       </div>
     </div>
     

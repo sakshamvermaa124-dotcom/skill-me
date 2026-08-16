@@ -239,5 +239,5 @@ async def payment_status(student_id: int, batch_id: int):
     return {
         "status": payment["status"],
         "amount_paise": payment["amount"],
-        "amount_rupees": payment["amount"] / 100,
+        "amount_rupees": float(payment["amount"]) / 100 if payment["amount"] else 0,
     }

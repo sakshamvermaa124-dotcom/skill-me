@@ -2438,6 +2438,13 @@ img.brand-logo-img,
    ============================================================ */
 @media (max-width: 375px) {
   :root { --container-padding: 0 14px; }
+  
+  .btn-primary, .btn-secondary { width: 100%; justify-content: center; }
+  .success-btn-group { flex-direction: column; width: 100%; }
+  .success-btn-group a, .success-btn-group button { width: 100%; margin-bottom: 8px; }
+
+  .hero h1 { font-size: 2.2rem; }
+  .hero-stats { grid-template-columns: 1fr; }
 
   .hero-title { font-size: 1.9rem; }
   .hero-badge { font-size: 0.73rem; padding: 6px 14px; }

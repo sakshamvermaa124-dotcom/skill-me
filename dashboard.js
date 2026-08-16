@@ -270,6 +270,9 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       errorEl.textContent = err.message || 'An error occurred';
       errorEl.style.display = 'block';
+      loginBtn.disabled = false;
+      loginBtn.style.opacity = '1';
+      loginBtn.textContent = loginState === 'otp' ? 'Verify OTP & Enter →' : 'Get Login Code';
     }
   });
 

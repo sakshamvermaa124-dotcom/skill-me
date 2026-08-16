@@ -925,7 +925,7 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
             Check your email for confirmation
           </div>
-          <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+          <div class="success-btn-group" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
             <a href="index.html" class="btn-primary">
               Back to Home
             </a>
@@ -942,8 +942,8 @@
           <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 400px; margin-left: auto; margin-right: auto; text-align: center;">
             <p style="font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-bottom: 12px;">Checking a different application?</p>
             <div style="display: flex; gap: 8px;">
-              <input type="email" id="check-status-email" placeholder="Enter email address" onkeydown="if(event.key === 'Enter') checkStatusEmail()" style="flex: 1; padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: #fff; font-size: 0.9rem; outline: none;">
-              <button type="button" onclick="checkStatusEmail()" class="btn-primary" style="padding: 10px 16px; min-width: max-content;">Check</button>
+              <input type="email" id="check-status-email" placeholder="Enter email address" onkeydown="if(event.key === 'Enter') checkStatusEmail()" style="flex: 1; min-width: 0; padding: 12px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: #fff; font-size: 0.95rem; outline: none; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+              <button type="button" onclick="checkStatusEmail()" class="btn-primary" style="padding: 12px 20px; min-width: max-content;">Check</button>
             </div>
             <p id="check-status-result" style="font-size: 0.95rem; font-weight: 500; margin-top: 14px; display: none;"></p>
           </div>
@@ -1372,7 +1372,8 @@
       if (!newEmail) return;
       const btn = emailInput.nextElementSibling;
       const origText = btn.textContent;
-      btn.textContent = '...';
+      btn.textContent = 'Checking...';
+      btn.disabled = true;
       resultMsg.style.display = 'none';
       
       fetch((window.SKILLME_API || 'http://localhost:8000') + '/api/students/status/' + encodeURIComponent(newEmail))
@@ -1382,6 +1383,7 @@
         })
         .then(data => {
           btn.textContent = origText;
+          btn.disabled = false;
           if (data.student && data.student.status) {
             localStorage.setItem('skillme_submitted_email', newEmail);
             localStorage.setItem('skillme_application_submitted', 'true');
@@ -1404,6 +1406,7 @@
         })
         .catch(err => {
           btn.textContent = origText;
+          btn.disabled = false;
           resultMsg.textContent = 'No application found for ' + newEmail;
           resultMsg.style.color = '#ef4444';
           resultMsg.style.display = 'block';
