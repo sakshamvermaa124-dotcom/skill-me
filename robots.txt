@@ -17,5 +17,5 @@ User-agent: Googlebot-Image
 Allow: /assets/
 
 # Host & Sitemap
-Host: https://skill-me-intern.in
-Sitemap: https://skill-me-intern.in/sitemap.xml
+Host: https://www.skill-me-intern.in
+Sitemap: https://www.skill-me-intern.in/sitemap.xml
