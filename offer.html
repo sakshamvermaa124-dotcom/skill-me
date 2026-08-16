@@ -525,21 +525,28 @@
     <div class="watermark">SKILLME</div>
 
     <!-- Letterhead -->
-    <div class="letterhead">
+    <div class="letterhead" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px;">
       <div class="brand-group">
-        <img width="36" height="36" src="assets/logo.webp" alt="SkillMe Logo" class="brand-logo-img" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='inline-flex';" style="width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important;">
+        <img width="48" height="48" src="assets/logo.webp" alt="SkillMe Logo" class="brand-logo-img" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='inline-flex';" style="width: 48px !important; height: 48px !important; max-width: 48px !important; max-height: 48px !important; object-fit: cover !important; border-radius: 50% !important;">
         <div style="display:none; width:48px; height:48px; border-radius:50%; background:#0c0b0b; border:2px solid #c99a4e; align-items:center; justify-content:center; color:#2563eb; font-weight:800; font-size:1.2rem;" class="brand-logo-fallback">SM</div>
         <div>
           <div class="brand-title"><span class="brand-skill">Skill</span><span class="brand-me">Me</span></div>
-          <div class="brand-sub">Technical Engineering Internship</div>
+          <div class="brand-sub">Technical Engineering Internship &bull; skill-me-intern.in</div>
         </div>
       </div>
-      <div class="doc-meta">
-        <strong>Doc Ref:</strong> <span id="doc-ref-id">SKM-OFFER-2026-0812</span><br>
-        <strong>Issued Date:</strong> <span id="doc-date-val">August 16, 2026</span><br>
-        <strong>Govt. Reg:</strong> <span style="font-family:'JetBrains Mono',monospace; font-size:0.75rem; color:#44403c;">UDYAM-UP-50-0294192</span><br>
-        <strong>Verification:</strong> <span style="color:#047857; font-weight:700;">● Cryptographically Verified</span>
+      <div class="msme-header-box" style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+        <img src="assets/msme_logo.png" alt="MSME Govt. of India" style="height: 28px; width: auto; object-fit: contain;" />
+        <div style="font-size: 0.72rem; color: #64748b; font-family: 'JetBrains Mono', monospace; font-weight: 600;">
+          Ministry of MSME &bull; <strong style="color: #1e293b;">UDYAM-UP-50-0294192</strong>
+        </div>
       </div>
+    </div>
+
+    <!-- Official Document Metadata Ribbon -->
+    <div class="doc-meta-ribbon" style="display: flex; justify-content: space-between; align-items: center; background: #fafaf9; border: 1px solid #e7e5e4; border-radius: 8px; padding: 10px 18px; margin-bottom: 28px; font-size: 0.8rem; color: #57534e;">
+      <div><strong>Doc Ref:</strong> <span id="doc-ref-id" style="font-family:'JetBrains Mono',monospace; color:#1c1917; font-weight:700;">SKM-OFFER-2026-0812</span></div>
+      <div><strong>Issued Date:</strong> <span id="doc-date-val" style="color:#1c1917; font-weight:600;">August 16, 2026</span></div>
+      <div><strong>Verification:</strong> <span style="color:#047857; font-weight:700;">● Cryptographically Verified</span></div>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════

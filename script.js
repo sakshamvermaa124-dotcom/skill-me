@@ -445,11 +445,14 @@ document.addEventListener('DOMContentLoaded', () => {
     ribbon.addEventListener('touchstart', () => { isPaused = true; }, { passive: true });
     ribbon.addEventListener('touchend', () => { isPaused = false; }, { passive: true });
 
-    // Fetch live production feed asynchronously from API
+    // Fetch live production feed asynchronously from API with graceful timeout
     async function fetchLiveFeed() {
       try {
         const apiBase = window.SKILLME_API || (window.location.hostname === 'localhost' ? 'http://localhost:8000' : 'https://skill-me.onrender.com');
-        const res = await fetch(`${apiBase}/api/students/public-activity`);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6000);
+        const res = await fetch(`${apiBase}/api/students/public-activity`, { signal: controller.signal });
+        clearTimeout(timeoutId);
         if (res.ok) {
           const data = await res.json();
           if (data && data.activities && data.activities.length > 0) {

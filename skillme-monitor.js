@@ -109,14 +109,21 @@
 
   // ── Global error handler ───────────────────────────────────────────────
   window.addEventListener('error', function(event) {
-    // Ignore errors from Sentry's own scripts or browser extensions
-    if (event.filename && (
-      event.filename.includes('sentry') ||
-      event.filename.includes('extension://') ||
-      event.filename.includes('chrome-extension://')
-    )) return;
+    const msg = event.message || '';
+    // Ignore errors from Sentry, browser extensions, translate tools, or internal IPC
+    if (
+      (event.filename && (
+        event.filename.includes('sentry') ||
+        event.filename.includes('extension://') ||
+        event.filename.includes('chrome-extension://') ||
+        event.filename.includes('moz-extension://')
+      )) ||
+      msg.includes('Object Not Found Matching Id') ||
+      msg.includes('ResizeObserver loop') ||
+      msg.includes('Extension context invalidated')
+    ) return;
 
-    queueError('js_error', event.message || 'Unknown JS error', {
+    queueError('js_error', msg || 'Unknown JS error', {
       stack: event.error ? event.error.stack : (event.filename + ':' + event.lineno + ':' + event.colno),
     });
   });
@@ -126,6 +133,19 @@
     const reason = event.reason;
     const message = reason instanceof Error ? reason.message : String(reason);
     const stack = reason instanceof Error ? reason.stack : '';
+
+    // Ignore known third-party browser extension errors, translations, and media aborts
+    if (
+      message.includes('Object Not Found Matching Id') ||
+      message.includes('ResizeObserver loop') ||
+      message.includes('Extension context invalidated') ||
+      message.includes('chrome-extension') ||
+      message.includes('moz-extension') ||
+      message.includes('The play() request was interrupted') ||
+      message.includes('The user aborted a request')
+    ) {
+      return;
+    }
 
     queueError('js_error', 'Unhandled Promise: ' + message, { stack: stack });
   });
