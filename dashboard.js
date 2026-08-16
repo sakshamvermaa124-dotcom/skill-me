@@ -328,12 +328,32 @@ document.addEventListener('DOMContentLoaded', () => {
       // Update dynamic GitHub Repo Link in Beginner Guide Step 1
       if (latest.repo_name) {
         const org = data.github_org || data.summary?.github_org || 'sakshamvermaa124-dotcom';
-        const repoUrl = `https://github.com/${org}/${latest.repo_name}/issues`;
+        const baseRepoUrl = `https://github.com/${org}/${latest.repo_name}`;
+        const repoUrl = `${baseRepoUrl}/issues`;
+        
         const guideLink = document.querySelector('.guide-repo-link');
         if (guideLink) {
           guideLink.href = repoUrl;
           const subText = guideLink.querySelector('.guide-repo-link-sub');
           if (subText) subText.textContent = `github.com/${org}/${latest.repo_name}`;
+        }
+
+        // Update Quick Actions
+        const quickRepo = document.getElementById('dash-quick-repo');
+        if (quickRepo) quickRepo.href = baseRepoUrl;
+        const quickIssues = document.getElementById('dash-quick-issues');
+        if (quickIssues) quickIssues.href = repoUrl;
+
+        // Update Git Clone snippet
+        const cloneUrlEl = document.querySelector('.guide-code .url');
+        if (cloneUrlEl) cloneUrlEl.textContent = `${baseRepoUrl}.git`;
+        const cloneCmdEl = document.querySelectorAll('.guide-code .cmd')[1]; // The 'cd' command's next text node
+        if (cloneCmdEl && cloneCmdEl.nextSibling) {
+          cloneCmdEl.nextSibling.textContent = ` ${latest.repo_name}`;
+        }
+        const copyBtn = document.querySelector('.guide-code-copy');
+        if (copyBtn) {
+          copyBtn.setAttribute('onclick', `copyCode(this, 'git clone ${baseRepoUrl}.git\\ncd ${latest.repo_name}')`);
         }
       }
 
@@ -1175,6 +1195,7 @@ window.openMilestoneShareModal = function(customData) {
   const PROD_BASE = 'https://skill-me-intern.in';
   const referralLink = `${PROD_BASE}/apply.html?ref=${studentRefCode}`;
   const ghUser = (student.github || '').trim().replace(/^@/, '');
+  const domainHashtag = student.domain ? student.domain.replace(/[^a-zA-Z0-9]/g, '') : 'Tech';
   const portfolioUrl = ghUser ? `${PROD_BASE}/portfolio.html?gh=${encodeURIComponent(ghUser)}` : PROD_BASE;
   const offerUrl = `${PROD_BASE}/offer.html?name=${encodeURIComponent(student.name || '')}&domain=${encodeURIComponent(student.domain || '')}`;
 
@@ -1197,7 +1218,7 @@ Explore my live Proof of Work portfolio & codebase here:
 
 Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
 
-#SkillMe #ProofOfWork #WebDevelopment #SoftwareEngineering #TechInternship #GitHub`;
+#SkillMe #ProofOfWork #${domainHashtag} #SoftwareEngineering #TechInternship #GitHub`;
 
   // Format WhatsApp Squad Invite
   const whatsAppInvite = `🚀 Hey! I just completed Milestone ${week} on the SkillMe ${domain} internship with ${prs} verified PRs merged!
