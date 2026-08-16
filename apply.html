@@ -956,8 +956,48 @@
       }
     });
 
-    // ── Quiz Guard ─────────────────────────────────────────────
+    // ── View Status / Quiz Guard ───────────────────────────────
     (function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      const isStatusView = urlParams.get('view') === 'status';
+      const isSubmitted = localStorage.getItem('skillme_application_submitted');
+      const submittedEmail = localStorage.getItem('skillme_submitted_email');
+
+      if (isStatusView && isSubmitted) {
+        document.addEventListener('DOMContentLoaded', () => {
+          document.getElementById('apply-form').style.display = 'none';
+          document.getElementById('form-progress').style.display = 'none';
+          const successState = document.getElementById('success-state');
+          successState.classList.add('active');
+          
+          if (submittedEmail) {
+            fetch((window.SKILLME_API || 'http://localhost:8000') + '/api/students/status/' + encodeURIComponent(submittedEmail))
+              .then(res => res.json())
+              .then(data => {
+                if (data.student && data.student.status) {
+                  const status = data.student.status;
+                  const h2 = successState.querySelector('h2');
+                  const p = successState.querySelector('p');
+                  if (status === 'applied') {
+                    h2.textContent = 'Application Pending Review';
+                    p.innerHTML = 'We are currently reviewing your application. You will hear from us shortly.';
+                  } else if (status === 'shortlisted') {
+                    h2.textContent = 'You\'re Shortlisted! 🎉';
+                    p.innerHTML = 'Congratulations! Please check your email inbox for the next steps.';
+                  } else if (status === 'enrolled') {
+                    h2.textContent = 'You\'re Enrolled! 🚀';
+                    p.innerHTML = 'You have been assigned to a batch. Please check your email or log into the <a href="dashboard.html" style="color:#c99a4e; text-decoration:underline;">Student Dashboard</a>.';
+                  } else if (status === 'dropped') {
+                    h2.textContent = 'Application Closed';
+                    p.innerHTML = 'Your application is no longer active.';
+                  }
+                }
+              }).catch(err => console.error("Could not fetch status", err));
+          }
+        });
+        return;
+      }
+
       const quizRaw = localStorage.getItem('skillme_quiz_result');
       if (!quizRaw) {
         window.location.href = 'quiz.html';
@@ -1265,6 +1305,9 @@
         return data;
       })
       .then(data => {
+        localStorage.setItem('skillme_application_submitted', 'true');
+        localStorage.setItem('skillme_submitted_email', document.getElementById('email').value.trim());
+
         document.getElementById('apply-form').style.display = 'none';
         document.getElementById('form-progress').style.display = 'none';
         

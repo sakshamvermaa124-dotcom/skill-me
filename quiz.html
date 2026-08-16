@@ -885,6 +885,7 @@ function showResults() {
     completedAt: new Date().toISOString()
   };
   localStorage.setItem('skillme_quiz_result', JSON.stringify(result));
+  localStorage.removeItem('skillme_application_submitted'); // Clear old submission flag on new quiz completion
 
   // Populate breakdown
   const list = document.getElementById('breakdown-list');
@@ -930,18 +931,30 @@ function showScreen(id) {
 // ──────────────────────────────────────────────────────────────
 (function () {
   const existing = localStorage.getItem('skillme_quiz_result');
+  const submitted = localStorage.getItem('skillme_application_submitted');
   const urlParams = new URLSearchParams(window.location.search);
   const isRetake = urlParams.get('retake') === '1' || urlParams.get('retake') === 'true';
-
-  // If quiz is already completed and user is NOT explicitly retaking, REDIRECT IMMEDIATELY to apply.html!
-  if (existing && !isRetake) {
-    window.location.href = 'apply.html';
-    return;
-  }
 
   // If explicitly retaking via ?retake=1, clear existing result so user can start fresh
   if (isRetake) {
     localStorage.removeItem('skillme_quiz_result');
+  } else if (existing && !submitted) {
+    // If quiz is completed and user hasn't submitted yet, redirect to apply.html
+    window.location.href = 'apply.html';
+    return;
+  }
+  
+  // If user has a submitted application, show them a banner
+  if (submitted && !isRetake) {
+    document.addEventListener('DOMContentLoaded', () => {
+      const banner = document.createElement('div');
+      banner.style.cssText = 'background: rgba(201, 154, 78, 0.1); border: 1px solid rgba(201, 154, 78, 0.3); border-radius: 8px; padding: 12px 20px; text-align: center; margin-bottom: 24px; font-size: 0.95rem;';
+      banner.innerHTML = `You recently submitted an application. <a href="apply.html?view=status" style="color: #c99a4e; text-decoration: underline; font-weight: 500; margin-left: 8px;">View Application Status</a>`;
+      const welcomeScreen = document.getElementById('screen-welcome');
+      if (welcomeScreen) {
+        welcomeScreen.insertBefore(banner, welcomeScreen.firstChild);
+      }
+    });
   }
 })();
 </script>
