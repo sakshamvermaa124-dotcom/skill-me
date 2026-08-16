@@ -1182,7 +1182,8 @@ window.openMilestoneShareModal = function(customData) {
   const data = customData || window._dashData || {};
   const student = (data && data.student) || window._dashStudent || { name: 'Intern', github: 'developer' };
   const progress = (data && data.progress && data.progress[0]) || {};
-  const prs = Number(progress.prs_merged) || 4;
+  const prs = progress.prs_merged !== undefined ? Number(progress.prs_merged) : 0;
+  const assigned = progress.issues_assigned !== undefined ? Number(progress.issues_assigned) : 0;
   const score = Number(progress.score) || 100;
   const week = Number(progress.week) || 1;
   const domain = (progress.domain || student.domain || 'Web Development').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -1196,8 +1197,49 @@ window.openMilestoneShareModal = function(customData) {
   const portfolioUrl = ghUser ? `${PROD_BASE}/portfolio.html?gh=${encodeURIComponent(ghUser)}` : PROD_BASE;
   const offerUrl = `${PROD_BASE}/offer.html?name=${encodeURIComponent(student.name || '')}&domain=${encodeURIComponent(student.domain || '')}`;
 
-  // Format LinkedIn Post
-  const linkedInPost = `🚀 Milestone ${week} Sprint Completed on SkillMe (@skill-me-intern)!
+  let linkedInPost = '';
+  let whatsAppInvite = '';
+  let badgeText = '';
+  let titleText = '';
+  let subText = '';
+
+  if (prs === 0) {
+    badgeText = `🎉 OFFER LETTER UNLOCKED`;
+    titleText = `You're Enrolled!`;
+    subText = `Your official internship offer letter is ready. Share it with your network:`;
+    
+    linkedInPost = `I'm thrilled to share that I've been selected for the ${domain} Virtual Internship at SkillMe (@skill-me-intern)! 🚀
+  
+Ready to build real-world projects, merge pull requests, and level up my engineering skills over the next 4 weeks. Let's go! 💻🔥
+
+📄 View my verified digital Offer Letter:
+👉 ${offerUrl}
+
+Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
+
+#SkillMe #ProofOfWork #${domainHashtag} #SoftwareEngineering #TechInternship #GitHub`;
+
+    whatsAppInvite = `🚀 Hey! I've been selected for the SkillMe ${domain} internship!
+  
+Check out my verified offer letter:
+👉 ${offerUrl}
+
+Join me and earn verified Proof of Work for your resume:
+👉 Join my SkillMe Squad: ${referralLink}`;
+
+  } else {
+    badgeText = `🎉 SPRINT MILESTONE UNLOCKED`;
+    titleText = `Milestone Achieved: ${prs} PR${prs === 1 ? '' : 's'} Merged!`;
+    subText = `You've successfully merged verified PRs to your assigned project repository. Share your verifiable achievement:`;
+    
+    // Check if they completed all assigned issues for the week
+    const isSprintComplete = assigned > 0 && prs >= assigned;
+    
+    const intro = isSprintComplete 
+      ? `🚀 Milestone ${week} Sprint Completed on SkillMe (@skill-me-intern)!`
+      : `🚀 Code milestone unlocked on SkillMe (@skill-me-intern)!`;
+
+    linkedInPost = `${intro}
 
 Proud to share that I have merged ${prs} verified Pull Requests and resolved core engineering tasks for the ${domain} technical internship!
 
@@ -1217,14 +1259,14 @@ Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
 
 #SkillMe #ProofOfWork #${domainHashtag} #SoftwareEngineering #TechInternship #GitHub`;
 
-  // Format WhatsApp Squad Invite
-  const whatsAppInvite = `🚀 Hey! I just completed Milestone ${week} on the SkillMe ${domain} internship with ${prs} verified PRs merged!
+    whatsAppInvite = `🚀 Hey! I just completed Milestone ${week} on the SkillMe ${domain} internship with ${prs} verified PRs merged!
 
 Check out my verified offer letter:
 👉 ${offerUrl}
 
 Collaborate with me on real repositories and earn verified Proof of Work for your resume:
 👉 Join my SkillMe Sprint Squad: ${referralLink}`;
+  }
 
   milestoneShareData = {
     linkedInText: linkedInPost,
@@ -1240,12 +1282,14 @@ Collaborate with me on real repositories and earn verified Proof of Work for you
 
   const titleEl = document.getElementById('milestone-title');
   const badgeEl = document.getElementById('milestone-badge');
+  const subEl = document.getElementById('milestone-sub');
   const prsEl = document.getElementById('modal-stat-prs');
   const scoreEl = document.getElementById('modal-stat-score');
   const weekEl = document.getElementById('modal-stat-week');
 
-  if (titleEl) titleEl.textContent = `Milestone ${week} Achieved: ${prs} PRs Merged!`;
-  if (badgeEl) badgeEl.textContent = `🎉 SPRINT MILESTONE ${week} UNLOCKED`;
+  if (titleEl) titleEl.textContent = titleText;
+  if (badgeEl) badgeEl.textContent = badgeText;
+  if (subEl) subEl.textContent = subText;
   if (prsEl) prsEl.textContent = prs;
   if (scoreEl) scoreEl.textContent = `${score} pts`;
   if (weekEl) weekEl.textContent = `Week ${week}`;
