@@ -929,13 +929,23 @@
             <a href="index.html" class="btn-primary">
               Back to Home
             </a>
-            <button type="button" class="btn-primary" style="background:rgba(201,154,78,0.2);border:1px solid rgba(201,154,78,0.5);color:#c99a4e;" onclick="localStorage.removeItem('skillme_quiz_result'); window.location.href='quiz.html'">
+            <button type="button" class="btn-primary" style="background:rgba(201,154,78,0.2);border:1px solid rgba(201,154,78,0.5);color:#c99a4e;" onclick="localStorage.removeItem('skillme_quiz_result'); localStorage.removeItem('skillme_application_submitted'); window.location.href='quiz.html'">
               Submit Another
             </button>
             <a href="dashboard.html" class="btn-primary" style="background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.5);color:#fff;">
               Student Dashboard
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
+          </div>
+
+          <!-- Status Checker Input -->
+          <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 400px; margin-left: auto; margin-right: auto; text-align: center;">
+            <p style="font-size: 0.85rem; color: rgba(255,255,255,0.6); margin-bottom: 12px;">Checking a different application?</p>
+            <div style="display: flex; gap: 8px;">
+              <input type="email" id="check-status-email" placeholder="Enter email address" onkeydown="if(event.key === 'Enter') checkStatusEmail()" style="flex: 1; padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: #fff; font-size: 0.9rem; outline: none;">
+              <button type="button" onclick="checkStatusEmail()" class="btn-primary" style="padding: 10px 16px; min-width: max-content;">Check</button>
+            </div>
+            <p id="check-status-result" style="font-size: 0.95rem; font-weight: 500; margin-top: 14px; display: none;"></p>
           </div>
         </div>
       </div>
@@ -961,14 +971,13 @@
       const urlParams = new URLSearchParams(window.location.search);
       const isStatusView = urlParams.get('view') === 'status';
       const isSubmitted = localStorage.getItem('skillme_application_submitted');
-      const submittedEmail = localStorage.getItem('skillme_submitted_email');
-
-      if (isStatusView && isSubmitted) {
+      if (isStatusView) {
         document.addEventListener('DOMContentLoaded', () => {
           document.getElementById('apply-form').style.display = 'none';
           document.getElementById('form-progress').style.display = 'none';
           const successState = document.getElementById('success-state');
           successState.classList.add('active');
+          const submittedEmail = localStorage.getItem('skillme_submitted_email');
           
           if (submittedEmail) {
             fetch((window.SKILLME_API || 'http://localhost:8000') + '/api/students/status/' + encodeURIComponent(submittedEmail))
@@ -979,8 +988,8 @@
                   const h2 = successState.querySelector('h2');
                   const p = successState.querySelector('p');
                   if (status === 'applied') {
-                    h2.textContent = 'Application Pending Review';
-                    p.innerHTML = 'We are currently reviewing your application. You will hear from us shortly.';
+                    h2.textContent = 'Application Submitted!';
+                    p.innerHTML = 'We\'ve received your application. You\'ll hear from us within <strong>48 hours</strong> with a screening quiz link.';
                   } else if (status === 'shortlisted') {
                     h2.textContent = 'You\'re Shortlisted! 🎉';
                     p.innerHTML = 'Congratulations! Please check your email inbox for the next steps.';
@@ -988,13 +997,22 @@
                     h2.textContent = 'You\'re Enrolled! 🚀';
                     p.innerHTML = 'You have been assigned to a batch. Please check your email or log into the <a href="dashboard.html" style="color:#c99a4e; text-decoration:underline;">Student Dashboard</a>.';
                   } else if (status === 'dropped') {
-                    h2.textContent = 'Application Closed';
-                    p.innerHTML = 'Your application is no longer active.';
+                    h2.textContent = 'Application Dropped';
+                    p.innerHTML = 'Your application is no longer active. You can submit another application for a different domain.';
                   }
                 }
-              }).catch(err => console.error("Could not fetch status", err));
+              })
+              .catch(err => console.log('Error fetching status:', err));
+          } else {
+            // No email found in local storage, prompt user
+            successState.querySelector('h2').textContent = 'Check Application Status';
+            successState.querySelector('p').innerHTML = 'Please enter your email below to check your status.';
+            successState.querySelector('.success-detail').style.display = 'none';
+            successState.querySelector('.success-icon').innerHTML = '🔍';
           }
+
         });
+        return;
         return;
       }
 
@@ -1345,5 +1363,52 @@
       to { transform: rotate(360deg); }
     }
   </style>
+  <script>
+    window.checkStatusEmail = function() {
+      const emailInput = document.getElementById('check-status-email');
+      const resultMsg = document.getElementById('check-status-result');
+      if (!emailInput || !resultMsg) return;
+      const newEmail = emailInput.value.trim();
+      if (!newEmail) return;
+      const btn = emailInput.nextElementSibling;
+      const origText = btn.textContent;
+      btn.textContent = '...';
+      resultMsg.style.display = 'none';
+      
+      fetch((window.SKILLME_API || 'http://localhost:8000') + '/api/students/status/' + encodeURIComponent(newEmail))
+        .then(res => {
+          if (!res.ok) throw new Error();
+          return res.json();
+        })
+        .then(data => {
+          btn.textContent = origText;
+          if (data.student && data.student.status) {
+            localStorage.setItem('skillme_submitted_email', newEmail);
+            localStorage.setItem('skillme_application_submitted', 'true');
+            
+            const status = data.student.status;
+            let msg = '';
+            let color = '#c99a4e';
+            
+            if (status === 'applied') { msg = '⏳ Review Pending'; }
+            else if (status === 'shortlisted') { msg = '🎉 Shortlisted'; color = '#34d399'; }
+            else if (status === 'enrolled') { msg = '🚀 Enrolled'; color = '#34d399'; }
+            else if (status === 'dropped') { msg = '❌ Dropped'; color = '#ef4444'; }
+            
+            resultMsg.textContent = 'Status: ' + msg;
+            resultMsg.style.color = color;
+            resultMsg.style.display = 'block';
+          } else {
+            throw new Error();
+          }
+        })
+        .catch(err => {
+          btn.textContent = origText;
+          resultMsg.textContent = 'No application found for ' + newEmail;
+          resultMsg.style.color = '#ef4444';
+          resultMsg.style.display = 'block';
+        });
+    };
+  </script>
 </body>
 </html>

@@ -558,6 +558,10 @@
       <button class="btn-primary" id="start-btn" onclick="startQuiz()" disabled>
         Start Quiz &nbsp; →
       </button>
+
+      <div style="margin-top: 24px; text-align: center;">
+        <a href="apply.html?view=status" style="color: rgba(255,255,255,0.5); font-size: 0.85rem; text-decoration: underline; transition: color 0.2s;" onmouseover="this.style.color='#c99a4e'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">Already applied? Check your status here</a>
+      </div>
     </div>
 
     <!-- ══ SCREEN 2: Question ══ -->
@@ -938,26 +942,17 @@ function showScreen(id) {
   // If explicitly retaking via ?retake=1, clear existing result so user can start fresh
   if (isRetake) {
     localStorage.removeItem('skillme_quiz_result');
-  } else if (existing && !submitted) {
-    // If quiz is completed and user hasn't submitted yet, redirect to apply.html
+  } else if (submitted) {
+    // If they already successfully submitted an application in the past,
+    // intercept them and send them directly to the Status Tracker window!
+    window.location.href = 'apply.html?view=status';
+    return;
+  } else if (existing) {
+    // They passed the quiz but haven't submitted yet, drop them back in the form.
     window.location.href = 'apply.html';
     return;
-  }
-  
-  // If user has a submitted application, show them a banner
-  if (submitted && !isRetake) {
-    document.addEventListener('DOMContentLoaded', () => {
-      const banner = document.createElement('div');
-      banner.style.cssText = 'background: rgba(201, 154, 78, 0.1); border: 1px solid rgba(201, 154, 78, 0.3); border-radius: 8px; padding: 12px 20px; text-align: center; margin-bottom: 24px; font-size: 0.95rem;';
-      banner.innerHTML = `You recently submitted an application. <a href="apply.html?view=status" style="color: #c99a4e; text-decoration: underline; font-weight: 500; margin-left: 8px;">View Application Status</a>`;
-      const welcomeScreen = document.getElementById('screen-welcome');
-      if (welcomeScreen) {
-        welcomeScreen.insertBefore(banner, welcomeScreen.firstChild);
-      }
-    });
   }
 })();
 </script>
 </body>
 </html>
-
