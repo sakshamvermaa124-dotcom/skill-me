@@ -40,8 +40,8 @@ class TestFrontendPortfolioContract:
 
         assert "SkillMe" in content
         assert "letterhead" in content or "offer" in content
-        # MSME/CIN constraint: verify MSME/CIN are not present
-        assert "MSME Reg" not in content
+        # Verify official Govt. of India Udyam registration is present
+        assert "UDYAM-UP-50-0294192" in content
         assert "CIN:" not in content
 
 

@@ -303,7 +303,7 @@ def _draw_footer(c: rl_canvas.Canvas, w: float, h: float, cert_id: str, issued_o
     c.setFillColor(C_MUTED)
     c.setFont("Helvetica", 4.5)
     c.drawString(18 * mm, 6, "This is a computer-generated document. Verify at skill-me-intern.in/certificate.html")
-    c.drawRightString(w - 18 * mm, 6, "© 2024–2026 SkillMe Technologies Pvt. Ltd. All rights reserved.")
+    c.drawRightString(w - 18 * mm, 6, "© 2024–2026 SkillMe Technologies • Govt. of India Udyam Reg. UDYAM-UP-50-0294192")
 
 def _draw_qr(c: rl_canvas.Canvas, w: float, h: float, cert_id: str):
     """Draw a QR code linking to the certificate verification page."""
