@@ -122,14 +122,12 @@ document.addEventListener('DOMContentLoaded', () => {
       loginBtn.disabled = false;
       loginBtn.textContent = 'Get Login Code';
       if (document.getElementById('signout-btn')) document.getElementById('signout-btn').style.display = 'none';
-      if (document.getElementById('mobile-signout-btn')) document.getElementById('mobile-signout-btn').style.setProperty('display', 'none', 'important');
       if (document.getElementById('login-cancel-wrap')) document.getElementById('login-cancel-wrap').style.display = 'none';
     } catch (e) {
       console.log("No active session found.");
       loginBtn.disabled = false;
       loginBtn.textContent = 'Get Login Code';
       if (document.getElementById('signout-btn')) document.getElementById('signout-btn').style.display = 'none';
-      if (document.getElementById('mobile-signout-btn')) document.getElementById('mobile-signout-btn').style.setProperty('display', 'none', 'important');
       if (document.getElementById('login-cancel-wrap')) document.getElementById('login-cancel-wrap').style.display = 'none';
     }
   }
@@ -289,8 +287,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Show Sign Out button in navbar when logged into dashboard
     const signoutBtn = document.getElementById('signout-btn');
     if (signoutBtn) signoutBtn.style.display = 'inline-flex';
-    const mobSignoutBtn = document.getElementById('mobile-signout-btn');
-    if (mobSignoutBtn) mobSignoutBtn.style.setProperty('display', 'block', 'important');
 
     // Header
     const firstName = student.name.split(' ')[0];
@@ -994,7 +990,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const dashView = document.getElementById('dashboard-view');
     const loginView = document.getElementById('login-view');
     const signoutBtn = document.getElementById('signout-btn');
-    const mobSignoutBtn = document.getElementById('mobile-signout-btn');
     
     if (dashView && loginView) {
       dashView.style.display = 'none';
@@ -1002,7 +997,6 @@ document.addEventListener('DOMContentLoaded', () => {
       loginView.style.opacity = '1';
       loginView.style.transform = 'translateY(0)';
       if (signoutBtn) signoutBtn.style.display = 'none';
-      if (mobSignoutBtn) mobSignoutBtn.style.setProperty('display', 'none', 'important');
       // Reset login form inputs
       const emailInput = document.getElementById('login-email');
       const otpWrap = document.getElementById('otp-wrap');
