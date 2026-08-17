@@ -489,14 +489,15 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // ─── Automated Milestone Celebration Popup Trigger ───
-      if (pct < 100 && (totalPrs > 0 || totalCompleted > 0 || urlParams.get('preview') === 'progress' || urlParams.get('preview') === 'milestone')) {
-        const milestoneNum = Math.max(1, Math.floor(pct / 25) || 1);
-        const milestoneSeenKey = `skillme_milestone_seen_${milestoneNum}_student_${student.id || 'guest'}`;
-        if (!localStorage.getItem(milestoneSeenKey) || urlParams.get('preview') === 'milestone' || urlParams.get('preview') === 'progress') {
+      // Automatically triggers celebration modal on first visit after merging a new PR / completing a task
+      const milestoneContext = resolveMilestoneContext(data);
+      if (pct < 100 && milestoneContext.hasCompletedTasks) {
+        const milestoneCelebrationKey = `skillme_milestone_seen_s${milestoneContext.student.id || 'guest'}_pr${milestoneContext.totalPrs}_t${milestoneContext.latestTaskId || milestoneContext.taskNum}_w${milestoneContext.weekNum}`;
+        if (!localStorage.getItem(milestoneCelebrationKey) || urlParams.get('preview') === 'milestone' || urlParams.get('preview') === 'progress') {
           setTimeout(() => {
             window.openMilestoneShareModal(data);
             if (urlParams.get('preview') !== 'milestone' && urlParams.get('preview') !== 'progress') {
-              localStorage.setItem(milestoneSeenKey, 'true');
+              localStorage.setItem(milestoneCelebrationKey, 'true');
             }
           }, 850);
         }
@@ -1189,7 +1190,7 @@ function showCompletionPopup(student, data) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// 🚀 Automated 1-Click LinkedIn & WhatsApp Milestone Share Engine
+// 🚀 Dynamic Milestone Share Engine & GitHub Issue Resolution
 // ═══════════════════════════════════════════════════════════════
 
 let currentShareTab = 'linkedin';
@@ -1197,40 +1198,164 @@ let milestoneShareData = {
   linkedInText: '',
   whatsAppText: '',
   referralLink: '',
-  portfolioUrl: ''
+  portfolioUrl: '',
+  offerUrl: '',
+  githubUrl: ''
 };
 
-window.openMilestoneShareModal = function(customData) {
-  const data = customData || window._dashData || {};
+/**
+ * Strict validator for GitHub issue URLs.
+ * Ensures the URL is an authentic, full GitHub issue URL (e.g. https://github.com/org/repo/issues/123).
+ * Never accepts placeholders, hashes, or non-issue paths.
+ */
+function isValidGithubIssueUrl(url) {
+  if (!url || typeof url !== 'string') return false;
+  const trimmed = url.trim();
+  if (trimmed === '#' || trimmed === '' || trimmed === 'null' || trimmed === 'undefined') return false;
+  const githubIssueRegex = /^https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/issues\/\d+$/;
+  return githubIssueRegex.test(trimmed);
+}
+
+/**
+ * Resolves the milestone and task context dynamically from live dashboard data.
+ */
+function resolveMilestoneContext(data) {
   const student = (data && data.student) || window._dashStudent || { name: 'Intern', github: 'developer' };
-  const progress = (data && data.progress && data.progress[0]) || {};
-  
-  // Calculate totals across all weeks
+  const rawIssues = (data && data.issues) || [];
+  const rawSubmissions = (data && data.submissions) || [];
+  const rawProgress = (data && data.progress) || [];
+
+  // Sum up totals across all weeks
   let totalAssigned = 0;
   let totalCompleted = 0;
   let totalPrs = 0;
-  if (data.progress && Array.isArray(data.progress)) {
-    data.progress.forEach(p => {
-      totalAssigned += Number(p.issues_assigned) || 0;
-      totalCompleted += Number(p.issues_completed) || 0;
-      totalPrs += Number(p.prs_merged) || 0;
-    });
+  let totalScore = 0;
+  let maxWeek = 1;
+
+  rawProgress.forEach(p => {
+    totalAssigned += Number(p.issues_assigned) || 0;
+    totalCompleted += Number(p.issues_completed) || 0;
+    totalPrs += Number(p.prs_merged) || 0;
+    totalScore += Number(p.score) || 0;
+    maxWeek = Math.max(maxWeek, Number(p.week) || 1);
+  });
+
+  // If progress has not been recorded in progress rows, check submissions
+  const mergedSubmissions = rawSubmissions.filter(s => (s.status || '').toLowerCase() === 'merged');
+  if (totalPrs === 0 && mergedSubmissions.length > 0) {
+    totalPrs = mergedSubmissions.length;
+  }
+  if (totalCompleted === 0 && mergedSubmissions.length > 0) {
+    totalCompleted = mergedSubmissions.length;
   }
 
-  const prs = progress.prs_merged !== undefined ? Number(progress.prs_merged) : 0;
-  const assigned = progress.issues_assigned !== undefined ? Number(progress.issues_assigned) : 0;
-  const score = Number(progress.score) || 100;
-  const week = Number(progress.week) || 1;
-  const domain = (progress.domain || student.domain || 'Web Development').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-  const batchNum = progress.batch_number || 1;
-  
+  const domain = (student.domain || (rawProgress[0] && rawProgress[0].domain) || 'Web Development')
+    .replace(/-/g, ' ')
+    .replace(/\b\w/g, l => l.toUpperCase());
+  const domainHashtag = domain.replace(/[^a-zA-Z0-9]/g, '') || 'Tech';
+
+  const PROD_BASE = 'https://www.skill-me-intern.in';
   const studentRefCode = `SKM-${student.id ? String(student.id).padStart(4, '0') : '2026'}`;
-  const PROD_BASE = 'https://skill-me-intern.in';
   const referralLink = `${PROD_BASE}/apply.html?ref=${studentRefCode}`;
   const ghUser = (student.github || '').trim().replace(/^@/, '');
-  const domainHashtag = student.domain ? student.domain.replace(/[^a-zA-Z0-9]/g, '') : 'Tech';
-  const portfolioUrl = ghUser ? `${PROD_BASE}/portfolio.html?gh=${encodeURIComponent(ghUser)}` : PROD_BASE;
-  const offerUrl = `${PROD_BASE}/offer.html?name=${encodeURIComponent(student.name || '')}&domain=${encodeURIComponent(student.domain || '')}`;
+  const portfolioUrl = ghUser ? `${PROD_BASE}/portfolio.html?gh=${encodeURIComponent(ghUser)}` : `${PROD_BASE}/portfolio.html`;
+  const offerUrl = `${PROD_BASE}/offer.html?name=${encodeURIComponent(student.name || '')}&domain=${encodeURIComponent(domain)}&student_id=${student.id || ''}`;
+  const certUrl = `${PROD_BASE}/certificate.html?student_id=${student.id || ''}&domain=${encodeURIComponent(domain)}`;
+
+  // Group all assigned issues by week_number to determine task indices (Task 1, Task 2, Task 3)
+  const issuesByWeek = {};
+  rawIssues.forEach(iss => {
+    const w = Number(iss.week_number) || 1;
+    if (!issuesByWeek[w]) issuesByWeek[w] = [];
+    issuesByWeek[w].push(iss);
+  });
+
+  // Sort each week's issues deterministically by id or github_issue_number
+  Object.keys(issuesByWeek).forEach(w => {
+    issuesByWeek[w].sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));
+  });
+
+  // Helper to find task index for an issue within its week
+  function getTaskIndex(issue) {
+    const w = Number(issue.week_number) || 1;
+    const weekList = issuesByWeek[w] || [];
+    const idx = weekList.findIndex(item => (item.id && issue.id && item.id === issue.id) || (item.github_issue_number && item.github_issue_number === issue.github_issue_number));
+    return idx >= 0 ? idx + 1 : (Number(issue.task_index) || 1);
+  }
+
+  // Find completed issues
+  const completedIssues = rawIssues.filter(iss => (iss.status || '').toLowerCase() === 'completed');
+
+  // Identify the latest completed task:
+  let latestTask = null;
+  if (completedIssues.length > 0) {
+    // Sort completed issues by week (descending) then id (descending)
+    completedIssues.sort((a, b) => {
+      const weekDiff = (Number(b.week_number) || 1) - (Number(a.week_number) || 1);
+      if (weekDiff !== 0) return weekDiff;
+      return (Number(b.id) || 0) - (Number(a.id) || 0);
+    });
+    latestTask = completedIssues[0];
+  } else if (mergedSubmissions.length > 0) {
+    // Fallback to latest merged submission
+    const latestSub = mergedSubmissions[0];
+    latestTask = {
+      id: latestSub.issue_id || 0,
+      title: latestSub.issue_title || 'Completed Engineering Task',
+      week_number: Number(latestSub.week_number) || 1,
+      github_url: latestSub.issue_github_url || null,
+      difficulty: latestSub.difficulty || 'medium',
+      status: 'completed'
+    };
+  }
+
+  // Determine state
+  const hasCompletedTasks = (latestTask !== null) || (totalPrs > 0) || (totalCompleted > 0);
+  const isAllComplete = (totalAssigned > 0 && totalCompleted >= totalAssigned) || (totalCompleted >= 12);
+
+  let weekNum = 1;
+  let taskNum = 1;
+  let taskTitle = 'Engineering Task';
+  let validatedGithubUrl = null;
+  let latestTaskId = 0;
+
+  if (latestTask) {
+    weekNum = Number(latestTask.week_number) || 1;
+    taskNum = getTaskIndex(latestTask);
+    taskTitle = (latestTask.title || 'Engineering Task').replace(/^\[.*?\]\s*/, '').trim();
+    latestTaskId = latestTask.id || latestTask.github_issue_number || 1;
+    if (isValidGithubIssueUrl(latestTask.github_url)) {
+      validatedGithubUrl = latestTask.github_url;
+    }
+  }
+
+  return {
+    student,
+    domain,
+    domainHashtag,
+    totalAssigned,
+    totalCompleted,
+    totalPrs,
+    totalScore,
+    maxWeek,
+    hasCompletedTasks,
+    isAllComplete,
+    latestTask,
+    latestTaskId,
+    weekNum,
+    taskNum,
+    taskTitle,
+    validatedGithubUrl,
+    referralLink,
+    portfolioUrl,
+    offerUrl,
+    certUrl
+  };
+}
+
+window.openMilestoneShareModal = function(customData) {
+  const data = customData || window._dashData || {};
+  const ctx = resolveMilestoneContext(data);
 
   let linkedInPost = '';
   let whatsAppInvite = '';
@@ -1238,101 +1363,121 @@ window.openMilestoneShareModal = function(customData) {
   let titleText = '';
   let subText = '';
 
-  if (totalAssigned > 0 && totalCompleted >= totalAssigned) {
-    badgeText = `?? INTERNSHIP COMPLETED`;
-    titleText = `100% Completed!`;
-    subText = `You've completed your internship. Share your achievement:`;
-    
-    linkedInPost = `I'm thrilled to announce that I have successfully completed the 4-week ${domain} Virtual Internship at SkillMe (@skill-me-intern)! ??
-  
-Over the past month, I merged ${totalPrs} Pull Requests, solved real-world engineering issues, and built verifiable Proof of Work. It was an incredible learning experience! ????
+  if (ctx.isAllComplete) {
+    // ─── Case 1: 100% Completed Sprint ───
+    badgeText = `🏆 INTERNSHIP COMPLETED`;
+    titleText = `100% Milestone Completed!`;
+    subText = `You've completed all tasks across the 4-week sprint. Share your achievement:`;
 
-?? View my verified portfolio and credentials:
-?? ${portfolioUrl}
+    const githubBlock = ctx.validatedGithubUrl 
+      ? `🔗 Final Verified Task & Issue:\n👉 ${ctx.validatedGithubUrl}\n\n` 
+      : '';
 
-Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
+    linkedInPost = `I'm thrilled to announce that I have successfully completed the 4-week ${ctx.domain} Virtual Internship at SkillMe (@skill-me-intern)! 🎓🚀
 
-#SkillMe #ProofOfWork #${domainHashtag} #SoftwareEngineering #TechInternship #GitHub`;
+Over the past month, I solved real production-grade GitHub issues, merged ${ctx.totalPrs} Pull Requests, and built verifiable Proof of Work. It was an incredible hands-on engineering journey!
 
-    whatsAppInvite = `?? I just completed the SkillMe ${domain} internship!
-  
-I successfully merged ${totalPrs} PRs and earned my verified credentials. Check out my Proof of Work portfolio:
-?? ${portfolioUrl}
+📊 Verified Sprint Summary:
+• Track: ${ctx.domain} Engineering Sprint
+• Progress: 100% Curriculum Completed (All 4 Weeks)
+• Total Pull Requests Merged: ${ctx.totalPrs}
+• Engineering XP Score: ${ctx.totalScore} pts
+• Final Milestone Task: Week ${ctx.weekNum}, Task ${ctx.taskNum} — ${ctx.taskTitle}
 
-Join me and earn verified Proof of Work for your resume:
-?? Join my SkillMe Squad: ${referralLink}`;
+${githubBlock}🌐 View my live Proof of Work portfolio & codebase:
+👉 ${ctx.portfolioUrl}
 
-  } else if (prs === 0) {
-    badgeText = `🎉 OFFER LETTER UNLOCKED`;
-    titleText = `You're Enrolled!`;
-    subText = `Your official internship offer letter is ready. Share it with your network:`;
-    
-    linkedInPost = `I'm thrilled to share that I've been selected for the ${domain} Virtual Internship at SkillMe (@skill-me-intern)! 🚀
-  
-Ready to build real-world projects, merge pull requests, and level up my engineering skills over the next 4 weeks. Let's go! 💻🔥
-
-📄 View my verified digital Offer Letter:
-👉 ${offerUrl}
+📄 View my verified digital Certificate & LOR:
+👉 ${ctx.certUrl}
 
 Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
 
-#SkillMe #ProofOfWork #${domainHashtag} #SoftwareEngineering #TechInternship #GitHub`;
+#SkillMe #ProofOfWork #${ctx.domainHashtag} #SoftwareEngineering #TechInternship #OpenSource #GitHub`;
 
-    whatsAppInvite = `🚀 Hey! I've been selected for the SkillMe ${domain} internship!
-  
-Check out my verified offer letter:
-👉 ${offerUrl}
+    whatsAppInvite = `🏆 I just completed the SkillMe ${ctx.domain} internship with 100% tasks solved and ${ctx.totalPrs} PRs merged!
 
-Join me and earn verified Proof of Work for your resume:
-👉 Join my SkillMe Squad: ${referralLink}`;
+Check out my verified Proof of Work portfolio:
+👉 ${ctx.portfolioUrl}
+
+Join me on SkillMe and earn verified credentials for your resume:
+👉 Join my SkillMe Squad: ${ctx.referralLink}`;
+
+  } else if (!ctx.hasCompletedTasks) {
+    // ─── Case 2: 0 PRs Merged (Offer Milestone) ───
+    badgeText = `🎉 OFFICIAL OFFER UNLOCKED`;
+    titleText = `You're Enrolled at SkillMe!`;
+    subText = `Your official internship offer is confirmed. Share your new engineering journey:`;
+
+    linkedInPost = `I'm thrilled to share that I have been selected for the ${ctx.domain} Virtual Internship at SkillMe (@skill-me-intern)! 🚀
+
+Over the next 4 weeks, I will be contributing to production-grade repositories, solving real-world GitHub issues, and building verifiable Proof of Work.
+
+🎯 Program Highlights:
+• Track: ${ctx.domain} Engineering Sprint
+• Hands-on Git, Branching & Pull Request workflows
+• MSME Recognized & Cryptographically Verifiable Credentials
+• Lifetime Public Proof-of-Work Portfolio
+
+📄 View my official verified digital Offer Letter:
+👉 ${ctx.offerUrl}
+
+Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
+
+#SkillMe #ProofOfWork #${ctx.domainHashtag} #SoftwareEngineering #TechInternship #OpenSource #GitHub`;
+
+    whatsAppInvite = `🚀 Hey! I've been selected for the SkillMe ${ctx.domain} Virtual Internship!
+
+Check out my verified digital Offer Letter:
+👉 ${ctx.offerUrl}
+
+Join me to solve real GitHub issues and build verified Proof of Work for your resume:
+👉 Join my SkillMe Squad: ${ctx.referralLink}`;
 
   } else {
+    // ─── Case 3: After Every Successful PR Merge / Task Completion ───
     badgeText = `🎉 SPRINT MILESTONE UNLOCKED`;
-    titleText = `Milestone Achieved: ${prs} PR${prs === 1 ? '' : 's'} Merged!`;
-    subText = `You've successfully merged verified PRs to your assigned project repository. Share your verifiable achievement:`;
-    
-    // Check if they completed all assigned issues for the week
-    const isSprintComplete = assigned > 0 && prs >= assigned;
-    
-    const intro = isSprintComplete 
-      ? `🚀 Milestone ${week} Sprint Completed on SkillMe (@skill-me-intern)!`
-      : `🚀 Code milestone unlocked on SkillMe (@skill-me-intern)!`;
+    titleText = `Week ${ctx.weekNum}, Task ${ctx.taskNum} Completed!`;
+    subText = `You've successfully merged your Pull Request and resolved "${ctx.taskTitle}". Share your verifiable achievement:`;
 
-    linkedInPost = `${intro}
+    const githubBlock = ctx.validatedGithubUrl 
+      ? `🔗 Verified Task & Issue on GitHub:\n👉 ${ctx.validatedGithubUrl}\n\n` 
+      : '';
 
-Proud to share that I have merged ${prs} verified Pull Requests and resolved core engineering tasks for the ${domain} technical internship!
+    linkedInPost = `Week ${ctx.weekNum}, Task ${ctx.taskNum} completed at SkillMe (@skill-me-intern)! 🚀
 
-📊 Verified Proof of Work Stats:
-• Pull Requests Merged: ${prs}
-• Engineering Score: ${score} pts
-• Sprint Milestone: Week ${week} Complete
-• Cryptographic Verification: Active
+I just merged my latest Pull Request and successfully resolved "${ctx.taskTitle}" for the ${ctx.domain} Virtual Internship.
 
-📄 View my verified digital Offer Letter:
-👉 ${offerUrl}
+SkillMe is India's premier open-source engineering platform where interns solve real-world GitHub issues and build tamper-proof Proof of Work.
 
-Explore my live Proof of Work portfolio & codebase here:
-👉 ${portfolioUrl}
+📊 Milestone Highlights:
+• Milestone: Week ${ctx.weekNum}, Task ${ctx.taskNum} — ${ctx.taskTitle}
+• Status: Pull Request Merged & Verified ✅
+• Total PRs Merged: ${ctx.totalPrs}
+• Current Engineering Score: ${ctx.totalScore} pts
+
+${githubBlock}🌐 View my live Proof of Work portfolio:
+👉 ${ctx.portfolioUrl}
 
 Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
 
-#SkillMe #ProofOfWork #${domainHashtag} #SoftwareEngineering #TechInternship #GitHub`;
+#SkillMe #ProofOfWork #${ctx.domainHashtag} #SoftwareEngineering #TechInternship #OpenSource #GitHub`;
 
-    whatsAppInvite = `🚀 Hey! I just completed Milestone ${week} on the SkillMe ${domain} internship with ${prs} verified PRs merged!
+    whatsAppInvite = `🚀 Milestone update! I just completed Week ${ctx.weekNum}, Task ${ctx.taskNum} ("${ctx.taskTitle}") at SkillMe with a merged Pull Request!
 
-Check out my verified offer letter:
-👉 ${offerUrl}
+${ctx.validatedGithubUrl ? `Check out my verified GitHub task:\n👉 ${ctx.validatedGithubUrl}\n\n` : ''}View my live Proof of Work portfolio:
+👉 ${ctx.portfolioUrl}
 
-Collaborate with me on real repositories and earn verified Proof of Work for your resume:
-👉 Join my SkillMe Sprint Squad: ${referralLink}`;
+Join me on SkillMe to solve real GitHub issues and level up your resume:
+👉 Join my SkillMe Sprint Squad: ${ctx.referralLink}`;
   }
 
   milestoneShareData = {
     linkedInText: linkedInPost,
     whatsAppText: whatsAppInvite,
-    referralLink: referralLink,
-    portfolioUrl: portfolioUrl,
-    offerUrl: offerUrl
+    referralLink: ctx.referralLink,
+    portfolioUrl: ctx.portfolioUrl,
+    offerUrl: ctx.offerUrl,
+    githubUrl: ctx.validatedGithubUrl || ''
   };
 
   // Populate DOM elements
@@ -1349,9 +1494,9 @@ Collaborate with me on real repositories and earn verified Proof of Work for you
   if (titleEl) titleEl.textContent = titleText;
   if (badgeEl) badgeEl.textContent = badgeText;
   if (subEl) subEl.textContent = subText;
-  if (prsEl) prsEl.textContent = prs;
-  if (scoreEl) scoreEl.textContent = `${score} pts`;
-  if (weekEl) weekEl.textContent = `Week ${week}`;
+  if (prsEl) prsEl.textContent = ctx.totalPrs;
+  if (scoreEl) scoreEl.textContent = `${ctx.totalScore} pts`;
+  if (weekEl) weekEl.textContent = ctx.hasCompletedTasks ? `W${ctx.weekNum} · T${ctx.taskNum}` : `Week ${ctx.maxWeek}`;
 
   switchShareTab(currentShareTab);
 

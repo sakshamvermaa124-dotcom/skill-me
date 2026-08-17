@@ -166,10 +166,12 @@ async def get_progress(email: str):
             progress = enrollments
 
     submissions = await db.fetch_all(
-        """SELECT s.pr_url, s.pr_number, s.status, s.submitted_at, s.merged_at,
-                  i.title as issue_title, i.week_number
+        """SELECT s.id, s.issue_id, s.pr_url, s.pr_number, s.status, s.submitted_at, s.merged_at,
+                  i.title as issue_title, i.week_number, i.github_issue_number, i.difficulty,
+                  b.repo_name, b.domain
            FROM submissions s
            LEFT JOIN issues i ON s.issue_id = i.id
+           LEFT JOIN batches b ON s.batch_id = b.id
            WHERE s.student_id = ?
            ORDER BY s.submitted_at DESC""",
         (student["id"],),
@@ -188,6 +190,18 @@ async def get_progress(email: str):
 
     from config import settings
     org = settings.github_org or "skill-me-intern"
+
+    formatted_submissions = []
+    for sub in submissions:
+        sub_dict = dict(sub)
+        repo_name = sub_dict.get("repo_name", "")
+        issue_num = sub_dict.get("github_issue_number")
+        if repo_name and issue_num:
+            sub_dict["issue_github_url"] = f"https://github.com/{org}/{repo_name}/issues/{issue_num}"
+        else:
+            sub_dict["issue_github_url"] = None
+        formatted_submissions.append(sub_dict)
+
     formatted_issues = []
     for iss in assigned_issues:
         iss_dict = dict(iss)
@@ -196,25 +210,32 @@ async def get_progress(email: str):
         if repo_name and issue_num:
             iss_dict["github_url"] = f"https://github.com/{org}/{repo_name}/issues/{issue_num}"
         else:
-            iss_dict["github_url"] = f"https://github.com/{org}/{repo_name}/issues" if repo_name else "#"
+            iss_dict["github_url"] = None
         formatted_issues.append(iss_dict)
+
+    primary_domain = student.get("domain") or (progress[0]["domain"] if progress else "Web Development")
 
     return {
         "student": {
             "id": student["id"],
+            "first_name": student["first_name"],
+            "last_name": student["last_name"],
             "name": f"{student['first_name']} {student['last_name']}",
             "email": student["email"],
             "github": student["github_username"],
+            "domain": primary_domain,
+            "college": student.get("college"),
+            "referral_code": student.get("referral_code"),
         },
         "progress": [dict(p) for p in progress],
-        "submissions": [dict(s) for s in submissions],
+        "submissions": formatted_submissions,
         "issues": formatted_issues,
         "github_org": org,
         "summary": {
             "total_tasks": len(formatted_issues),
             "completed_tasks": sum(int(p["issues_completed"]) for p in progress),
             "prs_merged": sum(int(p["prs_merged"]) for p in progress),
-            "total_prs": len([s for s in submissions]),
+            "total_prs": len(formatted_submissions),
             # Always divide by 12 (3 tasks × 4 weeks) so that completing
             # only week-1 tasks never shows 100%. Cap at 100 for safety.
             "completion_pct": min(100, round(
