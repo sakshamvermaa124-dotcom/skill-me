@@ -1,0 +1,48 @@
+name: Frontend Lint & Syntax Check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**.js'
+      - '**.html'
+  pull_request:
+    branches: [main]
+    paths:
+      - '**.js'
+      - '**.html'
+
+jobs:
+  js-syntax-check:
+    name: JavaScript Syntax Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check JS syntax
+        run: |
+          echo "🔍 Validating JavaScript syntax..."
+          ERRORS=0
+          for file in $(find . -name '*.js' -not -path './node_modules/*' -not -path './.git/*'); do
+            if ! node -c "$file" 2>/dev/null; then
+              echo "✗ SYNTAX ERROR: $file"
+              node -c "$file"
+              ERRORS=$((ERRORS + 1))
+            else
+              echo "✓ $file"
+            fi
+          done
+
+          if [ $ERRORS -gt 0 ]; then
+            echo ""
+            echo "✗ FAILED — $ERRORS file(s) have JavaScript syntax errors."
+            exit 1
+          fi
+          echo ""
+          echo "✓ All JavaScript files pass syntax check."
