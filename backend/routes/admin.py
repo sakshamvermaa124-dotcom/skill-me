@@ -762,14 +762,28 @@ async def delete_student(student_id: int, _: str = Depends(require_admin)):
         await db.execute("DELETE FROM email_logs WHERE student_id = ? OR LOWER(recipient_email) = LOWER(?)", (student_id, email))
         await db.execute("DELETE FROM otp_tokens WHERE LOWER(email) = LOWER(?)", (email,))
 
-        # 3. Clean up any dedicated 1-student batches that now have 0 enrollments
+        # 3. Clean up any dedicated 1-student batches and their GitHub repos
+        deleted_repos = []
         for b_id in batch_ids:
-            batch = await db.fetch_one("SELECT max_students FROM batches WHERE id = ?", (b_id,))
+            batch = await db.fetch_one("SELECT max_students, repo_name FROM batches WHERE id = ?", (b_id,))
             if batch and batch.get("max_students") == 1:
                 active_enrollments = await db.fetch_one(
                     "SELECT COUNT(*) as count FROM enrollments WHERE batch_id = ?", (b_id,)
                 )
                 if not active_enrollments or active_enrollments["count"] == 0:
+                    # Delete the GitHub repo if it exists
+                    repo_name = batch.get("repo_name")
+                    if repo_name:
+                        try:
+                            deleted = await github_service.delete_repo(repo_name)
+                            if deleted:
+                                deleted_repos.append(repo_name)
+                                logger.info(f"Deleted GitHub repo: {github_service.org}/{repo_name}")
+                            else:
+                                logger.warning(f"Could not delete GitHub repo: {github_service.org}/{repo_name} (may not exist or insufficient permissions)")
+                        except Exception as repo_err:
+                            logger.warning(f"Failed to delete GitHub repo {repo_name}: {repo_err}")
+
                     await db.execute("DELETE FROM issues WHERE batch_id = ?", (b_id,))
                     await db.execute("DELETE FROM progress WHERE batch_id = ?", (b_id,))
                     await db.execute("DELETE FROM submissions WHERE batch_id = ?", (b_id,))
@@ -791,7 +805,8 @@ async def delete_student(student_id: int, _: str = Depends(require_admin)):
             "status": "deleted",
             "student_id": student_id,
             "email": email,
-            "message": f"Student #{student_id} ({email}) has been completely wiped from the database. When they return, they will be treated as a brand-new user."
+            "deleted_repos": deleted_repos,
+            "message": f"Student #{student_id} ({email}) has been completely wiped from the database{' and ' + str(len(deleted_repos)) + ' GitHub repo(s) deleted' if deleted_repos else ''}. When they return, they will be treated as a brand-new user."
         }
     except Exception as e:
         logger.error(f"Failed to delete student {student_id}: {e}", exc_info=True)
