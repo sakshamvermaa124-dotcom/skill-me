@@ -21,12 +21,14 @@ try {
 
 let adminKey = '';
 let allStudents = [];
+let allAlumni = [];
 let allBatches = [];
 let currentPage = 'overview';
 
 const PAGE_META = {
   overview:  { title: 'Overview',  subtitle: 'Platform summary and recent activity' },
   students:  { title: 'Students',  subtitle: 'Manage applications and enrollments' },
+  alumni:    { title: 'Alumni',    subtitle: 'Students who completed their internship' },
   batches:   { title: 'Batches',   subtitle: 'Manage cohorts and automated task assignment' },
   email:     { title: 'Email Settings', subtitle: 'Brevo SMTP relay — test and monitor email delivery' },
 };
@@ -847,6 +849,7 @@ function navigate(page) {
   currentPage = page;
   if (page === 'overview') loadOverview();
   if (page === 'students') loadStudents();
+  if (page === 'alumni') loadAlumni();
   if (page === 'batches') loadBatches();
   if (page === 'email') loadEmailStatus();
 }
@@ -1022,9 +1025,18 @@ async function loadStudents(silent = false) {
     tbody.innerHTML = `<tr><td colspan="6"><div class="loading-overlay"><div class="spinner"></div></div></td></tr>`;
   }
   try {
-    const data = await api('/api/admin/students?limit=100');
-    allStudents = data.students || [];
+    const data = await api('/api/admin/students?limit=200');
+    const all = data.students || [];
+    // Separate alumni (paid students) from active students
+    allStudents = all.filter(s => !s.has_paid);
+    allAlumni = all.filter(s => s.has_paid);
     renderStudents(allStudents);
+    // Update alumni badge
+    const badge = document.getElementById('alumni-badge');
+    if (badge) {
+      badge.textContent = allAlumni.length;
+      badge.style.display = allAlumni.length > 0 ? 'inline-flex' : 'none';
+    }
   } catch(e) {
     if (!silent) {
       tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-text">${e.message}</div></div></td></tr>`;
@@ -1071,6 +1083,68 @@ function renderStudents(students) {
           ${s.batch_id ? `<button class="btn btn-sm" style="background:rgba(56,189,248,0.12);color:#38bdf8;border:1px solid rgba(56,189,248,0.22);" onclick="openAssignModal(${s.batch_id},'${s.first_name} ${s.last_name} (${s.domain || 'Batch'})')" title="Assign or re-assign weekly curriculum tasks">⚡ Tasks</button>` : ''}
           ${(s.status === 'completed' || s.status === 'enrolled') && s.batch_id ? `<button class="btn btn-sm" style="background:rgba(212,168,83,0.15);color:#d4a853;border:1px solid rgba(212,168,83,0.3);" onclick="issueCertificate(${s.id},${s.batch_id},'${s.first_name} ${s.last_name}')">🏅 Certificate</button>` : ''}
           ${s.status !== 'dropped' ? `<button class="btn btn-sm" style="background:rgba(251,113,133,0.12);color:#fb7185;border:1px solid rgba(251,113,133,0.2);" onclick="updateStatus(${s.id},'dropped')">Drop</button>` : ''}
+          <button class="btn btn-sm" style="background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.25);" onclick="deleteStudent(${s.id},'${s.first_name} ${s.last_name}','${s.email}')" title="Permanently delete entire record from database">🗑️ Delete</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+// ─── ALUMNI ───
+async function loadAlumni(silent = false) {
+  const tbody = document.getElementById('alumni-tbody');
+  if (!tbody) return;
+  if (!silent) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="loading-overlay"><div class="spinner"></div></div></td></tr>`;
+  }
+  try {
+    // If allAlumni is already populated from loadStudents, use it; otherwise fetch fresh
+    if (!allAlumni.length && !allStudents.length) {
+      const data = await api('/api/admin/students?limit=200');
+      const all = data.students || [];
+      allStudents = all.filter(s => !s.has_paid);
+      allAlumni = all.filter(s => s.has_paid);
+    }
+    renderAlumni(allAlumni);
+  } catch(e) {
+    if (!silent) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-text">${e.message}</div></div></td></tr>`;
+    }
+  }
+}
+
+function filterAlumni() {
+  const q = (document.getElementById('alumni-search')?.value || '').toLowerCase();
+  const filtered = allAlumni.filter(s => {
+    return !q || `${s.first_name} ${s.last_name} ${s.email} ${s.domain || ''} ${s.github_username || ''}`.toLowerCase().includes(q);
+  });
+  renderAlumni(filtered);
+}
+
+function renderAlumni(alumni) {
+  const tbody = document.getElementById('alumni-tbody');
+  if (!tbody) return;
+  if (!alumni.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">🎓</div><div class="empty-state-text">No alumni yet — students appear here after completing payment</div></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = alumni.map(s => `
+    <tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#34d399,#059669);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;flex-shrink:0;">${(s.first_name[0]||'?').toUpperCase()}</div>
+          <div>
+            <div style="font-weight:500;">${s.first_name} ${s.last_name}</div>
+            ${s.github_username ? `<div style="font-size:0.72rem;color:var(--text-muted);">@${s.github_username}</div>` : ''}
+          </div>
+        </div>
+      </td>
+      <td style="color:var(--text-secondary);font-size:0.82rem;">${s.email}</td>
+      <td>${s.domain || '—'}</td>
+      <td><span style="padding:4px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.3);color:#34d399;">✓ Paid</span></td>
+      <td style="color:var(--text-muted);font-size:0.82rem;">${fmtDate(s.created_at)}</td>
+      <td>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          ${s.batch_id ? `<button class="btn btn-sm" style="background:rgba(212,168,83,0.15);color:#d4a853;border:1px solid rgba(212,168,83,0.3);" onclick="issueCertificate(${s.id},${s.batch_id},'${s.first_name} ${s.last_name}')">🏅 Certificate</button>` : ''}
           <button class="btn btn-sm" style="background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.25);" onclick="deleteStudent(${s.id},'${s.first_name} ${s.last_name}','${s.email}')" title="Permanently delete entire record from database">🗑️ Delete</button>
         </div>
       </td>

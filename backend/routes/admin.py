@@ -619,18 +619,22 @@ async def list_students(
     """List all students, optionally filtered by status."""
     if status:
         students = await db.fetch_all(
-            """SELECT s.*, e.batch_id 
+            """SELECT s.*, e.batch_id,
+               CASE WHEN p.id IS NOT NULL THEN 1 ELSE 0 END as has_paid
                FROM students s 
                LEFT JOIN enrollments e ON s.id = e.student_id AND e.status != 'dropped'
+               LEFT JOIN payments p ON s.id = p.student_id AND p.status = 'paid'
                WHERE s.status = ? 
                ORDER BY s.created_at DESC LIMIT ? OFFSET ?""",
             (status, limit, offset),
         )
     else:
         students = await db.fetch_all(
-            """SELECT s.*, e.batch_id 
+            """SELECT s.*, e.batch_id,
+               CASE WHEN p.id IS NOT NULL THEN 1 ELSE 0 END as has_paid
                FROM students s 
                LEFT JOIN enrollments e ON s.id = e.student_id AND e.status != 'dropped'
+               LEFT JOIN payments p ON s.id = p.student_id AND p.status = 'paid'
                ORDER BY s.created_at DESC LIMIT ? OFFSET ?""",
             (limit, offset),
         )
