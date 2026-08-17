@@ -1,5 +1,24 @@
 // ─── SkillMe Admin Console — JS ───
-const API = window.SKILLME_API || 'http://localhost:8000';
+function getAPI() {
+  if (window.SKILLME_API) return window.SKILLME_API;
+  const isLocal = (
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname.startsWith('192.168.')
+  );
+  return isLocal ? 'http://localhost:8000' : 'https://skill-me.onrender.com';
+}
+
+// Dynamically resolves API to prevent stale localhost fallbacks
+var API = getAPI();
+try {
+  Object.defineProperty(window, 'API', {
+    get: function() { return getAPI(); },
+    set: function(v) { window.SKILLME_API = v; },
+    configurable: true
+  });
+} catch(e) {}
+
 let adminKey = '';
 let allStudents = [];
 let allBatches = [];
@@ -458,7 +477,7 @@ async function adminLogin() {
     btn.textContent = 'Verifying Passkey...';
   }
   try {
-    const res = await fetch(`${API}/api/admin/stats`, {
+    const res = await fetch(`${getAPI()}/api/admin/stats`, {
       headers: { 'X-Admin-Key': key }
     });
     if (res.status === 403) {
@@ -466,16 +485,23 @@ async function adminLogin() {
       if (btn) { btn.disabled = false; btn.textContent = 'ACCESS CONSOLE →'; }
       return;
     }
-    if (!res.ok) throw new Error('Server error');
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.detail || `Server error (${res.status})`);
+    }
     adminKey = key;
     localStorage.setItem('skillme_admin_key', key);
+    sessionStorage.setItem('skillme_admin_key', key);
 
-    playUnzipTransition(() => {
-      showApp();
-      if (btn) btn.disabled = false;
-    });
+    showApp();
+    if (btn) { btn.disabled = false; btn.textContent = 'ACCESS CONSOLE →'; }
+
+    try {
+      playUnzipTransition();
+    } catch(e) {}
   } catch (e) {
-    if (errEl) errEl.textContent = 'Could not connect to backend.';
+    console.error("Admin login error:", e);
+    if (errEl) errEl.textContent = e.message || 'Could not connect to backend.';
     if (btn) { btn.disabled = false; btn.textContent = 'ACCESS CONSOLE →'; }
   }
 }
@@ -736,10 +762,18 @@ function initAdmin3DCrystalEngine() {
 
 function showApp() {
   const overlay = document.getElementById('login-overlay');
-  if (overlay) overlay.classList.add('hidden');
-  document.getElementById('app').style.display = 'flex';
-  initAdminBgLattice();
-  initAdmin3DCrystalEngine();
+  if (overlay) {
+    overlay.style.display = 'none';
+    overlay.style.opacity = '0';
+    overlay.style.pointerEvents = 'none';
+    overlay.classList.add('hidden');
+  }
+  const app = document.getElementById('app');
+  if (app) {
+    app.style.display = 'flex';
+  }
+  try { initAdminBgLattice(); } catch(e) {}
+  try { initAdmin3DCrystalEngine(); } catch(e) {}
   startClock();
   loadOverview();
 }
