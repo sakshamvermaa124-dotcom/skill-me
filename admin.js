@@ -1097,14 +1097,17 @@ async function loadAlumni(silent = false) {
     tbody.innerHTML = `<tr><td colspan="6"><div class="loading-overlay"><div class="spinner"></div></div></td></tr>`;
   }
   try {
-    // If allAlumni is already populated from loadStudents, use it; otherwise fetch fresh
-    if (!allAlumni.length && !allStudents.length) {
-      const data = await api('/api/admin/students?limit=200');
-      const all = data.students || [];
-      allStudents = all.filter(s => !Number(s.has_paid));
-      allAlumni = all.filter(s => Number(s.has_paid));
-    }
+    const data = await api('/api/admin/students?limit=200');
+    const all = data.students || [];
+    allStudents = all.filter(s => !Number(s.has_paid));
+    allAlumni = all.filter(s => Number(s.has_paid));
     renderAlumni(allAlumni);
+    // Update badge
+    const badge = document.getElementById('alumni-badge');
+    if (badge) {
+      badge.textContent = allAlumni.length;
+      badge.style.display = allAlumni.length > 0 ? 'inline-flex' : 'none';
+    }
   } catch(e) {
     if (!silent) {
       tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-text">${e.message}</div></div></td></tr>`;
