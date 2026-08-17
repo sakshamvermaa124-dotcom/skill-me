@@ -48,23 +48,40 @@
   <script src="config.js"></script>
   <script src="skillme-monitor.js" defer></script>
 
-  <!-- BreadcrumbList Structured Data -->
+  <!-- Structured Data Graph (Breadcrumbs & Portfolio Collection Page) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
+    "@graph": [
       {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "SkillMe",
-        "item": "https://www.skill-me-intern.in/"
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "SkillMe",
+            "item": "https://www.skill-me-intern.in/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Proof of Work Portfolio",
+            "item": "https://www.skill-me-intern.in/portfolio"
+          }
+        ]
       },
       {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "Proof of Work Portfolio",
-        "item": "https://www.skill-me-intern.in/portfolio"
+        "@type": "CollectionPage",
+        "@id": "https://www.skill-me-intern.in/portfolio#collection",
+        "name": "SkillMe Intern Proof of Work Portfolios",
+        "url": "https://www.skill-me-intern.in/portfolio",
+        "description": "Verified open-source contributions, code quality benchmarks, merged pull requests, and software engineering portfolios created by SkillMe interns.",
+        "publisher": {
+          "@type": "EducationalOrganization",
+          "name": "SkillMe",
+          "url": "https://www.skill-me-intern.in",
+          "identifier": "UDYAM-UP-50-0294192"
+        }
       }
     ]
   }

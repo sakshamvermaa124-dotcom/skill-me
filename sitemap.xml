@@ -6,7 +6,7 @@
   <!-- Homepage -->
   <url>
     <loc>https://www.skill-me-intern.in/</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -14,7 +14,7 @@
   <!-- Screening Quiz -->
   <url>
     <loc>https://www.skill-me-intern.in/quiz</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
@@ -22,7 +22,7 @@
   <!-- Apply Page -->
   <url>
     <loc>https://www.skill-me-intern.in/apply</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.90</priority>
   </url>
@@ -30,7 +30,7 @@
   <!-- Verification Page -->
   <url>
     <loc>https://www.skill-me-intern.in/verify</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -38,7 +38,7 @@
   <!-- Student Dashboard -->
   <url>
     <loc>https://www.skill-me-intern.in/dashboard</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.80</priority>
   </url>
@@ -46,7 +46,7 @@
   <!-- Certificate Portal -->
   <url>
     <loc>https://www.skill-me-intern.in/certificate</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
   </url>
@@ -54,15 +54,29 @@
   <!-- Portfolio Portal -->
   <url>
     <loc>https://www.skill-me-intern.in/portfolio</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
+  </url>
+
+  <!-- LLM & AI Specifications -->
+  <url>
+    <loc>https://www.skill-me-intern.in/llms.txt</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://www.skill-me-intern.in/llms-full.txt</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.65</priority>
   </url>
 
   <!-- Contact Us -->
   <url>
     <loc>https://www.skill-me-intern.in/contact</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.70</priority>
   </url>
@@ -70,19 +84,19 @@
   <!-- Legal & Policies -->
   <url>
     <loc>https://www.skill-me-intern.in/terms</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.50</priority>
   </url>
   <url>
     <loc>https://www.skill-me-intern.in/privacy</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.50</priority>
   </url>
   <url>
     <loc>https://www.skill-me-intern.in/refunds</loc>
-    <lastmod>2026-08-16</lastmod>
+    <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.50</priority>
   </url>

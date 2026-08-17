@@ -43,23 +43,40 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
-  <!-- BreadcrumbList Structured Data -->
+  <!-- Structured Data Graph (Breadcrumbs & Screening Assessment Quiz) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
+    "@graph": [
       {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "SkillMe",
-        "item": "https://www.skill-me-intern.in/"
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "SkillMe",
+            "item": "https://www.skill-me-intern.in/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Screening Quiz",
+            "item": "https://www.skill-me-intern.in/quiz"
+          }
+        ]
       },
       {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "Screening Quiz",
-        "item": "https://www.skill-me-intern.in/quiz"
+        "@type": "Quiz",
+        "@id": "https://www.skill-me-intern.in/quiz#assessment",
+        "name": "SkillMe Open Source Technical Screening Assessment",
+        "description": "Interactive domain aptitude screening assessment to qualify students for SkillMe's 4-week open-source engineering internship batches.",
+        "educationalCredentialAwarded": "Eligibility for Open Source Internship Enrollment",
+        "provider": {
+          "@type": "EducationalOrganization",
+          "name": "SkillMe",
+          "url": "https://www.skill-me-intern.in",
+          "identifier": "UDYAM-UP-50-0294192"
+        }
       }
     ]
   }

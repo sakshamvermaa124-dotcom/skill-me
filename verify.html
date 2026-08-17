@@ -45,23 +45,47 @@
   <script src="config.js"></script>
   <script src="skillme-monitor.js" defer></script>
 
-  <!-- BreadcrumbList Structured Data -->
+  <!-- Structured Data Graph (Breadcrumbs & Verification Web Application) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
+    "@graph": [
       {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "SkillMe",
-        "item": "https://www.skill-me-intern.in/"
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "SkillMe",
+            "item": "https://www.skill-me-intern.in/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Verify Certificate",
+            "item": "https://www.skill-me-intern.in/verify"
+          }
+        ]
       },
       {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "Verify Certificate",
-        "item": "https://www.skill-me-intern.in/verify"
+        "@type": "WebApplication",
+        "@id": "https://www.skill-me-intern.in/verify#app",
+        "name": "SkillMe Credential & Certificate Verification Portal",
+        "url": "https://www.skill-me-intern.in/verify",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "All",
+        "description": "Public cryptographic verification engine for SkillMe internship certificates, Letters of Recommendation (LOR), and merged GitHub engineering contributions.",
+        "provider": {
+          "@type": "EducationalOrganization",
+          "name": "SkillMe",
+          "url": "https://www.skill-me-intern.in",
+          "identifier": "UDYAM-UP-50-0294192"
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "INR"
+        }
       }
     ]
   }

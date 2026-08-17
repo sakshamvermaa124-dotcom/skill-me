@@ -50,23 +50,45 @@
   <script src="config.js"></script>
   <script src="skillme-monitor.js" defer></script>
 
-  <!-- BreadcrumbList Structured Data -->
+  <!-- Structured Data Graph (Breadcrumbs & Credential Portal) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
+    "@graph": [
       {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "SkillMe",
-        "item": "https://www.skill-me-intern.in/"
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "SkillMe",
+            "item": "https://www.skill-me-intern.in/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Certificate of Completion",
+            "item": "https://www.skill-me-intern.in/certificate"
+          }
+        ]
       },
       {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "Certificate of Completion",
-        "item": "https://www.skill-me-intern.in/certificate"
+        "@type": "EducationalOccupationalCredential",
+        "@id": "https://www.skill-me-intern.in/certificate#credential",
+        "name": "SkillMe Open Source Engineering Internship Certificate of Completion",
+        "description": "Cryptographically verifiable Certificate of Completion recognizing 4-week open-source engineering milestone completion, merged GitHub pull requests, and software contributions.",
+        "credentialCategory": "Certificate of Completion",
+        "recognizedBy": {
+          "@type": "EducationalOrganization",
+          "name": "Ministry of Micro, Small & Medium Enterprises (MSME)",
+          "identifier": "UDYAM-UP-50-0294192"
+        },
+        "recognizedAuthority": {
+          "@type": "EducationalOrganization",
+          "name": "SkillMe",
+          "url": "https://www.skill-me-intern.in",
+          "identifier": "UDYAM-UP-50-0294192"
+        }
       }
     ]
   }
