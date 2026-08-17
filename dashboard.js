@@ -1259,7 +1259,7 @@ function resolveMilestoneContext(data) {
   const referralLink = `${PROD_BASE}/apply.html?ref=${studentRefCode}`;
   const ghUser = (student.github || '').trim().replace(/^@/, '');
   const portfolioUrl = ghUser ? `${PROD_BASE}/portfolio.html?gh=${encodeURIComponent(ghUser)}` : `${PROD_BASE}/portfolio.html`;
-  const offerUrl = `${PROD_BASE}/offer.html?name=${encodeURIComponent(student.name || '')}&domain=${encodeURIComponent(domain)}&student_id=${student.id || ''}`;
+  const offerUrl = `${PROD_BASE}/offer.html?name=${encodeURIComponent(student.name || '')}&domain=${encodeURIComponent(domain)}&student_id=${student.id || ''}&college=${encodeURIComponent(student.college || '')}`;
   const certUrl = `${PROD_BASE}/certificate.html?student_id=${student.id || ''}&domain=${encodeURIComponent(domain)}`;
 
   // Group all assigned issues by week_number to determine task indices (Task 1, Task 2, Task 3)

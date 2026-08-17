@@ -759,50 +759,98 @@
 
   </div>
 
+  <script src="config.js"></script>
   <script>
     // Extract query parameters
     const urlParams = new URLSearchParams(window.location.search);
-    const studentName = urlParams.get('name') || localStorage.getItem('student_name') || "Saksham Verma";
-    const domainName  = urlParams.get('domain') || localStorage.getItem('student_domain') || "Web Development";
-    const studentId   = urlParams.get('student_id') || urlParams.get('id') || "1001";
-    const collegeName = urlParams.get('college') || localStorage.getItem('student_college') || "Department of Computer Science & Engineering";
+    let studentName = urlParams.get('name') || localStorage.getItem('student_name') || "";
+    let domainName  = urlParams.get('domain') || localStorage.getItem('student_domain') || "Web Development";
+    let studentId   = urlParams.get('student_id') || urlParams.get('id') || "1001";
+    let collegeName = urlParams.get('college') || localStorage.getItem('student_college') || "";
     const initialView = urlParams.get('view') === 'hod' ? 'hod' : 'offer';
 
     const formattedDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-    const docRef = `SKM-${initialView === 'hod' ? 'NOC' : 'OFFER'}-2026-${String(studentId).padStart(4, '0')}`;
+    let qrOfferInstance = null;
+    let qrHodInstance = null;
 
-    // Populate DOM
-    document.querySelectorAll('.student-name-text').forEach(el => el.textContent = studentName);
-    document.querySelectorAll('.domain-name-text').forEach(el => el.textContent = domainName);
-    document.querySelectorAll('.doc-joining-text').forEach(el => el.textContent = formattedDate);
-    
-    const docDateVal = document.getElementById('doc-date-val');
-    if (docDateVal) docDateVal.textContent = formattedDate;
+    function renderDocumentData() {
+      const displayName = studentName || "Intern Candidate";
+      const displayDomain = domainName || "Web Development";
+      const displayCollege = collegeName || "Department of Computer Science & Engineering";
+      const docRef = `SKM-${initialView === 'hod' ? 'NOC' : 'OFFER'}-2026-${String(studentId).padStart(4, '0')}`;
 
-    const docRefId = document.getElementById('doc-ref-id');
-    if (docRefId) docRefId.textContent = docRef;
+      // Populate DOM
+      document.querySelectorAll('.student-name-text').forEach(el => el.textContent = displayName);
+      document.querySelectorAll('.domain-name-text').forEach(el => el.textContent = displayDomain);
+      document.querySelectorAll('.doc-joining-text').forEach(el => el.textContent = formattedDate);
+      
+      const docDateVal = document.getElementById('doc-date-val');
+      if (docDateVal) docDateVal.textContent = formattedDate;
 
-    const collegeEl = document.getElementById('hod-college-name');
-    if (collegeEl && collegeName) collegeEl.textContent = collegeName;
+      const docRefId = document.getElementById('doc-ref-id');
+      if (docRefId) docRefId.textContent = docRef;
 
-    // QR Code Verification URLs
-    const verifyUrl = `${window.location.origin}/verify.html?id=${encodeURIComponent(studentId)}&name=${encodeURIComponent(studentName)}`;
+      const collegeEl = document.getElementById('hod-college-name');
+      if (collegeEl) collegeEl.textContent = displayCollege;
 
-    new QRious({
-      element: document.getElementById('qr-offer'),
-      value: verifyUrl,
-      size: 110,
-      background: '#fafaf9',
-      foreground: '#0c0b0b'
-    });
+      // QR Code Verification URLs
+      const verifyUrl = `${window.location.origin}/verify.html?id=${encodeURIComponent(studentId)}&name=${encodeURIComponent(displayName)}`;
 
-    new QRious({
-      element: document.getElementById('qr-hod'),
-      value: verifyUrl,
-      size: 110,
-      background: '#fafaf9',
-      foreground: '#0c0b0b'
-    });
+      const qrRefOffer = document.getElementById('qr-ref-offer');
+      if (qrRefOffer) qrRefOffer.textContent = `Ref: SKM-OFFER-${String(studentId).padStart(4, '0')}`;
+
+      const qrRefHod = document.getElementById('qr-ref-hod');
+      if (qrRefHod) qrRefHod.textContent = `Ref: SKM-NOC-${String(studentId).padStart(4, '0')}`;
+
+      if (qrOfferInstance) {
+        qrOfferInstance.value = verifyUrl;
+      } else {
+        qrOfferInstance = new QRious({
+          element: document.getElementById('qr-offer'),
+          value: verifyUrl,
+          size: 110,
+          background: '#fafaf9',
+          foreground: '#0c0b0b'
+        });
+      }
+
+      if (qrHodInstance) {
+        qrHodInstance.value = verifyUrl;
+      } else {
+        qrHodInstance = new QRious({
+          element: document.getElementById('qr-hod'),
+          value: verifyUrl,
+          size: 110,
+          background: '#fafaf9',
+          foreground: '#0c0b0b'
+        });
+      }
+
+      if (initialView === 'hod') {
+        document.title = `HOD Verification & College NOC Compliance Pack — ${displayName} — SkillMe`;
+      } else {
+        document.title = `Official Internship Offer Letter — ${displayName} — SkillMe`;
+      }
+    }
+
+    // Initial render
+    renderDocumentData();
+
+    // If studentName was not in URL but studentId is present, attempt API hydration
+    if (!urlParams.get('name') && studentId && studentId !== '1001') {
+      const API = window.SKILLME_API || '';
+      fetch(`${API}/api/students/progress/id/${encodeURIComponent(studentId)}`)
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data && data.student) {
+            studentName = data.student.name || studentName;
+            domainName = data.student.domain || domainName;
+            collegeName = data.student.college || collegeName;
+            renderDocumentData();
+          }
+        })
+        .catch(() => {});
+    }
 
     // Document Switcher
     function switchDocument(view) {
@@ -811,6 +859,7 @@
       const tabOffer = document.getElementById('tab-btn-offer');
       const tabHod = document.getElementById('tab-btn-hod');
       const docRefEl = document.getElementById('doc-ref-id');
+      const displayName = studentName || "Intern Candidate";
 
       if (view === 'hod') {
         offerView.classList.remove('active');
@@ -818,14 +867,14 @@
         tabOffer.classList.remove('active');
         tabHod.classList.add('active');
         if (docRefEl) docRefEl.textContent = `SKM-NOC-2026-${String(studentId).padStart(4, '0')}`;
-        document.title = `HOD Verification & College NOC Compliance Pack — ${studentName} — SkillMe`;
+        document.title = `HOD Verification & College NOC Compliance Pack — ${displayName} — SkillMe`;
       } else {
         hodView.classList.remove('active');
         offerView.classList.add('active');
         tabHod.classList.remove('active');
         tabOffer.classList.add('active');
         if (docRefEl) docRefEl.textContent = `SKM-OFFER-2026-${String(studentId).padStart(4, '0')}`;
-        document.title = `Official Internship Offer Letter — ${studentName} — SkillMe`;
+        document.title = `Official Internship Offer Letter — ${displayName} — SkillMe`;
       }
     }
 
