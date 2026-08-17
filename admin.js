@@ -1028,8 +1028,8 @@ async function loadStudents(silent = false) {
     const data = await api('/api/admin/students?limit=200');
     const all = data.students || [];
     // Separate alumni (paid students) from active students
-    allStudents = all.filter(s => !s.has_paid);
-    allAlumni = all.filter(s => s.has_paid);
+    allStudents = all.filter(s => !Number(s.has_paid));
+    allAlumni = all.filter(s => Number(s.has_paid));
     renderStudents(allStudents);
     // Update alumni badge
     const badge = document.getElementById('alumni-badge');
@@ -1101,8 +1101,8 @@ async function loadAlumni(silent = false) {
     if (!allAlumni.length && !allStudents.length) {
       const data = await api('/api/admin/students?limit=200');
       const all = data.students || [];
-      allStudents = all.filter(s => !s.has_paid);
-      allAlumni = all.filter(s => s.has_paid);
+      allStudents = all.filter(s => !Number(s.has_paid));
+      allAlumni = all.filter(s => Number(s.has_paid));
     }
     renderAlumni(allAlumni);
   } catch(e) {
