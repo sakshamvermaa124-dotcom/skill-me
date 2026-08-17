@@ -320,15 +320,15 @@ class BatchService:
         raw_gh = raw_gh.lstrip("@").strip()
         if not raw_gh:
             raise ValueError("Student has no GitHub username specified. Please update their profile before enrolling.")
-        
+
         # Clean username for repo naming
         gh_clean = re.sub(r"[^a-zA-Z0-9_-]", "", raw_gh.lower())
         if not gh_clean:
             gh_clean = f"student-{student_id}"
 
-        # 4. Resolve domain and slug
+        # 4. Resolve domain and canonical slug
         raw_domain = student.get("domain") or "web-dev"
-        slug = task_service.DOMAIN_SLUG_MAP.get(raw_domain, raw_domain.lower().replace(" ", "-").replace("/", "-"))
+        slug = task_service.normalize_domain_slug(raw_domain)
 
         # Determine next batch number for this domain
         batch_count_row = await db.fetch_one(
@@ -367,6 +367,8 @@ class BatchService:
                         description=f"SkillMe {raw_domain} Internship — {student['first_name']} {student['last_name']} (@{raw_gh})",
                     )
                     github_repo_created = True
+                    # Allow GitHub brief moment to initialize the generated template repository
+                    await asyncio.sleep(1.5)
                     break
                 except Exception as e:
                     logger.warning(f"Template '{tmpl}' failed for {repo_name}: {e}")
@@ -575,46 +577,53 @@ class BatchService:
             if student_id:
                 student = await db.fetch_one("SELECT * FROM students WHERE id = ?", (student_id,))
                 if student:
-                    assignee_username = student.get("github_username")
+                    raw_assignee = (student.get("github_username") or "").strip()
+                    if "github.com/" in raw_assignee:
+                        raw_assignee = raw_assignee.rstrip("/").split("/")[-1]
+                    raw_assignee = raw_assignee.lstrip("@").strip()
+                    assignee_username = raw_assignee or None
 
             # Create issue on GitHub
             title = f"[{week_info['prefix']}] {issue_def['title']}"
-            body = issue_def.get("body", "")
+            raw_body = issue_def.get("body", "")
+            body = raw_body
+            if assignee_username and f"@{assignee_username}" not in body:
+                body = f"> 👤 **Assigned Intern:** @{assignee_username}\n\n{raw_body}"
 
-            try:
-                gh_issue = await github_service.create_issue(
-                    repo_name=batch["repo_name"],
-                    title=title,
-                    body=body,
-                    assignee=assignee_username,
-                    labels=[week_info["label"], week_info["difficulty"]],
-                )
-                github_issue_number = gh_issue["number"]
-            except Exception as e:
-                logger.error(f"Failed to create GitHub issue with assignee {assignee_username}: {e}")
-                # Retry without assignee (e.g. if student hasn't accepted invite yet)
-                if assignee_username:
-                    try:
-                        logger.info(f"Retrying issue creation without assignee...")
-                        gh_issue = await github_service.create_issue(
-                            repo_name=batch["repo_name"],
-                            title=title,
-                            body=body,
-                            assignee=None,
-                            labels=[week_info["label"], week_info["difficulty"]],
-                        )
-                        github_issue_number = gh_issue["number"]
-                    except Exception as fallback_e:
-                        logger.error(f"Failed to create GitHub issue without assignee: {fallback_e}")
-                        github_issue_number = None
-                else:
-                    github_issue_number = None
+            github_issue_number = None
 
-            if github_issue_number is None:
-                logger.error(f"Skipping database insertion for task '{title}' because GitHub issue creation failed.")
-                continue
+            # Try up to 3 times to create issue on GitHub
+            for attempt in range(3):
+                try:
+                    gh_issue = await github_service.create_issue(
+                        repo_name=batch["repo_name"],
+                        title=title,
+                        body=body,
+                        assignee=assignee_username,
+                        labels=[week_info["label"], week_info["difficulty"]],
+                    )
+                    github_issue_number = gh_issue["number"]
+                    break
+                except Exception as e:
+                    logger.warning(f"Attempt {attempt+1}: Failed to create GitHub issue with assignee '{assignee_username}': {e}")
+                    # Retry without assignee (e.g. if student hasn't accepted invite yet or collaborator status pending)
+                    if assignee_username:
+                        try:
+                            gh_issue = await github_service.create_issue(
+                                repo_name=batch["repo_name"],
+                                title=title,
+                                body=body,
+                                assignee=None,
+                                labels=[week_info["label"], week_info["difficulty"]],
+                            )
+                            github_issue_number = gh_issue["number"]
+                            break
+                        except Exception as fallback_e:
+                            logger.warning(f"Attempt {attempt+1}: Failed to create GitHub issue without assignee: {fallback_e}")
+                    if attempt < 2:
+                        await asyncio.sleep(1.0)
 
-            # Record in database
+            # Record in database (even if GitHub API was unreachable, so student can see tasks on dashboard)
             issue_id = await db.insert(
                 """INSERT INTO issues (batch_id, github_issue_number, title, description, week_number, difficulty, assigned_to, status)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
@@ -622,7 +631,7 @@ class BatchService:
                     batch_id,
                     github_issue_number,
                     issue_def["title"],
-                    body,
+                    raw_body,
                     week_number,
                     week_info["difficulty"],
                     student_id,

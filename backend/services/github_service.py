@@ -102,12 +102,19 @@ class GitHubService:
             username: GitHub username to invite
             permission: One of 'pull', 'push', 'admin', 'maintain', 'triage'
         """
+        clean_user = (username or "").strip()
+        if "github.com/" in clean_user:
+            clean_user = clean_user.rstrip("/").split("/")[-1]
+        clean_user = clean_user.lstrip("@").strip()
+        if not clean_user:
+            raise ValueError("Invalid GitHub username for collaborator invitation")
+
         response = await self.client.put(
-            f"/repos/{self.org}/{repo_name}/collaborators/{username}",
+            f"/repos/{self.org}/{repo_name}/collaborators/{clean_user}",
             json={"permission": permission},
         )
         response.raise_for_status()
-        logger.info(f"Added {username} as collaborator to {repo_name} with {permission} access")
+        logger.info(f"Added {clean_user} as collaborator to {repo_name} with {permission} access")
         # 201 = invitation created, 204 = already a collaborator
         if response.status_code == 201:
             return response.json()
@@ -115,11 +122,16 @@ class GitHubService:
 
     async def remove_collaborator(self, repo_name: str, username: str) -> bool:
         """Remove a collaborator from a repo."""
+        clean_user = (username or "").strip()
+        if "github.com/" in clean_user:
+            clean_user = clean_user.rstrip("/").split("/")[-1]
+        clean_user = clean_user.lstrip("@").strip()
+
         response = await self.client.delete(
-            f"/repos/{self.org}/{repo_name}/collaborators/{username}"
+            f"/repos/{self.org}/{repo_name}/collaborators/{clean_user}"
         )
         if response.status_code == 204:
-            logger.info(f"Removed {username} from {repo_name}")
+            logger.info(f"Removed {clean_user} from {repo_name}")
             return True
         return False
 
@@ -147,7 +159,12 @@ class GitHubService:
         """
         payload = {"title": title, "body": body}
         if assignee:
-            payload["assignees"] = [assignee]
+            clean_assignee = assignee.strip()
+            if "github.com/" in clean_assignee:
+                clean_assignee = clean_assignee.rstrip("/").split("/")[-1]
+            clean_assignee = clean_assignee.lstrip("@").strip()
+            if clean_assignee:
+                payload["assignees"] = [clean_assignee]
         if labels:
             payload["labels"] = labels
 
