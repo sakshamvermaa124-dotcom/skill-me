@@ -3,14 +3,8 @@ name: Frontend Lint & Syntax Check
 on:
   push:
     branches: [main]
-    paths:
-      - '**.js'
-      - '**.html'
   pull_request:
     branches: [main]
-    paths:
-      - '**.js'
-      - '**.html'
 
 jobs:
   js-syntax-check:
@@ -24,6 +18,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      - name: Configure git hooks from repo
+        run: git config core.hooksPath .githooks
 
       - name: Check JS syntax
         run: |
@@ -46,3 +43,4 @@ jobs:
           fi
           echo ""
           echo "✓ All JavaScript files pass syntax check."
+
