@@ -1311,7 +1311,7 @@ function resolveMilestoneContext(data) {
 
   // Determine state
   const hasCompletedTasks = (latestTask !== null) || (totalPrs > 0) || (totalCompleted > 0);
-  const isAllComplete = (totalAssigned > 0 && totalCompleted >= totalAssigned) || (totalCompleted >= 12);
+  const isAllComplete = (totalCompleted >= 12);
 
   let weekNum = 1;
   let taskNum = 1;
@@ -1499,6 +1499,29 @@ Join me on SkillMe to solve real GitHub issues and level up your resume:
   if (weekEl) weekEl.textContent = ctx.hasCompletedTasks ? `W${ctx.weekNum} · T${ctx.taskNum}` : `Week ${ctx.maxWeek}`;
 
   switchShareTab(currentShareTab);
+
+  const actionsRow = modal.querySelector('.milestone-actions-row');
+  if (actionsRow) {
+    let offerBtn = document.getElementById('btn-view-offer');
+    if (!ctx.hasCompletedTasks && ctx.offerUrl) {
+      if (!offerBtn) {
+        offerBtn = document.createElement('button');
+        offerBtn.id = 'btn-view-offer';
+        offerBtn.className = 'btn-share-main';
+        offerBtn.style.backgroundColor = 'rgba(99, 102, 241, 0.15)';
+        offerBtn.style.color = '#a5b4fc';
+        offerBtn.style.border = '1px solid rgba(99, 102, 241, 0.3)';
+        offerBtn.style.marginTop = '10px';
+        offerBtn.style.width = '100%';
+        offerBtn.innerHTML = 'View Official Offer Letter dY"S';
+        actionsRow.parentElement.appendChild(offerBtn);
+      }
+      offerBtn.onclick = () => window.open(ctx.offerUrl, '_blank');
+      offerBtn.style.display = 'block';
+    } else {
+      if (offerBtn) offerBtn.style.display = 'none';
+    }
+  }
 
   modal.style.display = 'flex';
   void modal.offsetWidth;
