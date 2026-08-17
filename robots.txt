@@ -6,16 +6,56 @@ Disallow: /admin.html
 Disallow: /api/
 Disallow: /preview_emails/
 
-# Specialized Search Bots
+# Search Engine Crawlers
 User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
 Allow: /
 
 User-agent: Googlebot-Image
 Allow: /assets/
 
-# Host & Sitemap
+User-agent: Bingbot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+# AI Answer Engines & LLM Search Bots (AEO / GEO)
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Diffbot
+Allow: /
+
+User-agent: FacebookBot
+Allow: /
+
+# Host, Sitemap & LLM Specs
 Host: https://www.skill-me-intern.in
 Sitemap: https://www.skill-me-intern.in/sitemap.xml

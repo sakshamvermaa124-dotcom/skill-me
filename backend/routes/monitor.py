@@ -50,8 +50,25 @@ async def receive_frontend_errors(batch: FrontendErrorBatch, request: Request):
     Accepts a batch of error reports from student browsers.
     No authentication required — rate-limited by IP.
     """
+    IGNORE_PATTERNS = [
+        "Object Not Found Matching Id",
+        "ResizeObserver loop",
+        "Extension context invalidated",
+        "chrome-extension://",
+        "moz-extension://",
+        "safari-extension://",
+        "The play() request was interrupted",
+        "The user aborted a request",
+        "sentry",
+    ]
+
     inserted = 0
     for err in batch.errors[:20]:  # Cap at 20 per request
+        # Ignore noisy browser extensions and translation tools
+        if any(p.lower() in (err.message or "").lower() for p in IGNORE_PATTERNS) or \
+           any(p.lower() in (err.stack_trace or "").lower() for p in IGNORE_PATTERNS):
+            continue
+
         try:
             await db.insert(
                 """INSERT INTO frontend_errors

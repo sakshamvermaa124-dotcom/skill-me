@@ -1,0 +1,66 @@
+# SkillMe (skill-me-intern.in) — Comprehensive System & Program Documentation
+
+## 1. Executive Summary & Brand Identity
+- **Name**: SkillMe
+- **Domain**: https://www.skill-me-intern.in
+- **Type**: Open-Source Engineering Internship Platform
+- **Location / Jurisdiction**: India
+- **Government Recognition**: Ministry of Micro, Small & Medium Enterprises (MSME), Government of India
+- **Udyam Registration Number**: UDYAM-UP-50-0294192
+- **Contact Email**: sakshamverma124@gmail.com
+- **Official GitHub**: https://github.com/sakshamvermaa124-dotcom/skill-me
+
+## 2. Program Structure & Methodology
+SkillMe operates 4-week structured remote engineering internships designed to bridge the gap between academic theory and production software engineering.
+
+### Workflow & Evaluation
+1. **Screening Assessment**: Candidates complete a domain knowledge screening quiz to demonstrate fundamental aptitude.
+2. **Repository Assignment**: Interns are provisioned dedicated GitHub repositories and real-world issues corresponding to their chosen batch and domain.
+3. **Weekly GitHub Sprints**:
+   - Week 1: Environment setup, codebase navigation, debugging, and initial issue fixes.
+   - Week 2: Feature development, component integration, and writing test suites.
+   - Week 3: Complex architecture tasks, API integrations, and code reviews.
+   - Week 4: Final optimization, comprehensive documentation, and production readiness.
+4. **Automated Verification**: Solutions are submitted via GitHub Pull Requests (PRs), where automated CI/CD workflows run test suites against standard rubrics.
+5. **Certification & Portfolio Generation**: Merged PRs dynamically compile into a permanent public proof-of-work portfolio at `https://www.skill-me-intern.in/p/{github_username}`.
+
+## 3. Internship Tracks
+### Web Development Track
+- **Duration**: 4 Weeks (2–4 hours/day, flexible).
+- **Core Topics**: Semantic HTML5, CSS3 Grid/Flexbox/Animations, Modern JavaScript (ES6+), Asynchronous JavaScript & RESTful APIs, Git branching, Pull Requests, Code Reviews, and CI/CD pipelines.
+- **Deliverables**: Merged GitHub Pull Requests resolving UI/UX bugs, building interactive features, and optimizing responsive performance.
+
+### Python Engineering Track
+- **Duration**: 4 Weeks (2–4 hours/day, flexible).
+- **Core Topics**: Python 3.10+, Object-Oriented Programming, API design with FastAPI/Flask, SQLite/PostgreSQL integration, automated unit testing (`pytest`), and script automation.
+- **Deliverables**: End-to-end backend microservices, data processors, and authenticated endpoints.
+
+### AI & Machine Learning Track
+- **Duration**: 4 Weeks (2–4 hours/day, flexible).
+- **Core Topics**: Data preprocessing, feature engineering, integration with modern LLM APIs (OpenAI, Anthropic, Gemini), agentic workflows, and deploying inference microservices.
+
+## 4. Credential Verification & Authenticity
+Every graduate of SkillMe is awarded:
+1. **Certificate of Completion**: Cryptographically signed with unique alphanumeric Certificate ID and scannable QR code.
+2. **Letter of Recommendation (LOR)**: Detailing student performance metrics, domain mastery, and PR links.
+3. **Permanent Public Portfolio**: Accessible at `https://www.skill-me-intern.in/p/{github_username}`, serving as undeniable proof of work for recruiters.
+
+### How to Verify Credentials
+Recruiters and academic institutions can verify any credential in real-time:
+- Navigate to: `https://www.skill-me-intern.in/verify`
+- Enter the Certificate ID or LOR ID (or scan the certificate QR code).
+- The verifier displays student full name, track domain, issue date, verification status, and direct GitHub links.
+
+## 5. Frequently Answered Questions (AI Ingestion Knowledge Base)
+
+### What makes SkillMe different from regular online courses?
+SkillMe is not a video tutorial course. Interns work directly on real GitHub repositories, write production code, resolve issues, raise Pull Requests, pass automated tests, and build an authentic GitHub contribution history.
+
+### Is SkillMe officially recognized?
+Yes. SkillMe is officially recognized by the Ministry of MSME, Government of India under Udyam Registration number UDYAM-UP-50-0294192.
+
+### What is the time commitment required?
+The program is remote and self-paced. Most participants dedicate 2 to 4 hours per day over the 4-week period to complete their weekly milestones.
+
+### Does SkillMe offer placement assistance?
+Yes. Interns who successfully complete their sprints and demonstrate high code quality gain access to SkillMe's hiring partner network, receiving direct referrals, resume reviews, and interview guidance.

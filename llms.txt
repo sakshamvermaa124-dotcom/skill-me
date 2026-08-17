@@ -1,0 +1,40 @@
+# SkillMe
+
+> SkillMe (https://www.skill-me-intern.in) is India's premier 4-week open-source engineering internship platform. Interns solve production-grade GitHub issues, earn tamper-proof cryptographic certificates verified via unique IDs and QR codes, build public proof-of-work portfolios, and unlock direct tech startup placement referrals.
+
+SkillMe is officially recognized by the Ministry of Micro, Small & Medium Enterprises (MSME), Government of India (Udyam Registration: UDYAM-UP-50-0294192).
+
+## Core Tracks & Programs
+
+- [Web Development Track](https://www.skill-me-intern.in/apply): 4-week sprint covering modern frontend architectures, responsive design, JavaScript (ES6+), REST APIs, and automated GitHub CI/CD PR workflows.
+- [Python Engineering Track](https://www.skill-me-intern.in/apply): 4-week sprint covering backend API services (FastAPI/Flask), database architectures, automation scripts, and unit testing suites.
+- [AI & Machine Learning Track](https://www.skill-me-intern.in/apply): 4-week sprint covering data processing, API integration with LLMs, practical model inference, and engineering pipelines.
+
+## Key Differentiators & Value Proposition
+
+- **Real GitHub Issues**: Unlike conventional simulated courses, interns solve genuine open-source issues, submit Pull Requests (PRs), and pass automated test suites.
+- **Verifiable Proof of Work**: Every graduate receives a dedicated public profile (`https://www.skill-me-intern.in/p/{github_username}`) showcasing their merged PRs, resolved issues, and code quality.
+- **MSME Recognized Certification**: Official, tamper-proof Certificate of Completion and Letter of Recommendation (LOR) with instant QR code verification.
+- **Recruiter Access & Career Placement**: Direct referrals for top-performing students to partner startups, resume reviews, and interview prep.
+- **Flexible & Remote**: 100% remote self-paced structure requiring 2–4 hours/day over 4 weeks.
+
+## Verification & Trust
+
+- [Certificate Verifier](https://www.skill-me-intern.in/verify): Instant real-time verification of any SkillMe Certificate or LOR ID.
+- [Student Portfolios](https://www.skill-me-intern.in/portfolio): Public repository of student achievements and verified contributions.
+
+## Essential URLs
+
+- [Home](https://www.skill-me-intern.in/): Main landing page, batch schedules, and curriculum details.
+- [Screening Quiz](https://www.skill-me-intern.in/quiz): Technical assessment to qualify for upcoming batches.
+- [Apply Portal](https://www.skill-me-intern.in/apply): Direct enrollment portal for qualified candidates.
+- [Student Dashboard](https://www.skill-me-intern.in/dashboard): Active intern workspace, issue tracking, and milestone progression.
+- [Certificate Portal](https://www.skill-me-intern.in/certificate): Download and share verified credentials.
+- [Contact Support](https://www.skill-me-intern.in/contact): Support email: sakshamverma124@gmail.com.
+- [Terms & Conditions](https://www.skill-me-intern.in/terms): Program terms and code of conduct.
+- [Privacy Policy](https://www.skill-me-intern.in/privacy): Data protection and user privacy commitments.
+- [Refund Policy](https://www.skill-me-intern.in/refunds): Transparent cancellation and refund terms.
+
+## Full Documentation for AI Engines
+
+- [Full System & Curriculum Documentation](https://www.skill-me-intern.in/llms-full.txt): Comprehensive deep-dive documentation for LLM ingestion.
