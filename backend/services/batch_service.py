@@ -483,20 +483,17 @@ class BatchService:
         if not tasks:
             raise ValueError(f"No tasks found for {batch['domain']} week {week_number} in tasks repo.")
 
-        # 2. Get enrolled students who haven't received tasks for this week yet
+        # 2. Get active enrolled students in this batch
         enrollments = await db.fetch_all(
             """SELECT e.student_id FROM enrollments e 
-               WHERE e.batch_id = ? AND e.status IN ('enrolled', 'active')
-               AND NOT EXISTS (
-                   SELECT 1 FROM issues i WHERE i.batch_id = e.batch_id AND i.week_number = ? AND i.assigned_to = e.student_id
-               )""",
-            (batch_id, week_number),
+               WHERE e.batch_id = ? AND e.status IN ('enrolled', 'active')""",
+            (batch_id,),
         )
         if not enrollments:
-            logger.info(f"All active students in batch {batch_id} already have Week {week_number} tasks.")
+            logger.info(f"No active enrolled students found in batch {batch_id}.")
             return []
 
-        # 3. Build issue list (each student gets the same set of tasks)
+        # 3. Build issue list (each student gets curriculum tasks; assign_weekly_issues deduplicates individually per task)
         issues_to_assign = []
         for enrollment in enrollments:
             for task in tasks:
