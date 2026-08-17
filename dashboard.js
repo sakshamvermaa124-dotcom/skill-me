@@ -72,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const token = localStorage.getItem('token');
       const savedEmail = localStorage.getItem('skillme_email');
       const signoutBtn = document.getElementById('signout-btn');
+    const mobSignoutBtn = document.getElementById('mobile-signout-btn');
       
       // If we have a saved email in localStorage, restore progress directly
       const emailToUse = savedEmail || (async () => {
@@ -88,6 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Show Sign Out button so user can abort if stuck
         if (signoutBtn) signoutBtn.style.display = 'inline-flex';
+        if (mobSignoutBtn) mobSignoutBtn.style.display = 'block';
         const cancelWrap = document.getElementById('login-cancel-wrap');
         if (cancelWrap) cancelWrap.style.display = 'block';
         
@@ -97,6 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // If user clicked sign out while fetch was pending, abort the restore process
         if (!localStorage.getItem('skillme_email') && !localStorage.getItem('token')) {
           if (signoutBtn) signoutBtn.style.display = 'none';
+        if (mobSignoutBtn) mobSignoutBtn.style.display = 'none';
           if (document.getElementById('login-cancel-wrap')) document.getElementById('login-cancel-wrap').style.display = 'none';
           return;
         }
@@ -106,28 +109,36 @@ document.addEventListener('DOMContentLoaded', () => {
           data._email = resolvedEmail;
           renderDashboard(data);
           
-          loginView.style.display = 'none';
-          dashView.style.display = 'block';
-          dashView.style.opacity = '1';
-          dashView.style.transform = 'translateY(0)';
+          if (data.progress && data.progress.length === 0) {
+            loginView.style.display = 'none';
+            document.getElementById('unenrolled-view').style.display = 'flex';
+          } else {
+            loginView.style.display = 'none';
+            dashView.style.display = 'block';
+            dashView.style.opacity = '1';
+            dashView.style.transform = 'translateY(0)';
+          }
           if (lenis) lenis.resize();
           return;
         } else {
           // If session email fails to load, clear saved session so user can re-login
           localStorage.removeItem('skillme_email');
           if (signoutBtn) signoutBtn.style.display = 'none';
+        if (mobSignoutBtn) mobSignoutBtn.style.display = 'none';
           if (document.getElementById('login-cancel-wrap')) document.getElementById('login-cancel-wrap').style.display = 'none';
         }
       }
       loginBtn.disabled = false;
       loginBtn.textContent = 'Get Login Code';
       if (document.getElementById('signout-btn')) document.getElementById('signout-btn').style.display = 'none';
+      if (document.getElementById('mobile-signout-btn')) document.getElementById('mobile-signout-btn').style.display = 'none';
       if (document.getElementById('login-cancel-wrap')) document.getElementById('login-cancel-wrap').style.display = 'none';
     } catch (e) {
       console.log("No active session found.");
       loginBtn.disabled = false;
       loginBtn.textContent = 'Get Login Code';
       if (document.getElementById('signout-btn')) document.getElementById('signout-btn').style.display = 'none';
+      if (document.getElementById('mobile-signout-btn')) document.getElementById('mobile-signout-btn').style.display = 'none';
       if (document.getElementById('login-cancel-wrap')) document.getElementById('login-cancel-wrap').style.display = 'none';
     }
   }
@@ -260,10 +271,15 @@ document.addEventListener('DOMContentLoaded', () => {
         loginView.style.transition = 'all 0.4s ease';
 
         setTimeout(() => {
-          loginView.style.display = 'none';
-          dashView.style.display = 'block';
-          dashView.style.opacity = '1';
-          dashView.style.transform = 'translateY(0)';
+          if (data.progress && data.progress.length === 0) {
+            loginView.style.display = 'none';
+            document.getElementById('unenrolled-view').style.display = 'flex';
+          } else {
+            loginView.style.display = 'none';
+            dashView.style.display = 'block';
+            dashView.style.opacity = '1';
+            dashView.style.transform = 'translateY(0)';
+          }
           if (lenis) lenis.resize();
         }, 400);
       }
@@ -286,7 +302,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Show Sign Out button in navbar when logged into dashboard
     const signoutBtn = document.getElementById('signout-btn');
+    const mobSignoutBtn = document.getElementById('mobile-signout-btn');
     if (signoutBtn) signoutBtn.style.display = 'inline-flex';
+        if (mobSignoutBtn) mobSignoutBtn.style.display = 'block';
 
     // Header
     const firstName = student.name.split(' ')[0];
@@ -988,15 +1006,19 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.removeItem('token');
     localStorage.removeItem('skillme_email');
     const dashView = document.getElementById('dashboard-view');
+    const unenrolledView = document.getElementById('unenrolled-view');
     const loginView = document.getElementById('login-view');
     const signoutBtn = document.getElementById('signout-btn');
+    const mobSignoutBtn = document.getElementById('mobile-signout-btn');
     
     if (dashView && loginView) {
       dashView.style.display = 'none';
+      if (unenrolledView) unenrolledView.style.display = 'none';
       loginView.style.display = 'flex';
       loginView.style.opacity = '1';
       loginView.style.transform = 'translateY(0)';
       if (signoutBtn) signoutBtn.style.display = 'none';
+      if (mobSignoutBtn) mobSignoutBtn.style.display = 'none';
       // Reset login form inputs
       const emailInput = document.getElementById('login-email');
       const otpWrap = document.getElementById('otp-wrap');
@@ -1463,3 +1485,7 @@ function triggerMilestoneConfetti() {
   }
   requestAnimationFrame(draw);
 }
+
+
+
+

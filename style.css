@@ -2561,3 +2561,5 @@ img.brand-logo-img,
     z-index: 1001;
   }
 }
+
+@media (min-width: 769px) { #mobile-signout-btn { display: none !important; } }

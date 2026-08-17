@@ -59,7 +59,7 @@ async def request_otp(email: str) -> dict:
     """
     # Check student exists
     student = await db.fetch_one(
-        "SELECT id, first_name, last_name FROM students WHERE email = ?",
+        "SELECT id, first_name, last_name, status FROM students WHERE email = ?",
         (email.lower().strip(),)
     )
     if not student:
