@@ -800,12 +800,26 @@ function logoutAdmin() {
   setTimeout(initRunnerLoopCanvas, 100);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initRunnerLoopCanvas();
   const saved = localStorage.getItem('skillme_admin_key') || sessionStorage.getItem('skillme_admin_key');
   if (saved) {
-    adminKey = saved;
-    showApp();
+    try {
+      const res = await fetch(`${getAPI()}/api/admin/stats`, {
+        headers: { 'X-Admin-Key': saved }
+      });
+      if (res.ok) {
+        adminKey = saved;
+        showApp();
+      } else {
+        localStorage.removeItem('skillme_admin_key');
+        sessionStorage.removeItem('skillme_admin_key');
+        adminKey = '';
+      }
+    } catch(e) {
+      adminKey = saved;
+      showApp();
+    }
   }
 });
 
@@ -826,7 +840,7 @@ function navigate(page) {
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
   document.getElementById(`nav-${page}`)?.classList.add('active');
-  document.getElementById(`page-${page}`).classList.add('active');
+  document.getElementById(`page-${page}`)?.classList.add('active');
   const meta = PAGE_META[page] || {};
   document.getElementById('topbar-title').textContent = meta.title || page;
   document.getElementById('topbar-subtitle').textContent = meta.subtitle || '';
@@ -841,7 +855,7 @@ function refreshCurrentPage() { navigate(currentPage); }
 
 // ─── API HELPER ───
 async function api(path, opts = {}) {
-  const res = await fetch(`${API}${path}`, {
+  const res = await fetch(`${getAPI()}${path}`, {
     ...opts,
     headers: { 'X-Admin-Key': adminKey, 'Content-Type': 'application/json', ...(opts.headers || {}) }
   });
