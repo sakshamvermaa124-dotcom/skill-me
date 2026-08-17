@@ -151,3 +151,59 @@ class TestAdminStats:
 
         r2 = await client.get("/api/admin/stats", headers=admin_headers)
         assert r2.json()["total_students"] == before + 1
+
+
+@pytest.mark.admin
+class TestDeleteStudent:
+    async def test_delete_student_success(self, client, admin_headers, test_student):
+        r = await client.delete(
+            f"/api/admin/students/{test_student['id']}",
+            headers=admin_headers,
+        )
+        assert r.status_code == 200
+        data = r.json()
+        assert data["status"] == "deleted"
+        assert data["student_id"] == test_student["id"]
+
+        # Verify completely gone from DB
+        row = await test_db.fetch_one("SELECT * FROM students WHERE id = ?", (test_student["id"],))
+        assert row is None
+
+        # Verify user status check returns 404 (acts like brand new user)
+        status_res = await client.get(f"/api/students/status/{test_student['email']}")
+        assert status_res.status_code == 404
+
+        # Verify user can re-apply fresh
+        apply_res = await client.post("/api/students/apply", json={
+            "first_name": "New",
+            "last_name": "User",
+            "email": test_student["email"],
+            "domain": "web-dev"
+        })
+        assert apply_res.status_code == 200
+        assert apply_res.json()["status"] == "applied"
+
+    async def test_delete_enrolled_student_cascades_all_data(self, client, admin_headers, enrolled_student):
+        student_id = enrolled_student["id"]
+        email = enrolled_student["email"]
+
+        r = await client.delete(
+            f"/api/admin/students/{student_id}",
+            headers=admin_headers,
+        )
+        assert r.status_code == 200
+
+        # Verify all child tables have no records for this student
+        assert await test_db.fetch_one("SELECT * FROM students WHERE id = ?", (student_id,)) is None
+        assert await test_db.fetch_one("SELECT * FROM enrollments WHERE student_id = ?", (student_id,)) is None
+        assert await test_db.fetch_one("SELECT * FROM progress WHERE student_id = ?", (student_id,)) is None
+        assert await test_db.fetch_one("SELECT * FROM submissions WHERE student_id = ?", (student_id,)) is None
+        assert await test_db.fetch_one("SELECT * FROM issues WHERE assigned_to = ?", (student_id,)) is None
+
+    async def test_delete_nonexistent_student(self, client, admin_headers):
+        r = await client.delete(
+            "/api/admin/students/99999",
+            headers=admin_headers,
+        )
+        assert r.status_code == 404
+

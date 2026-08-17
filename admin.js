@@ -922,6 +922,7 @@ async function loadRecentApplications(silent = false) {
                 <div style="display:flex;gap:6px;">
                   <button class="btn btn-sm" style="background:rgba(201,154,78,0.12);color:#c99a4e;border:1px solid rgba(201,154,78,0.22);" onclick="updateStatus(${s.id},'shortlisted')">Shortlist</button>
                   <button class="btn btn-sm" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.25);" onclick="autoEnrollStudent(${s.id},'${s.first_name} ${s.last_name}', this)">Enroll</button>
+                  <button class="btn btn-sm" style="background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.22);" onclick="deleteStudent(${s.id},'${s.first_name} ${s.last_name}','${s.email}')" title="Permanently delete entire record from database">🗑️</button>
                 </div>
               </td>
             </tr>`).join('')}
@@ -1021,6 +1022,7 @@ function renderStudents(students) {
           ${(s.status === 'shortlisted' || s.status === 'applied') ? `<button class="btn btn-sm" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.25);" onclick="autoEnrollStudent(${s.id},'${s.first_name} ${s.last_name}', this)">Enroll</button>` : ''}
           ${(s.status === 'completed' || s.status === 'enrolled') && s.batch_id ? `<button class="btn btn-sm" style="background:rgba(212,168,83,0.15);color:#d4a853;border:1px solid rgba(212,168,83,0.3);" onclick="issueCertificate(${s.id},${s.batch_id},'${s.first_name} ${s.last_name}')">🏅 Certificate</button>` : ''}
           ${s.status !== 'dropped' ? `<button class="btn btn-sm" style="background:rgba(251,113,133,0.12);color:#fb7185;border:1px solid rgba(251,113,133,0.2);" onclick="updateStatus(${s.id},'dropped')">Drop</button>` : ''}
+          <button class="btn btn-sm" style="background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.25);" onclick="deleteStudent(${s.id},'${s.first_name} ${s.last_name}','${s.email}')" title="Permanently delete entire record from database">🗑️ Delete</button>
         </div>
       </td>
     </tr>`).join('');
@@ -1041,6 +1043,29 @@ async function updateStatus(studentId, newStatus) {
     loadStats(true);
   } catch(e) {
     toast(e.message, 'error');
+  }
+}
+
+async function deleteStudent(studentId, name, email) {
+  if (!confirm(`Are you sure you want to PERMANENTLY DELETE "${name}" (${email}) from the database?\n\nThis will completely wipe:\n- Student profile & application\n- Batch enrollments & progress\n- Assigned issues & submissions\n- Certificates & payment records\n- OTP tokens & email logs\n\nWhen this user returns, they will be treated as a completely brand-new user.\n\nThis action cannot be undone.`)) {
+    return;
+  }
+  try {
+    const data = await api(`/api/admin/students/${studentId}`, {
+      method: 'DELETE'
+    });
+    toast(`🗑️ Permanently deleted ${name} (${email}) from database.`);
+    if (currentPage === 'overview') {
+      loadRecentApplications(true);
+      loadOverviewBatches(true);
+    }
+    loadStudents(true);
+    loadStats(true);
+    if (currentPage === 'batches') {
+      loadBatches(true);
+    }
+  } catch(e) {
+    toast(`Failed to delete student: ${e.message}`, 'error');
   }
 }
 

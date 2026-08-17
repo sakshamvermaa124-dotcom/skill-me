@@ -716,6 +716,88 @@ async def update_student_status(
     return {"status": "updated", "student_id": student_id, "new_status": req.status}
 
 
+@router.delete("/students/{student_id}", summary="Delete student and all associated records")
+async def delete_student(student_id: int, _: str = Depends(require_admin)):
+    """
+    Permanently delete a student and all their associated records from the database:
+    - Submissions
+    - Weekly progress
+    - Assigned issues
+    - Certificates
+    - Payment records
+    - Batch enrollments
+    - Referral codes & referral conversions
+    - OTP login tokens
+    - Email logs for their address
+    - Any dedicated 1-student batches created for them
+    - The Student profile itself
+
+    After deletion, when this user returns they will act as a completely new user.
+    """
+    student = await db.fetch_one("SELECT * FROM students WHERE id = ?", (student_id,))
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    email = student["email"]
+
+    try:
+        # 1. Fetch batches enrolled by this student
+        enrolled_batches = await db.fetch_all(
+            "SELECT batch_id FROM enrollments WHERE student_id = ?", (student_id,)
+        )
+        batch_ids = [b["batch_id"] for b in enrolled_batches]
+
+        # 2. Delete all student-specific tracking and progress
+        await db.execute("DELETE FROM submissions WHERE student_id = ?", (student_id,))
+        await db.execute("DELETE FROM progress WHERE student_id = ?", (student_id,))
+        await db.execute("DELETE FROM issues WHERE assigned_to = ?", (student_id,))
+        await db.execute("DELETE FROM certificates WHERE student_id = ?", (student_id,))
+        await db.execute("DELETE FROM payments WHERE student_id = ?", (student_id,))
+        await db.execute("DELETE FROM enrollments WHERE student_id = ?", (student_id,))
+        await db.execute("DELETE FROM referral_codes WHERE student_id = ?", (student_id,))
+        await db.execute(
+            "DELETE FROM referral_conversions WHERE referrer_student_id = ? OR referred_student_id = ? OR LOWER(referred_email) = LOWER(?)",
+            (student_id, student_id, email),
+        )
+        await db.execute("DELETE FROM email_logs WHERE student_id = ? OR LOWER(recipient_email) = LOWER(?)", (student_id, email))
+        await db.execute("DELETE FROM otp_tokens WHERE LOWER(email) = LOWER(?)", (email,))
+
+        # 3. Clean up any dedicated 1-student batches that now have 0 enrollments
+        for b_id in batch_ids:
+            batch = await db.fetch_one("SELECT max_students FROM batches WHERE id = ?", (b_id,))
+            if batch and batch.get("max_students") == 1:
+                active_enrollments = await db.fetch_one(
+                    "SELECT COUNT(*) as count FROM enrollments WHERE batch_id = ?", (b_id,)
+                )
+                if not active_enrollments or active_enrollments["count"] == 0:
+                    await db.execute("DELETE FROM issues WHERE batch_id = ?", (b_id,))
+                    await db.execute("DELETE FROM progress WHERE batch_id = ?", (b_id,))
+                    await db.execute("DELETE FROM submissions WHERE batch_id = ?", (b_id,))
+                    await db.execute("DELETE FROM batches WHERE id = ?", (b_id,))
+                    logger.info(f"Cleaned up dedicated 1-student batch {b_id}")
+
+        # 4. Clean up any error/monitor logs
+        try:
+            await db.execute("DELETE FROM monitor_alerts WHERE student_id = ? OR LOWER(student_email) = LOWER(?)", (student_id, email))
+            await db.execute("DELETE FROM frontend_errors WHERE LOWER(student_email) = LOWER(?)", (email,))
+        except Exception:
+            pass
+
+        # 5. Delete the student record itself
+        await db.execute("DELETE FROM students WHERE id = ?", (student_id,))
+
+        logger.info(f"Admin permanently deleted student #{student_id} ({student['first_name']} {student['last_name']} - {email})")
+        return {
+            "status": "deleted",
+            "student_id": student_id,
+            "email": email,
+            "message": f"Student #{student_id} ({email}) has been completely wiped from the database. When they return, they will be treated as a brand-new user."
+        }
+    except Exception as e:
+        logger.error(f"Failed to delete student {student_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Database error while deleting student: {str(e)}")
+
+
 # ──────────────────────────────────────────────
 # Auto-Assign Scheduler
 # ──────────────────────────────────────────────
