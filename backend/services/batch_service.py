@@ -554,14 +554,15 @@ class BatchService:
             assignee_username = None
 
             # Task assignment deduplication guard: skip creating duplicate GitHub issues if already assigned
+            existing_issue = None
             if student_id:
                 existing_issue = await db.fetch_one(
                     """SELECT id, github_issue_number FROM issues 
                        WHERE batch_id = ? AND week_number = ? AND assigned_to = ? AND title = ?""",
                     (batch_id, week_number, student_id, issue_def["title"])
                 )
-                if existing_issue:
-                    logger.info(f"Skipping duplicate task assignment '{issue_def['title']}' for student {student_id} in batch {batch_id}.")
+                if existing_issue and existing_issue["github_issue_number"] is not None:
+                    logger.info(f"Skipping duplicate task assignment '{issue_def['title']}' for student {student_id} in batch {batch_id} (already Issue #{existing_issue['github_issue_number']}).")
                     created_issues.append({
                         "id": existing_issue["id"],
                         "github_issue_number": existing_issue["github_issue_number"],
@@ -620,38 +621,46 @@ class BatchService:
                     if attempt < 2:
                         await asyncio.sleep(1.0)
 
-            # Record in database (even if GitHub API was unreachable, so student can see tasks on dashboard)
-            issue_id = await db.insert(
-                """INSERT INTO issues (batch_id, github_issue_number, title, description, week_number, difficulty, assigned_to, status)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-                (
-                    batch_id,
-                    github_issue_number,
-                    issue_def["title"],
-                    raw_body,
-                    week_number,
-                    week_info["difficulty"],
-                    student_id,
-                    "assigned" if student_id else "open",
-                ),
-            )
-
-            # Initialize/update progress record
-            if student_id:
-                existing_progress = await db.fetch_one(
-                    "SELECT id, issues_assigned FROM progress WHERE student_id = ? AND batch_id = ? AND week = ?",
-                    (student_id, batch_id, week_number),
-                )
-                if existing_progress:
+            # Record in database (or update existing record if repairing missing github_issue_number)
+            if existing_issue:
+                issue_id = existing_issue["id"]
+                if github_issue_number:
                     await db.execute(
-                        "UPDATE progress SET issues_assigned = issues_assigned + 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-                        (existing_progress["id"],),
+                        "UPDATE issues SET github_issue_number = ? WHERE id = ?",
+                        (github_issue_number, issue_id),
                     )
-                else:
-                    await db.insert(
-                        "INSERT INTO progress (student_id, batch_id, week, issues_assigned) VALUES (?, ?, ?, 1)",
+            else:
+                issue_id = await db.insert(
+                    """INSERT INTO issues (batch_id, github_issue_number, title, description, week_number, difficulty, assigned_to, status)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                    (
+                        batch_id,
+                        github_issue_number,
+                        issue_def["title"],
+                        raw_body,
+                        week_number,
+                        week_info["difficulty"],
+                        student_id,
+                        "assigned" if student_id else "open",
+                    ),
+                )
+
+                # Initialize/update progress record
+                if student_id:
+                    existing_progress = await db.fetch_one(
+                        "SELECT id, issues_assigned FROM progress WHERE student_id = ? AND batch_id = ? AND week = ?",
                         (student_id, batch_id, week_number),
                     )
+                    if existing_progress:
+                        await db.execute(
+                            "UPDATE progress SET issues_assigned = issues_assigned + 1, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                            (existing_progress["id"],),
+                        )
+                    else:
+                        await db.insert(
+                            "INSERT INTO progress (student_id, batch_id, week, issues_assigned) VALUES (?, ?, ?, 1)",
+                            (student_id, batch_id, week_number),
+                        )
 
             created_issues.append({
                 "id": issue_id,
