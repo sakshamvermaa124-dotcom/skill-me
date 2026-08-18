@@ -4,8 +4,8 @@
 // ============================================================
 
 // API base URL — reads from config.js (auto-detects local vs production)
-const API = window.SKILLME_API || 'http://localhost:8000';
-const FRONTEND = window.SKILLME_FRONTEND || 'http://localhost:8000';
+const API = window.SKILLME_API || '${API}';
+const FRONTEND = window.SKILLME_FRONTEND || '${FRONTEND}';
 
 // --- Lenis Smooth Scrolling (from darkroomengineering/lenis) ---
 let lenis;
@@ -536,7 +536,7 @@ document.addEventListener('DOMContentLoaded', () => {
         card.innerHTML = `
           <div class="sub-dot ${status}"></div>
           <div class="sub-info">
-            <div class="sub-title" style="white-space: normal !important; word-wrap: break-word !important; overflow: visible !important; text-overflow: clip !important; display: block; line-height: 1.4;">${sub.issue_title || `Pull Request #${sub.pr_number || '?'}`}</div>
+            <div class="sub-title">${sub.issue_title || `Pull Request #${sub.pr_number || '?'}`}</div>
             <div class="sub-meta">
               <span>Week ${sub.week_number || '?'}</span>
               <span>${dateStr}</span>
@@ -579,7 +579,7 @@ document.addEventListener('DOMContentLoaded', () => {
         card.innerHTML = `
           <div class="sub-dot ${status === 'completed' ? 'merged' : 'open'}"></div>
           <div class="sub-info">
-            <div class="sub-title" style="white-space: normal !important; word-wrap: break-word !important; overflow: visible !important; text-overflow: clip !important; display: block; line-height: 1.4; padding-right: 12px;">${task.title || `Task #${task.github_issue_number || task.id}`}</div>
+            <div class="sub-title">${task.title || `Task #${task.github_issue_number || task.id}`}</div>
             <div class="sub-meta">
               <span>Week ${task.week_number || 1}</span>
               <span style="color:${diffColor};font-weight:600;">${(task.difficulty || 'medium').toUpperCase()}</span>
@@ -1523,7 +1523,7 @@ Join me on SkillMe to solve real GitHub issues and level up your resume:
         offerBtn.style.border = '1px solid rgba(99, 102, 241, 0.3)';
         offerBtn.style.marginTop = '10px';
         offerBtn.style.width = '100%';
-        offerBtn.innerHTML = 'View Official Offer Letter dY"S';
+        offerBtn.innerHTML = 'View Official Offer Letter 📄';
         actionsRow.parentElement.appendChild(offerBtn);
       }
       offerBtn.onclick = () => window.open(ctx.offerUrl, '_blank');
@@ -1666,24 +1666,4 @@ function triggerMilestoneConfetti() {
 
 
 
-
-const styleFix = document.createElement("style");
-styleFix.innerHTML = `
-@media (max-width: 768px) {
-  .sprint-milestones-row {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-  .milestone-name {
-    white-space: normal !important;
-    overflow: visible !important;
-    font-size: 0.7rem !important;
-  }
-  .progress-card, .dash-page, .guide-card, .cert-banner, .dash-header {
-    max-width: 100vw !important;
-    overflow-x: hidden !important;
-    box-sizing: border-box !important;
-  }
-}
-`;
-document.head.appendChild(styleFix);
 
