@@ -165,6 +165,13 @@ async def get_progress(email: str):
         if enrollments:
             progress = enrollments
 
+    # Also fetch their invite status
+    enrollment_record = await db.fetch_one(
+        "SELECT github_invite_status FROM enrollments WHERE student_id = ? AND status != 'dropped' ORDER BY joined_at DESC LIMIT 1",
+        (student["id"],)
+    )
+    invite_status = enrollment_record["github_invite_status"] if enrollment_record else "accepted"
+
     submissions = await db.fetch_all(
         """SELECT s.id, s.issue_id, s.pr_url, s.pr_number, s.status, s.submitted_at, s.merged_at,
                   i.title as issue_title, i.week_number, i.github_issue_number, i.difficulty,
@@ -226,6 +233,7 @@ async def get_progress(email: str):
             "domain": primary_domain,
             "college": student.get("college"),
             "referral_code": student.get("referral_code"),
+            "invite_status": invite_status,
         },
         "progress": [dict(p) for p in progress],
         "submissions": formatted_submissions,

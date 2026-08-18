@@ -310,6 +310,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const firstName = student.name.split(' ')[0];
     document.getElementById('dash-name').textContent = `Welcome back, ${firstName}`;
 
+    const inviteAlert = document.getElementById('dash-pending-invite-alert');
+    if (inviteAlert) {
+      if (student.invite_status === 'pending') {
+        inviteAlert.style.display = 'flex';
+      } else {
+        inviteAlert.style.display = 'none';
+      }
+    }
+
     if (student.github) {
       document.getElementById('dash-github').href = `https://github.com/${student.github}`;
     }
