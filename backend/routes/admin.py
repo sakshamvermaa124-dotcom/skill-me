@@ -1121,6 +1121,12 @@ async def send_github_invite_reminders(
            JOIN batches b ON b.id = e.batch_id
            WHERE e.github_invite_status = 'pending'
              AND e.status NOT IN ('dropped')
+             AND NOT EXISTS (
+                 SELECT 1 FROM email_logs el
+                 WHERE el.student_id = s.id 
+                   AND el.email_type = 'github_invite_reminder'
+                   AND el.sent_at >= datetime('now', '-1 day')
+             )
            ORDER BY e.joined_at ASC"""
     )
 
@@ -1138,6 +1144,7 @@ async def send_github_invite_reminders(
             "sent_to": [],
         }
 
+    import asyncio
     async def _fire_emails():
         for t in targets:
             repo_url = f"https://github.com/{org}/{t['repo_name']}" if t.get("repo_name") else None
@@ -1150,6 +1157,7 @@ async def send_github_invite_reminders(
                     domain=domain,
                     repo_url=repo_url,
                     github_email=t["email"],
+                    student_id=t["id"],
                 )
                 logger.info(
                     f"GitHub invite reminder sent → {t['email']} "
@@ -1157,6 +1165,9 @@ async def send_github_invite_reminders(
                 )
             except Exception as exc:
                 logger.error(f"Failed to send invite reminder to {t['email']}: {exc}")
+            
+            # Brief delay between emails to avoid tripping SMTP connection rate limits
+            await asyncio.sleep(1)
 
     background_tasks.add_task(_fire_emails)
 

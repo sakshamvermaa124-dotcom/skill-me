@@ -147,10 +147,10 @@ async def _send_and_log(
         from db.database import db
         await db.insert(
             """INSERT INTO email_logs
-               (recipient_email, recipient_name, email_type, subject, student_id, batch_id, status, body)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+               (recipient_email, recipient_name, email_type, subject, student_id, batch_id, status)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
             (to_email, to_name, email_type, subject, student_id, batch_id,
-             "sent" if success else "failed", html_body),
+             "sent" if success else "failed"),
         )
     except Exception as log_exc:
         logger.warning("Failed to log email to DB: %s", log_exc)
@@ -373,6 +373,34 @@ class EmailService:
             f"🏆 Your Certificate & Letter of Recommendation are Ready — {cert_id}",
             html,
             email_type="certificate_ready",
+        )
+
+    # 6. GitHub invite reminder (for students with pending collaborator status)
+    async def send_github_invite_reminder(
+        self,
+        first_name: str,
+        last_name: str,
+        email: str,
+        domain: str,
+        repo_url: str | None = None,
+        github_email: str | None = None,
+        student_id: int | None = None,
+    ) -> bool:
+        html = _render(
+            "github_invite_reminder.html",
+            first_name=first_name,
+            last_name=last_name,
+            domain_label=_domain_label(domain),
+            repo_url=repo_url or "",
+            github_email=github_email or email,
+        )
+        return await _send_and_log(
+            email,
+            f"{first_name} {last_name}",
+            "⚠️ Action Required: Accept Your GitHub Invite to Start Your Internship",
+            html,
+            email_type="github_invite_reminder",
+            student_id=student_id,
         )
 
     # Test utility
