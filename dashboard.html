@@ -2267,6 +2267,48 @@
       <!-- Credential Quick-Access Strip (visible when paid) -->
       <div class="cred-strip" id="cred-strip"></div>
 
+
+      <!-- Build Your Internship Proof / Flex Section -->
+      <div class="flex-options-section" id="flex-options-section" style="margin-bottom: 30px; display: none;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+          <h2 style="margin:0; font-size:1.4rem; color:#fff;">Build Your Internship Proof 🚀</h2>
+        </div>
+        <p style="color:var(--text-secondary); font-size:0.9rem; margin-top:0; margin-bottom:20px;">Get your tasks, showcase your work, and build a portfolio that proves what you can do.</p>
+        
+        <div class="flex-cards-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+          
+          <!-- Card 1: Task PDF -->
+          <div class="flex-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 20px; display: flex; flex-direction: column;">
+            <div style="font-size: 24px; margin-bottom: 12px;">📄</div>
+            <h3 style="color:#fff; font-size: 1.1rem; margin-top:0; margin-bottom:8px;">Get Task PDF</h3>
+            <p style="color:var(--text-muted); font-size: 0.85rem; line-height: 1.5; flex-grow: 1;">Download your assigned task and complete it locally without relying on GitHub web.</p>
+            <button class="dash-action-btn primary" onclick="downloadTaskPdf()" style="margin-top: 16px; width: 100%; justify-content: center; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
+              Download Task PDF
+            </button>
+          </div>
+
+          <!-- Card 2: Portfolio -->
+          <div class="flex-card" style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 20px; display: flex; flex-direction: column;">
+            <div style="font-size: 24px; margin-bottom: 12px;">🌐</div>
+            <h3 style="color:#fff; font-size: 1.1rem; margin-top:0; margin-bottom:8px;">Build Your Portfolio</h3>
+            <p style="color:var(--text-muted); font-size: 0.85rem; line-height: 1.5; flex-grow: 1;">Showcase your GitHub work, projects, deployments and contributions.</p>
+            <button class="dash-action-btn primary" onclick="viewPortfolio()" style="margin-top: 16px; width: 100%; justify-content: center; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">
+              View My Portfolio
+            </button>
+          </div>
+
+          <!-- Card 3: Instant Certificate -->
+          <div class="flex-card" style="background: linear-gradient(145deg, rgba(201,154,78,0.1), rgba(181,135,61,0.05)); border: 1px solid rgba(201,154,78,0.3); border-radius: 12px; padding: 20px; display: flex; flex-direction: column;">
+            <div style="font-size: 24px; margin-bottom: 12px;">⚡</div>
+            <h3 style="color:#f0c97a; font-size: 1.1rem; margin-top:0; margin-bottom:8px;">Instant Certificate + LOR</h3>
+            <p style="color:var(--text-muted); font-size: 0.85rem; line-height: 1.5; flex-grow: 1;">Need internship proof urgently? Get your Certificate + LOR instantly for ₹129. <br><br><span style="color:#c99a4e; font-weight:600; font-size:0.8rem;">Your internship remains active! You can continue completing tasks after receiving this.</span></p>
+            <button class="dash-action-btn primary" onclick="showFlexPaymentModal()" style="margin-top: 16px; width: 100%; justify-content: center; background: linear-gradient(135deg, #c99a4e, #b5873d); color: #000; border: none; font-weight: 700;">
+              Get Certificate + LOR
+            </button>
+          </div>
+
+        </div>
+      </div>
       <!-- Certificate Section -->
       <div id="cert-section" style="display:none;"></div>
 
