@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Action Required: Accept Your GitHub Invite — SkillMe{% endblock %}
+
+{% block body %}
+<p class="greeting">Hi {{ first_name }}, one quick step! 👋</p>
+<p class="lead">
+  You're enrolled in the <strong>{{ domain_label }}</strong> internship track at SkillMe.
+  We've set up your personal GitHub repository and sent you a collaboration invite — but
+  we noticed you haven't accepted it yet.
+</p>
+<p class="lead" style="margin-top:-12px;">
+  <strong>You need to accept this invite to access your tasks and start submitting Pull Requests.</strong>
+  It only takes 30 seconds.
+</p>
+
+<div class="divider"></div>
+
+<p class="section-label">✅ How to Accept — 3 Simple Steps</p>
+
+<div class="steps">
+  <div class="step" style="border-left: 4px solid #2563eb; background: #eff6ff;">
+    <div class="step-num" style="background:#2563eb; min-width:28px;">1</div>
+    <div class="step-text">
+      <strong style="color:#1d4ed8;">Open your GitHub email</strong><br />
+      GitHub sent you an email with the subject <em>"You have been invited to collaborate on a repository."</em>
+      Check your <strong>inbox</strong> and your <strong>Spam / Junk folder</strong> — it sometimes lands there.
+    </div>
+  </div>
+  <div class="step" style="border-left: 4px solid #7c3aed; background: #f5f3ff;">
+    <div class="step-num" style="background:#7c3aed; min-width:28px;">2</div>
+    <div class="step-text">
+      <strong style="color:#6d28d9;">Click "View Invitation"</strong><br />
+      Inside the email, click the blue <strong>"View Invitation"</strong> button. This opens GitHub in your browser.
+      If you can't find the email, you can also go directly to
+      <a href="https://github.com/notifications" style="color:#7c3aed;font-weight:600;">github.com/notifications</a>.
+    </div>
+  </div>
+  <div class="step" style="border-left: 4px solid #10b981; background: #f0fdf4;">
+    <div class="step-num" style="background:#10b981; min-width:28px;">3</div>
+    <div class="step-text">
+      <strong style="color:#15803d;">Click "Accept Invitation"</strong><br />
+      On the GitHub page, click the green <strong>"Accept Invitation"</strong> button.
+      That's it — you now have access to your internship repository and your assigned tasks!
+    </div>
+  </div>
+</div>
+
+{% if repo_url %}
+<div class="cta-wrap" style="margin-top:24px;">
+  <a href="{{ repo_url }}" target="_blank" class="cta-btn">🔗 Open My Internship Repository →</a>
+</div>
+{% endif %}
+
+<div class="divider"></div>
+
+<div class="note" style="border-left-color: #f59e0b; background: #fffbeb;">
+  <strong>📩 Can't find the invite email?</strong><br />
+  — Check your <strong>Spam</strong> or <strong>Junk</strong> folder — GitHub emails sometimes get filtered.<br />
+  — Make sure you're checking the inbox for <strong>{{ github_email }}</strong> (the email linked to your GitHub account).<br />
+  — Still no luck? Reply to this email and we'll re-send your invite manually.
+</div>
+
+<div class="divider"></div>
+
+<p class="section-label">🚀 What Happens After You Accept?</p>
+
+<div class="steps">
+  <div class="step">
+    <div class="step-num" style="background:#10b981; min-width:28px;">✓</div>
+    <div class="step-text"><strong style="color:#15803d;">GitHub Invite Accepted</strong><br />You now have write access to your internship repo.</div>
+  </div>
+  <div class="step">
+    <div class="step-num" style="min-width:28px;">→</div>
+    <div class="step-text"><strong>Open Your Assigned Issues</strong><br />Go to the repository's Issues tab and find your tasks labeled <em>week-1</em>.</div>
+  </div>
+  <div class="step">
+    <div class="step-num" style="min-width:28px;">→</div>
+    <div class="step-text"><strong>Submit a Pull Request</strong><br />Solve the issue, create a branch, push your code, and open a PR. Your dashboard updates automatically.</div>
+  </div>
+  <div class="step">
+    <div class="step-num" style="min-width:28px;">🏆</div>
+    <div class="step-text"><strong>Earn Your Certificate</strong><br />Complete all 4 weeks to unlock your verified SkillMe certificate and Letter of Recommendation.</div>
+  </div>
+</div>
+
+<div class="cta-wrap" style="margin-top:20px;">
+  <a href="{{ dashboard_url }}" target="_blank" class="cta-btn">📊 View My Dashboard →</a>
+  <a href="https://github.com/notifications" target="_blank" class="cta-btn-secondary">Check GitHub Notifications ↗</a>
+</div>
+
+<p style="font-size:13px;color:#64748b;margin-top:24px;line-height:1.7;">
+  Any issues? Just reply to this email — we typically respond within a few hours.<br />
+  — The SkillMe Team
+</p>
+{% endblock %}

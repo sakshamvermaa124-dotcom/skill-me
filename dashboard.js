@@ -41,14 +41,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Auto-Login via Saved Session ---
   async function checkExistingSession() {
-    const isPreview = urlParams.get('preview') === '1' || urlParams.get('preview') === 'paid' || urlParams.get('preview') === 'progress' || urlParams.get('preview') === 'milestone';
+    const isPreview = urlParams.get('preview') === '1' || urlParams.get('preview') === 'paid' || urlParams.get('preview') === 'progress' || urlParams.get('preview') === 'milestone' || urlParams.get('preview') === 'pending';
     
     // Bypass login entirely for preview mode
     if (isPreview) {
         const isProgress = urlParams.get('preview') === 'progress' || urlParams.get('preview') === 'milestone';
         const completedCount = isProgress ? 4 : 12;
+        const isPending = urlParams.get('preview') === 'pending';
         const mockData = {
-            student: { id: 999, name: "Saksham Verma", github: "sakshamverma124", domain: "Web Development" },
+            student: { id: 999, name: "Saksham Verma", github: "sakshamverma124", domain: "Web Development", invite_status: isPending ? "pending" : "accepted" },
             progress: [{ week: isProgress ? 1 : 4, issues_completed: completedCount, issues_assigned: 12, prs_merged: completedCount, score: isProgress ? 100 : 300 }],
             submissions: [],
             issues: [
