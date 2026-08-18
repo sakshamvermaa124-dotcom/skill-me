@@ -48,6 +48,8 @@ async def handle_github_webhook(request: Request):
         return await _handle_pull_request(data)
     elif event_type == "check_suite":
         return await _handle_check_suite(data)
+    elif event_type == "member":
+        return await _handle_member(data)
     elif event_type == "ping":
         return {"status": "pong", "message": "Webhook is active"}
     else:
@@ -129,6 +131,39 @@ async def _handle_pull_request(data: dict) -> dict:
             return {"status": "pr_closed", "pr_number": pr_number}
 
     return {"status": "ignored", "action": action}
+
+
+async def _handle_member(data: dict) -> dict:
+    """Handle member events (e.g. collaborator accepted invite)."""
+    action = data.get("action")
+    if action != "added":
+        return {"status": "ignored", "action": action}
+
+    member = data.get("member", {})
+    repo = data.get("repository", {})
+    username = member.get("login", "")
+    repo_name = repo.get("name", "")
+
+    if not username or not repo_name:
+        return {"status": "ignored", "reason": "missing member or repo"}
+
+    # Look up the batch and student to update the enrollment
+    try:
+        batch = await db.fetch_one("SELECT id FROM batches WHERE repo_name = ?", (repo_name,))
+        student = await db.fetch_one("SELECT id FROM students WHERE github_username = ? COLLATE NOCASE", (username,))
+        
+        if batch and student:
+            await db.execute(
+                "UPDATE enrollments SET github_invite_status = 'accepted', updated_at = CURRENT_TIMESTAMP WHERE student_id = ? AND batch_id = ?",
+                (student["id"], batch["id"])
+            )
+            logger.info(f"GitHub invite accepted for {username} on {repo_name}")
+            return {"status": "invite_accepted", "username": username}
+    except Exception as e:
+        logger.error(f"Error processing member webhook for {username}: {e}")
+        return {"status": "error", "message": str(e)}
+
+    return {"status": "ignored", "reason": "student or batch not found"}
 
 
 async def _handle_check_suite(data: dict) -> dict:

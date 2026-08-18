@@ -215,7 +215,7 @@ class BatchService:
                 await github_service.add_collaborator(
                     batch["repo_name"], student["github_username"]
                 )
-                invite_status = "accepted"  # Optimistic — GitHub sends an invite
+                invite_status = "pending"  # Will be updated to 'accepted' via webhook
             except Exception as e:
                 logger.error(f"Failed to add {student['github_username']} to {batch['repo_name']}: {e}")
                 invite_status = "failed"
@@ -389,7 +389,6 @@ class BatchService:
         invite_status = "pending"
         try:
             await github_service.add_collaborator(repo_name, raw_gh, permission="push")
-            invite_status = "accepted"
         except Exception as e:
             logger.error(f"Failed to add {raw_gh} as collaborator to {repo_name}: {e}")
             invite_status = "failed"

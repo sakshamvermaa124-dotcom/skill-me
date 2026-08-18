@@ -1041,3 +1041,139 @@ async def get_batch_analytics(batch_id: int, _: str = Depends(require_admin)):
         },
         "student_grid": [dict(s) for s in student_grid],
     }
+
+
+# ──────────────────────────────────────────────
+# GitHub Invite Reminder Emails
+# ──────────────────────────────────────────────
+
+@router.get("/emails/pending-github-invite", summary="List students with pending GitHub invites")
+async def list_pending_github_invites(_: str = Depends(require_admin)):
+    """
+    Returns all enrolled students whose GitHub collaborator invite is still pending.
+    Use this to preview who the invite reminder email will be sent to before firing it.
+    """
+    rows = await db.fetch_all(
+        """SELECT
+             s.id, s.first_name, s.last_name, s.email,
+             s.github_username, s.domain,
+             e.github_invite_status, e.joined_at,
+             b.repo_name, b.domain as batch_domain, b.id as batch_id
+           FROM enrollments e
+           JOIN students s ON s.id = e.student_id
+           JOIN batches b ON b.id = e.batch_id
+           WHERE e.github_invite_status = 'pending'
+             AND e.status NOT IN ('dropped')
+           ORDER BY e.joined_at ASC"""
+    )
+
+    students = []
+    org = settings.github_org or "skill-me-intern"
+    for r in rows:
+        repo_url = f"https://github.com/{org}/{r['repo_name']}" if r.get("repo_name") else None
+        students.append({
+            "student_id":          r["id"],
+            "name":                f"{r['first_name']} {r['last_name']}",
+            "first_name":          r["first_name"],
+            "email":               r["email"],
+            "github_username":     r["github_username"],
+            "domain":              r["batch_domain"] or r["domain"],
+            "repo_name":           r["repo_name"],
+            "repo_url":            repo_url,
+            "batch_id":            r["batch_id"],
+            "invite_status":       r["github_invite_status"],
+            "joined_at":           r["joined_at"],
+        })
+
+    return {
+        "count": len(students),
+        "students": students,
+        "message": f"{len(students)} student(s) have a pending GitHub collaborator invite.",
+    }
+
+
+from fastapi import Body
+
+@router.post("/emails/send-github-invite-reminder", summary="Send GitHub invite reminder to pending students")
+async def send_github_invite_reminders(
+    background_tasks: BackgroundTasks,
+    student_ids: list[int] | None = Body(None),
+    _: str = Depends(require_admin),
+):
+    """
+    Sends a GitHub collaboration invite reminder email to all enrolled students
+    whose invite_status is still 'pending'. 
+
+    - If `student_ids` is provided (JSON body list of ints), only those students are emailed.
+    - If omitted, ALL pending-invite students are emailed.
+
+    Emails are dispatched in the background so the API responds immediately.
+    Returns the list of students the email is being sent to.
+    """
+    # Build the query — filter by student_ids if provided
+    rows = await db.fetch_all(
+        """SELECT
+             s.id, s.first_name, s.last_name, s.email,
+             s.github_username, s.domain,
+             b.repo_name, b.domain as batch_domain, b.id as batch_id
+           FROM enrollments e
+           JOIN students s ON s.id = e.student_id
+           JOIN batches b ON b.id = e.batch_id
+           WHERE e.github_invite_status = 'pending'
+             AND e.status NOT IN ('dropped')
+           ORDER BY e.joined_at ASC"""
+    )
+
+    org = settings.github_org or "skill-me-intern"
+    targets = []
+    for r in rows:
+        if student_ids and r["id"] not in student_ids:
+            continue
+        targets.append(dict(r))
+
+    if not targets:
+        return {
+            "status": "no_targets",
+            "message": "No students with pending GitHub invites found (or none matched the provided IDs).",
+            "sent_to": [],
+        }
+
+    async def _fire_emails():
+        for t in targets:
+            repo_url = f"https://github.com/{org}/{t['repo_name']}" if t.get("repo_name") else None
+            domain = t.get("batch_domain") or t.get("domain") or "web-dev"
+            try:
+                await email_service.send_github_invite_reminder(
+                    first_name=t["first_name"],
+                    last_name=t["last_name"],
+                    email=t["email"],
+                    domain=domain,
+                    repo_url=repo_url,
+                    github_email=t["email"],
+                )
+                logger.info(
+                    f"GitHub invite reminder sent → {t['email']} "
+                    f"(student_id={t['id']}, repo={t.get('repo_name')})"
+                )
+            except Exception as exc:
+                logger.error(f"Failed to send invite reminder to {t['email']}: {exc}")
+
+    background_tasks.add_task(_fire_emails)
+
+    sent_to = [
+        {
+            "student_id":      t["id"],
+            "name":            f"{t['first_name']} {t['last_name']}",
+            "email":           t["email"],
+            "github_username": t.get("github_username"),
+            "repo_name":       t.get("repo_name"),
+        }
+        for t in targets
+    ]
+
+    return {
+        "status": "dispatched",
+        "message": f"Reminder emails are being sent to {len(targets)} student(s) in the background.",
+        "sent_to": sent_to,
+    }
+
