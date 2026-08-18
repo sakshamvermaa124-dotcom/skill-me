@@ -2563,3 +2563,145 @@ img.brand-logo-img,
 }
 
 @media (min-width: 769px) { #mobile-signout-btn { display: none !important; } }
+
+/* ==========================================================================
+   MOBILE-FIRST POLISH (ADDED FOR HOMEPAGE OPTIMIZATION)
+   ========================================================================== */
+html, body {
+  overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+  /* 1. Typography & Spacing Polish */
+  .hero-title {
+    font-size: 2.25rem !important; /* Scale down H1 */
+    line-height: 1.15 !important;
+  }
+  .hero-title .line {
+    display: block !important;
+  }
+  .hero-description {
+    font-size: 1rem !important;
+    padding: 0 10px;
+  }
+  :root {
+    --section-padding: 48px 0; /* Maximize screen real estate */
+  }
+  .container {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  section {
+    padding: var(--section-padding) !important;
+  }
+
+  /* 2. Layout Conversions */
+  .hero-stats {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important; /* 2x2 grid */
+    gap: 16px !important;
+    text-align: center;
+    width: 100%;
+    justify-content: center;
+  }
+  .hero-stat {
+    border-right: none !important;
+    padding-right: 0 !important;
+    margin-right: 0 !important;
+    margin-bottom: 16px;
+  }
+  
+  .features-grid,
+  .domains-grid,
+  .how-it-works-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important; /* Stack vertically */
+    gap: 24px !important;
+  }
+  
+  /* Full-Width Touch Targets */
+  .hero-actions {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 12px !important;
+  }
+  .hero-actions .btn-primary, 
+  .hero-actions .btn-secondary,
+  .nav-cta,
+  .cta-buttons .btn-primary,
+  .cta-buttons .btn-secondary {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+    padding: 16px 24px !important; /* Larger touch targets */
+    font-size: 1.1rem !important;
+    box-sizing: border-box;
+  }
+
+  /* 3. Mobile Navigation Polish */
+  .nav-links-center.open {
+    display: flex !important;
+    flex-direction: column !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: rgba(10, 10, 10, 0.85) !important; /* Dark background */
+    backdrop-filter: blur(16px) !important; /* Premium blur effect */
+    -webkit-backdrop-filter: blur(16px) !important;
+    z-index: 1000;
+    padding-top: 100px;
+    align-items: center;
+    gap: 32px;
+    transition: all 0.3s ease;
+  }
+  .nav-links-center.open a {
+    font-size: 1.5rem !important;
+    padding: 16px !important;
+    width: 100%;
+    text-align: center;
+  }
+}
+
+.mobile-only-nav {
+  display: none !important;
+}
+@media (max-width: 768px) {
+  .nav-links-center.open .mobile-only-nav {
+    display: block !important;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .nav-links-center.open {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .nav-actions-right {
+    z-index: 1001;
+  }
+  .nav-actions-right .nav-link-dashboard:not(#signout-btn),
+  .nav-actions-right .nav-cta {
+    display: none !important;
+  }
+  .nav-toggle {
+    z-index: 1002;
+  }
+  #hero {
+    padding-top: 120px !important;
+  }
+}
+
+
+/* Mobile Typography & Tap Enhancements */
+html, body {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+

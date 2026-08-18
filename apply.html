@@ -749,7 +749,7 @@
         <span>SkillMe</span>
       </a>
     </div>
-    <div class="nav-links-center" id="nav-links-center">
+    <div class="nav-links-center" id="nav-links-center" data-lenis-prevent>
       <a href="index.html#how-it-works">How It Works</a>
       <a href="index.html#domains">Domains</a>
       <a href="index.html#benefits">Benefits</a>
@@ -1108,8 +1108,10 @@
     const navLinks = document.getElementById('nav-links-center');
     if (navToggle && navLinks) {
       navToggle.addEventListener('click', () => {
-        navToggle.classList.toggle('active');
-        navLinks.classList.toggle('open');
+        const isOpen = navLinks.classList.toggle('open');
+        navToggle.classList.toggle('active', isOpen);
+        document.body.style.overflow = isOpen ? 'hidden' : '';
+        document.documentElement.style.overflow = isOpen ? 'hidden' : '';
       });
     }
 
