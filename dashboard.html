@@ -38,7 +38,7 @@
   <link rel="apple-touch-icon" href="assets/logo.png">
   <link rel="manifest" href="site.webmanifest">
   
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=3">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -545,7 +545,8 @@
       background: linear-gradient(90deg, transparent, rgba(201,154,78,0.4), transparent);
     }
     @media (max-width: 600px) {
-      .progress-card { flex-direction: column; text-align: center; gap: 20px; }
+      .progress-card { flex-direction: column; text-align: center; gap: 20px; width: 100%; box-sizing: border-box; align-items: center; }
+      .progress-details { width: 100%; box-sizing: border-box; }
     }
     .progress-ring-wrap {
       position: relative;
@@ -1626,8 +1627,6 @@
     
     
     .theme-icon { transition: opacity 0.2s ease; }
-    [data-theme="light"] 
-    [data-theme="light"] 
     @media (max-width: 768px) {
       .nav-container { padding: 0 16px; height: 60px; }
       #dashboard-view { padding: 0 16px 60px; }
@@ -1637,7 +1636,7 @@
       .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
       .stat-card { padding: 20px; }
       .stat-value { font-size: 1.9rem; }
-      .progress-card { padding: 24px 20px; gap: 24px; max-width: 100vw; overflow-x: hidden; box-sizing: border-box; }
+      .progress-card { padding: 24px 20px; gap: 24px; width: 100%; box-sizing: border-box; }
       .sprint-milestones-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
       .milestone-name { white-space: normal; overflow: visible; font-size: 0.7rem; }
       .sub-card { padding: 14px 16px; gap: 12px; }
@@ -1654,12 +1653,14 @@
       .guide-tab { padding: 10px 10px; font-size: 0.78rem; gap: 5px; }
       .guide-step { gap: 10px; }
       .guide-code { font-size: 0.72rem; padding: 12px 14px; overflow-x: auto; word-wrap: break-word; white-space: pre-wrap; }
-      .dash-page, .guide-card, .cert-banner, .dash-header { max-width: 100vw; overflow-x: hidden; box-sizing: border-box; }
+      .dash-page, .guide-card, .cert-banner, .dash-header { width: 100%; box-sizing: border-box; }
       .login-card { padding: 36px 24px; }
     }
     @media (max-width: 480px) {
       .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
       .stat-card { padding: 16px; border-radius: 16px; }
+      .progress-card { padding: 16px 14px; gap: 16px; }
+      .sprint-milestone-step { padding: 8px; }
       .stat-value { font-size: 1.7rem; }
       .stat-icon { width: 36px; height: 36px; font-size: 16px; border-radius: 10px; margin-bottom: 12px; }
       .sub-card { flex-direction: column; align-items: flex-start; padding: 14px; width: 100%; box-sizing: border-box; }
@@ -1976,7 +1977,7 @@
         color: #f0c97a;
       }
   </style>
-  <script src="config.js" defer></script>
+  <script src="config.js?v=2" defer></script>
   <script src="skillme-monitor.js" defer></script>
   <style>.brand-logo-img, .logo img, .nav-logo img, .cert-company-logo, .lh-logo { width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important; flex-shrink: 0 !important; }</style>
 </head>
@@ -2019,14 +2020,14 @@
           const isOpen = navLinks.classList.toggle('open');
           navToggle.classList.toggle('active', isOpen);
           document.body.style.overflow = isOpen ? 'hidden' : '';
-          document.documentElement.style.overflow = isOpen ? 'hidden' : '';
+          if(window.lenis) isOpen ? window.lenis.stop() : window.lenis.start();
         });
         navLinks.querySelectorAll('a').forEach(link => {
           link.addEventListener('click', () => {
             navLinks.classList.remove('open');
             navToggle.classList.remove('active');
             document.body.style.overflow = '';
-            document.documentElement.style.overflow = '';
+            if(window.lenis) window.lenis.start();
           });
         });
       }
