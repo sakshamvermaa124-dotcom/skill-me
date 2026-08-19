@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const isOpen = navLinks.classList.toggle('open');
       navToggle.classList.toggle('active', isOpen);
       document.body.style.overflow = isOpen ? 'hidden' : '';
-      document.documentElement.style.overflow = isOpen ? 'hidden' : '';
+      if(window.lenis) isOpen ? window.lenis.stop() : window.lenis.start();
     });
   }
 
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (navToggle) navToggle.classList.remove('active');
       navLinks.classList.remove('open');
       document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
+      if(window.lenis) window.lenis.start();
     }));
   }
   // Close mobile menu on Escape key
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (navToggle) navToggle.classList.remove('active');
       navLinks.classList.remove('open');
       document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
+      if(window.lenis) window.lenis.start();
     }
   });
 
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (navToggle) navToggle.classList.remove('active');
       navLinks.classList.remove('open');
       document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
+      if(window.lenis) window.lenis.start();
     }
   });
 
