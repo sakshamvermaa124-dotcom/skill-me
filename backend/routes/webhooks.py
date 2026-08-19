@@ -61,7 +61,7 @@ async def _handle_pull_request(data: dict) -> dict:
     action = data.get("action")
     pr = data.get("pull_request", {})
     repo = data.get("repository", {})
-    repo_name = repo.get("name", "")
+    repo_name = repo.get("full_name") or repo.get("name", "")
     pr_number = pr.get("number")
     pr_url = pr.get("html_url", "")
     pr_user = pr.get("user", {}).get("login", "")
@@ -73,7 +73,7 @@ async def _handle_pull_request(data: dict) -> dict:
 
     # Look up the batch by repo name
     batch = await db.fetch_one(
-        "SELECT * FROM batches WHERE repo_name = ?", (repo_name,)
+        "SELECT * FROM batches WHERE repo_name LIKE ?", ("%" + repo_name.split("/").pop(),)
     )
     if not batch:
         logger.warning(f"Webhook for unknown repo: {repo_name}")
@@ -142,14 +142,14 @@ async def _handle_member(data: dict) -> dict:
     member = data.get("member", {})
     repo = data.get("repository", {})
     username = member.get("login", "")
-    repo_name = repo.get("name", "")
+    repo_name = repo.get("full_name") or repo.get("name", "")
 
     if not username or not repo_name:
         return {"status": "ignored", "reason": "missing member or repo"}
 
     # Look up the batch and student to update the enrollment
     try:
-        batch = await db.fetch_one("SELECT id FROM batches WHERE repo_name = ?", (repo_name,))
+        batch = await db.fetch_one("SELECT id FROM batches WHERE repo_name = ?", ("%" + repo_name.split("/").pop(),))
         student = await db.fetch_one("SELECT id FROM students WHERE github_username = ? COLLATE NOCASE", (username,))
         
         if batch and student:
@@ -174,7 +174,7 @@ async def _handle_check_suite(data: dict) -> dict:
 
     check_suite = data.get("check_suite", {})
     repo = data.get("repository", {})
-    repo_name = repo.get("name", "")
+    repo_name = repo.get("full_name") or repo.get("name", "")
     conclusion = check_suite.get("conclusion", "")  # success, failure, neutral, etc.
 
     # Find associated PRs
@@ -193,7 +193,7 @@ async def _handle_check_suite(data: dict) -> dict:
 
     # Look up batch
     batch = await db.fetch_one(
-        "SELECT * FROM batches WHERE repo_name = ?", (repo_name,)
+        "SELECT * FROM batches WHERE repo_name = ?", ("%" + repo_name.split("/").pop(),)
     )
     if not batch:
         return {"status": "ignored", "reason": "repo not tracked"}
