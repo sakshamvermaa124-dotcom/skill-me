@@ -2532,7 +2532,7 @@ img.brand-logo-img,
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     gap: 28px;
     z-index: 999;
