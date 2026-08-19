@@ -8,6 +8,7 @@ import logging
 import re
 from datetime import datetime, timedelta
 from db.database import db
+import asyncio
 from services.github_service import github_service
 from services.task_service import task_service
 from config import settings
@@ -668,6 +669,9 @@ class BatchService:
                 "assigned_to": student_id,
                 "week": week_number,
             })
+            
+            # Avoid GitHub secondary rate limit when creating many issues
+            await asyncio.sleep(1.0)
 
         logger.info(f"Assigned {len(created_issues)} issues for batch {batch_id}, week {week_number}")
         return created_issues
