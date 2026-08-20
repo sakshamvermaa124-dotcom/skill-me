@@ -127,12 +127,34 @@ class GitHubService:
             clean_user = clean_user.rstrip("/").split("/")[-1]
         clean_user = clean_user.lstrip("@").strip()
 
-        response = await self.client.delete(
+        try:
+            response = await self.client.delete(
+                f"/repos/{self.org}/{repo_name}/collaborators/{clean_user}"
+            )
+            response.raise_for_status()
+            logger.info(f"Removed {clean_user} from {repo_name}")
+            return True
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 404:
+                return False
+            logger.error(f"Failed to remove collaborator {username} from {repo_name}: {e}")
+            raise
+
+    async def check_collaborator(self, repo_name: str, username: str) -> bool:
+        """Check if a user is currently a collaborator on a repo."""
+        clean_user = (username or "").strip()
+        if not clean_user:
+            return False
+        
+        response = await self.client.get(
             f"/repos/{self.org}/{repo_name}/collaborators/{clean_user}"
         )
         if response.status_code == 204:
-            logger.info(f"Removed {clean_user} from {repo_name}")
             return True
+        elif response.status_code == 404:
+            return False
+            
+        logger.warning(f"Unexpected status code {response.status_code} checking collaborator {username} on {repo_name}")
         return False
 
     # ──────────────────────────────────────────────

@@ -2091,13 +2091,16 @@
 
         <div id="dash-pending-invite-alert" style="display: none; margin-bottom: 24px; padding: 16px 20px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; align-items: flex-start; gap: 12px;">
           <svg style="width: 24px; height: 24px; color: #f59e0b; flex-shrink: 0; margin-top: 2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-          <div>
+          <div style="flex-grow: 1;">
             <h3 style="margin: 0 0 4px 0; color: #fcd34d; font-size: 1rem; font-weight: 600;">GitHub Invite Pending</h3>
             <p style="margin: 0; color: #fde68a; font-size: 0.88rem; line-height: 1.4;">
               We've sent an invitation to collaborate on your internship repository. Check your email or GitHub notifications to accept it.
-              <a href="https://github.com/notifications" target="_blank" style="color: #f59e0b; text-decoration: underline; font-weight: 500; margin-left: 4px;">Check Notifications →</a>
+              <a href="https://github.com/notifications" target="_blank" style="color: #f59e0b; text-decoration: underline; font-weight: 500; margin-left: 4px;">Check Notifications &nearr;</a>
             </p>
           </div>
+          <button onclick="verifyGithubInvite(this)" style="background: #f59e0b; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background 0.2s;" onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='#f59e0b'">
+            Verify Now
+          </button>
         </div>
 
         <h1 id="dash-name">Welcome back!</h1>

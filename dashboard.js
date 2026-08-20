@@ -1781,3 +1781,48 @@ function triggerMilestoneConfetti() {
         if (btn) { btn.disabled = false; btn.textContent = 'Pay ₹129 & Unlock Instant Certificate'; }
       }
     };
+
+async function verifyGithubInvite(btn) {
+  const email = localStorage.getItem("skillme_email");
+  if (!email) return;
+  
+  const originalText = btn.innerText;
+  btn.innerText = "Verifying...";
+  btn.disabled = true;
+  btn.style.opacity = "0.7";
+  
+  try {
+    const API = window.API || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:8001' : 'https://skillme-backend-9p34.onrender.com');
+    const res = await fetch(`${API}/api/students/verify-github-invite`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email: email })
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      if (data.status === "accepted" || data.status === "already_accepted") {
+        document.getElementById("dash-pending-invite-alert").style.display = "none";
+        // Show success toast
+        const toast = document.createElement("div");
+        toast.textContent = "GitHub invite verified successfully!";
+        toast.style.cssText = "position:fixed;bottom:20px;right:20px;background:#10b981;color:white;padding:12px 24px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:9999;font-family:Inter,sans-serif;";
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+      } else {
+        alert("We checked GitHub, but you haven't accepted the invite yet! Please check your email or GitHub notifications.");
+      }
+    } else {
+      const err = await res.json().catch(()=>({}));
+      alert("Error verifying invite: " + (err.detail || "Please try again later."));
+    }
+  } catch (error) {
+    alert("Network error. Please try again.");
+  } finally {
+    btn.innerText = originalText;
+    btn.disabled = false;
+    btn.style.opacity = "1";
+  }
+}
