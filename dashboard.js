@@ -1792,7 +1792,6 @@ async function verifyGithubInvite(btn) {
   btn.style.opacity = "0.7";
   
   try {
-    const API = window.API || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:8001' : 'https://skillme-backend-9p34.onrender.com');
     const res = await fetch(`${API}/api/students/verify-github-invite`, {
       method: "POST",
       headers: {
