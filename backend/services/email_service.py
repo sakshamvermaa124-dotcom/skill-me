@@ -353,7 +353,7 @@ class EmailService:
             issued_date = datetime.utcnow().strftime("%d %B %Y")
         _base = "https://skill-me-intern.in"
         certificate_url = f"{_base}/certificate.html?email={email}"
-        verify_url = f"{_base}/certificate.html?cert_id={cert_id}"
+        verify_url = f"{_base}/verify.html?cert_id={cert_id}"
         lor_url = f"{_base}/lor.html?cert_id={cert_id}"
         html = _render(
             "certificate_ready.html",

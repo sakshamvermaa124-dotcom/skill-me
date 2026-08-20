@@ -30,6 +30,7 @@ from routes.auth import router as auth_router
 from routes.referrals import router as referrals_router
 from routes.portfolio import router as portfolio_router
 from routes.monitor import router as monitor_router
+from routes.tasks import router as tasks_router
 from services.monitor_scheduler import register_monitor_jobs
 
 # Rate limiter
@@ -148,6 +149,7 @@ app.include_router(auth_router)
 app.include_router(referrals_router)
 app.include_router(portfolio_router)
 app.include_router(monitor_router)
+app.include_router(tasks_router)
 
 
 # ──────────────────────────────────────────────

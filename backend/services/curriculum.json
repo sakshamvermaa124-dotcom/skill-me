@@ -1,0 +1,1280 @@
+{
+  "web-dev": [
+    {
+      "project_name": "Modern Interactive Portfolio & DevStudio",
+      "tagline": "A high-performance developer portfolio with glassmorphism UI, dynamic themes, CMS project grid, and contact studio.",
+      "weeks": {
+        "1": {
+          "title": "Base Model: Responsive Structure & Animated Glassmorphism UI",
+          "deliverables": [
+            "Sticky glassmorphic navbar with smooth scroll spy and mobile hamburger menu",
+            "Hero section with dynamic typography, animated tagline, and gradient glowing badges",
+            "Interactive skills grid with hover elevation and tech badge animations",
+            "Theme toggle engine (Dark Mode & Light Mode) with smooth CSS transitions"
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nConstruct the visual foundation and core structure for your **DevStudio Portfolio** running locally on localhost.\n\n### 🛠️ Step-by-Step Requirements\n1. **Responsive Layout Architecture**: Build semantic HTML5 structure (`<header>`, `<nav>`, `<main>`, `<section>`, `<footer>`).\n2. **Glassmorphism Styling**: Implement modern CSS with backdrop blur, glass borders, and custom CSS variables for effortless theming.\n3. **Hero & Intro Stage**: Include your developer bio, role pills, and eye-catching entrance animations using `@keyframes`.\n4. **Theme Switcher Engine**: Write JavaScript to toggle `.dark-mode` and `.light-mode` classes with instant local state persistence.\n\n### 📋 Localhost Acceptance Criteria\n- [ ] Runs seamlessly on `http://localhost:...` or Live Server.\n- [ ] Responsive across 320px, 768px, 1024px, and 1440px viewports without horizontal overflow.\n- [ ] Theme switcher toggles colors smoothly without reloading the page.",
+          "post_highlights": [
+            "Crafted modern glassmorphism design with responsive CSS Grid & Flexbox",
+            "Engineered seamless Dark/Light mode switcher with instant CSS transitions",
+            "Implemented fluid entrance animations and mobile-first navigation"
+          ]
+        },
+        "2": {
+          "title": "Feature Add-Up: Dynamic Project Showcase & Category Filter Engine",
+          "deliverables": [
+            "Interactive project showcase cards rendered dynamically from JSON data",
+            "Category filter tabs (All, Frontend, Full Stack, Utilities) with smooth fade transitions",
+            "Modal preview overlay showing project screenshots, live demo links, and tech stack pills",
+            "Search bar with live instant filtering as the user types"
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nUpgrade your DevStudio Portfolio from Week 1 by integrating a dynamic, client-side project rendering and filtering engine.\n\n### 🛠️ Step-by-Step Requirements\n1. **Data-Driven Project Grid**: Store project metadata in a structured JavaScript array/JSON and dynamically generate cards.\n2. **Category Filtering**: Implement category filter buttons that dynamically show/hide matching cards with CSS transitions.\n3. **Live Search**: Add real-time text input filtering matching project titles and technology keywords.\n4. **Interactive Modal Dialog**: Clicking any project opens a detailed modal with feature breakdown and close triggers.",
+          "post_highlights": [
+            "Built a dynamic data-driven project showcase with interactive filtering",
+            "Added live real-time keyword search across project titles and tech stacks",
+            "Implemented accessible modal previews with backdrop blur effects"
+          ]
+        },
+        "3": {
+          "title": "Integration: Live GitHub Stats & Interactive Terminal Console",
+          "deliverables": [
+            "Live GitHub API integration fetching repository stats, star counts, and commit activity",
+            "Interactive CLI / Terminal widget where visitors can type commands (e.g. `help`, `skills`, `contact`)",
+            "Dynamic testimonial slider with autoplay, manual navigation dots, and swipe support"
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nLevel up your Week 2 build by integrating real-time API feeds and an interactive mini-terminal widget inside your portfolio.\n\n### 🛠️ Step-by-Step Requirements\n1. **GitHub API Feed**: Fetch public profile metrics using `fetch()` and `async/await` with fallback error handling.\n2. **Interactive Developer CLI**: Build an embedded retro terminal component on localhost that parses user input commands.\n3. **Interactive Testimonial Carousel**: Implement a touch-friendly review carousel with smooth transition intervals.",
+          "post_highlights": [
+            "Integrated GitHub REST API to showcase live repos and contribution metrics",
+            "Engineered an interactive developer CLI console supporting custom commands",
+            "Added skeleton loaders and a responsive testimonial carousel"
+          ]
+        },
+        "4": {
+          "title": "Capstone Polish: Interactive Contact Studio, SEO & Production Performance",
+          "deliverables": [
+            "Complete contact form with client-side regex validation, floating labels, and success feedback",
+            "Custom toast notification system for user interactions (theme changes, form submissions)",
+            "Lighthouse performance optimization (accessible ARIA tags, lazy loading images, zero errors)",
+            "Final capstone demo showcasing end-to-end user experience on localhost"
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the final polish of your DevStudio Portfolio, turning it into a production-grade showcase ready for presentation.\n\n### 🛠️ Step-by-Step Requirements\n1. **Interactive Contact Form**: Validate email, name, and message fields with custom real-time error states.\n2. **Toast Alert Dispatcher**: Build a reusable notification toast manager that animates alerts into the top-right corner.\n3. **Accessibility & Optimization**: Add proper ARIA labels, semantic markup, and optimized assets to achieve a 95+ score on Lighthouse.",
+          "post_highlights": [
+            "Completed the 4-week DevStudio Portfolio capstone project from scratch!",
+            "Built robust form validation, custom toast notification engine, and responsive UI",
+            "Optimized for high performance, accessibility, and modern design standards"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "TaskFlow: Collaborative Sprint & Kanban Workspace",
+      "tagline": "A full-featured productivity and sprint board application with drag-and-drop, category filters, and local state sync.",
+      "weeks": {
+        "1": {
+          "title": "Base Model: Kanban Board Layout & Task Card Architecture",
+          "deliverables": [
+            "3-Column Sprint Board (To Do, In Progress, Done) with custom badges",
+            "Modern responsive task card component with priority indicators",
+            "Quick-add task drawer with clean inputs for title, description, and urgency",
+            "Modern dark-mode glassmorphic workspace layout"
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational UI and column grid for **TaskFlow**, your local productivity and sprint board application.\n\n### 🛠️ Step-by-Step Requirements\n1. Create a 3-column Kanban workspace using CSS Grid & Flexbox.\n2. Design task cards featuring title, description, priority badge (High, Med, Low), and estimated hours.\n3. Build a modal/drawer to input new tasks with clean form styling.",
+          "post_highlights": [
+            "Built the core 3-column Kanban architecture in HTML5 & modern CSS",
+            "Engineered modular task card components with priority indicators",
+            "Created responsive dark workspace layout for sprint management"
+          ]
+        },
+        "2": {
+          "title": "Feature Add-Up: LocalStorage CRUD & Drag/Drop Reordering",
+          "deliverables": [
+            "Full CRUD operations (Create, Read, Update, Delete tasks) via JavaScript",
+            "Native HTML5 Drag and Drop or column shift controls to move tasks between stages",
+            "Persistent state management using `localStorage` so tasks remain on refresh",
+            "Real-time task counter per column updating automatically"
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nTransform your static TaskFlow board into a fully functional, state-persistent application on localhost.\n\n### 🛠️ Step-by-Step Requirements\n1. Write JavaScript CRUD logic to add, edit title/description, delete, and move tasks.\n2. Synchronize all card updates with `localStorage` on every change.\n3. Implement drag-and-drop or one-click column move buttons.",
+          "post_highlights": [
+            "Implemented full CRUD functionality with client-side state persistence",
+            "Added smooth drag-and-drop card movement across Kanban columns",
+            "Synchronized real-time task count badges and local storage caching"
+          ]
+        },
+        "3": {
+          "title": "Integration: Search, Tag Filtering & Sprint Progress Analytics",
+          "deliverables": [
+            "Instant search bar with highlight matching keywords across all columns",
+            "Tag filter system (Bug, Feature, Design, Docs) to filter visible cards",
+            "Visual sprint completion progress ring / bar calculating percentage of Done tasks",
+            "Export & Import sprint data as a JSON file"
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nEnhance TaskFlow with real-time search, multi-tag filtering, sprint progress tracking, and JSON data backup.\n\n### 🛠️ Step-by-Step Requirements\n1. Build an instant search filter that queries cards across all columns.\n2. Add a dynamic progress bar computing `(Done / Total) * 100%`.\n3. Add JSON export/import buttons allowing users to download and restore their task board.",
+          "post_highlights": [
+            "Added instant keyword search and multi-tag filtering across board columns",
+            "Engineered a dynamic sprint completion progress tracker",
+            "Integrated JSON export and import capabilities for data portability"
+          ]
+        },
+        "4": {
+          "title": "Capstone Polish: Activity Timeline, Due Date Alerts & Final Polish",
+          "deliverables": [
+            "Activity audit log tracking timestamps for created, moved, and completed tasks",
+            "Overdue task notification badges with visual pulsing warning indicators",
+            "Sound/visual celebration confetti effect upon moving a task to 'Done'",
+            "Final capstone demo showcasing complete sprint management on localhost"
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the final polish of TaskFlow with an audit activity feed, deadline warning system, and celebration effects.\n\n### 🛠️ Step-by-Step Requirements\n1. Build a collapsible activity log panel logging user actions with timestamps.\n2. Add date comparison logic to flag overdue tasks in red.\n3. Trigger a visual confetti celebration when all tasks in a sprint reach 'Done'.",
+          "post_highlights": [
+            "Completed the 4-week TaskFlow Kanban application capstone!",
+            "Built automated activity logging, deadline warning engine, and celebration triggers",
+            "Delivered a polished, production-ready productivity platform on localhost"
+          ]
+        }
+      }
+    }
+  ],
+  "python": [
+    {
+      "project_name": "PyAnalytics: Local Automation & Data Processing Hub",
+      "tagline": "An end-to-end Python CLI and Web processing suite with data sanitization, automated reporting, and REST API endpoints.",
+      "weeks": {
+        "1": {
+          "title": "Base Model: Core CLI Architecture, File Parsers & Input Validation",
+          "deliverables": [
+            "Modular Python package structure with clean classes and type hints",
+            "CSV & JSON file ingestion engine with comprehensive error handling",
+            "Interactive CLI menu powered by `argparse` or `rich` with formatted tables"
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational Python processing engine and CLI interface for **PyAnalytics**.",
+          "post_highlights": [
+            "Built modular Python architecture with robust OOP data models and type hints",
+            "Implemented CSV/JSON ingestion pipeline with error handling",
+            "Created interactive terminal CLI with styled table outputs"
+          ]
+        },
+        "2": {
+          "title": "Feature Add-Up: Data Transformation, Cleaning & Aggregation Engine",
+          "deliverables": [
+            "Data cleaning pipeline handling missing values, duplicates, and type casting",
+            "Statistical summary engine calculating metrics (mean, median, percentiles, group-bys)",
+            "Automated Markdown and CSV export generator"
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nUpgrade your PyAnalytics core by adding advanced data transformation, cleaning rules, and statistical calculation methods.",
+          "post_highlights": [
+            "Engineered custom data cleaning and outlier detection algorithms in Python",
+            "Built statistical aggregation methods with multi-column group-by operations",
+            "Automated report generation into structured Markdown and CSV files"
+          ]
+        },
+        "3": {
+          "title": "Integration: FastAPI REST Backend & Local Web Visualizer",
+          "deliverables": [
+            "FastAPI/Flask local server exposing data processing endpoints",
+            "Interactive Swagger / OpenAPI docs running on `http://localhost:8000/docs`",
+            "Visual web dashboard displaying generated analytics charts"
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nWrap your Python data engine into a high-performance REST API with FastAPI and connect it to a localhost web interface.",
+          "post_highlights": [
+            "Converted core Python processing engine into a FastAPI REST service",
+            "Built Pydantic schema validation and async route handlers on localhost",
+            "Connected API endpoints to a live visual browser dashboard"
+          ]
+        },
+        "4": {
+          "title": "Capstone Polish: Automated Web Scraping Pipeline, SQLite Caching & Tests",
+          "deliverables": [
+            "Automated web scraper with BeautifulSoup / HTTPX collecting live data",
+            "SQLite database caching layer storing historical analytics queries",
+            "Pytest suite achieving 85%+ code coverage with edge-case validation",
+            "Final capstone demo showing CLI + Web API execution on localhost"
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the PyAnalytics suite by adding live web scraping, SQLite database caching, and a comprehensive test suite.",
+          "post_highlights": [
+            "Completed the 4-week PyAnalytics Python engineering capstone!",
+            "Integrated automated web scraping, SQLite caching, and Pytest coverage",
+            "Demonstrated end-to-end CLI and FastAPI workflow on localhost"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "PySentinel: Automated Web Intelligence & System Monitor",
+      "tagline": "An async Python automation engine monitoring website uptime, scraping tech job feeds, and firing webhook alerts.",
+      "weeks": {
+        "1": {
+          "title": "Base Model: Async HTTP Engine & Service Health Ping Daemon",
+          "deliverables": [
+            "Asynchronous HTTP ping engine using `asyncio` and `httpx`",
+            "Service target configuration parser reading YAML/JSON target endpoints",
+            "Terminal console logger with colored status codes and response latencies"
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild an async Python service health checker that continuously monitors multiple endpoints on localhost.",
+          "post_highlights": [
+            "Engineered high-concurrency async monitoring engine using Asyncio & HTTPX",
+            "Built structured YAML config parser for target endpoints",
+            "Logged sub-millisecond response latency stats in terminal"
+          ]
+        },
+        "2": {
+          "title": "Feature Add-Up: Web Content Scraping & Keyword Alert Engine",
+          "deliverables": [
+            "BeautifulSoup / Selectolax web scraper extracting structured headlines and job postings",
+            "Keyword matching engine flagging terms (e.g. 'Remote', 'FastAPI', 'Internship')",
+            "SQLite database logging scraped records with duplicate detection"
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement targeted web scraping with intelligent keyword filtering and database deduplication.",
+          "post_highlights": [
+            "Built robust web scraper with HTML parsing and DOM extraction",
+            "Implemented intelligent keyword matching and hash-based deduplication",
+            "Logged historical monitoring data in a local SQLite database"
+          ]
+        },
+        "3": {
+          "title": "Integration: Webhook Dispatcher & Discord/Slack Notification Bot",
+          "deliverables": [
+            "Automated webhook notification engine dispatching alerts to Discord/Slack/Telegram",
+            "Configurable notification thresholds (downtime warnings, matching job alerts)",
+            "FastAPI mini-dashboard displaying uptime percentages and live logs"
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nConnect real-time webhook alerting and build a lightweight FastAPI status monitor.",
+          "post_highlights": [
+            "Integrated webhook dispatchers for instant Discord and Slack notifications",
+            "Configured downtime threshold triggers and alert throttling",
+            "Served live health status through a FastAPI endpoint on localhost"
+          ]
+        },
+        "4": {
+          "title": "Capstone Polish: Scheduling Daemon, Docker Packaging & Demo",
+          "deliverables": [
+            "Automated background scheduler with APScheduler / Celery running periodic jobs",
+            "Dockerfile containerizing the Python sentinel application",
+            "End-to-end video demonstration showing live alerting and monitor logs"
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nPackage PySentinel into a containerized automation bot with periodic scheduling and complete testing.",
+          "post_highlights": [
+            "Completed the 4-week PySentinel Python Automation capstone!",
+            "Implemented background task scheduling and Docker containerization",
+            "Demonstrated live website monitoring and instant webhook alerts on video"
+          ]
+        }
+      }
+    }
+  ],
+  "react": [
+    {
+      "project_name": "OmniStore: Modern Next.js E-Commerce & SaaS Marketplace",
+      "tagline": "A responsive Next.js / React application with state management, product catalog, cart drawer, and checkout simulator.",
+      "weeks": {
+        "1": {
+          "title": "Base Model: Component Architecture, Dynamic Layout & Product Grid",
+          "deliverables": [
+            "Next.js / React project setup with Tailwind CSS or CSS Modules",
+            "Responsive header with cart badge counter and category navigation",
+            "Product card grid with hover zoom, price tags, and rating stars"
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational component hierarchy, design system, and product catalog for **OmniStore** on localhost.",
+          "post_highlights": [
+            "Created modular Next.js / React component architecture with Tailwind CSS",
+            "Built responsive product card grid with hover effects and price badges",
+            "Engineered sticky navigation bar with dynamic cart item indicator"
+          ]
+        },
+        "2": {
+          "title": "Feature Add-Up: Global State Management (Zustand/Context) & Slide-Out Cart",
+          "deliverables": [
+            "Global cart state store with Add, Remove, Quantity adjustment, and Subtotal calculation",
+            "Slide-out Cart drawer with smooth entrance transitions and item list",
+            "LocalStorage state persistence so cart persists across page reloads"
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement scalable global state management for cart operations with local storage persistence.",
+          "post_highlights": [
+            "Integrated global state management (Zustand/React Context) for cart handling",
+            "Engineered smooth slide-out drawer with real-time price computations",
+            "Implemented persistent local storage synchronization"
+          ]
+        },
+        "3": {
+          "title": "Integration: Search, Dynamic Filtering, and Product Detail Pages",
+          "deliverables": [
+            "Dynamic routing (`/product/[id]`) with image gallery and spec table",
+            "Multi-filter sidebar (Category, Price range slider, In-stock toggle)",
+            "Real-time instant search bar with debounced query execution"
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nAdd dynamic route pages for individual products, multi-facet filtering, and debounced search.",
+          "post_highlights": [
+            "Built Next.js dynamic routing with rich product detail views and image zoom",
+            "Implemented debounced instant search and multi-facet filtering",
+            "Created accessible filter sidebars with responsive layout adaptation"
+          ]
+        },
+        "4": {
+          "title": "Capstone Polish: Coupon Engine, Multi-Step Checkout Modal & Capstone Demo",
+          "deliverables": [
+            "Promo code discount simulator (e.g. `SAVE20`) with instant validation and total deduction",
+            "Multi-step checkout modal with shipping address validation and payment simulation",
+            "Animated order confirmation celebration screen with downloadable order receipt",
+            "Final localhost video demo showing full shopping journey from browsing to checkout"
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nDeliver a production-ready e-commerce experience with discount vouchers, checkout simulation, and receipt generation.",
+          "post_highlights": [
+            "Completed the 4-week OmniStore Next.js / React e-commerce capstone!",
+            "Built promo code discount simulator, multi-step checkout form, and receipt generator",
+            "Demonstrated complete end-to-end shopping experience on localhost"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "StreamVibe: Interactive Media & Video Streaming Hub",
+      "tagline": "A sleek Netflix/YouTube-style media streaming application with custom video player, bookmarking, and genre filters.",
+      "weeks": {
+        "1": {
+          "title": "Base Model: Dark Cinema UI, Hero Banner & Video Thumbnail Rails",
+          "deliverables": [
+            "Dark theme cinema UI layout with backdrop poster hero section",
+            "Horizontal scrolling media rails (Trending, Top Rated, Action, Sci-Fi)",
+            "Media card component with hover preview glow and badge ratings"
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational UI structure and scrolling media rails for **StreamVibe** in React/Next.js.",
+          "post_highlights": [
+            "Engineered dark cinema UI with responsive hero banner and trailer overlay",
+            "Built smooth horizontal scrolling media rails for categorized browsing",
+            "Implemented modern card hover animations and rating badges"
+          ]
+        },
+        "2": {
+          "title": "Feature Add-Up: Custom Video Player & Watchlist Persistence",
+          "deliverables": [
+            "Custom HTML5/React video player overlay with play/pause, seekbar, volume, and fullscreen",
+            "Interactive 'Add to My List' bookmarking engine",
+            "Zustand/Redux state store keeping saved watchlist items in `localStorage`"
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nBuild a customized in-app video player modal and persistent user watchlist.",
+          "post_highlights": [
+            "Built a custom React video player with custom playback controls and scrubber",
+            "Engineered user Watchlist with local storage synchronization",
+            "Added modal backdrop blur with escape key dismissal"
+          ]
+        },
+        "3": {
+          "title": "Integration: Live TMDB / YouTube API Data & Live Search Engine",
+          "deliverables": [
+            "Integration with public TMDB API or mock video stream API via `fetch`/`tanstack-query`",
+            "Debounced live search input filtering movies, genres, and cast members",
+            "Skeleton shimmer placeholders while async video metadata loads"
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nConnect real movie/video API endpoints with async caching and debounced searching.",
+          "post_highlights": [
+            "Integrated TMDB REST API for dynamic movie metadata and posters",
+            "Implemented debounced instant search across video titles and genres",
+            "Added elegant skeleton shimmer loaders during data fetching"
+          ]
+        },
+        "4": {
+          "title": "Capstone Polish: User Review Ratings, Responsive Layout & Capstone Demo",
+          "deliverables": [
+            "Interactive star rating and comment review submission form",
+            "Responsive mobile navigation drawer and playback controls",
+            "Final capstone demo showing full video browsing and playback on localhost"
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the StreamVibe platform with interactive user reviews and full responsive polish.",
+          "post_highlights": [
+            "Completed the 4-week StreamVibe React / Next.js streaming platform capstone!",
+            "Built interactive user review engine and responsive mobile media layout",
+            "Demonstrated dynamic movie streaming and watchlist on video"
+          ]
+        }
+      }
+    }
+  ],
+  "node": [
+    {
+      "project_name": "CloudVault: RESTful Secure API & Resource Management Hub",
+      "tagline": "A robust Node.js and Express backend API with JWT authentication, database integration, and rate limiting on localhost.",
+      "weeks": {
+        "1": {
+          "title": "Base Model: Express Server Setup, Middleware & Routing Architecture",
+          "deliverables": [
+            "Modular Express app structure (Controllers, Routes, Middlewares, Services)",
+            "Global error handling middleware and structured JSON response formatters",
+            "Environment configuration management with dotenv and request logger (Morgan/Winston)"
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational Express.js server architecture and centralized error handling system.",
+          "post_highlights": [
+            "Structured modular Node.js & Express application architecture",
+            "Built global error handling middleware and custom HTTP response helpers",
+            "Configured request logging and secure environment variable loaders"
+          ]
+        },
+        "2": {
+          "title": "Feature Add-Up: JWT Authentication & Role-Based Access Control",
+          "deliverables": [
+            "User registration, password hashing with bcrypt, and login endpoints",
+            "JWT token generation, cookie/header storage, and authorization guards",
+            "Protected user profile routes with role-based permissions (User vs Admin)"
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement secure JWT authentication, password hashing, and role-based route middleware.",
+          "post_highlights": [
+            "Engineered secure authentication pipeline with bcrypt hashing and JWT tokens",
+            "Created custom route authorization guards and role-based permissions",
+            "Tested auth endpoints with Postman / Bruno on localhost"
+          ]
+        },
+        "3": {
+          "title": "Integration: Database CRUD (SQLite/MongoDB), Pagination & Search",
+          "deliverables": [
+            "Resource CRUD endpoints with database persistence",
+            "Query parameter filters, sorting (`sort=createdAt:desc`), and limit/offset pagination",
+            "Data validation middleware using Zod / Joi with descriptive error payloads"
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nConnect your API to a persistent database with query filters, pagination, and schema validation.",
+          "post_highlights": [
+            "Implemented database CRUD operations with schema validation (Zod/Joi)",
+            "Engineered advanced query filtering, sorting, and pagination algorithms",
+            "Ensured resilient database error handling and validation responses"
+          ]
+        },
+        "4": {
+          "title": "Capstone Polish: Rate Limiting, Swagger API Docs & Capstone Demo",
+          "deliverables": [
+            "API Rate limiting with express-rate-limit and Helmet security headers",
+            "Auto-generated Swagger / OpenAPI interactive documentation running on `http://localhost:5000/api-docs`",
+            "Comprehensive automated integration test suite using Supertest and Jest",
+            "Final video demonstration showcasing all endpoints and security protections"
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nSecure and document the CloudVault API with rate limiting, Swagger documentation, and automated tests.",
+          "post_highlights": [
+            "Completed the 4-week CloudVault Node.js & Express backend capstone!",
+            "Integrated Swagger OpenAPI documentation, rate limiting, and Helmet security",
+            "Demonstrated complete authenticated REST API workflows on localhost"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "ChatPulse: Real-Time WebSockets Messaging & Collab Server",
+      "tagline": "A high-concurrency Node.js WebSocket backend with room channels, typing indicators, and message history persistence.",
+      "weeks": {
+        "1": {
+          "title": "Base Model: Socket.IO Server & Client Connection Gateway",
+          "deliverables": [
+            "Express server combined with Socket.IO HTTP connection listener",
+            "Connection lifecycle handlers (`connection`, `disconnect`, `reconnect`)",
+            "Lightweight HTML/JS test client testing bi-directional message broadcasting on localhost"
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nSet up a real-time WebSocket communication server with Socket.IO in Node.js.",
+          "post_highlights": [
+            "Configured high-concurrency Socket.IO server on Node.js",
+            "Built connection lifecycle event listeners and error guards",
+            "Tested live bi-directional message broadcasting on localhost"
+          ]
+        },
+        "2": {
+          "title": "Feature Add-Up: Dynamic Chat Rooms, User Nicknames & Private Channels",
+          "deliverables": [
+            "Room joining & leaving logic (`socket.join('room-name')`)",
+            "User presence tracking (Active online user list per channel)",
+            "Real-time typing indicator events (`user:typing`, `user:stop-typing`)"
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement isolated chat room channels, live presence counters, and typing indicator events.",
+          "post_highlights": [
+            "Implemented multi-room channel segregation and private messaging",
+            "Added live user presence tracker and typing notification events",
+            "Emitted system join/leave broadcast alerts to connected clients"
+          ]
+        },
+        "3": {
+          "title": "Integration: SQLite Message History Persistence & File Attachments",
+          "deliverables": [
+            "Database schema storing chat messages, room IDs, and timestamps",
+            "Initial room history payload sent upon joining a room",
+            "File upload endpoint for sending image/document attachments in chat"
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nPersist chat histories into an SQLite database and support file attachments.",
+          "post_highlights": [
+            "Persisted message transcripts with timestamps in SQLite database",
+            "Loaded historical message logs automatically upon channel connection",
+            "Handled multipart image and document upload attachments"
+          ]
+        },
+        "4": {
+          "title": "Capstone Polish: Message Reactions, Read Receipts & Capstone Demo",
+          "deliverables": [
+            "Emoji reactions on messages updating in real time for all room participants",
+            "Read receipts (sent, delivered, read status indicators)",
+            "Final video demonstration showing multi-window real-time chat on localhost"
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the ChatPulse server with live emoji reactions, delivery receipts, and full video demo.",
+          "post_highlights": [
+            "Completed the 4-week ChatPulse Real-Time Node.js WebSockets capstone!",
+            "Built real-time emoji reactions, read receipts, and message persistence",
+            "Demonstrated multi-user live messaging across split browser windows"
+          ]
+        }
+      }
+    }
+  ],
+  "java": [
+    {
+      "project_name": "BankPulse: Enterprise Banking & Transaction Management System",
+      "tagline": "A production-grade Java and Spring Boot application with JPA persistence, transactional safety, and REST APIs on localhost.",
+      "weeks": {
+        "1": {
+          "title": "Base Model: Maven Setup, Spring Boot REST Controller & Domain Entities",
+          "deliverables": [
+            "Spring Boot project architecture with layered separation (Controller, Service, Repository, DTO)",
+            "Domain entities with Jakarta Validation annotations (`@NotNull`, `@Size`, `@Email`)",
+            "Base REST endpoints for account creation and balance lookups"
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nConstruct the enterprise Spring Boot backend and domain model for BankPulse.",
+          "post_highlights": [
+            "Structured enterprise Spring Boot architecture with Maven and layered services",
+            "Built robust domain entity models with Jakarta validation rules",
+            "Implemented REST controllers with standard HTTP status responses"
+          ]
+        },
+        "2": {
+          "title": "Feature Add-Up: Spring Data JPA, H2 Database & Transactional Logic",
+          "deliverables": [
+            "Spring Data JPA repositories with custom derived query methods",
+            "Atomic fund transfer service with `@Transactional` rollback guarantees",
+            "In-memory H2 database console running on `http://localhost:8080/h2-console`"
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement database persistence with Spring Data JPA and atomic transfer transactions.",
+          "post_highlights": [
+            "Configured Spring Data JPA repositories with H2 in-memory database",
+            "Implemented ACID-compliant transactional money transfer logic",
+            "Inspected live relational tables via the H2 web console on localhost"
+          ]
+        },
+        "3": {
+          "title": "Integration: Exception Handling, DTO Mapping & Account Statements",
+          "deliverables": [
+            "Centralized exception handling with `@ControllerAdvice` and custom API errors",
+            "ModelMapper / MapStruct integration for entity-to-DTO conversion",
+            "Statement generator generating monthly transaction history summaries with filters"
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nAdd global error handling, DTO mapping layer, and account statement generation.",
+          "post_highlights": [
+            "Built centralized error handling with `@ControllerAdvice` and structured responses",
+            "Implemented clean DTO mapping layer for secure data encapsulation",
+            "Created filtered transaction history statement generator"
+          ]
+        },
+        "4": {
+          "title": "Capstone Polish: Spring Security, Swagger UI & Capstone Demo",
+          "deliverables": [
+            "Spring Security integration with Basic Auth or JWT token authentication",
+            "Interactive Swagger / OpenAPI UI running on `http://localhost:8080/swagger-ui.html`",
+            "JUnit 5 & Mockito service unit test suite",
+            "Final video demonstration showing transaction flows and Swagger UI"
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the BankPulse enterprise backend with Spring Security, Swagger documentation, and unit tests.",
+          "post_highlights": [
+            "Completed the 4-week BankPulse Java Spring Boot enterprise capstone!",
+            "Integrated Spring Security authentication and interactive Swagger OpenAPI docs",
+            "Demonstrated transactional banking operations and JUnit tests on localhost"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "ShopSphere: Multi-Tier E-Commerce & Inventory Hub",
+      "tagline": "A modular Spring Boot microservice architecture for product catalog, stock replenishment, and order fulfillment.",
+      "weeks": {
+        "1": {
+          "title": "Base Model: Spring Boot REST API & Product Catalog Domain",
+          "deliverables": [
+            "Spring Boot 3 project setup with Lombok, DevTools, and layered package architecture",
+            "Product entity with SKU, price, stock quantity, and category relationships",
+            "REST endpoints for product listing, filtering, and creation"
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational product catalog and category management REST endpoints in Spring Boot.",
+          "post_highlights": [
+            "Built Spring Boot 3 product catalog backend with Lombok and JPA",
+            "Created product entity models with stock quantity validation",
+            "Tested CRUD endpoints on localhost using Postman"
+          ]
+        },
+        "2": {
+          "title": "Feature Add-Up: Inventory Management & Order Creation Service",
+          "deliverables": [
+            "Order and OrderItem relational JPA entities (`@OneToMany`, `@ManyToOne`)",
+            "Transactional order placement logic deducting stock with insufficient inventory guards",
+            "Order status state machine (PENDING, PAID, SHIPPED, CANCELLED)"
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement relational order placement logic with automated stock deductions and rollback safety.",
+          "post_highlights": [
+            "Implemented transactional order placement with automated inventory decrements",
+            "Built stock-level guards preventing overselling",
+            "Created order state transitions with validation checks"
+          ]
+        },
+        "3": {
+          "title": "Integration: Global Pagination, Specification Filtering & Discount Engine",
+          "deliverables": [
+            "Spring Data JPA `JpaSpecificationExecutor` for dynamic multi-criteria search",
+            "Pageable REST endpoints with sort and limit parameters",
+            "Promotional discount code calculation engine"
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nImplement dynamic JPA query specifications, pagination, and promotional discount calculations.",
+          "post_highlights": [
+            "Integrated JPA Specifications for multi-attribute product filtering",
+            "Configured sorted pagination responses for high-volume catalogs",
+            "Built discount coupon voucher validator in service layer"
+          ]
+        },
+        "4": {
+          "title": "Capstone Polish: OpenApi Docs, JUnit 5 Mockito Tests & Capstone Demo",
+          "deliverables": [
+            "Swagger / Springdoc OpenAPI interactive documentation",
+            "JUnit 5 unit tests with Mockito mocking service dependencies",
+            "Final localhost video demonstration showing order placement and inventory updates"
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nDocument with Swagger UI, achieve 80%+ test coverage with Mockito, and record the capstone demo.",
+          "post_highlights": [
+            "Completed the 4-week ShopSphere Spring Boot e-commerce capstone!",
+            "Added comprehensive JUnit 5 & Mockito test suites",
+            "Showcased complete order fulfillment pipeline and Swagger UI on video"
+          ]
+        }
+      }
+    }
+  ],
+  "ml": [
+    {
+      "project_name": "VisionAI: Local Computer Vision & Multi-Modal Intelligence Studio",
+      "tagline": "An end-to-end Machine Learning web application featuring image recognition, feature extraction, and real-time inference on localhost.",
+      "weeks": {
+        "1": {
+          "title": "Base Model: Image Preprocessing, Dataset Pipeline & Baseline Classifier",
+          "deliverables": [
+            "Image dataset loading and augmentation pipeline with PyTorch / TensorFlow / OpenCV",
+            "Baseline Convolutional Neural Network (CNN) architecture with training loop",
+            "Training metric curves (Loss and Accuracy) plotted across epochs with Matplotlib"
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational computer vision data pipeline and baseline neural network classifier in Python.",
+          "post_highlights": [
+            "Engineered PyTorch image preprocessing and data augmentation pipeline",
+            "Trained baseline Convolutional Neural Network with validation checkpoints",
+            "Plotted training loss and accuracy convergence curves"
+          ]
+        },
+        "2": {
+          "title": "Feature Add-Up: Transfer Learning & Model Optimization",
+          "deliverables": [
+            "Transfer learning pipeline using pre-trained ResNet / MobileNet architectures",
+            "Fine-tuning strategy achieving 90%+ classification accuracy",
+            "Confusion matrix visualization identifying class-level misclassifications"
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nUpgrade your model performance with transfer learning, layer freezing, and hyperparameter optimization.",
+          "post_highlights": [
+            "Implemented transfer learning with fine-tuned ResNet architectures",
+            "Achieved 92%+ classification accuracy with learning rate scheduling",
+            "Generated detailed classification reports and confusion matrix heatmaps"
+          ]
+        },
+        "3": {
+          "title": "Integration: Gradio / Streamlit Local Web Interface & Live Webcam Feed",
+          "deliverables": [
+            "Local web app interface using Gradio or Streamlit running on `http://localhost:7860`",
+            "Drag-and-drop image upload with instant top-3 class probability bars",
+            "Live webcam snapshot inference mode with bounding box / heatmap visualization"
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nDeploy an interactive web interface on localhost allowing users to test images and live video feeds.",
+          "post_highlights": [
+            "Built interactive Gradio web application for real-time model inference",
+            "Added drag-and-drop testing with dynamic confidence probability bars",
+            "Integrated Gradio/OpenCV webcam snapshot inference"
+          ]
+        },
+        "4": {
+          "title": "Capstone Polish: Class Activation Maps (Grad-CAM), FastAPI Endpoint & Demo",
+          "deliverables": [
+            "Grad-CAM visualizer highlighting image regions driving model classification decisions",
+            "FastAPI backend microservice serving high-throughput `/predict` endpoint",
+            "Complete end-to-end video recording showcasing model inference on localhost"
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete VisionAI with visual model interpretability (Grad-CAM), high-speed REST API, and capstone presentation.",
+          "post_highlights": [
+            "Completed the 4-week VisionAI Computer Vision capstone studio!",
+            "Implemented Grad-CAM explainability heatmaps and FastAPI REST endpoints",
+            "Showcased production-ready local AI inference pipeline on video"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "NeuroNLP: Semantic Text Intelligence & Sentiment Studio",
+      "tagline": "An end-to-end NLP application with transformer embeddings, semantic search, sentiment classification, and interactive UI.",
+      "weeks": {
+        "1": {
+          "title": "Base Model: Text Preprocessing Pipeline & TF-IDF Baseline Classifier",
+          "deliverables": [
+            "Text tokenization, lemmatization, and stopword removal pipeline with NLTK / SpaCy",
+            "TF-IDF vectorizer and Naive Bayes / Logistic Regression text classifier",
+            "Model accuracy and F1-score evaluation on benchmark customer reviews dataset"
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild a baseline text classification pipeline for customer sentiment analysis in Python.",
+          "post_highlights": [
+            "Built text normalization and tokenization pipeline with SpaCy",
+            "Trained TF-IDF baseline sentiment classifier with Scikit-Learn",
+            "Evaluated classification metrics with precision/recall reports"
+          ]
+        },
+        "2": {
+          "title": "Feature Add-Up: HuggingFace Transformers & Fine-Tuned DistilBERT",
+          "deliverables": [
+            "HuggingFace pipeline integrating pre-trained DistilBERT / RoBERTa models",
+            "Multi-label classification (Positive, Neutral, Negative, Urgent)",
+            "Confidence score extraction and sentence highlighting"
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nUpgrade classification with pre-trained Transformer architectures from HuggingFace.",
+          "post_highlights": [
+            "Integrated HuggingFace Transformers (DistilBERT) for deep text comprehension",
+            "Achieved 94%+ sentiment classification accuracy",
+            "Extracted granular confidence probabilities and attention spans"
+          ]
+        },
+        "3": {
+          "title": "Integration: Semantic Vector Search & Document Question-Answering",
+          "deliverables": [
+            "Sentence-Transformers (`all-MiniLM-L6-v2`) generating dense text embeddings",
+            "Local vector similarity search using Cosine Similarity or FAISS",
+            "Document search engine retrieving top-3 matching passages for user queries"
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nImplement semantic vector search across unstructured documents using FAISS or sentence embeddings.",
+          "post_highlights": [
+            "Built dense vector embeddings using Sentence-Transformers",
+            "Implemented in-memory FAISS semantic similarity search",
+            "Engineered document question-answering retrieval on localhost"
+          ]
+        },
+        "4": {
+          "title": "Capstone Polish: Streamlit NLP Studio Web App & Capstone Demo",
+          "deliverables": [
+            "Interactive Streamlit web app running on `http://localhost:8501`",
+            "Live text analysis playground with keyword wordcloud and entity visualizer",
+            "Final capstone demo showcasing sentiment analysis and semantic search on video"
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the NeuroNLP suite with an interactive web UI, Named Entity Recognition visualizer, and video presentation.",
+          "post_highlights": [
+            "Completed the 4-week NeuroNLP Semantic Intelligence capstone!",
+            "Built interactive Streamlit web dashboard with live NER and sentiment visualizers",
+            "Demonstrated semantic document search and inference on localhost"
+          ]
+        }
+      }
+    }
+  ],
+  "data-science": [
+    {
+      "project_name": "InsightHub: Interactive Data Intelligence & ML Dashboard",
+      "tagline": "An end-to-end data science platform with exploratory data analysis, statistical modeling, and interactive visualization on localhost.",
+      "weeks": {
+        "1": {
+          "title": "Base Model: Dataset Ingestion & Automated EDA Dashboard",
+          "deliverables": [
+            "Interactive Streamlit / Dash web application running on `http://localhost:8501`",
+            "Dataset upload module supporting CSV, Excel, and JSON files",
+            "Automated descriptive statistics summary (shape, missing values, data types, distributions)",
+            "Interactive correlation heatmap and univariate distribution charts"
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational **InsightHub** Exploratory Data Analysis (EDA) web application in Python.",
+          "post_highlights": [
+            "Built an interactive Exploratory Data Analysis web app with Streamlit & Plotly",
+            "Automated descriptive statistics, null value identification, and summary KPIs",
+            "Rendered interactive correlation heatmaps and distribution graphs on localhost"
+          ]
+        },
+        "2": {
+          "title": "Feature Add-Up: Feature Engineering & Interactive Filtering Engine",
+          "deliverables": [
+            "Dynamic data filtering sidebar (date range sliders, categorical multi-selects, value thresholds)",
+            "Feature transformation pipeline (log transform, scaling, one-hot encoding, binning)",
+            "Outlier detection and visualization using Box Plots and Z-score methods",
+            "Download cleaned dataset button in CSV/Parquet format"
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nExpand InsightHub with interactive sidebar filters and a visual feature engineering pipeline.",
+          "post_highlights": [
+            "Implemented dynamic multi-criteria filtering with real-time chart updates",
+            "Built visual feature engineering pipeline (scaling, encoding, imputation)",
+            "Added outlier detection visualizer with instant clean data export"
+          ]
+        },
+        "3": {
+          "title": "Integration: Machine Learning Predictive Model & Performance Visualizer",
+          "deliverables": [
+            "Supervised ML training pipeline (Random Forest / Logistic Regression / XGBoost)",
+            "Interactive model evaluation suite (Confusion Matrix, ROC-AUC curve, Classification Report)",
+            "Hyperparameter tuning controls (sliders for max depth, estimators, learning rate)",
+            "Real-time prediction simulator allowing custom user feature inputs"
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nIntegrate machine learning model training and real-time inference directly into the InsightHub interface.",
+          "post_highlights": [
+            "Integrated Scikit-Learn predictive modeling pipeline inside the dashboard",
+            "Rendered interactive Confusion Matrix, ROC-AUC curves, and metric charts",
+            "Built real-time prediction simulator with custom feature input controls"
+          ]
+        },
+        "4": {
+          "title": "Capstone Polish: Model Explainability (SHAP), SQL Query Explorer & Capstone Demo",
+          "deliverables": [
+            "Model explainability tab using SHAP / feature importance charts to explain predictions",
+            "Embedded SQL Query Runner allowing direct database queries on raw tables",
+            "Automated Executive PDF / HTML Summary Report generator",
+            "Final capstone walkthrough showcasing full data-to-prediction lifecycle on localhost"
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the InsightHub platform with feature explainability, direct SQL querying, and executive summary export.",
+          "post_highlights": [
+            "Completed the 4-week InsightHub Data Science & ML platform capstone!",
+            "Integrated SHAP model explainability and in-browser SQL query runner",
+            "Demonstrated end-to-end data lifecycle from raw CSV to live ML inference"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "FinanceForecaster: Algorithmic Market & Crypto Trend Engine",
+      "tagline": "A financial data analytics platform with historical price ingestion, technical indicators, and time-series forecasting.",
+      "weeks": {
+        "1": {
+          "title": "Base Model: Historical Market Ingestion & Candlestick Charts",
+          "deliverables": [
+            "Financial time-series data loader using `yfinance` or Pandas Datareader",
+            "Interactive Candlestick chart with volume bars using Plotly",
+            "Summary statistics calculating Daily Returns, Volatility, and CAGR"
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild an interactive financial market visualizer in Python with candlestick charting on localhost.",
+          "post_highlights": [
+            "Integrated live financial time-series data fetching with Yahoo Finance",
+            "Rendered interactive OHLC Candlestick charts with volume indicators",
+            "Computed daily return distributions and annualized volatility metrics"
+          ]
+        },
+        "2": {
+          "title": "Feature Add-Up: Technical Analysis Indicators (SMA, EMA, RSI, MACD)",
+          "deliverables": [
+            "Moving Average calculation engine (SMA 20/50/200, Exponential Moving Averages)",
+            "Relative Strength Index (RSI) oscillator with overbought/oversold bands",
+            "MACD (Moving Average Convergence Divergence) signal line generator"
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement core technical indicators and momentum oscillators into your financial charts.",
+          "post_highlights": [
+            "Built custom technical indicator calculation engine in Pandas",
+            "Rendered multi-pane charts for RSI and MACD signal crossovers",
+            "Added moving average overlay toggles on price charts"
+          ]
+        },
+        "3": {
+          "title": "Integration: Algorithmic Trading Strategy Backtester",
+          "deliverables": [
+            "Rule-based backtesting engine (e.g. Golden Cross SMA 50/200 Strategy)",
+            "Performance metrics calculator: Total Return, Sharpe Ratio, Max Drawdown, Win Rate",
+            "Visual equity curve comparing strategy performance against Buy & Hold benchmark"
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nConstruct an automated backtesting simulation evaluating strategy profitability and Sharpe ratio.",
+          "post_highlights": [
+            "Built an algorithmic backtesting simulation for momentum crossover strategies",
+            "Calculated Sharpe Ratio, Maximum Drawdown, and cumulative returns",
+            "Plotted visual trade buy/sell markers directly on price charts"
+          ]
+        },
+        "4": {
+          "title": "Capstone Polish: Time-Series Forecasting (Prophet/ARIMA) & Demo",
+          "deliverables": [
+            "Future price trend forecast using Facebook Prophet / ARIMA models",
+            "Prediction confidence intervals (80% and 95% uncertainty bands)",
+            "Complete video walkthrough showing live backtesting and forecasting on localhost"
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete FinanceForecaster with predictive time-series modeling and record the capstone video.",
+          "post_highlights": [
+            "Completed the 4-week FinanceForecaster Financial Analytics capstone!",
+            "Implemented Prophet time-series forecasting with confidence intervals",
+            "Demonstrated technical indicators and strategy backtesting on video"
+          ]
+        }
+      }
+    }
+  ],
+  "flutter": [
+    {
+      "project_name": "FitPulse: Modern Mobile Fitness & Workout Companion",
+      "tagline": "A cross-platform Flutter application with custom animations, local SQLite/Hive persistence, and real-time workout tracking.",
+      "weeks": {
+        "1": {
+          "title": "Base Model: Flutter Widget Architecture & Glassmorphic Dashboard",
+          "deliverables": [
+            "Clean Flutter project structure with reusable widgets and theme palette",
+            "Dashboard screen with calorie progress ring, daily goals, and workout cards",
+            "Custom bottom navigation bar with fluid icon transitions"
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational multi-screen Flutter mobile UI for FitPulse on your emulator / localhost.",
+          "post_highlights": [
+            "Designed custom Flutter mobile UI with glassmorphic cards and theme palette",
+            "Built animated calorie progress ring and workout category cards",
+            "Implemented smooth bottom navigation bar with responsive layout"
+          ]
+        },
+        "2": {
+          "title": "Feature Add-Up: State Management (Provider/Riverpod) & Local Persistence",
+          "deliverables": [
+            "State management implementation (Provider / Riverpod / Bloc) for daily stats",
+            "Local database persistence with Hive or SQLite storing completed workouts",
+            "Log Workout form with duration, intensity selector, and instant UI update"
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement state management and offline database persistence for user workout tracking.",
+          "post_highlights": [
+            "Integrated Provider / Riverpod state management for reactive data flow",
+            "Implemented offline database persistence using Hive / SQLite",
+            "Built interactive workout logger with instant reactive UI updates"
+          ]
+        },
+        "3": {
+          "title": "Integration: Custom Workout Timer, Audio Cues & Rest Intervals",
+          "deliverables": [
+            "Interactive HIIT / Rest timer with play, pause, reset, and interval counter",
+            "Animated circular countdown indicator with color shifting",
+            "Workout history list with dismissible swipe-to-delete cards"
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nAdd an interactive interval workout timer with animated progress rings and swipeable history.",
+          "post_highlights": [
+            "Built an animated circular countdown interval timer in Flutter",
+            "Added dismissible swipe-to-delete cards with undo snackbars",
+            "Implemented workout history filtering by date and intensity"
+          ]
+        },
+        "4": {
+          "title": "Capstone Polish: Weekly Analytics Charts, Dark Theme & Capstone Demo",
+          "deliverables": [
+            "Weekly workout analytics chart using `fl_chart` visualizing burned calories",
+            "Dark / Light theme switcher with custom color schemes",
+            "Haptic feedback and smooth hero animations across screens",
+            "Final video demonstration showing complete mobile app flow"
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the FitPulse mobile app with weekly analytics charts, theme customization, and polished animations.",
+          "post_highlights": [
+            "Completed the 4-week FitPulse Flutter mobile application capstone!",
+            "Integrated interactive weekly charts with `fl_chart` and dark mode theme engine",
+            "Demonstrated complete cross-platform mobile workflow on video"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "WalletWave: Personal Finance & Smart Budget Tracker",
+      "tagline": "A Flutter mobile finance app with expense categorisation, monthly budget limits, and interactive spending charts.",
+      "weeks": {
+        "1": {
+          "title": "Base Model: Financial Account Dashboard & Transaction Cards",
+          "deliverables": [
+            "Bank card carousel widget displaying total balance, income, and expenses",
+            "Recent transactions list with category icon badges and amount coloring",
+            "Add Transaction floating action button with bottom sheet modal"
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the core financial account overview and transaction list screen in Flutter.",
+          "post_highlights": [
+            "Designed financial dashboard with animated account card carousel",
+            "Built transaction list widgets with color-coded cashflow badges",
+            "Created interactive quick-add bottom sheet modal in Flutter"
+          ]
+        },
+        "2": {
+          "title": "Feature Add-Up: Category Management & SQLite/Isar Local Database",
+          "deliverables": [
+            "Local database integration with SQLite / Isar storing transactions",
+            "Category picker (Food, Shopping, Bills, Travel, Entertainment)",
+            "CRUD operations: create new expenses, edit amounts, and delete transactions"
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement offline transaction storage with SQLite/Isar and category tagging.",
+          "post_highlights": [
+            "Integrated SQLite local persistence for financial transactions",
+            "Created dynamic category selector with custom icon assets",
+            "Built full transaction editing and deletion workflows"
+          ]
+        },
+        "3": {
+          "title": "Integration: Monthly Budget Limits & Visual Pie Chart Breakdown",
+          "deliverables": [
+            "Interactive Pie/Donut spending breakdown chart using `fl_chart`",
+            "Category budget limit progress bars with warning colors when exceeding 80%",
+            "Monthly date range picker filtering transactions by month and year"
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nAdd interactive spending charts and monthly budget progress monitors.",
+          "post_highlights": [
+            "Rendered interactive Donut charts showing category expense percentages",
+            "Implemented budget limit progress bars with warning threshold alerts",
+            "Added monthly date filter controls in Flutter"
+          ]
+        },
+        "4": {
+          "title": "Capstone Polish: CSV Statement Export, Biometric Pin & Capstone Demo",
+          "deliverables": [
+            "CSV transaction statement export saved to device storage",
+            "Pin lock / Biometric authentication simulation screen before accessing data",
+            "Final localhost video demo showing full mobile app functionality"
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete WalletWave with CSV financial statement export, pin protection, and video demo.",
+          "post_highlights": [
+            "Completed the 4-week WalletWave Flutter Finance application capstone!",
+            "Built CSV statement export and biometric pin lock protection",
+            "Demonstrated budget tracking and analytics charts on video"
+          ]
+        }
+      }
+    }
+  ],
+  "devops": [
+    {
+      "project_name": "DevDeploy: Automated Multi-Stage Docker & CI/CD Pipeline Hub",
+      "tagline": "A full DevOps infrastructure project with multi-stage Docker builds, GitHub Actions workflows, and health monitoring on localhost.",
+      "weeks": {
+        "1": {
+          "title": "Base Model: Multi-Stage Dockerfile & Container Optimization",
+          "deliverables": [
+            "Optimized multi-stage Dockerfile for a sample web application reducing image size by 70%+",
+            "Docker Compose configuration linking app, Redis cache, and PostgreSQL database",
+            "Container healthcheck directives and environment variable isolation"
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nContainerize a full-stack application with multi-stage Docker builds and Docker Compose on localhost.",
+          "post_highlights": [
+            "Engineered production multi-stage Dockerfile with 70%+ image reduction",
+            "Built Docker Compose orchestrating web app, Redis cache, and PostgreSQL",
+            "Configured container healthchecks and isolated environment configs"
+          ]
+        },
+        "2": {
+          "title": "Feature Add-Up: Automated CI Testing Pipeline & Code Quality Gates",
+          "deliverables": [
+            "GitHub Actions CI workflow running linters, security scans (Trivy/Sonar), and unit tests",
+            "Automated build status badges and PR verification checks",
+            "Failure alerting notifications and test report artifact uploading"
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nBuild an automated Continuous Integration (CI) pipeline with security scanning and test execution.",
+          "post_highlights": [
+            "Built automated GitHub Actions CI pipeline with linter and unit test gates",
+            "Integrated Trivy container vulnerability scanner into build pipeline",
+            "Configured automated artifact uploads and PR validation checks"
+          ]
+        },
+        "3": {
+          "title": "Integration: Nginx Reverse Proxy, SSL Simulation & Load Balancing",
+          "deliverables": [
+            "Nginx reverse proxy configuration routing traffic to multiple app container replicas",
+            "Gzip compression, caching headers, and rate limiting rules configured in Nginx",
+            "Local self-signed SSL/TLS certificate setup testing HTTPS traffic on localhost"
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nConfigure an Nginx reverse proxy with load balancing, caching, and local HTTPS simulation.",
+          "post_highlights": [
+            "Configured Nginx reverse proxy with round-robin container load balancing",
+            "Implemented Gzip compression, caching headers, and rate limiting",
+            "Tested local HTTPS simulation and upstream failover behavior"
+          ]
+        },
+        "4": {
+          "title": "Capstone Polish: Prometheus & Grafana Monitoring Dashboard & Demo",
+          "deliverables": [
+            "Prometheus metrics exporter scraping container CPU, memory, and HTTP response codes",
+            "Grafana dashboard running on `http://localhost:3000` visualizing live system health",
+            "Stress-test benchmark simulation with Apache Bench (`ab`) demonstrating real-time chart spikes",
+            "Final video demonstration showcasing full containerized stack and Grafana metrics"
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the DevOps infrastructure stack with Prometheus metrics collection and a live Grafana dashboard.",
+          "post_highlights": [
+            "Completed the 4-week DevDeploy DevOps & Infrastructure capstone!",
+            "Built live Prometheus & Grafana monitoring dashboards for container health",
+            "Demonstrated automated multi-container stack and live load metrics on video"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "InfraGuard: Microservices Orchestration & Infrastructure as Code",
+      "tagline": "Automated Terraform IaC, local Kubernetes (k3s/Minikube) deployments, and Helm chart packaging on localhost.",
+      "weeks": {
+        "1": {
+          "title": "Base Model: Infrastructure as Code with Terraform Local Provider",
+          "deliverables": [
+            "Terraform configuration files (`main.tf`, `variables.tf`, `outputs.tf`)",
+            "Automated provisioning of local Docker networks, volumes, and containers via Terraform",
+            "State file locking and plan validation workflows"
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nProvision and manage local Docker infrastructure resources declaratively using Terraform.",
+          "post_highlights": [
+            "Authored modular Terraform IaC configurations for container provisioning",
+            "Managed local network and volume state declaratively",
+            "Executed plan and apply workflows with state verification"
+          ]
+        },
+        "2": {
+          "title": "Feature Add-Up: Kubernetes Manifests (Deployments, Services, ConfigMaps)",
+          "deliverables": [
+            "Kubernetes Deployment manifests with multi-replica scaling and rolling update strategies",
+            "ClusterIP and NodePort Service definitions routing internal traffic",
+            "ConfigMaps and Secrets isolating sensitive connection strings"
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nDeploy containerized microservices onto local Kubernetes (Minikube / Kind / K3s).",
+          "post_highlights": [
+            "Wrote production-ready Kubernetes Deployment and Service manifests",
+            "Configured zero-downtime rolling update deployment strategies",
+            "Isolated sensitive environment configs with Kubernetes Secrets"
+          ]
+        },
+        "3": {
+          "title": "Integration: Helm Chart Packaging & Ingress Routing",
+          "deliverables": [
+            "Custom Helm chart packaging application deployments, services, and values",
+            "Configurable `values.yaml` enabling environment-specific parameter overrides",
+            "Nginx Ingress Controller routing hostnames on localhost"
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nPackage Kubernetes applications into reusable Helm charts with dynamic Ingress routing.",
+          "post_highlights": [
+            "Packaged multi-tier applications into custom reusable Helm charts",
+            "Configured parameter-driven `values.yaml` templating",
+            "Routed traffic with Kubernetes Nginx Ingress on localhost"
+          ]
+        },
+        "4": {
+          "title": "Capstone Polish: Horizontal Pod Autoscaler (HPA), Chaos Testing & Demo",
+          "deliverables": [
+            "Horizontal Pod Autoscaler (HPA) automatically scaling pods based on CPU load",
+            "Chaos load test triggering automatic scale-up from 2 to 6 replicas",
+            "Final video demonstration showing Helm deployment and dynamic pod autoscaling"
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete InfraGuard with Horizontal Pod Autoscaling and record the capstone video.",
+          "post_highlights": [
+            "Completed the 4-week InfraGuard Kubernetes & IaC capstone!",
+            "Implemented Horizontal Pod Autoscaler with dynamic replica expansion",
+            "Demonstrated Helm deployments and load-based autoscaling on video"
+          ]
+        }
+      }
+    }
+  ],
+  "cpp": [
+    {
+      "project_name": "AlgoCore: High-Performance Data Engine & Memory Manager",
+      "tagline": "A high-performance C++20 data structures engine with custom memory allocators, cache optimization, and benchmarking suite.",
+      "weeks": {
+        "1": {
+          "title": "Base Model: Modern C++20 Project Setup, Custom Vector & Memory Tracker",
+          "deliverables": [
+            "CMake build configuration with C++20 standards and strict compiler flags (`-Wall -Wextra`)",
+            "Custom dynamic array container (`CustomVector<T>`) implementing memory allocation and iterators",
+            "Real-time memory allocation tracker counting heap allocations and detecting memory leaks"
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational C++20 container library and heap memory allocation tracker on localhost.",
+          "post_highlights": [
+            "Configured modern C++20 project with CMake and strict compiler diagnostics",
+            "Implemented templated dynamic array container with custom iterators",
+            "Built real-time heap memory tracker to ensure zero memory leaks"
+          ]
+        },
+        "2": {
+          "title": "Feature Add-Up: High-Speed Hash Table & Collision Resolution Engine",
+          "deliverables": [
+            "Custom Hash Table container with Robin Hood hashing / Quadratic Probing",
+            "Dynamic rehashing algorithm maintaining optimal load factors (`< 0.7`)",
+            "Performance benchmark comparing custom container against `std::unordered_map`"
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement a high-speed custom Hash Table with cache-friendly collision resolution and dynamic rehashing.",
+          "post_highlights": [
+            "Engineered custom Hash Table with Robin Hood collision resolution in C++20",
+            "Implemented dynamic rehashing algorithm with automated load balancing",
+            "Benchmarked insertion and lookup speeds against standard STL containers"
+          ]
+        },
+        "3": {
+          "title": "Integration: Multi-Threaded Task Queue & Thread Pool Engine",
+          "deliverables": [
+            "Thread-safe work queue using `std::mutex`, `std::condition_variable`, and locks",
+            "Worker thread pool capable of dispatching asynchronous tasks with `std::future`",
+            "Parallel data processor sorting and indexing 1,000,000+ elements concurrently"
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nBuild a multi-threaded thread pool and parallel task processor in modern C++.",
+          "post_highlights": [
+            "Built a thread-safe task queue and worker thread pool using modern C++ concurrency",
+            "Implemented asynchronous task dispatching with `std::future` and promises",
+            "Demonstrated parallel data indexing of 1,000,000+ records on localhost"
+          ]
+        },
+        "4": {
+          "title": "Capstone Polish: Custom Arena Memory Allocator, Microbenchmarking & Demo",
+          "deliverables": [
+            "Custom Arena / Pool memory allocator bypassing `malloc` overhead for high-frequency allocations",
+            "Microbenchmarking suite measuring nanosecond execution time and cache hits",
+            "Zero memory leak verification with Valgrind / AddressSanitizer (`ASan`)",
+            "Final video demonstration showcasing container benchmarks and multithreaded speed"
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the AlgoCore engine with an arena allocator, microbenchmarks, and sanitizer verification.",
+          "post_highlights": [
+            "Completed the 4-week AlgoCore C++ High-Performance Data Engine capstone!",
+            "Built custom Arena memory allocator delivering 5x allocation speedups",
+            "Verified 100% memory safety with AddressSanitizer and benchmarked nanosecond speeds"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "PixelForge: 2D Game Physics & Real-Time Rendering Engine",
+      "tagline": "A 2D physics and real-time graphics simulation in C++ and SDL2/SFML with collision detection and particle systems.",
+      "weeks": {
+        "1": {
+          "title": "Base Model: SDL2 / SFML Window Loop, Vector2D Math & Frame Timer",
+          "deliverables": [
+            "C++ game engine loop with fixed-timestep delta time updating and frame capping (60 FPS)",
+            "2D Vector math library (`Vector2D`) supporting dot products, normalization, and magnitude",
+            "Window initialization and primitive shape rendering pipeline"
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild a real-time game engine loop and 2D vector mathematics library in modern C++.",
+          "post_highlights": [
+            "Configured 60 FPS fixed-timestep game loop in C++ with SDL2/SFML",
+            "Authored complete Vector2D mathematics library with operator overloading",
+            "Rendered dynamic geometric shapes with real-time keyboard controls"
+          ]
+        },
+        "2": {
+          "title": "Feature Add-Up: Rigid Body Physics & Elastic Collision Engine",
+          "deliverables": [
+            "Rigid body physics components with mass, velocity, acceleration, and gravity forces",
+            "Axis-Aligned Bounding Box (AABB) and Circle-Circle collision detection algorithms",
+            "Elastic impulse resolution bouncing bodies realistically upon impact"
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement Newtonian physics simulation with gravity, impulse forces, and collision resolution.",
+          "post_highlights": [
+            "Built Newtonian rigid body physics simulation with gravity and drag forces",
+            "Implemented AABB and Circle collision intersection algorithms",
+            "Calculated realistic elastic collision impulse reactions"
+          ]
+        },
+        "3": {
+          "title": "Integration: Particle System Generator & Spatial Partitioning Grid",
+          "deliverables": [
+            "Dynamic particle emitter simulating smoke, fire, and explosion bursts",
+            "Spatial hash grid partitioning dividing the canvas to optimize collision checks from O(N^2) to O(N)",
+            "Benchmark rendering 1,000+ simultaneous colliding particles smoothly at 60 FPS"
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nImplement a high-performance particle emitter and spatial grid partitioner.",
+          "post_highlights": [
+            "Created custom particle emitter with lifespan decay and color interpolations",
+            "Built spatial hash grid reducing collision complexity to O(N)",
+            "Maintained steady 60 FPS with 1,000+ interacting particle bodies on localhost"
+          ]
+        },
+        "4": {
+          "title": "Capstone Polish: Interactive Sandbox UI, ImGui Controls & Capstone Demo",
+          "deliverables": [
+            "Dear ImGui integration with sliders adjusting gravity, elasticity, and particle count in real time",
+            "Interactive mouse spawning of physics bodies and obstacle placement",
+            "Final video demonstration showcasing real-time physics simulation on localhost"
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nIntegrate Dear ImGui sandbox controls into PixelForge and record the capstone video demonstration.",
+          "post_highlights": [
+            "Completed the 4-week PixelForge C++ Physics Engine capstone!",
+            "Integrated Dear ImGui control panels for live parameter tuning",
+            "Demonstrated 60 FPS particle simulations and collision physics on video"
+          ]
+        }
+      }
+    }
+  ]
+}

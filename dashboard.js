@@ -463,38 +463,26 @@ document.addEventListener('DOMContentLoaded', () => {
       // ─── Certificate Banner (Payment Gated) ───
       const certSection = document.getElementById('cert-section');
       if (certSection) {
-        if (pct === 100 && student.id && data._batch_id) {
+        let isPaid = false;
+        if (student.id && data._batch_id) {
           if (isPreview && urlParams.get('preview') === 'paid') {
-              renderCertReady(certSection, student, data);
-          } else if (isPreview) {
-              renderPaymentBanner(certSection, student, data);
+            isPaid = true;
           } else {
-            // Production: ALWAYS verify payment server-side
             try {
               const payStatus = await fetch(`${API}/api/payments/status/${student.id}/${data._batch_id}`);
               const payData = await payStatus.json();
-              if (payData.status === 'paid') {
-                renderCertReady(certSection, student, data);
-              } else {
-                renderPaymentBanner(certSection, student, data);
-              }
-            } catch(e) {
-              renderPaymentBanner(certSection, student, data);
-            }
+              if (payData.status === 'paid') isPaid = true;
+            } catch(e) {}
           }
-        } else if (pct > 0) {
-          certSection.style.display = 'block';
-          certSection.innerHTML = `
-            <div class="cert-progress-hint">
-              <div style="display:flex;align-items:center;gap:12px;">
-                <div style="font-size:1.4rem;">&#128196;</div>
-                <div>
-                  <div style="font-weight:600;font-size:0.88rem;margin-bottom:2px;">Certificate unlocks at 100%</div>
-                  <div style="font-size:0.78rem;color:var(--text-3);">${100-pct}% more to go — finish all your assigned issues to earn your certificate.</div>
-                </div>
-              </div>
-              <div class="cert-mini-bar"><div class="cert-mini-fill" style="width:${pct}%"></div></div>
-            </div>`;
+        }
+
+        if (isPaid) {
+          renderCertReady(certSection, student, data);
+        } else if (pct === 100) {
+          renderPaymentBanner(certSection, student, data);
+        } else {
+          certSection.style.display = 'none';
+          certSection.innerHTML = '';
         }
       }
 
@@ -557,6 +545,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Render Assigned Tasks
     renderTasks(data.issues || []);
+
+    // Open tasks.html when Task Guide / PDF button is clicked
+    const pdfBtn = document.getElementById('flex-pdf-btn');
+    if (pdfBtn) {
+      pdfBtn.onclick = function() {
+        if (window._dashStudent && window._dashData) {
+          window.open(`tasks.html?student_id=${window._dashStudent.id}&batch_id=${window._dashData._batch_id}`, '_blank');
+        } else {
+          window.open('tasks.html', '_blank');
+        }
+      };
+    }
+
   }
 
   function renderTasks(issues) {
@@ -748,6 +749,11 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.classList.remove('active');
         setTimeout(() => modal.style.display = 'none', 400); // match transition duration
       }
+      const modal2 = document.getElementById('instant-payment-modal');
+      if (modal2) {
+        modal2.classList.remove('active');
+        setTimeout(() => modal2.style.display = 'none', 400);
+      }
     };
     
     window.showPaymentModal = function(student, data) {
@@ -879,17 +885,41 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
     `;
+
+    // Change the instant pay trigger button to Paid
+    const instantPayTrigger = document.getElementById('flex-cert-btn');
+    if (instantPayTrigger) {
+      instantPayTrigger.innerHTML = `<div style="display: flex; align-items: center; gap: 8px;"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span style="font-size: 1.05rem;">Paid &amp; Unlocked</span></div><span style="font-size: 0.8rem; color: rgba(255,255,255,0.9); font-weight: 600;">Certificate Ready</span>`;
+      instantPayTrigger.style.background = 'rgba(52, 211, 153, 0.1)';
+      instantPayTrigger.style.borderColor = 'rgba(52, 211, 153, 0.2)';
+      instantPayTrigger.style.color = '#34d399';
+      instantPayTrigger.onclick = null;
+      instantPayTrigger.style.cursor = 'default';
+    }
+
+    const modalBtn = document.getElementById('modal-pay-btn');
+    if (modalBtn) {
+      modalBtn.innerHTML = 'Paid &amp; Unlocked';
+      modalBtn.disabled = true;
+    }
+    
+    const instBtn = document.getElementById('instant-pay-trigger-btn');
+    if (instBtn) {
+      instBtn.innerHTML = 'Paid &amp; Unlocked';
+      instBtn.disabled = true;
+    }
   }
 
 
   // Exposed globally so the onclick in the banner HTML can call it
   window.initiatePayment = async function(studentId, batchId) {
-    const btn = document.getElementById('pay-btn');
-    const modalBtn = document.getElementById('modal-pay-btn');
-    const discountInput = document.getElementById('discount-code');
-    const discountCode = discountInput ? discountInput.value.trim() : null;
-    
-    if (btn) { btn.disabled = true; btn.textContent = 'Creating order...'; }
+      const btn = document.getElementById('pay-btn');
+      const modalBtn = document.getElementById('modal-pay-btn');
+      const discountInputBanner = document.getElementById('discount-code');
+      const discountInputMilestone = document.getElementById('discount-code-milestone');
+      const discountCode = (discountInputBanner && discountInputBanner.value.trim()) || (discountInputMilestone && discountInputMilestone.value.trim()) || null;
+      
+      if (btn) { btn.disabled = true; btn.textContent = 'Creating order...'; }
     if (modalBtn) { modalBtn.disabled = true; modalBtn.textContent = 'Creating order...'; }
 
     try {
@@ -941,6 +971,17 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         theme: {
           color: "#4f46e5"
+        },
+        modal: {
+          ondismiss: function () {
+            // User closed Razorpay popup without completing payment
+            if (btn) { btn.disabled = false; btn.innerHTML = '⚡ Pay &amp; Activate Everything'; }
+            if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = '⚡ Pay &amp; Activate Everything'; }
+            const flexBtn = document.getElementById('flex-cert-btn');
+            if (flexBtn && !flexBtn.innerHTML.includes('Paid')) {
+              flexBtn.disabled = false;
+            }
+          }
         },
         handler: async function (response) {
           // 4. Verify payment on backend
@@ -1016,45 +1057,8 @@ document.addEventListener('DOMContentLoaded', () => {
   window.signOut = function() {
     localStorage.removeItem('token');
     localStorage.removeItem('skillme_email');
-    const dashView = document.getElementById('dashboard-view');
-    const unenrolledView = document.getElementById('unenrolled-view');
-    const loginView = document.getElementById('login-view');
-    const signoutBtn = document.getElementById('signout-btn');
-    const mobSignoutBtn = document.getElementById('mobile-signout-btn');
-    
-    if (dashView && loginView) {
-      dashView.style.display = 'none';
-      if (unenrolledView) unenrolledView.style.display = 'none';
-      loginView.style.display = 'flex';
-      loginView.style.opacity = '1';
-      loginView.style.transform = 'translateY(0)';
-      if (signoutBtn) signoutBtn.style.display = 'none';
-      if (mobSignoutBtn) mobSignoutBtn.style.display = 'none';
-      // Reset login form inputs
-      const emailInput = document.getElementById('login-email');
-      const otpWrap = document.getElementById('otp-wrap');
-      const loginBtn = document.getElementById('login-btn');
-      if (emailInput) { 
-        emailInput.value = ''; 
-        emailInput.readOnly = false; 
-      }
-      if (otpWrap) otpWrap.style.display = 'none';
-      if (loginBtn) { 
-        loginBtn.disabled = false; 
-        loginBtn.style.opacity = '1';
-        loginBtn.textContent = 'Get Login Code'; 
-      }
-      
-      const resendBtn = document.getElementById('resend-btn');
-      if (resendBtn) {
-        resendBtn.disabled = false;
-        resendBtn.textContent = 'Resend Code';
-      }
-      
-      loginState = 'email';
-    } else {
-      window.location.href = 'dashboard.html';
-    }
+    fetch(`${API}/api/auth/logout`, { method: 'POST' }).catch(() => {});
+    window.location.reload();
   };
 
 });
@@ -1667,3 +1671,103 @@ function triggerMilestoneConfetti() {
 
 
 
+
+
+    window.handlePayClick = async function() {
+      const btn = document.getElementById('instant-pay-trigger-btn');
+      const discountInputInstant = document.getElementById('discount-code-instant');
+      const discountCode = discountInputInstant ? discountInputInstant.value.trim() : null;
+      
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Creating order...';
+      }
+      
+      if (!window._dashStudent || !window._dashData) {
+        alert('Student data not loaded yet.');
+        if (btn) { btn.disabled = false; btn.textContent = 'Pay ₹129 & Unlock Instant Certificate'; }
+        return;
+      }
+      
+      const studentId = window._dashStudent.id;
+      const batchId = window._dashData._batch_id;
+      
+      try {
+        const res = await fetch(`${API}/api/payments/create-order`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            student_id: studentId, 
+            batch_id: batchId,
+            discount_code: discountCode
+          })
+        });
+        const orderData = await res.json();
+        
+        if (!res.ok) {
+          alert(orderData.detail || 'Could not create payment order');
+          if (btn) { btn.disabled = false; btn.textContent = 'Pay ₹129 & Unlock Instant Certificate'; }
+          return;
+        }
+
+        if (orderData.status === 'already_paid') {
+          alert('You have already paid! Unlocking certificate.');
+          window.location.reload();
+          return;
+        }
+
+        const options = {
+          key: orderData.key_id,
+          amount: orderData.amount,
+          currency: orderData.currency,
+          name: 'SkillMe',
+          description: 'Instant Verified Certificate + LOR',
+          order_id: orderData.order_id,
+          handler: async function (response) {
+            if (btn) btn.textContent = 'Verifying payment...';
+            try {
+              const verifyRes = await fetch(`${API}/api/payments/verify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  student_id: studentId,
+                  batch_id: batchId,
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  discount_code: discountCode
+                })
+              });
+              const verifyData = await verifyRes.json();
+              if (verifyRes.ok && verifyData.status === 'success') {
+                window.closePaymentModal();
+                alert('Payment successful! Your certificate is ready.');
+                window.location.reload();
+              } else {
+                alert(verifyData.detail || 'Payment verification failed.');
+                if (btn) { btn.disabled = false; btn.textContent = 'Pay ₹129 & Unlock Instant Certificate'; }
+              }
+            } catch(e) {
+              alert('Error verifying payment.');
+              if (btn) { btn.disabled = false; btn.textContent = 'Pay ₹129 & Unlock Instant Certificate'; }
+            }
+          },
+          prefill: {
+            name: window._dashStudent.full_name || '',
+            email: window._dashStudent.email || ''
+          },
+          theme: { color: '#c99a4e' },
+          modal: {
+            ondismiss: function() {
+              if (btn) { btn.disabled = false; btn.textContent = 'Pay ₹129 & Unlock Instant Certificate'; }
+            }
+          }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+      } catch(e) {
+        alert('Payment initialization failed.');
+        if (btn) { btn.disabled = false; btn.textContent = 'Pay ₹129 & Unlock Instant Certificate'; }
+      }
+    };

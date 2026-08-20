@@ -38,7 +38,7 @@
   <link rel="apple-touch-icon" href="assets/logo.png">
   <link rel="manifest" href="site.webmanifest">
   
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=8">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -2144,7 +2144,32 @@
         </div>
       </div>
 
-      <!-- Stats Row -->
+      <!-- Quick Flex Actions (Task PDF & Instant Pay in a Single Row) -->
+      <div class="flex-actions-grid" id="flex-actions-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; width: 100%; margin-bottom: 20px;">
+        <button type="button" class="flex-action-btn pdf-btn" id="flex-pdf-btn" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; padding: 16px 20px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span style="font-size: 1.05rem;">View Task Guide (PDF)</span>
+          </div>
+          <span style="font-size: 0.75rem; color: rgba(255,255,255,0.6); font-weight: 400;">Easy way to get done! Download &amp; solve in VS Code.</span>
+        </button>
+
+        <button type="button" class="flex-action-btn premium-btn" id="flex-cert-btn" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; padding: 16px 20px;" onclick="var m=document.getElementById('instant-payment-modal');if(m){m.style.display='flex';setTimeout(function(){m.classList.add('active')},10)}">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 15l-3 1.5 1-3.5-2.5-2h3.5l1-3.5 1 3.5h3.5l-2.5 2 1 3.5z"/><circle cx="12" cy="12" r="10"/></svg>
+            <span style="font-size: 1.05rem;">Pay &amp; Get Instant Cert (₹129)</span>
+          </div>
+          <span style="font-size: 0.75rem; color: rgba(255,255,255,0.6); font-weight: 400;">Instant Certificate + LOR unlocking. Continue tasks anytime!</span>
+        </button>
+      </div>
+
+      <!-- Credential Quick-Access Strip (visible when paid) -->
+      <div class="cred-strip" id="cred-strip"></div>
+
+      <!-- Certificate Section (Congratulations, Everything is Activated - visible when paid) -->
+      <div id="cert-section" style="display:none;"></div>
+
+      <!-- Stats Row (4 Sections: Issues Solved, PRs Merged, Current Week, Score & Proof) -->
       <div class="stats-grid" id="stats-grid-el">
         <div class="stat-card" id="stat-card-1" style="--stat-accent:linear-gradient(180deg,#a78bfa,#7c3aed);--stat-icon-bg:rgba(167,139,250,0.1);--stat-icon-border:rgba(167,139,250,0.2);">
           <div class="stat-card-row">
@@ -2231,6 +2256,14 @@
               <div class="progress-bar-inner" id="progress-bar-inner"></div>
             </div>
 
+            <!-- Progress Tracking Note (Highlighted Single-Line Badge) -->
+            <div style="margin-top: 12px; margin-bottom: 14px; text-align: left;">
+              <div style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.76rem; color: rgba(255, 255, 255, 0.9); background: linear-gradient(135deg, rgba(201, 154, 78, 0.15), rgba(201, 154, 78, 0.05)); padding: 6px 14px; border-radius: 16px; border: 1px solid rgba(201, 154, 78, 0.35); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); line-height: 1.4;">
+                <span style="font-size: 0.95rem; flex-shrink: 0;">💡</span>
+                <span><strong style="color: #f0c97a;">Note:</strong> Progress tracking is powered by GitHub PRs. Solving tasks offline? You can still claim your certificate &amp; LOR anytime!</span>
+              </div>
+            </div>
+
             <!-- 4-Week Milestone Roadmap -->
             <div class="sprint-milestones-row" id="sprint-milestones-row">
               <div class="sprint-milestone-step active" id="milestone-w1">
@@ -2266,12 +2299,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Credential Quick-Access Strip (visible when paid) -->
-      <div class="cred-strip" id="cred-strip"></div>
-
-      <!-- Certificate Section -->
-      <div id="cert-section" style="display:none;"></div>
 
       <!-- ======== How to Complete Tasks Guide ======== -->
       <div class="guide-section" id="guide-section-el">
@@ -2316,12 +2343,9 @@
               </button>
             </div>
 
-            <!-- ═══════════════════════════════════════ -->
             <!-- TAB 1: BEGINNER (BROWSER ONLY) -->
-            <!-- ═══════════════════════════════════════ -->
             <div class="guide-panel active" id="panel-beginner">
               <div class="guide-steps">
-
                 <div class="guide-step">
                   <div class="guide-step-num">1</div>
                   <div class="guide-step-content">
@@ -2335,9 +2359,9 @@
                 <div class="guide-step">
                   <div class="guide-step-num">2</div>
                   <div class="guide-step-content">
-                    <div class="guide-step-title">Navigate to the File &amp; Click the ✏️ Edit Icon</div>
+                    <div class="guide-step-title">Edit the Target File on GitHub Web</div>
                     <div class="guide-step-desc">
-                      Click the <strong>"Code"</strong> tab, open the file specified in the issue (e.g. <code>src/navbar.js</code>), and click the <strong>pencil (✏️ Edit)</strong> button in the top-right corner. You can now edit code right in your browser without installing anything!
+                      Navigate to the file mentioned in your issue description (e.g. <code>src/components/Navbar.js</code>), click the <strong>✏️ (Edit)</strong> pencil icon on GitHub web, and write your solution.
                     </div>
                   </div>
                 </div>
@@ -2345,9 +2369,9 @@
                 <div class="guide-step">
                   <div class="guide-step-num">3</div>
                   <div class="guide-step-content">
-                    <div class="guide-step-title">Make Changes &amp; Click "Commit changes..."</div>
+                    <div class="guide-step-title">Commit to a New Branch</div>
                     <div class="guide-step-desc">
-                      Implement the required code changes. When finished, click the green <strong>"Commit changes..."</strong> button in the top-right corner.
+                      Scroll to the bottom of the editor. Select <strong>"Create a new branch for this commit and start a pull request"</strong>. Give it a name like <code>fix/issue-5-solution</code>.
                     </div>
                   </div>
                 </div>
@@ -2355,68 +2379,30 @@
                 <div class="guide-step">
                   <div class="guide-step-num">4</div>
                   <div class="guide-step-content">
-                    <div class="guide-step-title">Select "Create a new branch" &amp; Click Propose Changes</div>
+                    <div class="guide-step-title">Submit PR with Closing Keyword</div>
                     <div class="guide-step-desc">
-                      In the commit popup dialog, select: <strong>"Create a new branch for this commit and start a pull request"</strong>. Keep or customize the branch name (e.g. <code>fix/navbar-issue-5</code>) and click <strong>"Propose changes"</strong>.
+                      In the Pull Request title and description, write <strong><code>Closes #5</code></strong> (replace 5 with your issue number). Click <strong>"Create Pull Request"</strong>. Done! 🎉
                     </div>
                   </div>
-                </div>
-
-                <div class="guide-step">
-                  <div class="guide-step-num">5</div>
-                  <div class="guide-step-content">
-                    <div class="guide-step-title">Link Your Issue with <code>Closes #&lt;number&gt;</code> (Crucial Step!)</div>
-                    <div class="guide-step-desc">
-                      In the Pull Request description box, write <strong>Closes #</strong> followed by your issue number (e.g. <strong>Closes #5</strong>). This magic keyword tells GitHub to automatically link your contribution, run automated build checks, and award you points on your dashboard!
-                    </div>
-                    <div class="guide-code">
-                      <button class="guide-code-copy" onclick="copyCode(this, 'Closes #5\n\n- Implemented responsive navbar\n- Added active link highlights')">Copy</button>
-                      <span class="cmd">Closes #5</span><br><br>
-                      <span class="comment">## Brief summary of changes:</span><br>
-                      - Implemented responsive navbar component<br>
-                      - Added active link highlights
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-
-              <!-- Safety Matrix Callout -->
-              <div class="pr-dos-donts-grid">
-                <div class="pr-safety-card dos">
-                  <div class="pr-safety-title">✅ Essential Best Practices</div>
-                  <ul class="pr-safety-list">
-                    <li>Always choose <strong>"Create a new branch"</strong> when proposing changes.</li>
-                    <li>Always include <strong><code>Closes #&lt;IssueNumber&gt;</code></strong> in your PR description.</li>
-                    <li>Verify automated test checks turn green after opening the PR.</li>
-                  </ul>
-                </div>
-                <div class="pr-safety-card donts">
-                  <div class="pr-safety-title">❌ Common Mistakes to Avoid</div>
-                  <ul class="pr-safety-list">
-                    <li>Never select <em>"Commit directly to the main branch"</em>.</li>
-                    <li>Never edit files outside of your assigned issue scope.</li>
-                    <li>Don't delete or rename existing project configurations.</li>
-                  </ul>
                 </div>
               </div>
             </div>
 
-            <!-- ═══════════════════════════════════════ -->
-            <!-- TAB 2: ADVANCED (TERMINAL & VS CODE) -->
-            <!-- ═══════════════════════════════════════ -->
+            <!-- TAB 2: ADVANCED (VS CODE & GIT) -->
             <div class="guide-panel" id="panel-advanced">
               <div class="guide-steps">
-
                 <div class="guide-step">
                   <div class="guide-step-num">1</div>
                   <div class="guide-step-content">
-                    <div class="guide-step-title">Clone the Repository</div>
-                    <div class="guide-step-desc">Open your terminal or command prompt and clone your assigned repository:</div>
+                    <div class="guide-step-title">Clone Repository &amp; Open in VS Code</div>
+                    <div class="guide-step-desc">Open your terminal or command prompt and clone your batch repository:</div>
                     <div class="guide-code">
-                      <button class="guide-code-copy" onclick="copyCode(this, 'git clone #\ncd #')">Copy</button>
-                      <span class="cmd">git</span> clone <span class="url">#</span><br>
-                      <span class="cmd">cd</span> #
+                      <button class="guide-code-copy" onclick="copyCode(this, 'git clone <repo-url>
+cd <repo-folder>
+code .')">Copy</button>
+                      <span class="cmd">git</span> clone <span class="url">&lt;repo-url&gt;</span><br>
+                      <span class="cmd">cd</span> &lt;repo-folder&gt;<br>
+                      <span class="cmd">code</span> .
                     </div>
                   </div>
                 </div>
@@ -2424,8 +2410,8 @@
                 <div class="guide-step">
                   <div class="guide-step-num">2</div>
                   <div class="guide-step-content">
-                    <div class="guide-step-title">Create a Dedicated Feature Branch</div>
-                    <div class="guide-step-desc">Never commit directly to <code>main</code>. Always checkout a new feature branch:</div>
+                    <div class="guide-step-title">Create a Feature Branch</div>
+                    <div class="guide-step-desc">Always create a new branch from <code>main</code> before writing code:</div>
                     <div class="guide-code">
                       <button class="guide-code-copy" onclick="copyCode(this, 'git checkout -b fix/issue-5-solution')">Copy</button>
                       <span class="cmd">git</span> checkout <span class="flag">-b</span> fix/issue-5-solution
@@ -2447,7 +2433,9 @@
                     <div class="guide-step-title">Stage, Commit &amp; Push to GitHub</div>
                     <div class="guide-step-desc">Commit your work with a clear message and push your feature branch:</div>
                     <div class="guide-code">
-                      <button class="guide-code-copy" onclick="copyCode(this, 'git add .\ngit commit -m &quot;feat: complete task - solve issue #5&quot;\ngit push origin fix/issue-5-solution')">Copy</button>
+                      <button class="guide-code-copy" onclick="copyCode(this, 'git add .
+git commit -m &quot;feat: complete task - solve issue #5&quot;
+git push origin fix/issue-5-solution')">Copy</button>
                       <span class="cmd">git</span> add .<br>
                       <span class="cmd">git</span> commit <span class="flag">-m</span> <span class="url">"feat: complete task - solve issue #5"</span><br>
                       <span class="cmd">git</span> push origin fix/issue-5-solution
@@ -2462,7 +2450,6 @@
                     <div class="guide-step-desc">Click the <strong>"Compare &amp; pull request"</strong> banner on GitHub and include <strong><code>Closes #5</code></strong> in your description.</div>
                   </div>
                 </div>
-
               </div>
 
               <div class="guide-tip" style="margin-top:16px;">
@@ -2473,64 +2460,29 @@
               </div>
             </div>
 
-            <!-- ═══════════════════════════════════════ -->
             <!-- TAB 3: INTERACTIVE 1-CLICK PR HELPER -->
-            <!-- ═══════════════════════════════════════ -->
             <div class="guide-panel" id="panel-helper">
               <div class="pr-helper-container">
-                <div class="pr-helper-head">
-                  <span style="font-size:1.4rem;">🛠️</span>
-                  <div>
-                    <h3>1-Click PR Helper &amp; Syntax Generator</h3>
-                    <div style="font-size:0.78rem; color:var(--text-secondary); margin-top:2px;">Type your assigned issue number below to generate error-free branch names, commit commands, and PR linking syntax:</div>
-                  </div>
-                </div>
+                <div class="pr-helper-title">🎯 1-Click Pull Request Description Generator</div>
+                <p class="pr-helper-desc">Fill in the quick details below and copy a production-ready PR title and description to paste directly into GitHub.</p>
 
-                <!-- Input Row -->
-                <div class="pr-helper-input-row">
-                  <div style="display:flex; align-items:center; gap:8px;">
-                    <label for="pr-helper-issue-num">Assigned Issue #:</label>
-                    <input type="text" id="pr-helper-issue-num" class="pr-helper-input" value="5" placeholder="e.g. 5" oninput="updatePRHelper()">
-                  </div>
-                  <div style="display:flex; align-items:center; gap:8px; flex:1; min-width:200px;">
-                    <label for="pr-helper-desc">Task Title:</label>
-                    <input type="text" id="pr-helper-desc" class="pr-helper-input" style="width:100%;" value="Navbar Navigation" placeholder="e.g. Navbar Navigation" oninput="updatePRHelper()">
-                  </div>
-                </div>
-
-                <!-- Generated Fields Matrix -->
                 <div class="pr-helper-grid">
-                  <div class="pr-helper-item">
-                    <div class="pr-helper-item-lbl">
-                      <span>1. Feature Branch Name</span>
-                      <button class="pr-btn-copy-mini" onclick="copyHelperVal(this, 'pr-val-branch')">Copy</button>
-                    </div>
-                    <div class="pr-helper-item-val" id="pr-val-branch">fix/issue-5-navbar-navigation</div>
+                  <div class="pr-helper-field">
+                    <label>Assigned Issue Number</label>
+                    <input type="number" id="pr-helper-issue" placeholder="e.g. 5" min="1" oninput="generatePRTemplate()">
                   </div>
+                  <div class="pr-helper-field">
+                    <label>Task Summary / What did you build?</label>
+                    <input type="text" id="pr-helper-summary" placeholder="e.g. Added user authentication using JWT" oninput="generatePRTemplate()">
+                  </div>
+                </div>
 
-                  <div class="pr-helper-item">
-                    <div class="pr-helper-item-lbl">
-                      <span>2. Git Commit Command</span>
-                      <button class="pr-btn-copy-mini" onclick="copyHelperVal(this, 'pr-val-commit')">Copy</button>
-                    </div>
-                    <div class="pr-helper-item-val" id="pr-val-commit">git commit -m "fix: resolve issue #5 - Navbar Navigation"</div>
+                <div class="pr-helper-output-wrap" style="margin-top:16px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <span style="font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Generated PR Title &amp; Body</span>
+                    <button class="guide-code-copy" id="pr-copy-btn" onclick="copyPRHelperOutput()" style="position:static;">Copy Template 📋</button>
                   </div>
-
-                  <div class="pr-helper-item">
-                    <div class="pr-helper-item-lbl">
-                      <span>3. Pull Request Title</span>
-                      <button class="pr-btn-copy-mini" onclick="copyHelperVal(this, 'pr-val-title')">Copy</button>
-                    </div>
-                    <div class="pr-helper-item-val" id="pr-val-title">fix: resolve issue #5 - Navbar Navigation</div>
-                  </div>
-
-                  <div class="pr-helper-item" style="border-color:rgba(52,211,153,0.3); background:rgba(52,211,153,0.04);">
-                    <div class="pr-helper-item-lbl">
-                      <span style="color:#34d399;">4. PR Description (Magic Link Keyword)</span>
-                      <button class="pr-btn-copy-mini" style="background:rgba(52,211,153,0.2);color:#34d399;border-color:rgba(52,211,153,0.4);" onclick="copyHelperVal(this, 'pr-val-close')">Copy</button>
-                    </div>
-                    <div class="pr-helper-item-val" id="pr-val-close" style="color:#34d399; font-weight:700;">Closes #5</div>
-                  </div>
+                  <pre class="pr-helper-output" id="pr-helper-result">Fill in the fields above to generate your PR text...</pre>
                 </div>
 
                 <div style="margin-top:16px; font-size:0.78rem; color:var(--text-secondary); line-height:1.5; background:rgba(255,255,255,0.02); padding:10px 14px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
@@ -2587,7 +2539,7 @@
 
   <!-- Lenis JS (from darkroomengineering/lenis) -->
   <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js" defer></script>
-  <script src="dashboard.js?v=7" defer></script>
+  <script src="dashboard.js?v=8" defer></script>
 
 
 
@@ -2675,7 +2627,10 @@
             </li>
           </ul>
           
-          <button id="modal-pay-btn" class="cert-btn cert-btn-primary" style="width: 100%; justify-content: center; font-size: 1.05rem;">
+          <div style="margin-bottom: 12px; display: flex; justify-content: center;">
+              <input type="text" id="discount-code-milestone" placeholder="Discount Code (Optional)" style="padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: #fff; outline: none; font-size: 14px; width: 100%; text-align: center;">
+            </div>
+            <button id="modal-pay-btn" class="cert-btn cert-btn-primary" style="width: 100%; justify-content: center; font-size: 1.05rem;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
               <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
             </svg>
@@ -2693,6 +2648,50 @@
       </div>
     </div>
     
+
+    <!-- Instant Payment Modal Overlay -->
+    <div class="payment-modal-overlay" id="instant-payment-modal" style="display: none;">
+      <div class="payment-modal-card">
+        <div class="payment-modal-close" onclick="var m=document.getElementById('instant-payment-modal');if(m){m.classList.remove('active');setTimeout(function(){m.style.display='none'},400)}">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </div>
+        <div class="payment-modal-glow"></div>
+        <div class="payment-modal-content">
+          <div class="payment-modal-icon">🚀</div>
+          <div class="payment-modal-title">Instant Certificate + LOR</div>
+          <div class="payment-modal-desc">Want your certificate and LOR instantly? Pay ₹129 and activate everything now!</div>
+          
+          <ul class="payment-modal-list">
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              <span><strong>Verified Certificate</strong> with unique ID</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              <span><strong>Personalized LOR</strong> based on your domain</span>
+            </li>
+          </ul>
+
+          <div style="background: rgba(201, 154, 78, 0.1); border: 1px dashed rgba(201, 154, 78, 0.4); border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.8rem; color: #f0c97a; text-align: left;">
+            💡 <strong>Note:</strong> You can still continue and complete your internship tasks at your own pace after unlocking your certificate!
+          </div>
+
+          <div class="payment-modal-action">
+            <div style="margin-bottom: 12px; display: flex; justify-content: center;">
+              <input type="text" id="discount-code-instant" placeholder="Discount Code (Optional)" style="padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: #fff; outline: none; font-size: 14px; width: 100%; text-align: center;">
+            </div>
+            <button type="button" id="instant-pay-trigger-btn" class="cert-btn cert-btn-primary" style="width: 100%; justify-content: center; font-size: 1.05rem;" onclick="handlePayClick()">
+              Pay ₹129 &amp; Unlock Instant Certificate
+            </button>
+            <div class="payment-modal-secure" style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 12px; font-size: 0.75rem; color: var(--text-3);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              Secured by Razorpay • Instant Generation
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
 </body>
 </html>
 

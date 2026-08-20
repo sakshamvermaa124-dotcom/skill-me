@@ -2708,3 +2708,51 @@ html, body {
   -webkit-tap-highlight-color: transparent;
 }
 
+
+
+/* Flex Actions Grid */
+.flex-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  width: 100%;
+  margin-top: 16px;
+  margin-bottom: 24px;
+}
+.flex-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 18px 20px;
+  border-radius: 14px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.flex-action-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateY(-2px);
+}
+.premium-btn {
+  border-color: rgba(201, 154, 78, 0.4);
+  color: #f0c97a;
+  background: linear-gradient(145deg, rgba(201, 154, 78, 0.05), rgba(201, 154, 78, 0.15));
+}
+.premium-btn:hover {
+  background: linear-gradient(145deg, rgba(201, 154, 78, 0.1), rgba(201, 154, 78, 0.25));
+}
+@media (max-width: 768px) {
+  .flex-actions-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .cred-strip {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+}

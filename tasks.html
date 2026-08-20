@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete 4-Week Project Curriculum & Task Guide - SkillMe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --bg-base: #0a0d14;
+            --bg-card: #111726;
+            --bg-surface: #182238;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-gold: #f0c97a;
+            --accent-blue: #38bdf8;
+            --accent-indigo: #818cf8;
+            --accent-green: #34d399;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-gold: rgba(240, 201, 122, 0.3);
+            --code-bg: #070a10;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-base);
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin: 0;
+            padding: 24px 20px 60px;
+        }
+        .container { max-width: 920px; margin: 0 auto; }
+        
+        /* Top Navigation / Action Bar */
+        .top-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 28px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+        .back-dash-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+        .back-dash-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        .print-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(240, 201, 122, 0.25), rgba(240, 201, 122, 0.1));
+            border: 1px solid var(--border-gold);
+            color: var(--accent-gold);
+            padding: 9px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.88rem;
+            font-weight: 700;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .print-btn:hover {
+            background: var(--accent-gold);
+            color: #000;
+            box-shadow: 0 4px 16px rgba(240, 201, 122, 0.25);
+        }
+
+        /* Document Header */
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            background: rgba(240, 201, 122, 0.12);
+            color: var(--accent-gold);
+            border: 1px solid var(--border-gold);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .title { font-size: 2.1rem; font-weight: 800; margin: 0 0 8px; color: #fff; letter-spacing: -0.5px; }
+        .subtitle { font-size: 1rem; color: var(--text-secondary); font-weight: 500; }
+        
+        .section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 26px;
+            margin-bottom: 28px;
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        }
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+        }
+
+        /* Project Overview Hero Banner */
+        .project-banner {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(129, 140, 248, 0.06));
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 28px;
+        }
+        .project-banner-label {
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+        .project-banner-title {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+        .project-banner-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.5;
+        }
+        
+        .workflow-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .workflow-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .workflow-step {
+            font-size: 0.68rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        .workflow-card h4 {
+            margin: 0;
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .workflow-card p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* 4-Week LinkedIn Template Tabs (Interactive UI) */
+        .template-tabs-wrap {
+            display: block;
+        }
+        .template-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.84rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .tab-btn:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+        .tab-btn.active {
+            background: linear-gradient(135deg, rgba(240, 201, 122, 0.2), rgba(240, 201, 122, 0.08));
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        .template-box {
+            background: var(--code-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 20px;
+            position: relative;
+        }
+        .template-content {
+            font-family: "Inter", sans-serif;
+            font-size: 0.88rem;
+            color: #e2e8f0;
+            white-space: pre-wrap;
+            line-height: 1.65;
+        }
+        .copy-template-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: rgba(240, 201, 122, 0.15);
+            border: 1px solid var(--border-gold);
+            color: var(--accent-gold);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .copy-template-btn:hover { background: rgba(240, 201, 122, 0.3); color: #fff; }
+
+        /* Print-Only All-Templates Block */
+        .print-all-templates {
+            display: none;
+        }
+
+        /* Task Cards (1 Per Page for Print) */
+        .task-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 28px;
+            border: 1px solid var(--border);
+            margin-bottom: 32px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        .task-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .task-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #fff;
+            margin: 0;
+        }
+        .task-badge {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .checklist-box {
+            background: rgba(52, 211, 153, 0.05);
+            border: 1px solid rgba(52, 211, 153, 0.2);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 20px 0 0;
+        }
+        .checklist-box h4 {
+            margin: 0 0 10px;
+            color: var(--accent-green);
+            font-size: 0.92rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .checklist-box ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #d1fae5;
+            font-size: 0.86rem;
+        }
+        .checklist-box li { margin-bottom: 6px; }
+
+        .markdown-content h1, .markdown-content h2, .markdown-content h3 { color: var(--text-primary); margin-top: 1.4em; margin-bottom: 0.5em; }
+        .markdown-content h2 { font-size: 1.15em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+        .markdown-content p { margin-top: 0; margin-bottom: 1em; color: var(--text-secondary); }
+        .markdown-content ul, .markdown-content ol { padding-left: 1.5em; margin-bottom: 1em; color: var(--text-secondary); }
+        .markdown-content li { margin-bottom: 6px; }
+        .markdown-content code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: "JetBrains Mono", monospace; font-size: 0.88em; border: 1px solid var(--border); color: #f472b6; }
+        .markdown-content pre { background: var(--code-bg); padding: 16px; border-radius: 8px; overflow-x: auto; border: 1px solid var(--border); margin: 1em 0; }
+        .markdown-content pre code { background: none; padding: 0; border: none; font-size: 0.85em; color: #a5b4fc; }
+
+        #loading { text-align: center; padding: 60px 20px; color: var(--text-secondary); font-size: 1.1rem; }
+        .hidden { display: none !important; }
+
+        /* Responsive Mobile Styles */
+        @media (max-width: 640px) {
+            body { padding: 16px 12px 40px; overflow-x: hidden; }
+            .container { width: 100%; max-width: 100%; overflow-x: hidden; }
+            .top-toolbar { flex-direction: column; align-items: stretch; gap: 10px; }
+            .back-dash-btn, .print-btn { justify-content: center; width: 100%; text-align: center; }
+            .title { font-size: 1.5rem; word-break: break-word; }
+            .subtitle { font-size: 0.9rem; word-break: break-word; }
+            .section, .task-card, .project-banner { padding: 18px 14px; border-radius: 12px; word-break: break-word; overflow-wrap: break-word; }
+            .task-title { font-size: 1.12rem; word-break: break-word; }
+            .workflow-grid { grid-template-columns: 1fr; }
+            .template-tabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 8px; }
+            .template-content { word-break: break-word; overflow-wrap: break-word; font-size: 0.84rem; }
+            .copy-template-btn { position: static; margin-bottom: 12px; width: 100%; justify-content: center; }
+        }
+
+        /* ============================================================
+           PRINT / PDF SPECIFIC STYLING (DARK THEME + ALL TEMPLATES + 1 TASK PER PAGE)
+           ============================================================ */
+        @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            body {
+                background: #0a0d14 !important;
+                color: #f8fafc !important;
+                padding: 0;
+            }
+            .container { max-width: 100% !important; margin: 0; }
+            .top-toolbar { display: none !important; }
+            .header { border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important; padding-bottom: 12px; margin-bottom: 20px; }
+            .title { color: #ffffff !important; font-size: 1.8rem !important; }
+            .subtitle { color: #94a3b8 !important; }
+            .badge-pill { background: rgba(240, 201, 122, 0.15) !important; color: #f0c97a !important; border-color: rgba(240, 201, 122, 0.3) !important; }
+            .project-banner {
+                background: rgba(56, 189, 248, 0.08) !important;
+                border: 1px solid rgba(56, 189, 248, 0.3) !important;
+                box-shadow: none !important;
+            }
+            .project-banner-title { color: #ffffff !important; }
+            .project-banner-desc { color: #94a3b8 !important; }
+            .section {
+                background: #111726 !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                box-shadow: none !important;
+            }
+            .section-title { color: #ffffff !important; border-color: rgba(255, 255, 255, 0.1) !important; }
+            .workflow-card {
+                background: #182238 !important;
+                border: 1px solid rgba(255, 255, 255, 0.08) !important;
+                color: #f8fafc !important;
+            }
+            .workflow-card h4 { color: #ffffff !important; }
+            .workflow-card p { color: #94a3b8 !important; }
+            
+            /* Hide interactive tabs on print, reveal ALL 4 weekly templates */
+            .template-tabs-wrap { display: none !important; }
+            .print-all-templates {
+                display: flex !important;
+                flex-direction: column;
+                gap: 14px;
+                margin-top: 12px;
+            }
+            .print-template-card {
+                background: #070a10 !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                border-radius: 8px;
+                padding: 12px 16px;
+            }
+            .print-template-title {
+                font-weight: 700;
+                font-size: 0.88rem;
+                color: #f0c97a !important;
+                margin-bottom: 6px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                padding-bottom: 4px;
+            }
+            .print-template-body {
+                font-size: 0.78rem;
+                color: #e2e8f0 !important;
+                white-space: pre-wrap;
+                line-height: 1.5;
+            }
+
+            /* FORCE EACH OF THE 4 TASKS ONTO ITS OWN SINGLE PAGE IN PDF */
+            .task-card {
+                page-break-before: always !important;
+                break-before: page !important;
+                background: #111726 !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                box-shadow: none !important;
+                padding: 24px !important;
+                margin-top: 24px !important;
+            }
+            .task-title { color: #ffffff !important; }
+            .task-badge { background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important; color: white !important; }
+            .markdown-content p, .markdown-content ul, .markdown-content ol { color: #cbd5e1 !important; }
+            .markdown-content h1, .markdown-content h2, .markdown-content h3 { color: #ffffff !important; }
+            .markdown-content code { background: #070a10 !important; border-color: rgba(255, 255, 255, 0.1) !important; color: #f472b6 !important; }
+            .checklist-box { background: rgba(52, 211, 153, 0.08) !important; border-color: rgba(52, 211, 153, 0.25) !important; color: #d1fae5 !important; }
+            .checklist-box h4 { color: #34d399 !important; }
+            .checklist-box ul { color: #d1fae5 !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Clean Top Navigation Toolbar (Non-Clustered) -->
+        <div class="top-toolbar">
+            <a href="dashboard.html" class="back-dash-btn">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                Back to Dashboard
+            </a>
+            <button class="print-btn" onclick="window.print()">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6v-8z"/></svg>
+                Download 4-Week PDF (Ctrl+P)
+            </button>
+        </div>
+
+        <div class="header">
+            <div class="badge-pill">✨ Complete 4-Week Project Curriculum &amp; Verification Guide</div>
+            <div class="title">4-Week Internship Project Guide</div>
+            <div class="subtitle"><span id="student-name">Student</span> &bull; <span id="student-domain" style="text-transform: capitalize; color: var(--accent-gold);">Domain Track</span> &bull; Complete 4-Week Syllabus</div>
+        </div>
+
+        <div id="loading">Loading your 4-week project curriculum...</div>
+
+        <div id="content" class="hidden">
+            <!-- Project Banner -->
+            <div class="project-banner">
+                <div class="project-banner-label">Assigned 4-Week Incremental Project</div>
+                <div class="project-banner-title" id="project-title">Loading Project...</div>
+                <p class="project-banner-desc" id="project-desc">Loading Project Tagline...</p>
+            </div>
+
+            <!-- 1. Localhost Development & Video Verification Workflow -->
+            <div class="section">
+                <div class="section-title">
+                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    1. Localhost &amp; LinkedIn Video Proof Workflow
+                </div>
+                <p style="font-size: 0.92rem; color: var(--text-secondary); margin-top: 0;">
+                    Complete your tasks locally on your computer in VS Code. Once built, demonstrate your project running on <code>localhost</code> via a screen recording video and share on LinkedIn to verify your progress!
+                </p>
+
+                <div class="workflow-grid">
+                    <div class="workflow-card">
+                        <span class="workflow-step">Step 1</span>
+                        <h4>💻 Code in VS Code</h4>
+                        <p>Create your local workspace and implement the week's required features.</p>
+                    </div>
+                    <div class="workflow-card">
+                        <span class="workflow-step">Step 2</span>
+                        <h4>⚡ Run on Localhost</h4>
+                        <p>Launch your server (e.g. Live Server, Vite, or Python) and test your UI.</p>
+                    </div>
+                    <div class="workflow-card">
+                        <span class="workflow-step">Step 3</span>
+                        <h4>🎥 Record 30-60s Demo</h4>
+                        <p>Record a screen capture showing your running localhost project in action.</p>
+                    </div>
+                    <div class="workflow-card">
+                        <span class="workflow-step">Step 4</span>
+                        <h4>🚀 Post &amp; Tag on LinkedIn</h4>
+                        <p>Copy the weekly template below, attach your video, and tag <strong>@SkillMe</strong>.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 4-Week LinkedIn Video Proof Templates (Interactive Tabs on Web, ALL 4 Printed in PDF) -->
+            <div class="section">
+                <div class="section-title">
+                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                    2. 4-Week Correlated LinkedIn Post Templates
+                </div>
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0;">
+                    Select any week to view your customized post caption matching the exact milestone of your assigned project:
+                </p>
+
+                <!-- Web Interactive Tab View -->
+                <div class="template-tabs-wrap">
+                    <div class="template-tabs">
+                        <button class="tab-btn active" onclick="switchTemplateTab(1)">Week 1: Base Model</button>
+                        <button class="tab-btn" onclick="switchTemplateTab(2)">Week 2: Feature Add-Up</button>
+                        <button class="tab-btn" onclick="switchTemplateTab(3)">Week 3: Integrations</button>
+                        <button class="tab-btn" onclick="switchTemplateTab(4)">Week 4: Capstone Polish</button>
+                    </div>
+
+                    <div class="template-box">
+                        <button class="copy-template-btn" onclick="copyActiveTemplate()">
+                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <span id="copy-btn-text">Copy Post Template</span>
+                        </button>
+                        <div class="template-content" id="template-text">Loading template...</div>
+                    </div>
+                </div>
+
+                <!-- Print-Only View: All 4 Templates Rendered for PDF -->
+                <div class="print-all-templates" id="print-templates-container">
+                    <!-- Injected dynamically for printing -->
+                </div>
+            </div>
+
+            <!-- 3. All 4 Weekly Tasks (Each on its own page when printing to PDF) -->
+            <div id="tasks-container">
+                <!-- All 4 weekly tasks rendered sequentially -->
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        const API = window.SKILLME_API || 'http://localhost:8000';
+        let dynamicTemplates = {};
+        let activeWeekTab = 1;
+
+        function switchTemplateTab(week) {
+            activeWeekTab = week;
+            document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+                btn.classList.toggle('active', (idx + 1) === week);
+            });
+            updateTemplateDisplay();
+        }
+
+        function updateTemplateDisplay() {
+            const tmpl = dynamicTemplates[activeWeekTab] || "Template loading...";
+            document.getElementById('template-text').textContent = tmpl;
+        }
+
+        function copyActiveTemplate() {
+            const text = document.getElementById('template-text').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btnText = document.getElementById('copy-btn-text');
+                btnText.textContent = 'Copied to Clipboard!';
+                setTimeout(() => btnText.textContent = 'Copy Post Template', 2000);
+            });
+        }
+
+        async function fetchTasks() {
+            const urlParams = new URLSearchParams(window.location.search);
+            let studentId = urlParams.get('student_id');
+            let batchId = urlParams.get('batch_id');
+
+            try {
+                if (!studentId || !batchId) {
+                    // Try fetching authenticated session from dashboard
+                    const token = localStorage.getItem('token');
+                    const authRes = await fetch(`${API}/api/student/dashboard`, {
+                        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+                        credentials: 'include'
+                    });
+                    if (authRes.ok) {
+                        const dashData = await authRes.json();
+                        studentId = dashData.student ? dashData.student.id : 1;
+                        batchId = (dashData.progress && dashData.progress[0] && dashData.progress[0].batch_id) || 1;
+                    } else {
+                        studentId = 1;
+                        batchId = 1;
+                    }
+                }
+
+                const res = await fetch(`${API}/api/tasks/current/${studentId}/${batchId}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                
+                const fullName = `${data.student.first_name} ${data.student.last_name}`.trim();
+                const domain = (data.batch.domain || "Web Development").replace('-', ' ');
+                
+                document.getElementById('student-name').textContent = fullName;
+                document.getElementById('student-domain').textContent = domain;
+                
+                if (data.project) {
+                    document.getElementById('project-title').textContent = data.project.name;
+                    document.getElementById('project-desc').textContent = data.project.tagline;
+                }
+
+                dynamicTemplates = data.linkedin_templates || {};
+                activeWeekTab = data.current_week || 1;
+                switchTemplateTab(activeWeekTab);
+
+                // Populate Print All Templates Container for PDF
+                const printTmplContainer = document.getElementById('print-templates-container');
+                if (printTmplContainer) {
+                    const weekNames = ["Week 1: Base Model", "Week 2: Feature Add-Up", "Week 3: Integrations & API", "Week 4: Capstone Polish"];
+                    printTmplContainer.innerHTML = [1, 2, 3, 4].map(w => `
+                        <div class="print-template-card">
+                            <div class="print-template-title">${weekNames[w - 1]} Post Template</div>
+                            <div class="print-template-body">${dynamicTemplates[w] || ''}</div>
+                        </div>
+                    `).join('');
+                }
+
+                const container = document.getElementById('tasks-container');
+                if (!data.tasks || data.tasks.length === 0) {
+                    container.innerHTML = '<div class="section"><p>No assigned tasks found.</p></div>';
+                } else {
+                    container.innerHTML = data.tasks.map((task) => `
+                        <div class="task-card">
+                            <div class="task-header">
+                                <h3 class="task-title">Week ${task.week_number} Task: ${task.title}</h3>
+                                <span class="task-badge">${task.difficulty}</span>
+                            </div>
+                            
+                            <div class="markdown-content">
+                                ${marked.parse(task.description)}
+                            </div>
+
+                            <div class="checklist-box">
+                                <h4>🎥 Video Demonstration Checklist (What to show on Localhost):</h4>
+                                <ul>
+                                    <li>Launch your project in VS Code and run it locally on <code>localhost</code>.</li>
+                                    <li>Demonstrate user interactions (clicking buttons, filters, forms, responsive view).</li>
+                                    <li>Briefly show your clean file structure and code in VS Code.</li>
+                                    <li>Keep your video between 30 to 60 seconds and post with the Week ${task.week_number} LinkedIn template!</li>
+                                </ul>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('content').classList.remove('hidden');
+            } catch(e) { 
+                console.error("Error fetching tasks:", e);
+                document.getElementById('loading').textContent = "Failed to load tasks. Please try again from your dashboard.";
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchTasks);
+    </script>
+</body>
+</html>
