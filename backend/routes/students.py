@@ -465,41 +465,40 @@ async def get_public_activity():
         }
 
 
- c l a s s   V e r i f y I n v i t e R e q u e s t ( B a s e M o d e l ) : 
-         e m a i l :   s t r 
- 
- @ r o u t e r . p o s t ( ' / v e r i f y - g i t h u b - i n v i t e ' ,   s u m m a r y = ' M a n u a l l y   c h e c k   i f   u s e r   a c c e p t e d   G i t H u b   i n v i t e ' ) 
- a s y n c   d e f   v e r i f y _ g i t h u b _ i n v i t e ( r e q :   V e r i f y I n v i t e R e q u e s t ) : 
-         s t u d e n t   =   a w a i t   d b . f e t c h _ o n e ( ' S E L E C T   i d ,   g i t h u b _ u s e r n a m e   F R O M   s t u d e n t s   W H E R E   e m a i l   =   ?   C O L L A T E   N O C A S E ' ,   ( r e q . e m a i l , ) ) 
-         i f   n o t   s t u d e n t : 
-                 r a i s e   H T T P E x c e p t i o n ( s t a t u s _ c o d e = 4 0 4 ,   d e t a i l = ' S t u d e n t   n o t   f o u n d ' ) 
- 
-         e n r o l l m e n t   =   a w a i t   d b . f e t c h _ o n e ( ' ' ' 
-                 S E L E C T   e . g i t h u b _ i n v i t e _ s t a t u s ,   b . r e p o _ n a m e   
-                 F R O M   e n r o l l m e n t s   e   
-                 J O I N   b a t c h e s   b   O N   e . b a t c h _ i d   =   b . i d   
-                 W H E R E   e . s t u d e n t _ i d   =   ? 
-         ' ' ' ,   ( s t u d e n t [ ' i d ' ] , ) ) 
- 
-         i f   n o t   e n r o l l m e n t : 
-                 r a i s e   H T T P E x c e p t i o n ( s t a t u s _ c o d e = 4 0 4 ,   d e t a i l = ' E n r o l l m e n t   n o t   f o u n d ' ) 
- 
-         i f   e n r o l l m e n t [ ' g i t h u b _ i n v i t e _ s t a t u s ' ]   = =   ' a c c e p t e d ' : 
-                 r e t u r n   { ' s t a t u s ' :   ' a l r e a d y _ a c c e p t e d ' } 
- 
-         r e p o _ f u l l _ n a m e   =   e n r o l l m e n t [ ' r e p o _ n a m e ' ] 
-         r e p o _ n a m e   =   r e p o _ f u l l _ n a m e . s p l i t ( ' / ' ) [ - 1 ]   i f   ' / '   i n   r e p o _ f u l l _ n a m e   e l s e   r e p o _ f u l l _ n a m e 
- 
-         #   C h e c k   G i t H u b   A P I 
-         i s _ c o l l a b o r a t o r   =   a w a i t   g i t h u b _ s e r v i c e . c h e c k _ c o l l a b o r a t o r ( r e p o _ n a m e ,   s t u d e n t [ ' g i t h u b _ u s e r n a m e ' ] ) 
-         
-         i f   i s _ c o l l a b o r a t o r : 
-                 a w a i t   d b . e x e c u t e ( 
-                         ' U P D A T E   e n r o l l m e n t s   S E T   g i t h u b _ i n v i t e _ s t a t u s   =   ? ,   u p d a t e d _ a t   =   C U R R E N T _ T I M E S T A M P   W H E R E   s t u d e n t _ i d   =   ? ' , 
-                         ( ' a c c e p t e d ' ,   s t u d e n t [ ' i d ' ] ) 
-                 ) 
-                 r e t u r n   { ' s t a t u s ' :   ' a c c e p t e d ' } 
-         e l s e : 
-                 r e t u r n   { ' s t a t u s ' :   ' p e n d i n g ' } 
-  
- 
+class VerifyInviteRequest(BaseModel):
+    email: str
+
+@router.post('/verify-github-invite', summary='Manually check if user accepted GitHub invite')
+async def verify_github_invite(req: VerifyInviteRequest):
+    student = await db.fetch_one('SELECT id, github_username FROM students WHERE email = ? COLLATE NOCASE', (req.email,))
+    if not student:
+        raise HTTPException(status_code=404, detail='Student not found')
+
+    enrollment = await db.fetch_one('''
+        SELECT e.github_invite_status, b.repo_name 
+        FROM enrollments e 
+        JOIN batches b ON e.batch_id = b.id 
+        WHERE e.student_id = ?
+    ''', (student['id'],))
+
+    if not enrollment:
+        raise HTTPException(status_code=404, detail='Enrollment not found')
+
+    if enrollment['github_invite_status'] == 'accepted':
+        return {'status': 'already_accepted'}
+
+    repo_full_name = enrollment['repo_name']
+    repo_name = repo_full_name.split('/')[-1] if '/' in repo_full_name else repo_full_name
+
+    # Check GitHub API
+    is_collaborator = await github_service.check_collaborator(repo_name, student['github_username'])
+    
+    if is_collaborator:
+        await db.execute(
+            'UPDATE enrollments SET github_invite_status = ?, updated_at = CURRENT_TIMESTAMP WHERE student_id = ?',
+            ('accepted', student['id'])
+        )
+        return {'status': 'accepted'}
+    else:
+        return {'status': 'pending'}
+
