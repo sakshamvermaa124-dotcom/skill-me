@@ -364,7 +364,9 @@ section('A6 \u2014 !important budget (regression + end-state progress)');
   const dashCssPath = path.join(ROOT, 'dashboard.css');
   if (fs.existsSync(dashCssPath)) {
     const css = fs.readFileSync(dashCssPath, 'utf8');
-    const cssImportants = [...css.matchAll(/!important/g)].length;
+    // Strip block comments before counting so R6 fence comment text doesn't inflate count
+    const cssNoComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
+    const cssImportants = [...cssNoComments.matchAll(/!important/g)].length;
     const cssCssBaselinePath = path.join(ROOT, 'tools', '.dash-css-important-baseline');
     const END_STATE_TARGET = 15;
 

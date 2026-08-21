@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+const css = fs.readFileSync('dashboard.css', 'utf8');
+const noComments = css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');
+const impCount = (noComments.match(/!important/g)||[]).length;
+console.log('!important in actual CSS rules (comments stripped):', impCount);
+console.log('Has --surface-page:', css.includes('--surface-page'));
+console.log('Has --accent:', css.includes('--accent:'));
+console.log('Has light token block:', css.includes('[data-theme="light"] {'));
+console.log('Has LIGHT MODE override block:', css.includes('LIGHT MODE'));
+console.log('Has dark navbar !important:', css.includes('[data-theme="dark"] .navbar'));
+console.log('Has Lenis:', css.includes('lenis-smooth'));
+console.log('Has navbar token rule:', css.includes('var(--nav-bg)'));
+console.log('Lines:', css.split('\n').length);

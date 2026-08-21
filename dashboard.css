@@ -1,26 +1,122 @@
 /* =============================================================
-   dashboard.css — Verbatim extraction of dashboard.html inline styles
-   Commit 2 of 5: mechanical move only, zero restructuring.
+   dashboard.css — Semantic token system
+   Commit 3 of 5: tokens, light/dark theming, !important fence.
 
-   Contains:
-     Block 1: Primary 1932-line style block (dashboard.html:46-1979)
-     Block 2: Logo sizing one-liner (dashboard.html:1982)
+   Accent decision (contrast audit):
+     (a) #412d15 as --accent: 1.38:1 on dark cards → FAIL, invisible
+     (b) #c99a4e / #8a6529:   7.02:1 / 5.28:1      → AAA / AA  ← chosen
+         #412d15 used only for --border-strong / --surface-sunken
 
-   Baseline declaration count matches the original HTML inline styles.
+   !important: 15 total, all in the R6 FENCE block at end of this file.
    ============================================================= */
 
+/* ── Semantic token declarations ──────────────────────────────────────────
+   Both themes define the same token names — every component rule is
+   written once and is theme-agnostic.  This replaces the 230-line
+   [data-theme="light"] !important override block entirely.
+   ──────────────────────────────────────────────────────────────────────── */
 
-    /* Global dashboard background override */
-    body { background: var(--bg-primary); color: var(--text-primary); transition: background 0.3s ease, color 0.3s ease; }
-    
-    /* Sun/Moon hide logic */
-    [data-theme="light"] #sun-icon { display: none; }
-    [data-theme="dark"] #moon-icon { display: none; }
-    
-    /* Overrides */
-    
+/* Dark theme (default) */
+:root,
+[data-theme="dark"] {
+  /* Surfaces */
+  --surface-page:    #000000;
+  --surface-raised:  #1f150c;
+  --surface-sunken:  #412d15;
+  --surface-hover:   #2b1e10;
 
-    /* ======== Lenis Base ======== */
+  /* Lines */
+  --border-hairline: rgba(255,255,255,0.06);
+  --border-strong:   #412d15;
+
+  /* Text */
+  --text-strong:   #eae6e1;
+  --text-default:  #c7bfb5;
+  --text-muted:    #969089;
+  --text-faint:    #5e5852;
+
+  /* Brand — #c99a4e: 7.02:1 on cards (AAA), 8.22:1 on page (AAA) */
+  --accent:          #c99a4e;
+  --accent-hover:    #d8ac63;
+  --accent-contrast: #000000;
+  --accent-wash:     rgba(201,154,78,0.10);
+
+  /* Status */
+  --ok:      #10b981;  --ok-wash:      rgba(16,185,129,0.12);
+  --warn:    #f59e0b;  --warn-wash:    rgba(245,158,11,0.12);
+  --danger:  #ef4444;  --danger-wash:  rgba(239,68,68,0.12);
+  --info:    #60a5fa;  --info-wash:    rgba(96,165,250,0.12);
+
+  /* Legacy aliases (existing component rules use these; no rewrite needed) */
+  --bg-primary:     var(--surface-page);
+  --bg-card:        var(--surface-raised);
+  --bg-card-hover:  var(--surface-hover);
+  --text-primary:   var(--text-strong);
+  --text-secondary: var(--text-muted);
+  --border-glass:   1px solid var(--border-hairline);
+  --border-subtle:  1px solid rgba(255,255,255,0.07);
+
+  /* Navbar */
+  --nav-bg:     rgba(0,0,0,0.80);
+  --nav-border: rgba(255,255,255,0.06);
+  --nav-shadow: 0 2px 16px rgba(0,0,0,0.5);
+}
+
+/* Light theme */
+[data-theme="light"] {
+  /* Surfaces */
+  --surface-page:    #e1dcc9;
+  --surface-raised:  #ffffff;
+  --surface-sunken:  #d6d0bc;
+  --surface-hover:   #f5f2ea;
+
+  /* Lines */
+  --border-hairline: rgba(0,0,0,0.08);
+  --border-strong:   #412d15;
+
+  /* Text */
+  --text-strong:   #1c1917;
+  --text-default:  #3d3530;
+  --text-muted:    #64748b;
+  --text-faint:    #94a3b8;
+
+  /* Brand — #8a6529: 5.28:1 on white cards (AA), 3.85:1 on warm paper (AA Large) */
+  --accent:          #8a6529;
+  --accent-hover:    #6f4f1f;
+  --accent-contrast: #ffffff;
+  --accent-wash:     rgba(138,101,41,0.10);
+
+  /* Status (darkened for AA on white) */
+  --ok:      #059669;  --ok-wash:      rgba(5,150,105,0.10);
+  --warn:    #d97706;  --warn-wash:    rgba(217,119,6,0.10);
+  --danger:  #dc2626;  --danger-wash:  rgba(220,38,38,0.10);
+  --info:    #2563eb;  --info-wash:    rgba(37,99,235,0.10);
+
+  /* Legacy aliases */
+  --bg-primary:     var(--surface-page);
+  --bg-card:        var(--surface-raised);
+  --bg-card-hover:  var(--surface-hover);
+  --text-primary:   var(--text-strong);
+  --text-secondary: var(--text-muted);
+  --border-glass:   1px solid var(--border-hairline);
+  --border-subtle:  1px solid rgba(0,0,0,0.06);
+
+  /* Navbar */
+  --nav-bg:     rgba(255,255,255,0.95);
+  --nav-border: rgba(0,0,0,0.06);
+  --nav-shadow: 0 2px 16px rgba(0,0,0,0.05);
+}
+
+/* Navbar: token-driven, no !important needed (dashboard.css loads after style.css) */
+.navbar {
+  background: var(--nav-bg);
+  border-bottom: 1px solid var(--nav-border);
+  box-shadow: var(--nav-shadow);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ======== Lenis Base ======== */
     html.lenis, html.lenis body { height: auto; }
     .lenis.lenis-smooth { scroll-behavior: auto !important; }
     .lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
@@ -547,7 +643,7 @@
       font-family: 'Space Grotesk', sans-serif;
     }
     .progress-details p {
-      white-space: normal !important;
+      white-space: normal;
       word-wrap: break-word;
       color: var(--text-secondary);
       font-size: 0.88rem;
@@ -765,248 +861,7 @@
       from { stroke-dashoffset: 502; }
     }
 
-    /* Navbar override for dashboard — dark mode only */
-    [data-theme="dark"] .navbar {
-      background: rgba(6, 8, 15, 0.8) !important;
-      backdrop-filter: blur(20px) !important;
-      -webkit-backdrop-filter: blur(20px) !important;
-    }
-
-    /* ======================================================
-       LIGHT MODE — Dashboard-specific overrides
-       All the dark-mode-only hardcoded colors fixed here
-    ====================================================== */
-
-    /* Navbar: solid white so content can't bleed through */
-    [data-theme="light"] .navbar {
-      background: rgba(255, 255, 255, 0.95) !important;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
-      box-shadow: 0 2px 16px rgba(0, 0, 0, 0.05) !important;
-      backdrop-filter: blur(16px) !important;
-      -webkit-backdrop-filter: blur(16px) !important;
-    }
-
-    /* Dash header h1 — white gradient is invisible on light bg */
-    [data-theme="light"] .dash-header h1 {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #92700a 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    /* "Your Internship" label */
-    [data-theme="light"] .dash-greeting {
-      color: #64748b !important;
-    }
-
-    /* Dash tags — invisible border on white */
-    [data-theme="light"] .dash-tag {
-      border-color: rgba(0, 0, 0, 0.1) !important;
-      background: #f1f5f9 !important;
-      color: #334155 !important;
-    }
-    [data-theme="light"] .dash-tag.accent {
-      background: rgba(99, 102, 241, 0.08) !important;
-      border-color: rgba(99, 102, 241, 0.2) !important;
-      color: #4f46e5 !important;
-    }
-
-    /* Login input — invisible border on white */
-    [data-theme="light"] .login-input-wrap input {
-      background: #f8fafc !important;
-      border-color: #cbd5e1 !important;
-      color: #0f172a !important;
-    }
-    [data-theme="light"] .login-input-wrap input::placeholder {
-      color: #94a3b8 !important;
-    }
-    [data-theme="light"] .login-input-wrap input:focus {
-      border-color: rgba(99, 102, 241, 0.5) !important;
-      background: #ffffff !important;
-      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1) !important;
-    }
-
-    /* Guide subtitle — rgba(255,255,255,0.45) = invisible on white */
-    [data-theme="light"] .guide-subtitle {
-      color: #64748b !important;
-    }
-
-    /* Guide steps */
-    [data-theme="light"] .guide-step {
-      background: #f8fafc !important;
-      border-color: #e2e8f0 !important;
-    }
-    [data-theme="light"] .guide-step:hover {
-      background: #f1f5f9 !important;
-      border-color: #cbd5e1 !important;
-    }
-    [data-theme="light"] .guide-step-desc strong {
-      color: #0f172a !important;
-    }
-
-    /* Guide tip callout — rgba(255,255,255,0.55) = invisible on white */
-    [data-theme="light"] .guide-tip {
-      background: rgba(52, 211, 153, 0.06) !important;
-      border-color: rgba(52, 211, 153, 0.2) !important;
-    }
-    [data-theme="light"] .guide-tip-text {
-      color: #334155 !important;
-    }
-    [data-theme="light"] .guide-tip-text strong {
-      color: #059669 !important;
-    }
-
-    /* Guide warning callout */
-    [data-theme="light"] .guide-warning {
-      background: rgba(251, 191, 36, 0.06) !important;
-      border-color: rgba(251, 191, 36, 0.2) !important;
-    }
-    [data-theme="light"] .guide-warning .guide-tip-text {
-      color: #334155 !important;
-    }
-
-    /* Guide toggle button */
-    [data-theme="light"] .guide-toggle {
-      border-color: #e2e8f0 !important;
-      color: #64748b !important;
-    }
-    [data-theme="light"] .guide-toggle:hover {
-      border-color: #cbd5e1 !important;
-      color: #334155 !important;
-    }
-
-    /* Guide tabs */
-    [data-theme="light"] .guide-tabs {
-      background: #f1f5f9 !important;
-      border-color: #e2e8f0 !important;
-    }
-    [data-theme="light"] .guide-tab {
-      color: #64748b !important;
-    }
-    [data-theme="light"] .guide-tab:hover {
-      color: #334155 !important;
-      background: #e2e8f0 !important;
-    }
-    [data-theme="light"] .guide-tab.active {
-      background: rgba(99, 102, 241, 0.1) !important;
-      color: #4338ca !important;
-      border-color: rgba(99, 102, 241, 0.2) !important;
-    }
-    [data-theme="light"] .guide-tab:not(.active) .tab-badge {
-      background: #e2e8f0 !important;
-      color: #64748b !important;
-    }
-    [data-theme="light"] .guide-tab.active .tab-badge {
-      background: rgba(52, 211, 153, 0.12) !important;
-      color: #059669 !important;
-    }
-
-    /* Progress ring text */
-    [data-theme="light"] .progress-ring-sub {
-      color: #64748b !important;
-    }
-    [data-theme="light"] .progress-bar-track {
-      background: #e2e8f0 !important;
-    }
-
-    /* Cert mini progress bar track */
-    [data-theme="light"] .cert-mini-bar {
-      background: rgba(0, 0, 0, 0.08) !important;
-    }
-
-    /* Sub-card hover */
-    [data-theme="light"] .sub-card:hover {
-      background: #f1f5f9 !important;
-      border-color: #cbd5e1 !important;
-    }
-
-    /* Sub-link icon */
-    [data-theme="light"] .sub-link {
-      color: #94a3b8 !important;
-    }
-    [data-theme="light"] .sub-link:hover {
-      color: #4f46e5 !important;
-    }
-
-    /* Count badge on section headers */
-    [data-theme="light"] .section-header .count-badge {
-      background: rgba(99, 102, 241, 0.08) !important;
-      color: #4338ca !important;
-      border-color: rgba(99, 102, 241, 0.15) !important;
-    }
-
-    /* Empty state — white text on white bg */
-    [data-theme="light"] .empty-state {
-      background: #f8fafc !important;
-      border-color: #e2e8f0 !important;
-    }
-    [data-theme="light"] .empty-state h3 {
-      color: #475569 !important;
-    }
-    [data-theme="light"] .empty-state p {
-      color: #94a3b8 !important;
-    }
-
-    /* Cred pills */
-    [data-theme="light"] .cred-pill {
-      background: #f8fafc !important;
-      border-color: #e2e8f0 !important;
-      color: #334155 !important;
-    }
-    [data-theme="light"] .cred-pill:hover {
-      border-color: #cbd5e1 !important;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
-    }
-    [data-theme="light"] .cred-pill-label {
-      color: #94a3b8 !important;
-    }
-
-    /* Cert banner secondary button */
-    [data-theme="light"] .cert-btn-secondary {
-      background: #f1f5f9 !important;
-      border: 1px solid #e2e8f0 !important;
-      color: #334155 !important;
-    }
-
-    /* Payment modal */
-    [data-theme="light"] .payment-modal-card {
-      background: #ffffff !important;
-      border-color: rgba(0, 0, 0, 0.08) !important;
-    }
-    [data-theme="light"] .payment-modal-title {
-      color: #0f172a !important;
-    }
-    [data-theme="light"] .payment-modal-list {
-      background: #f8fafc !important;
-      border-color: rgba(0, 0, 0, 0.05) !important;
-    }
-    [data-theme="light"] .payment-modal-list li {
-      color: #334155 !important;
-    }
-    [data-theme="light"] .payment-modal-close {
-      background: rgba(0, 0, 0, 0.04) !important;
-      color: #64748b !important;
-    }
-    [data-theme="light"] .payment-modal-close:hover {
-      background: rgba(0, 0, 0, 0.08) !important;
-      color: #0f172a !important;
-    }
-
-    /* Dashboard text visibility fixes */
-    [data-theme="light"] .cert-banner-title,
-    [data-theme="light"] .progress-details h3,
-    [data-theme="light"] .login-card h2,
-    [data-theme="light"] .progress-ring-pct {
-      color: #0f172a !important;
-    }
-
-    [data-theme="light"] .cert-banner-sub,
-    [data-theme="light"] .progress-details p,
-    [data-theme="light"] .login-card p,
-    [data-theme="light"] .progress-ring-sub {
-      color: #475569 !important;
-    }
-
+    
     /* ======== Beginner Guide Section ======== */
     .guide-section {
       margin-top: 48px;
@@ -1343,7 +1198,7 @@
       transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s;
     }
     .guide-body.collapsed {
-      max-height: 0 !important;
+      max-height: 0;
       opacity: 0;
       pointer-events: none;
     }
@@ -1943,5 +1798,38 @@
         color: #f0c97a;
       }
 
-/* ── Logo sizing (was inline one-liner in <head>) ── */
-.brand-logo-img, .logo img, .nav-logo img, .cert-company-logo, .lh-logo { width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important; flex-shrink: 0 !important; }
+/* ══════════════════════════════════════════════════════════════
+   R6 FENCE — All !important declarations are catalogued here.
+   Rule: ≤15 total. Each must cite the override it fights.
+   Adding one outside this fence requires removing one from it.
+
+   Current inventory (15 declarations across 5 rules):
+
+   [R6-1] Lenis scroll-behavior — overrides :root scroll-behavior
+          from any upstream CSS; Lenis docs explicitly require this.
+          Location: .lenis.lenis-smooth (line ~121)
+
+   [R6-2] .nav-container layout — overrides style.css .container
+          max-width and padding so dashboard nav spans full width.
+          Location: .nav-container (3 declarations, line ~1435)
+
+   [R6-3] .sub-title responsive — overrides base .sub-title
+          white-space:nowrap so card titles wrap on mobile.
+          (Inside @media max-width:480px, no JS involvement)
+          Location: .sub-title inside @media (4 declarations, line ~1489)
+
+   [R6-4] Logo sizing — overrides upstream img rules; the 36×36
+          circle is enforced in HTML style="" too (dashboard.html:56).
+          Location: .brand-logo-img etc. (7 declarations, line ~1802)
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Logo sizing (was inline one-liner in <head>) — see R6-4 ── */
+.brand-logo-img, .logo img, .nav-logo img, .cert-company-logo, .lh-logo {
+  width: 36px !important;
+  height: 36px !important;
+  max-width: 36px !important;
+  max-height: 36px !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
+  flex-shrink: 0 !important;
+}
