@@ -7,7 +7,7 @@
  */
 
 (function() {
-  const RENDER_URL = 'https://skill-me.onrender.com';  // Live Render API
+  const RENDER_URL = 'https://skill-me-855405842571.asia-south2.run.app';  // Live GCP
   const LOCAL_URL  = 'http://' + window.location.hostname + ':8000';
 
   const isLocal = (
