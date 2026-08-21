@@ -23,7 +23,7 @@ jobs:
           for attempt in 1 2 3 4 5; do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
               --max-time 30 \
-              "https://skill-me.onrender.com/health")
+              "https://skill-me-855405842571.asia-south2.run.app/health")
             echo "Attempt $attempt: HTTP $STATUS"
             if [ "$STATUS" = "200" ]; then
               echo "Service is healthy."
@@ -45,7 +45,7 @@ jobs:
             -H "X-Admin-Key: ${{ secrets.SKILLME_ADMIN_KEY }}" \
             -H "Content-Type: application/json" \
             --max-time 120 \
-            "https://skill-me.onrender.com/api/monitor/trigger")
+            "https://skill-me-855405842571.asia-south2.run.app/api/monitor/trigger")
           
           BODY=$(echo "$RESPONSE" | sed -n '1p')
           STATUS=$(echo "$RESPONSE" | grep "HTTP_STATUS" | cut -d: -f2)
