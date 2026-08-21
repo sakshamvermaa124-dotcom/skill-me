@@ -749,8 +749,44 @@
         width: 100%;
         justify-content: flex-end;
       }
-    }
-  </style>
+      }
+      
+      @media print {
+        @page {
+          size: A4 portrait;
+          margin: 10mm;
+        }
+        body {
+          background: #ffffff !important;
+          color: #000 !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        .navbar, .footer, .btn-primary, .portfolio-toast, .floating-actions, .bg-grid {
+          display: none !important;
+        }
+        .portfolio-wrapper {
+          padding: 0 !important;
+          margin: 0 !important;
+          background: none !important;
+        }
+        .profile-bento, .pr-bento-card, .skills-card {
+          box-shadow: none !important;
+          border: 1px solid #ddd !important;
+          background: #ffffff !important;
+          page-break-inside: avoid !important;
+          break-inside: avoid !important;
+          color: #000 !important;
+        }
+        h1, h2, h3, h4, p, span, div {
+          color: #000 !important;
+        }
+        .bento-icon {
+          background: #f0f0f0 !important;
+          border-color: #ddd !important;
+        }
+      }
+    </style>
 </head>
 <body>
 
@@ -765,8 +801,7 @@
         <span class="nav-brand-text">Skill<span>Me</span></span>
       </a>
       <div class="nav-actions">
-        <a href="dashboard.html" class="nav-btn nav-btn-dash">Student Dashboard &rarr;</a>
-        <a href="apply.html" class="nav-btn nav-btn-apply">Apply Now &rarr;</a>
+        <a href="dashboard.html" class="nav-btn nav-btn-dash">Return to Dashboard &rarr;</a>
       </div>
     </div>
   </nav>

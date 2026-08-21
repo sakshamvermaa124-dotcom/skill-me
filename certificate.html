@@ -685,22 +685,33 @@
 
     /* ─── Print Styles ─── */
     @media print {
+      @page {
+        size: A4 landscape;
+        margin: 0;
+      }
       body {
         background: #ffffff !important;
         padding: 0 !important;
+        margin: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
       .action-bar, .verify-strip, .verify-page {
         display: none !important;
       }
       .cert-wrap {
-        max-width: 100% !important;
-        width: 100% !important;
+        display: block !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        transform: scale(1) !important;
       }
       .certificate {
         box-shadow: none !important;
+        border: none !important;
         border-radius: 0 !important;
-        width: 100% !important;
-        height: 100vh !important;
+        margin: 0 auto !important;
+        page-break-after: avoid;
+        page-break-inside: avoid;
       }
     }
   </style>
