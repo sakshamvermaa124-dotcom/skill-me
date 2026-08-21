@@ -73,7 +73,7 @@ async def get_current_tasks(student_id: int, batch_id: int):
         bullets = "\n".join([f"• {pt}" for pt in w_data.get("post_highlights", [])])
         
         linkedin_templates[w] = (
-            f"🚀 Excited to share my Week {w} milestone for '{proj_name}' in the {domain_clean} Virtual Internship at SkillMe!\n\n"
+            f"🚀 Excited to share my Week {w} milestone for '{proj_name}' in the {domain_clean} Virtual Internship at @SkillMe!\n\n"
             f"During Week {w}, I built and tested the following features locally on localhost in VS Code:\n\n"
             f"🎯 Week {w} Milestone Highlights:\n"
             f"{bullets}\n\n"

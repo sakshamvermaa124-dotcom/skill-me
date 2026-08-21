@@ -154,7 +154,7 @@ async def _handle_member(data: dict) -> dict:
         
         if batch and student:
             await db.execute(
-                "UPDATE enrollments SET github_invite_status = 'accepted', updated_at = CURRENT_TIMESTAMP WHERE student_id = ? AND batch_id = ?",
+                "UPDATE enrollments SET github_invite_status = 'accepted' WHERE student_id = ? AND batch_id = ?",
                 (student["id"], batch["id"])
             )
             logger.info(f"GitHub invite accepted for {username} on {repo_name}")

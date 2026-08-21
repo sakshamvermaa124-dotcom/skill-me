@@ -221,6 +221,9 @@ document.addEventListener('DOMContentLoaded', async () => {
               Copy Recruiter Link
             </button>
           </div>
+          <p style="font-size: 0.75rem; color: rgba(255,255,255,0.5); text-align: left; margin-top: 12px; margin-bottom: 0; font-style: italic; line-height: 1.4; opacity: 0.8;">
+            Note: When posting to LinkedIn, make sure to manually select <strong>@SkillMe</strong> from the dropdown menu to officially tag us!
+          </p>
         </div>
 
         <div class="hero-skills-strip">
@@ -331,7 +334,7 @@ window.copyPortfolioLink = function(url) {
 
 // 1-Click Share on LinkedIn
 window.shareOnLinkedIn = function(name, domains, prCount, url) {
-  const text = `🚀 Excited to share my verified engineering Proof of Work portfolio on SkillMe (@skill-me-intern)!
+  const text = `🚀 Excited to share my verified engineering Proof of Work portfolio on SkillMe (@SkillMe)!
 
 I have contributed and merged ${prCount} verified Pull Requests across real-world GitHub repositories in ${domains}.
 

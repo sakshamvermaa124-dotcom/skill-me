@@ -847,44 +847,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── Certificate banner ────────────────────────────────────────────────────
     certSection.style.display = 'block';
-    certSection.innerHTML = `
-      <div class="cert-banner">
-        <div class="cert-banner-content">
-          <div class="cert-banner-icon">✨</div>
-          <div class="cert-banner-text">
-            <div class="cert-banner-title">Congratulations! Everything is activated.</div>
-            <div class="cert-banner-sub">Payment confirmed • Access your Proof of Work Portfolio, LOR, and Certificate below!</div>
-          </div>
-          <div class="cert-banner-actions" style="flex-wrap: wrap; gap: 8px;">
-            <a href="${portfolioUrl}" target="_blank" class="cert-btn" style="background:var(--accent-indigo); color:#fff; border:none; font-weight:700;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line>
-              </svg>
-              Portfolio
-            </a>
-            <a href="${certUrl}" target="_blank" class="cert-btn cert-btn-primary">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
-                <rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-                <polyline points="9 12 11 14 15 10"/>
-              </svg>
-              Certificate
-            </a>
-            <a href="${lorUrl}" target="_blank" class="cert-btn cert-btn-secondary" style="border-color:rgba(201,154,78,0.4);">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-              </svg>
-              LOR
-            </a>
-            <a href="${dlUrl}" target="_blank" class="cert-btn cert-btn-secondary">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              Download PDF
-            </a>
-          </div>
-        </div>
-      </div>
-    `;
+    certSection.innerHTML = '';
 
     // Change the instant pay trigger button to Paid
     const instantPayTrigger = document.getElementById('flex-cert-btn');
@@ -1387,7 +1350,7 @@ window.openMilestoneShareModal = function(customData) {
       ? `🔗 Final Verified Task & Issue:\n👉 ${ctx.validatedGithubUrl}\n\n` 
       : '';
 
-    linkedInPost = `I'm thrilled to announce that I have successfully completed the 4-week ${ctx.domain} Virtual Internship at SkillMe (@skill-me-intern)! 🎓🚀
+    linkedInPost = `I'm thrilled to announce that I have successfully completed the 4-week ${ctx.domain} Virtual Internship at SkillMe (@SkillMe)! 🎓🚀
 
 Over the past month, I solved real production-grade GitHub issues, merged ${ctx.totalPrs} Pull Requests, and built verifiable Proof of Work. It was an incredible hands-on engineering journey!
 
@@ -1422,7 +1385,7 @@ Join me on SkillMe and earn verified credentials for your resume:
     titleText = `You're Enrolled at SkillMe!`;
     subText = `Your official internship offer is confirmed. Share your new engineering journey:`;
 
-    linkedInPost = `I'm thrilled to share that I have been selected for the ${ctx.domain} Virtual Internship at SkillMe (@skill-me-intern)! 🚀
+    linkedInPost = `I'm thrilled to share that I have been selected for the ${ctx.domain} Virtual Internship at SkillMe (@SkillMe)! 🚀
 
 Over the next 4 weeks, I will be contributing to production-grade repositories, solving real-world GitHub issues, and building verifiable Proof of Work.
 
@@ -1457,7 +1420,7 @@ Join me to solve real GitHub issues and build verified Proof of Work for your re
       ? `🔗 Verified Task & Issue on GitHub:\n👉 ${ctx.validatedGithubUrl}\n\n` 
       : '';
 
-    linkedInPost = `Week ${ctx.weekNum}, Task ${ctx.taskNum} completed at SkillMe (@skill-me-intern)! 🚀
+    linkedInPost = `Week ${ctx.weekNum}, Task ${ctx.taskNum} completed at SkillMe (@SkillMe)! 🚀
 
 I just merged my latest Pull Request and successfully resolved "${ctx.taskTitle}" for the ${ctx.domain} Virtual Internship.
 
