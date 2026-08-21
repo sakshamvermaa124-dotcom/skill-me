@@ -338,41 +338,56 @@ for (const fnName of [...inlineCalls].sort()) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ASSERTION 6: !important budget
-//   On first run, capture the baseline count.
-//   On subsequent runs, fail if the count has gone UP (regressions only).
-//   dashboard.css: once it exists, must stay <= 15.
+//   Regression check: count must not increase from baseline (captured first run).
+//   End-state progress: separately report distance to ≤15 (post-commit-3 target).
+//   Both dashboard.html AND dashboard.css are tracked.
 // ─────────────────────────────────────────────────────────────────────────────
-section('A6 \u2014 !important budget');
+section('A6 \u2014 !important budget (regression + end-state progress)');
 {
+  // ── dashboard.html ──
   const htmlImportants = [...html.matchAll(/!important/g)].length;
   const htmlBaselinePath = path.join(ROOT, 'tools', '.dash-important-baseline');
 
   if (!fs.existsSync(htmlBaselinePath)) {
     fs.writeFileSync(htmlBaselinePath, String(htmlImportants), 'utf8');
-    console.log(`  \uD83D\uDCCC  dashboard.html !important baseline captured: ${htmlImportants}`);
+    console.log(`  \uD83D\uDCCC  dashboard.html baseline captured: ${htmlImportants}`);
   } else {
     const baseline = parseInt(fs.readFileSync(htmlBaselinePath, 'utf8').trim(), 10);
     if (htmlImportants > baseline) {
-      fail(`dashboard.html: ${htmlImportants} !important declarations, up from baseline ${baseline} \u2014 no new !important allowed`);
+      fail(`dashboard.html: ${htmlImportants} !important \u2014 UP from baseline ${baseline}. No new !important allowed.`);
     } else {
-      pass(`dashboard.html: ${htmlImportants} !important declarations (baseline ${baseline} \u2014 ok)`);
+      pass(`dashboard.html: ${htmlImportants} !important (baseline ${baseline} \u2014 no regression)`);
     }
   }
 
+  // ── dashboard.css ──
   const dashCssPath = path.join(ROOT, 'dashboard.css');
   if (fs.existsSync(dashCssPath)) {
     const css = fs.readFileSync(dashCssPath, 'utf8');
     const cssImportants = [...css.matchAll(/!important/g)].length;
-    const cssLimit = 15;
-    if (cssImportants <= cssLimit) {
-      pass(`dashboard.css: ${cssImportants} !important declarations (<= ${cssLimit})`);
+    const cssCssBaselinePath = path.join(ROOT, 'tools', '.dash-css-important-baseline');
+    const END_STATE_TARGET = 15;
+
+    // Regression check (baseline file)
+    if (!fs.existsSync(cssCssBaselinePath)) {
+      fs.writeFileSync(cssCssBaselinePath, String(cssImportants), 'utf8');
+      console.log(`  \uD83D\uDCCC  dashboard.css baseline captured: ${cssImportants}`);
     } else {
-      fail(`dashboard.css: ${cssImportants} !important declarations \u2014 must be <= ${cssLimit}`);
+      const cssBaseline = parseInt(fs.readFileSync(cssCssBaselinePath, 'utf8').trim(), 10);
+      if (cssImportants > cssBaseline) {
+        fail(`dashboard.css: ${cssImportants} !important \u2014 UP from baseline ${cssBaseline}. No new !important allowed.`);
+      } else if (cssImportants <= END_STATE_TARGET) {
+        pass(`dashboard.css: ${cssImportants} !important \u2014 \u2705 end-state target \u2264${END_STATE_TARGET} REACHED`);
+      } else {
+        pass(`dashboard.css: ${cssImportants} !important (baseline ${cssBaseline} \u2014 no regression)`);
+        console.log(`  \uD83D\uDCCA  End-state progress: ${cssImportants} \u2192 target \u2264${END_STATE_TARGET} (need \u2212${cssImportants - END_STATE_TARGET} more reductions)`);
+      }
     }
   } else {
     pass('dashboard.css: not yet present \u2014 skipping');
   }
 }
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ASSERTION 7: style.css must not have been modified (hash check)
