@@ -495,8 +495,8 @@ async def verify_github_invite(req: VerifyInviteRequest):
     
     if is_collaborator:
         await db.execute(
-            'UPDATE enrollments SET github_invite_status = ?, updated_at = CURRENT_TIMESTAMP WHERE student_id = ?',
-            ('accepted', student['id'])
+            "UPDATE enrollments SET github_invite_status = ? WHERE student_id = ?",
+            ("accepted", student["id"])
         )
         return {'status': 'accepted'}
     else:
