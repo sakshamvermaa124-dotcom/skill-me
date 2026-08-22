@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
+
   <!-- Primary SEO Meta Tags -->
   <title>Certificate of Completion — SkillMe</title>
   <meta name="title" content="Certificate of Completion — SkillMe">
-  <meta name="description" content="Verified Certificate of Internship Completion issued by SkillMe. View cryptographically validated performance records and pull requests.">
-  <meta name="keywords" content="SkillMe certificate, certificate of completion, verified internship certificate, student certificate">
+  <meta name="description"
+    content="Verified Certificate of Internship Completion issued by SkillMe. View cryptographically validated performance records and pull requests.">
+  <meta name="keywords"
+    content="SkillMe certificate, certificate of completion, verified internship certificate, student certificate">
   <meta name="robots" content="index, follow">
   <meta name="language" content="English">
   <meta name="geo.region" content="IN">
@@ -37,12 +40,14 @@
   <link rel="icon" href="assets/logo.webp" type="image/webp">
   <link rel="apple-touch-icon" href="assets/logo.png">
   <link rel="manifest" href="site.webmanifest">
-  
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Dancing+Script:wght@700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Dancing+Script:wght@700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Space+Grotesk:wght@500;600;700&display=swap"
+    rel="stylesheet" />
+
   <!-- Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -110,11 +115,17 @@
       --blue: #2563eb;
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
       background: var(--dark-canvas);
-      background-image: 
+      background-image:
         radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201, 154, 78, 0.12), transparent 70%),
         radial-gradient(ellipse 60% 40% at 50% 110%, rgba(37, 99, 235, 0.08), transparent 70%);
       min-height: 100vh;
@@ -138,6 +149,7 @@
       justify-content: center;
       z-index: 10;
     }
+
     .badge-id {
       background: rgba(201, 154, 78, 0.12);
       border: 1px solid rgba(201, 154, 78, 0.35);
@@ -149,6 +161,7 @@
       font-family: 'JetBrains Mono', monospace;
       letter-spacing: 0.05em;
     }
+
     .btn-action {
       display: inline-flex;
       align-items: center;
@@ -163,20 +176,24 @@
       text-decoration: none;
       border: none;
     }
+
     .btn-download {
       background: linear-gradient(135deg, #c99a4e 0%, #b5873d 100%);
       color: #0c0b0b;
       box-shadow: 0 4px 16px rgba(201, 154, 78, 0.35);
     }
+
     .btn-download:hover {
       box-shadow: 0 6px 22px rgba(201, 154, 78, 0.5);
       transform: translateY(-1px);
     }
+
     .btn-secondary {
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(255, 255, 255, 0.15);
       color: #e2e8f0;
     }
+
     .btn-secondary:hover {
       background: rgba(255, 255, 255, 0.12);
       border-color: rgba(255, 255, 255, 0.25);
@@ -198,7 +215,7 @@
       position: relative;
       overflow: hidden;
       border-radius: 6px;
-      box-shadow: 
+      box-shadow:
         0 25px 60px rgba(0, 0, 0, 0.6),
         0 0 0 1px rgba(201, 154, 78, 0.4),
         0 0 40px rgba(201, 154, 78, 0.12);
@@ -210,11 +227,12 @@
     .cert-bg-pattern {
       position: absolute;
       inset: 0;
-      background-image: 
+      background-image:
         radial-gradient(circle at 50% 50%, rgba(201, 154, 78, 0.03) 0%, transparent 60%),
         repeating-linear-gradient(45deg, transparent 0, transparent 40px, rgba(201, 154, 78, 0.015) 40px, rgba(201, 154, 78, 0.015) 41px);
       pointer-events: none;
     }
+
     .cert-watermark-text {
       position: absolute;
       top: 50%;
@@ -237,12 +255,14 @@
       border: 2px solid #c99a4e;
       pointer-events: none;
     }
+
     .cert-border-middle {
       position: absolute;
       inset: 18px;
       border: 1px solid rgba(201, 154, 78, 0.35);
       pointer-events: none;
     }
+
     .cert-border-inner {
       position: absolute;
       inset: 22px;
@@ -257,15 +277,35 @@
       height: 38px;
       pointer-events: none;
     }
+
     .corner-flourish svg {
       width: 100%;
       height: 100%;
       color: #c99a4e;
     }
-    .corner-flourish.tl { top: 10px; left: 10px; }
-    .corner-flourish.tr { top: 10px; right: 10px; transform: scaleX(-1); }
-    .corner-flourish.bl { bottom: 10px; left: 10px; transform: scaleY(-1); }
-    .corner-flourish.br { bottom: 10px; right: 10px; transform: scale(-1); }
+
+    .corner-flourish.tl {
+      top: 10px;
+      left: 10px;
+    }
+
+    .corner-flourish.tr {
+      top: 10px;
+      right: 10px;
+      transform: scaleX(-1);
+    }
+
+    .corner-flourish.bl {
+      bottom: 10px;
+      left: 10px;
+      transform: scaleY(-1);
+    }
+
+    .corner-flourish.br {
+      bottom: 10px;
+      right: 10px;
+      transform: scale(-1);
+    }
 
     /* Content Layout */
     .cert-content {
@@ -286,11 +326,13 @@
       border-bottom: 1px solid rgba(201, 154, 78, 0.2);
       padding-bottom: 12px;
     }
+
     .cert-brand {
       display: flex;
       align-items: center;
       gap: 12px;
     }
+
     .cert-brand-logo {
       width: 44px;
       height: 44px;
@@ -299,6 +341,7 @@
       border: 1.5px solid #c99a4e;
       background: #0c0b0b;
     }
+
     .cert-brand-title {
       font-family: 'Space Grotesk', sans-serif;
       font-weight: 800;
@@ -307,7 +350,11 @@
       letter-spacing: -0.3px;
       line-height: 1.1;
     }
-    .cert-brand-title span { color: #c99a4e; }
+
+    .cert-brand-title span {
+      color: #c99a4e;
+    }
+
     .cert-brand-sub {
       font-size: 0.72rem;
       font-weight: 600;
@@ -316,12 +363,14 @@
       text-transform: uppercase;
       margin-top: 2px;
     }
+
     .cert-header-meta {
       text-align: right;
       font-size: 0.75rem;
       color: #64748b;
       line-height: 1.5;
     }
+
     .cert-header-meta strong {
       color: #0f172a;
       font-family: 'JetBrains Mono', monospace;
@@ -332,6 +381,7 @@
       text-align: center;
       margin: 8px 0 4px;
     }
+
     .cert-ribbon-label {
       font-family: 'Cinzel', serif;
       font-size: 0.76rem;
@@ -342,15 +392,19 @@
       display: block;
       margin-bottom: 4px;
     }
+
     .cert-main-title {
-      font-family: 'Cinzel', serif;
-      font-size: 1.85rem;
-      font-weight: 800;
+      font-family: 'Playfair Display', serif;
+      font-size: 2.1rem;
+      font-weight: 700;
       color: #0f172a;
-      letter-spacing: 0.05em;
       text-transform: uppercase;
+      letter-spacing: 0.08em;
       line-height: 1.2;
+      text-align: center;
+      margin: 0 auto;
     }
+
     .cert-title-divider {
       display: flex;
       align-items: center;
@@ -359,11 +413,13 @@
       margin: 6px auto 0;
       width: 60%;
     }
+
     .cert-divider-line {
       flex: 1;
       height: 1px;
       background: linear-gradient(90deg, transparent, #c99a4e, transparent);
     }
+
     .cert-divider-diamond {
       width: 6px;
       height: 6px;
@@ -376,12 +432,15 @@
       text-align: center;
       padding: 0 20px;
     }
+
     .cert-present-text {
       font-family: 'Cormorant Garamond', serif;
       font-style: italic;
-      font-size: 1rem;
-      color: #475569;
+      font-size: 1.15rem;
+      font-weight: 500;
+      color: #334155;
     }
+
     .cert-recipient-name {
       font-family: 'Playfair Display', serif;
       font-weight: 700;
@@ -391,18 +450,22 @@
       margin: 2px 0 2px;
       text-shadow: 0 2px 14px rgba(201, 154, 78, 0.12);
     }
+
     .cert-name-line {
       width: 50%;
       height: 1.5px;
       background: linear-gradient(90deg, transparent, #c99a4e 50%, transparent);
       margin: 0 auto 6px;
     }
+
     .cert-completion-text {
       font-family: 'Cormorant Garamond', serif;
       font-style: italic;
-      font-size: 0.95rem;
-      color: #475569;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #334155;
     }
+
     .cert-track-name {
       font-family: 'Cinzel', serif;
       font-size: 1.25rem;
@@ -411,19 +474,20 @@
       letter-spacing: 0.04em;
       margin: 3px 0;
     }
+
     .cert-narrative {
       font-family: 'Inter', sans-serif;
-      font-size: 0.74rem;
-      line-height: 1.6;
+      font-size: 0.95rem;
+      line-height: 1.7;
       color: #475569;
-      max-width: 780px;
-      margin: 6px auto 0;
+      max-width: 820px;
+      margin: 16px auto 32px;
     }
 
     /* ─── Details Grid ─── */
     .cert-details-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 12px;
       padding: 10px 16px;
       background: #faf8f5;
@@ -431,9 +495,11 @@
       border-radius: 8px;
       margin: 6px 0;
     }
+
     .cert-detail-box {
       text-align: center;
     }
+
     .cert-detail-lbl {
       font-size: 0.62rem;
       font-weight: 700;
@@ -442,13 +508,17 @@
       letter-spacing: 0.08em;
       margin-bottom: 2px;
     }
+
     .cert-detail-val {
       font-family: 'Space Grotesk', sans-serif;
       font-size: 0.82rem;
       font-weight: 700;
       color: #0f172a;
     }
-    .cert-detail-val.emerald { color: #059669; }
+
+    .cert-detail-val.emerald {
+      color: #059669;
+    }
 
     /* ─── Footer: Signatures, Seal & QR ─── */
     .cert-footer-row {
@@ -458,9 +528,11 @@
       gap: 16px;
       padding-top: 4px;
     }
+
     .cert-col-left {
       text-align: left;
     }
+
     .cert-meta-label {
       font-size: 0.64rem;
       font-weight: 700;
@@ -468,6 +540,7 @@
       text-transform: uppercase;
       letter-spacing: 0.08em;
     }
+
     .cert-meta-val {
       font-family: 'Space Grotesk', sans-serif;
       font-size: 0.82rem;
@@ -475,6 +548,7 @@
       color: #0f172a;
       margin-top: 1px;
     }
+
     .cert-meta-val.gold {
       font-family: 'JetBrains Mono', monospace;
       color: #a17830;
@@ -488,6 +562,7 @@
       align-items: center;
       justify-content: center;
     }
+
     .cert-seal-wrap {
       width: 64px;
       height: 64px;
@@ -500,6 +575,7 @@
       border: 2px dashed #ffffff;
       position: relative;
     }
+
     .cert-seal-inner {
       width: 48px;
       height: 48px;
@@ -512,8 +588,19 @@
       text-align: center;
       color: #fff;
     }
-    .cert-seal-stars { font-size: 8px; letter-spacing: 1px; }
-    .cert-seal-text { font-family: 'Cinzel', serif; font-size: 6px; font-weight: 900; letter-spacing: 0.5px; text-transform: uppercase; }
+
+    .cert-seal-stars {
+      font-size: 8px;
+      letter-spacing: 1px;
+    }
+
+    .cert-seal-text {
+      font-family: 'Cinzel', serif;
+      font-size: 6px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
 
     /* Right: Signatory & QR */
     .cert-col-right {
@@ -522,9 +609,11 @@
       justify-content: flex-end;
       gap: 16px;
     }
+
     .cert-sig-box {
       text-align: right;
     }
+
     .cert-sig-script {
       font-family: 'Dancing Script', cursive;
       font-size: 1.65rem;
@@ -533,25 +622,30 @@
       line-height: 1;
       margin-bottom: 2px;
     }
+
     .cert-sig-line {
       width: 120px;
       height: 1.5px;
       background: rgba(201, 154, 78, 0.5);
       margin: 0 0 3px auto;
     }
+
     .cert-sig-name {
       font-size: 0.78rem;
       font-weight: 700;
       color: #0f172a;
     }
+
     .cert-sig-title {
       font-size: 0.64rem;
       color: #64748b;
     }
+
     .cert-qr-holder {
       text-align: center;
       flex-shrink: 0;
     }
+
     .cert-qr-box {
       width: 58px;
       height: 58px;
@@ -561,8 +655,18 @@
       border-radius: 4px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
-    .cert-qr-box canvas { width: 100% !important; height: 100% !important; }
-    .cert-qr-sub { font-size: 0.55rem; color: #64748b; margin-top: 2px; font-weight: 600; }
+
+    .cert-qr-box canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .cert-qr-sub {
+      font-size: 0.55rem;
+      color: #64748b;
+      margin-top: 2px;
+      font-weight: 600;
+    }
 
     /* Bottom Fine Print */
     .cert-bottom-fineprint {
@@ -588,6 +692,7 @@
       align-items: center;
       gap: 16px;
     }
+
     .verify-strip-icon {
       width: 42px;
       height: 42px;
@@ -600,11 +705,13 @@
       font-size: 20px;
       flex-shrink: 0;
     }
+
     .verify-strip-text {
       font-size: 0.85rem;
       line-height: 1.5;
       color: #cbd5e1;
     }
+
     .verify-strip-text strong {
       color: #ffffff;
       font-size: 0.92rem;
@@ -620,7 +727,11 @@
       margin: 40px auto;
       text-align: center;
     }
-    .verify-page.active { display: block; }
+
+    .verify-page.active {
+      display: block;
+    }
+
     .verify-page-icon {
       width: 68px;
       height: 68px;
@@ -633,6 +744,7 @@
       font-size: 30px;
       margin: 0 auto 20px;
     }
+
     .verify-page h1 {
       font-family: 'Cinzel', serif;
       font-size: 1.85rem;
@@ -640,11 +752,13 @@
       color: #fff;
       margin-bottom: 8px;
     }
+
     .verify-input-group {
       display: flex;
       gap: 10px;
       margin: 24px 0 16px;
     }
+
     .verify-input {
       flex: 1;
       padding: 14px 18px;
@@ -658,10 +772,12 @@
       text-transform: uppercase;
       letter-spacing: 0.08em;
     }
+
     .verify-input:focus {
       border-color: #c99a4e;
       box-shadow: 0 0 16px rgba(201, 154, 78, 0.3);
     }
+
     .verify-submit {
       padding: 14px 28px;
       background: linear-gradient(135deg, #c99a4e, #b5873d);
@@ -672,6 +788,7 @@
       border-radius: 10px;
       cursor: pointer;
     }
+
     .verify-result {
       display: none;
       text-align: left;
@@ -681,7 +798,10 @@
       padding: 20px;
       margin-top: 20px;
     }
-    .verify-result.active { display: block; }
+
+    .verify-result.active {
+      display: block;
+    }
 
     /* ─── Print Styles ─── */
     @media print {
@@ -689,6 +809,7 @@
         size: A4 landscape;
         margin: 0;
       }
+
       body {
         background: #ffffff !important;
         padding: 0 !important;
@@ -696,15 +817,20 @@
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
-      .action-bar, .verify-strip, .verify-page {
+
+      .action-bar,
+      .verify-strip,
+      .verify-page {
         display: none !important;
       }
+
       .cert-wrap {
         display: block !important;
         margin: 0 auto !important;
         padding: 0 !important;
         transform: scale(1) !important;
       }
+
       .certificate {
         box-shadow: none !important;
         border: 2px solid #c99a4e !important;
@@ -716,395 +842,436 @@
     }
   </style>
 </head>
+
 <body>
 
-<!-- ═══ VERIFY SEARCH PAGE (Shown when no parameters exist) ═══ -->
-<div class="verify-page" id="verify-page">
-  <div class="verify-page-icon">🏛️</div>
-  <h1>Verify Certificate Authenticity</h1>
-  <p style="font-size:0.92rem; color:#94a3b8; line-height:1.6; margin-top:8px;">
-    Enter the unique Certificate ID to verify credentials issued under the SkillMe Technical Internship Program.
-  </p>
+  <!-- ═══ VERIFY SEARCH PAGE (Shown when no parameters exist) ═══ -->
+  <div class="verify-page" id="verify-page">
+    <div class="verify-page-icon">🏛️</div>
+    <h1>Verify Certificate Authenticity</h1>
+    <p style="font-size:0.92rem; color:#94a3b8; line-height:1.6; margin-top:8px;">
+      Enter the unique Certificate ID to verify credentials issued under the SkillMe Technical Internship Program.
+    </p>
 
-  <div class="verify-input-group">
-    <input type="text" class="verify-input" id="verify-id-input" placeholder="e.g. SM-A1B2-C3D4-E5F6" maxlength="24" autocomplete="off" spellcheck="false" />
-    <button class="verify-submit" id="verify-submit-btn" onclick="handleVerifySearch()">Verify</button>
-  </div>
-  <div style="font-size:0.78rem; color:#64748b;">Format: SM-XXXX-XXXX-XXXX &bull; Instant Cryptographic Check</div>
+    <div class="verify-input-group">
+      <input type="text" class="verify-input" id="verify-id-input" placeholder="e.g. SM-A1B2-C3D4-E5F6" maxlength="24"
+        autocomplete="off" spellcheck="false" />
+      <button class="verify-submit" id="verify-submit-btn" onclick="handleVerifySearch()">Verify</button>
+    </div>
+    <div style="font-size:0.78rem; color:#64748b;">Format: SM-XXXX-XXXX-XXXX &bull; Instant Cryptographic Check</div>
 
-  <div class="verify-result" id="verify-result"></div>
-</div>
-
-<!-- ═══ CERTIFICATE DISPLAY VIEW ═══ -->
-<div id="cert-view-wrapper">
-
-  <!-- Top Action Control Bar -->
-  <div class="action-bar" id="action-bar">
-    <div class="badge-id" id="cert-id-badge">Loading Credential...</div>
-    <button class="btn-action btn-download" onclick="downloadPDF()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Download High-Res PDF
-    </button>
-    <button class="btn-action btn-secondary" onclick="window.print()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-      Print
-    </button>
-    <a class="btn-action btn-secondary" href="verify.html" id="verify-another-btn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
-      Verify Credentials
-    </a>
+    <div class="verify-result" id="verify-result"></div>
   </div>
 
-  <!-- Main Certificate Canvas -->
-  <div class="cert-wrap">
-    <div class="certificate" id="certificate">
-      <!-- Background pattern & Watermark -->
-      <div class="cert-bg-pattern"></div>
-      <div class="cert-watermark-text">SKILLME</div>
+  <!-- ═══ CERTIFICATE DISPLAY VIEW ═══ -->
+  <div id="cert-view-wrapper">
 
-      <!-- Guilloche Borders -->
-      <div class="cert-border-outer"></div>
-      <div class="cert-border-middle"></div>
-      <div class="cert-border-inner"></div>
+    <!-- Top Action Control Bar -->
+    <div class="action-bar" id="action-bar">
+      <div class="badge-id" id="cert-id-badge">Loading Credential...</div>
+      <button class="btn-action btn-download" onclick="downloadPDF()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+        Download High-Res PDF
+      </button>
+      <button class="btn-action btn-secondary" onclick="window.print()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+          <polyline points="6 9 6 2 18 2 18 9" />
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+          <rect x="6" y="14" width="12" height="8" />
+        </svg>
+        Print
+      </button>
+      <a class="btn-action btn-secondary" href="verify.html" id="verify-another-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          <polyline points="9 12 11 14 15 10" />
+        </svg>
+        Verify Credentials
+      </a>
+    </div>
 
-      <!-- Corner Flourishes -->
-      <div class="corner-flourish tl">
-        <svg viewBox="0 0 100 100" fill="currentColor"><path d="M0,0 L100,0 L100,20 L20,20 L20,100 L0,100 Z"/><circle cx="35" cy="35" r="8"/></svg>
-      </div>
-      <div class="corner-flourish tr">
-        <svg viewBox="0 0 100 100" fill="currentColor"><path d="M0,0 L100,0 L100,20 L20,20 L20,100 L0,100 Z"/><circle cx="35" cy="35" r="8"/></svg>
-      </div>
-      <div class="corner-flourish bl">
-        <svg viewBox="0 0 100 100" fill="currentColor"><path d="M0,0 L100,0 L100,20 L20,20 L20,100 L0,100 Z"/><circle cx="35" cy="35" r="8"/></svg>
-      </div>
-      <div class="corner-flourish br">
-        <svg viewBox="0 0 100 100" fill="currentColor"><path d="M0,0 L100,0 L100,20 L20,20 L20,100 L0,100 Z"/><circle cx="35" cy="35" r="8"/></svg>
-      </div>
+    <!-- Main Certificate Canvas -->
+    <div class="cert-wrap">
+      <div class="certificate" id="certificate">
+        <!-- Background pattern & Watermark -->
+        <div class="cert-bg-pattern"></div>
+        <div class="cert-watermark-text">SKILLME</div>
 
-      <!-- Inner Certificate Content -->
-      <div class="cert-content">
+        <!-- Guilloche Borders -->
+        <div class="cert-border-outer"></div>
+        <div class="cert-border-middle"></div>
+        <div class="cert-border-inner"></div>
 
-        <!-- 1. Header: Brand Letterhead -->
-        <div class="cert-header">
-          <div class="cert-brand">
-            <img src="assets/logo.webp" alt="SkillMe Logo" class="cert-brand-logo" onerror="this.src='assets/logo.png'">
-            <div>
-              <div class="cert-brand-title">Skill<span>Me</span></div>
-              <div class="cert-brand-sub">Technical Internship Platform</div>
-            </div>
-          </div>
-          <div style="display: flex; align-items: center; gap: 20px;">
-            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">
-              <img src="assets/msme_logo.png" alt="MSME Govt. of India" style="height: 22px; width: auto; object-fit: contain;" />
-              <div style="font-size: 0.62rem; color: #64748b; font-family: 'JetBrains Mono', monospace; font-weight: 600;">
-                Ministry of MSME &bull; <strong style="color: #0f172a;">UDYAM-UP-50-0294192</strong>
+        <!-- Corner Flourishes -->
+        <div class="corner-flourish tl">
+          <svg viewBox="0 0 100 100" fill="currentColor">
+            <path d="M0,0 L100,0 L100,20 L20,20 L20,100 L0,100 Z" />
+            <circle cx="35" cy="35" r="8" />
+          </svg>
+        </div>
+        <div class="corner-flourish tr">
+          <svg viewBox="0 0 100 100" fill="currentColor">
+            <path d="M0,0 L100,0 L100,20 L20,20 L20,100 L0,100 Z" />
+            <circle cx="35" cy="35" r="8" />
+          </svg>
+        </div>
+        <div class="corner-flourish bl">
+          <svg viewBox="0 0 100 100" fill="currentColor">
+            <path d="M0,0 L100,0 L100,20 L20,20 L20,100 L0,100 Z" />
+            <circle cx="35" cy="35" r="8" />
+          </svg>
+        </div>
+        <div class="corner-flourish br">
+          <svg viewBox="0 0 100 100" fill="currentColor">
+            <path d="M0,0 L100,0 L100,20 L20,20 L20,100 L0,100 Z" />
+            <circle cx="35" cy="35" r="8" />
+          </svg>
+        </div>
+
+        <!-- Inner Certificate Content -->
+        <div class="cert-content">
+
+          <!-- 1. Header: Brand Letterhead -->
+          <div class="cert-header">
+            <div class="cert-brand">
+              <img src="assets/logo.webp" alt="SkillMe Logo" class="cert-brand-logo"
+                onerror="this.src='assets/logo.png'">
+              <div>
+                <div class="cert-brand-title">Skill<span>Me</span></div>
               </div>
             </div>
-            <div class="cert-header-meta">
-              <div>Doc Ref: <strong id="cert-doc-ref">SKM-CERT-2026</strong></div>
-              <div>Auth: <span style="color:#059669; font-weight:700;">● Verified</span></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 2. Title Section -->
-        <div class="cert-title-block">
-          <span class="cert-ribbon-label">Certificate of Merit &amp; Completion</span>
-          <h1 class="cert-main-title">Certificate of Internship Excellence</h1>
-          <div class="cert-title-divider">
-            <div class="cert-divider-line"></div>
-            <div class="cert-divider-diamond"></div>
-            <div class="cert-divider-line"></div>
-          </div>
-        </div>
-
-        <!-- 3. Body Narrative -->
-        <div class="cert-body-block">
-          <div class="cert-present-text">This is proudly presented to</div>
-          <div class="cert-recipient-name" id="cert-name">Candidate Name</div>
-          <div class="cert-name-line"></div>
-          <div class="cert-completion-text">for successful completion and exemplary technical performance in the</div>
-          <div class="cert-track-name" id="cert-domain">Web Development Engineering Internship</div>
-          <p class="cert-narrative" id="cert-description">
-            A rigorous 4-week industry-standard software engineering internship. The candidate demonstrated competency in real-world GitHub repositories, successfully implemented modular architecture, resolved assigned issues, passed automated CI/CD test pipelines, and adhered to professional engineering standards.
-          </p>
-        </div>
-
-        <!-- 4. Details Parameters Grid (NO BATCH NUMBER) -->
-        <div class="cert-details-grid">
-          <div class="cert-detail-box">
-            <div class="cert-detail-lbl">Duration</div>
-            <div class="cert-detail-val" id="cert-duration">4 Weeks</div>
-          </div>
-          <div class="cert-detail-box">
-            <div class="cert-detail-lbl">Delivery Mode</div>
-            <div class="cert-detail-val">Remote / Async</div>
-          </div>
-          <div class="cert-detail-box">
-            <div class="cert-detail-lbl">Verification</div>
-            <div class="cert-detail-val">GitHub Pull Requests</div>
-          </div>
-          <div class="cert-detail-box">
-            <div class="cert-detail-lbl">Merit Status</div>
-            <div class="cert-detail-val emerald">✓ Completed &amp; Verified</div>
-          </div>
-        </div>
-
-        <!-- 5. Footer: Date, Gold Seal, Signatory & QR -->
-        <div class="cert-footer-row">
-          <!-- Left: Issuance Meta -->
-          <div class="cert-col-left">
-            <div class="cert-meta-label">Date of Issuance</div>
-            <div class="cert-meta-val" id="cert-date">August 16, 2026</div>
-            <div class="cert-meta-label" style="margin-top: 6px;">Certificate ID</div>
-            <div class="cert-meta-val gold" id="cert-id">SM-2026-WD-1001</div>
-          </div>
-
-          <!-- Center: Official Seal -->
-          <div class="cert-col-center">
-            <div class="cert-seal-wrap">
-              <div class="cert-seal-inner">
-                <span class="cert-seal-stars">★★★</span>
-                <span class="cert-seal-text">VERIFIED<br>MERIT</span>
-                <span class="cert-seal-stars">★★★</span>
+            <div style="display: flex; align-items: center; gap: 20px;">
+              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">
+                <img src="assets/msme_logo.png" alt="MSME Govt. of India"
+                  style="height: 22px; width: auto; object-fit: contain;" />
+                <div
+                  style="font-size: 0.62rem; color: #64748b; font-family: 'JetBrains Mono', monospace; font-weight: 600;">
+                  Ministry of MSME &bull; <strong style="color: #0f172a;">UDYAM-UP-50-0294192</strong>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Right: Signature & Live QR -->
-          <div class="cert-col-right">
-            <div class="cert-sig-box">
-              <div class="cert-sig-script">Saksham Verma</div>
-              <div class="cert-sig-line"></div>
-              <div class="cert-sig-name">Saksham Verma</div>
-              <div class="cert-sig-title">Founder &amp; Technical Director</div>
-              <div class="cert-meta-label" style="margin-top:2px;">SkillMe Technical Internship</div>
-            </div>
-
-            <div class="cert-qr-holder">
-              <div class="cert-qr-box">
-                <canvas id="qr-canvas"></canvas>
-              </div>
-              <div class="cert-qr-sub">Scan to Verify</div>
+          <!-- 2. Main Title -->
+          <div class="cert-title-container">
+            <div class="cert-main-title">CERTIFICATE OF ACHIEVEMENT</div>
+            <div class="cert-divider">
+              <div class="cert-divider-line"></div>
+              <div class="cert-divider-diamond"></div>
+              <div class="cert-divider-line"></div>
             </div>
           </div>
-        </div>
 
-        <!-- 6. Bottom Fine Print -->
-        <div class="cert-bottom-fineprint">
-          <span>Cryptographically validated credential &bull; Authenticate at skill-me-intern.in/verify.html</span>
-          <span>&copy; 2026 SkillMe &bull; Govt. of India Udyam Reg. UDYAM-UP-50-0294192</span>
-        </div>
+          <!-- 3. Body Narrative -->
+          <div class="cert-body-block">
+            <div class="cert-present-text">This is proudly presented to</div>
+            <div class="cert-recipient-name" id="cert-name">Candidate Name</div>
+            <div class="cert-name-line"></div>
+            <div class="cert-completion-text">for successful completion and exemplary technical performance in the</div>
+            <div class="cert-track-name" id="cert-domain">Web Development Engineering Internship</div>
+            <p class="cert-narrative" id="cert-description">
+              A rigorous 4-week industry-standard software engineering internship. The candidate demonstrated competency
+              in real-world GitHub repositories, successfully implemented modular architecture, resolved assigned
+              issues, passed automated CI/CD test pipelines, and adhered to professional engineering standards.
+            </p>
+          </div>
 
+
+
+          <!-- 5. Footer: Date, Gold Seal, Signatory & QR -->
+          <div class="cert-footer-row">
+            <!-- Left: Issuance Meta -->
+            <div class="cert-col-left">
+              <div class="cert-meta-label" style="font-size: 0.85rem;">Date of Issuance</div>
+              <div class="cert-meta-val" id="cert-date" style="font-size: 1.3rem;">August 16, 2026</div>
+            </div>
+
+            <!-- Center: Official Seal -->
+            <div class="cert-col-center"
+              style="display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 5px;">
+              <div class="cert-meta-label" style="font-size: 0.85rem;">Student ID</div>
+              <div class="cert-meta-val" id="cert-id" style="font-size: 1.3rem; color: #000;">SM-2026-WD-1001</div>
+            </div>
+
+            <!-- Right: Signature & Live QR -->
+            <div class="cert-col-right">
+              <div class="cert-sig-box">
+                <img src="assets/signature.png" alt="Signature"
+                  style="height: 160px; width: auto; object-fit: contain; margin-bottom: -20px; margin-top: -60px; mix-blend-mode: multiply; filter: contrast(1.5) brightness(1.1); pointer-events: none; z-index: 2; position: relative; transform: translate(35px, 25px);">
+                <div class="cert-sig-line"></div>
+                <div class="cert-sig-name">Saksham Verma</div>
+                <div class="cert-sig-title">Founder &amp; Technical Director</div>
+                <div class="cert-meta-label" style="margin-top:2px;">SkillMe Technical Internship</div>
+              </div>
+
+              <div class="cert-qr-holder">
+                <div class="cert-qr-box">
+                  <canvas id="qr-canvas"></canvas>
+                </div>
+                <div class="cert-qr-sub">Scan to Verify</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6. Bottom Fine Print -->
+          <div class="cert-bottom-fineprint">
+            <span>Cryptographically validated credential &bull; Authenticate at skill-me-intern.in/verify</span>
+            <span>&copy; 2026 SkillMe &bull; Govt. of India Udyam Reg. UDYAM-UP-50-0294192</span>
+          </div>
+
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Live Verification Status Strip -->
-  <div class="verify-strip" id="verify-section">
-    <div class="verify-strip-icon">✓</div>
-    <div class="verify-strip-text">
-      <strong>Credential Authenticity Confirmed</strong>
-      <span>This certificate is officially registered in SkillMe's cryptographic verification registry for <strong id="verify-holder-name" style="display:inline; color:#f0c97a;">Candidate Name</strong>.</span>
+    <!-- Live Verification Status Strip -->
+    <div class="verify-strip" id="verify-section">
+      <div class="verify-strip-icon">✓</div>
+      <div class="verify-strip-text">
+        <strong>Credential Authenticity Confirmed</strong>
+        <span>This certificate is officially registered in SkillMe's cryptographic verification registry for <strong
+            id="verify-holder-name" style="display:inline; color:#f0c97a;">Candidate Name</strong>.</span>
+      </div>
     </div>
+
   </div>
 
-</div>
+  <script>
+    const API = window.SKILLME_API || 'http://localhost:8000';
+    const params = new URLSearchParams(window.location.search);
+    let studentId = params.get('student_id') || params.get('id');
+    let batchId = params.get('batch_id');
+    const certId = params.get('cert_id');
+    const email = params.get('email');
+    const nameParam = params.get('name');
+    const domainParam = params.get('domain');
+    let resolvedName = nameParam || '';
 
-<script>
-  const API = window.SKILLME_API || 'http://localhost:8000';
-  const params = new URLSearchParams(window.location.search);
-  let studentId     = params.get('student_id') || params.get('id');
-  let batchId       = params.get('batch_id');
-  const certId      = params.get('cert_id');
-  const email       = params.get('email');
-  const nameParam   = params.get('name');
-  const domainParam = params.get('domain');
-  let resolvedName  = nameParam || '';
+    // Deterministic Certificate ID generator (SHA-256)
+    async function generateCertId(sid, bid) {
+      const raw = `skillme-${sid || '1001'}-${bid || '1'}`;
+      const encoder = new TextEncoder();
+      const data = encoder.encode(raw);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+      return `SM-${hashHex.substring(0, 4)}-${hashHex.substring(4, 8)}-${hashHex.substring(8, 12)}`;
+    }
 
-  // Deterministic Certificate ID generator (SHA-256)
-  async function generateCertId(sid, bid) {
-    const raw = `skillme-${sid || '1001'}-${bid || '1'}`;
-    const encoder = new TextEncoder();
-    const data = encoder.encode(raw);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
-    return `SM-${hashHex.substring(0,4)}-${hashHex.substring(4,8)}-${hashHex.substring(8,12)}`;
-  }
+    // Determine mode
+    const hasParams = studentId || batchId || certId || email || nameParam;
 
-  // Determine mode
-  const hasParams = studentId || batchId || certId || email || nameParam;
-
-  if (!hasParams) {
-    document.getElementById('verify-page').classList.add('active');
-    document.getElementById('cert-view-wrapper').style.display = 'none';
-    setTimeout(() => document.getElementById('verify-id-input')?.focus(), 300);
-    document.getElementById('verify-id-input')?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') handleVerifySearch();
-    });
-  } else {
-    document.getElementById('verify-page').style.display = 'none';
-    document.getElementById('cert-view-wrapper').style.display = 'block';
-    loadCertificate();
-  }
-
-  async function loadCertificate() {
-    if (nameParam && studentId) {
-      const realCertId = certId || await generateCertId(studentId, batchId || '1');
-      populateCertificate({
-        holder: nameParam,
-        domain: domainParam || 'Web Development',
-        issued_at: new Date().toISOString(),
-        cert_id: realCertId,
+    if (!hasParams) {
+      document.getElementById('verify-page').classList.add('active');
+      document.getElementById('cert-view-wrapper').style.display = 'none';
+      setTimeout(() => document.getElementById('verify-id-input')?.focus(), 300);
+      document.getElementById('verify-id-input')?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleVerifySearch();
       });
-      return;
-    }
-
-    if (certId) {
-      await verifyCert(certId);
-      return;
-    }
-
-    if (email && !studentId) {
-      try {
-        const res = await fetch(`${API}/api/students/progress/${encodeURIComponent(email)}`);
-        if (!res.ok) throw new Error('Student not found');
-        const data = await res.json();
-        studentId = data.student?.id;
-        if (data.student?.name) resolvedName = data.student.name;
-        const prog = data.progress;
-        if (prog && prog.length > 0) batchId = prog[0].batch_id;
-      } catch(e) {
-        showError(`Could not find student: ${e.message}`);
-        return;
-      }
-    }
-
-    if (studentId) {
-      await triggerAndDisplay();
     } else {
-      showError('No student identified. Please verify URL credentials.');
+      document.getElementById('verify-page').style.display = 'none';
+      document.getElementById('cert-view-wrapper').style.display = 'block';
+      loadCertificate();
     }
-  }
 
-  async function triggerAndDisplay() {
-    const bid = batchId || 0;
-    try {
-      const metaRes = await fetch(`${API}/api/certificates/metadata/${studentId}/${bid}`);
-      if (metaRes.ok) {
-        const myCert = await metaRes.json();
-        const certHolder = resolvedName || `${myCert.first_name} ${myCert.last_name}`;
+    async function loadCertificate() {
+      if (nameParam && studentId) {
+        const realCertId = certId || await generateCertId(studentId, batchId || '1');
         populateCertificate({
-          holder: certHolder,
-          domain: myCert.domain || domainParam || 'Web Development',
-          issued_at: myCert.issued_at,
-          cert_id: myCert.cert_id,
+          holder: nameParam,
+          domain: domainParam || 'Web Development',
+          issued_at: new Date().toISOString(),
+          cert_id: realCertId,
         });
         return;
       }
-    } catch(e) {}
 
-    const fallbackCertId = await generateCertId(studentId, batchId || '1');
-    populateCertificate({
-      holder: resolvedName || `Student #${studentId}`,
-      domain: domainParam || 'Web Development',
-      issued_at: new Date().toISOString(),
-      cert_id: fallbackCertId,
-    });
-  }
+      if (certId) {
+        await verifyCert(certId);
+        return;
+      }
 
-  async function verifyCert(id) {
-    try {
-      const res = await fetch(`${API}/api/certificates/verify/${encodeURIComponent(id)}`);
-      if (!res.ok) throw new Error('Not found');
-      const data = await res.json();
-      populateCertificate(data);
-    } catch(e) {
-      showError('Certificate not found. The ID may be invalid or expired.');
+      if (email && !studentId) {
+        try {
+          const res = await fetch(`${API}/api/students/progress/${encodeURIComponent(email)}`);
+          if (!res.ok) throw new Error('Student not found');
+          const data = await res.json();
+          studentId = data.student?.id;
+          if (data.student?.name) resolvedName = data.student.name;
+          const prog = data.progress;
+          if (prog && prog.length > 0) batchId = prog[0].batch_id;
+        } catch (e) {
+          showError(`Could not find student: ${e.message}`);
+          return;
+        }
+      }
+
+      if (studentId) {
+        await triggerAndDisplay();
+      } else {
+        showError('No student identified. Please verify URL credentials.');
+      }
     }
-  }
 
-  function populateCertificate(data) {
-    const rawName = data.holder || data.student_name || 'Saksham Verma';
-    const name = rawName
-      .replace(/([a-z])([A-Z])/g, '$1 $2')
-      .replace(/[_-]/g, ' ')
-      .replace(/\s+/g, ' ').trim()
-      .split(' ')
-      .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-      .join(' ');
+    async function triggerAndDisplay() {
+      const bid = batchId || 0;
+      try {
+        const metaRes = await fetch(`${API}/api/certificates/metadata/${studentId}/${bid}`);
+        if (metaRes.ok) {
+          const myCert = await metaRes.json();
+          const certHolder = resolvedName || `${myCert.first_name} ${myCert.last_name}`;
+          populateCertificate({
+            holder: certHolder,
+            domain: myCert.domain || domainParam || 'Web Development',
+            issued_at: myCert.issued_at,
+            cert_id: myCert.cert_id,
+          });
+          return;
+        }
+      } catch (e) { }
 
-    const rawDomain = (data.domain || 'Web Development').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    const domainLabel = rawDomain.toLowerCase().includes('internship')
-      ? rawDomain
-      : `${rawDomain} Engineering Internship`;
-
-    const id = data.cert_id || 'SM-2026-WD-1001';
-    const date = data.issued_at
-      ? new Date(data.issued_at).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })
-      : new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
-
-    document.getElementById('cert-name').textContent = name;
-    document.getElementById('cert-domain').textContent = domainLabel;
-    document.getElementById('cert-date').textContent = date;
-    document.getElementById('cert-id').textContent = id;
-    document.getElementById('cert-id-badge').textContent = id;
-    document.getElementById('cert-doc-ref').textContent = `SKM-CERT-${id.replace(/^SM-/, '')}`;
-    
-    const verifyHolder = document.getElementById('verify-holder-name');
-    if (verifyHolder) verifyHolder.textContent = name;
-
-    document.title = `Certificate of Completion — ${name} — SkillMe`;
-
-    // Generate Verification QR Code
-    const verifyUrl = `${window.location.origin}/verify.html?cert_id=${encodeURIComponent(id)}&id=${encodeURIComponent(id)}`;
-    try {
-      new QRious({
-        element: document.getElementById('qr-canvas'),
-        value: verifyUrl,
-        size: 120,
-        background: '#ffffff',
-        foreground: '#0f172a'
+      const fallbackCertId = await generateCertId(studentId, batchId || '1');
+      populateCertificate({
+        holder: resolvedName || `Student #${studentId}`,
+        domain: domainParam || 'Web Development',
+        issued_at: new Date().toISOString(),
+        cert_id: fallbackCertId,
       });
-    } catch(e) { console.error('QR code generation error:', e); }
-  }
+    }
 
-  function showError(msg) {
-    const el = document.getElementById('verify-section');
-    if (el) {
-      el.innerHTML = `
+    async function verifyCert(id) {
+      try {
+        const res = await fetch(`${API}/api/certificates/verify/${encodeURIComponent(id)}`);
+        if (!res.ok) throw new Error('Not found');
+        const data = await res.json();
+        populateCertificate(data);
+      } catch (e) {
+        showError('Certificate not found. The ID may be invalid or expired.');
+      }
+    }
+
+    function populateCertificate(data) {
+      const rawName = data.holder || data.student_name || 'Saksham Verma';
+      const name = rawName
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/[_-]/g, ' ')
+        .replace(/\s+/g, ' ').trim()
+        .split(' ')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(' ');
+
+      const rawDomain = (data.domain || 'Web Development').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      const domainLabel = rawDomain.toLowerCase().includes('internship')
+        ? rawDomain
+        : `${rawDomain} Engineering Internship`;
+
+      const id = data.cert_id || 'SM-2026-WD-1001';
+      const rawDateObj = data.issued_at ? new Date(data.issued_at) : new Date();
+      const date = rawDateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+      const startDateObj = new Date(rawDateObj.getTime() - (28 * 24 * 60 * 60 * 1000));
+      const startDateStr = startDateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+
+      document.getElementById('cert-name').textContent = name;
+      document.getElementById('cert-domain').textContent = domainLabel;
+      document.getElementById('cert-date').textContent = date;
+      document.getElementById('cert-id').textContent = id;
+
+      // Update description with dynamic domain narrative and dates
+      const descEl = document.getElementById('cert-description');
+      if (descEl) {
+        let domainSkills = "implementing modular architecture, resolving assigned issues, and adhering to professional engineering standards.";
+        const lowerDomain = rawDomain.toLowerCase();
+
+        if (lowerDomain.includes('web')) {
+          domainSkills = "building responsive interfaces, implementing REST APIs, and deploying full-stack applications.";
+        } else if (lowerDomain.includes('python')) {
+          domainSkills = "developing scalable backend logic, automating data pipelines, and deploying Python applications.";
+        } else if (lowerDomain.includes('data')) {
+          domainSkills = "performing advanced data analysis, developing predictive models, and engineering data pipelines.";
+        } else if (lowerDomain.includes('android')) {
+          domainSkills = "designing intuitive mobile UI/UX, integrating robust APIs, and deploying Android applications.";
+        } else if (lowerDomain.includes('ui') || lowerDomain.includes('ux') || lowerDomain.includes('design')) {
+          domainSkills = "conducting user research, designing high-fidelity prototypes, and delivering accessible user experiences.";
+        } else if (lowerDomain.includes('ai') || lowerDomain.includes('machine learning')) {
+          domainSkills = "developing machine learning models, engineering prompt pipelines, and integrating AI-driven solutions.";
+        } else if (lowerDomain.includes('devops') || lowerDomain.includes('cloud')) {
+          domainSkills = "architecting cloud infrastructure, automating CI/CD pipelines, and managing containerized deployments.";
+        } else if (lowerDomain.includes('security') || lowerDomain.includes('cyber')) {
+          domainSkills = "conducting vulnerability assessments, implementing security protocols, and hardening application infrastructure.";
+        } else if (lowerDomain.includes('sql') || lowerDomain.includes('database')) {
+          domainSkills = "designing relational schemas, engineering analytical queries, and optimizing database performance.";
+        } else if (lowerDomain.includes('java') || lowerDomain.includes('cpp') || lowerDomain.includes('c++')) {
+          domainSkills = "implementing object-oriented architectures, developing microservices, and optimizing performance.";
+        } else if (lowerDomain.includes('marketing') || lowerDomain.includes('seo')) {
+          domainSkills = "executing data-driven campaigns, optimizing SEO strategies, and improving audience engagement.";
+        }
+
+        descEl.innerHTML = `Successfully completed a 4-week <strong>${rawDomain}</strong> internship from <strong>${startDateStr}</strong> to <strong>${date}</strong>, demonstrating professional competency by ${domainSkills}`;
+      }
+
+      // We removed cert-id-badge and cert-doc-ref from the HTML earlier, so don't update them if missing
+      const badgeEl = document.getElementById('cert-id-badge');
+      if (badgeEl) badgeEl.textContent = id;
+
+      const docRefEl = document.getElementById('cert-doc-ref');
+      if (docRefEl) docRefEl.textContent = `SKM-CERT-${id.replace(/^SM-/, '')}`;
+
+      const verifyHolder = document.getElementById('verify-holder-name');
+      if (verifyHolder) verifyHolder.textContent = name;
+
+      document.title = `Certificate of Completion — ${name} — SkillMe`;
+
+      // Generate Verification QR Code
+      const verifyUrl = `${window.location.origin}/verify.html?cert_id=${encodeURIComponent(id)}&id=${encodeURIComponent(id)}`;
+      try {
+        new QRious({
+          element: document.getElementById('qr-canvas'),
+          value: verifyUrl,
+          size: 120,
+          background: '#ffffff',
+          foreground: '#0f172a'
+        });
+      } catch (e) { console.error('QR code generation error:', e); }
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('verify-section');
+      if (el) {
+        el.innerHTML = `
         <div class="verify-strip-icon" style="background:rgba(239,68,68,0.15); color:#ef4444;">✕</div>
         <div class="verify-strip-text">
           <strong style="color:#ef4444;">Verification Failed</strong>
           <span>${msg}</span>
         </div>`;
-    }
-  }
-
-  async function handleVerifySearch() {
-    const input = document.getElementById('verify-id-input');
-    const btn = document.getElementById('verify-submit-btn');
-    const resultEl = document.getElementById('verify-result');
-    const rawId = (input.value || '').trim().toUpperCase();
-
-    if (!rawId) {
-      input.focus();
-      return;
+      }
     }
 
-    btn.disabled = true;
-    btn.textContent = 'Verifying...';
+    async function handleVerifySearch() {
+      const input = document.getElementById('verify-id-input');
+      const btn = document.getElementById('verify-submit-btn');
+      const resultEl = document.getElementById('verify-result');
+      const rawId = (input.value || '').trim().toUpperCase();
 
-    try {
-      const res = await fetch(`${API}/api/certificates/verify/${encodeURIComponent(rawId)}`);
-      if (!res.ok) throw new Error('Certificate not found');
-      const data = await res.json();
-      const domainLabel = (data.domain || 'web-dev').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      const certViewUrl = `${window.location.origin}/certificate.html?cert_id=${encodeURIComponent(data.cert_id)}`;
+      if (!rawId) {
+        input.focus();
+        return;
+      }
 
-      resultEl.className = 'verify-result active';
-      resultEl.innerHTML = `
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+
+      try {
+        const res = await fetch(`${API}/api/certificates/verify/${encodeURIComponent(rawId)}`);
+        if (!res.ok) throw new Error('Certificate not found');
+        const data = await res.json();
+        const domainLabel = (data.domain || 'web-dev').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        const certViewUrl = `${window.location.origin}/certificate.html?cert_id=${encodeURIComponent(data.cert_id)}`;
+
+        resultEl.className = 'verify-result active';
+        resultEl.innerHTML = `
         <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
           <span style="font-size:24px;">✅</span>
           <div>
@@ -1119,9 +1286,9 @@
         </div>
         <a href="${certViewUrl}" target="_blank" style="display:inline-block; padding:9px 20px; background:#c99a4e; color:#0c0b0b; font-weight:700; border-radius:8px; text-decoration:none; font-size:0.85rem;">View Full Certificate &rarr;</a>
       `;
-    } catch(e) {
-      resultEl.className = 'verify-result active';
-      resultEl.innerHTML = `
+      } catch (e) {
+        resultEl.className = 'verify-result active';
+        resultEl.innerHTML = `
         <div style="display:flex; align-items:center; gap:12px;">
           <span style="font-size:24px;">❌</span>
           <div>
@@ -1130,81 +1297,82 @@
           </div>
         </div>
       `;
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Verify';
-    }
-  }
-
-  // 1-Click High-Res PDF Download
-  async function downloadPDF() {
-    const btn = document.querySelector('.btn-download');
-    const origText = btn ? btn.innerHTML : '';
-    try {
-      if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = 'Generating PDF...';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Verify';
       }
-
-      const certEl = document.getElementById('certificate');
-      const origBR = certEl.style.borderRadius;
-      const origBS = certEl.style.boxShadow;
-      const origTransform = certEl.style.transform;
-      
-      certEl.style.borderRadius = '0';
-      certEl.style.boxShadow = 'none';
-      certEl.style.transform = 'scale(1)';
-
-      const wrap = document.querySelector('.cert-wrap');
-      const origWrapH = wrap ? wrap.style.height : '';
-      if (wrap) wrap.style.height = '690px';
-
-      const canvas = await html2canvas(certEl, {
-        scale: 3,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        logging: false
-      });
-
-      certEl.style.borderRadius = origBR;
-      certEl.style.boxShadow = origBS;
-      certEl.style.transform = origTransform;
-      if (wrap) wrap.style.height = origWrapH;
-      scaleCertificate();
-
-      const imgData = canvas.toDataURL('image/jpeg', 1.0);
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-      const pdfW = pdf.internal.pageSize.getWidth();
-      const pdfH = pdf.internal.pageSize.getHeight();
-
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
-      const holderName = (document.getElementById('cert-name').textContent || 'Certificate').replace(/\s+/g, '_');
-      pdf.save(`SkillMe_Certificate_${holderName}.pdf`);
-    } catch(e) {
-      console.error('PDF generation error:', e);
-      alert('PDF generation error. Please try printing or saving as PDF.');
-    } finally {
-      if (btn) { btn.disabled = false; btn.innerHTML = origText; }
     }
-  }
 
-  // Auto-fit Responsive Scaling
-  function scaleCertificate() {
-    const cert = document.querySelector('.certificate');
-    const wrap = document.querySelector('.cert-wrap');
-    if (!cert || !wrap) return;
-    const wrapWidth = wrap.clientWidth;
-    const certWidth = 980;
-    const scale = Math.min(1, wrapWidth / certWidth);
-    cert.style.transform = `scale(${scale})`;
-    wrap.style.height = `${690 * scale}px`;
-  }
+    // 1-Click High-Res PDF Download
+    async function downloadPDF() {
+      const btn = document.querySelector('.btn-download');
+      const origText = btn ? btn.innerHTML : '';
+      try {
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = 'Generating PDF...';
+        }
 
-  window.addEventListener('resize', scaleCertificate);
-  window.addEventListener('DOMContentLoaded', scaleCertificate);
-  scaleCertificate();
-</script>
+        const certEl = document.getElementById('certificate');
+        const origBR = certEl.style.borderRadius;
+        const origBS = certEl.style.boxShadow;
+        const origTransform = certEl.style.transform;
+
+        certEl.style.borderRadius = '0';
+        certEl.style.boxShadow = 'none';
+        certEl.style.transform = 'scale(1)';
+
+        const wrap = document.querySelector('.cert-wrap');
+        const origWrapH = wrap ? wrap.style.height : '';
+        if (wrap) wrap.style.height = '690px';
+
+        const canvas = await html2canvas(certEl, {
+          scale: 3,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          logging: false
+        });
+
+        certEl.style.borderRadius = origBR;
+        certEl.style.boxShadow = origBS;
+        certEl.style.transform = origTransform;
+        if (wrap) wrap.style.height = origWrapH;
+        scaleCertificate();
+
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+        const pdfW = pdf.internal.pageSize.getWidth();
+        const pdfH = pdf.internal.pageSize.getHeight();
+
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
+        const holderName = (document.getElementById('cert-name').textContent || 'Certificate').replace(/\s+/g, '_');
+        pdf.save(`SkillMe_Certificate_${holderName}.pdf`);
+      } catch (e) {
+        console.error('PDF generation error:', e);
+        alert('PDF generation error. Please try printing or saving as PDF.');
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = origText; }
+      }
+    }
+
+    // Auto-fit Responsive Scaling
+    function scaleCertificate() {
+      const cert = document.querySelector('.certificate');
+      const wrap = document.querySelector('.cert-wrap');
+      if (!cert || !wrap) return;
+      const wrapWidth = wrap.clientWidth;
+      const certWidth = 980;
+      const scale = Math.min(1, wrapWidth / certWidth);
+      cert.style.transform = `scale(${scale})`;
+      wrap.style.height = `${690 * scale}px`;
+    }
+
+    window.addEventListener('resize', scaleCertificate);
+    window.addEventListener('DOMContentLoaded', scaleCertificate);
+    scaleCertificate();
+  </script>
 </body>
+
 </html>
