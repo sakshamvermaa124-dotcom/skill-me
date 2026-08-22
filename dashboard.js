@@ -313,6 +313,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (dashNameEl) dashNameEl.textContent = `Welcome back, ${firstName}`;
     const sidebarNameEl = document.getElementById('dash-sidebar-name');
     if (sidebarNameEl) sidebarNameEl.textContent = student.name;
+    const mobileHeaderNameEl = document.getElementById('mobile-header-name');
+    if (mobileHeaderNameEl) mobileHeaderNameEl.textContent = student.name;
 
     const inviteAlert = document.getElementById('dash-pending-invite-alert');
     if (inviteAlert) {
@@ -339,9 +341,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (progress && progress.length > 0) {
       const latest = progress[progress.length - 1];
-      document.getElementById('dash-domain').innerHTML = `
+      const domainHtml = `
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px; margin-top: -2px;"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
         ${(latest.domain || 'web-dev').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}`;
+      
+      const dashDomain = document.getElementById('dash-domain');
+      if (dashDomain) dashDomain.innerHTML = domainHtml;
+      
+      const mobileDashDomain = document.getElementById('mobile-dash-domain');
+      if (mobileDashDomain) mobileDashDomain.innerHTML = domainHtml;
 
       // Calculate week based on batch start_date if available
       if (latest.start_date) {
@@ -365,12 +373,13 @@ document.addEventListener('DOMContentLoaded', () => {
           const subText = guideLink.querySelector('.guide-repo-link-sub');
           if (subText) subText.textContent = `github.com/${org}/${latest.repo_name}`;
         }
-
+        
         // Update Quick Actions
-        const quickRepo = document.getElementById('dash-quick-repo');
-        if (quickRepo) quickRepo.href = baseRepoUrl;
-        const quickIssues = document.getElementById('dash-quick-issues');
-        if (quickIssues) quickIssues.href = repoUrl;
+        const quickRepos = document.querySelectorAll('.js-dash-repo-link');
+        quickRepos.forEach(el => el.href = baseRepoUrl);
+        
+        const quickIssues = document.querySelectorAll('.js-dash-issues-link');
+        quickIssues.forEach(el => el.href = repoUrl);
 
         // Update Git Clone snippet
         const cloneUrlEl = document.querySelector('.guide-code .url');

@@ -478,12 +478,7 @@ class BatchService:
         if not batch:
             raise ValueError(f"Batch {batch_id} not found")
 
-        # 1. Fetch tasks for this domain and week
-        tasks = await task_service.fetch_tasks(batch["domain"], week_number)
-        if not tasks:
-            raise ValueError(f"No tasks found for {batch['domain']} week {week_number} in tasks repo.")
-
-        # 2. Get active enrolled students in this batch
+        # 1. Get active enrolled students in this batch
         enrollments = await db.fetch_all(
             """SELECT e.student_id FROM enrollments e 
                WHERE e.batch_id = ? AND e.status IN ('enrolled', 'active')""",
@@ -493,14 +488,21 @@ class BatchService:
             logger.info(f"No active enrolled students found in batch {batch_id}.")
             return []
 
-        # 3. Build issue list (each student gets curriculum tasks; assign_weekly_issues deduplicates individually per task)
+        # 2. Build issue list (each student gets a unique curriculum task from curriculum.json)
         issues_to_assign = []
         for enrollment in enrollments:
+            student_id = enrollment["student_id"]
+            # Fetch the student-specific task (there is exactly 1 per week based on our new logic)
+            tasks = await task_service.fetch_tasks(batch["domain"], week_number, student_id=student_id)
+            if not tasks:
+                logger.warning(f"No tasks found for {batch['domain']} week {week_number} student {student_id}")
+                continue
+                
             for task in tasks:
                 issues_to_assign.append({
                     "title": task["title"],
                     "body": task["body"],
-                    "assigned_to_student_id": enrollment["student_id"],
+                    "assigned_to_student_id": student_id,
                 })
 
         # 4. Assign using existing logic
