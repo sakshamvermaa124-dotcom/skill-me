@@ -558,17 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Render Assigned Tasks
     renderTasks(data.issues || []);
 
-    // Open tasks.html when Task Guide / PDF button is clicked
-    const pdfBtn = document.getElementById('flex-pdf-btn');
-    if (pdfBtn) {
-      pdfBtn.onclick = function() {
-        if (window._dashStudent && window._dashData) {
-          window.open(`tasks.html?student_id=${window._dashStudent.id}&batch_id=${window._dashData._batch_id}`, '_blank');
-        } else {
-          window.open('tasks.html', '_blank');
-        }
-      };
-    }
+    // Removed pdfBtn onclick to rely on standard HTML anchor tag for popup blocker bypass
 
   }
 

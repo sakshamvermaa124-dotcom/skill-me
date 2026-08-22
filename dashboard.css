@@ -100,6 +100,7 @@
 
 /* Body class set by dashboard-ui.js once logged in */
 .dash-app { overflow-x: hidden; }
+.dash-app .navbar { display: none !important; }
 
 /* Sidebar-aware main content shift */
 .dash-app .dash-page {
