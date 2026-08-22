@@ -583,14 +583,14 @@
                 if (!studentId || !batchId) {
                     // Try fetching authenticated session from dashboard
                     const token = localStorage.getItem('token');
-                    const authRes = await fetch(`${API}/api/student/dashboard`, {
+                    const authRes = await fetch(`${API}/api/auth/me`, {
                         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
                         credentials: 'include'
                     });
                     if (authRes.ok) {
                         const dashData = await authRes.json();
-                        studentId = dashData.student ? dashData.student.id : 1;
-                        batchId = (dashData.progress && dashData.progress[0] && dashData.progress[0].batch_id) || 1;
+                        studentId = dashData.id;
+                        batchId = dashData.batch_id || 1;
                     } else {
                         studentId = 1;
                         batchId = 1;

@@ -402,6 +402,11 @@ document.addEventListener('DOMContentLoaded', () => {
       data._batch_id = latest.batch_id || data._batch_id;
     }
 
+    const flexPdfBtn = document.getElementById('flex-pdf-btn');
+    if (flexPdfBtn && student && data._batch_id) {
+        flexPdfBtn.href = `tasks.html?student_id=${student.id}&batch_id=${data._batch_id}`;
+    }
+
     document.getElementById('stat-completed').textContent = totalCompleted;
     document.getElementById('stat-assigned').textContent = totalAssigned;
     document.getElementById('stat-prs').textContent = totalPrs;
@@ -689,27 +694,29 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // --- Live PR Helper Interactive Generator ---
-  window.updatePRHelper = function() {
-    const issueInput = document.getElementById('pr-helper-issue-num');
-    const descInput = document.getElementById('pr-helper-desc');
-    const issueNum = (issueInput ? issueInput.value.trim().replace(/^#/, '') : '') || '1';
-    const descText = (descInput ? descInput.value.trim() : '') || 'solve assigned task';
-    const slug = descText.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'feature';
+  window.generatePRTemplate = function() {
+    const issueInput = document.getElementById('pr-helper-issue');
+    const descInput = document.getElementById('pr-helper-summary');
+    const issueNum = (issueInput && issueInput.value.trim() !== '') ? issueInput.value.trim().replace(/^#/, '') : '[ISSUE_NUMBER]';
+    const descText = (descInput && descInput.value.trim() !== '') ? descInput.value.trim() : '[Briefly describe what you built]';
 
-    const branchVal = document.getElementById('pr-val-branch');
-    const commitVal = document.getElementById('pr-val-commit');
-    const titleVal = document.getElementById('pr-val-title');
-    const closeVal = document.getElementById('pr-val-close');
+    const resultEl = document.getElementById('pr-helper-result');
+    if (!resultEl) return;
 
-    if (branchVal) branchVal.textContent = `fix/issue-${issueNum}-${slug}`;
-    if (commitVal) commitVal.textContent = `git commit -m "fix: resolve issue #${issueNum} - ${descText}"`;
-    if (titleVal) titleVal.textContent = `fix: resolve issue #${issueNum} - ${descText}`;
-    if (closeVal) closeVal.textContent = `Closes #${issueNum}`;
+    if (issueNum === '[ISSUE_NUMBER]' && descText === '[Briefly describe what you built]') {
+      resultEl.textContent = 'Fill in the fields above to generate your PR text...';
+      resultEl.style.color = 'var(--text-muted)';
+      return;
+    }
+
+    resultEl.style.color = 'var(--text-primary)';
+    resultEl.textContent = `fix: resolve issue #${issueNum} - ${descText}\n\n### Description\n${descText}\n\nCloses #${issueNum}`;
   };
 
-  window.copyHelperVal = function(btn, elementId) {
-    const el = document.getElementById(elementId);
-    if (!el) return;
+  window.copyPRHelperOutput = function() {
+    const el = document.getElementById('pr-helper-result');
+    if (!el || el.textContent === 'Fill in the fields above to generate your PR text...') return;
+    const btn = document.getElementById('pr-copy-btn');
     const text = el.textContent.trim();
     window.copyCode(btn, text);
   };
@@ -896,8 +903,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!orderRes.ok) {
         alert(orderData.detail || 'Could not create payment order. Try again.');
-        if (btn) { btn.disabled = false; btn.innerHTML = 'Pay &amp; Activate Everything'; }
-        if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = 'Pay &amp; Activate Everything'; }
+        if (btn) { btn.disabled = false; btn.innerHTML = 'Pay the Fee &amp; Activate Profile'; }
+        if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = 'Pay the Fee &amp; Activate Profile'; }
         return;
       }
 
@@ -970,13 +977,13 @@ document.addEventListener('DOMContentLoaded', () => {
               window.closePaymentModal();
             } else {
               alert('Payment verification failed: ' + (verifyData.detail || 'Please contact support.'));
-              if (btn) { btn.disabled = false; btn.innerHTML = 'Pay ₹129 &amp; Activate Everything'; }
-              if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = 'Pay ₹129 &amp; Activate Everything'; }
+              if (btn) { btn.disabled = false; btn.innerHTML = 'Pay the Fee &amp; Activate Profile'; }
+              if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = 'Pay the Fee &amp; Activate Profile'; }
             }
           } catch(err) {
             alert('Network error during verification. Your payment may have been processed — please refresh.');
-            if (btn) { btn.disabled = false; btn.innerHTML = 'Pay ₹129 &amp; Activate Everything'; }
-            if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = 'Pay ₹129 &amp; Activate Everything'; }
+            if (btn) { btn.disabled = false; btn.innerHTML = 'Pay the Fee &amp; Activate Profile'; }
+            if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = 'Pay the Fee &amp; Activate Profile'; }
           }
         }
       };
@@ -1038,6 +1045,11 @@ function showCompletionPopup(student, data) {
   const certUrl  = `${FRONTEND}/certificate.html?email=${encodeURIComponent(email)}&student_id=${student ? student.id : ''}&batch_id=${batchId}&name=${encodeURIComponent(name)}&domain=${encodeURIComponent(domain)}`;
   const lorUrl   = `${FRONTEND}/lor.html?student_id=${student ? student.id : ''}&batch_id=${batchId}&name=${encodeURIComponent(name)}&domain=${encodeURIComponent(domain)}`;
   const portfolioUrl = (student && student.github) ? `${FRONTEND}/portfolio.html?gh=${student.github}` : '#';
+
+  const flexPdfBtn = document.getElementById('flex-pdf-btn');
+  if (flexPdfBtn && student) {
+      flexPdfBtn.href = `tasks.html?student_id=${student.id}&batch_id=${batchId}`;
+  }
 
   // Create overlay
   const overlay = document.createElement('div');
@@ -1111,7 +1123,7 @@ function showCompletionPopup(student, data) {
         // Not paid — show pay CTA
         credArea.innerHTML = `
           <div style="background:rgba(201,154,78,0.08);border:1px solid rgba(201,154,78,0.2);border-radius:14px;padding:18px;text-align:center;">
-            <div style="font-size:0.85rem;color:rgba(255,255,255,0.6);margin-bottom:12px;">Activate your Certificate, LOR & Portfolio with a one-time fee of <strong style="color:#c99a4e;">₹129</strong></div>
+            <div style="font-size:0.85rem;color:rgba(255,255,255,0.6);margin-bottom:12px;">Activate your Certificate, LOR & Portfolio with a one-time fee</div>
             <button onclick="document.getElementById('completion-overlay').remove();setTimeout(()=>showPaymentModal(window._dashStudent,window._dashData),200);" style="background:linear-gradient(135deg,#c99a4e,#e8b96e);color:#000;border:none;border-radius:10px;padding:12px 28px;font-weight:700;font-size:0.88rem;cursor:pointer;width:100%;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">💳 Pay & Activate Everything</button>
           </div>`;
       }
@@ -1648,7 +1660,7 @@ function triggerMilestoneConfetti() {
       
       if (!window._dashStudent || !window._dashData) {
         alert('Student data not loaded yet.');
-        if (btn) { btn.disabled = false; btn.textContent = 'Pay ₹129 & Unlock Instant Certificate'; }
+        if (btn) { btn.disabled = false; btn.textContent = 'Unlock Priority Delivery Instantly'; }
         return;
       }
       
@@ -1669,7 +1681,7 @@ function triggerMilestoneConfetti() {
         
         if (!res.ok) {
           alert(orderData.detail || 'Could not create payment order');
-          if (btn) { btn.disabled = false; btn.textContent = 'Pay ₹129 & Unlock Instant Certificate'; }
+          if (btn) { btn.disabled = false; btn.textContent = 'Unlock Priority Delivery Instantly'; }
           return;
         }
 
@@ -1708,11 +1720,11 @@ function triggerMilestoneConfetti() {
                 window.location.reload();
               } else {
                 alert(verifyData.detail || 'Payment verification failed.');
-                if (btn) { btn.disabled = false; btn.textContent = 'Pay ₹129 & Unlock Instant Certificate'; }
+                if (btn) { btn.disabled = false; btn.textContent = 'Unlock Priority Delivery Instantly'; }
               }
             } catch(e) {
               alert('Error verifying payment.');
-              if (btn) { btn.disabled = false; btn.textContent = 'Pay ₹129 & Unlock Instant Certificate'; }
+              if (btn) { btn.disabled = false; btn.textContent = 'Unlock Priority Delivery Instantly'; }
             }
           },
           prefill: {
@@ -1722,7 +1734,7 @@ function triggerMilestoneConfetti() {
           theme: { color: '#c99a4e' },
           modal: {
             ondismiss: function() {
-              if (btn) { btn.disabled = false; btn.textContent = 'Pay ₹129 & Unlock Instant Certificate'; }
+              if (btn) { btn.disabled = false; btn.textContent = 'Unlock Priority Delivery Instantly'; }
             }
           }
         };
@@ -1741,7 +1753,7 @@ function triggerMilestoneConfetti() {
         rzp.open();
       } catch(e) {
         alert('Payment initialization failed.');
-        if (btn) { btn.disabled = false; btn.textContent = 'Pay ₹129 & Unlock Instant Certificate'; }
+        if (btn) { btn.disabled = false; btn.textContent = 'Unlock Priority Delivery Instantly'; }
       }
     };
 
