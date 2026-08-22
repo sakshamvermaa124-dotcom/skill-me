@@ -309,7 +309,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Header
     const firstName = student.name.split(' ')[0];
-    document.getElementById('dash-name').textContent = `Welcome back, ${firstName}`;
+    const dashNameEl = document.getElementById('dash-name');
+    if (dashNameEl) dashNameEl.textContent = `Welcome back, ${firstName}`;
+    const sidebarNameEl = document.getElementById('dash-sidebar-name');
+    if (sidebarNameEl) sidebarNameEl.textContent = student.name;
 
     const inviteAlert = document.getElementById('dash-pending-invite-alert');
     if (inviteAlert) {

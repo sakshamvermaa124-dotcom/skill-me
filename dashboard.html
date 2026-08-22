@@ -65,7 +65,7 @@
       <span class="dash-sidebar-logo-text">SkillMe</span>
     </a>
 
-    <nav class="dash-sidebar-nav" id="dash-sidebar-nav" aria-label="Dashboard sections">
+    <nav class="dash-sidebar-nav" id="dash-sidebar-nav" aria-label="Dashboard sections" data-lenis-prevent>
       <button class="dash-nav-item is-active" id="nav-overview" onclick="dashShowPanel('panel-overview')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/>
@@ -105,17 +105,13 @@
         <span class="dash-nav-label">Assigned Issues ↗</span>
       </a>
 
-      <!-- Student identity — dashboard.js writes to #dash-name and #dash-domain -->
+      <!-- Student identity — dashboard.js writes to #dash-sidebar-name and #dash-domain -->
       <div class="dash-sidebar-user">
-        <div id="dash-name" class="dash-sidebar-name">—</div>
+        <div id="dash-sidebar-name" class="dash-sidebar-name">—</div>
         <div id="dash-domain" class="dash-sidebar-domain"></div>
       </div>
 
       <!-- Sign-out — start display:none; dashboard.js reveals them at lines 75-76, 102-103, 305-306 -->
-      <a href="#" onclick="signOut(); return false;" id="mobile-signout-btn" class="dash-sidebar-signout" style="display: none;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        <span class="dash-nav-label">Sign Out</span>
-      </a>
       <button onclick="signOut()" class="dash-sidebar-signout" id="signout-btn" style="display: none;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         <span class="dash-nav-label">Sign Out</span>
@@ -197,11 +193,24 @@
          Rule B: #dashboard-view stays plain div (dashboard.js sets display:block at lines 118, 280).
          Grid lives on child .dash-shell. -->
     <div id="dashboard-view" style="display: none;">
+      <!-- Mobile Dashboard Header -->
+      <header class="dash-mobile-header" id="dash-mobile-header">
+        <a href="index.html" class="dash-mobile-logo" aria-label="SkillMe home">
+          <img src="assets/logo.webp" alt="SkillMe Logo" class="brand-logo-img" width="32" height="32" style="width: 32px !important; height: 32px !important; border-radius: 50% !important;">
+          <span>SkillMe</span>
+        </a>
+        <button onclick="signOut()" class="dash-mobile-signout" aria-label="Sign Out">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </header>
       <div class="dash-shell" id="dash-shell">
 
         <!-- ── Panel: Overview ──────────────────────────────────────── -->
         <div class="dash-panel" id="panel-overview">
-          <h1 class="dash-panel-title">Overview</h1>
+          <div class="dash-header" id="dash-header-el" style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+            <div class="dash-header-icon" style="font-size: 2.2rem;">👋</div>
+            <h1 id="dash-name" class="dash-panel-title" style="margin-bottom: 0;">Welcome back</h1>
+          </div>
 
           <!-- Pending GitHub invite alert — dashboard.js toggles display -->
           <div id="dash-pending-invite-alert" style="display: none; margin-bottom: 24px; padding: 16px 20px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; align-items: flex-start; gap: 12px;">
