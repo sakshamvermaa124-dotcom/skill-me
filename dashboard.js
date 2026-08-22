@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const token = localStorage.getItem('token');
       const savedEmail = localStorage.getItem('skillme_email');
       const signoutBtn = document.getElementById('signout-btn');
-    const mobSignoutBtn = document.getElementById('mobile-signout-btn');
+    
       
       // If we have a saved email in localStorage, restore progress directly
       const emailToUse = savedEmail || (async () => {
@@ -132,14 +132,14 @@ document.addEventListener('DOMContentLoaded', () => {
       loginBtn.disabled = false;
       loginBtn.textContent = 'Get Login Code';
       if (document.getElementById('signout-btn')) document.getElementById('signout-btn').style.display = 'none';
-      if (document.getElementById('mobile-signout-btn')) document.getElementById('mobile-signout-btn').style.display = 'none';
+      
       if (document.getElementById('login-cancel-wrap')) document.getElementById('login-cancel-wrap').style.display = 'none';
     } catch (e) {
       console.log("No active session found.");
       loginBtn.disabled = false;
       loginBtn.textContent = 'Get Login Code';
       if (document.getElementById('signout-btn')) document.getElementById('signout-btn').style.display = 'none';
-      if (document.getElementById('mobile-signout-btn')) document.getElementById('mobile-signout-btn').style.display = 'none';
+      
       if (document.getElementById('login-cancel-wrap')) document.getElementById('login-cancel-wrap').style.display = 'none';
     }
   }
@@ -303,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Show Sign Out button in navbar when logged into dashboard
     const signoutBtn = document.getElementById('signout-btn');
-    const mobSignoutBtn = document.getElementById('mobile-signout-btn');
+    
     if (signoutBtn) signoutBtn.style.display = 'inline-flex';
         if (mobSignoutBtn) mobSignoutBtn.style.display = 'block';
 
