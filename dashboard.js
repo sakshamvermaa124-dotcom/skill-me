@@ -90,7 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Show Sign Out button so user can abort if stuck
         if (signoutBtn) signoutBtn.style.display = 'inline-flex';
-        if (mobSignoutBtn) mobSignoutBtn.style.display = 'block';
         const cancelWrap = document.getElementById('login-cancel-wrap');
         if (cancelWrap) cancelWrap.style.display = 'block';
         
@@ -100,7 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // If user clicked sign out while fetch was pending, abort the restore process
         if (!localStorage.getItem('skillme_email') && !localStorage.getItem('token')) {
           if (signoutBtn) signoutBtn.style.display = 'none';
-        if (mobSignoutBtn) mobSignoutBtn.style.display = 'none';
           if (document.getElementById('login-cancel-wrap')) document.getElementById('login-cancel-wrap').style.display = 'none';
           return;
         }
@@ -125,7 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
           // If session email fails to load, clear saved session so user can re-login
           localStorage.removeItem('skillme_email');
           if (signoutBtn) signoutBtn.style.display = 'none';
-        if (mobSignoutBtn) mobSignoutBtn.style.display = 'none';
           if (document.getElementById('login-cancel-wrap')) document.getElementById('login-cancel-wrap').style.display = 'none';
         }
       }
@@ -305,7 +302,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const signoutBtn = document.getElementById('signout-btn');
     
     if (signoutBtn) signoutBtn.style.display = 'inline-flex';
-        if (mobSignoutBtn) mobSignoutBtn.style.display = 'block';
 
     // Header
     const firstName = student.name.split(' ')[0];
