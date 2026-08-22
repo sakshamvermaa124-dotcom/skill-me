@@ -1,4 +1,322 @@
-<!DOCTYPE html>
+// tools/apply-shell.mjs  — Commits 4+5 combined: app shell, sidebar, theme toggle, J1-J3
+// IDEMPOTENT: checks if already applied before each section.
+// Run: node tools/apply-shell.mjs
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const ROOT = path.resolve(fileURLToPath(import.meta.url), '..', '..');
+
+function read(f)   { return fs.readFileSync(path.join(ROOT, f), 'utf8'); }
+function write(f, s) { fs.writeFileSync(path.join(ROOT, f), s, 'utf8'); console.log('  wrote', f); }
+
+// ─── 1. dashboard.css — insert shell CSS once ────────────────────────────────
+{
+  let css = read('dashboard.css');
+
+  const SHELL_SENTINEL = '/* === APP SHELL v1 === */';
+  if (css.includes(SHELL_SENTINEL)) {
+    console.log('dashboard.css: shell CSS already present — skipping');
+  } else {
+    const LENIS_ANCHOR = '/* ======== Lenis Base ======== */';
+    const li = css.indexOf(LENIS_ANCHOR);
+    if (li === -1) { console.error('CSS: Lenis anchor not found'); process.exit(1); }
+
+    const SHELL_CSS = `${SHELL_SENTINEL}
+/* ======================================================
+   App Shell — Sidebar + Panel router (commits 4+5)
+   Rule B: .dash-shell (grid) is a CHILD of #dashboard-view.
+   ====================================================== */
+
+/* Body class set by dashboard-ui.js once logged in */
+.dash-app { overflow-x: hidden; }
+
+/* Sidebar-aware main content shift */
+.dash-app .dash-page {
+  padding-top: 0;
+  padding-left: 248px;
+  transition: padding-left 0.25s ease;
+}
+@media (max-width: 1099px) { .dash-app .dash-page { padding-left: 72px; } }
+@media (max-width: 767px)  { .dash-app .dash-page { padding-left: 0; padding-bottom: 64px; } }
+
+/* ── Sidebar ───────────────────────────────────────────────── */
+.dash-sidebar {
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  width: 248px;
+  display: none;
+  flex-direction: column;
+  background: var(--surface-raised);
+  border-right: 1px solid var(--border-hairline);
+  z-index: 100;
+  overflow: hidden;
+  transition: width 0.25s ease;
+}
+.dash-app .dash-sidebar { display: flex; }
+
+@media (max-width: 1099px) {
+  .dash-sidebar { width: 72px; }
+  .dash-sidebar-logo-text,
+  .dash-nav-label,
+  .dash-sidebar-user { display: none; }
+}
+@media (max-width: 767px) { .dash-sidebar { display: none; } }
+
+.dash-sidebar-logo {
+  display: flex; align-items: center; gap: 10px;
+  padding: 20px 16px 16px;
+  text-decoration: none;
+  color: var(--text-strong);
+  font-weight: 700; font-size: 1.1rem; letter-spacing: -0.3px;
+  border-bottom: 1px solid var(--border-hairline);
+  flex-shrink: 0;
+}
+.dash-sidebar-logo img { flex-shrink: 0; }
+.dash-sidebar-logo-text { white-space: nowrap; }
+
+.dash-sidebar-nav {
+  flex: 1; display: flex; flex-direction: column;
+  padding: 12px 8px; gap: 2px; overflow-y: auto;
+}
+.dash-nav-item {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 10px 12px; border-radius: 10px; border: none;
+  background: transparent; color: var(--text-muted);
+  font-size: 0.88rem; font-weight: 500; font-family: inherit;
+  cursor: pointer; text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+.dash-nav-item svg { flex-shrink: 0; opacity: 0.7; }
+.dash-nav-item:hover { background: var(--surface-hover); color: var(--text-default); }
+.dash-nav-item:hover svg { opacity: 1; }
+.dash-nav-item.is-active { background: var(--accent-wash); color: var(--accent); font-weight: 600; }
+.dash-nav-item.is-active svg { opacity: 1; }
+@media (max-width: 1099px) {
+  .dash-nav-item { justify-content: center; padding: 12px; border-radius: 12px; }
+}
+
+.dash-sidebar-footer {
+  padding: 12px 8px; border-top: 1px solid var(--border-hairline);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.dash-sidebar-user { padding: 8px 12px 4px; overflow: hidden; }
+.dash-sidebar-name {
+  font-size: 0.88rem; font-weight: 600; color: var(--text-strong);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px;
+}
+.dash-sidebar-domain { font-size: 0.75rem; color: var(--text-muted); }
+
+.dash-sidebar-quick {
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  border-radius: 8px; font-size: 0.82rem;
+  color: var(--text-muted); text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+.dash-sidebar-quick:hover { background: var(--surface-hover); color: var(--text-default); }
+
+.dash-theme-toggle {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 8px 12px; border: none; border-radius: 8px; background: transparent;
+  color: var(--text-muted); font-size: 0.82rem; font-weight: 500;
+  font-family: inherit; cursor: pointer; text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+.dash-theme-toggle:hover { background: var(--surface-hover); color: var(--text-default); }
+.dash-theme-toggle svg { flex-shrink: 0; }
+
+.dash-sidebar-signout {
+  display: flex; align-items: center; gap: 8px; padding: 8px 12px;
+  border-radius: 8px; border: none; background: transparent;
+  color: var(--text-faint); font-size: 0.82rem; font-family: inherit;
+  cursor: pointer; width: 100%; text-align: left;
+  transition: background 0.15s, color 0.15s; text-decoration: none;
+}
+.dash-sidebar-signout:hover { background: var(--danger-wash, rgba(239,68,68,0.08)); color: var(--danger, #ef4444); }
+
+/* ── Mobile tab bar ────────────────────────────────────────── */
+.dash-tab-bar {
+  display: none; position: fixed; bottom: 0; left: 0; right: 0;
+  height: 60px; background: var(--surface-raised);
+  border-top: 1px solid var(--border-hairline); z-index: 100;
+  align-items: stretch;
+}
+@media (max-width: 767px) { .dash-app .dash-tab-bar { display: flex; } }
+.dash-tab {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 3px;
+  border: none; background: transparent; color: var(--text-muted);
+  font-size: 0.65rem; font-weight: 500; font-family: inherit; cursor: pointer;
+  transition: color 0.15s; padding: 6px 0;
+}
+.dash-tab svg { width: 20px; height: 20px; opacity: 0.6; }
+.dash-tab.is-active { color: var(--accent); }
+.dash-tab.is-active svg { opacity: 1; }
+
+/* ── Shell & Panels ────────────────────────────────────────── */
+/* Rule B: grid on .dash-shell child, never on #dashboard-view */
+.dash-shell { padding: 24px 28px; max-width: 1080px; }
+@media (max-width: 767px) { .dash-shell { padding: 16px; } }
+
+.dash-panel { display: block; }
+.dash-panel[hidden],
+.dash-panel[style*="display: none"],
+.dash-panel[style*="display:none"] { display: none; }
+
+.dash-panel-title {
+  font-size: clamp(1.3rem, 3vw, 1.6rem);
+  font-weight: 700; font-family: 'Space Grotesk', sans-serif;
+  color: var(--text-strong); margin: 0 0 24px; letter-spacing: -0.4px;
+}
+
+/* ── Reduced motion ────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+`;
+    css = css.slice(0, li) + SHELL_CSS + css.slice(li);
+    console.log('dashboard.css: shell CSS inserted');
+  }
+
+  // Verify !important count (strip comments first)
+  const noComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const imp = (noComments.match(/!important/g)||[]).length;
+  console.log('dashboard.css !important after edit:', imp, '(target: ≤15 — all in R6 fence)');
+  if (imp > 15) {
+    console.warn('WARNING: !important count exceeds budget — check shell CSS additions');
+  }
+
+  write('dashboard.css', css);
+}
+
+// ─── 2. dashboard-ui.js ───────────────────────────────────────────────────────
+{
+  const SENTINEL = '// === dashboard-ui.js v1 ===';
+  const existing = fs.existsSync(path.join(ROOT, 'dashboard-ui.js')) ? read('dashboard-ui.js') : '';
+  if (existing.includes(SENTINEL)) {
+    console.log('dashboard-ui.js already written — skipping');
+  } else {
+    const UI_JS = `${SENTINEL}
+// App shell: section router, theme toggle, sidebar show/hide
+// Loaded defer after dashboard.js. Only touches elements the HTML shell owns.
+(function () {
+  'use strict';
+
+  const PANELS = ['panel-overview', 'panel-work', 'panel-credentials', 'panel-guide'];
+  const NAV_IDS = {
+    'panel-overview':    'nav-overview',
+    'panel-work':        'nav-work',
+    'panel-credentials': 'nav-credentials',
+    'panel-guide':       'nav-guide',
+  };
+  const TAB_IDS = {
+    'panel-overview':    'tab-overview',
+    'panel-work':        'tab-work',
+    'panel-credentials': 'tab-credentials',
+    'panel-guide':       'tab-guide',
+  };
+
+  // R8: re-trigger ring transition after panel becomes visible
+  function replayRing(panel) {
+    const ring = panel && panel.querySelector('#progress-ring');
+    if (!ring) return;
+    const saved = ring.style.strokeDashoffset;
+    ring.style.transition = 'none';
+    ring.style.strokeDashoffset = '326.7';
+    void ring.getBoundingClientRect();
+    ring.style.transition = '';
+    ring.style.strokeDashoffset = saved;
+  }
+
+  // Section router — Rule A: only touches .dash-panel wrappers
+  window.dashShowPanel = function (id) {
+    if (!PANELS.includes(id)) return;
+    PANELS.forEach(function (pid) {
+      const el = document.getElementById(pid);
+      if (!el) return;
+      if (pid === id) {
+        el.removeAttribute('hidden');
+        el.style.display = 'block';
+      } else {
+        el.setAttribute('hidden', '');
+        el.style.display = 'none';
+      }
+    });
+    Object.keys(NAV_IDS).forEach(function (pid) {
+      var btn = document.getElementById(NAV_IDS[pid]);
+      if (btn) btn.classList.toggle('is-active', pid === id);
+    });
+    Object.keys(TAB_IDS).forEach(function (pid) {
+      var btn = document.getElementById(TAB_IDS[pid]);
+      if (btn) btn.classList.toggle('is-active', pid === id);
+    });
+    var panel = document.getElementById(id);
+    if (!panel) return;
+    // R4: ensure sub-cards are visible in newly-shown panel
+    panel.querySelectorAll('.sub-card:not(.visible)').forEach(function (c) { c.classList.add('visible'); });
+    replayRing(panel);
+    window.dispatchEvent(new Event('resize'));
+  };
+
+  // Theme
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    localStorage.setItem('dash-theme', t);
+    var btn = document.getElementById('dash-theme-toggle');
+    if (!btn) return;
+    if (t === 'light') {
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg><span class="dash-nav-label"> Light Mode</span>';
+      btn.title = 'Switch to dark mode';
+    } else {
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><span class="dash-nav-label"> Dark Mode</span>';
+      btn.title = 'Switch to light mode';
+    }
+  }
+  window.dashToggleTheme = function () {
+    var cur = document.documentElement.getAttribute('data-theme') || 'dark';
+    applyTheme(cur === 'dark' ? 'light' : 'dark');
+  };
+  var stored = localStorage.getItem('dash-theme');
+  if (stored) applyTheme(stored);
+
+  // Sidebar visibility — MutationObserver on #dashboard-view
+  document.addEventListener('DOMContentLoaded', function () {
+    var dashViewEl = document.getElementById('dashboard-view');
+    if (!dashViewEl) return;
+
+    function syncShell() {
+      var vis = dashViewEl.style.display !== '' && dashViewEl.style.display !== 'none';
+      document.body.classList.toggle('dash-app', vis);
+    }
+    syncShell();
+    var mo = new MutationObserver(syncShell);
+    mo.observe(dashViewEl, { attributes: true, attributeFilter: ['style'] });
+  });
+})();
+`;
+    write('dashboard-ui.js', UI_JS);
+  }
+}
+
+// ─── 3. dashboard.html — full rewrite ─────────────────────────────────────────
+// Read existing to verify it's the commit-2 state (has the expected structure)
+{
+  const existingHtml = read('dashboard.html');
+  const SENTINEL = '<!-- dash-shell-v1 -->';
+  if (existingHtml.includes(SENTINEL)) {
+    console.log('dashboard.html already rewritten — skipping HTML');
+  } else {
+    // Verify we have the right base
+    const checks = ['id="login-view"', 'id="dashboard-view"', 'panel-beginner', 'panel-advanced', 'panel-helper'];
+    checks.forEach(c => {
+      if (!existingHtml.includes(c)) { console.error('HTML: missing anchor', c); process.exit(1); }
+    });
+    console.log('HTML anchors verified');
+
+    const NEW_HTML = `<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
@@ -39,7 +357,8 @@
   <link rel="apple-touch-icon" href="assets/logo.png">
   <link rel="manifest" href="site.webmanifest">
 
-
+  <!-- R9 FOUC guard: read stored theme before first paint (blocking) -->
+  <script>(function(){var t=localStorage.getItem('dash-theme');if(t)document.documentElement.setAttribute('data-theme',t);})()</script>
 
   <link rel="stylesheet" href="style.css?v=8">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -110,6 +429,12 @@
         <div id="dash-name" class="dash-sidebar-name">—</div>
         <div id="dash-domain" class="dash-sidebar-domain"></div>
       </div>
+
+      <!-- Theme toggle — activates the [data-theme="light"] CSS already in dashboard.css -->
+      <button class="dash-theme-toggle" id="dash-theme-toggle" onclick="dashToggleTheme()" aria-label="Toggle color theme">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <span class="dash-nav-label">Dark Mode</span>
+      </button>
 
       <!-- Sign-out — start display:none; dashboard.js reveals them at lines 75-76, 102-103, 305-306 -->
       <a href="#" onclick="signOut(); return false;" id="mobile-signout-btn" class="dash-sidebar-signout" style="display: none;">
@@ -456,7 +781,7 @@
                 <span id="guide-toggle-text">Hide Guide</span>
               </button>
 
-              <div class="guide-body" id="guide-body">
+              <div class="guide-body" id="guide-body" style="max-height:3500px; opacity:1;">
 
                 <a href="#" target="_blank" class="guide-repo-link" style="margin-top:20px;">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
@@ -745,3 +1070,127 @@ git push origin fix/issue-5-solution')">Copy</button>
 
 </body>
 </html>
+`;
+    write('dashboard.html', NEW_HTML);
+  }
+}
+
+// ─── 4. dashboard.js — J1, J2, J3 ────────────────────────────────────────────
+{
+  let js = read('dashboard.js');
+
+  // J1: Replace fragile text-node lookup with .clone-dir class
+  // Original (two lines with CRLF):
+  //   const cloneCmdEl = document.querySelectorAll('.guide-code .cmd')[1]; // The 'cd' command's next text node
+  //   if (cloneCmdEl && cloneCmdEl.nextSibling) {
+  //     cloneCmdEl.nextSibling.textContent = ` ${latest.repo_name}`;
+  //   }
+  const J1_REGEX = /const cloneCmdEl = document\.querySelectorAll\('\.guide-code \.cmd'\)\[1\];[^\n]*\r?\n\s*if \(cloneCmdEl && cloneCmdEl\.nextSibling\) \{\r?\n\s*cloneCmdEl\.nextSibling\.textContent = [`'`]\s*\$\{latest\.repo_name\}[`'`];\r?\n\s*\}/;
+  if (J1_REGEX.test(js)) {
+    js = js.replace(J1_REGEX,
+      `// J1 — .clone-dir wrapper in HTML, no fragile text-node (R5)\r\n        const cloneDirEl = document.querySelector('.guide-code .clone-dir');\r\n        if (cloneDirEl) cloneDirEl.textContent = latest.repo_name;`
+    );
+    console.log('J1 applied ✓');
+  } else {
+    console.warn('J1: regex did not match — trying simpler pattern');
+    // Simpler: just look for the nextSibling line
+    if (js.includes("cloneCmdEl.nextSibling.textContent = ` ${latest.repo_name}`")) {
+      js = js.replace(
+        /const cloneCmdEl[\s\S]*?cloneCmdEl\.nextSibling\.textContent = [`][\s\S]*?[`];[\s\S]*?\}/,
+        `// J1 — .clone-dir wrapper in HTML, no fragile text-node (R5)\r\n        const cloneDirEl = document.querySelector('.guide-code .clone-dir');\r\n        if (cloneDirEl) cloneDirEl.textContent = latest.repo_name;`
+      );
+      console.log('J1 applied via simple pattern ✓');
+    } else {
+      console.error('J1: FAILED — check dashboard.js line 375-378');
+    }
+  }
+  console.log('J1 check — clone-dir present in JS:', js.includes('.clone-dir'));
+
+  // J2: Rename updatePRHelper → generatePRTemplate, fix IDs
+  if (!js.includes('generatePRTemplate')) {
+    js = js.replace(
+      /window\.updatePRHelper = function\(\)/,
+      '// J2: renamed to match HTML oninput="generatePRTemplate()"\n  window.generatePRTemplate = function()'
+    );
+    // Fix the input IDs inside the function
+    js = js.replace(
+      "document.getElementById('pr-helper-issue-num')",
+      "document.getElementById('pr-helper-issue')"
+    );
+    js = js.replace(
+      "document.getElementById('pr-helper-desc')",
+      "document.getElementById('pr-helper-summary')"
+    );
+    // Replace the 4 output element lookups + writes with single textarea write
+    js = js.replace(
+      /const branchVal[\s\S]*?if \(closeVal\) closeVal\.textContent[\s\S]*?;/,
+      `const output = document.getElementById('pr-helper-result');
+    if (output) {
+      output.textContent = [
+        'fix: resolve issue #' + issueNum + ' - ' + descText,
+        '',
+        '## What changes were made',
+        descText,
+        '',
+        '## Related issue',
+        'Closes #' + issueNum,
+      ].join('\\n');
+    }`
+    );
+    // Keep window.updatePRHelper as alias
+    js = js.replace(
+      'window.generatePRTemplate = function()',
+      'window.generatePRTemplate = window.updatePRHelper = function()'
+    );
+    console.log('J2 applied ✓');
+  } else {
+    console.log('J2 already applied — skipping');
+  }
+
+  // Rename copyHelperVal → copyPRHelperOutput and fix it to copy #pr-helper-result
+  if (!js.includes('copyPRHelperOutput')) {
+    js = js.replace(
+      /window\.copyHelperVal = function\(btn, elementId\) \{[\s\S]*?\};/,
+      `window.copyPRHelperOutput = window.copyHelperVal = function(btn, elementId) {
+    // J2: copyPRHelperOutput — copies #pr-helper-result if called with no args
+    var elId = elementId || 'pr-helper-result';
+    var btnEl = btn || document.getElementById('pr-copy-btn');
+    var el = document.getElementById(elId);
+    if (!el) return;
+    var text = el.textContent.trim();
+    window.copyCode(btnEl, text);
+  };`
+    );
+    console.log('J2 copyPRHelperOutput applied ✓');
+  }
+
+  // J3: Animate stat numbers (lines 397-401 in original)
+  const J3_OLD_LITERAL = "document.getElementById('stat-completed').textContent = totalCompleted;";
+  if (js.includes(J3_OLD_LITERAL) && !js.includes('// J3:')) {
+    js = js.replace(
+      // Match the 5 textContent assignments for stats
+      /document\.getElementById\('stat-completed'\)\.textContent = totalCompleted;\s*document\.getElementById\('stat-assigned'\)\.textContent = totalAssigned;\s*document\.getElementById\('stat-prs'\)\.textContent = totalPrs;\s*document\.getElementById\('stat-week'\)\.textContent = maxWeek;\s*document\.getElementById\('stat-score'\)\.textContent = totalScore;/,
+      `// J3: animate stat count-ups using animateValue() (dashboard.js:728 — was dead code)
+    [['stat-completed', totalCompleted], ['stat-prs', totalPrs],
+     ['stat-week', maxWeek], ['stat-score', totalScore]].forEach(function(pair) {
+      var el = document.getElementById(pair[0]);
+      if (el) animateValue(el, 0, pair[1], 1200);
+    });
+    document.getElementById('stat-assigned').textContent = totalAssigned; // denominator, no count-up`
+    );
+    console.log('J3 applied ✓');
+  } else if (js.includes('// J3:')) {
+    console.log('J3 already applied — skipping');
+  } else {
+    console.error('J3: could not find stat textContent block');
+    // Diagnose
+    const idx = js.indexOf("'stat-completed'");
+    console.log('stat-completed found at index:', idx);
+    if (idx !== -1) console.log('Context:', JSON.stringify(js.slice(idx - 10, idx + 80)));
+  }
+
+  write('dashboard.js', js);
+  console.log('dashboard.js J1/J2/J3 done');
+}
+
+console.log('\n✓ apply-shell.mjs complete. Run: node tools/dash-contract-check.mjs');

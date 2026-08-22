@@ -337,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (progress && progress.length > 0) {
       const latest = progress[progress.length - 1];
       document.getElementById('dash-domain').innerHTML = `
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px; margin-top: -2px;"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>
         ${(latest.domain || 'web-dev').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}`;
 
       // Calculate week based on batch start_date if available
@@ -683,6 +683,8 @@ document.addEventListener('DOMContentLoaded', () => {
       text.textContent = 'Hide Guide';
     } else {
       body.classList.add('collapsed');
+      body.style.maxHeight = null;
+      body.style.opacity = null;
       btn.classList.remove('expanded');
       text.textContent = 'Show Guide';
     }

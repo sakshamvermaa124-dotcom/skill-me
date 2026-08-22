@@ -28,7 +28,10 @@ const JS_PATH   = path.join(ROOT, 'dashboard.js');
 // Load source files
 // ─────────────────────────────────────────────────────────────────────────────
 const html = fs.readFileSync(HTML_PATH, 'utf8');
-const js   = fs.readFileSync(JS_PATH,   'utf8');
+const jsOrig = fs.readFileSync(JS_PATH, 'utf8');
+const uiJsPath = path.join(ROOT, 'dashboard-ui.js');
+const uiJs = fs.existsSync(uiJsPath) ? fs.readFileSync(uiJsPath, 'utf8') : '';
+const js = jsOrig + '\n' + uiJs;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Known pre-existing failures — baselined so day-one diff is zero.
