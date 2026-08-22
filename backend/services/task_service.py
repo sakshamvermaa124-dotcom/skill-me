@@ -172,33 +172,110 @@ class TaskService:
         # Fallback sanitized slug
         return re.sub(r"-+", "-", clean_lower.replace(" ", "-").replace("/", "-")).strip("-")
 
-    async def fetch_tasks(self, domain: str, week: int, student_id: int = None) -> list[dict]:
+    async def fetch_tasks(self, domain: str, week: int) -> list[dict]:
         """
-        Fetch task from curriculum.json to serve as the single GitHub issue for the week.
-        This unifies the GitHub PR tasks with the UI Dashboard/PDF Curriculum.
+        Fetch all task markdown files for a given domain and week.
+        Checks local filesystem first for instant & reliable loading,
+        and falls back to GitHub REST API.
+        
+        Args:
+            domain: e.g. "web-dev", "python", or form display value like "Web Development"
+            week: The week number (1-4)
+            
+        Returns:
+            A list of task dictionaries containing title, body, difficulty, and labels.
         """
-        from services.project_curriculum import get_project_track_for_student
-        
-        project_track = get_project_track_for_student(domain, student_id=student_id)
-        
-        weeks_dict = project_track.get("weeks", {})
-        # Support string or int keys in JSON
-        week_data = weeks_dict.get(str(week), weeks_dict.get(week, {}))
-        
-        title = week_data.get("title", f"Week {week} Project Milestone")
-        description = week_data.get("description", "Please refer to your curriculum for task details.")
-        
-        # Create exactly ONE comprehensive task for this week to replace the disjointed multiple issues
-        tasks = [
-            {
-                "title": f"{title}",
-                "body": description,
-                "difficulty": "medium",
-                "labels": [f"week-{week}"],
-                "_filename": "01-capstone.md",
-            }
+        slug = self.normalize_domain_slug(domain)
+        logger.info(f"Fetching tasks for domain='{domain}' → canonical slug='{slug}', week={week}")
+
+        tasks = []
+
+        # 1. Try reading from local SkillMe-Intern-Tasks directory
+        candidate_roots = [
+            Path(__file__).resolve().parent.parent.parent / "SkillMe-Intern-Tasks",
+            Path.cwd() / "SkillMe-Intern-Tasks",
+            Path(__file__).resolve().parent.parent / "SkillMe-Intern-Tasks",
         ]
-        
+
+        local_dir = None
+        for root in candidate_roots:
+            candidate = root / slug / f"week-{week}"
+            if candidate.exists() and candidate.is_dir():
+                local_dir = candidate
+                break
+
+        if local_dir:
+            try:
+                md_files = sorted(local_dir.glob("*.md"))
+                for file_path in md_files:
+                    try:
+                        content = file_path.read_text(encoding="utf-8")
+                        task_def = self._parse_markdown_task(content, file_path.name)
+                        if task_def:
+                            tasks.append(task_def)
+                    except Exception as fe:
+                        logger.warning(f"Failed to read local task file {file_path}: {fe}")
+                if tasks:
+                    logger.info(f"Loaded {len(tasks)} tasks locally from {local_dir}")
+                    tasks.sort(key=lambda x: x.get("_filename", ""))
+                    return tasks
+            except Exception as e:
+                logger.warning(f"Error reading local tasks from {local_dir}: {e}")
+
+        # 2. Fallback: Fetch from GitHub API
+        path = f"{slug}/week-{week}"
+        logger.info(f"Fetching tasks from GitHub API: {TASKS_REPO}/{path}")
+        try:
+            res = await github_service.client.get(f"/repos/{github_service.org}/{TASKS_REPO}/contents/{path}")
+            if res.status_code == 200:
+                contents = res.json()
+                if isinstance(contents, list):
+                    md_files = [f for f in contents if isinstance(f, dict) and f.get("name", "").endswith(".md")]
+                    for f in md_files:
+                        file_url = f.get("url")
+                        if not file_url:
+                            continue
+                        file_res = await github_service.client.get(file_url)
+                        if file_res.status_code == 200:
+                            file_data = file_res.json()
+                            if "content" in file_data:
+                                content = base64.b64decode(file_data["content"]).decode("utf-8")
+                                task_def = self._parse_markdown_task(content, f["name"])
+                                if task_def:
+                                    tasks.append(task_def)
+        except Exception as e:
+            logger.warning(f"Error fetching tasks from GitHub repo {TASKS_REPO}/{path}: {e}")
+
+        # 3. Fallback: Provide standard high-quality SkillMe curriculum tasks
+        if not tasks:
+            logger.warning(f"No tasks found at {path}. Generating default SkillMe curriculum tasks for {domain} Week {week}.")
+            domain_name = slug.replace("-", " ").title()
+            tasks = [
+                {
+                    "title": f"Week {week} Task 1: Setup & Architecture for {domain_name}",
+                    "body": f"## Objective\nSet up your development environment for **{domain_name}** and familiarize yourself with the project structure.\n\n### Requirements\n1. Clone this repository to your local machine.\n2. Install all necessary dependencies and run the local environment.\n3. Create a new branch named `feature/week-{week}-setup` and add notes to `PROGRESS.md`.\n4. Submit a Pull Request when ready!",
+                    "difficulty": "easy",
+                    "labels": [f"week-{week}", "easy"],
+                    "_filename": "01-setup.md",
+                },
+                {
+                    "title": f"Week {week} Task 2: Core Feature Implementation",
+                    "body": f"## Objective\nImplement the primary deliverable for Week {week} in the **{domain_name}** track.\n\n### Requirements\n1. Write clean, modular, and well-documented code.\n2. Ensure error handling and edge cases are covered.\n3. Test your implementation locally.\n4. Push your changes and open a Pull Request linking to this issue.",
+                    "difficulty": "medium",
+                    "labels": [f"week-{week}", "medium"],
+                    "_filename": "02-core-feature.md",
+                },
+                {
+                    "title": f"Week {week} Task 3: Testing & Code Review",
+                    "body": f"## Objective\nValidate your implementation with unit/integration tests or code quality checks.\n\n### Requirements\n1. Add test cases or verification steps for your Week {week} code.\n2. Perform a self-review of your PR against industry best practices.\n3. Request a review from the mentor/admin team.",
+                    "difficulty": "medium",
+                    "labels": [f"week-{week}", "medium"],
+                    "_filename": "03-testing.md",
+                },
+            ]
+
+        # Sort tasks alphabetically by filename (e.g. task-1, task-2)
+        tasks.sort(key=lambda x: x.get("_filename", ""))
         return tasks
 
     def _parse_markdown_task(self, content: str, filename: str) -> dict | None:
