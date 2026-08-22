@@ -854,7 +854,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── Certificate banner ────────────────────────────────────────────────────
     certSection.style.display = 'block';
-    certSection.innerHTML = '';
+    certSection.innerHTML = `
+      <div class="cert-banner">
+        <div class="cert-banner-glow"></div>
+        <div class="cert-banner-content">
+          <div class="cert-banner-icon">🏆</div>
+          <div class="cert-banner-text">
+            <div class="cert-banner-title">Congratulations! Your credentials are ready.</div>
+            <div class="cert-banner-sub">Payment confirmed · View, download, and verify your credentials!</div>
+          </div>
+          <div class="cert-banner-actions">
+            <a href="${certUrl}" target="_blank" class="cert-btn cert-btn-primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
+                <rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                <polyline points="9 12 11 14 15 10"/>
+              </svg>
+              View Certificate
+            </a>
+            <a href="${lorUrl}" target="_blank" class="cert-btn cert-btn-primary" style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; border: none;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              View LOR
+            </a>
+            <a href="${dlUrl}" target="_blank" class="cert-btn cert-btn-secondary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              Download PDF
+            </a>
+          </div>
+        </div>
+      </div>`;
 
     // Change the instant pay trigger button to Paid
     const instantPayTrigger = document.getElementById('flex-cert-btn');
@@ -1685,7 +1717,7 @@ function triggerMilestoneConfetti() {
           return;
         }
 
-        if (orderData.status === 'already_paid') {
+        if (orderData.already_paid) {
           alert('You have already paid! Unlocking certificate.');
           window.location.reload();
           return;
@@ -1728,8 +1760,8 @@ function triggerMilestoneConfetti() {
             }
           },
           prefill: {
-            name: window._dashStudent.full_name || '',
-            email: window._dashStudent.email || ''
+            name: orderData.student_name || '',
+            email: window._dashData._email || ''
           },
           theme: { color: '#c99a4e' },
           modal: {
@@ -1749,7 +1781,7 @@ function triggerMilestoneConfetti() {
           });
         }
 
-        const rzp = new Razorpay(options);
+        const rzp = new window.Razorpay(options);
         rzp.open();
       } catch(e) {
         alert('Payment initialization failed.');
