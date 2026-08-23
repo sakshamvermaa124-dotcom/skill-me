@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}📢 Important Update: How You Submit Your Weekly Tasks Has Changed{% endblock %}
+
+{% block body %}
+<p class="greeting">Hi {{ first_name }},</p>
+<p class="lead">
+  We've simplified how you complete and submit your <strong>{{ domain_label }}</strong> internship tasks at SkillMe.
+  Please read this carefully — it changes what you need to do each week.
+</p>
+
+<div class="divider"></div>
+
+<p class="section-label">🔁 What's Changing</p>
+<div class="info-table">
+  <div class="info-row">
+    <span class="info-label">Before</span>
+    <span class="info-value">GitHub repo + Pull Requests</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Now</span>
+    <span class="info-value">Build locally + Submit a LinkedIn post</span>
+  </div>
+</div>
+
+<p class="lead" style="margin-bottom: 20px;">
+  You no longer need a GitHub repository, pull requests, or issue tracking to complete your internship.
+  Each week now has one clear milestone project task, and you submit your work by posting about it on
+  LinkedIn and sharing the link with us for review.
+</p>
+
+<div class="divider"></div>
+
+<p class="section-label">✅ What You Need to Do Now</p>
+<div class="steps">
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-text"><strong>Open your Student Dashboard</strong><br />Log in and check your current week's milestone project — full requirements and deliverables are listed there.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-text"><strong>Build it locally</strong><br />Complete the week's project on your machine (VS Code / localhost) — no repo or PR needed.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-text"><strong>Post about it on LinkedIn</strong><br />Use the ready-made caption on your dashboard (or write your own), share a screenshot or short demo, and make sure to tag <strong>@SkillMe</strong>.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-text"><strong>Submit your post URL for review</strong><br />Paste your LinkedIn post link into the submission box for that week on your dashboard. Our team reviews it and marks it Approved or Rejected (with a note if changes are needed — you can resubmit).</div>
+  </div>
+</div>
+
+<div class="note">
+  💡 <strong>Good to know:</strong> Progress you've already earned from previously merged Pull Requests is preserved —
+  your weekly credit and score are unaffected. Only the way you submit going forward has changed.
+  If you had an <strong>open, unmerged Pull Request</strong> on GitHub, merging it will no longer count —
+  please redo that week's task through the new LinkedIn submission flow instead.
+</div>
+
+<div class="cta-wrap">
+  <a href="https://skill-me-intern.in/dashboard.html" target="_blank" class="cta-btn">Go to My Dashboard &rarr;</a>
+</div>
+
+<div class="note" style="margin-top: 20px;">
+  ❓ <strong>Questions?</strong> Just reply to this email or reach out to
+  <a href="mailto:sakshamverma124@gmail.com">sakshamverma124@gmail.com</a> — we're happy to help.
+</div>
+{% endblock %}

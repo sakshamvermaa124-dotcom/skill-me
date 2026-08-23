@@ -332,6 +332,28 @@ class EmailService:
             email_type="certificate_ready",
         )
 
+    # Announcement: GitHub PR -> LinkedIn submission flow change
+    async def send_submission_flow_update(
+        self,
+        first_name: str,
+        last_name: str,
+        email: str,
+        domain: str,
+    ) -> bool:
+        html = _render(
+            "submission_flow_update.html",
+            first_name=first_name,
+            last_name=last_name,
+            domain_label=_domain_label(domain),
+        )
+        return await _send_and_log(
+            email,
+            f"{first_name} {last_name}",
+            "📢 Important Update: How You Submit Your Weekly Tasks Has Changed",
+            html,
+            email_type="submission_flow_update",
+        )
+
     # Test utility
     async def send_test_email(self, to_email: str) -> bool:
         """Send a test email to verify SMTP configuration."""

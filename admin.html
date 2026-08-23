@@ -929,6 +929,12 @@
         Submissions
         <span class="nav-badge" id="submissions-badge" style="display:none;background:rgba(251,191,36,0.2);color:#fbbf24;">0</span>
       </div>
+      <div class="nav-item" id="nav-announcements" onclick="navigate('announcements')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>
+        </svg>
+        Announcements
+      </div>
     </nav>
 
     <!-- COLLAPSIBLE DEVELOPER PREVIEWS DROP BOX -->
@@ -1292,7 +1298,57 @@
       </div>
     </section>
 
+    <!-- ─── ANNOUNCEMENTS PAGE ─── -->
+    <section class="page" id="page-announcements">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">📢 Submission Flow Update</div>
+            <div style="font-size:0.8rem;color:var(--text-secondary);margin-top:2px;">
+              Notifies students that task submission moved from GitHub Pull Requests to LinkedIn posts + admin review.
+            </div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px;">
+            <label style="font-size:0.82rem;color:var(--text-secondary);">Send to students with status:</label>
+            <select class="filter-select" id="announcement-status-filter" onchange="previewAnnouncement()">
+              <option value="enrolled" selected>Enrolled</option>
+              <option value="shortlisted">Shortlisted</option>
+              <option value="applied">Applied</option>
+            </select>
+            <button class="btn btn-ghost btn-sm" onclick="previewAnnouncement()">Refresh Preview</button>
+          </div>
+
+          <div id="announcement-preview" style="margin-bottom:16px;">
+            <div class="loading-overlay"><div class="spinner"></div> Loading recipients...</div>
+          </div>
+
+          <button class="btn" style="background:rgba(201,154,78,0.15);color:#c99a4e;border:1px solid rgba(201,154,78,0.3);" onclick="confirmSendAnnouncement()">
+            📨 Send Submission Flow Update
+          </button>
+        </div>
+      </div>
+    </section>
+
   </main>
+</div>
+
+<!-- ─── ANNOUNCEMENT SEND CONFIRMATION MODAL ─── -->
+<div class="modal-overlay" id="announcement-confirm-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Confirm Send</div>
+      <button class="modal-close" onclick="closeModal('announcement-confirm-modal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p id="announcement-confirm-text" style="font-size:0.9rem;color:var(--text-secondary);line-height:1.6;"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('announcement-confirm-modal')">Cancel</button>
+      <button class="btn" style="background:rgba(201,154,78,0.15);color:#c99a4e;border:1px solid rgba(201,154,78,0.3);" onclick="sendAnnouncementNow()">Yes, Send Now</button>
+    </div>
+  </div>
 </div>
 
 <!-- ─── CREATE BATCH MODAL ─── -->

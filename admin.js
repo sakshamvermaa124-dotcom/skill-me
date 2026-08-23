@@ -32,6 +32,7 @@ const PAGE_META = {
   batches:   { title: 'Batches',   subtitle: 'Manage cohorts and enrollment' },
   email:     { title: 'Email Settings', subtitle: 'Brevo SMTP relay — test and monitor email delivery' },
   submissions: { title: 'Submissions', subtitle: 'Review and approve/reject weekly LinkedIn submissions' },
+  announcements: { title: 'Announcements', subtitle: 'Send platform-wide update emails to students' },
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -854,6 +855,7 @@ function navigate(page) {
   if (page === 'batches') loadBatches();
   if (page === 'email') loadEmailStatus();
   if (page === 'submissions') loadSubmissions();
+  if (page === 'announcements') previewAnnouncement();
 }
 
 function refreshCurrentPage() { navigate(currentPage); }
@@ -1607,6 +1609,71 @@ async function bulkRejectSubmissions() {
     loadSubmissions();
     loadStats(true);
   } catch(e) {
+    toast(e.message, 'error');
+  }
+}
+
+// ─── ANNOUNCEMENTS ───
+const ANNOUNCEMENT_KEY = 'submission-flow-update';
+let announcementPreviewCache = [];
+
+async function previewAnnouncement() {
+  const el = document.getElementById('announcement-preview');
+  const status = document.getElementById('announcement-status-filter').value;
+  el.innerHTML = `<div class="loading-overlay"><div class="spinner"></div> Loading recipients...</div>`;
+  try {
+    const data = await api(`/api/admin/announcements/${ANNOUNCEMENT_KEY}/preview?status=${encodeURIComponent(status)}`);
+    announcementPreviewCache = data.students || [];
+    if (!announcementPreviewCache.length) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-state-text">No students with status "${status}" found.</div></div>`;
+      return;
+    }
+    el.innerHTML = `
+      <div style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:10px;">
+        <strong style="color:var(--text-primary);">${announcementPreviewCache.length}</strong> student(s) will receive this email:
+      </div>
+      <div class="table-wrap" style="max-height:280px;overflow-y:auto;">
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>Domain</th></tr></thead>
+          <tbody>
+            ${announcementPreviewCache.map(s => `
+              <tr>
+                <td>${s.first_name} ${s.last_name}</td>
+                <td>${s.email}</td>
+                <td>${s.domain || '-'}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  } catch (e) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-state-text">${e.message}</div></div>`;
+  }
+}
+
+function confirmSendAnnouncement() {
+  if (!announcementPreviewCache.length) {
+    toast('No recipients to send to — refresh the preview first.', 'error');
+    return;
+  }
+  document.getElementById('announcement-confirm-text').textContent =
+    `This will send the "Submission Flow Update" email to ${announcementPreviewCache.length} student(s) right now. This cannot be undone. Continue?`;
+  openModal('announcement-confirm-modal');
+}
+
+async function sendAnnouncementNow() {
+  const status = document.getElementById('announcement-status-filter').value;
+  try {
+    const data = await api(`/api/admin/announcements/${ANNOUNCEMENT_KEY}/send`, {
+      method: 'POST',
+      body: JSON.stringify({ status })
+    });
+    closeModal('announcement-confirm-modal');
+    if (data.status === 'no_targets') {
+      toast('No matching students found.', 'error');
+      return;
+    }
+    toast(`Sending to ${data.sent_to.length} student(s)...`);
+  } catch (e) {
     toast(e.message, 'error');
   }
 }

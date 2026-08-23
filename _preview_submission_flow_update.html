@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>📢 Important Update: How You Submit Your Weekly Tasks Has Changed</title>
+  <!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
+  <![endif]-->
+  <style>
+    /* Reset */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      color: #1e293b;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1.6;
+    }
+    table { border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; }
+    img { border: 0; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }
+    a { color: #2563eb; text-decoration: none; }
+
+    /* Layout Card */
+    .wrapper {
+      max-width: 600px;
+      margin: 36px auto;
+      background-color: #ffffff;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+    }
+
+    /* Top Multi-Color Accent Strip */
+    .accent-bar {
+      height: 5px;
+      background: linear-gradient(90deg, #c99a4e 0%, #d8ac63 35%, #2563eb 70%, #10b981 100%);
+    }
+
+    /* Header */
+    .header {
+      background: #ffffff;
+      padding: 26px 36px 22px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .header-table { width: 100%; }
+    .brand-logo-img {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      vertical-align: middle;
+      display: inline-block;
+    }
+    .brand-text-wrap {
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 12px;
+    }
+    .brand-title {
+      font-size: 21px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+    .brand-title span { color: #c99a4e; }
+    .brand-subtitle {
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-top: 2px;
+    }
+    .header-meta {
+      text-align: right;
+      font-size: 11px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+    .header-meta a {
+      color: #2563eb;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .header-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: rgba(201, 154, 78, 0.12);
+      border: 1px solid rgba(201, 154, 78, 0.28);
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #936818;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+
+    /* Body */
+    .body {
+      background: #ffffff;
+      padding: 34px 36px;
+    }
+
+    /* Typography */
+    .greeting {
+      font-size: 22px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 12px;
+      letter-spacing: -0.4px;
+      line-height: 1.3;
+    }
+    .lead {
+      font-size: 15px;
+      line-height: 1.7;
+      color: #334155;
+      margin-bottom: 24px;
+    }
+    .lead strong {
+      color: #0f172a;
+    }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: #e2e8f0;
+      margin: 28px 0;
+    }
+
+    /* Section Label */
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #b5873d;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Info Table */
+    .info-table {
+      width: 100%;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 24px;
+      background: #ffffff;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 18px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 14px;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-row:nth-child(even) { background: #f8fafc; }
+    .info-label { color: #64748b; font-weight: 500; font-size: 13px; }
+    .info-value { color: #0f172a; font-weight: 700; text-align: right; font-size: 14px; }
+
+    /* Steps */
+    .steps { margin: 0 0 10px; }
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 16px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #0f172a;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .step-text { font-size: 13.5px; line-height: 1.6; color: #475569; }
+    .step-text strong { color: #0f172a; font-weight: 700; }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .badge-green  { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .badge-blue   { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .badge-purple { background: #f3e8ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+    .badge-amber  { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+
+    /* Tasks items */
+    .task-item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #2563eb;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 10px;
+    }
+    .task-item-title { font-size: 14px; font-weight: 700; color: #0f172a; }
+    .task-item-link {
+      font-size: 13px;
+      color: #2563eb;
+      text-decoration: none;
+      margin-top: 5px;
+      display: inline-block;
+      font-weight: 600;
+    }
+    .task-item-link:hover { text-decoration: underline; }
+
+    /* Cert ID block */
+    .cert-id-box {
+      background: #faf8f5;
+      border: 1px solid rgba(201, 154, 78, 0.35);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      margin: 22px 0;
+    }
+
+    /* Prominent NOC & HOD Feature Box */
+    .noc-feature-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-left: 4px solid #2563eb;
+      border-radius: 12px;
+      padding: 20px 22px;
+      margin: 24px 0;
+    }
+    .noc-feature-header {
+      margin-bottom: 10px;
+    }
+    .noc-feature-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #1e3a8a;
+      line-height: 1.3;
+    }
+    .noc-feature-desc {
+      font-size: 13.5px;
+      color: #334155;
+      line-height: 1.6;
+      margin-top: 4px;
+    }
+    .noc-feature-list {
+      list-style: none;
+      margin: 12px 0 14px;
+      padding: 0;
+    }
+    .noc-feature-list li {
+      font-size: 13px;
+      color: #1e293b;
+      margin-bottom: 7px;
+      padding-left: 20px;
+      position: relative;
+      line-height: 1.5;
+    }
+    .noc-feature-list li::before {
+      content: '✔';
+      position: absolute;
+      left: 0;
+      color: #2563eb;
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    /* 👑 High-Impact Unmissable Offer Hero CTA Card */
+    .offer-hero-cta-card {
+      background: linear-gradient(135deg, #fffbf2 0%, #fef8eb 100%);
+      border: 2px solid #c99a4e;
+      border-radius: 14px;
+      padding: 24px 22px;
+      margin: 24px 0;
+      text-align: center;
+      box-shadow: 0 10px 28px rgba(201, 154, 78, 0.18);
+    }
+    .offer-hero-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #c99a4e;
+      color: #0c0b0b;
+      font-size: 10.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+    }
+    .offer-hero-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+    .offer-hero-sub {
+      font-size: 13px;
+      color: #57534e;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+    .btn-offer-hero {
+      display: inline-block;
+      background: linear-gradient(135deg, #c99a4e 0%, #b5873d 100%);
+      color: #0c0b0b !important;
+      font-weight: 800;
+      font-size: 15.5px;
+      padding: 14px 34px;
+      border-radius: 8px;
+      text-decoration: none;
+      letter-spacing: 0.01em;
+      box-shadow: 0 4px 16px rgba(181, 135, 61, 0.4);
+    }
+
+    /* 🚀 1-Click Milestone Share Card */
+    .share-milestone-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px 22px;
+      margin: 24px 0;
+    }
+    .share-milestone-title {
+      font-size: 14.5px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .share-milestone-desc {
+      font-size: 13px;
+      color: #64748b;
+      margin-bottom: 16px;
+    }
+    .share-btns-table {
+      width: 100%;
+    }
+    .btn-email-linkedin {
+      display: inline-block;
+      background: #0a66c2;
+      color: #ffffff !important;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 10px 18px;
+      border-radius: 6px;
+      text-decoration: none;
+      text-align: center;
+      width: 95%;
+      box-sizing: border-box;
+    }
+    .btn-email-whatsapp {
+      display: inline-block;
+      background: #25d366;
+      color: #ffffff !important;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 10px 18px;
+      border-radius: 6px;
+      text-decoration: none;
+      text-align: center;
+      width: 95%;
+      box-sizing: border-box;
+    }
+    .btn-email-follow-company {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 11px 18px;
+      background: #f0f7ff;
+      border: 1.5px solid #0a66c2;
+      color: #0a66c2 !important;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    .btn-email-follow-company:hover {
+      background: #e0effe;
+    }
+    .cert-id-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #b5873d;
+      margin-bottom: 6px;
+    }
+    .cert-id-value {
+      font-size: 20px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: 0.05em;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    /* CTAs */
+    .cta-wrap { text-align: center; margin: 30px 0 10px; }
+    .cta-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #b5873d 0%, #c99a4e 50%, #dfb56c 100%);
+      color: #0f172a !important;
+      font-weight: 800;
+      font-size: 14.5px;
+      padding: 13px 32px;
+      border-radius: 8px;
+      text-decoration: none;
+      letter-spacing: 0.01em;
+      box-shadow: 0 4px 14px rgba(181, 135, 61, 0.3);
+      transition: all 0.2s ease;
+    }
+    .cta-btn:hover {
+      box-shadow: 0 6px 20px rgba(181, 135, 61, 0.4);
+    }
+    .cta-btn-secondary {
+      display: inline-block;
+      background: #ffffff;
+      color: #1e293b !important;
+      font-weight: 700;
+      font-size: 13.5px;
+      padding: 10px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      border: 1px solid #cbd5e1;
+      margin-top: 10px;
+    }
+    .cta-btn-secondary:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+    }
+
+    /* Callout Note */
+    .note {
+      font-size: 13px;
+      color: #475569;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 3px solid #b5873d;
+      border-radius: 6px;
+      padding: 13px 16px;
+      margin-top: 24px;
+      line-height: 1.6;
+    }
+    .note strong { color: #0f172a; }
+
+    /* Footer */
+    .footer {
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      padding: 24px 36px;
+      text-align: center;
+    }
+    .footer-links { margin-bottom: 12px; }
+    .footer-links a {
+      color: #64748b;
+      text-decoration: none;
+      font-size: 12.5px;
+      font-weight: 600;
+      margin: 0 10px;
+    }
+    .footer-links a:hover { color: #0f172a; }
+    .footer-copy {
+      font-size: 11.5px;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+    .footer-copy a { color: #64748b; text-decoration: none; }
+
+    @media only screen and (max-width: 600px) {
+      .wrapper { margin: 12px auto; border-radius: 10px; }
+      .header { padding: 20px 20px 16px; }
+      .body { padding: 24px 20px; }
+      .footer { padding: 20px; }
+      .greeting { font-size: 19px; }
+      .cta-btn { width: 100%; box-sizing: border-box; text-align: center; }
+      .cta-btn-secondary { width: 100%; box-sizing: border-box; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- Top Accent Bar -->
+  <div class="accent-bar"></div>
+
+  <!-- Header -->
+  <div class="header">
+    <table class="header-table" cellpadding="0" cellspacing="0">
+      <tr>
+        <td style="vertical-align: middle;">
+          <img src="https://skill-me-intern.in/assets/logo.png" alt="SkillMe Logo" class="brand-logo-img" width="42" height="42" />
+          <div class="brand-text-wrap">
+            <div class="brand-title">Skill<span>Me</span></div>
+            <div class="brand-subtitle">Technical Internship</div>
+          </div>
+        </td>
+        <td style="text-align: right; vertical-align: middle;">
+          <div class="header-meta">
+            <a href="https://skill-me-intern.in" target="_blank">skill-me-intern.in</a><br />
+            <span class="header-badge">Verified Internship</span>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Body Content -->
+  <div class="body">
+    
+<p class="greeting">Hi Priya,</p>
+<p class="lead">
+  We've simplified how you complete and submit your <strong>Web Development</strong> internship tasks at SkillMe.
+  Please read this carefully — it changes what you need to do each week.
+</p>
+
+<div class="divider"></div>
+
+<p class="section-label">🔁 What's Changing</p>
+<div class="info-table">
+  <div class="info-row">
+    <span class="info-label">Before</span>
+    <span class="info-value">GitHub repo + Pull Requests</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Now</span>
+    <span class="info-value">Build locally + Submit a LinkedIn post</span>
+  </div>
+</div>
+
+<p class="lead" style="margin-bottom: 20px;">
+  You no longer need a GitHub repository, pull requests, or issue tracking to complete your internship.
+  Each week now has one clear milestone project task, and you submit your work by posting about it on
+  LinkedIn and sharing the link with us for review.
+</p>
+
+<div class="divider"></div>
+
+<p class="section-label">✅ What You Need to Do Now</p>
+<div class="steps">
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-text"><strong>Open your Student Dashboard</strong><br />Log in and check your current week's milestone project — full requirements and deliverables are listed there.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-text"><strong>Build it locally</strong><br />Complete the week's project on your machine (VS Code / localhost) — no repo or PR needed.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-text"><strong>Post about it on LinkedIn</strong><br />Use the ready-made caption on your dashboard (or write your own), share a screenshot or short demo, and make sure to tag <strong>@SkillMe</strong>.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-text"><strong>Submit your post URL for review</strong><br />Paste your LinkedIn post link into the submission box for that week on your dashboard. Our team reviews it and marks it Approved or Rejected (with a note if changes are needed — you can resubmit).</div>
+  </div>
+</div>
+
+<div class="note">
+  💡 <strong>Good to know:</strong> Progress you've already earned from previously merged Pull Requests is preserved —
+  your weekly credit and score are unaffected. Only the way you submit going forward has changed.
+  If you had an <strong>open, unmerged Pull Request</strong> on GitHub, merging it will no longer count —
+  please redo that week's task through the new LinkedIn submission flow instead.
+</div>
+
+<div class="cta-wrap">
+  <a href="https://skill-me-intern.in/dashboard.html" target="_blank" class="cta-btn">Go to My Dashboard &rarr;</a>
+</div>
+
+<div class="note" style="margin-top: 20px;">
+  ❓ <strong>Questions?</strong> Just reply to this email or reach out to
+  <a href="mailto:sakshamverma124@gmail.com">sakshamverma124@gmail.com</a> — we're happy to help.
+</div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-links">
+      <a href="https://skill-me-intern.in" target="_blank">Home</a>
+      <a href="https://skill-me-intern.in/dashboard.html" target="_blank">Student Dashboard</a>
+      <a href="https://www.linkedin.com/company/skill-me-intern/" target="_blank">LinkedIn Community</a>
+      <a href="mailto:sakshamverma124@gmail.com">Support</a>
+    </div>
+    <div class="footer-copy">
+      You received this email because you registered on SkillMe.<br />
+      &copy; 2026 SkillMe &mdash; Udyam Registered Enterprise (UDYAM-UP-50-0294192, Govt. of India).<br />
+      <span style="font-size:10.5px;">Cryptographically Verified Deliverables &bull; Ministry of MSME Registered</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

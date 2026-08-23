@@ -46,6 +46,23 @@ class BulkSubmissionRequest(BaseModel):
     admin_note: str | None = Field(None, max_length=500)
 
 
+class SendAnnouncementRequest(BaseModel):
+    status: str = Field("enrolled", description="Target student status filter (ignored if student_ids given)")
+    student_ids: list[int] | None = Field(None, description="Explicit recipient list, overrides the status filter")
+
+
+# Registry of one-off / recurring announcements admins can send from the panel.
+# `fn` is the email_service method name — resolved dynamically at send time (not
+# bound at import time) so it always dispatches through the current email_service.
+ANNOUNCEMENTS = {
+    "submission-flow-update": {
+        "label": "Submission Flow Update (GitHub PRs → LinkedIn)",
+        "fn": "send_submission_flow_update",
+        "email_type": "submission_flow_update",
+    },
+}
+
+
 # ──────────────────────────────────────────────
 # Dashboard Stats
 # ──────────────────────────────────────────────
@@ -467,6 +484,93 @@ async def bulk_reject_submissions(req: BulkSubmissionRequest, _: str = Depends(r
     """Reject multiple submissions in one call — powers the review queue's select-all/bulk-reject action."""
     results = await submission_service.bulk_reject(req.submission_ids, req.admin_note)
     return {"status": "done", "results": results}
+
+
+# ──────────────────────────────────────────────
+# Announcements
+# ──────────────────────────────────────────────
+
+@router.get("/announcements", summary="List available announcements")
+async def list_announcements(_: str = Depends(require_admin)):
+    """List announcement templates admins can send from the panel."""
+    return {
+        "announcements": [
+            {"key": key, "label": ann["label"]} for key, ann in ANNOUNCEMENTS.items()
+        ]
+    }
+
+
+@router.get("/announcements/{key}/preview", summary="Preview recipients for an announcement")
+async def preview_announcement(key: str, status: str = "enrolled", _: str = Depends(require_admin)):
+    """Preview who would receive this announcement before sending it."""
+    if key not in ANNOUNCEMENTS:
+        raise HTTPException(status_code=404, detail=f"Unknown announcement '{key}'")
+
+    rows = await db.fetch_all(
+        "SELECT id, first_name, last_name, email, domain FROM students WHERE status = ? ORDER BY first_name",
+        (status,),
+    )
+    return {"count": len(rows), "students": rows}
+
+
+@router.post("/announcements/{key}/send", summary="Send an announcement email")
+async def send_announcement(
+    key: str, req: SendAnnouncementRequest,
+    background_tasks: BackgroundTasks,
+    _: str = Depends(require_admin),
+):
+    """
+    Send an announcement email to students.
+    - If `student_ids` is provided, only those students are emailed.
+    - Otherwise, all students matching `status` (default 'enrolled') are emailed.
+    Emails are dispatched in the background so the API responds immediately.
+    """
+    if key not in ANNOUNCEMENTS:
+        raise HTTPException(status_code=404, detail=f"Unknown announcement '{key}'")
+    ann = ANNOUNCEMENTS[key]
+
+    if req.student_ids:
+        placeholders = ",".join("?" for _id in req.student_ids)
+        rows = await db.fetch_all(
+            f"SELECT id, first_name, last_name, email, domain FROM students WHERE id IN ({placeholders})",
+            tuple(req.student_ids),
+        )
+    else:
+        rows = await db.fetch_all(
+            "SELECT id, first_name, last_name, email, domain FROM students WHERE status = ?",
+            (req.status,),
+        )
+
+    if not rows:
+        return {"status": "no_targets", "message": "No matching students found.", "sent_to": []}
+
+    async def _fire_emails():
+        import asyncio
+        send_fn = getattr(email_service, ann["fn"])
+        for r in rows:
+            try:
+                await send_fn(
+                    first_name=r["first_name"],
+                    last_name=r["last_name"],
+                    email=r["email"],
+                    domain=r.get("domain") or "web-dev",
+                )
+                logger.info(f"Announcement '{key}' sent → {r['email']} (student_id={r['id']})")
+            except Exception as exc:
+                logger.error(f"Failed to send announcement '{key}' to {r['email']}: {exc}")
+            await asyncio.sleep(1)  # avoid tripping SMTP connection rate limits
+
+    background_tasks.add_task(_fire_emails)
+
+    sent_to = [
+        {"student_id": r["id"], "name": f"{r['first_name']} {r['last_name']}", "email": r["email"]}
+        for r in rows
+    ]
+    return {
+        "status": "dispatched",
+        "message": f"Announcement is being sent to {len(rows)} student(s) in the background.",
+        "sent_to": sent_to,
+    }
 
 
 # ──────────────────────────────────────────────
