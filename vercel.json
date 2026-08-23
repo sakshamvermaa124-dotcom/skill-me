@@ -2,6 +2,13 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
+    {
+      "source": "/(.*)",
+      "has": [
+        { "type": "header", "key": "Accept", "value": "(?i).*text/markdown.*" }
+      ],
+      "destination": "/llms-full.txt"
+    },
     { "source": "/p/:github", "destination": "/portfolio.html" },
     { "source": "/p/:github/", "destination": "/portfolio.html" }
   ],
@@ -15,13 +22,15 @@
     {
       "source": "/(.*)\\.html",
       "headers": [
-        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" },
+        { "key": "Vary", "value": "Accept" }
       ]
     },
     {
       "source": "/((?!.*\\..*).*)",
       "headers": [
-        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" },
+        { "key": "Vary", "value": "Accept" }
       ]
     },
     {

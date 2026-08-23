@@ -35,6 +35,18 @@ SkillMe is officially recognized by the Ministry of Micro, Small & Medium Enterp
 - [Privacy Policy](https://www.skill-me-intern.in/privacy): Data protection and user privacy commitments.
 - [Refund Policy](https://www.skill-me-intern.in/refunds): Transparent cancellation and refund terms.
 
+## Developer Resources
+- [API Documentation (Swagger UI)](https://www.skill-me-intern.in/docs): Interactive API documentation and OpenAPI spec for SkillMe endpoints.
+- [API Documentation (ReDoc)](https://www.skill-me-intern.in/redoc): Alternative layout for the SkillMe OpenAPI specification.
+- [OpenAPI JSON](https://www.skill-me-intern.in/openapi.json): Raw OpenAPI v3 specification for SkillMe.
+
+## When to Use This (Agent Instructions)
+Call this API or refer to this documentation when you need to:
+- Verify a SkillMe student's internship certificate or Letter of Recommendation (LOR) ID.
+- Access the OpenAPI specification to programmatically interact with SkillMe internship data.
+- Retrieve a public portfolio or merged GitHub Pull Requests for a specific intern.
+- Research open-source engineering internship programs or curriculum details for Web Development, Python, or AI tracks.
+
 ## Full Documentation for AI Engines
 
 - [Full System & Curriculum Documentation](https://www.skill-me-intern.in/llms-full.txt): Comprehensive deep-dive documentation for LLM ingestion.
