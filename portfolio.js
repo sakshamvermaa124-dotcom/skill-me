@@ -26,12 +26,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (isPreview) {
     renderPortfolio({
       profile: { name: "Saksham Verma", github_username: "sakshamverma124", college: "IIT Delhi" },
-      stats: { total_tasks_completed: 12, total_prs_merged: 12, total_score: 300 },
+      stats: { total_tasks_completed: 12, total_score: 300 },
       domains: ["web-dev", "machine-learning"],
       submissions: [
-        { title: "feat(auth): implemented OAuth2 JWT authentication pipeline", merged_at: "2026-08-12T14:30:00Z", pr_url: "https://github.com/sakshamvermaa124-dotcom/web-dev-batch-1/pull/14", domain: "web-dev" },
-        { title: "fix(pipeline): resolved memory leak in streaming telemetry worker", merged_at: "2026-08-08T10:15:00Z", pr_url: "https://github.com/sakshamvermaa124-dotcom/web-dev-batch-1/pull/9", domain: "machine-learning" },
-        { title: "perf(db): optimized Turso SQLite indexing for async query latency", merged_at: "2026-08-04T18:00:00Z", pr_url: "https://github.com/sakshamvermaa124-dotcom/web-dev-batch-1/pull/4", domain: "web-dev" }
+        { week: 4, reviewed_at: "2026-08-12T14:30:00Z", linkedin_url: "https://www.linkedin.com/feed/update/urn:li:activity:1", domain: "web-dev" },
+        { week: 3, reviewed_at: "2026-08-08T10:15:00Z", linkedin_url: "https://www.linkedin.com/feed/update/urn:li:activity:2", domain: "machine-learning" },
+        { week: 2, reviewed_at: "2026-08-04T18:00:00Z", linkedin_url: "https://www.linkedin.com/feed/update/urn:li:activity:3", domain: "web-dev" }
       ]
     });
     return;
@@ -134,33 +134,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     const skillsHtml = Array.from(studentSkills).map(skill => `<span class="skill-pill">${skill}</span>`).join('');
 
-    // Recent PR Submissions
+    // Approved LinkedIn milestone submissions
     const submissionsHtml = submissions.length > 0
       ? submissions.map(sub => {
-          const rawTs = sub.merged_at || sub.submitted_at || null;
+          const rawTs = sub.reviewed_at || sub.submitted_at || null;
           const rawDate = rawTs ? (rawTs.includes('T') ? rawTs.split('T')[0] : rawTs.split(' ')[0]) : null;
           const dateStr = rawDate
             ? new Date(rawDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
             : 'Verified Contribution';
-          const repoUrl = sub.pr_url ? sub.pr_url.split('/pull/')[0] : '#';
-          const repoName = repoUrl !== '#' ? repoUrl.split('/').slice(-2).join('/') : 'SkillMe Production Repo';
-          const prNumber = sub.pr_url ? sub.pr_url.split('/pull/')[1] || '1' : '1';
           const domainLabel = (sub.domain || 'web-dev').replace(/-/g, ' ').toUpperCase();
 
           return `
-            <a href="${sub.pr_url || '#'}" target="_blank" rel="noopener noreferrer" class="pr-bento-card">
+            <a href="${sub.linkedin_url || '#'}" target="_blank" rel="noopener noreferrer" class="pr-bento-card">
               <div class="pr-left-col">
                 <div class="pr-git-icon">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M13 6h3a2 2 0 0 1 2 2v7"></path><line x1="6" y1="9" x2="6" y2="21"></line></svg>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
                 </div>
                 <div class="pr-main-content">
-                  <div class="pr-title-text">${sub.title || 'Resolved Assigned Technical Issue'}</div>
+                  <div class="pr-title-text">Week ${sub.week || ''} Milestone</div>
                   <div class="pr-meta-row">
-                    <span class="badge-pr-status">● Merged #${prNumber}</span>
-                    <span class="badge-repo-name">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                      ${repoName}
-                    </span>
+                    <span class="badge-pr-status">● Approved</span>
                     <span>&bull;</span>
                     <span>${dateStr}</span>
                     <span>&bull;</span>
@@ -169,7 +162,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
               </div>
               <div class="pr-right-action">
-                <span>View on GitHub</span>
+                <span>View on LinkedIn</span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
               </div>
             </a>
@@ -178,8 +171,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       : `
         <div style="background:var(--bg-surface); border:1px dashed var(--border-subtle); border-radius:14px; padding:40px; text-align:center; color:var(--text-muted);">
           <div style="font-size:24px; margin-bottom:8px;">📦</div>
-          <div style="font-weight:700; color:#f8fafc; margin-bottom:4px;">Contributions Syncing Live</div>
-          <div style="font-size:0.85rem;">Merged Pull Requests will automatically populate here in real-time as GitHub webhooks sync.</div>
+          <div style="font-weight:700; color:#f8fafc; margin-bottom:4px;">Milestones Syncing Live</div>
+          <div style="font-size:0.85rem;">Approved LinkedIn milestone submissions will populate here once reviewed.</div>
         </div>
       `;
 
@@ -212,7 +205,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>
 
           <div class="hero-actions-deck">
-            <button class="btn-hero-action btn-share-linkedin" onclick="shareOnLinkedIn('${name}', '${domains.join(', ')}', '${s.total_prs_merged || 0}', '${fullUrl}')">
+            <button class="btn-hero-action btn-share-linkedin" onclick="shareOnLinkedIn('${name}', '${domains.join(', ')}', '${submissions.length || 0}', '${fullUrl}')">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
               Share on LinkedIn
             </button>
@@ -246,8 +239,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
             <span class="bento-stat-badge" style="color:#34d399; background:rgba(16,185,129,0.1);">Verified</span>
           </div>
-          <div class="bento-stat-val">${s.total_prs_merged || 0}</div>
-          <div class="bento-stat-label">Pull Requests Merged</div>
+          <div class="bento-stat-val">${submissions.length || 0}</div>
+          <div class="bento-stat-label">Milestones Approved</div>
         </div>
 
         <div class="bento-stat-card" style="--card-accent:#c99a4e;">
@@ -289,9 +282,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="section-header-row">
           <div class="section-title">
             <span>⚡</span> Verified Engineering Contributions
-            <span class="feed-count-pill">${submissions.length} Merged PRs</span>
+            <span class="feed-count-pill">${submissions.length} Milestones</span>
           </div>
-          <div style="font-size:0.8rem; color:#64748b;">Live GitHub Sync &bull; Automated CI/CD</div>
+          <div style="font-size:0.8rem; color:#64748b;">Admin-Reviewed &bull; Verified Submissions</div>
         </div>
 
         <div class="pr-feed">
@@ -333,19 +326,19 @@ window.copyPortfolioLink = function(url) {
 };
 
 // 1-Click Share on LinkedIn
-window.shareOnLinkedIn = function(name, domains, prCount, url) {
+window.shareOnLinkedIn = function(name, domains, milestoneCount, url) {
   const text = `🚀 Excited to share my verified engineering Proof of Work portfolio on SkillMe (@SkillMe)!
 
-I have contributed and merged ${prCount} verified Pull Requests across real-world GitHub repositories in ${domains}.
+I have completed and had ${milestoneCount} verified project milestones approved in ${domains}.
 
-Every contribution is tested via CI/CD, peer-reviewed, and merged into production repositories.
+Every milestone is reviewed by the SkillMe team before being marked complete.
 
-Check out my live portfolio, merged PRs, and codebase here:
+Check out my live portfolio here:
 👉 ${url}
 
 Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
 
-#SkillMe #ProofOfWork #SoftwareEngineering #WebDevelopment #GitHub #Tech`;
+#SkillMe #ProofOfWork #SoftwareEngineering #WebDevelopment #Tech`;
 
   const shareUrl = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(text)}`;
   window.open(shareUrl, '_blank');

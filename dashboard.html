@@ -7,8 +7,8 @@
   <!-- Primary SEO Meta Tags -->
   <title>Student Portal &amp; Task Dashboard — SkillMe</title>
   <meta name="title" content="Student Portal &amp; Task Dashboard — SkillMe">
-  <meta name="description" content="SkillMe student portal: Track weekly GitHub issue assignments, pull request merges, performance scores, and certificates.">
-  <meta name="keywords" content="SkillMe dashboard, student login, intern portal, GitHub tasks, task submission">
+  <meta name="description" content="SkillMe student portal: Track weekly project milestones, LinkedIn submission approvals, performance scores, and certificates.">
+  <meta name="keywords" content="SkillMe dashboard, student login, intern portal, milestone tasks, task submission">
   <meta name="robots" content="noindex, follow">
   <meta name="language" content="English">
   <meta name="geo.region" content="IN">
@@ -115,16 +115,6 @@
     </nav>
 
     <div class="dash-sidebar-footer">
-      <!-- Quick links -->
-      <a href="#" id="dash-quick-repo" target="_blank" rel="noopener noreferrer" class="dash-sidebar-quick js-dash-repo-link">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
-        <span class="dash-nav-label">Project Repo ↗</span>
-      </a>
-      <a href="#" id="dash-quick-issues" target="_blank" rel="noopener noreferrer" class="dash-sidebar-quick js-dash-issues-link">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-        <span class="dash-nav-label">Assigned Issues ↗</span>
-      </a>
-
       <!-- Student identity — dashboard.js writes to #dash-sidebar-name and #dash-domain -->
       <div class="dash-sidebar-user">
         <div id="dash-sidebar-name" class="dash-sidebar-name">—</div>
@@ -240,39 +230,6 @@
             </div>
           </div>
 
-          <!-- Mobile Quick Actions -->
-          <div class="mobile-quick-actions">
-            <a href="#" target="_blank" rel="noopener noreferrer" class="mobile-quick-btn js-dash-repo-link">
-              <div class="icon-wrap" style="background: rgba(99,102,241,0.1); color: #818cf8;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg></div>
-              <div class="text-wrap">
-                <span class="title">Project Repo</span>
-                <span class="sub">View Source</span>
-              </div>
-            </a>
-            <a href="#" target="_blank" rel="noopener noreferrer" class="mobile-quick-btn js-dash-issues-link">
-              <div class="icon-wrap" style="background: rgba(52,211,153,0.1); color: #34d399;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></div>
-              <div class="text-wrap">
-                <span class="title">Assigned Issues</span>
-                <span class="sub">Track Tasks</span>
-              </div>
-            </a>
-          </div>
-
-          <!-- Pending GitHub invite alert — dashboard.js toggles display -->
-          <div id="dash-pending-invite-alert" style="display: none; margin-bottom: 24px; padding: 16px 20px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; align-items: flex-start; gap: 12px;">
-            <svg style="width: 24px; height: 24px; color: #f59e0b; flex-shrink: 0; margin-top: 2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-            <div style="flex-grow: 1;">
-              <h3 style="margin: 0 0 4px 0; color: #fcd34d; font-size: 1rem; font-weight: 600;">GitHub Invite Pending</h3>
-              <p style="margin: 0; color: #fde68a; font-size: 0.88rem; line-height: 1.4;">
-                We've sent an invitation to collaborate on your internship repository. Check your email or GitHub notifications to accept it.
-                <a href="https://github.com/notifications" target="_blank" style="color: #f59e0b; text-decoration: underline; font-weight: 500; margin-left: 4px;">Check Notifications &nearr;</a>
-              </p>
-            </div>
-            <button onclick="verifyGithubInvite(this)" style="background: #f59e0b; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background 0.2s;" onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='#f59e0b'">
-              Verify Now
-            </button>
-          </div>
-
           <!-- Quick Action Hub -->
           <div class="dash-quick-actions">
             <a href="verify.html" class="dash-action-btn">
@@ -290,10 +247,6 @@
             <a href="https://mail.google.com/mail/?view=cm&fs=1&to=admin@skill-me-intern.in" target="_blank" class="dash-action-btn" style="text-decoration: none;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
               Support Email
-            </a>
-            <a id="dash-github" href="javascript:void(0)" target="_blank" class="dash-action-btn" style="text-decoration: none;">
-              <svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px;"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-              GitHub Profile
             </a>
             <button class="dash-action-btn" id="dash-share-milestone-btn" onclick="openMilestoneShareModal()" style="border-color:rgba(201,154,78,0.4);color:#f0c97a;cursor:pointer;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
@@ -331,7 +284,7 @@
                 </div>
                 <span class="stat-trend" style="background:rgba(167,139,250,0.1);color:#a78bfa;border-color:rgba(167,139,250,0.2);">Assigned</span>
               </div>
-              <div class="stat-label">Issues Solved</div>
+              <div class="stat-label">Tasks Completed</div>
               <div class="stat-value"><span id="stat-completed">0</span><span class="stat-unit"> / <span id="stat-assigned">0</span></span></div>
             </div>
             <div class="stat-card" id="stat-card-2" style="--stat-accent:linear-gradient(180deg,#34d399,#059669);--stat-icon-bg:rgba(52,211,153,0.1);--stat-icon-border:rgba(52,211,153,0.2);">
@@ -341,7 +294,7 @@
                 </div>
                 <span class="stat-trend">Live Sync</span>
               </div>
-              <div class="stat-label">PRs Merged</div>
+              <div class="stat-label">Submissions Approved</div>
               <div class="stat-value" id="stat-prs">0</div>
             </div>
             <div class="stat-card" id="stat-card-3" style="--stat-accent:linear-gradient(180deg,#60a5fa,#2563eb);--stat-icon-bg:rgba(96,165,250,0.1);--stat-icon-border:rgba(96,165,250,0.2);">
@@ -390,14 +343,14 @@
               </div>
               <div class="progress-details">
                 <h3>Internship Milestone Progress</h3>
-                <p id="progress-desc">You're just getting started. Submit your first PR to see your progress update in real-time.</p>
+                <p id="progress-desc">You're just getting started. Submit your first LinkedIn post for a task to see your progress update once it's approved.</p>
                 <div class="progress-bar-track">
                   <div class="progress-bar-inner" id="progress-bar-inner"></div>
                 </div>
                 <div style="margin-top: 12px; margin-bottom: 14px; text-align: left;">
                   <div style="display: inline-flex; align-items: flex-start; gap: 10px; font-size: 0.8rem; color: rgba(255, 255, 255, 0.9); background: linear-gradient(135deg, rgba(201, 154, 78, 0.15), rgba(201, 154, 78, 0.05)); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(201, 154, 78, 0.35); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); line-height: 1.5;">
                     <span style="font-size: 1.1rem; flex-shrink: 0; line-height: 1.2;">💡</span>
-                    <span><strong style="color: #f0c97a;">Note:</strong> This progress bar updates automatically when your GitHub Pull Requests are merged. If you prefer to complete your tasks offline, don't worry—you can still claim your Certificate and LOR at any time!</span>
+                    <span><strong style="color: #f0c97a;">Note:</strong> This progress bar updates automatically once an admin approves your submitted LinkedIn task post. If you prefer to complete your tasks offline, don't worry—you can still claim your Certificate and LOR at any time!</span>
                   </div>
                 </div>
                 <!-- 4-Week Milestone Roadmap -->
@@ -442,7 +395,7 @@
                 <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.2)" stroke-width="1"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
               </div>
               <h3>No assigned tasks yet</h3>
-              <p>Tasks will appear here as soon as your weekly batch issues are released.</p>
+              <p>Tasks will appear here as soon as your weekly batch project is released.</p>
             </div>
           </div>
 
@@ -450,7 +403,7 @@
           <div class="submissions-section" id="submissions-section-el">
             <div class="section-header">
               <h2>Submissions</h2>
-              <span class="count-badge" id="sub-count">0 PRs</span>
+              <span class="count-badge" id="sub-count">0 Submitted</span>
             </div>
             <div class="sub-list" id="sub-list">
               <!-- Cards injected by JS -->
@@ -460,7 +413,7 @@
                 <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.2)" stroke-width="1"><path d="M9 5H2v7l6.29 6.29c.94.94 2.48.94 3.42 0l3.58-3.58c.94-.94.94-2.48 0-3.42L9 5Z"/><path d="M6 9.01V9"/><path d="m15 5 6.3 6.3a2.4 2.4 0 0 1 0 3.4L17 19"/></svg>
               </div>
               <h3>No submissions yet</h3>
-              <p>Once you push your first PR, it will appear here with real-time status tracking.</p>
+              <p>Once you submit a LinkedIn post for a task, it will appear here with real-time review status.</p>
             </div>
           </div>
         </div><!-- /panel-work -->
@@ -502,9 +455,9 @@
             <div class="guide-card">
               <div class="guide-header">
                 <div class="guide-header-icon">🚀</div>
-                <h2>How to Complete Your Tasks &amp; Submit Pull Requests</h2>
+                <h2>How to Complete Your Tasks &amp; Submit for Review</h2>
               </div>
-              <p class="guide-subtitle">Follow these simple steps to solve assigned issues, avoid common Git errors, and earn verified Proof of Work on your GitHub profile.</p>
+              <p class="guide-subtitle">Follow these simple steps every week to complete your assigned task, share your work on LinkedIn, and get it approved by an admin.</p>
 
               <button class="guide-toggle expanded" id="guide-toggle-btn" onclick="toggleGuide()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
@@ -512,160 +465,36 @@
               </button>
 
               <div class="guide-body" id="guide-body">
-
-                <a href="#" target="_blank" class="guide-repo-link" style="margin-top:20px;">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
-                  <div class="guide-repo-link-text">
-                    <div class="guide-repo-link-title">📂 Open Your Batch Repository &amp; View Issues</div>
-                    <div class="guide-repo-link-sub">Find your assigned issue labeled with your GitHub username</div>
+                <div class="guide-steps" style="margin-top:20px;">
+                  <div class="guide-step">
+                    <div class="guide-step-num">1</div>
+                    <div class="guide-step-content">
+                      <div class="guide-step-title">Open Your Assigned Task</div>
+                      <div class="guide-step-desc">Go to the <strong>Work</strong> tab and open the task assigned for the current week. Read the description and deliverables carefully before you begin.</div>
+                    </div>
                   </div>
-                  <svg width="16" height="16" class="guide-repo-link-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </a>
-
-                <div class="guide-tabs" style="margin-top:20px;">
-                  <button class="guide-tab active" data-tab="beginner" onclick="switchGuideTab('beginner')">
-                    🌱 Browser Flow
-                    <span class="tab-badge">Zero Setup • 3 Mins</span>
-                  </button>
-                  <button class="guide-tab" data-tab="advanced" onclick="switchGuideTab('advanced')">
-                    ⚡ VS Code &amp; Git
-                    <span class="tab-badge">Local Workflow</span>
-                  </button>
-                  <button class="guide-tab" data-tab="helper" onclick="switchGuideTab('helper')">
-                    🛠️ 1-Click PR Helper
-                    <span class="tab-badge" style="background:rgba(201,154,78,0.2);color:#f0c97a;">Generator</span>
-                  </button>
-                </div>
-
-                <!-- TAB 1: BEGINNER — R3: MUST be first -->
-                <div class="guide-panel active" id="panel-beginner">
-                  <div class="guide-steps">
-                    <div class="guide-step">
-                      <div class="guide-step-num">1</div>
-                      <div class="guide-step-content">
-                        <div class="guide-step-title">Open Your Assigned Issue &amp; Note the Number</div>
-                        <div class="guide-step-desc">Go to your assigned repository, click the <strong>"Issues"</strong> tab, and click on the issue assigned to your GitHub username (e.g. <strong>Issue #5: Build Navigation Bar</strong>). Note down the issue number.</div>
-                      </div>
+                  <div class="guide-step">
+                    <div class="guide-step-num">2</div>
+                    <div class="guide-step-content">
+                      <div class="guide-step-title">Complete the Task</div>
+                      <div class="guide-step-desc">Build/solve the task as described. Keep a record of what you built so you can talk about it in your post.</div>
                     </div>
-                    <div class="guide-step">
-                      <div class="guide-step-num">2</div>
-                      <div class="guide-step-content">
-                        <div class="guide-step-title">Edit the Target File on GitHub Web</div>
-                        <div class="guide-step-desc">Navigate to the file mentioned in your issue description (e.g. <code>src/components/Navbar.js</code>), click the <strong>✏️ (Edit)</strong> pencil icon on GitHub web, and write your solution.</div>
-                      </div>
+                  </div>
+                  <div class="guide-step">
+                    <div class="guide-step-num">3</div>
+                    <div class="guide-step-content">
+                      <div class="guide-step-title">Post About It on LinkedIn</div>
+                      <div class="guide-step-desc">Use the suggested caption on each task card (copy it with one click), publish a LinkedIn post about your progress, and tag <strong>@SkillMe</strong>.</div>
                     </div>
-                    <div class="guide-step">
-                      <div class="guide-step-num">3</div>
-                      <div class="guide-step-content">
-                        <div class="guide-step-title">Commit to a New Branch</div>
-                        <div class="guide-step-desc">Scroll to the bottom of the editor. Select <strong>"Create a new branch for this commit and start a pull request"</strong>. Give it a name like <code>fix/issue-5-solution</code>.</div>
-                      </div>
-                    </div>
-                    <div class="guide-step">
-                      <div class="guide-step-num">4</div>
-                      <div class="guide-step-content">
-                        <div class="guide-step-title">Submit PR with Closing Keyword</div>
-                        <div class="guide-step-desc">In the Pull Request title and description, write <strong><code>Closes #5</code></strong> (replace 5 with your issue number). Click <strong>"Create Pull Request"</strong>. Done! 🎉</div>
-                      </div>
+                  </div>
+                  <div class="guide-step">
+                    <div class="guide-step-num">4</div>
+                    <div class="guide-step-content">
+                      <div class="guide-step-title">Submit Your Post URL for Review</div>
+                      <div class="guide-step-desc">Paste the link to your published LinkedIn post into the task card and click <strong>"Submit for Review"</strong>. An admin will review it and approve it — your progress updates automatically once approved.</div>
                     </div>
                   </div>
                 </div>
-
-                <!-- TAB 2: ADVANCED -->
-                <div class="guide-panel" id="panel-advanced">
-                  <div class="guide-steps">
-                    <div class="guide-step">
-                      <div class="guide-step-num">1</div>
-                      <div class="guide-step-content">
-                        <div class="guide-step-title">Clone Repository &amp; Open in VS Code</div>
-                        <div class="guide-step-desc">Open your terminal or command prompt and clone your batch repository:</div>
-                        <div class="guide-code">
-                          <button class="guide-code-copy" onclick="copyCode(this, 'git clone <repo-url>
-cd <repo-folder>
-code .')">Copy</button>
-                          <span class="cmd">git</span> clone <span class="url">&lt;repo-url&gt;</span><br>
-                          <span class="cmd">cd</span> <span class="clone-dir">&lt;repo-folder&gt;</span><br>
-                          <span class="cmd">code</span> .
-                        </div>
-                      </div>
-                    </div>
-                    <div class="guide-step">
-                      <div class="guide-step-num">2</div>
-                      <div class="guide-step-content">
-                        <div class="guide-step-title">Create a Feature Branch</div>
-                        <div class="guide-step-desc">Always create a new branch from <code>main</code> before writing code:</div>
-                        <div class="guide-code">
-                          <button class="guide-code-copy" onclick="copyCode(this, 'git checkout -b fix/issue-5-solution')">Copy</button>
-                          <span class="cmd">git</span> checkout <span class="flag">-b</span> fix/issue-5-solution
-                        </div>
-                      </div>
-                    </div>
-                    <div class="guide-step">
-                      <div class="guide-step-num">3</div>
-                      <div class="guide-step-content">
-                        <div class="guide-step-title">Develop &amp; Test Your Changes in VS Code</div>
-                        <div class="guide-step-desc">Open the repository in VS Code (<code>code .</code>), edit the target files, and test your changes locally.</div>
-                      </div>
-                    </div>
-                    <div class="guide-step">
-                      <div class="guide-step-num">4</div>
-                      <div class="guide-step-content">
-                        <div class="guide-step-title">Stage, Commit &amp; Push to GitHub</div>
-                        <div class="guide-step-desc">Commit your work with a clear message and push your feature branch:</div>
-                        <div class="guide-code">
-                          <button class="guide-code-copy" onclick="copyCode(this, 'git add .
-git commit -m &quot;feat: complete task - solve issue #5&quot;
-git push origin fix/issue-5-solution')">Copy</button>
-                          <span class="cmd">git</span> add .<br>
-                          <span class="cmd">git</span> commit <span class="flag">-m</span> <span class="url">"feat: complete task - solve issue #5"</span><br>
-                          <span class="cmd">git</span> push origin fix/issue-5-solution
-                        </div>
-                      </div>
-                    </div>
-                    <div class="guide-step">
-                      <div class="guide-step-num">5</div>
-                      <div class="guide-step-content">
-                        <div class="guide-step-title">Open Pull Request on GitHub</div>
-                        <div class="guide-step-desc">Click the <strong>"Compare &amp; pull request"</strong> banner on GitHub and include <strong><code>Closes #5</code></strong> in your description.</div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="guide-tip" style="margin-top:16px;">
-                    <div class="guide-tip-icon">💡</div>
-                    <div class="guide-tip-text">
-                      <strong>Pro Tip:</strong> Install the official <a href="https://marketplace.visualstudio.com/items?itemName=GitHub.vscode-pull-request-github" target="_blank" style="color:#c99a4e;text-decoration:underline;">GitHub Pull Requests extension</a> in VS Code to review and submit PRs directly without switching windows!
-                    </div>
-                  </div>
-                </div>
-
-                <!-- TAB 3: HELPER — R3: MUST be last -->
-                <div class="guide-panel" id="panel-helper">
-                  <div class="pr-helper-container">
-                    <div class="pr-helper-title">🎯 1-Click Pull Request Description Generator</div>
-                    <p class="pr-helper-desc" id="pr-helper-desc">Fill in the quick details below and copy a production-ready PR title and description to paste directly into GitHub.</p>
-                    <div class="pr-helper-grid">
-                      <div class="pr-helper-field">
-                        <label>Assigned Issue Number</label>
-                        <input type="number" id="pr-helper-issue" placeholder="e.g. 5" min="1" oninput="generatePRTemplate()">
-                      </div>
-                      <div class="pr-helper-field">
-                        <label>Task Summary / What did you build?</label>
-                        <input type="text" id="pr-helper-summary" placeholder="e.g. Added user authentication using JWT" oninput="generatePRTemplate()">
-                      </div>
-                    </div>
-                    <div class="pr-helper-output-wrap" style="margin-top:16px;">
-                      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                        <span style="font-size:0.75rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Generated PR Title &amp; Body</span>
-                        <button class="guide-code-copy" id="pr-copy-btn" onclick="copyPRHelperOutput()" style="position:static;">Copy Template 📋</button>
-                      </div>
-                      <pre class="pr-helper-output" id="pr-helper-result">Fill in the fields above to generate your PR text...</pre>
-                    </div>
-                    <div style="margin-top:16px; font-size:0.78rem; color:var(--text-secondary); line-height:1.5; background:rgba(255,255,255,0.02); padding:10px 14px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);">
-                      ✨ <strong>Why "Closes #5" is required:</strong> GitHub uses this keyword to automatically link your Pull Request to your issue. Once the mentor merges your PR, the issue automatically closes and updates your live dashboard score!
-                    </div>
-                  </div>
-                </div>
-
               </div><!-- /guide-body -->
             </div><!-- /guide-card -->
           </div><!-- /guide-section -->
@@ -693,11 +522,11 @@ git push origin fix/issue-5-solution')">Copy</button>
       </div>
       <div class="milestone-modal-badge" id="milestone-badge">🎉 SPRINT MILESTONE UNLOCKED</div>
       <div class="milestone-modal-title" id="milestone-title">Milestone 1 Complete!</div>
-      <div class="milestone-modal-sub" id="milestone-sub">You've successfully merged verified PRs to your assigned project repository. Share your verifiable achievement:</div>
+      <div class="milestone-modal-sub" id="milestone-sub">You've successfully got a verified LinkedIn task submission approved. Share your verifiable achievement:</div>
       <div class="milestone-stats-strip">
         <div class="milestone-stat-item">
           <div class="milestone-stat-val" id="modal-stat-prs">0</div>
-          <div class="milestone-stat-lbl">PRs Merged</div>
+          <div class="milestone-stat-lbl">Approved</div>
         </div>
         <div class="milestone-stat-item">
           <div class="milestone-stat-val" id="modal-stat-score">0</div>

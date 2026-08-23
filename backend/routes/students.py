@@ -1,13 +1,13 @@
 """
 SkillMe — Student API Routes
-Public endpoints for student applications and status checks.
+Public endpoints for student applications, status checks, and LinkedIn task submissions.
 """
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field
 from db.database import db
 from services.email_service import email_service
-from services.github_service import github_service
+from services.submission_service import submission_service
 
 router = APIRouter(prefix="/api/students", tags=["students"])
 
@@ -21,7 +21,6 @@ class ApplicationRequest(BaseModel):
     last_name: str = Field(..., min_length=1, max_length=100)
     email: str = Field(..., min_length=5, max_length=200)
     phone: str | None = Field(None, max_length=20)
-    github_username: str | None = Field(None, max_length=100)
     linkedin_url: str | None = Field(None, max_length=300)
     college: str | None = Field(None, max_length=200)
     year_of_study: str | None = Field(None, max_length=50)
@@ -29,6 +28,13 @@ class ApplicationRequest(BaseModel):
     motivation: str | None = Field(None, max_length=1000)
     referral_source: str | None = Field(None, max_length=100)
     referred_by: str | None = Field(None, max_length=20)  # referral code e.g. SKM-A1B2C3
+
+
+class SubmitTaskRequest(BaseModel):
+    student_id: int
+    batch_id: int
+    week: int = Field(..., ge=1, le=4)
+    linkedin_url: str = Field(..., max_length=500)
 
 
 # ──────────────────────────────────────────────
@@ -56,23 +62,17 @@ async def apply(req: ApplicationRequest, background_tasks: BackgroundTasks):
                 "current_status": existing["status"],
             }
 
-        # Extract GitHub username from URL if full URL provided
-        github_username = req.github_username
-        if github_username and "github.com/" in github_username:
-            github_username = github_username.rstrip("/").split("/")[-1]
-
         # Insert student record
         student_id = await db.insert(
-            """INSERT INTO students 
-               (first_name, last_name, email, phone, github_username, linkedin_url, 
+            """INSERT INTO students
+               (first_name, last_name, email, phone, linkedin_url,
                 college, year_of_study, domain, motivation, referral_source, status)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'applied')""",
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'applied')""",
             (
                 req.first_name,
                 req.last_name,
                 req.email,
                 req.phone,
-                github_username,
                 req.linkedin_url,
                 req.college,
                 req.year_of_study,
@@ -89,7 +89,6 @@ async def apply(req: ApplicationRequest, background_tasks: BackgroundTasks):
             last_name=req.last_name,
             email=req.email,
             domain=req.domain,
-            github_username=github_username or "",
         )
 
         # Track referral if a code was provided
@@ -119,7 +118,6 @@ async def check_status(email: str):
     if not student:
         raise HTTPException(status_code=404, detail="No application found with this email")
 
-    # Get enrollments if any
     enrollments = await db.fetch_all(
         """SELECT b.domain, b.batch_number, e.status as enrollment_status
            FROM enrollments e
@@ -144,8 +142,8 @@ async def get_progress(email: str):
         raise HTTPException(status_code=404, detail="Student not found with this email.")
 
     progress = await db.fetch_all(
-        """SELECT p.week, p.issues_assigned, p.issues_completed, p.prs_merged, p.score,
-                  b.domain, b.batch_number, b.id as batch_id, b.repo_name, b.start_date
+        """SELECT p.week, p.issues_completed, p.score,
+                  b.domain, b.batch_number, b.id as batch_id, b.start_date
            FROM progress p
            JOIN batches b ON p.batch_id = b.id
            WHERE p.student_id = ?
@@ -156,8 +154,8 @@ async def get_progress(email: str):
     if not progress:
         # Fallback to enrollments table if no progress rows exist yet
         enrollments = await db.fetch_all(
-            """SELECT 1 as week, 0 as issues_assigned, 0 as issues_completed, 0 as prs_merged, 0 as score,
-                      b.domain, b.batch_number, b.id as batch_id, b.repo_name, b.start_date
+            """SELECT 1 as week, 0 as issues_completed, 0 as score,
+                      b.domain, b.batch_number, b.id as batch_id, b.start_date
                FROM enrollments e
                JOIN batches b ON e.batch_id = b.id
                WHERE e.student_id = ? AND e.status != 'dropped'""",
@@ -166,60 +164,15 @@ async def get_progress(email: str):
         if enrollments:
             progress = enrollments
 
-    # Also fetch their invite status
-    enrollment_record = await db.fetch_one(
-        "SELECT github_invite_status FROM enrollments WHERE student_id = ? AND status != 'dropped' ORDER BY joined_at DESC LIMIT 1",
-        (student["id"],)
-    )
-    invite_status = enrollment_record["github_invite_status"] if enrollment_record else "accepted"
-
     submissions = await db.fetch_all(
-        """SELECT s.id, s.issue_id, s.pr_url, s.pr_number, s.status, s.submitted_at, s.merged_at,
-                  i.title as issue_title, i.week_number, i.github_issue_number, i.difficulty,
-                  b.repo_name, b.domain
+        """SELECT s.id, s.week, s.linkedin_url, s.status, s.admin_note,
+                  s.submitted_at, s.reviewed_at, b.domain
            FROM submissions s
-           LEFT JOIN issues i ON s.issue_id = i.id
            LEFT JOIN batches b ON s.batch_id = b.id
            WHERE s.student_id = ?
-           ORDER BY s.submitted_at DESC""",
+           ORDER BY s.week ASC""",
         (student["id"],),
     )
-
-    # Fetch assigned issues for the student (assigned directly or via batch enrollment)
-    assigned_issues = await db.fetch_all(
-        """SELECT DISTINCT i.id, i.github_issue_number, i.title, i.description, i.week_number,
-                  i.difficulty, i.status, i.created_at, b.repo_name, b.domain, b.start_date
-           FROM issues i
-           JOIN batches b ON i.batch_id = b.id
-           WHERE i.assigned_to = ? OR (i.batch_id IN (SELECT batch_id FROM enrollments WHERE student_id = ?) AND i.assigned_to IS NULL)
-           ORDER BY i.week_number ASC, i.id ASC""",
-        (student["id"], student["id"]),
-    )
-
-    from config import settings
-    org = settings.github_org or "skill-me-intern"
-
-    formatted_submissions = []
-    for sub in submissions:
-        sub_dict = dict(sub)
-        repo_name = sub_dict.get("repo_name", "")
-        issue_num = sub_dict.get("github_issue_number")
-        if repo_name and issue_num:
-            sub_dict["issue_github_url"] = f"https://github.com/{org}/{repo_name}/issues/{issue_num}"
-        else:
-            sub_dict["issue_github_url"] = None
-        formatted_submissions.append(sub_dict)
-
-    formatted_issues = []
-    for iss in assigned_issues:
-        iss_dict = dict(iss)
-        repo_name = iss_dict.get("repo_name", "")
-        issue_num = iss_dict.get("github_issue_number")
-        if repo_name and issue_num:
-            iss_dict["github_url"] = f"https://github.com/{org}/{repo_name}/issues/{issue_num}"
-        else:
-            iss_dict["github_url"] = None
-        formatted_issues.append(iss_dict)
 
     primary_domain = student.get("domain") or (progress[0]["domain"] if progress else "Web Development")
 
@@ -230,26 +183,19 @@ async def get_progress(email: str):
             "last_name": student["last_name"],
             "name": f"{student['first_name']} {student['last_name']}",
             "email": student["email"],
-            "github": student["github_username"],
             "domain": primary_domain,
             "college": student.get("college"),
             "referral_code": student.get("referral_code"),
-            "invite_status": invite_status,
         },
         "progress": [dict(p) for p in progress],
-        "submissions": formatted_submissions,
-        "issues": formatted_issues,
-        "github_org": org,
+        "submissions": [dict(s) for s in submissions],
         "summary": {
-            "total_tasks": len(formatted_issues),
+            "total_tasks": 4,
             "completed_tasks": sum(int(p["issues_completed"]) for p in progress),
-            "prs_merged": sum(int(p["prs_merged"]) for p in progress),
-            "total_prs": len(formatted_submissions),
             # Total tasks depends on domain (8 for Python, 12 for others)
             "completion_pct": min(100, round(
                 sum(int(p["issues_completed"]) for p in progress) / (8 if primary_domain.lower() == 'python' else 12) * 100
             )),
-            "github_org": org,
         },
     }
 
@@ -263,15 +209,30 @@ async def get_progress_by_id(student_id: int):
     if not student:
         raise HTTPException(status_code=404, detail="Student not found.")
 
-    # Re-use the same logic via email
-    from fastapi import Request
     return await get_progress(student["email"])
+
+
+@router.post("/submit-task", summary="Submit a LinkedIn post URL for a week's task")
+async def submit_task(req: SubmitTaskRequest):
+    """
+    Student submits a LinkedIn post URL for a given week's task.
+    The submission is queued as 'pending' until an admin reviews it.
+    """
+    try:
+        return await submission_service.submit_linkedin_url(
+            student_id=req.student_id,
+            batch_id=req.batch_id,
+            week=req.week,
+            linkedin_url=req.linkedin_url,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/public-activity", summary="Get live public proof-of-work activity feed")
 async def get_public_activity():
     """
-    Returns live proof-of-work updates, recent PR merges, verified credentials,
+    Returns live proof-of-work updates, approved milestone submissions, verified credentials,
     and verified platform metrics. Anonymizes student names and uses NO student photos.
     Includes cold-start resilience to ensure 100% production reliability.
     """
@@ -281,16 +242,16 @@ async def get_public_activity():
     fallback_activities = [
         {
             "id": "act-1",
-            "type": "pr_merged",
+            "type": "submission_approved",
             "student_initials": "RS",
             "student_name": "Rahul S.",
             "college": "AKTU",
             "domain": "Web Development",
             "domain_slug": "web-dev",
-            "badge_text": "PR #14 Merged",
-            "action_text": "merged PR for FastAPI Endpoint Auth",
+            "badge_text": "Week 2 Approved",
+            "action_text": "had their FastAPI Endpoint Auth milestone approved",
             "time_ago": "3m ago",
-            "icon": "git-merge",
+            "icon": "check-circle",
             "verified": True
         },
         {
@@ -309,16 +270,16 @@ async def get_public_activity():
         },
         {
             "id": "act-3",
-            "type": "pr_merged",
+            "type": "submission_approved",
             "student_initials": "AV",
             "student_name": "Aman V.",
             "college": "IPU Delhi",
             "domain": "AI & Machine Learning",
             "domain_slug": "ml",
-            "badge_text": "PR #28 Merged",
-            "action_text": "merged Model Evaluation Pipeline",
+            "badge_text": "Week 3 Approved",
+            "action_text": "had their Model Evaluation Pipeline milestone approved",
             "time_ago": "19m ago",
-            "icon": "git-merge",
+            "icon": "check-circle",
             "verified": True
         },
         {
@@ -337,16 +298,16 @@ async def get_public_activity():
         },
         {
             "id": "act-5",
-            "type": "pr_merged",
+            "type": "submission_approved",
             "student_initials": "RD",
             "student_name": "Rohan D.",
             "college": "Pune University",
             "domain": "Web Development",
             "domain_slug": "web-dev",
-            "badge_text": "PR #09 Merged",
-            "action_text": "resolved Responsive Grid System issue",
+            "badge_text": "Week 1 Approved",
+            "action_text": "had their Responsive Grid System milestone approved",
             "time_ago": "52m ago",
-            "icon": "git-merge",
+            "icon": "check-circle",
             "verified": True
         },
         {
@@ -365,42 +326,42 @@ async def get_public_activity():
         },
         {
             "id": "act-7",
-            "type": "pr_merged",
+            "type": "submission_approved",
             "student_initials": "HN",
             "student_name": "Harsh N.",
             "college": "GTU",
             "domain": "Full-Stack Dev",
             "domain_slug": "web-dev",
-            "badge_text": "PR #33 Merged",
-            "action_text": "merged Database Migration script",
+            "badge_text": "Week 4 Approved",
+            "action_text": "had their Database Migration milestone approved",
             "time_ago": "1h 15m ago",
-            "icon": "git-merge",
+            "icon": "check-circle",
             "verified": True
         }
     ]
 
     try:
         # 1. Fetch aggregate metrics
-        db_prs = await db.fetch_one("SELECT count(id) as count FROM submissions WHERE status = 'merged'")
+        db_approved = await db.fetch_one("SELECT count(id) as count FROM submissions WHERE status = 'approved'")
         db_students = await db.fetch_one("SELECT count(id) as count FROM students")
         db_certs = await db.fetch_one("SELECT count(id) as count FROM certificates")
         db_colleges = await db.fetch_one("SELECT count(DISTINCT college) as count FROM students WHERE college IS NOT NULL AND TRIM(college) != ''")
 
         # Combine with live base counters for robust social proof
-        total_prs = max(428, (db_prs["count"] if db_prs else 0) + 428)
+        total_approved = max(428, (db_approved["count"] if db_approved else 0) + 428)
         total_students = max(890, (db_students["count"] if db_students else 0) + 890)
         total_certs = max(194, (db_certs["count"] if db_certs else 0) + 194)
         total_colleges = max(68, (db_colleges["count"] if db_colleges else 0) + 68)
 
-        # 2. Fetch recent actual merged PRs if present in DB
+        # 2. Fetch recent actual approved submissions if present in DB
         db_activities = []
         recent_subs = await db.fetch_all(
-            """SELECT s.pr_number, s.submitted_at, s.merged_at, i.title as issue_title,
+            """SELECT s.week, s.submitted_at, s.reviewed_at,
                       st.first_name, st.last_name, st.college, st.domain
                FROM submissions s
                JOIN students st ON s.student_id = st.id
-               LEFT JOIN issues i ON s.issue_id = i.id
-               ORDER BY s.submitted_at DESC LIMIT 5"""
+               WHERE s.status = 'approved'
+               ORDER BY s.reviewed_at DESC LIMIT 5"""
         )
 
         for sub in recent_subs:
@@ -411,23 +372,23 @@ async def get_public_activity():
             college = (sub["college"] or "Engineering College").strip()
             if len(college) > 20 and "(" in college:
                 college = college.split("(")[0].strip()
-            
+
             domain_raw = (sub["domain"] or "web-dev").lower()
             domain_name = "Web Development" if "web" in domain_raw else ("Python Backend" if "python" in domain_raw else "AI / Data Science")
-            pr_num = sub["pr_number"] or 1
+            week = sub["week"] or 1
 
             db_activities.append({
-                "id": f"db-sub-{pr_num}-{initials}",
-                "type": "pr_merged",
+                "id": f"db-sub-{week}-{initials}",
+                "type": "submission_approved",
                 "student_initials": initials,
                 "student_name": anon_name,
                 "college": college[:24],
                 "domain": domain_name,
                 "domain_slug": domain_raw,
-                "badge_text": f"PR #{pr_num} Merged",
-                "action_text": f"merged PR for {sub['issue_title'] or 'Production Issue'}",
+                "badge_text": f"Week {week} Approved",
+                "action_text": f"had their Week {week} milestone approved",
                 "time_ago": "Just now",
-                "icon": "git-merge",
+                "icon": "check-circle",
                 "verified": True
             })
 
@@ -437,7 +398,7 @@ async def get_public_activity():
         return {
             "status": "success",
             "stats": {
-                "total_prs_merged": total_prs,
+                "total_submissions_approved": total_approved,
                 "total_students": total_students,
                 "total_certificates": total_certs,
                 "total_colleges": total_colleges,
@@ -452,7 +413,7 @@ async def get_public_activity():
         return {
             "status": "fallback",
             "stats": {
-                "total_prs_merged": 428,
+                "total_submissions_approved": 428,
                 "total_students": 890,
                 "total_certificates": 194,
                 "total_colleges": 68,
@@ -462,42 +423,3 @@ async def get_public_activity():
             "activities": fallback_activities,
             "error_detail": str(e)
         }
-
-
-class VerifyInviteRequest(BaseModel):
-    email: str
-
-@router.post('/verify-github-invite', summary='Manually check if user accepted GitHub invite')
-async def verify_github_invite(req: VerifyInviteRequest):
-    student = await db.fetch_one('SELECT id, github_username FROM students WHERE email = ? COLLATE NOCASE', (req.email,))
-    if not student:
-        raise HTTPException(status_code=404, detail='Student not found')
-
-    enrollment = await db.fetch_one('''
-        SELECT e.github_invite_status, b.repo_name 
-        FROM enrollments e 
-        JOIN batches b ON e.batch_id = b.id 
-        WHERE e.student_id = ?
-    ''', (student['id'],))
-
-    if not enrollment:
-        raise HTTPException(status_code=404, detail='Enrollment not found')
-
-    if enrollment['github_invite_status'] == 'accepted':
-        return {'status': 'already_accepted'}
-
-    repo_full_name = enrollment['repo_name']
-    repo_name = repo_full_name.split('/')[-1] if '/' in repo_full_name else repo_full_name
-
-    # Check GitHub API
-    is_collaborator = await github_service.check_collaborator(repo_name, student['github_username'])
-    
-    if is_collaborator:
-        await db.execute(
-            "UPDATE enrollments SET github_invite_status = ? WHERE student_id = ?",
-            ("accepted", student["id"])
-        )
-        return {'status': 'accepted'}
-    else:
-        return {'status': 'pending'}
-

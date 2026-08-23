@@ -133,7 +133,7 @@ class TestAdminStats:
         assert "total_students" in data
         assert "active_batches" in data
         assert "pending_applications" in data
-        assert "total_issues_assigned" in data
+        assert "pending_submissions" in data
 
     async def test_stats_counts_are_non_negative(self, client, admin_headers):
         r = await client.get("/api/admin/stats", headers=admin_headers)
@@ -141,7 +141,7 @@ class TestAdminStats:
         assert data["total_students"] >= 0
         assert data["active_batches"] >= 0
         assert data["pending_applications"] >= 0
-        assert data["total_issues_assigned"] >= 0
+        assert data["pending_submissions"] >= 0
 
     async def test_stats_increments_on_new_student(self, client, admin_headers):
         r1 = await client.get("/api/admin/stats", headers=admin_headers)
@@ -198,7 +198,6 @@ class TestDeleteStudent:
         assert await test_db.fetch_one("SELECT * FROM enrollments WHERE student_id = ?", (student_id,)) is None
         assert await test_db.fetch_one("SELECT * FROM progress WHERE student_id = ?", (student_id,)) is None
         assert await test_db.fetch_one("SELECT * FROM submissions WHERE student_id = ?", (student_id,)) is None
-        assert await test_db.fetch_one("SELECT * FROM issues WHERE assigned_to = ?", (student_id,)) is None
 
     async def test_delete_nonexistent_student(self, client, admin_headers):
         r = await client.delete(

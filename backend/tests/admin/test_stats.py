@@ -1,22 +1,7 @@
 """
-Admin Tests — GitHub Status & Email
+Admin Tests — Email
 """
 import pytest
-
-
-@pytest.mark.admin
-class TestGitHubStatus:
-    async def test_github_status_returns_connected(self, client, admin_headers):
-        r = await client.get("/api/admin/github/status", headers=admin_headers)
-        assert r.status_code == 200
-        data = r.json()
-        assert data["status"] == "connected"
-        assert "authenticated_as" in data
-        assert "org" in data
-
-    async def test_github_status_no_auth(self, client):
-        r = await client.get("/api/admin/github/status")
-        assert r.status_code == 403
 
 
 @pytest.mark.admin

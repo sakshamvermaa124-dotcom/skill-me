@@ -856,12 +856,6 @@
             </div>
             
             <div class="form-group">
-              <label for="github">GitHub Profile URL <span class="required">*</span></label>
-              <input type="url" class="form-input" id="github" name="github" placeholder="https://github.com/johndoe" required>
-              <div class="form-error" id="github-error">Please enter a valid GitHub URL</div>
-            </div>
-            
-            <div class="form-group">
               <label for="linkedin">LinkedIn Profile URL <span class="optional">(optional)</span></label>
               <input type="url" class="form-input" id="linkedin" name="linkedin" placeholder="https://linkedin.com/in/johndoe">
             </div>
@@ -1155,7 +1149,7 @@
       if (step === 1) {
         valid = validateField('firstName', silent) & validateField('lastName', silent) & validateEmail('email', silent) & validateField('phone', silent);
       } else if (step === 2) {
-        valid = validateField('college', silent) & validateSelect('year', silent) & validateGithub('github', silent) & validateLinkedinFollow(silent);
+        valid = validateField('college', silent) & validateSelect('year', silent) & validateLinkedinFollow(silent);
       } else if (step === 3) {
         valid = validateDomain() & validateField('motivation', silent);
       }
@@ -1247,24 +1241,6 @@
       return true;
     }
 
-    function validateGithub(id, silent = false) {
-      const input = document.getElementById(id);
-      const error = document.getElementById(`${id}-error`);
-      const val = input.value.trim();
-      if (!val || !val.includes('github.com/')) {
-        if (!silent) {
-          input.classList.add('error');
-          if (error) error.classList.add('visible');
-        }
-        return false;
-      }
-      if (!silent) {
-        input.classList.remove('error');
-        if (error) error.classList.remove('visible');
-      }
-      return true;
-    }
-
     function validateDomain() {
       const hiddenDomain = document.getElementById('hidden-domain');
       const error = document.getElementById('domain-error');
@@ -1339,7 +1315,6 @@
         last_name: document.getElementById('lastName').value.trim(),
         email: document.getElementById('email').value.trim(),
         phone: document.getElementById('phone').value.trim(),
-        github_username: document.getElementById('github').value.trim(),
         linkedin_url: document.getElementById('linkedin').value.trim(),
         college: document.getElementById('college').value.trim(),
         year_of_study: document.getElementById('year').value,

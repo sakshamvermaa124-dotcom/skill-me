@@ -11,19 +11,11 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
     model_config = SettingsConfigDict(extra="ignore", env_file=".env", env_file_encoding="utf-8")
 
-    # GitHub
-    skillme_github_token: str = ""
-    github_org: str = "sakshamvermaa124-dotcom"
-
     # Server
     port: int = 8000
     host: str = "0.0.0.0"
-    # The public URL of this backend — used to auto-register GitHub webhooks.
-    # Set this to your Render service URL, e.g. https://skill-me-api.onrender.com
+    # The public URL of this backend.
     backend_url: str = ""
-
-    # Webhook
-    webhook_secret: str = ""
 
     # Admin Auth
     admin_api_key: str = "sakshamm"
@@ -33,9 +25,6 @@ class Settings(BaseSettings):
     # For local dev: leave TURSO_AUTH_TOKEN blank and set TURSO_DB_URL to a local file path
     turso_db_url: str = "local.db"      # e.g. libsql://your-db-name.turso.io
     turso_auth_token: str = ""           # Turso auth token (blank = local SQLite)
-
-    # GitHub API base URL
-    github_api_url: str = "https://api.github.com"
 
     # ── Email (Brevo SMTP relay) ───────────────────
     email_enabled: bool = True

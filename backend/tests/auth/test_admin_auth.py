@@ -39,16 +39,12 @@ class TestAdminAuthEnforced:
         )
         assert r.status_code == 403
 
-    async def test_admin_github_status_no_key(self, client):
-        r = await client.get("/api/admin/github/status")
-        assert r.status_code == 403
-
     async def test_admin_email_logs_no_key(self, client):
         r = await client.get("/api/admin/email/logs")
         assert r.status_code == 403
 
-    async def test_admin_scheduler_status_no_key(self, client):
-        r = await client.get("/api/admin/scheduler/status")
+    async def test_admin_submissions_no_key(self, client):
+        r = await client.get("/api/admin/submissions")
         assert r.status_code == 403
 
     async def test_certificate_list_no_key(self, client):

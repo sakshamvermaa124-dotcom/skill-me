@@ -66,7 +66,6 @@ class TestStudentProgress:
         summary = r.json()["summary"]
         assert "total_tasks" in summary
         assert "completed_tasks" in summary
-        assert "prs_merged" in summary
         assert "completion_pct" in summary
 
     async def test_progress_completion_pct_is_bounded(self, client, enrolled_student):

@@ -21,18 +21,15 @@ CREATE TABLE IF NOT EXISTS students (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Batches — each batch is a group of students + a GitHub repo
+-- Batches — each batch is a group of students in a domain/cohort
 CREATE TABLE IF NOT EXISTS batches (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     domain TEXT NOT NULL,              -- web-dev, python, react, etc.
     batch_number INTEGER NOT NULL,
-    repo_name TEXT,                    -- GitHub repo name (e.g., web-dev-batch-1)
     status TEXT NOT NULL DEFAULT 'provisioning',  -- provisioning | active | completed | archived
     max_students INTEGER DEFAULT 30,
     start_date TEXT,
     end_date TEXT,
-    auto_assign INTEGER DEFAULT 0,     -- 1 = auto-assign tasks each week
-    weeks_assigned TEXT DEFAULT '[]',  -- JSON array of week numbers already assigned
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(domain, batch_number)
@@ -44,7 +41,6 @@ CREATE TABLE IF NOT EXISTS enrollments (
     student_id INTEGER NOT NULL,
     batch_id INTEGER NOT NULL,
     status TEXT NOT NULL DEFAULT 'enrolled',  -- enrolled | active | completed | dropped
-    github_invite_status TEXT DEFAULT 'pending',  -- pending | accepted | failed
     joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     completed_at TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES students(id),
@@ -52,37 +48,20 @@ CREATE TABLE IF NOT EXISTS enrollments (
     UNIQUE(student_id, batch_id)
 );
 
--- Issues — individual tasks assigned to students
-CREATE TABLE IF NOT EXISTS issues (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    batch_id INTEGER NOT NULL,
-    github_issue_number INTEGER,        -- The issue number on GitHub
-    title TEXT NOT NULL,
-    description TEXT,
-    week_number INTEGER NOT NULL,       -- 1, 2, 3, or 4
-    difficulty TEXT DEFAULT 'medium',   -- easy | medium | hard
-    assigned_to INTEGER,                -- student_id
-    status TEXT NOT NULL DEFAULT 'open',  -- open | assigned | in_progress | completed
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (batch_id) REFERENCES batches(id),
-    FOREIGN KEY (assigned_to) REFERENCES students(id)
-);
-
--- Submissions — PR submissions for issues
+-- Submissions — a student's LinkedIn post submitted for a given week's task, pending admin review
 CREATE TABLE IF NOT EXISTS submissions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    issue_id INTEGER NOT NULL,
     student_id INTEGER NOT NULL,
     batch_id INTEGER NOT NULL,
-    pr_url TEXT,
-    pr_number INTEGER,
-    status TEXT NOT NULL DEFAULT 'open',  -- open | tests_passed | tests_failed | merged | closed
+    week INTEGER NOT NULL,              -- 1, 2, 3, or 4
+    linkedin_url TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',  -- pending | approved | rejected
+    admin_note TEXT,
     submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     reviewed_at TIMESTAMP,
-    merged_at TIMESTAMP,
-    FOREIGN KEY (issue_id) REFERENCES issues(id),
     FOREIGN KEY (student_id) REFERENCES students(id),
-    FOREIGN KEY (batch_id) REFERENCES batches(id)
+    FOREIGN KEY (batch_id) REFERENCES batches(id),
+    UNIQUE(student_id, batch_id, week)
 );
 
 -- Progress — weekly aggregated progress per student per batch
@@ -91,10 +70,7 @@ CREATE TABLE IF NOT EXISTS progress (
     student_id INTEGER NOT NULL,
     batch_id INTEGER NOT NULL,
     week INTEGER NOT NULL,              -- 1, 2, 3, or 4
-    issues_assigned INTEGER DEFAULT 0,
-    issues_completed INTEGER DEFAULT 0,
-    prs_submitted INTEGER DEFAULT 0,
-    prs_merged INTEGER DEFAULT 0,
+    issues_completed INTEGER DEFAULT 0, -- tasks approved this week (0 or 1)
     score INTEGER DEFAULT 0,            -- Calculated score for this week
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES students(id),
@@ -107,10 +83,9 @@ CREATE INDEX IF NOT EXISTS idx_students_email ON students(email);
 CREATE INDEX IF NOT EXISTS idx_students_github ON students(github_username);
 CREATE INDEX IF NOT EXISTS idx_enrollments_student ON enrollments(student_id);
 CREATE INDEX IF NOT EXISTS idx_enrollments_batch ON enrollments(batch_id);
-CREATE INDEX IF NOT EXISTS idx_issues_batch ON issues(batch_id);
-CREATE INDEX IF NOT EXISTS idx_issues_assigned ON issues(assigned_to);
 CREATE INDEX IF NOT EXISTS idx_submissions_student ON submissions(student_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_batch ON submissions(batch_id);
+CREATE INDEX IF NOT EXISTS idx_submissions_status ON submissions(status);
 
 -- Certificates — issued on internship completion
 CREATE TABLE IF NOT EXISTS certificates (
@@ -147,7 +122,7 @@ CREATE TABLE IF NOT EXISTS email_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     recipient_email TEXT NOT NULL,
     recipient_name  TEXT,
-    email_type      TEXT NOT NULL,  -- application_confirmation | shortlisted | offer_letter | weekly_tasks | certificate_ready | test
+    email_type      TEXT NOT NULL,  -- application_confirmation | shortlisted | offer_letter | certificate_ready | test
     subject         TEXT NOT NULL,
     student_id      INTEGER,        -- NULL for non-student emails (e.g. test)
     batch_id        INTEGER,        -- NULL when not batch-related

@@ -1,4 +1,4 @@
-from .github_service import github_service, GitHubService
 from .batch_service import batch_service, BatchService
+from .submission_service import submission_service, SubmissionService
 
-__all__ = ["github_service", "GitHubService", "batch_service", "BatchService"]
+__all__ = ["batch_service", "BatchService", "submission_service", "SubmissionService"]

@@ -223,8 +223,8 @@ def _draw_body(c: rl_canvas.Canvas, w: float, h: float, student: dict, batch: di
     c.setFont("Helvetica", 7.5)
     desc_y = mid_y - 22 * mm
     desc_lines = [
-        "A rigorous 4-week industry-grade internship program consisting of real-world GitHub contributions,",
-        "code reviews, pull request workflows, and collaborative software development practices.",
+        "A rigorous 4-week industry-grade internship program consisting of real-world project milestones,",
+        "mentor-reviewed submissions, and collaborative software development practices.",
     ]
     for i, line in enumerate(desc_lines):
         c.drawCentredString(w / 2, desc_y - i * 10, line)

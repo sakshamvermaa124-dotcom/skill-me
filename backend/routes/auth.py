@@ -123,7 +123,7 @@ async def get_me(
 
     student_id = int(payload["sub"])
     student = await db.fetch_one(
-        """SELECT s.*, e.batch_id, b.domain, b.batch_number, b.repo_name,
+        """SELECT s.*, e.batch_id, b.domain, b.batch_number,
                   b.start_date, e.status as enrollment_status
            FROM students s
            LEFT JOIN enrollments e ON e.student_id = s.id AND e.status != 'dropped'

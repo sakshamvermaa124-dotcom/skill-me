@@ -12,7 +12,7 @@ import asyncio
 import logging
 import smtplib
 import ssl
-from datetime import datetime, timedelta
+from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
@@ -219,7 +219,6 @@ class EmailService:
         last_name: str,
         email: str,
         domain: str,
-        github_username: str = "",
     ) -> bool:
         html = _render(
             "application_received.html",
@@ -227,7 +226,6 @@ class EmailService:
             last_name=last_name,
             email=email,
             domain_label=_domain_label(domain),
-            github_username=github_username,
         )
         return await _send_and_log(
             email,
@@ -297,47 +295,6 @@ class EmailService:
             email_type="offer_letter",
         )
 
-    # 4. Weekly tasks assigned
-    async def send_weekly_tasks_notification(
-        self,
-        first_name: str,
-        last_name: str,
-        email: str,
-        domain: str,
-        batch_number: int,
-        week_number: int,
-        tasks: list[dict],
-        repo_url: str | None = None,
-        github_username: str | None = None,
-    ) -> bool:
-        deadline = (datetime.utcnow() + timedelta(days=7)).strftime("%d %B %Y")
-        # Build filtered issues URL for this student only
-        issues_url = None
-        if repo_url and github_username:
-            issues_url = f"{repo_url}/issues?assignee={github_username}"
-        html = _render(
-            "weekly_tasks.html",
-            first_name=first_name,
-            last_name=last_name,
-            domain_label=_domain_label(domain),
-            batch_number=batch_number,
-            week_number=week_number,
-            tasks=tasks,
-            task_count=len(tasks),
-            deadline=deadline,
-            repo_url=repo_url or "",
-            issues_url=issues_url or "",
-            github_username=github_username or "",
-            dashboard_url=f"{settings.frontend_url}/dashboard.html",
-        )
-        return await _send_and_log(
-            email,
-            f"{first_name} {last_name}",
-            f"💻 Week {week_number} Tasks Are Live — SkillMe {_domain_label(domain)}",
-            html,
-            email_type="weekly_tasks",
-        )
-
     # 5. Certificate ready
     async def send_certificate_ready(
         self,
@@ -375,34 +332,6 @@ class EmailService:
             email_type="certificate_ready",
         )
 
-    # 6. GitHub invite reminder (for students with pending collaborator status)
-    async def send_github_invite_reminder(
-        self,
-        first_name: str,
-        last_name: str,
-        email: str,
-        domain: str,
-        repo_url: str | None = None,
-        github_email: str | None = None,
-        student_id: int | None = None,
-    ) -> bool:
-        html = _render(
-            "github_invite_reminder.html",
-            first_name=first_name,
-            last_name=last_name,
-            domain_label=_domain_label(domain),
-            repo_url=repo_url or "",
-            github_email=github_email or email,
-        )
-        return await _send_and_log(
-            email,
-            f"{first_name} {last_name}",
-            "⚠️ Action Required: Accept Your GitHub Invite to Start Your Internship",
-            html,
-            email_type="github_invite_reminder",
-            student_id=student_id,
-        )
-
     # Test utility
     async def send_test_email(self, to_email: str) -> bool:
         """Send a test email to verify SMTP configuration."""
@@ -412,7 +341,6 @@ class EmailService:
             last_name="User",
             email=to_email,
             domain_label="Web Development",
-            github_username="testuser",
         )
         return await _send_and_log(
             to_email,

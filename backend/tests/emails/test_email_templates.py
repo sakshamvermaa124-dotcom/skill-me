@@ -80,14 +80,13 @@ class TestEmailTemplatesRendering:
             last_name="Sharma",
             email="priya@example.com",
             domain_label="Python and AI Engineering",
-            github_username="priyasharma",
         )
         assert "Priya" in html
         assert "Python and AI Engineering" in html
-        assert "@priyasharma" in html
         assert "https://www.linkedin.com/company/skill-me-intern/" in html
         assert "Batch Allocation" not in html
         assert "open-source readiness" not in html
+        assert "GitHub" not in html
 
     def test_shortlisted_template(self):
         """shortlisted.html renders congratulations and clean sprint milestones."""
@@ -101,31 +100,6 @@ class TestEmailTemplatesRendering:
         assert "DevOps and Cloud Engineering" in html
         assert "https://www.linkedin.com/company/skill-me-intern/" in html
         assert "batch schedule" not in html
-
-    def test_weekly_tasks_template(self):
-        """weekly_tasks.html renders sprint overview and issue links."""
-        sample_tasks = [
-            {"title": "Implement JWT Auth Middleware", "issue_url": "https://github.com/repo/issues/1"},
-            {"title": "Add Rate Limiting to /api/v1", "issue_url": "https://github.com/repo/issues/2"},
-        ]
-        html = _render(
-            "weekly_tasks.html",
-            first_name="Ananya",
-            last_name="Patel",
-            domain_label="Web Development",
-            week_number=1,
-            task_count=2,
-            deadline="23 August 2026",
-            tasks=sample_tasks,
-            issues_url="https://github.com/repo/issues",
-            repo_url="https://github.com/repo",
-        )
-        assert "Ananya" in html
-        assert "Week 1 of 4" in html
-        assert "Implement JWT Auth Middleware" in html
-        assert "Add Rate Limiting to /api/v1" in html
-        assert "Batch #" not in html
-        assert "Assigned Cohort Tasks" not in html
 
     def test_certificate_ready_template(self):
         """certificate_ready.html renders credential ID and verification link."""

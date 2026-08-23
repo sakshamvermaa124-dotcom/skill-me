@@ -6,7 +6,7 @@
 <p class="greeting">Hello {{ first_name }},</p>
 <p class="lead">
   We have officially received your application for the <strong>{{ domain_label }}</strong> internship at <strong>SkillMe</strong>.
-  Our engineering review committee is currently screening your profile and GitHub activity.
+  Our engineering review committee is currently screening your profile.
 </p>
 
 <div class="divider"></div>
@@ -24,10 +24,6 @@
   <div class="info-row">
     <span class="info-label">Selected Track</span>
     <span class="info-value">{{ domain_label }}</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">GitHub Profile</span>
-    <span class="info-value">{% if github_username %}@{{ github_username }}{% else %}&mdash;{% endif %}</span>
   </div>
   <div class="info-row">
     <span class="info-label">Application Status</span>
@@ -50,12 +46,12 @@
   </div>
   <div class="step">
     <div class="step-num">3</div>
-    <div class="step-text"><strong>GitHub Repository Access &amp; Sprint Kickoff</strong><br />You'll be added to the production assigned repository with curated weekly issues to solve and merge.</div>
+    <div class="step-text"><strong>Project Sprint Kickoff</strong><br />You'll get your 4-week milestone project guide and submit weekly LinkedIn posts for admin review.</div>
   </div>
 </div>
 
 <div class="note">
-  💡 <strong>Pro Tip:</strong> Keep your GitHub contribution graph active and ensure your profile details are up to date during the screening phase.
+  💡 <strong>Pro Tip:</strong> Keep your profile details up to date during the screening phase.
 </div>
 
 <div class="cta-wrap">

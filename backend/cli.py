@@ -5,10 +5,8 @@ Command-line tool for quick admin operations.
 Usage:
     python cli.py create-batch --domain web-dev --batch 1
     python cli.py add-student --email john@example.com --batch-id 1
-    python cli.py assign-issues --batch-id 1 --week 1
     python cli.py batch-status --batch-id 1
     python cli.py list-students
-    python cli.py github-check
 """
 
 import asyncio
@@ -35,34 +33,8 @@ async def _init():
 
 @click.group()
 def cli():
-    """SkillMe Admin CLI - Manage batches, students, and GitHub automation."""
+    """SkillMe Admin CLI - Manage batches and students."""
     pass
-
-
-# ==============================================
-# GitHub
-# ==============================================
-
-@cli.command("github-check")
-def github_check():
-    """Check GitHub API connection and token validity."""
-    async def _run():
-        await _init()
-        from services.github_service import github_service
-        user = await github_service.verify_token()
-        if user:
-            console.print(Panel(
-                f"[green]OK Connected[/green]\n"
-                f"Authenticated as: [bold]{user['login']}[/bold]\n"
-                f"Org: [bold]{github_service.org}[/bold]",
-                title="GitHub Status",
-                border_style="green",
-            ))
-        else:
-            console.print("[red]X GitHub token is invalid or not configured[/red]")
-        await github_service.close()
-
-    run_async(_run())
 
 
 # ==============================================
@@ -72,24 +44,19 @@ def github_check():
 @cli.command("create-batch")
 @click.option("--domain", "-d", required=True, help="Domain (e.g., web-dev, python)")
 @click.option("--batch", "-b", required=True, type=int, help="Batch number")
-@click.option("--template", "-t", default=None, help="Override template repo name")
 @click.option("--max-students", default=30, type=int, help="Max students per batch")
-@click.option("--webhook-url", default=None, help="Webhook URL for PR events")
-def create_batch(domain, batch, template, max_students, webhook_url):
-    """Create a new batch - provisions a GitHub repo from template."""
+def create_batch(domain, batch, max_students):
+    """Create a new batch."""
     async def _run():
         await _init()
         from services.batch_service import batch_service
-        from services.github_service import github_service
 
         try:
             with console.status(f"Creating batch {domain} #{batch}..."):
                 result = await batch_service.create_batch(
                     domain=domain,
                     batch_number=batch,
-                    template_repo=template,
                     max_students=max_students,
-                    webhook_url=webhook_url,
                 )
 
             console.print(Panel(
@@ -97,7 +64,6 @@ def create_batch(domain, batch, template, max_students, webhook_url):
                 f"ID: [bold]{result['id']}[/bold]\n"
                 f"Domain: [bold]{result['domain']}[/bold]\n"
                 f"Batch #: [bold]{result['batch_number']}[/bold]\n"
-                f"Repo: [bold]{result['repo_name']}[/bold]\n"
                 f"Start: {result['start_date']}\n"
                 f"End: {result['end_date']}",
                 title="New Batch",
@@ -105,8 +71,6 @@ def create_batch(domain, batch, template, max_students, webhook_url):
             ))
         except Exception as e:
             console.print(f"[red]Error: {e}[/red]")
-        finally:
-            await github_service.close()
 
     run_async(_run())
 
@@ -129,7 +93,6 @@ def list_batches(status):
         table.add_column("ID", style="cyan", justify="center")
         table.add_column("Domain", style="bold")
         table.add_column("Batch #", justify="center")
-        table.add_column("Repo", style="dim")
         table.add_column("Status", justify="center")
         table.add_column("Start", justify="center")
         table.add_column("End", justify="center")
@@ -147,7 +110,6 @@ def list_batches(status):
                 str(b["id"]),
                 b["domain"],
                 str(b["batch_number"]),
-                b["repo_name"] or "-",
                 f"[{color}]{b['status']}[/{color}]",
                 b["start_date"] or "-",
                 b["end_date"] or "-",
@@ -175,7 +137,6 @@ def batch_status(batch_id):
             f"Domain: [bold]{batch['domain']}[/bold]  |  "
             f"Batch #: [bold]{batch['batch_number']}[/bold]  |  "
             f"Status: [bold]{batch['status']}[/bold]\n"
-            f"Repo: [dim]{batch['repo_name']}[/dim]\n"
             f"Period: {batch['start_date']} → {batch['end_date']}",
             title=f"Batch #{batch_id}",
             border_style="blue",
@@ -189,21 +150,15 @@ def batch_status(batch_id):
 
         table = Table(title="Student Progress", box=box.ROUNDED)
         table.add_column("Student", style="bold")
-        table.add_column("GitHub", style="dim")
         table.add_column("Status")
-        table.add_column("Assigned", justify="center")
         table.add_column("Completed", justify="center")
-        table.add_column("PRs Merged", justify="center")
         table.add_column("Score", justify="center", style="bold cyan")
 
         for s in progress:
             table.add_row(
                 f"{s['first_name']} {s['last_name']}",
-                s["github_username"] or "-",
                 s["enrollment_status"],
-                str(s["total_assigned"]),
                 str(s["total_completed"]),
-                str(s["total_prs_merged"]),
                 str(s["total_score"]),
             )
 
@@ -225,7 +180,6 @@ def add_student(email, batch_id):
         await _init()
         from db.database import db
         from services.batch_service import batch_service
-        from services.github_service import github_service
 
         student = await db.fetch_one(
             "SELECT * FROM students WHERE email = ?", (email,)
@@ -237,20 +191,17 @@ def add_student(email, batch_id):
 
         try:
             with console.status(f"Enrolling {student['first_name']}..."):
-                result = await batch_service.add_student_to_batch(
+                await batch_service.add_student_to_batch(
                     student_id=student["id"],
                     batch_id=batch_id,
                 )
 
             console.print(
                 f"[OK] Enrolled {student['first_name']} {student['last_name']} "
-                f"in batch {batch_id}\n"
-                f"GitHub invite: {result['github_invite_status']}"
+                f"in batch {batch_id}"
             )
         except Exception as e:
             console.print(f"[red]Error: {e}[/red]")
-        finally:
-            await github_service.close()
 
     run_async(_run())
 
@@ -281,7 +232,6 @@ def list_students(status):
         table.add_column("ID", style="cyan", justify="center")
         table.add_column("Name", style="bold")
         table.add_column("Email")
-        table.add_column("GitHub", style="dim")
         table.add_column("College")
         table.add_column("Status", justify="center")
         table.add_column("Applied", justify="center")
@@ -292,7 +242,6 @@ def list_students(status):
                 str(s["id"]),
                 f"{s['first_name']} {s['last_name']}",
                 s["email"],
-                s["github_username"] or "-",
                 s["college"] or "-",
                 f"[{status_color}]{s['status']}[/{status_color}]",
                 s["created_at"][:10] if s["created_at"] else "-",
@@ -304,70 +253,38 @@ def list_students(status):
 
 
 # ==============================================
-# Issue Assignment
+# Submissions
 # ==============================================
 
-@cli.command("assign-issues")
-@click.option("--batch-id", "-b", required=True, type=int, help="Batch ID")
-@click.option("--week", "-w", required=True, type=int, help="Week number (1-4)")
-@click.option("--issues-file", "-f", default=None, help="JSON file with issue definitions")
-def assign_issues(batch_id, week, issues_file):
-    """Assign issues for a specific week to all enrolled students."""
+@cli.command("list-pending-submissions")
+def list_pending_submissions():
+    """List all pending LinkedIn task submissions awaiting review."""
     async def _run():
         await _init()
-        import json
-        from services.batch_service import batch_service
-        from services.github_service import github_service
-        from db.database import db
+        from services.submission_service import submission_service
 
-        # Load issues from file or use defaults
-        if issues_file:
-            with open(issues_file) as f:
-                issues = json.load(f)
-                
-            try:
-                with console.status(f"Assigning {len(issues)} issues for week {week}..."):
-                    result = await batch_service.assign_weekly_issues(
-                        batch_id=batch_id,
-                        week_number=week,
-                        issues=issues,
-                    )
-            except Exception as e:
-                console.print(f"[red]Error: {e}[/red]")
-                return finally_close()
-        else:
-            try:
-                with console.status(f"Fetching and assigning tasks from GitHub repo for week {week}..."):
-                    result = await batch_service.assign_week_from_task_repo(
-                        batch_id=batch_id,
-                        week_number=week,
-                    )
-            except Exception as e:
-                console.print(f"[red]Error: {e}[/red]")
-                return finally_close()
+        submissions = await submission_service.list_submissions(status="pending")
+        if not submissions:
+            console.print("[yellow]No pending submissions.[/yellow]")
+            return
 
-            console.print(f"[OK] Assigned {len(result)} issues for week {week}")
+        table = Table(title="Pending Submissions", box=box.ROUNDED, show_lines=True)
+        table.add_column("ID", style="cyan", justify="center")
+        table.add_column("Student", style="bold")
+        table.add_column("Week", justify="center")
+        table.add_column("LinkedIn URL")
+        table.add_column("Submitted", justify="center")
 
-            table = Table(box=box.SIMPLE)
-            table.add_column("Issue #", justify="center")
-            table.add_column("Title")
-            table.add_column("Assigned To", justify="center")
+        for s in submissions:
+            table.add_row(
+                str(s["id"]),
+                f"{s['first_name']} {s['last_name']}",
+                str(s["week"]),
+                s["linkedin_url"],
+                s["submitted_at"] or "-",
+            )
 
-            for issue in result:
-                table.add_row(
-                    str(issue.get("github_issue_number", "-")),
-                    issue["title"],
-                    str(issue.get("assigned_to", "-")),
-                )
-            console.print(table)
-
-        def finally_close():
-            pass
-
-        try:
-            pass
-        finally:
-            await github_service.close()
+        console.print(table)
 
     run_async(_run())
 

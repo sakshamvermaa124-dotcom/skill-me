@@ -59,8 +59,8 @@ class TestAddStudentToBatch:
 
 @pytest.mark.admin
 class TestAutoEnrollStudent:
-    async def test_auto_enroll_student_creates_batch_repo_and_enrolls(self, client, admin_headers, test_student):
-        """1-click auto-enroll creates personal batch/repo and enrolls student."""
+    async def test_auto_enroll_student_creates_batch_and_enrolls(self, client, admin_headers, test_student):
+        """1-click auto-enroll creates a dedicated batch and enrolls the student."""
         r = await client.post(
             f"/api/admin/students/{test_student['id']}/enroll",
             headers=admin_headers,
@@ -69,13 +69,11 @@ class TestAutoEnrollStudent:
         data = r.json()
         assert data["status"] == "enrolled"
         assert "batch_id" in data
-        assert "repo_name" in data
         assert data["student_id"] == test_student["id"]
 
         # Verify DB batch record created
         batch = await test_db.fetch_one("SELECT * FROM batches WHERE id = ?", (data["batch_id"],))
         assert batch is not None
-        assert batch["repo_name"] == data["repo_name"]
 
         # Verify enrollment record created
         enrollment = await test_db.fetch_one(

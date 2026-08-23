@@ -181,7 +181,7 @@ class TestBatchAnalytics:
         assert "batch" in data
         assert "enrollments" in data
         assert "weekly_progress" in data
-        assert "pr_stats" in data
+        assert "submission_stats" in data
         assert "revenue" in data
         assert "student_grid" in data
 

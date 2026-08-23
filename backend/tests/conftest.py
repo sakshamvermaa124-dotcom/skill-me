@@ -55,7 +55,6 @@ settings.razorpay_key_id = "rzp_test_key"
 settings.razorpay_key_secret = "test_secret"
 settings.certificate_price_paise = 9900
 settings.backend_url = "http://test.local"
-settings.github_org = "test-org"
 
 
 # ── Test Database Helpers ─────────────────────────────────────────────────────
@@ -152,14 +151,13 @@ async def seed_batch(
     db: TestDatabase,
     domain: str = "web-dev",
     batch_number: int = 1,
-    repo_name: str = "web-dev-batch-1",
     status: str = "active",
 ) -> int:
     """Insert and return the ID of a test batch."""
     return await db.insert(
-        """INSERT INTO batches (domain, batch_number, repo_name, status)
-           VALUES (?, ?, ?, ?)""",
-        (domain, batch_number, repo_name, status),
+        """INSERT INTO batches (domain, batch_number, status)
+           VALUES (?, ?, ?)""",
+        (domain, batch_number, status),
     )
 
 
@@ -221,31 +219,12 @@ def make_jwt(student_id: int, email: str) -> str:
 
 # ── Mock External Services ────────────────────────────────────────────────────
 
-def mock_github_service():
-    """Return a mock that makes all GitHub API calls no-ops."""
-    mock = MagicMock()
-    mock.verify_token = AsyncMock(return_value={"login": "test-bot"})
-    mock.create_repo_from_template = AsyncMock(return_value={"name": "web-dev-batch-1", "html_url": "https://github.com/test-org/web-dev-batch-1"})
-    mock.add_collaborator = AsyncMock(return_value=True)
-    mock.remove_collaborator = AsyncMock(return_value=True)
-    mock.create_issue = AsyncMock(return_value={"number": 1, "html_url": "https://github.com/test-org/repo/issues/1"})
-    mock.create_webhook = AsyncMock(return_value={"id": 12345})
-    mock.list_pull_requests = AsyncMock(return_value=[])
-    mock.add_pr_comment = AsyncMock(return_value=True)
-    mock.merge_pull_request = AsyncMock(return_value=True)
-    mock.verify_webhook_signature = MagicMock(return_value=True)
-    mock.org = "test-org"
-    mock.close = AsyncMock()
-    return mock
-
-
 def mock_email_service():
     """Return a mock that swallows all email sends."""
     mock = MagicMock()
     mock.send_application_confirmation = AsyncMock(return_value=True)
     mock.send_shortlist_notification = AsyncMock(return_value=True)
     mock.send_offer_letter = AsyncMock(return_value=True)
-    mock.send_weekly_tasks_notification = AsyncMock(return_value=True)
     mock.send_certificate_ready = AsyncMock(return_value=True)
     mock.send_test_email = AsyncMock(return_value=True)
     return mock
@@ -253,15 +232,9 @@ def mock_email_service():
 
 def mock_scheduler_service():
     """Return a mock scheduler that does nothing."""
-    import logging as _logging
     mock = MagicMock()
     mock.start = MagicMock()
     mock.shutdown = MagicMock()
-    mock.trigger_now = AsyncMock(return_value={"status": "triggered", "batches_processed": 0})
-    mock._scheduler = MagicMock()
-    mock._scheduler.running = True
-    mock._scheduler.get_job = MagicMock(return_value=None)
-    mock._logger = _logging.getLogger("skillme.scheduler")
     return mock
 
 
@@ -320,7 +293,6 @@ async def client() -> AsyncGenerator[httpx.AsyncClient, None]:
     """
     from contextlib import ExitStack
 
-    mock_gh = mock_github_service()
     mock_email = mock_email_service()
     mock_sched = mock_scheduler_service()
 
@@ -333,23 +305,17 @@ async def client() -> AsyncGenerator[httpx.AsyncClient, None]:
         patch("routes.payments.db", test_db),
         patch("routes.referrals.db", test_db),
         patch("routes.portfolio.db", test_db),
-        patch("routes.webhooks.db", test_db),
         patch("services.auth_service.db", test_db),
         patch("services.batch_service.db", test_db),
+        patch("services.submission_service.db", test_db),
         patch("services.certificate_service.db", test_db),
         patch("middleware.student_auth.db", test_db),
-        patch("services.github_service.github_service", mock_gh),
-        patch("routes.admin.github_service", mock_gh),
-        patch("routes.webhooks.github_service", mock_gh),
-        patch("services.batch_service.github_service", mock_gh),
         patch("services.email_service.email_service", mock_email),
         patch("routes.admin.email_service", mock_email),
         patch("routes.students.email_service", mock_email),
         patch("routes.auth.email_service", mock_email),
         patch("routes.certificates.email_service", mock_email),
         patch("routes.payments.email_service", mock_email),
-        patch("routes.admin.scheduler_service", mock_sched),
-        patch("main.github_service", mock_gh),
         patch("main.scheduler_service", mock_sched),
     ]
 

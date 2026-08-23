@@ -426,7 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (avatarEl) avatarEl.textContent = act.student_initials || act.initials || "SM";
         if (userEl) userEl.textContent = act.student_name || act.name || "Student Contributor";
         if (collegeEl) collegeEl.textContent = act.college || "Engineering College";
-        if (actionEl) actionEl.textContent = act.action_text || act.action || "merged verified PR";
+        if (actionEl) actionEl.textContent = act.action_text || act.action || "had a milestone approved";
         if (timeEl) timeEl.textContent = act.time_ago || act.time || "Just now";
         item.classList.remove('switching');
       }, 350);
@@ -463,8 +463,8 @@ document.addEventListener('DOMContentLoaded', () => {
             activities = data.activities;
           }
           if (data && data.stats) {
-            if (prCountEl && data.stats.total_prs_merged) {
-              prCountEl.textContent = `${data.stats.total_prs_merged}+`;
+            if (prCountEl && data.stats.total_submissions_approved) {
+              prCountEl.textContent = `${data.stats.total_submissions_approved}+`;
             }
             if (collegeCountEl && data.stats.total_colleges) {
               collegeCountEl.textContent = `${data.stats.total_colleges}+`;

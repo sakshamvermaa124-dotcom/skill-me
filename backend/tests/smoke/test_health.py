@@ -17,7 +17,6 @@ class TestHealthEndpoint:
         assert "status" in data
         assert data["status"] == "healthy"
         assert "database" in data
-        assert "github" in data
 
     async def test_health_database_connected(self, client):
         r = await client.get("/health")

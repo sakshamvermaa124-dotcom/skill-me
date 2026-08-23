@@ -229,8 +229,7 @@ class TestAdminAuthProtection:
         ("POST", "/api/admin/batches"),
         ("GET", "/api/admin/students"),
         ("GET", "/api/admin/email/logs"),
-        ("GET", "/api/admin/github/status"),
-        ("GET", "/api/admin/scheduler/status"),
+        ("GET", "/api/admin/submissions"),
     ])
     async def test_admin_endpoint_requires_key(self, client, method, path):
         if method == "GET":

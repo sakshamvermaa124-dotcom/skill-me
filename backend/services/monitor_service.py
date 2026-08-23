@@ -3,7 +3,7 @@ SkillMe — Monitor Service
 Core monitoring engine for the real-time automated QA system.
 
 Capabilities:
-  - Health probes (API, DB, GitHub, email)
+  - Health probes (API, DB, email)
   - Synthetic end-to-end tests (application, auth, certificate, LOR, portfolio, verify)
   - Database integrity checks (orphans, missing records, inconsistencies)
   - Stuck-student detection (students stuck at any stage beyond expected time)
@@ -30,14 +30,10 @@ logger = logging.getLogger("skillme.monitor")
 SYNTHETIC_EMAIL = "qa-synthetic-bot@skillme-internal-test.in"
 SYNTHETIC_FIRST = "QA-Bot"
 SYNTHETIC_LAST = "Synthetic"
-SYNTHETIC_GITHUB = "skillme-qa-bot"
-
 # Thresholds for stuck-student detection (in hours)
 STUCK_THRESHOLDS = {
     "applied_no_action": 72,          # Applied but no admin action in 72h
     "shortlisted_no_enrollment": 48,  # Shortlisted but not enrolled in 48h
-    "enrolled_no_issues": 24,         # Enrolled in active batch but no issues after 24h past start_date
-    "pr_merged_no_progress": 6,       # PR merged but progress not updated in 6h
     "completed_no_certificate": 24,   # Status=completed but no certificate in 24h
     "paid_no_certificate": 2,         # Payment paid but no certificate in 2h
     "certificate_no_email": 6,        # Certificate issued but no email sent in 6h
@@ -141,7 +137,7 @@ def _get_candidate_backend_urls() -> list[str]:
 # ═════════════════════════════════════════════════════════════════════════════
 
 async def probe_health_endpoint() -> dict:
-    """Hit the /health endpoint and verify API + DB + GitHub connectivity."""
+    """Hit the /health endpoint and verify API + DB connectivity."""
     check_name = "health_endpoint"
     start = time.time()
     urls = _get_candidate_backend_urls()
@@ -239,45 +235,6 @@ async def probe_database() -> dict:
             is_regression=int(is_reg),
         )
     return {"status": status, "tables": results, "time_ms": elapsed}
-
-
-async def probe_github_api() -> dict:
-    """Verify GitHub token and org access."""
-    check_name = "github_api"
-    start = time.time()
-    try:
-        from services.github_service import github_service
-        user = await github_service.verify_token()
-        elapsed = int((time.time() - start) * 1000)
-        if user:
-            await _record_check(check_name, "probe", "pass", elapsed, {"user": user.get("login")})
-            return {"status": "pass", "user": user.get("login"), "time_ms": elapsed}
-        else:
-            is_reg = await _check_regression(check_name, "fail")
-            await _record_check(check_name, "probe", "fail", elapsed)
-            await _create_alert(
-                "synthetic", "critical", "api_health",
-                "GitHub API token verification failed",
-                "github_service.verify_token() returned None",
-                workflow="github",
-                component="backend/services/github_service.py",
-                is_regression=int(is_reg),
-            )
-            return {"status": "fail", "time_ms": elapsed}
-    except Exception as e:
-        elapsed = int((time.time() - start) * 1000)
-        is_reg = await _check_regression(check_name, "fail")
-        await _record_check(check_name, "probe", "fail", elapsed, {"error": str(e)})
-        await _create_alert(
-            "synthetic", "critical", "api_health",
-            "GitHub API unreachable",
-            f"Exception during GitHub token verification: {e}",
-            workflow="github",
-            component="backend/services/github_service.py",
-            error_details=traceback.format_exc(),
-            is_regression=int(is_reg),
-        )
-        return {"status": "fail", "error": str(e), "time_ms": elapsed}
 
 
 async def probe_email_smtp() -> dict:
@@ -382,7 +339,6 @@ async def run_all_probes() -> dict:
     results = {}
     results["health"] = await probe_health_endpoint()
     results["database"] = await probe_database()
-    results["github"] = await probe_github_api()
     results["email_smtp"] = await probe_email_smtp()
     results["email_delivery"] = await probe_email_delivery()
 
@@ -663,7 +619,7 @@ async def test_progress_endpoint() -> dict:
             return {"status": "pass", "note": "no enrolled students", "time_ms": elapsed}
 
         progress = await db.fetch_all(
-            """SELECT p.week, p.issues_completed, p.prs_merged
+            """SELECT p.week, p.issues_completed
                FROM progress p
                JOIN students s ON p.student_id = s.id
                WHERE s.email = ?
@@ -835,17 +791,17 @@ async def check_db_integrity() -> dict:
     # 2. Orphaned submissions
     try:
         orphaned = await db.fetch_all(
-            """SELECT s.id, s.issue_id, s.student_id FROM submissions s
-               LEFT JOIN issues i ON s.issue_id = i.id
+            """SELECT s.id, s.batch_id, s.student_id FROM submissions s
+               LEFT JOIN batches b ON s.batch_id = b.id
                LEFT JOIN students st ON s.student_id = st.id
-               WHERE i.id IS NULL OR st.id IS NULL"""
+               WHERE b.id IS NULL OR st.id IS NULL"""
         )
         results["orphaned_submissions"] = {"count": len(orphaned), "records": orphaned[:20]}
         if orphaned:
             await _create_alert("system", "warning", "db_integrity",
                 f"{len(orphaned)} orphaned submission records",
-                "Submissions referencing deleted issues/students",
-                component="backend/services/batch_service.py")
+                "Submissions referencing deleted batches/students",
+                component="backend/services/submission_service.py")
     except Exception as e:
         results["orphaned_submissions"] = {"error": str(e)}
 
@@ -1129,7 +1085,7 @@ async def run_initial_audit() -> dict:
                WHERE e.status != 'dropped' AND s.email != ?
                  AND NOT EXISTS (
                      SELECT 1 FROM progress p WHERE p.student_id = s.id AND p.batch_id = e.batch_id
-                       AND (p.issues_completed > 0 OR p.prs_merged > 0)
+                       AND p.issues_completed > 0
                  )""",
             (SYNTHETIC_EMAIL,),
         )
@@ -1223,13 +1179,12 @@ async def get_student_journey(email: str) -> dict:
     journey = {"student": dict(student)}
 
     journey["enrollments"] = await db.fetch_all(
-        """SELECT e.*, b.domain, b.batch_number, b.repo_name, b.status as batch_status
+        """SELECT e.*, b.domain, b.batch_number, b.status as batch_status
            FROM enrollments e JOIN batches b ON e.batch_id = b.id WHERE e.student_id = ?""", (sid,))
     journey["progress"] = await db.fetch_all(
         "SELECT * FROM progress WHERE student_id = ? ORDER BY week", (sid,))
     journey["submissions"] = await db.fetch_all(
-        """SELECT s.*, i.title as issue_title, i.week_number
-           FROM submissions s LEFT JOIN issues i ON s.issue_id = i.id WHERE s.student_id = ?""", (sid,))
+        "SELECT * FROM submissions WHERE student_id = ? ORDER BY week", (sid,))
     journey["certificates"] = await db.fetch_all(
         "SELECT * FROM certificates WHERE student_id = ?", (sid,))
     journey["payments"] = await db.fetch_all(

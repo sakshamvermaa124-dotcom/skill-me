@@ -29,8 +29,9 @@ const PAGE_META = {
   overview:  { title: 'Overview',  subtitle: 'Platform summary and recent activity' },
   students:  { title: 'Students',  subtitle: 'Manage applications and enrollments' },
   alumni:    { title: 'Alumni',    subtitle: 'Students who completed their internship' },
-  batches:   { title: 'Batches',   subtitle: 'Manage cohorts and automated task assignment' },
+  batches:   { title: 'Batches',   subtitle: 'Manage cohorts and enrollment' },
   email:     { title: 'Email Settings', subtitle: 'Brevo SMTP relay — test and monitor email delivery' },
+  submissions: { title: 'Submissions', subtitle: 'Review and approve/reject weekly LinkedIn submissions' },
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -852,6 +853,7 @@ function navigate(page) {
   if (page === 'alumni') loadAlumni();
   if (page === 'batches') loadBatches();
   if (page === 'email') loadEmailStatus();
+  if (page === 'submissions') loadSubmissions();
 }
 
 function refreshCurrentPage() { navigate(currentPage); }
@@ -908,7 +910,6 @@ async function loadOverview() {
   loadStats();
   loadRecentApplications();
   loadOverviewBatches();
-  loadSchedulerStatus();
 }
 
 async function loadStats() {
@@ -919,7 +920,7 @@ async function loadStats() {
       ${statCard('👥', data.total_students, 'Total Students', 'rgba(201,154,78,0.12)', '#c99a4e')}
       ${statCard('🟢', data.active_batches, 'Active Batches', 'rgba(79,163,107,0.15)', '#4fa36b')}
       ${statCard('📋', data.pending_applications, 'Pending Applications', 'rgba(201,154,78,0.15)', '#d8ac63')}
-      ${statCard('🎯', data.total_issues_assigned, 'Issues Assigned', 'rgba(181,135,61,0.15)', '#b5873d')}
+      ${statCard('📝', data.pending_submissions, 'Pending Submissions', 'rgba(181,135,61,0.15)', '#b5873d')}
     `;
     const badge = document.getElementById('pending-badge');
     if (badge) {
@@ -928,6 +929,15 @@ async function loadStats() {
         badge.textContent = data.pending_applications;
       } else {
         badge.style.display = 'none';
+      }
+    }
+    const subBadge = document.getElementById('submissions-badge');
+    if (subBadge) {
+      if (data.pending_submissions > 0) {
+        subBadge.style.display = 'inline-flex';
+        subBadge.textContent = data.pending_submissions;
+      } else {
+        subBadge.style.display = 'none';
       }
     }
   } catch (e) {
@@ -1080,7 +1090,6 @@ function renderStudents(students) {
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           ${s.status === 'applied' ? `<button class="btn btn-sm" style="background:rgba(201,154,78,0.12);color:#c99a4e;border:1px solid rgba(201,154,78,0.22);" onclick="updateStatus(${s.id},'shortlisted')">Shortlist</button>` : ''}
           ${(s.status === 'shortlisted' || s.status === 'applied') ? `<button class="btn btn-sm" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.25);" onclick="autoEnrollStudent(${s.id},'${s.first_name} ${s.last_name}', this)">Enroll</button>` : ''}
-          ${s.batch_id ? `<button class="btn btn-sm" style="background:rgba(56,189,248,0.12);color:#38bdf8;border:1px solid rgba(56,189,248,0.22);" onclick="openAssignModal(${s.batch_id},'${s.first_name} ${s.last_name} (${s.domain || 'Batch'})')" title="Assign or re-assign weekly curriculum tasks">⚡ Tasks</button>` : ''}
           ${(s.status === 'completed' || s.status === 'enrolled') && s.batch_id ? `<button class="btn btn-sm" style="background:rgba(212,168,83,0.15);color:#d4a853;border:1px solid rgba(212,168,83,0.3);" onclick="issueCertificate(${s.id},${s.batch_id},'${s.first_name} ${s.last_name}')">🏅 Certificate</button>` : ''}
           ${s.status !== 'dropped' ? `<button class="btn btn-sm" style="background:rgba(251,113,133,0.12);color:#fb7185;border:1px solid rgba(251,113,133,0.2);" onclick="updateStatus(${s.id},'dropped')">Drop</button>` : ''}
           <button class="btn btn-sm" style="background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.25);" onclick="deleteStudent(${s.id},'${s.first_name} ${s.last_name}','${s.email}')" title="Permanently delete entire record from database">🗑️ Delete</button>
@@ -1218,7 +1227,7 @@ async function autoEnrollStudent(studentId, name, btnEl) {
     const data = await api(`/api/admin/students/${studentId}/enroll`, {
       method: 'POST'
     });
-    toast(`✅ Enrolled ${name}! Created repo ${data.repo_name} & configured webhook.`);
+    toast(`✅ Enrolled ${name}!`);
     if (currentPage === 'overview') {
       loadRecentApplications(true);
       loadOverviewBatches(true);
@@ -1252,32 +1261,15 @@ async function loadBatches(silent = false) {
     }
     el.innerHTML = allBatches.map(b => {
       const fill = Math.min(100, Math.round((b.enrolled_students || 0) / (b.max_students || 30) * 100));
-      const autoOn = !!b.auto_assign;
       return `
         <div class="batch-card" id="batch-card-${b.id}">
           <div class="batch-card-header">
             <div>
               <div class="batch-card-title">${b.domain.replace('-',' ').replace(/\b\w/g, c=>c.toUpperCase())} — Batch #${b.batch_number}</div>
-              <div class="batch-card-meta">${b.repo_name} &nbsp;&middot;&nbsp; ${b.enrolled_students || 0} / ${b.max_students} students &nbsp;&middot;&nbsp; Started ${fmtDate(b.start_date)}</div>
+              <div class="batch-card-meta">${b.enrolled_students || 0} / ${b.max_students} students &nbsp;&middot;&nbsp; Started ${fmtDate(b.start_date)}</div>
             </div>
             <div class="batch-card-actions">
               ${statusBadge(b.status)}
-              <button class="btn btn-ghost btn-sm" onclick="setupWebhook(${b.id}, this)" title="Register GitHub webhook so PRs are tracked in real-time">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-                Setup Webhook
-              </button>
-              <button class="btn btn-ghost btn-sm" onclick="syncBatchPRs(${b.id}, this)" title="Fetch all merged PRs from GitHub and update student scores">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-                Sync PRs
-              </button>
-              <button class="btn btn-ghost btn-sm" onclick="fixAssignees(${b.id}, this)" title="Re-assign GitHub issues to students who have since accepted their collaborator invite">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
-                Fix Assignees
-              </button>
-              <button class="btn btn-ghost btn-sm" onclick="openAssignModal(${b.id}, '${b.domain} Batch #${b.batch_number}')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
-                Assign Tasks
-              </button>
               <button class="btn btn-ghost btn-sm" onclick="openAnalyticsModal(${b.id}, '${b.domain} Batch #${b.batch_number}')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
                 Analytics
@@ -1293,120 +1285,12 @@ async function loadBatches(silent = false) {
             <span>${fill}% enrolled</span>
             <span>${b.max_students - (b.enrolled_students || 0)} slots remaining</span>
           </div>
-          <div style="display:flex;align-items:center;gap:16px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <label class="toggle-switch" title="${autoOn ? 'Auto-assign ON: tasks will be pushed every Monday' : 'Auto-assign OFF: click to enable'}">
-                <input type="checkbox" ${autoOn ? 'checked' : ''} onchange="toggleAutoAssign(${b.id}, this.checked)" />
-                <span class="toggle-slider"></span>
-              </label>
-              <div>
-                <div style="font-size:0.82rem;font-weight:500;">Auto-Assign</div>
-                <div style="font-size:0.72rem;color:var(--text-muted);">${autoOn ? 'Enabled — runs every Monday 9AM' : 'Disabled'}</div>
-              </div>
-            </div>
-            <button class="btn btn-ghost btn-sm" onclick="triggerNow(${b.id})" title="Run auto-assign now for this batch">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-              Run Now
-            </button>
-            <div style="margin-left:auto;font-size:0.75rem;color:var(--text-muted);">
-              Weeks assigned: <strong style="color:var(--text-primary)">${formatWeeksAssigned(b.weeks_assigned)}</strong>
-            </div>
-          </div>
         </div>`;
     }).join('');
   } catch(e) {
     el.innerHTML = `<div class="empty-state"><div class="empty-state-text">${e.message}</div></div>`;
   }
 }
-
-function formatWeeksAssigned(raw) {
-  try {
-    const arr = typeof raw === 'string' ? JSON.parse(raw) : (raw || []);
-    if (!arr.length) return 'None';
-    return arr.map(w => `W${w}`).join(', ');
-  } catch { return 'None'; }
-}
-
-async function setupWebhook(batchId, btnEl) {
-  const btn = btnEl || event.currentTarget;
-  const origContent = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg> Setting up...`;
-  try {
-    const result = await api(`/api/admin/batches/${batchId}/setup-webhook`, { method: 'POST' });
-    if (result.status === 'already_exists') {
-      toast(`Webhook already active on this repo — PRs are being tracked ✅`);
-    } else {
-      toast(`✅ Webhook registered! Future merged PRs will auto-update student scores.`);
-    }
-  } catch(e) {
-    if (e.message && e.message.includes('BACKEND_URL')) {
-      toast(`Set BACKEND_URL in Render env vars first (your API public URL)`, 'error');
-    } else {
-      toast(`Webhook setup failed: ${e.message}`, 'error');
-    }
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = origContent;
-  }
-}
-
-async function syncBatchPRs(batchId, btnEl) {
-  const btn = btnEl || event.currentTarget;
-  const origContent = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg> Syncing...`;
-  try {
-    const result = await api(`/api/admin/batches/${batchId}/sync-prs`, { method: 'POST' });
-    const synced = result.merged_prs_processed || 0;
-    const skipped = result.already_synced || 0;
-    if (synced > 0) {
-      toast(`✅ Synced ${synced} merged PR${synced !== 1 ? 's' : ''}! (${skipped} already up to date)`);
-    } else {
-      toast(`All PRs already synced (${skipped} up to date)`);
-    }
-    loadBatches(true);
-  } catch(e) {
-    toast(`Sync failed: ${e.message}`, 'error');
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = origContent;
-  }
-}
-
-async function fixAssignees(batchId, btnEl) {
-  const btn = btnEl || event.currentTarget;
-  const origContent = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg> Fixing...`;
-  try {
-    const result = await api(`/api/admin/batches/${batchId}/fix-assignees`, { method: 'POST' });
-    const fixed = result.fixed || 0;
-    const errors = result.errors || 0;
-    const skipped = result.skipped || 0;
-    if (errors > 0) {
-      toast(`Fixed ${fixed} issue${fixed !== 1 ? 's' : ''}, ${errors} failed (students may not have accepted invite yet), ${skipped} skipped`, 'error');
-    } else if (fixed > 0) {
-      toast(`✅ Fixed ${fixed} issue${fixed !== 1 ? 's' : ''} — students are now assigned on GitHub!`);
-    } else {
-      toast(`All issues already have assignees (${skipped} skipped — no GitHub username)`);
-    }
-  } catch(e) {
-    toast(`Fix assignees failed: ${e.message}`, 'error');
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = origContent;
-  }
-}
-
-async function toggleAutoAssign(batchId, enabled) {
-  try {
-    await api(`/api/admin/batches/${batchId}/auto-assign?enabled=${enabled}`, { method: 'PATCH' });
-    toast(`Auto-assign ${enabled ? 'enabled' : 'disabled'} for batch ${batchId}`);
-    loadBatches(true);
-  } catch(e) { toast(e.message, 'error'); }
-}
-
 
 async function deleteBatch(batchId, batchName) {
   if (!confirm(`Are you sure you want to permanently delete "${batchName}"?\n\nThis will instantly wipe all progress, submissions, email logs, and enrollments associated with this batch. This action cannot be undone.`)) {
@@ -1419,108 +1303,6 @@ async function deleteBatch(batchId, batchName) {
     loadOverviewBatches(true);
   } catch(e) {
     toast(`Failed to delete batch: ${e.message}`, 'error');
-  }
-}
-
-async function triggerNow(batchId) {
-  try {
-    const btn = event.currentTarget;
-    btn.disabled = true; btn.textContent = 'Running...';
-    // Enable auto-assign first then trigger
-    await api(`/api/admin/batches/${batchId}/auto-assign?enabled=true`, { method: 'PATCH' });
-    const result = await api('/api/admin/scheduler/trigger', { method: 'POST' });
-    toast('Scheduler ran! Check the batch for new tasks.');
-    loadBatches(true);
-  } catch(e) { toast(e.message, 'error'); }
-}
-
-async function loadSchedulerStatus() {
-  // Inject a scheduler status card into the overview if not already there
-  let el = document.getElementById('scheduler-panel');
-  if (!el) {
-    const overviewPage = document.getElementById('page-overview');
-    const div = document.createElement('div');
-    div.style = 'margin-bottom:24px;';
-    div.innerHTML = `<div class="panel" id="scheduler-panel">
-      <div class="panel-header">
-        <div><div class="panel-title">Auto-Assign Scheduler</div><div class="panel-subtitle">Automated weekly task delivery status</div></div>
-        <button class="btn btn-ghost btn-sm" onclick="loadSchedulerStatus()">Refresh</button>
-      </div>
-      <div class="panel-body" id="scheduler-panel-body"><div class="loading-overlay"><div class="spinner"></div></div></div>
-    </div>`;
-    overviewPage.insertBefore(div, overviewPage.querySelector('.grid-2'));
-    el = document.getElementById('scheduler-panel-body');
-  } else {
-    el = document.getElementById('scheduler-panel-body');
-    el.innerHTML = '<div class="loading-overlay"><div class="spinner"></div></div>';
-  }
-
-  try {
-    const data = await api('/api/admin/scheduler/status');
-    const nextRun = data.next_run ? new Date(data.next_run).toLocaleString('en-IN', { weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : 'Unknown';
-    const batches = data.auto_assign_batches || [];
-    el.innerHTML = `
-      <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div style="width:10px;height:10px;border-radius:50%;background:${data.scheduler_running ? '#34d399' : '#fb7185'};box-shadow:0 0 8px ${data.scheduler_running ? '#34d399' : '#fb7185'};"></div>
-          <span style="font-weight:500;font-size:0.9rem;">${data.scheduler_running ? 'Scheduler Running' : 'Scheduler Stopped'}</span>
-        </div>
-        <div style="font-size:0.82rem;color:var(--text-secondary);">Next run: <strong style="color:var(--text-primary);">${nextRun}</strong></div>
-        <div style="font-size:0.82rem;color:var(--text-secondary);">${batches.length} batch${batches.length !== 1 ? 'es' : ''} enrolled</div>
-        <button class="btn btn-primary btn-sm" style="margin-left:auto;" onclick="runSchedulerNow()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          Trigger All Now
-        </button>
-      </div>
-      ${batches.length ? `
-      <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px;">
-        <div style="font-size:0.72rem;color:var(--text-muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;">Auto-Assign Batches</div>
-        ${batches.map(b => `
-          <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
-            <span style="font-size:0.85rem;font-weight:500;">${b.name}</span>
-            <span style="font-size:0.75rem;color:var(--text-muted);">Started ${fmtDate(b.start_date)}</span>
-            <span style="margin-left:auto;font-size:0.75rem;">Assigned: <strong>${formatWeeksAssigned(b.weeks_assigned)}</strong></span>
-          </div>`).join('')}
-      </div>` : ''}
-    `;
-  } catch(e) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-state-text">${e.message}</div></div>`;
-  }
-}
-
-async function runSchedulerNow() {
-  try {
-    await api('/api/admin/scheduler/trigger', { method: 'POST' });
-    toast('Scheduler triggered! All eligible batches received tasks.');
-    loadSchedulerStatus();
-    loadBatches(true);
-  } catch(e) { toast(e.message, 'error'); }
-}
-
-function openAssignModal(batchId, batchName) {
-  document.getElementById('assign-batch-id').value = batchId;
-  document.getElementById('assign-batch-name').value = batchName;
-  openModal('assign-modal');
-}
-
-async function assignTasks() {
-  const batchId = document.getElementById('assign-batch-id').value;
-  const week = document.getElementById('assign-week').value;
-  try {
-    const btn = document.querySelector('#assign-modal .btn-primary');
-    btn.textContent = 'Assigning...';
-    btn.disabled = true;
-    const data = await api(`/api/admin/batches/${batchId}/assign-from-repo`, {
-      method: 'POST',
-      body: JSON.stringify({ week_number: parseInt(week) })
-    });
-    toast(`Assigned ${data.issues_created} tasks for Week ${week}!`);
-    closeModal('assign-modal');
-    btn.textContent = 'Assign Tasks'; btn.disabled = false;
-  } catch(e) {
-    toast(e.message, 'error');
-    const btn = document.querySelector('#assign-modal .btn-primary');
-    btn.textContent = 'Assign Tasks'; btn.disabled = false;
   }
 }
 
@@ -1620,49 +1402,20 @@ async function sendTestEmail() {
   }
 }
 
-async function syncAndRefreshAnalytics(batchId, batchName) {
-  const btn = document.getElementById(`analytics-sync-btn-${batchId}`);
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg> Syncing...`;
-  }
-  try {
-    const result = await api(`/api/admin/batches/${batchId}/sync-prs`, { method: 'POST' });
-    const synced = result.merged_prs_processed || 0;
-    const skipped = result.already_synced || 0;
-    toast(synced > 0
-      ? `✅ Synced ${synced} PR${synced !== 1 ? 's' : ''}! Refreshing analytics...`
-      : `All PRs already synced (${skipped} up to date)`
-    );
-    // Reload the analytics modal with fresh data
-    openAnalyticsModal(batchId, batchName);
-  } catch(e) {
-    toast(`Sync failed: ${e.message}`, 'error');
-    if (btn) { btn.disabled = false; }
-  }
-}
-
 async function openAnalyticsModal(batchId, batchName) {
   openModal('modal-analytics');
   document.getElementById('analytics-modal-title').textContent = `${batchName} Analytics`;
   const contentEl = document.getElementById('analytics-modal-content');
   contentEl.innerHTML = '<div class="loading-overlay"><div class="spinner"></div> Loading analytics...</div>';
-  
+
   try {
     const data = await api(`/api/admin/batches/${batchId}/analytics`);
     const enrollments = data.enrollments || {};
-    const prs = data.pr_stats || {};
+    const subs = data.submission_stats || {};
     const revenue = data.revenue || {};
     const students = data.student_grid || [];
-    
-    // Add a "Sync PRs" button at the top of the modal for quick refresh
+
     let html = `
-      <div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
-        <button id="analytics-sync-btn-${batchId}" class="btn btn-ghost btn-sm" onclick="syncAndRefreshAnalytics(${batchId}, '${batchName}')" title="Fetch latest merged PRs from GitHub and refresh analytics">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-          Sync PRs &amp; Refresh
-        </button>
-      </div>
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:24px;">
         <div style="background:var(--bg-card); padding:16px; border-radius:8px; border:1px solid var(--border);">
           <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">Enrollments</div>
@@ -1670,9 +1423,9 @@ async function openAnalyticsModal(batchId, batchName) {
           <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:4px;">${enrollments.dropped || 0} dropped, ${enrollments.completed || 0} completed</div>
         </div>
         <div style="background:var(--bg-card); padding:16px; border-radius:8px; border:1px solid var(--border);">
-          <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">Pull Requests</div>
-          <div style="font-size:1.5rem; font-weight:700;">${prs.merged || 0} <span style="font-size:1rem; color:var(--text-muted); font-weight:normal;">merged</span></div>
-          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:4px;">${prs.total_prs || 0} total submitted</div>
+          <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">Submissions</div>
+          <div style="font-size:1.5rem; font-weight:700;">${subs.approved || 0} <span style="font-size:1rem; color:var(--text-muted); font-weight:normal;">approved</span></div>
+          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:4px;">${subs.total_submissions || 0} total, ${subs.pending || 0} pending, ${subs.rejected || 0} rejected</div>
         </div>
         <div style="background:var(--bg-card); padding:16px; border-radius:8px; border:1px solid var(--border);">
           <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">Revenue</div>
@@ -1680,7 +1433,7 @@ async function openAnalyticsModal(batchId, batchName) {
           <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:4px;">${revenue.total_payments || 0} certificates paid</div>
         </div>
       </div>
-      
+
       <h3 style="margin-bottom:12px; font-size:1rem;">Student Progress Grid</h3>
       <div class="table-wrap" style="max-height: 400px; overflow-y: auto;">
         <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
@@ -1688,8 +1441,7 @@ async function openAnalyticsModal(batchId, batchName) {
             <tr>
               <th style="text-align:left; padding:10px; border-bottom:1px solid var(--border);">Student</th>
               <th style="text-align:left; padding:10px; border-bottom:1px solid var(--border);">Status</th>
-              <th style="text-align:center; padding:10px; border-bottom:1px solid var(--border);">Tasks</th>
-              <th style="text-align:center; padding:10px; border-bottom:1px solid var(--border);">PRs Merged</th>
+              <th style="text-align:center; padding:10px; border-bottom:1px solid var(--border);">Tasks Completed</th>
             </tr>
           </thead>
           <tbody>
@@ -1697,13 +1449,11 @@ async function openAnalyticsModal(batchId, batchName) {
               <tr>
                 <td style="padding:10px; border-bottom:1px solid var(--border);">
                   <div style="font-weight:500;">${s.first_name} ${s.last_name}</div>
-                  <div style="font-size:0.8rem; color:var(--text-muted);">${s.github_username || '—'}</div>
                 </td>
                 <td style="padding:10px; border-bottom:1px solid var(--border);">${statusBadge(s.enrollment_status)}</td>
-                <td style="padding:10px; border-bottom:1px solid var(--border); text-align:center;">${s.tasks_completed || 0} / ${s.tasks_assigned || 0}</td>
-                <td style="padding:10px; border-bottom:1px solid var(--border); text-align:center;">${s.prs_merged || 0}</td>
+                <td style="padding:10px; border-bottom:1px solid var(--border); text-align:center;">${s.tasks_completed || 0}</td>
               </tr>
-            `).join('') || '<tr><td colspan="4" style="padding:20px; text-align:center; color:var(--text-muted);">No student data available.</td></tr>'}
+            `).join('') || '<tr><td colspan="3" style="padding:20px; text-align:center; color:var(--text-muted);">No student data available.</td></tr>'}
           </tbody>
         </table>
       </div>
@@ -1711,6 +1461,153 @@ async function openAnalyticsModal(batchId, batchName) {
     contentEl.innerHTML = html;
   } catch(e) {
     contentEl.innerHTML = `<div class="empty-state"><div class="empty-state-text">Failed to load analytics: ${e.message}</div></div>`;
+  }
+}
+
+// ─── SUBMISSIONS (LinkedIn URL Review Queue) ───
+let allSubmissions = [];
+let selectedSubmissionIds = new Set();
+
+async function loadSubmissions() {
+  const tbody = document.getElementById('submissions-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = `<tr><td colspan="8"><div class="loading-overlay"><div class="spinner"></div></div></td></tr>`;
+  selectedSubmissionIds.clear();
+  updateSubmissionsBulkBar();
+  const status = document.getElementById('submission-status-filter')?.value || 'pending';
+  try {
+    const qs = status ? `?status=${encodeURIComponent(status)}` : '';
+    const data = await api(`/api/admin/submissions${qs}`);
+    allSubmissions = data.submissions || [];
+    renderSubmissions(allSubmissions);
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-state-text">${e.message}</div></div></td></tr>`;
+  }
+}
+
+function renderSubmissions(submissions) {
+  const tbody = document.getElementById('submissions-tbody');
+  if (!tbody) return;
+  if (!submissions.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-state-icon">📝</div><div class="empty-state-text">No submissions found</div></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = submissions.map(s => `
+    <tr>
+      <td><input type="checkbox" class="submission-row-check" data-id="${s.id}" ${selectedSubmissionIds.has(s.id) ? 'checked' : ''} onchange="toggleSubmissionSelected(${s.id}, this.checked)" /></td>
+      <td>
+        <div style="font-weight:500;">${s.first_name || ''} ${s.last_name || ''}</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);">${s.domain || ''}${s.batch_number ? ' — Batch #' + s.batch_number : ''}</div>
+      </td>
+      <td style="color:var(--text-secondary);font-size:0.82rem;">${s.email || '—'}</td>
+      <td>Week ${s.week}</td>
+      <td>${s.linkedin_url ? `<a href="${s.linkedin_url}" target="_blank" rel="noopener noreferrer" style="color:#38bdf8;">View Post ↗</a>` : '—'}</td>
+      <td style="color:var(--text-muted);font-size:0.8rem;">${fmtDate(s.submitted_at)}</td>
+      <td>${statusBadge(s.status)}</td>
+      <td>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          ${s.status === 'pending' ? `
+            <button class="btn btn-sm" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.3);" onclick="approveSubmission(${s.id})">✅ Approve</button>
+            <button class="btn btn-sm" style="background:rgba(251,113,133,0.15);color:#fb7185;border:1px solid rgba(251,113,133,0.3);" onclick="rejectSubmission(${s.id})">❌ Reject</button>
+          ` : '—'}
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function toggleSubmissionSelected(id, checked) {
+  if (checked) selectedSubmissionIds.add(id);
+  else selectedSubmissionIds.delete(id);
+  updateSubmissionsBulkBar();
+}
+
+function toggleSelectAllSubmissions(checked) {
+  selectedSubmissionIds.clear();
+  if (checked) {
+    allSubmissions.filter(s => s.status === 'pending').forEach(s => selectedSubmissionIds.add(s.id));
+  }
+  document.querySelectorAll('.submission-row-check').forEach(cb => {
+    const id = parseInt(cb.dataset.id);
+    cb.checked = selectedSubmissionIds.has(id);
+  });
+  updateSubmissionsBulkBar();
+}
+
+function clearSubmissionSelection() {
+  selectedSubmissionIds.clear();
+  document.querySelectorAll('.submission-row-check').forEach(cb => cb.checked = false);
+  const selectAll = document.getElementById('submissions-select-all');
+  if (selectAll) selectAll.checked = false;
+  updateSubmissionsBulkBar();
+}
+
+function updateSubmissionsBulkBar() {
+  const bar = document.getElementById('submissions-bulk-bar');
+  const countEl = document.getElementById('submissions-selected-count');
+  if (!bar) return;
+  const count = selectedSubmissionIds.size;
+  if (count > 0) {
+    bar.style.display = 'flex';
+    if (countEl) countEl.textContent = `${count} selected`;
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+async function approveSubmission(id) {
+  try {
+    await api(`/api/admin/submissions/${id}/approve`, { method: 'POST', body: JSON.stringify({}) });
+    toast('Submission approved');
+    loadSubmissions();
+    loadStats(true);
+  } catch(e) {
+    toast(e.message, 'error');
+  }
+}
+
+async function rejectSubmission(id) {
+  if (!confirm('Are you sure you want to reject this submission?')) return;
+  try {
+    await api(`/api/admin/submissions/${id}/reject`, { method: 'POST', body: JSON.stringify({}) });
+    toast('Submission rejected');
+    loadSubmissions();
+    loadStats(true);
+  } catch(e) {
+    toast(e.message, 'error');
+  }
+}
+
+async function bulkApproveSubmissions() {
+  const ids = Array.from(selectedSubmissionIds);
+  if (!ids.length) return;
+  if (!confirm(`Approve ${ids.length} selected submission${ids.length !== 1 ? 's' : ''}?`)) return;
+  try {
+    await api('/api/admin/submissions/bulk-approve', {
+      method: 'POST',
+      body: JSON.stringify({ submission_ids: ids })
+    });
+    toast(`Approved ${ids.length} submission${ids.length !== 1 ? 's' : ''}`);
+    loadSubmissions();
+    loadStats(true);
+  } catch(e) {
+    toast(e.message, 'error');
+  }
+}
+
+async function bulkRejectSubmissions() {
+  const ids = Array.from(selectedSubmissionIds);
+  if (!ids.length) return;
+  if (!confirm(`Reject ${ids.length} selected submission${ids.length !== 1 ? 's' : ''}?`)) return;
+  try {
+    await api('/api/admin/submissions/bulk-reject', {
+      method: 'POST',
+      body: JSON.stringify({ submission_ids: ids })
+    });
+    toast(`Rejected ${ids.length} submission${ids.length !== 1 ? 's' : ''}`);
+    loadSubmissions();
+    loadStats(true);
+  } catch(e) {
+    toast(e.message, 'error');
   }
 }
 

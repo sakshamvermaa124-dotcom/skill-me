@@ -46,17 +46,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Bypass login entirely for preview mode
     if (isPreview) {
         const isProgress = urlParams.get('preview') === 'progress' || urlParams.get('preview') === 'milestone';
-        const completedCount = isProgress ? 4 : 12;
-        const isPending = urlParams.get('preview') === 'pending';
+        const completedCount = isProgress ? 1 : 4;
         const mockData = {
-            student: { id: 999, name: "Saksham Verma", github: "sakshamverma124", domain: "Web Development", invite_status: isPending ? "pending" : "accepted" },
-            progress: [{ week: isProgress ? 1 : 4, issues_completed: completedCount, issues_assigned: 12, prs_merged: completedCount, score: isProgress ? 100 : 300 }],
-            submissions: [],
-            issues: [
-              { id: 1, github_issue_number: 7, title: "Build the Navigation Bar", week_number: 1, difficulty: "easy", status: "completed", github_url: "https://github.com/sakshamvermaa124-dotcom/web-dev-batch-1/issues/7" },
-              { id: 2, github_issue_number: 8, title: "Hero Section with Animation", week_number: 1, difficulty: "easy", status: "completed", github_url: "https://github.com/sakshamvermaa124-dotcom/web-dev-batch-1/issues/8" },
-              { id: 3, github_issue_number: 9, title: "Responsive Card Grid", week_number: 1, difficulty: "medium", status: isProgress ? "open" : "completed", github_url: "https://github.com/sakshamvermaa124-dotcom/web-dev-batch-1/issues/9" }
+            student: { id: 999, first_name: "Saksham", last_name: "Verma", name: "Saksham Verma", email: "test@example.com", domain: "Web Development", college: "Test College" },
+            progress: [{ week: isProgress ? 1 : 4, issues_completed: completedCount, score: isProgress ? 100 : 300, domain: "web-dev", batch_number: 1, batch_id: 1, start_date: new Date().toISOString() }],
+            submissions: [
+              { id: 1, week: 1, linkedin_url: "https://www.linkedin.com/posts/example", status: "approved", admin_note: null, submitted_at: new Date().toISOString(), reviewed_at: new Date().toISOString(), domain: "web-dev" }
             ],
+            summary: { total_tasks: 4, completed_tasks: completedCount, completion_pct: Math.round((completedCount / 4) * 100) },
             _batch_id: 1,
             _email: "test@example.com"
         };
@@ -312,19 +309,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileHeaderNameEl = document.getElementById('mobile-header-name');
     if (mobileHeaderNameEl) mobileHeaderNameEl.textContent = student.name;
 
-    const inviteAlert = document.getElementById('dash-pending-invite-alert');
-    if (inviteAlert) {
-      if (student.invite_status === 'pending') {
-        inviteAlert.style.display = 'flex';
-      } else {
-        inviteAlert.style.display = 'none';
-      }
-    }
-
-    if (student.github) {
-      document.getElementById('dash-github').href = `https://github.com/${student.github}`;
-    }
-
     const hodUrl = `offer.html?view=hod&student_id=${student.id || ''}&name=${encodeURIComponent(student.name || '')}&domain=${encodeURIComponent(student.domain || '')}&college=${encodeURIComponent(student.college || '')}`;
     const hodQuickLink = document.getElementById('dash-quick-hod');
     if (hodQuickLink) hodQuickLink.href = hodUrl;
@@ -333,7 +317,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (hodBannerBtn) hodBannerBtn.href = hodUrl;
 
     // Progress
-    let totalAssigned = 0, totalCompleted = 0, totalPrs = 0, totalScore = 0, maxWeek = 1;
+    let totalAssigned = (data.summary && data.summary.total_tasks) || 4;
+    let totalCompleted = (data.summary && data.summary.completed_tasks) || 0;
+    let totalScore = 0, maxWeek = 1;
+    const approvedCount = (submissions || []).filter(s => (s.status || '').toLowerCase() === 'approved').length;
 
     if (progress && progress.length > 0) {
       const latest = progress[progress.length - 1];
@@ -357,43 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch(e) {}
       }
 
-      // Update dynamic GitHub Repo Link in Beginner Guide Step 1
-      if (latest.repo_name) {
-        const org = data.github_org || data.summary?.github_org || 'sakshamvermaa124-dotcom';
-        const baseRepoUrl = `https://github.com/${org}/${latest.repo_name}`;
-        const repoUrl = `${baseRepoUrl}/issues`;
-        
-        const guideLink = document.querySelector('.guide-repo-link');
-        if (guideLink) {
-          guideLink.href = repoUrl;
-          const subText = guideLink.querySelector('.guide-repo-link-sub');
-          if (subText) subText.textContent = `github.com/${org}/${latest.repo_name}`;
-        }
-        
-        // Update Quick Actions
-        const quickRepos = document.querySelectorAll('.js-dash-repo-link');
-        quickRepos.forEach(el => el.href = baseRepoUrl);
-        
-        const quickIssues = document.querySelectorAll('.js-dash-issues-link');
-        quickIssues.forEach(el => el.href = repoUrl);
-
-        // Update Git Clone snippet
-        const cloneUrlEl = document.querySelector('.guide-code .url');
-        if (cloneUrlEl) cloneUrlEl.textContent = `${baseRepoUrl}.git`;
-        const cloneCmdEl = document.querySelectorAll('.guide-code .cmd')[1]; // The 'cd' command's next text node
-        if (cloneCmdEl && cloneCmdEl.nextSibling) {
-          cloneCmdEl.nextSibling.textContent = ` ${latest.repo_name}`;
-        }
-        const copyBtn = document.querySelector('.guide-code-copy');
-        if (copyBtn) {
-          copyBtn.setAttribute('onclick', `copyCode(this, 'git clone ${baseRepoUrl}.git\\ncd ${latest.repo_name}')`);
-        }
-      }
-
       progress.forEach(p => {
-        totalAssigned += Number(p.issues_assigned) || 0;
-        totalCompleted += Number(p.issues_completed) || 0;
-        totalPrs += Number(p.prs_merged) || 0;
         totalScore += Number(p.score) || 0;
         maxWeek = Math.max(maxWeek, p.week || 1);
       });
@@ -409,27 +360,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('stat-completed').textContent = totalCompleted;
     document.getElementById('stat-assigned').textContent = totalAssigned;
-    document.getElementById('stat-prs').textContent = totalPrs;
+    document.getElementById('stat-prs').textContent = approvedCount;
     document.getElementById('stat-week').textContent = maxWeek;
     document.getElementById('stat-score').textContent = totalScore;
 
     // Progress ring + bar
-    // Always divide by 12 (3 tasks × 4 weeks = full internship).
-    // This prevents showing 100% when only Week 1 (3 tasks) is done.
-    const cappedCompleted = Math.min(totalCompleted, 12);
-    const pct = Math.min(100, Math.round((cappedCompleted / 12) * 100));
+    // Prefer the backend-computed completion percentage (based on admin-approved submissions).
+    const pct = (data.summary && typeof data.summary.completion_pct === 'number')
+      ? Math.min(100, Math.max(0, Math.round(data.summary.completion_pct)))
+      : Math.min(100, Math.round((totalCompleted / (totalAssigned || 4)) * 100));
     document.getElementById('progress-pct').textContent = `${pct}%`;
 
     // Update description based on progress
     const descEl = document.getElementById('progress-desc');
     if (pct === 0) {
-      descEl.textContent = "You're just getting started. Submit your first PR to see your progress update in real-time.";
+      descEl.textContent = "You're just getting started. Submit your first LinkedIn post for a task to see your progress update once it's approved.";
     } else if (pct < 50) {
-      descEl.textContent = `Great start! You've completed ${totalCompleted} out of ${totalAssigned} issues. Keep the momentum going!`;
+      descEl.textContent = `Great start! You've completed ${totalCompleted} out of ${totalAssigned} tasks. Keep the momentum going!`;
     } else if (pct < 100) {
-      descEl.textContent = `Impressive progress! ${totalCompleted} of ${totalAssigned} issues done. You're on track for a strong finish.`;
+      descEl.textContent = `Impressive progress! ${totalCompleted} of ${totalAssigned} tasks done. You're on track for a strong finish.`;
     } else {
-      descEl.textContent = `Outstanding! You've completed all ${totalAssigned} assigned issues. You're a star intern!`;
+      descEl.textContent = `Outstanding! You've completed all ${totalAssigned} assigned tasks. You're a star intern!`;
       // Show 100% completion celebration popup every time
       setTimeout(() => showCompletionPopup(student, data), 800);
     }
@@ -515,18 +466,31 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }, 600);
 
-    // Submissions
+    // Submissions (LinkedIn task review history)
+    renderSubmissionsList(submissions || []);
+
+    // Render Assigned Tasks + per-week LinkedIn submission UI
+    loadAndRenderTasks(data);
+
+    // Removed pdfBtn onclick to rely on standard HTML anchor tag for popup blocker bypass
+
+  }
+
+  function renderSubmissionsList(submissions) {
     const subList = document.getElementById('sub-list');
     const subEmpty = document.getElementById('sub-empty');
     const subCount = document.getElementById('sub-count');
+    if (!subList) return;
     subList.innerHTML = '';
 
     if (submissions && submissions.length > 0) {
-      subEmpty.style.display = 'none';
-      subCount.textContent = `${submissions.length} PR${submissions.length !== 1 ? 's' : ''}`;
+      if (subEmpty) subEmpty.style.display = 'none';
+      if (subCount) subCount.textContent = `${submissions.length} Submitted`;
 
-      submissions.forEach((sub, i) => {
-        const status = (sub.status || 'open').toLowerCase();
+      const sortedSubs = [...submissions].sort((a, b) => (a.week || 0) - (b.week || 0));
+      sortedSubs.forEach((sub, i) => {
+        const status = (sub.status || 'pending').toLowerCase();
+        const dotClass = status === 'approved' ? 'merged' : (status === 'rejected' ? 'failed' : 'open');
         const dateStr = sub.submitted_at
           ? new Date(sub.submitted_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
           : '';
@@ -535,16 +499,16 @@ document.addEventListener('DOMContentLoaded', () => {
         card.className = 'sub-card';
         card.style.transitionDelay = `${i * 0.08}s`;
         card.innerHTML = `
-          <div class="sub-dot ${status}"></div>
+          <div class="sub-dot ${dotClass}"></div>
           <div class="sub-info">
-            <div class="sub-title">${sub.issue_title || `Pull Request #${sub.pr_number || '?'}`}</div>
+            <div class="sub-title">Week ${sub.week || '?'} LinkedIn Submission</div>
             <div class="sub-meta">
-              <span>Week ${sub.week_number || '?'}</span>
               <span>${dateStr}</span>
+              ${sub.admin_note ? `<span title="Admin note">📝 ${sub.admin_note}</span>` : ''}
             </div>
           </div>
-          <span class="sub-status ${status}">${status}</span>
-          ${sub.pr_url ? `<a href="${sub.pr_url}" target="_blank" class="sub-link" title="View PR">
+          <span class="sub-status ${dotClass}">${status}</span>
+          ${sub.linkedin_url ? `<a href="${sub.linkedin_url}" target="_blank" class="sub-link" title="View LinkedIn Post">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>` : ''}
         `;
@@ -552,47 +516,102 @@ document.addEventListener('DOMContentLoaded', () => {
         subObserver.observe(card);
       });
     } else {
-      subEmpty.style.display = 'block';
-      subCount.textContent = '0 PRs';
+      if (subEmpty) subEmpty.style.display = 'block';
+      if (subCount) subCount.textContent = '0 Submitted';
     }
-
-    // Render Assigned Tasks
-    renderTasks(data.issues || []);
-
-    // Removed pdfBtn onclick to rely on standard HTML anchor tag for popup blocker bypass
-
   }
 
-  function renderTasks(issues) {
+  // Fetch the current 4-week task set (with ready-made LinkedIn captions) and render it
+  // alongside the student's submission status for each week.
+  async function loadAndRenderTasks(data) {
+    const student = data.student;
+    const batchId = data._batch_id;
+    const submissions = data.submissions || [];
+
+    if (!student || !student.id || !batchId) {
+      renderTasks([], {}, submissions, null);
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API}/api/tasks/current/${student.id}/${batchId}`);
+      if (!res.ok) {
+        renderTasks([], {}, submissions, { studentId: student.id, batchId });
+        return;
+      }
+      const taskData = await res.json();
+      renderTasks(taskData.tasks || [], taskData.linkedin_templates || {}, submissions, { studentId: student.id, batchId });
+    } catch (e) {
+      renderTasks([], {}, submissions, { studentId: student.id, batchId });
+    }
+  }
+
+  function renderTasks(tasks, templates, submissions, ctx) {
     const tasksList = document.getElementById('tasks-list');
     const tasksEmpty = document.getElementById('tasks-empty');
     const tasksCount = document.getElementById('tasks-count');
     if (!tasksList) return;
 
     tasksList.innerHTML = '';
-    if (issues && issues.length > 0) {
+    if (tasks && tasks.length > 0) {
       if (tasksEmpty) tasksEmpty.style.display = 'none';
-      if (tasksCount) tasksCount.textContent = `${issues.length} Task${issues.length !== 1 ? 's' : ''}`;
+      if (tasksCount) tasksCount.textContent = `${tasks.length} Task${tasks.length !== 1 ? 's' : ''}`;
 
-      issues.forEach((task, i) => {
-        const status = (task.status || 'open').toLowerCase();
+      const sortedTasks = [...tasks].sort((a, b) => (a.week_number || 0) - (b.week_number || 0));
+
+      sortedTasks.forEach((task, i) => {
+        const week = task.week_number || (i + 1);
         const diffColor = task.difficulty === 'easy' ? '#34d399' : (task.difficulty === 'medium' ? '#fbbf24' : '#f87171');
+        const sub = (submissions || []).find(s => Number(s.week) === Number(week));
+        const subStatus = sub ? (sub.status || 'pending').toLowerCase() : 'not_submitted';
+        const caption = (templates && templates[String(week)]) || '';
+
+        let badgeClass = 'open', badgeText = 'Not submitted yet';
+        if (subStatus === 'pending') { badgeClass = 'open'; badgeText = 'Pending review'; }
+        else if (subStatus === 'approved') { badgeClass = 'merged'; badgeText = 'Approved ✓'; }
+        else if (subStatus === 'rejected') { badgeClass = 'failed'; badgeText = 'Rejected — you can resubmit'; }
+
+        const isApproved = subStatus === 'approved';
+        const inputId = `sub-url-input-w${week}`;
+        const btnId = `sub-submit-btn-w${week}`;
+        const btnLabel = isApproved ? 'Approved' : (subStatus === 'rejected' ? 'Resubmit' : (subStatus === 'pending' ? 'Update Submission' : 'Submit for Review'));
+
         const card = document.createElement('div');
         card.className = 'sub-card task-card';
+        card.style.flexDirection = 'column';
+        card.style.alignItems = 'stretch';
         card.style.transitionDelay = `${i * 0.08}s`;
         card.innerHTML = `
-          <div class="sub-dot ${status === 'completed' ? 'merged' : 'open'}"></div>
-          <div class="sub-info">
-            <div class="sub-title">${task.title || `Task #${task.github_issue_number || task.id}`}</div>
-            <div class="sub-meta">
-              <span>Week ${task.week_number || 1}</span>
-              <span style="color:${diffColor};font-weight:600;">${(task.difficulty || 'medium').toUpperCase()}</span>
+          <div style="display:flex;align-items:center;gap:16px;width:100%;">
+            <div class="sub-dot ${badgeClass}"></div>
+            <div class="sub-info">
+              <div class="sub-title">${task.title || `Week ${week} Task`}</div>
+              <div class="sub-meta">
+                <span>Week ${week}</span>
+                <span style="color:${diffColor};font-weight:600;">${(task.difficulty || 'medium').toUpperCase()}</span>
+              </div>
             </div>
+            <span class="sub-status ${badgeClass}">${badgeText}</span>
           </div>
-          <span class="sub-status ${status === 'completed' ? 'merged' : 'open'}">${status}</span>
-          ${task.github_url ? `<a href="${task.github_url}" target="_blank" class="sub-link" title="Open GitHub Issue">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          </a>` : ''}
+          ${task.description ? `<p style="margin:14px 0 0 0;font-size:0.85rem;color:var(--text-secondary);line-height:1.5;">${task.description}</p>` : ''}
+          ${sub && sub.admin_note && subStatus === 'rejected' ? `<div style="margin-top:10px;font-size:0.8rem;color:#f87171;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:8px 12px;">Admin note: ${sub.admin_note}</div>` : ''}
+          ${caption ? `
+          <div style="margin-top:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <span style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Suggested LinkedIn Caption</span>
+              <button class="guide-code-copy" style="position:static;" onclick="copyCode(this, ${JSON.stringify(caption)})">Copy Caption</button>
+            </div>
+            <pre style="white-space:pre-wrap;font-family:inherit;font-size:0.8rem;color:var(--text-secondary);background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:10px 14px;max-height:140px;overflow-y:auto;">${caption}</pre>
+          </div>` : ''}
+          <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+            <div class="login-input-wrap" style="flex:1;min-width:220px;margin-bottom:0;">
+              <input type="url" id="${inputId}" placeholder="Paste your LinkedIn post URL" value="${sub && sub.linkedin_url ? sub.linkedin_url : ''}" ${isApproved ? 'disabled' : ''}>
+            </div>
+            <button id="${btnId}" class="cert-btn cert-btn-primary" style="flex-shrink:0;" ${isApproved ? 'disabled' : ''}
+              onclick="window.submitTaskForReview(${ctx ? ctx.studentId : 'null'}, ${ctx ? ctx.batchId : 'null'}, ${week}, this)">
+              ${btnLabel}
+            </button>
+          </div>
         `;
         tasksList.appendChild(card);
         // Add visible class immediately for the initial fade-in to prevent invisible cards
@@ -603,6 +622,68 @@ document.addEventListener('DOMContentLoaded', () => {
       if (tasksCount) tasksCount.textContent = '0 Tasks';
     }
   }
+
+  // --- Submit a week's LinkedIn post URL for admin review ---
+  window.submitTaskForReview = async function(studentId, batchId, week, btn) {
+    if (!studentId || !batchId) {
+      alert('Missing student/batch info. Please refresh the page and try again.');
+      return;
+    }
+    const input = document.getElementById(`sub-url-input-w${week}`);
+    const url = input ? input.value.trim() : '';
+    if (!url) {
+      alert('Please paste your LinkedIn post URL first.');
+      return;
+    }
+    if (!/^https:\/\/(www\.)?linkedin\.com\//i.test(url)) {
+      alert('Please enter a valid linkedin.com post URL.');
+      return;
+    }
+
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+
+    try {
+      const res = await fetch(`${API}/api/students/submit-task`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ student_id: studentId, batch_id: batchId, week, linkedin_url: url })
+      });
+      const resData = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        alert(resData.detail || 'Could not submit for review. Please try again.');
+        btn.disabled = false;
+        btn.textContent = originalText;
+        return;
+      }
+
+      // Update local cache and re-render both the task card and the submissions history
+      if (window._dashData) {
+        window._dashData.submissions = window._dashData.submissions || [];
+        const existingIdx = window._dashData.submissions.findIndex(s => Number(s.week) === Number(week));
+        const newSub = {
+          id: resData.submission_id,
+          week,
+          linkedin_url: url,
+          status: resData.status || 'pending',
+          admin_note: null,
+          submitted_at: new Date().toISOString(),
+          reviewed_at: null
+        };
+        if (existingIdx >= 0) window._dashData.submissions[existingIdx] = newSub;
+        else window._dashData.submissions.push(newSub);
+
+        renderSubmissionsList(window._dashData.submissions);
+        loadAndRenderTasks(window._dashData);
+      }
+    } catch (e) {
+      alert('Network error while submitting. Please try again.');
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  };
 
   function signOut() {
     localStorage.removeItem('token');
@@ -632,18 +713,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-
-  // --- Guide: Tab Switching ---
-  window.switchGuideTab = function(tab) {
-    // Toggle tab buttons
-    document.querySelectorAll('.guide-tab').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.tab === tab);
-    });
-    // Toggle panels
-    document.querySelectorAll('.guide-panel').forEach(panel => {
-      panel.classList.toggle('active', panel.id === `panel-${tab}`);
-    });
-  };
 
   // --- Guide: Copy to Clipboard ---
   window.copyCode = function(btn, text) {
@@ -691,34 +760,6 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.classList.remove('expanded');
       text.textContent = 'Show Guide';
     }
-  };
-
-  // --- Live PR Helper Interactive Generator ---
-  window.generatePRTemplate = function() {
-    const issueInput = document.getElementById('pr-helper-issue');
-    const descInput = document.getElementById('pr-helper-summary');
-    const issueNum = (issueInput && issueInput.value.trim() !== '') ? issueInput.value.trim().replace(/^#/, '') : '[ISSUE_NUMBER]';
-    const descText = (descInput && descInput.value.trim() !== '') ? descInput.value.trim() : '[Briefly describe what you built]';
-
-    const resultEl = document.getElementById('pr-helper-result');
-    if (!resultEl) return;
-
-    if (issueNum === '[ISSUE_NUMBER]' && descText === '[Briefly describe what you built]') {
-      resultEl.textContent = 'Fill in the fields above to generate your PR text...';
-      resultEl.style.color = 'var(--text-muted)';
-      return;
-    }
-
-    resultEl.style.color = 'var(--text-primary)';
-    resultEl.textContent = `fix: resolve issue #${issueNum} - ${descText}\n\n### Description\n${descText}\n\nCloses #${issueNum}`;
-  };
-
-  window.copyPRHelperOutput = function() {
-    const el = document.getElementById('pr-helper-result');
-    if (!el || el.textContent === 'Fill in the fields above to generate your PR text...') return;
-    const btn = document.getElementById('pr-copy-btn');
-    const text = el.textContent.trim();
-    window.copyCode(btn, text);
   };
 
   // --- Intersection Observer for Submission Cards ---
@@ -1211,7 +1252,7 @@ function showCompletionPopup(student, data) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// 🚀 Dynamic Milestone Share Engine & GitHub Issue Resolution
+// 🚀 Dynamic Milestone Share Engine (LinkedIn Submission Based)
 // ═══════════════════════════════════════════════════════════════
 
 let currentShareTab = 'linkedin';
@@ -1221,54 +1262,35 @@ let milestoneShareData = {
   referralLink: '',
   portfolioUrl: '',
   offerUrl: '',
-  githubUrl: ''
+  linkedinUrl: ''
 };
 
 /**
- * Strict validator for GitHub issue URLs.
- * Ensures the URL is an authentic, full GitHub issue URL (e.g. https://github.com/org/repo/issues/123).
- * Never accepts placeholders, hashes, or non-issue paths.
- */
-function isValidGithubIssueUrl(url) {
-  if (!url || typeof url !== 'string') return false;
-  const trimmed = url.trim();
-  if (trimmed === '#' || trimmed === '' || trimmed === 'null' || trimmed === 'undefined') return false;
-  const githubIssueRegex = /^https:\/\/github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/issues\/\d+$/;
-  return githubIssueRegex.test(trimmed);
-}
-
-/**
  * Resolves the milestone and task context dynamically from live dashboard data.
+ * Data now comes from admin-approved LinkedIn submissions rather than merged
+ * GitHub Pull Requests / closed issues.
  */
 function resolveMilestoneContext(data) {
-  const student = (data && data.student) || window._dashStudent || { name: 'Intern', github: 'developer' };
-  const rawIssues = (data && data.issues) || [];
+  const student = (data && data.student) || window._dashStudent || { name: 'Intern' };
   const rawSubmissions = (data && data.submissions) || [];
   const rawProgress = (data && data.progress) || [];
+  const summary = (data && data.summary) || {};
 
-  // Sum up totals across all weeks
-  let totalAssigned = 0;
-  let totalCompleted = 0;
-  let totalPrs = 0;
+  const totalAssigned = Number(summary.total_tasks) || 4;
+  let totalCompleted = Number(summary.completed_tasks) || 0;
   let totalScore = 0;
   let maxWeek = 1;
 
   rawProgress.forEach(p => {
-    totalAssigned += Number(p.issues_assigned) || 0;
-    totalCompleted += Number(p.issues_completed) || 0;
-    totalPrs += Number(p.prs_merged) || 0;
     totalScore += Number(p.score) || 0;
     maxWeek = Math.max(maxWeek, Number(p.week) || 1);
   });
 
-  // If progress has not been recorded in progress rows, check submissions
-  const mergedSubmissions = rawSubmissions.filter(s => (s.status || '').toLowerCase() === 'merged');
-  if (totalPrs === 0 && mergedSubmissions.length > 0) {
-    totalPrs = mergedSubmissions.length;
+  const approvedSubmissions = rawSubmissions.filter(s => (s.status || '').toLowerCase() === 'approved');
+  if (totalCompleted === 0 && approvedSubmissions.length > 0) {
+    totalCompleted = approvedSubmissions.length;
   }
-  if (totalCompleted === 0 && mergedSubmissions.length > 0) {
-    totalCompleted = mergedSubmissions.length;
-  }
+  const totalApproved = approvedSubmissions.length;
 
   const domain = (student.domain || (rawProgress[0] && rawProgress[0].domain) || 'Web Development')
     .replace(/-/g, ' ')
@@ -1278,75 +1300,32 @@ function resolveMilestoneContext(data) {
   const PROD_BASE = 'https://www.skill-me-intern.in';
   const studentRefCode = `SKM-${student.id ? String(student.id).padStart(4, '0') : '2026'}`;
   const referralLink = `${PROD_BASE}/apply.html?ref=${studentRefCode}`;
+  // Portfolio pages are still keyed off an optional GitHub username; the new LinkedIn-based
+  // submission flow doesn't collect one, so this degrades gracefully to the generic page.
   const ghUser = (student.github || '').trim().replace(/^@/, '');
   const portfolioUrl = ghUser ? `${PROD_BASE}/portfolio.html?gh=${encodeURIComponent(ghUser)}` : `${PROD_BASE}/portfolio.html`;
   const offerUrl = `${PROD_BASE}/offer.html?name=${encodeURIComponent(student.name || '')}&domain=${encodeURIComponent(domain)}&student_id=${student.id || ''}&college=${encodeURIComponent(student.college || '')}`;
   const certUrl = `${PROD_BASE}/certificate.html?student_id=${student.id || ''}&domain=${encodeURIComponent(domain)}`;
 
-  // Group all assigned issues by week_number to determine task indices (Task 1, Task 2, Task 3)
-  const issuesByWeek = {};
-  rawIssues.forEach(iss => {
-    const w = Number(iss.week_number) || 1;
-    if (!issuesByWeek[w]) issuesByWeek[w] = [];
-    issuesByWeek[w].push(iss);
-  });
+  // Identify the latest approved LinkedIn submission (the "latest milestone")
+  const sortedApproved = [...approvedSubmissions].sort((a, b) => (Number(b.week) || 0) - (Number(a.week) || 0));
+  const latestSubmission = sortedApproved[0] || null;
 
-  // Sort each week's issues deterministically by id or github_issue_number
-  Object.keys(issuesByWeek).forEach(w => {
-    issuesByWeek[w].sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));
-  });
-
-  // Helper to find task index for an issue within its week
-  function getTaskIndex(issue) {
-    const w = Number(issue.week_number) || 1;
-    const weekList = issuesByWeek[w] || [];
-    const idx = weekList.findIndex(item => (item.id && issue.id && item.id === issue.id) || (item.github_issue_number && item.github_issue_number === issue.github_issue_number));
-    return idx >= 0 ? idx + 1 : (Number(issue.task_index) || 1);
-  }
-
-  // Find completed issues
-  const completedIssues = rawIssues.filter(iss => (iss.status || '').toLowerCase() === 'completed');
-
-  // Identify the latest completed task:
-  let latestTask = null;
-  if (completedIssues.length > 0) {
-    // Sort completed issues by week (descending) then id (descending)
-    completedIssues.sort((a, b) => {
-      const weekDiff = (Number(b.week_number) || 1) - (Number(a.week_number) || 1);
-      if (weekDiff !== 0) return weekDiff;
-      return (Number(b.id) || 0) - (Number(a.id) || 0);
-    });
-    latestTask = completedIssues[0];
-  } else if (mergedSubmissions.length > 0) {
-    // Fallback to latest merged submission
-    const latestSub = mergedSubmissions[0];
-    latestTask = {
-      id: latestSub.issue_id || 0,
-      title: latestSub.issue_title || 'Completed Engineering Task',
-      week_number: Number(latestSub.week_number) || 1,
-      github_url: latestSub.issue_github_url || null,
-      difficulty: latestSub.difficulty || 'medium',
-      status: 'completed'
-    };
-  }
-
-  // Determine state
-  const hasCompletedTasks = (latestTask !== null) || (totalPrs > 0) || (totalCompleted > 0);
-  const isAllComplete = (totalCompleted >= 12);
+  const hasCompletedTasks = (latestSubmission !== null) || (totalApproved > 0) || (totalCompleted > 0);
+  const isAllComplete = (typeof summary.completion_pct === 'number' && summary.completion_pct >= 100)
+    || (totalAssigned > 0 && totalCompleted >= totalAssigned);
 
   let weekNum = 1;
-  let taskNum = 1;
   let taskTitle = 'Engineering Task';
-  let validatedGithubUrl = null;
+  let validatedLinkedinUrl = null;
   let latestTaskId = 0;
 
-  if (latestTask) {
-    weekNum = Number(latestTask.week_number) || 1;
-    taskNum = getTaskIndex(latestTask);
-    taskTitle = (latestTask.title || 'Engineering Task').replace(/^\[.*?\]\s*/, '').trim();
-    latestTaskId = latestTask.id || latestTask.github_issue_number || 1;
-    if (isValidGithubIssueUrl(latestTask.github_url)) {
-      validatedGithubUrl = latestTask.github_url;
+  if (latestSubmission) {
+    weekNum = Number(latestSubmission.week) || 1;
+    taskTitle = `Week ${weekNum} Task`;
+    latestTaskId = latestSubmission.id || weekNum;
+    if (latestSubmission.linkedin_url && /^https:\/\/(www\.)?linkedin\.com\//i.test(latestSubmission.linkedin_url)) {
+      validatedLinkedinUrl = latestSubmission.linkedin_url;
     }
   }
 
@@ -1356,17 +1335,16 @@ function resolveMilestoneContext(data) {
     domainHashtag,
     totalAssigned,
     totalCompleted,
-    totalPrs,
+    totalPrs: totalApproved,
     totalScore,
     maxWeek,
     hasCompletedTasks,
     isAllComplete,
-    latestTask,
     latestTaskId,
     weekNum,
-    taskNum,
+    taskNum: weekNum,
     taskTitle,
-    validatedGithubUrl,
+    validatedLinkedinUrl,
     referralLink,
     portfolioUrl,
     offerUrl,
@@ -1390,22 +1368,22 @@ window.openMilestoneShareModal = function(customData) {
     titleText = `100% Milestone Completed!`;
     subText = `You've completed all tasks across the 4-week sprint. Share your achievement:`;
 
-    const githubBlock = ctx.validatedGithubUrl 
-      ? `🔗 Final Verified Task & Issue:\n👉 ${ctx.validatedGithubUrl}\n\n` 
+    const linkedinBlock = ctx.validatedLinkedinUrl
+      ? `🔗 Final Verified Milestone Post:\n👉 ${ctx.validatedLinkedinUrl}\n\n`
       : '';
 
     linkedInPost = `I'm thrilled to announce that I have successfully completed the 4-week ${ctx.domain} Virtual Internship at SkillMe (@SkillMe)! 🎓🚀
 
-Over the past month, I solved real production-grade GitHub issues, merged ${ctx.totalPrs} Pull Requests, and built verifiable Proof of Work. It was an incredible hands-on engineering journey!
+Over the past month, I solved real production-grade engineering tasks, got ${ctx.totalPrs} weekly submissions approved, and built verifiable Proof of Work. It was an incredible hands-on engineering journey!
 
 📊 Verified Sprint Summary:
 • Track: ${ctx.domain} Engineering Sprint
 • Progress: 100% Curriculum Completed (All 4 Weeks)
-• Total Pull Requests Merged: ${ctx.totalPrs}
+• Total Task Submissions Approved: ${ctx.totalPrs}
 • Engineering XP Score: ${ctx.totalScore} pts
-• Final Milestone Task: Week ${ctx.weekNum}, Task ${ctx.taskNum} — ${ctx.taskTitle}
+• Final Milestone Task: Week ${ctx.weekNum} — ${ctx.taskTitle}
 
-${githubBlock}🌐 View my live Proof of Work portfolio & codebase:
+${linkedinBlock}🌐 View my live Proof of Work portfolio & codebase:
 👉 ${ctx.portfolioUrl}
 
 📄 View my verified digital Certificate & LOR:
@@ -1413,9 +1391,9 @@ ${githubBlock}🌐 View my live Proof of Work portfolio & codebase:
 
 Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
 
-#SkillMe #ProofOfWork #${ctx.domainHashtag} #SoftwareEngineering #TechInternship #OpenSource #GitHub`;
+#SkillMe #ProofOfWork #${ctx.domainHashtag} #SoftwareEngineering #TechInternship`;
 
-    whatsAppInvite = `🏆 I just completed the SkillMe ${ctx.domain} internship with 100% tasks solved and ${ctx.totalPrs} PRs merged!
+    whatsAppInvite = `🏆 I just completed the SkillMe ${ctx.domain} internship with 100% tasks solved and ${ctx.totalPrs} submissions approved!
 
 Check out my verified Proof of Work portfolio:
 👉 ${ctx.portfolioUrl}
@@ -1431,11 +1409,11 @@ Join me on SkillMe and earn verified credentials for your resume:
 
     linkedInPost = `I'm thrilled to share that I have been selected for the ${ctx.domain} Virtual Internship at SkillMe (@SkillMe)! 🚀
 
-Over the next 4 weeks, I will be contributing to production-grade repositories, solving real-world GitHub issues, and building verifiable Proof of Work.
+Over the next 4 weeks, I will be completing real engineering tasks, sharing my progress on LinkedIn, and building verifiable Proof of Work.
 
 🎯 Program Highlights:
 • Track: ${ctx.domain} Engineering Sprint
-• Hands-on Git, Branching & Pull Request workflows
+• Hands-on weekly engineering tasks with admin-reviewed submissions
 • MSME Recognized & Cryptographically Verifiable Credentials
 • Lifetime Public Proof-of-Work Portfolio
 
@@ -1444,51 +1422,51 @@ Over the next 4 weeks, I will be contributing to production-grade repositories, 
 
 Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
 
-#SkillMe #ProofOfWork #${ctx.domainHashtag} #SoftwareEngineering #TechInternship #OpenSource #GitHub`;
+#SkillMe #ProofOfWork #${ctx.domainHashtag} #SoftwareEngineering #TechInternship`;
 
     whatsAppInvite = `🚀 Hey! I've been selected for the SkillMe ${ctx.domain} Virtual Internship!
 
 Check out my verified digital Offer Letter:
 👉 ${ctx.offerUrl}
 
-Join me to solve real GitHub issues and build verified Proof of Work for your resume:
+Join me to solve real engineering tasks and build verified Proof of Work for your resume:
 👉 Join my SkillMe Squad: ${ctx.referralLink}`;
 
   } else {
-    // ─── Case 3: After Every Successful PR Merge / Task Completion ───
+    // ─── Case 3: After Every Approved LinkedIn Submission / Task Completion ───
     badgeText = `🎉 SPRINT MILESTONE UNLOCKED`;
-    titleText = `Week ${ctx.weekNum}, Task ${ctx.taskNum} Completed!`;
-    subText = `You've successfully merged your Pull Request and resolved "${ctx.taskTitle}". Share your verifiable achievement:`;
+    titleText = `Week ${ctx.weekNum} Task Completed!`;
+    subText = `Your LinkedIn submission for "${ctx.taskTitle}" was approved. Share your verifiable achievement:`;
 
-    const githubBlock = ctx.validatedGithubUrl 
-      ? `🔗 Verified Task & Issue on GitHub:\n👉 ${ctx.validatedGithubUrl}\n\n` 
+    const linkedinBlock = ctx.validatedLinkedinUrl
+      ? `🔗 Verified LinkedIn Milestone Post:\n👉 ${ctx.validatedLinkedinUrl}\n\n`
       : '';
 
-    linkedInPost = `Week ${ctx.weekNum}, Task ${ctx.taskNum} completed at SkillMe (@SkillMe)! 🚀
+    linkedInPost = `Week ${ctx.weekNum} task completed at SkillMe (@SkillMe)! 🚀
 
-I just merged my latest Pull Request and successfully resolved "${ctx.taskTitle}" for the ${ctx.domain} Virtual Internship.
+My submission for "${ctx.taskTitle}" was just approved for the ${ctx.domain} Virtual Internship.
 
-SkillMe is India's premier open-source engineering platform where interns solve real-world GitHub issues and build tamper-proof Proof of Work.
+SkillMe is India's premier engineering platform where interns complete real-world tasks and build tamper-proof Proof of Work.
 
 📊 Milestone Highlights:
-• Milestone: Week ${ctx.weekNum}, Task ${ctx.taskNum} — ${ctx.taskTitle}
-• Status: Pull Request Merged & Verified ✅
-• Total PRs Merged: ${ctx.totalPrs}
+• Milestone: Week ${ctx.weekNum} — ${ctx.taskTitle}
+• Status: Submission Approved & Verified ✅
+• Total Submissions Approved: ${ctx.totalPrs}
 • Current Engineering Score: ${ctx.totalScore} pts
 
-${githubBlock}🌐 View my live Proof of Work portfolio:
+${linkedinBlock}🌐 View my live Proof of Work portfolio:
 👉 ${ctx.portfolioUrl}
 
 Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
 
-#SkillMe #ProofOfWork #${ctx.domainHashtag} #SoftwareEngineering #TechInternship #OpenSource #GitHub`;
+#SkillMe #ProofOfWork #${ctx.domainHashtag} #SoftwareEngineering #TechInternship`;
 
-    whatsAppInvite = `🚀 Milestone update! I just completed Week ${ctx.weekNum}, Task ${ctx.taskNum} ("${ctx.taskTitle}") at SkillMe with a merged Pull Request!
+    whatsAppInvite = `🚀 Milestone update! My Week ${ctx.weekNum} submission ("${ctx.taskTitle}") at SkillMe was just approved!
 
-${ctx.validatedGithubUrl ? `Check out my verified GitHub task:\n👉 ${ctx.validatedGithubUrl}\n\n` : ''}View my live Proof of Work portfolio:
+${ctx.validatedLinkedinUrl ? `Check out my verified milestone post:\n👉 ${ctx.validatedLinkedinUrl}\n\n` : ''}View my live Proof of Work portfolio:
 👉 ${ctx.portfolioUrl}
 
-Join me on SkillMe to solve real GitHub issues and level up your resume:
+Join me on SkillMe to complete real engineering tasks and level up your resume:
 👉 Join my SkillMe Sprint Squad: ${ctx.referralLink}`;
   }
 
@@ -1498,7 +1476,7 @@ Join me on SkillMe to solve real GitHub issues and level up your resume:
     referralLink: ctx.referralLink,
     portfolioUrl: ctx.portfolioUrl,
     offerUrl: ctx.offerUrl,
-    githubUrl: ctx.validatedGithubUrl || ''
+    linkedinUrl: ctx.validatedLinkedinUrl || ''
   };
 
   // Populate DOM elements
@@ -1789,46 +1767,3 @@ function triggerMilestoneConfetti() {
       }
     };
 
-async function verifyGithubInvite(btn) {
-  const email = localStorage.getItem("skillme_email");
-  if (!email) return;
-  
-  const originalText = btn.innerText;
-  btn.innerText = "Verifying...";
-  btn.disabled = true;
-  btn.style.opacity = "0.7";
-  
-  try {
-    const res = await fetch(`${API}/api/students/verify-github-invite`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ email: email })
-    });
-    
-    if (res.ok) {
-      const data = await res.json();
-      if (data.status === "accepted" || data.status === "already_accepted") {
-        document.getElementById("dash-pending-invite-alert").style.display = "none";
-        // Show success toast
-        const toast = document.createElement("div");
-        toast.textContent = "GitHub invite verified successfully!";
-        toast.style.cssText = "position:fixed;bottom:20px;right:20px;background:#10b981;color:white;padding:12px 24px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:9999;font-family:Inter,sans-serif;";
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-      } else {
-        alert("We checked GitHub, but you haven't accepted the invite yet! Please check your email or GitHub notifications.");
-      }
-    } else {
-      const err = await res.json().catch(()=>({}));
-      alert("Error verifying invite: " + (err.detail || "Please try again later."));
-    }
-  } catch (error) {
-    alert("Network error. Please try again.");
-  } finally {
-    btn.innerText = originalText;
-    btn.disabled = false;
-    btn.style.opacity = "1";
-  }
-}

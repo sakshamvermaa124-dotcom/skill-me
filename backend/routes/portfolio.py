@@ -31,9 +31,8 @@ async def get_portfolio(github_username: str):
 
     # 3. Aggregate progress stats across all batches
     stats = await db.fetch_one(
-        """SELECT 
+        """SELECT
              COALESCE(SUM(issues_completed), 0) as total_tasks_completed,
-             COALESCE(SUM(prs_merged), 0) as total_prs_merged,
              COALESCE(SUM(score), 0) as total_score
            FROM progress WHERE student_id = ?""",
         (student_id,)
@@ -41,21 +40,20 @@ async def get_portfolio(github_username: str):
 
     # 4. Fetch the batches/domains they successfully completed/enrolled in
     batches = await db.fetch_all(
-        """SELECT b.domain, b.batch_number, e.status 
-           FROM enrollments e 
-           JOIN batches b ON e.batch_id = b.id 
+        """SELECT b.domain, b.batch_number, e.status
+           FROM enrollments e
+           JOIN batches b ON e.batch_id = b.id
            WHERE e.student_id = ? AND e.status IN ('enrolled', 'active', 'completed')""",
         (student_id,)
     )
 
-    # 5. Fetch their recent merged submissions to act as "Proof of Work"
+    # 5. Fetch their approved LinkedIn submissions to act as "Proof of Work"
     submissions = await db.fetch_all(
-        """SELECT s.pr_url, s.pr_number, s.merged_at, s.submitted_at, i.title, b.domain 
+        """SELECT s.linkedin_url, s.week, s.reviewed_at, s.submitted_at, b.domain
            FROM submissions s
-           JOIN issues i ON s.issue_id = i.id
            JOIN batches b ON s.batch_id = b.id
-           WHERE s.student_id = ? AND s.status = 'merged'
-           ORDER BY COALESCE(s.merged_at, s.submitted_at) DESC
+           WHERE s.student_id = ? AND s.status = 'approved'
+           ORDER BY COALESCE(s.reviewed_at, s.submitted_at) DESC
            LIMIT 10""",
         (student_id,)
     )

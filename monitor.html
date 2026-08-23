@@ -452,7 +452,7 @@
           <span class="journey-stage" style="color:${stageColor};background:${stageColor}15">${data.current_stage}</span>
         </div>
         ${renderJourneySection('Enrollments', data.enrollments, ['batch_id', 'domain', 'batch_number', 'status', 'batch_status'])}
-        ${renderJourneySection('Progress', data.progress, ['week', 'issues_assigned', 'issues_completed', 'prs_merged', 'score'])}
+        ${renderJourneySection('Progress', data.progress, ['week', 'issues_completed', 'score'])}
         ${renderJourneySection('Payments', data.payments, ['status', 'amount', 'razorpay_order_id', 'created_at'])}
         ${renderJourneySection('Certificates', data.certificates, ['cert_id', 'issued_at'])}
         ${renderJourneySection('Emails', data.emails, ['email_type', 'subject', 'status', 'sent_at'])}

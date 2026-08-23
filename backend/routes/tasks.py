@@ -98,7 +98,7 @@ async def get_current_tasks(student_id: int, batch_id: int):
 
     return {
         "student": {"first_name": student["first_name"], "last_name": student["last_name"]},
-        "batch": {"domain": batch["domain"], "repo_name": batch["repo_name"]},
+        "batch": {"domain": batch["domain"]},
         "project": {
             "name": project_track["project_name"],
             "tagline": project_track["tagline"],

@@ -19,11 +19,9 @@ from slowapi.errors import RateLimitExceeded
 
 from config import settings
 from db.database import db
-from services.github_service import github_service
 from services.scheduler_service import scheduler_service
 from routes.admin import router as admin_router
 from routes.students import router as students_router
-from routes.webhooks import router as webhooks_router
 from routes.certificates import router as certificates_router
 from routes.payments import router as payments_router
 from routes.auth import router as auth_router
@@ -58,17 +56,6 @@ async def lifespan(app: FastAPI):
     logger.info("Starting SkillMe backend...")
     await db.connect()
     logger.info(f"Database connected: {settings.turso_db_url}")
-    logger.info(f"GitHub org: {settings.github_org}")
-
-    # Verify GitHub token on startup
-    if settings.skillme_github_token:
-        user = await github_service.verify_token()
-        if user:
-            logger.info(f"GitHub authenticated as: {user.get('login')}")
-        else:
-            logger.warning("GitHub token verification failed — check your SKILLME_GITHUB_TOKEN")
-    else:
-        logger.warning("No SKILLME_GITHUB_TOKEN configured — GitHub features will not work")
 
     # Start the task scheduler
     scheduler_service.start()
@@ -85,7 +72,6 @@ async def lifespan(app: FastAPI):
     # Shutdown
     logger.info("Shutting down SkillMe backend...")
     scheduler_service.shutdown()
-    await github_service.close()
     await db.disconnect()
     logger.info("Cleanup complete.")
 
@@ -96,7 +82,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="SkillMe API",
-    description="Backend API for SkillMe — India's open-source internship platform. Manages batches, students, GitHub automation, and progress tracking.",
+    description="Backend API for SkillMe — India's open-source internship platform. Manages batches, students, and progress tracking.",
     version="0.1.0",
     lifespan=lifespan,
     docs_url="/docs",
@@ -142,7 +128,6 @@ async def global_exception_handler(request, exc):
 # Mount routers
 app.include_router(admin_router)
 app.include_router(students_router)
-app.include_router(webhooks_router)
 app.include_router(certificates_router)
 app.include_router(payments_router)
 app.include_router(auth_router)
@@ -202,14 +187,6 @@ async def root_page():
 @app.get("/api/health", tags=["health"])
 async def health():
     """Detailed health check."""
-    github_ok = False
-    if settings.skillme_github_token:
-        try:
-            user = await github_service.verify_token()
-            github_ok = user is not None
-        except Exception:
-            github_ok = False
-
     db_ok = False
     try:
         await db.execute("SELECT 1")
@@ -221,8 +198,6 @@ async def health():
     return {
         "status": "healthy" if db_ok else "degraded",
         "database": "connected" if db_ok else "disconnected",
-        "github": "connected" if github_ok else "disconnected",
-        "org": settings.github_org,
     }
 
 
