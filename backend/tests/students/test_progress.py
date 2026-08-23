@@ -81,3 +81,35 @@ class TestStudentProgress:
     async def test_progress_by_invalid_id(self, client):
         r = await client.get("/api/students/progress/id/999999")
         assert r.status_code == 404
+
+    async def test_completing_all_4_weeks_reaches_100_percent(self, client, admin_headers, enrolled_student):
+        """
+        Regression test: a student can only ever get ONE approved submission per week
+        (submissions.UNIQUE(student_id, batch_id, week)), so completion_pct must be
+        calculated as (distinct weeks credited / 4), NOT as a sum of issues_completed
+        divided by a legacy per-domain issue count (8/12) — that old divisor assumed
+        multiple GitHub issues per week and made 100% unreachable under the new
+        one-submission-per-week model.
+        """
+        for week in [1, 2, 3, 4]:
+            sub = await client.post(
+                "/api/students/submit-task",
+                json={
+                    "student_id": enrolled_student["id"],
+                    "batch_id": enrolled_student["batch_id"],
+                    "week": week,
+                    "linkedin_url": "https://www.linkedin.com/posts/test-post",
+                },
+            )
+            submission_id = sub.json()["submission_id"]
+            r = await client.post(
+                f"/api/admin/submissions/{submission_id}/approve",
+                json={},
+                headers=admin_headers,
+            )
+            assert r.status_code == 200
+
+        r = await client.get(f"/api/students/progress/{enrolled_student['email']}")
+        summary = r.json()["summary"]
+        assert summary["completed_tasks"] == 4
+        assert summary["completion_pct"] == 100

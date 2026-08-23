@@ -191,10 +191,12 @@ async def get_progress(email: str):
         "submissions": [dict(s) for s in submissions],
         "summary": {
             "total_tasks": 4,
-            "completed_tasks": sum(int(p["issues_completed"]) for p in progress),
-            # Total tasks depends on domain (8 for Python, 12 for others)
+            # Count of distinct weeks with any credit (not a raw sum) — this stays correct
+            # both for legacy weeks that had multiple merged PRs and for the new one-
+            # submission-per-week model, where issues_completed can only ever be 0 or 1.
+            "completed_tasks": len({int(p["week"]) for p in progress if int(p["issues_completed"]) > 0}),
             "completion_pct": min(100, round(
-                sum(int(p["issues_completed"]) for p in progress) / (8 if primary_domain.lower() == 'python' else 12) * 100
+                len({int(p["week"]) for p in progress if int(p["issues_completed"]) > 0}) / 4 * 100
             )),
         },
     }
