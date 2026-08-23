@@ -599,9 +599,9 @@ document.addEventListener('DOMContentLoaded', () => {
           <div style="margin-top:14px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
               <span style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Suggested LinkedIn Caption</span>
-              <button class="guide-code-copy" style="position:static;" onclick="copyCode(this, ${JSON.stringify(caption)})">Copy Caption</button>
+              <button class="guide-code-copy" style="position:static;" data-caption="${caption.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}" onclick="copyCode(this, this.getAttribute('data-caption'))">Copy Caption</button>
             </div>
-            <pre style="white-space:pre-wrap;font-family:inherit;font-size:0.8rem;color:var(--text-secondary);background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:10px 14px;max-height:140px;overflow-y:auto;">${caption}</pre>
+            <pre data-lenis-prevent style="white-space:pre-wrap;font-family:inherit;font-size:0.8rem;color:var(--text-secondary);background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:10px 14px;max-height:140px;overflow-y:auto;">${caption}</pre>
           </div>` : ''}
           <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
             <div class="login-input-wrap" style="flex:1;min-width:220px;margin-bottom:0;">
