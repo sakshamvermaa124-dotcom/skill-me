@@ -2,7 +2,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const urlParams = new URLSearchParams(window.location.search);
   const pathParts = window.location.pathname.split('/').filter(Boolean);
   const pathUser = (pathParts.length >= 2 && pathParts[0] === 'p') ? pathParts[1] : (pathParts.length === 1 && pathParts[0] !== 'portfolio.html' && pathParts[0] !== 'p' ? pathParts[0] : null);
-  const rawUsername = urlParams.get('gh') || urlParams.get('github') || urlParams.get('u') || pathUser || localStorage.getItem('student_github') || '';
+  const studentId = urlParams.get('student_id') || localStorage.getItem('student_id');
+  const rawUsername = studentId || urlParams.get('gh') || urlParams.get('github') || urlParams.get('u') || pathUser || localStorage.getItem('student_github') || '';
   const username = rawUsername.trim().replace(/^@/, '');
   
   const container = document.getElementById('content-container');
@@ -39,7 +40,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     const baseUrl = window.SKILLME_API || window.location.origin;
-    const res = await fetch(`${baseUrl}/api/portfolio/${encodeURIComponent(username)}`);
+    const fetchUrl = studentId ? `${baseUrl}/api/portfolio/id/${encodeURIComponent(studentId)}` : `${baseUrl}/api/portfolio/${encodeURIComponent(username)}`;
+    const res = await fetch(fetchUrl);
     
     if (res.status === 403) {
       container.innerHTML = `
@@ -85,13 +87,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function renderPortfolio(data) {
-    const p = data.profile || {};
+    const p = data.student || data.profile || {};
     const s = data.stats || {};
     const domains = data.domains || ['web-dev'];
     const submissions = data.submissions || [];
 
     // Title Case Name
-    const rawName = p.name || 'Open Source Contributor';
+    const rawName = (p.first_name ? p.first_name + ' ' + (p.last_name || '') : p.name) || 'Engineering Intern';
     const name = rawName
       .replace(/([a-z])([A-Z])/g, '$1 $2')
       .replace(/[_-]/g, ' ')
@@ -119,17 +121,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Skills Mapping
     const skillMap = {
-      'web-dev': ['JavaScript', 'TypeScript', 'React.js', 'Node.js', 'REST APIs', 'Git', 'GitHub Actions', 'CI/CD'],
-      'python-dev': ['Python', 'FastAPI', 'PyTest', 'AsyncIO', 'Git', 'GitHub', 'CI/CD'],
-      'machine-learning': ['Python', 'PyTorch', 'Scikit-Learn', 'Data Pipelines', 'Git', 'GitHub'],
+      'web-dev': ['JavaScript', 'TypeScript', 'React.js', 'Node.js', 'REST APIs', 'Git', 'REST APIs', 'CI/CD'],
+      'python-dev': ['Python', 'FastAPI', 'PyTest', 'AsyncIO', 'Git', 'Automation', 'CI/CD'],
+      'machine-learning': ['Python', 'PyTorch', 'Scikit-Learn', 'Data Pipelines', 'Git', 'Version Control'],
       'data-science': ['Python', 'Pandas', 'NumPy', 'SQL', 'Data Modeling', 'Git'],
-      'android-dev': ['Kotlin', 'Android SDK', 'Jetpack Compose', 'Git', 'GitHub'],
+      'android-dev': ['Kotlin', 'Android SDK', 'Jetpack Compose', 'Git', 'Version Control'],
       'java-dev': ['Java', 'Spring Boot', 'SQL', 'Microservices', 'Git']
     };
 
     const studentSkills = new Set();
     domains.forEach(d => {
-      const list = skillMap[d] || ['Git', 'GitHub', 'Open Source', 'CI/CD'];
+      const list = skillMap[d] || ['Git', 'Version Control', 'Open Source', 'CI/CD'];
       list.forEach(skill => studentSkills.add(skill));
     });
     const skillsHtml = Array.from(studentSkills).map(skill => `<span class="skill-pill">${skill}</span>`).join('');
@@ -193,13 +195,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ${college ? `<span class="badge-college"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg> ${college}</span>` : ''}
               </div>
               <h1 class="hero-name">${name}</h1>
-              <div class="hero-role-line">
+                            <div class="hero-role-line">
                 <span>Engineering Intern at <strong>SkillMe</strong></span>
-                <span>&bull;</span>
-                <a href="https://github.com/${gh}" target="_blank" rel="noopener noreferrer">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
-                  @${gh} ↗
-                </a>
+                ${college ? `<span>&bull;</span> <span>${college}</span>` : ''}
               </div>
             </div>
           </div>
