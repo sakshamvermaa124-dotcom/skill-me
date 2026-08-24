@@ -1,578 +1,281 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Complete 4-Week Project Curriculum & Task Guide - SkillMe</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <title>Internship Tasks - SkillMe</title>
+    <!-- Use marked.js for markdown rendering -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+        
         :root {
-            --bg-base: #0a0d14;
-            --bg-card: #111726;
-            --bg-surface: #182238;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --accent-gold: #f0c97a;
-            --accent-blue: #38bdf8;
-            --accent-indigo: #818cf8;
-            --accent-green: #34d399;
-            --border: rgba(255, 255, 255, 0.08);
-            --border-gold: rgba(240, 201, 122, 0.3);
-            --code-bg: #070a10;
+            --bg: #ffffff;
+            --text-main: #111827;
+            --text-muted: #4b5563;
+            --border: #e5e7eb;
+            --primary: #c99a4e; /* brand gold */
+            --primary-light: rgba(201, 154, 78, 0.1);
         }
-        * { box-sizing: border-box; }
+
         body {
-            font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-base);
-            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray behind paper */
+            color: var(--text-main);
             line-height: 1.6;
             margin: 0;
-            padding: 24px 20px 60px;
-        }
-        .container { max-width: 920px; margin: 0 auto; }
-        
-        /* Top Navigation / Action Bar */
-        .top-toolbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            margin-bottom: 28px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border);
-            flex-wrap: wrap;
-        }
-        .back-dash-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.88rem;
-            font-weight: 600;
-            padding: 8px 14px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border);
-            transition: all 0.2s;
-        }
-        .back-dash-btn:hover {
-            color: #fff;
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-        .print-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: linear-gradient(135deg, rgba(240, 201, 122, 0.25), rgba(240, 201, 122, 0.1));
-            border: 1px solid var(--border-gold);
-            color: var(--accent-gold);
-            padding: 9px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 0.88rem;
-            font-weight: 700;
-            transition: all 0.2s;
-            text-decoration: none;
-        }
-        .print-btn:hover {
-            background: var(--accent-gold);
-            color: #000;
-            box-shadow: 0 4px 16px rgba(240, 201, 122, 0.25);
+            padding: 20px;
         }
 
-        /* Document Header */
+        .document-container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: var(--bg);
+            padding: 50px 60px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border-radius: 8px;
+        }
+
         .header {
             text-align: center;
-            margin-bottom: 32px;
-        }
-        .badge-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 14px;
-            border-radius: 20px;
-            font-size: 0.76rem;
-            font-weight: 700;
-            background: rgba(240, 201, 122, 0.12);
-            color: var(--accent-gold);
-            border: 1px solid var(--border-gold);
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .title { font-size: 2.1rem; font-weight: 800; margin: 0 0 8px; color: #fff; letter-spacing: -0.5px; }
-        .subtitle { font-size: 1rem; color: var(--text-secondary); font-weight: 500; }
-        
-        .section {
-            background: var(--bg-card);
-            border-radius: 16px;
-            padding: 26px;
-            margin-bottom: 28px;
-            border: 1px solid var(--border);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-        }
-        .section-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 16px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #fff;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
         }
 
-        /* Project Overview Hero Banner */
-        .project-banner {
-            background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(129, 140, 248, 0.06));
-            border: 1px solid rgba(56, 189, 248, 0.3);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 28px;
+        .header img {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 15px;
+            border-radius: 50%;
         }
-        .project-banner-label {
-            font-size: 0.72rem;
-            font-weight: 800;
-            color: var(--accent-blue);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
+
+        .header h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            margin: 0 0 5px 0;
+            color: var(--primary);
         }
-        .project-banner-title {
-            font-size: 1.45rem;
-            font-weight: 800;
-            color: #fff;
-            margin-bottom: 6px;
-        }
-        .project-banner-desc {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
+
+        .header p {
             margin: 0;
-            line-height: 1.5;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 500;
         }
-        
-        .workflow-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 12px;
-            margin-top: 16px;
+
+        .student-info {
+            display: flex;
+            justify-content: space-between;
+            background: var(--primary-light);
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+            border: 1px solid rgba(201, 154, 78, 0.2);
         }
-        .workflow-card {
-            background: var(--bg-surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 14px;
+
+        .student-info div {
             display: flex;
             flex-direction: column;
-            gap: 4px;
         }
-        .workflow-step {
-            font-size: 0.68rem;
-            font-weight: 800;
-            color: var(--accent-blue);
+
+        .student-info strong {
+            color: var(--primary);
+            font-size: 0.85rem;
             text-transform: uppercase;
-            letter-spacing: 0.8px;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
         }
-        .workflow-card h4 {
+
+        h2 {
+            font-family: 'Outfit', sans-serif;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            margin-top: 35px;
+            font-size: 1.4rem;
+        }
+
+        .overview-section, .perks-section, .instructions-section {
+            margin-bottom: 30px;
+        }
+
+        ul, ol {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .important-note {
+            background-color: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            padding: 15px 20px;
+            margin: 30px 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .important-note h3 {
+            margin: 0 0 10px 0;
+            color: #b45309;
+            font-size: 1.1rem;
+        }
+        
+        .important-note p {
             margin: 0;
-            font-size: 0.92rem;
-            font-weight: 700;
-            color: #fff;
-        }
-        .workflow-card p {
-            margin: 0;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            line-height: 1.4;
+            font-size: 0.95rem;
+            color: #78350f;
         }
 
-        /* 4-Week LinkedIn Template Tabs (Interactive UI) */
-        .template-tabs-wrap {
-            display: block;
-        }
-        .template-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-            overflow-x: auto;
-            padding-bottom: 4px;
-            flex-wrap: wrap;
-        }
-        .tab-btn {
-            background: var(--bg-surface);
-            border: 1px solid var(--border);
-            color: var(--text-secondary);
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 0.84rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-        }
-        .tab-btn:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
-        .tab-btn.active {
-            background: linear-gradient(135deg, rgba(240, 201, 122, 0.2), rgba(240, 201, 122, 0.08));
-            border-color: var(--accent-gold);
-            color: var(--accent-gold);
-        }
-
-        .template-box {
-            background: var(--code-bg);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            padding: 20px;
-            position: relative;
-        }
-        .template-content {
-            font-family: "Inter", sans-serif;
-            font-size: 0.88rem;
-            color: #e2e8f0;
-            white-space: pre-wrap;
-            line-height: 1.65;
-        }
-        .copy-template-btn {
-            position: absolute;
-            top: 14px;
-            right: 14px;
-            background: rgba(240, 201, 122, 0.15);
-            border: 1px solid var(--border-gold);
-            color: var(--accent-gold);
-            padding: 6px 14px;
-            border-radius: 8px;
-            font-size: 0.76rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .copy-template-btn:hover { background: rgba(240, 201, 122, 0.3); color: #fff; }
-
-        /* Print-Only All-Templates Block */
-        .print-all-templates {
-            display: none;
-        }
-
-        /* Task Cards (1 Per Page for Print) */
         .task-card {
-            background: var(--bg-card);
-            border-radius: 16px;
-            padding: 28px;
             border: 1px solid var(--border);
-            margin-bottom: 32px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-            position: relative;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 20px;
+            page-break-inside: avoid;
         }
+
         .task-header {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border);
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .task-title {
-            font-size: 1.35rem;
-            font-weight: 700;
-            color: #fff;
-            margin: 0;
-        }
-        .task-badge {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.78rem;
-            font-weight: 700;
-        }
-
-        .checklist-box {
-            background: rgba(52, 211, 153, 0.05);
-            border: 1px solid rgba(52, 211, 153, 0.2);
-            border-radius: 12px;
-            padding: 16px 20px;
-            margin: 20px 0 0;
-        }
-        .checklist-box h4 {
-            margin: 0 0 10px;
-            color: var(--accent-green);
-            font-size: 0.92rem;
-            font-weight: 700;
-            display: flex;
             align-items: center;
-            gap: 6px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
         }
-        .checklist-box ul {
+
+        .task-title {
             margin: 0;
-            padding-left: 20px;
-            color: #d1fae5;
-            font-size: 0.86rem;
+            font-size: 1.25rem;
+            color: var(--text-main);
         }
-        .checklist-box li { margin-bottom: 6px; }
 
-        .markdown-content h1, .markdown-content h2, .markdown-content h3 { color: var(--text-primary); margin-top: 1.4em; margin-bottom: 0.5em; }
-        .markdown-content h2 { font-size: 1.15em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
-        .markdown-content p { margin-top: 0; margin-bottom: 1em; color: var(--text-secondary); }
-        .markdown-content ul, .markdown-content ol { padding-left: 1.5em; margin-bottom: 1em; color: var(--text-secondary); }
-        .markdown-content li { margin-bottom: 6px; }
-        .markdown-content code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-family: "JetBrains Mono", monospace; font-size: 0.88em; border: 1px solid var(--border); color: #f472b6; }
-        .markdown-content pre { background: var(--code-bg); padding: 16px; border-radius: 8px; overflow-x: auto; border: 1px solid var(--border); margin: 1em 0; }
-        .markdown-content pre code { background: none; padding: 0; border: none; font-size: 0.85em; color: #a5b4fc; }
+        .task-badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
 
-        #loading { text-align: center; padding: 60px 20px; color: var(--text-secondary); font-size: 1.1rem; }
+        .markdown-content h3 {
+            font-size: 1.1rem;
+            margin-top: 20px;
+            color: var(--text-main);
+        }
+        
+        .markdown-content p, .markdown-content li {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .footer p { margin: 5px 0; }
+        .footer a { color: var(--primary); font-weight: 500; }
+
         .hidden { display: none !important; }
 
-        /* Responsive Mobile Styles */
-        @media (max-width: 640px) {
-            body { padding: 16px 12px 40px; overflow-x: hidden; }
-            .container { width: 100%; max-width: 100%; overflow-x: hidden; }
-            .top-toolbar { flex-direction: column; align-items: stretch; gap: 10px; }
-            .back-dash-btn, .print-btn { justify-content: center; width: 100%; text-align: center; }
-            .title { font-size: 1.5rem; word-break: break-word; }
-            .subtitle { font-size: 0.9rem; word-break: break-word; }
-            .section, .task-card, .project-banner { padding: 18px 14px; border-radius: 12px; word-break: break-word; overflow-wrap: break-word; }
-            .task-title { font-size: 1.12rem; word-break: break-word; }
-            .workflow-grid { grid-template-columns: 1fr; }
-            .template-tabs { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 8px; }
-            .template-content { word-break: break-word; overflow-wrap: break-word; font-size: 0.84rem; }
-            .copy-template-btn { position: static; margin-bottom: 12px; width: 100%; justify-content: center; }
-        }
-
-        /* ============================================================
-           PRINT / PDF SPECIFIC STYLING (DARK THEME + ALL TEMPLATES + 1 TASK PER PAGE)
-           ============================================================ */
         @media print {
-            * {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                color-adjust: exact !important;
-            }
-            body {
-                background: #0a0d14 !important;
-                color: #f8fafc !important;
-                padding: 0;
-            }
-            .container { max-width: 100% !important; margin: 0; }
-            .top-toolbar { display: none !important; }
-            .header { border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important; padding-bottom: 12px; margin-bottom: 20px; }
-            .title { color: #ffffff !important; font-size: 1.8rem !important; }
-            .subtitle { color: #94a3b8 !important; }
-            .badge-pill { background: rgba(240, 201, 122, 0.15) !important; color: #f0c97a !important; border-color: rgba(240, 201, 122, 0.3) !important; }
-            .project-banner {
-                background: rgba(56, 189, 248, 0.08) !important;
-                border: 1px solid rgba(56, 189, 248, 0.3) !important;
-                box-shadow: none !important;
-            }
-            .project-banner-title { color: #ffffff !important; }
-            .project-banner-desc { color: #94a3b8 !important; }
-            .section {
-                background: #111726 !important;
-                border: 1px solid rgba(255, 255, 255, 0.1) !important;
-                box-shadow: none !important;
-            }
-            .section-title { color: #ffffff !important; border-color: rgba(255, 255, 255, 0.1) !important; }
-            .workflow-card {
-                background: #182238 !important;
-                border: 1px solid rgba(255, 255, 255, 0.08) !important;
-                color: #f8fafc !important;
-            }
-            .workflow-card h4 { color: #ffffff !important; }
-            .workflow-card p { color: #94a3b8 !important; }
-            
-            /* Hide interactive tabs on print, reveal ALL 4 weekly templates */
-            .template-tabs-wrap { display: none !important; }
-            .print-all-templates {
-                display: flex !important;
-                flex-direction: column;
-                gap: 14px;
-                margin-top: 12px;
-            }
-            .print-template-card {
-                background: #070a10 !important;
-                border: 1px solid rgba(255, 255, 255, 0.1) !important;
-                border-radius: 8px;
-                padding: 12px 16px;
-            }
-            .print-template-title {
-                font-weight: 700;
-                font-size: 0.88rem;
-                color: #f0c97a !important;
-                margin-bottom: 6px;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-                padding-bottom: 4px;
-            }
-            .print-template-body {
-                font-size: 0.78rem;
-                color: #e2e8f0 !important;
-                white-space: pre-wrap;
-                line-height: 1.5;
-            }
-
-            /* FORCE EACH OF THE 4 TASKS ONTO ITS OWN SINGLE PAGE IN PDF */
-            .task-card {
-                page-break-before: always !important;
-                break-before: page !important;
-                background: #111726 !important;
-                border: 1px solid rgba(255, 255, 255, 0.1) !important;
-                box-shadow: none !important;
-                padding: 24px !important;
-                margin-top: 24px !important;
-            }
-            .task-title { color: #ffffff !important; }
-            .task-badge { background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important; color: white !important; }
-            .markdown-content p, .markdown-content ul, .markdown-content ol { color: #cbd5e1 !important; }
-            .markdown-content h1, .markdown-content h2, .markdown-content h3 { color: #ffffff !important; }
-            .markdown-content code { background: #070a10 !important; border-color: rgba(255, 255, 255, 0.1) !important; color: #f472b6 !important; }
-            .checklist-box { background: rgba(52, 211, 153, 0.08) !important; border-color: rgba(52, 211, 153, 0.25) !important; color: #d1fae5 !important; }
-            .checklist-box h4 { color: #34d399 !important; }
-            .checklist-box ul { color: #d1fae5 !important; }
+            body { background: white; padding: 0; }
+            .document-container { box-shadow: none; padding: 0; max-width: 100%; border: none; }
+            .important-note { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+            .task-badge { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+            .student-info { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+            .no-print { display: none !important; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Clean Top Navigation Toolbar (Non-Clustered) -->
-        <div class="top-toolbar">
-            <a href="dashboard.html" class="back-dash-btn">
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-                Back to Dashboard
-            </a>
-            <button class="print-btn" onclick="window.print()">
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6v-8z"/></svg>
-                Download 4-Week PDF (Ctrl+P)
-            </button>
-        </div>
-
+    <button class="no-print" onclick="window.print()" style="position: fixed; top: 20px; right: 20px; background-color: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-family: 'Outfit', sans-serif; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000; display: flex; align-items: center; gap: 8px; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)';">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        Download PDF
+    </button>
+    <div id="loading" style="text-align:center; padding: 50px; font-family: 'Outfit', sans-serif;">Generating official task document...</div>
+    
+    <div id="content" class="document-container hidden">
         <div class="header">
-            <div class="badge-pill">✨ Complete 4-Week Project Curriculum &amp; Verification Guide</div>
-            <div class="title">4-Week Internship Project Guide</div>
-            <div class="subtitle"><span id="student-name">Student</span> &bull; <span id="student-domain" style="text-transform: capitalize; color: var(--accent-gold);">Domain Track</span> &bull; Complete 4-Week Syllabus</div>
+            <img src="assets/logo.png" onerror="this.src='assets/logo.webp'" alt="SkillMe Logo">
+            <h1>SkillMe Internship Program</h1>
+            <p id="project-title">Loading Project...</p>
         </div>
 
-        <div id="loading">Loading your 4-week project curriculum...</div>
-
-        <div id="content" class="hidden">
-            <!-- Project Banner -->
-            <div class="project-banner">
-                <div class="project-banner-label">Assigned 4-Week Incremental Project</div>
-                <div class="project-banner-title" id="project-title">Loading Project...</div>
-                <p class="project-banner-desc" id="project-desc">Loading Project Tagline...</p>
+        <div class="student-info">
+            <div>
+                <strong>Intern Name</strong>
+                <span id="student-name">Loading...</span>
             </div>
-
-            <!-- 1. Localhost Development & Video Verification Workflow -->
-            <div class="section">
-                <div class="section-title">
-                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                    1. Localhost &amp; LinkedIn Video Proof Workflow
-                </div>
-                <p style="font-size: 0.92rem; color: var(--text-secondary); margin-top: 0;">
-                    Complete your tasks locally on your computer in VS Code. Once built, demonstrate your project running on <code>localhost</code> via a screen recording video and share on LinkedIn to verify your progress!
-                </p>
-
-                <div class="workflow-grid">
-                    <div class="workflow-card">
-                        <span class="workflow-step">Step 1</span>
-                        <h4>💻 Code in VS Code</h4>
-                        <p>Create your local workspace and implement the week's required features.</p>
-                    </div>
-                    <div class="workflow-card">
-                        <span class="workflow-step">Step 2</span>
-                        <h4>⚡ Run on Localhost</h4>
-                        <p>Launch your server (e.g. Live Server, Vite, or Python) and test your UI.</p>
-                    </div>
-                    <div class="workflow-card">
-                        <span class="workflow-step">Step 3</span>
-                        <h4>🎥 Record 30-60s Demo</h4>
-                        <p>Record a screen capture showing your running localhost project in action.</p>
-                    </div>
-                    <div class="workflow-card">
-                        <span class="workflow-step">Step 4</span>
-                        <h4>🚀 Post &amp; Tag on LinkedIn</h4>
-                        <p>Copy the weekly template below, attach your video, and tag <strong>@SkillMe</strong>.</p>
-                    </div>
-                </div>
+            <div>
+                <strong>Domain</strong>
+                <span id="student-domain" style="text-transform: capitalize;">Loading...</span>
             </div>
-
-            <!-- 2. 4-Week LinkedIn Video Proof Templates (Interactive Tabs on Web, ALL 4 Printed in PDF) -->
-            <div class="section">
-                <div class="section-title">
-                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                    2. 4-Week Correlated LinkedIn Post Templates
-                </div>
-                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0;">
-                    Select any week to view your customized post caption matching the exact milestone of your assigned project:
-                </p>
-
-                <!-- Web Interactive Tab View -->
-                <div class="template-tabs-wrap">
-                    <div class="template-tabs">
-                        <button class="tab-btn active" onclick="switchTemplateTab(1)">Week 1: Base Model</button>
-                        <button class="tab-btn" onclick="switchTemplateTab(2)">Week 2: Feature Add-Up</button>
-                        <button class="tab-btn" onclick="switchTemplateTab(3)">Week 3: Integrations</button>
-                        <button class="tab-btn" onclick="switchTemplateTab(4)">Week 4: Capstone Polish</button>
-                    </div>
-
-                    <div class="template-box">
-                        <button class="copy-template-btn" onclick="copyActiveTemplate()">
-                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                            <span id="copy-btn-text">Copy Post Template</span>
-                        </button>
-                        <div class="template-content" id="template-text">Loading template...</div>
-                    </div>
-                    <p style="font-size: 0.75rem; color: #64748b; text-align: left; margin-top: 12px; margin-bottom: 0; font-style: italic;">
-                        Note: When posting to LinkedIn, make sure to manually select <strong>@SkillMe</strong> from the dropdown menu to officially tag us!
-                    </p>
-                </div>
-
-                <!-- Print-Only View: All 4 Templates Rendered for PDF -->
-                <div class="print-all-templates" id="print-templates-container">
-                    <!-- Injected dynamically for printing -->
-                </div>
+            <div>
+                <strong>Batch</strong>
+                <span id="student-batch">Loading...</span>
             </div>
+        </div>
 
-            <!-- 3. All 4 Weekly Tasks (Each on its own page when printing to PDF) -->
-            <div id="tasks-container">
-                <!-- All 4 weekly tasks rendered sequentially -->
-            </div>
+        <div class="overview-section">
+            <h2>Internship Overview</h2>
+            <p id="project-desc">Welcome to your internship! Over the next 4 weeks, you will build real-world applications and deploy them. This document contains all the necessary instructions and tasks you need to complete.</p>
+        </div>
+
+        <div class="perks-section">
+            <h2>Internship Perks</h2>
+            <ul>
+                <li><strong>Verified Certificate:</strong> A publicly verifiable certificate with a unique credential ID.</li>
+                <li><strong>Letter of Recommendation (LOR):</strong> A personalized LOR highlighting your domain expertise.</li>
+                <li><strong>Proof of Work Portfolio:</strong> Lifetime hosting of your project portfolio to showcase to recruiters.</li>
+                <li><strong>Industry Experience:</strong> Hands-on experience building and deploying production-ready applications.</li>
+            </ul>
+        </div>
+
+        <div class="instructions-section">
+            <h2>Instructions for Interns</h2>
+            <ol>
+                <li>Complete the assigned projects for your domain as listed in the Task List below.</li>
+                <li>Once a task is complete, create a post or a short video demonstration on LinkedIn.</li>
+                <li>Tag <strong>@SkillMe</strong> in your LinkedIn post (make sure to select the official page from the dropdown).</li>
+                <li>Copy the URL of your published LinkedIn post.</li>
+                <li>Log in to your <strong>SkillMe Student Dashboard</strong> and submit the URL for the respective week's task.</li>
+            </ol>
+        </div>
+
+        <div class="important-note">
+            <h3>Internship Completion Criteria</h3>
+            <p>To be eligible for the internship certificate and all associated perks, participants must complete a minimum of <strong>two</strong> tasks. Submitting only one task will be considered incomplete and certificates will not be issued.</p>
+        </div>
+
+        <h2>Task List</h2>
+        <div id="tasks-container">
+            <!-- Tasks will be injected here -->
+        </div>
+
+        <div class="footer" style="text-align: left; background-color: var(--primary-light); padding: 25px 30px; border-radius: 8px; border: 1px solid rgba(201, 154, 78, 0.2);">
+            <h3 style="color: var(--primary); margin-top: 0; margin-bottom: 15px; font-family: 'Outfit', sans-serif; border: none;">Need Help or Support?</h3>
+            <p style="margin-bottom: 15px; color: var(--text-main);"><strong>Submission Details:</strong> Please submit all task URLs via your dashboard at <a href="https://www.skill-me-intern.in/dashboard">skill-me-intern.in/dashboard</a>.</p>
+            <p style="margin-bottom: 8px; color: var(--text-main);"><strong>Contact Information:</strong> If you face any issues, our team is here to help you succeed:</p>
+            <ul style="margin-top: 0; margin-bottom: 0;">
+                <li style="margin-bottom: 6px;"><strong>Email Support:</strong> Send us a detailed message at <a href="mailto:admin@skill-me-intern.in" style="color: var(--primary); font-weight: 500; text-decoration: none;">admin@skill-me-intern.in</a></li>
+                <li style="margin-bottom: 0;"><strong>Telegram Community:</strong> Join our official Telegram Group at <a href="https://t.me/SkillMeChannelTg" target="_blank" id="telegram-link" style="color: var(--primary); font-weight: 500; text-decoration: none;">@SkillMe</a> to chat with admins and fellow interns instantly.</li>
+            </ul>
         </div>
     </div>
 
     <script src="config.js"></script>
     <script>
         const API = window.SKILLME_API || 'http://localhost:8000';
-        let dynamicTemplates = {};
-        let activeWeekTab = 1;
-
-        function switchTemplateTab(week) {
-            activeWeekTab = week;
-            document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
-                btn.classList.toggle('active', (idx + 1) === week);
-            });
-            updateTemplateDisplay();
-        }
-
-        function updateTemplateDisplay() {
-            const tmpl = dynamicTemplates[activeWeekTab] || "Template loading...";
-            document.getElementById('template-text').textContent = tmpl;
-        }
-
-        function copyActiveTemplate() {
-            const text = document.getElementById('template-text').textContent;
-            navigator.clipboard.writeText(text).then(() => {
-                const btnText = document.getElementById('copy-btn-text');
-                btnText.textContent = 'Copied to Clipboard!';
-                setTimeout(() => btnText.textContent = 'Copy Post Template', 2000);
-            });
-        }
 
         async function fetchTasks() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -581,7 +284,6 @@
 
             try {
                 if (!studentId || !batchId) {
-                    // Try fetching authenticated session from dashboard
                     const token = localStorage.getItem('token');
                     const authRes = await fetch(`${API}/api/auth/me`, {
                         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
@@ -606,51 +308,25 @@
                 
                 document.getElementById('student-name').textContent = fullName;
                 document.getElementById('student-domain').textContent = domain;
+                document.getElementById('student-batch').textContent = `Batch #${batchId}`;
                 
                 if (data.project) {
                     document.getElementById('project-title').textContent = data.project.name;
                     document.getElementById('project-desc').textContent = data.project.tagline;
                 }
 
-                dynamicTemplates = data.linkedin_templates || {};
-                activeWeekTab = data.current_week || 1;
-                switchTemplateTab(activeWeekTab);
-
-                // Populate Print All Templates Container for PDF
-                const printTmplContainer = document.getElementById('print-templates-container');
-                if (printTmplContainer) {
-                    const weekNames = ["Week 1: Base Model", "Week 2: Feature Add-Up", "Week 3: Integrations & API", "Week 4: Capstone Polish"];
-                    printTmplContainer.innerHTML = [1, 2, 3, 4].map(w => `
-                        <div class="print-template-card">
-                            <div class="print-template-title">${weekNames[w - 1]} Post Template</div>
-                            <div class="print-template-body">${dynamicTemplates[w] || ''}</div>
-                        </div>
-                    `).join('');
-                }
-
                 const container = document.getElementById('tasks-container');
                 if (!data.tasks || data.tasks.length === 0) {
-                    container.innerHTML = '<div class="section"><p>No assigned tasks found.</p></div>';
+                    container.innerHTML = '<p>No assigned tasks found.</p>';
                 } else {
                     container.innerHTML = data.tasks.map((task) => `
                         <div class="task-card">
                             <div class="task-header">
-                                <h3 class="task-title">Week ${task.week_number} Task: ${task.title}</h3>
+                                <h3 class="task-title">Task ${task.week_number}: ${task.title}</h3>
                                 <span class="task-badge">${task.difficulty}</span>
                             </div>
-                            
                             <div class="markdown-content">
                                 ${marked.parse(task.description)}
-                            </div>
-
-                            <div class="checklist-box">
-                                <h4>🎥 Video Demonstration Checklist (What to show on Localhost):</h4>
-                                <ul>
-                                    <li>Launch your project in VS Code and run it locally on <code>localhost</code>.</li>
-                                    <li>Demonstrate user interactions (clicking buttons, filters, forms, responsive view).</li>
-                                    <li>Briefly show your clean file structure and code in VS Code.</li>
-                                    <li>Keep your video between 30 to 60 seconds and post with the Week ${task.week_number} LinkedIn template!</li>
-                                </ul>
                             </div>
                         </div>
                     `).join('');
@@ -658,6 +334,11 @@
 
                 document.getElementById('loading').classList.add('hidden');
                 document.getElementById('content').classList.remove('hidden');
+                
+                // Trigger print dialog after a brief delay for rendering
+                if (urlParams.get('print') === '1') {
+                    setTimeout(() => window.print(), 1000);
+                }
             } catch(e) { 
                 console.error("Error fetching tasks:", e);
                 document.getElementById('loading').textContent = "Failed to load tasks. Please try again from your dashboard.";

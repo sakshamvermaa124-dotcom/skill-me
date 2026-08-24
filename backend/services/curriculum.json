@@ -12,7 +12,7 @@
             "Interactive skills grid with hover elevation and tech badge animations",
             "Theme toggle engine (Dark Mode & Light Mode) with smooth CSS transitions"
           ],
-          "description": "### 🎯 Project Overview (Week 1: Base Model)\nConstruct the visual foundation and core structure for your **DevStudio Portfolio** running locally on localhost.\n\n### 🛠️ Step-by-Step Requirements\n1. **Responsive Layout Architecture**: Build semantic HTML5 structure (`<header>`, `<nav>`, `<main>`, `<section>`, `<footer>`).\n2. **Glassmorphism Styling**: Implement modern CSS with backdrop blur, glass borders, and custom CSS variables for effortless theming.\n3. **Hero & Intro Stage**: Include your developer bio, role pills, and eye-catching entrance animations using `@keyframes`.\n4. **Theme Switcher Engine**: Write JavaScript to toggle `.dark-mode` and `.light-mode` classes with instant local state persistence.\n\n### 📋 Localhost Acceptance Criteria\n- [ ] Runs seamlessly on `http://localhost:...` or Live Server.\n- [ ] Responsive across 320px, 768px, 1024px, and 1440px viewports without horizontal overflow.\n- [ ] Theme switcher toggles colors smoothly without reloading the page.",
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nConstruct the visual foundation and core structure for your **DevStudio Portfolio** running locally on localhost.\n\n### 🛠️ Step-by-Step Requirements\n1. **Responsive Layout Architecture**: Build semantic HTML5 structure (`<header>`, `<nav>`, `<main>`, `<section>`, `<footer>`).\n2. **Glassmorphism Styling**: Implement modern CSS with backdrop blur, glass borders, and custom CSS variables for effortless theming.\n3. **Hero & Intro Stage**: Include your developer bio, role pills, and eye-catching entrance animations using `@keyframes`.\n4. **Theme Switcher Engine**: Write JavaScript to toggle `.dark-mode` and `.light-mode` classes with instant local state persistence.\n\n### 📋 Localhost Acceptance Criteria\n- [ ] Runs seamlessly on `http://localhost:...` or Live Server.\n- [ ] Responsive across 320px, 768px, 1024px, and 1440px viewports without horizontal overflow.\n- [ ] Theme switcher toggles colors smoothly without reloading the page.\n\n### What to do\n- Sticky glassmorphic navbar with smooth scroll spy and mobile hamburger menu\n- Hero section with dynamic typography, animated tagline, and gradient glowing badges\n- Interactive skills grid with hover elevation and tech badge animations\n- Theme toggle engine (Dark Mode & Light Mode) with smooth CSS transitions\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Crafted modern glassmorphism design with responsive CSS Grid & Flexbox",
             "Engineered seamless Dark/Light mode switcher with instant CSS transitions",
@@ -27,7 +27,7 @@
             "Modal preview overlay showing project screenshots, live demo links, and tech stack pills",
             "Search bar with live instant filtering as the user types"
           ],
-          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nUpgrade your DevStudio Portfolio from Week 1 by integrating a dynamic, client-side project rendering and filtering engine.\n\n### 🛠️ Step-by-Step Requirements\n1. **Data-Driven Project Grid**: Store project metadata in a structured JavaScript array/JSON and dynamically generate cards.\n2. **Category Filtering**: Implement category filter buttons that dynamically show/hide matching cards with CSS transitions.\n3. **Live Search**: Add real-time text input filtering matching project titles and technology keywords.\n4. **Interactive Modal Dialog**: Clicking any project opens a detailed modal with feature breakdown and close triggers.",
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nUpgrade your DevStudio Portfolio from Week 1 by integrating a dynamic, client-side project rendering and filtering engine.\n\n### 🛠️ Step-by-Step Requirements\n1. **Data-Driven Project Grid**: Store project metadata in a structured JavaScript array/JSON and dynamically generate cards.\n2. **Category Filtering**: Implement category filter buttons that dynamically show/hide matching cards with CSS transitions.\n3. **Live Search**: Add real-time text input filtering matching project titles and technology keywords.\n4. **Interactive Modal Dialog**: Clicking any project opens a detailed modal with feature breakdown and close triggers.\n\n### What to do\n- Interactive project showcase cards rendered dynamically from JSON data\n- Category filter tabs (All, Frontend, Full Stack, Utilities) with smooth fade transitions\n- Modal preview overlay showing project screenshots, live demo links, and tech stack pills\n- Search bar with live instant filtering as the user types\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Built a dynamic data-driven project showcase with interactive filtering",
             "Added live real-time keyword search across project titles and tech stacks",
@@ -41,7 +41,7 @@
             "Interactive CLI / Terminal widget where visitors can type commands (e.g. `help`, `skills`, `contact`)",
             "Dynamic testimonial slider with autoplay, manual navigation dots, and swipe support"
           ],
-          "description": "### 🎯 Project Overview (Week 3: Integrations)\nLevel up your Week 2 build by integrating real-time API feeds and an interactive mini-terminal widget inside your portfolio.\n\n### 🛠️ Step-by-Step Requirements\n1. **GitHub API Feed**: Fetch public profile metrics using `fetch()` and `async/await` with fallback error handling.\n2. **Interactive Developer CLI**: Build an embedded retro terminal component on localhost that parses user input commands.\n3. **Interactive Testimonial Carousel**: Implement a touch-friendly review carousel with smooth transition intervals.",
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nLevel up your Week 2 build by integrating real-time API feeds and an interactive mini-terminal widget inside your portfolio.\n\n### 🛠️ Step-by-Step Requirements\n1. **GitHub API Feed**: Fetch public profile metrics using `fetch()` and `async/await` with fallback error handling.\n2. **Interactive Developer CLI**: Build an embedded retro terminal component on localhost that parses user input commands.\n3. **Interactive Testimonial Carousel**: Implement a touch-friendly review carousel with smooth transition intervals.\n\n### What to do\n- Live GitHub API integration fetching repository stats, star counts, and commit activity\n- Interactive CLI / Terminal widget where visitors can type commands (e.g. `help`, `skills`, `contact`)\n- Dynamic testimonial slider with autoplay, manual navigation dots, and swipe support\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Integrated GitHub REST API to showcase live repos and contribution metrics",
             "Engineered an interactive developer CLI console supporting custom commands",
@@ -56,7 +56,7 @@
             "Lighthouse performance optimization (accessible ARIA tags, lazy loading images, zero errors)",
             "Final capstone demo showcasing end-to-end user experience on localhost"
           ],
-          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the final polish of your DevStudio Portfolio, turning it into a production-grade showcase ready for presentation.\n\n### 🛠️ Step-by-Step Requirements\n1. **Interactive Contact Form**: Validate email, name, and message fields with custom real-time error states.\n2. **Toast Alert Dispatcher**: Build a reusable notification toast manager that animates alerts into the top-right corner.\n3. **Accessibility & Optimization**: Add proper ARIA labels, semantic markup, and optimized assets to achieve a 95+ score on Lighthouse.",
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the final polish of your DevStudio Portfolio, turning it into a production-grade showcase ready for presentation.\n\n### 🛠️ Step-by-Step Requirements\n1. **Interactive Contact Form**: Validate email, name, and message fields with custom real-time error states.\n2. **Toast Alert Dispatcher**: Build a reusable notification toast manager that animates alerts into the top-right corner.\n3. **Accessibility & Optimization**: Add proper ARIA labels, semantic markup, and optimized assets to achieve a 95+ score on Lighthouse.\n\n### What to do\n- Complete contact form with client-side regex validation, floating labels, and success feedback\n- Custom toast notification system for user interactions (theme changes, form submissions)\n- Lighthouse performance optimization (accessible ARIA tags, lazy loading images, zero errors)\n- Final capstone demo showcasing end-to-end user experience on localhost\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Completed the 4-week DevStudio Portfolio capstone project from scratch!",
             "Built robust form validation, custom toast notification engine, and responsive UI",
@@ -77,7 +77,7 @@
             "Quick-add task drawer with clean inputs for title, description, and urgency",
             "Modern dark-mode glassmorphic workspace layout"
           ],
-          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational UI and column grid for **TaskFlow**, your local productivity and sprint board application.\n\n### 🛠️ Step-by-Step Requirements\n1. Create a 3-column Kanban workspace using CSS Grid & Flexbox.\n2. Design task cards featuring title, description, priority badge (High, Med, Low), and estimated hours.\n3. Build a modal/drawer to input new tasks with clean form styling.",
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational UI and column grid for **TaskFlow**, your local productivity and sprint board application.\n\n### 🛠️ Step-by-Step Requirements\n1. Create a 3-column Kanban workspace using CSS Grid & Flexbox.\n2. Design task cards featuring title, description, priority badge (High, Med, Low), and estimated hours.\n3. Build a modal/drawer to input new tasks with clean form styling.\n\n### What to do\n- 3-Column Sprint Board (To Do, In Progress, Done) with custom badges\n- Modern responsive task card component with priority indicators\n- Quick-add task drawer with clean inputs for title, description, and urgency\n- Modern dark-mode glassmorphic workspace layout\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Built the core 3-column Kanban architecture in HTML5 & modern CSS",
             "Engineered modular task card components with priority indicators",
@@ -92,7 +92,7 @@
             "Persistent state management using `localStorage` so tasks remain on refresh",
             "Real-time task counter per column updating automatically"
           ],
-          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nTransform your static TaskFlow board into a fully functional, state-persistent application on localhost.\n\n### 🛠️ Step-by-Step Requirements\n1. Write JavaScript CRUD logic to add, edit title/description, delete, and move tasks.\n2. Synchronize all card updates with `localStorage` on every change.\n3. Implement drag-and-drop or one-click column move buttons.",
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nTransform your static TaskFlow board into a fully functional, state-persistent application on localhost.\n\n### 🛠️ Step-by-Step Requirements\n1. Write JavaScript CRUD logic to add, edit title/description, delete, and move tasks.\n2. Synchronize all card updates with `localStorage` on every change.\n3. Implement drag-and-drop or one-click column move buttons.\n\n### What to do\n- Full CRUD operations (Create, Read, Update, Delete tasks) via JavaScript\n- Native HTML5 Drag and Drop or column shift controls to move tasks between stages\n- Persistent state management using `localStorage` so tasks remain on refresh\n- Real-time task counter per column updating automatically\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Implemented full CRUD functionality with client-side state persistence",
             "Added smooth drag-and-drop card movement across Kanban columns",
@@ -107,7 +107,7 @@
             "Visual sprint completion progress ring / bar calculating percentage of Done tasks",
             "Export & Import sprint data as a JSON file"
           ],
-          "description": "### 🎯 Project Overview (Week 3: Integrations)\nEnhance TaskFlow with real-time search, multi-tag filtering, sprint progress tracking, and JSON data backup.\n\n### 🛠️ Step-by-Step Requirements\n1. Build an instant search filter that queries cards across all columns.\n2. Add a dynamic progress bar computing `(Done / Total) * 100%`.\n3. Add JSON export/import buttons allowing users to download and restore their task board.",
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nEnhance TaskFlow with real-time search, multi-tag filtering, sprint progress tracking, and JSON data backup.\n\n### 🛠️ Step-by-Step Requirements\n1. Build an instant search filter that queries cards across all columns.\n2. Add a dynamic progress bar computing `(Done / Total) * 100%`.\n3. Add JSON export/import buttons allowing users to download and restore their task board.\n\n### What to do\n- Instant search bar with highlight matching keywords across all columns\n- Tag filter system (Bug, Feature, Design, Docs) to filter visible cards\n- Visual sprint completion progress ring / bar calculating percentage of Done tasks\n- Export & Import sprint data as a JSON file\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Added instant keyword search and multi-tag filtering across board columns",
             "Engineered a dynamic sprint completion progress tracker",
@@ -122,11 +122,77 @@
             "Sound/visual celebration confetti effect upon moving a task to 'Done'",
             "Final capstone demo showcasing complete sprint management on localhost"
           ],
-          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the final polish of TaskFlow with an audit activity feed, deadline warning system, and celebration effects.\n\n### 🛠️ Step-by-Step Requirements\n1. Build a collapsible activity log panel logging user actions with timestamps.\n2. Add date comparison logic to flag overdue tasks in red.\n3. Trigger a visual confetti celebration when all tasks in a sprint reach 'Done'.",
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the final polish of TaskFlow with an audit activity feed, deadline warning system, and celebration effects.\n\n### 🛠️ Step-by-Step Requirements\n1. Build a collapsible activity log panel logging user actions with timestamps.\n2. Add date comparison logic to flag overdue tasks in red.\n3. Trigger a visual confetti celebration when all tasks in a sprint reach 'Done'.\n\n### What to do\n- Activity audit log tracking timestamps for created, moved, and completed tasks\n- Overdue task notification badges with visual pulsing warning indicators\n- Sound/visual celebration confetti effect upon moving a task to 'Done'\n- Final capstone demo showcasing complete sprint management on localhost\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Completed the 4-week TaskFlow Kanban application capstone!",
             "Built automated activity logging, deadline warning engine, and celebration triggers",
             "Delivered a polished, production-ready productivity platform on localhost"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "Advanced Full-Stack Web Development Scale Application",
+      "tagline": "Master production-grade Full-Stack Web Development workflows by building a highly scalable, complete end-to-end application from scratch.",
+      "weeks": {
+        "1": {
+          "title": "Week 1: Architecture & Foundation",
+          "deliverables": [
+            "Establish the required modules for the architecture & foundation phase.",
+            "Implement robust error handling and integrate necessary dependencies for Full-Stack Web Development.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Architecture & Foundation)\nIn Week 1, you will focus on the **Architecture & Foundation** phase of your Full-Stack Web Development application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the architecture & foundation phase.\n- Implement robust error handling and integrate necessary dependencies for Full-Stack Web Development.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the architecture & foundation module for a scale Full-Stack Web Development application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "2": {
+          "title": "Week 2: Core Feature Implementation",
+          "deliverables": [
+            "Establish the required modules for the core feature implementation phase.",
+            "Implement robust error handling and integrate necessary dependencies for Full-Stack Web Development.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Core Feature Implementation)\nIn Week 2, you will focus on the **Core Feature Implementation** phase of your Full-Stack Web Development application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the core feature implementation phase.\n- Implement robust error handling and integrate necessary dependencies for Full-Stack Web Development.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the core feature implementation module for a scale Full-Stack Web Development application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "3": {
+          "title": "Week 3: Database & API Integrations",
+          "deliverables": [
+            "Establish the required modules for the database & api integrations phase.",
+            "Implement robust error handling and integrate necessary dependencies for Full-Stack Web Development.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Database & API Integrations)\nIn Week 3, you will focus on the **Database & API Integrations** phase of your Full-Stack Web Development application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the database & api integrations phase.\n- Implement robust error handling and integrate necessary dependencies for Full-Stack Web Development.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the database & api integrations module for a scale Full-Stack Web Development application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "4": {
+          "title": "Week 4: Optimization, Security & Final Deployment",
+          "deliverables": [
+            "Establish the required modules for the optimization, security & final deployment phase.",
+            "Implement robust error handling and integrate necessary dependencies for Full-Stack Web Development.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Optimization, Security & Final Deployment)\nIn Week 4, you will focus on the **Optimization, Security & Final Deployment** phase of your Full-Stack Web Development application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the optimization, security & final deployment phase.\n- Implement robust error handling and integrate necessary dependencies for Full-Stack Web Development.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the optimization, security & final deployment module for a scale Full-Stack Web Development application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
           ]
         }
       }
@@ -144,7 +210,7 @@
             "CSV & JSON file ingestion engine with comprehensive error handling",
             "Interactive CLI menu powered by `argparse` or `rich` with formatted tables"
           ],
-          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational Python processing engine and CLI interface for **PyAnalytics**.",
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational Python processing engine and CLI interface for **PyAnalytics**.\n\n### What to do\n- Modular Python package structure with clean classes and type hints\n- CSV & JSON file ingestion engine with comprehensive error handling\n- Interactive CLI menu powered by `argparse` or `rich` with formatted tables\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Built modular Python architecture with robust OOP data models and type hints",
             "Implemented CSV/JSON ingestion pipeline with error handling",
@@ -158,7 +224,7 @@
             "Statistical summary engine calculating metrics (mean, median, percentiles, group-bys)",
             "Automated Markdown and CSV export generator"
           ],
-          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nUpgrade your PyAnalytics core by adding advanced data transformation, cleaning rules, and statistical calculation methods.",
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nUpgrade your PyAnalytics core by adding advanced data transformation, cleaning rules, and statistical calculation methods.\n\n### What to do\n- Data cleaning pipeline handling missing values, duplicates, and type casting\n- Statistical summary engine calculating metrics (mean, median, percentiles, group-bys)\n- Automated Markdown and CSV export generator\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Engineered custom data cleaning and outlier detection algorithms in Python",
             "Built statistical aggregation methods with multi-column group-by operations",
@@ -172,7 +238,7 @@
             "Interactive Swagger / OpenAPI docs running on `http://localhost:8000/docs`",
             "Visual web dashboard displaying generated analytics charts"
           ],
-          "description": "### 🎯 Project Overview (Week 3: Integrations)\nWrap your Python data engine into a high-performance REST API with FastAPI and connect it to a localhost web interface.",
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nWrap your Python data engine into a high-performance REST API with FastAPI and connect it to a localhost web interface.\n\n### What to do\n- FastAPI/Flask local server exposing data processing endpoints\n- Interactive Swagger / OpenAPI docs running on `http://localhost:8000/docs`\n- Visual web dashboard displaying generated analytics charts\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Converted core Python processing engine into a FastAPI REST service",
             "Built Pydantic schema validation and async route handlers on localhost",
@@ -187,7 +253,7 @@
             "Pytest suite achieving 85%+ code coverage with edge-case validation",
             "Final capstone demo showing CLI + Web API execution on localhost"
           ],
-          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the PyAnalytics suite by adding live web scraping, SQLite database caching, and a comprehensive test suite.",
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the PyAnalytics suite by adding live web scraping, SQLite database caching, and a comprehensive test suite.\n\n### What to do\n- Automated web scraper with BeautifulSoup / HTTPX collecting live data\n- SQLite database caching layer storing historical analytics queries\n- Pytest suite achieving 85%+ code coverage with edge-case validation\n- Final capstone demo showing CLI + Web API execution on localhost\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Completed the 4-week PyAnalytics Python engineering capstone!",
             "Integrated automated web scraping, SQLite caching, and Pytest coverage",
@@ -207,7 +273,7 @@
             "Service target configuration parser reading YAML/JSON target endpoints",
             "Terminal console logger with colored status codes and response latencies"
           ],
-          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild an async Python service health checker that continuously monitors multiple endpoints on localhost.",
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild an async Python service health checker that continuously monitors multiple endpoints on localhost.\n\n### What to do\n- Asynchronous HTTP ping engine using `asyncio` and `httpx`\n- Service target configuration parser reading YAML/JSON target endpoints\n- Terminal console logger with colored status codes and response latencies\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Engineered high-concurrency async monitoring engine using Asyncio & HTTPX",
             "Built structured YAML config parser for target endpoints",
@@ -221,7 +287,7 @@
             "Keyword matching engine flagging terms (e.g. 'Remote', 'FastAPI', 'Internship')",
             "SQLite database logging scraped records with duplicate detection"
           ],
-          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement targeted web scraping with intelligent keyword filtering and database deduplication.",
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement targeted web scraping with intelligent keyword filtering and database deduplication.\n\n### What to do\n- BeautifulSoup / Selectolax web scraper extracting structured headlines and job postings\n- Keyword matching engine flagging terms (e.g. 'Remote', 'FastAPI', 'Internship')\n- SQLite database logging scraped records with duplicate detection\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Built robust web scraper with HTML parsing and DOM extraction",
             "Implemented intelligent keyword matching and hash-based deduplication",
@@ -235,7 +301,7 @@
             "Configurable notification thresholds (downtime warnings, matching job alerts)",
             "FastAPI mini-dashboard displaying uptime percentages and live logs"
           ],
-          "description": "### 🎯 Project Overview (Week 3: Integrations)\nConnect real-time webhook alerting and build a lightweight FastAPI status monitor.",
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nConnect real-time webhook alerting and build a lightweight FastAPI status monitor.\n\n### What to do\n- Automated webhook notification engine dispatching alerts to Discord/Slack/Telegram\n- Configurable notification thresholds (downtime warnings, matching job alerts)\n- FastAPI mini-dashboard displaying uptime percentages and live logs\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Integrated webhook dispatchers for instant Discord and Slack notifications",
             "Configured downtime threshold triggers and alert throttling",
@@ -249,11 +315,77 @@
             "Dockerfile containerizing the Python sentinel application",
             "End-to-end video demonstration showing live alerting and monitor logs"
           ],
-          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nPackage PySentinel into a containerized automation bot with periodic scheduling and complete testing.",
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nPackage PySentinel into a containerized automation bot with periodic scheduling and complete testing.\n\n### What to do\n- Automated background scheduler with APScheduler / Celery running periodic jobs\n- Dockerfile containerizing the Python sentinel application\n- End-to-end video demonstration showing live alerting and monitor logs\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Completed the 4-week PySentinel Python Automation capstone!",
             "Implemented background task scheduling and Docker containerization",
             "Demonstrated live website monitoring and instant webhook alerts on video"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "Advanced Python Scale Application",
+      "tagline": "Master production-grade Python workflows by building a highly scalable, complete end-to-end application from scratch.",
+      "weeks": {
+        "1": {
+          "title": "Week 1: Architecture & Foundation",
+          "deliverables": [
+            "Establish the required modules for the architecture & foundation phase.",
+            "Implement robust error handling and integrate necessary dependencies for Python.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Architecture & Foundation)\nIn Week 1, you will focus on the **Architecture & Foundation** phase of your Python application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the architecture & foundation phase.\n- Implement robust error handling and integrate necessary dependencies for Python.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the architecture & foundation module for a scale Python application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "2": {
+          "title": "Week 2: Core Feature Implementation",
+          "deliverables": [
+            "Establish the required modules for the core feature implementation phase.",
+            "Implement robust error handling and integrate necessary dependencies for Python.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Core Feature Implementation)\nIn Week 2, you will focus on the **Core Feature Implementation** phase of your Python application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the core feature implementation phase.\n- Implement robust error handling and integrate necessary dependencies for Python.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the core feature implementation module for a scale Python application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "3": {
+          "title": "Week 3: Database & API Integrations",
+          "deliverables": [
+            "Establish the required modules for the database & api integrations phase.",
+            "Implement robust error handling and integrate necessary dependencies for Python.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Database & API Integrations)\nIn Week 3, you will focus on the **Database & API Integrations** phase of your Python application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the database & api integrations phase.\n- Implement robust error handling and integrate necessary dependencies for Python.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the database & api integrations module for a scale Python application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "4": {
+          "title": "Week 4: Optimization, Security & Final Deployment",
+          "deliverables": [
+            "Establish the required modules for the optimization, security & final deployment phase.",
+            "Implement robust error handling and integrate necessary dependencies for Python.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Optimization, Security & Final Deployment)\nIn Week 4, you will focus on the **Optimization, Security & Final Deployment** phase of your Python application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the optimization, security & final deployment phase.\n- Implement robust error handling and integrate necessary dependencies for Python.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the optimization, security & final deployment module for a scale Python application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
           ]
         }
       }
@@ -271,7 +403,7 @@
             "Responsive header with cart badge counter and category navigation",
             "Product card grid with hover zoom, price tags, and rating stars"
           ],
-          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational component hierarchy, design system, and product catalog for **OmniStore** on localhost.",
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational component hierarchy, design system, and product catalog for **OmniStore** on localhost.\n\n### What to do\n- Next.js / React project setup with Tailwind CSS or CSS Modules\n- Responsive header with cart badge counter and category navigation\n- Product card grid with hover zoom, price tags, and rating stars\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Created modular Next.js / React component architecture with Tailwind CSS",
             "Built responsive product card grid with hover effects and price badges",
@@ -285,7 +417,7 @@
             "Slide-out Cart drawer with smooth entrance transitions and item list",
             "LocalStorage state persistence so cart persists across page reloads"
           ],
-          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement scalable global state management for cart operations with local storage persistence.",
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement scalable global state management for cart operations with local storage persistence.\n\n### What to do\n- Global cart state store with Add, Remove, Quantity adjustment, and Subtotal calculation\n- Slide-out Cart drawer with smooth entrance transitions and item list\n- LocalStorage state persistence so cart persists across page reloads\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Integrated global state management (Zustand/React Context) for cart handling",
             "Engineered smooth slide-out drawer with real-time price computations",
@@ -299,7 +431,7 @@
             "Multi-filter sidebar (Category, Price range slider, In-stock toggle)",
             "Real-time instant search bar with debounced query execution"
           ],
-          "description": "### 🎯 Project Overview (Week 3: Integrations)\nAdd dynamic route pages for individual products, multi-facet filtering, and debounced search.",
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nAdd dynamic route pages for individual products, multi-facet filtering, and debounced search.\n\n### What to do\n- Dynamic routing (`/product/[id]`) with image gallery and spec table\n- Multi-filter sidebar (Category, Price range slider, In-stock toggle)\n- Real-time instant search bar with debounced query execution\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Built Next.js dynamic routing with rich product detail views and image zoom",
             "Implemented debounced instant search and multi-facet filtering",
@@ -314,7 +446,7 @@
             "Animated order confirmation celebration screen with downloadable order receipt",
             "Final localhost video demo showing full shopping journey from browsing to checkout"
           ],
-          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nDeliver a production-ready e-commerce experience with discount vouchers, checkout simulation, and receipt generation.",
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nDeliver a production-ready e-commerce experience with discount vouchers, checkout simulation, and receipt generation.\n\n### What to do\n- Promo code discount simulator (e.g. `SAVE20`) with instant validation and total deduction\n- Multi-step checkout modal with shipping address validation and payment simulation\n- Animated order confirmation celebration screen with downloadable order receipt\n- Final localhost video demo showing full shopping journey from browsing to checkout\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Completed the 4-week OmniStore Next.js / React e-commerce capstone!",
             "Built promo code discount simulator, multi-step checkout form, and receipt generator",
@@ -334,7 +466,7 @@
             "Horizontal scrolling media rails (Trending, Top Rated, Action, Sci-Fi)",
             "Media card component with hover preview glow and badge ratings"
           ],
-          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational UI structure and scrolling media rails for **StreamVibe** in React/Next.js.",
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational UI structure and scrolling media rails for **StreamVibe** in React/Next.js.\n\n### What to do\n- Dark theme cinema UI layout with backdrop poster hero section\n- Horizontal scrolling media rails (Trending, Top Rated, Action, Sci-Fi)\n- Media card component with hover preview glow and badge ratings\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Engineered dark cinema UI with responsive hero banner and trailer overlay",
             "Built smooth horizontal scrolling media rails for categorized browsing",
@@ -348,7 +480,7 @@
             "Interactive 'Add to My List' bookmarking engine",
             "Zustand/Redux state store keeping saved watchlist items in `localStorage`"
           ],
-          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nBuild a customized in-app video player modal and persistent user watchlist.",
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nBuild a customized in-app video player modal and persistent user watchlist.\n\n### What to do\n- Custom HTML5/React video player overlay with play/pause, seekbar, volume, and fullscreen\n- Interactive 'Add to My List' bookmarking engine\n- Zustand/Redux state store keeping saved watchlist items in `localStorage`\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Built a custom React video player with custom playback controls and scrubber",
             "Engineered user Watchlist with local storage synchronization",
@@ -362,7 +494,7 @@
             "Debounced live search input filtering movies, genres, and cast members",
             "Skeleton shimmer placeholders while async video metadata loads"
           ],
-          "description": "### 🎯 Project Overview (Week 3: Integrations)\nConnect real movie/video API endpoints with async caching and debounced searching.",
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nConnect real movie/video API endpoints with async caching and debounced searching.\n\n### What to do\n- Integration with public TMDB API or mock video stream API via `fetch`/`tanstack-query`\n- Debounced live search input filtering movies, genres, and cast members\n- Skeleton shimmer placeholders while async video metadata loads\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Integrated TMDB REST API for dynamic movie metadata and posters",
             "Implemented debounced instant search across video titles and genres",
@@ -376,11 +508,77 @@
             "Responsive mobile navigation drawer and playback controls",
             "Final capstone demo showing full video browsing and playback on localhost"
           ],
-          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the StreamVibe platform with interactive user reviews and full responsive polish.",
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the StreamVibe platform with interactive user reviews and full responsive polish.\n\n### What to do\n- Interactive star rating and comment review submission form\n- Responsive mobile navigation drawer and playback controls\n- Final capstone demo showing full video browsing and playback on localhost\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Completed the 4-week StreamVibe React / Next.js streaming platform capstone!",
             "Built interactive user review engine and responsive mobile media layout",
             "Demonstrated dynamic movie streaming and watchlist on video"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "Advanced React Scale Application",
+      "tagline": "Master production-grade React workflows by building a highly scalable, complete end-to-end application from scratch.",
+      "weeks": {
+        "1": {
+          "title": "Week 1: Architecture & Foundation",
+          "deliverables": [
+            "Establish the required modules for the architecture & foundation phase.",
+            "Implement robust error handling and integrate necessary dependencies for React.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Architecture & Foundation)\nIn Week 1, you will focus on the **Architecture & Foundation** phase of your React application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the architecture & foundation phase.\n- Implement robust error handling and integrate necessary dependencies for React.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the architecture & foundation module for a scale React application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "2": {
+          "title": "Week 2: Core Feature Implementation",
+          "deliverables": [
+            "Establish the required modules for the core feature implementation phase.",
+            "Implement robust error handling and integrate necessary dependencies for React.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Core Feature Implementation)\nIn Week 2, you will focus on the **Core Feature Implementation** phase of your React application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the core feature implementation phase.\n- Implement robust error handling and integrate necessary dependencies for React.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the core feature implementation module for a scale React application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "3": {
+          "title": "Week 3: Database & API Integrations",
+          "deliverables": [
+            "Establish the required modules for the database & api integrations phase.",
+            "Implement robust error handling and integrate necessary dependencies for React.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Database & API Integrations)\nIn Week 3, you will focus on the **Database & API Integrations** phase of your React application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the database & api integrations phase.\n- Implement robust error handling and integrate necessary dependencies for React.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the database & api integrations module for a scale React application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "4": {
+          "title": "Week 4: Optimization, Security & Final Deployment",
+          "deliverables": [
+            "Establish the required modules for the optimization, security & final deployment phase.",
+            "Implement robust error handling and integrate necessary dependencies for React.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Optimization, Security & Final Deployment)\nIn Week 4, you will focus on the **Optimization, Security & Final Deployment** phase of your React application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the optimization, security & final deployment phase.\n- Implement robust error handling and integrate necessary dependencies for React.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the optimization, security & final deployment module for a scale React application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
           ]
         }
       }
@@ -398,7 +596,7 @@
             "Global error handling middleware and structured JSON response formatters",
             "Environment configuration management with dotenv and request logger (Morgan/Winston)"
           ],
-          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational Express.js server architecture and centralized error handling system.",
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational Express.js server architecture and centralized error handling system.\n\n### What to do\n- Modular Express app structure (Controllers, Routes, Middlewares, Services)\n- Global error handling middleware and structured JSON response formatters\n- Environment configuration management with dotenv and request logger (Morgan/Winston)\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Structured modular Node.js & Express application architecture",
             "Built global error handling middleware and custom HTTP response helpers",
@@ -412,7 +610,7 @@
             "JWT token generation, cookie/header storage, and authorization guards",
             "Protected user profile routes with role-based permissions (User vs Admin)"
           ],
-          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement secure JWT authentication, password hashing, and role-based route middleware.",
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement secure JWT authentication, password hashing, and role-based route middleware.\n\n### What to do\n- User registration, password hashing with bcrypt, and login endpoints\n- JWT token generation, cookie/header storage, and authorization guards\n- Protected user profile routes with role-based permissions (User vs Admin)\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Engineered secure authentication pipeline with bcrypt hashing and JWT tokens",
             "Created custom route authorization guards and role-based permissions",
@@ -426,7 +624,7 @@
             "Query parameter filters, sorting (`sort=createdAt:desc`), and limit/offset pagination",
             "Data validation middleware using Zod / Joi with descriptive error payloads"
           ],
-          "description": "### 🎯 Project Overview (Week 3: Integrations)\nConnect your API to a persistent database with query filters, pagination, and schema validation.",
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nConnect your API to a persistent database with query filters, pagination, and schema validation.\n\n### What to do\n- Resource CRUD endpoints with database persistence\n- Query parameter filters, sorting (`sort=createdAt:desc`), and limit/offset pagination\n- Data validation middleware using Zod / Joi with descriptive error payloads\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Implemented database CRUD operations with schema validation (Zod/Joi)",
             "Engineered advanced query filtering, sorting, and pagination algorithms",
@@ -441,7 +639,7 @@
             "Comprehensive automated integration test suite using Supertest and Jest",
             "Final video demonstration showcasing all endpoints and security protections"
           ],
-          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nSecure and document the CloudVault API with rate limiting, Swagger documentation, and automated tests.",
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nSecure and document the CloudVault API with rate limiting, Swagger documentation, and automated tests.\n\n### What to do\n- API Rate limiting with express-rate-limit and Helmet security headers\n- Auto-generated Swagger / OpenAPI interactive documentation running on `http://localhost:5000/api-docs`\n- Comprehensive automated integration test suite using Supertest and Jest\n- Final video demonstration showcasing all endpoints and security protections\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Completed the 4-week CloudVault Node.js & Express backend capstone!",
             "Integrated Swagger OpenAPI documentation, rate limiting, and Helmet security",
@@ -461,7 +659,7 @@
             "Connection lifecycle handlers (`connection`, `disconnect`, `reconnect`)",
             "Lightweight HTML/JS test client testing bi-directional message broadcasting on localhost"
           ],
-          "description": "### 🎯 Project Overview (Week 1: Base Model)\nSet up a real-time WebSocket communication server with Socket.IO in Node.js.",
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nSet up a real-time WebSocket communication server with Socket.IO in Node.js.\n\n### What to do\n- Express server combined with Socket.IO HTTP connection listener\n- Connection lifecycle handlers (`connection`, `disconnect`, `reconnect`)\n- Lightweight HTML/JS test client testing bi-directional message broadcasting on localhost\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Configured high-concurrency Socket.IO server on Node.js",
             "Built connection lifecycle event listeners and error guards",
@@ -475,7 +673,7 @@
             "User presence tracking (Active online user list per channel)",
             "Real-time typing indicator events (`user:typing`, `user:stop-typing`)"
           ],
-          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement isolated chat room channels, live presence counters, and typing indicator events.",
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement isolated chat room channels, live presence counters, and typing indicator events.\n\n### What to do\n- Room joining & leaving logic (`socket.join('room-name')`)\n- User presence tracking (Active online user list per channel)\n- Real-time typing indicator events (`user:typing`, `user:stop-typing`)\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Implemented multi-room channel segregation and private messaging",
             "Added live user presence tracker and typing notification events",
@@ -489,7 +687,7 @@
             "Initial room history payload sent upon joining a room",
             "File upload endpoint for sending image/document attachments in chat"
           ],
-          "description": "### 🎯 Project Overview (Week 3: Integrations)\nPersist chat histories into an SQLite database and support file attachments.",
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nPersist chat histories into an SQLite database and support file attachments.\n\n### What to do\n- Database schema storing chat messages, room IDs, and timestamps\n- Initial room history payload sent upon joining a room\n- File upload endpoint for sending image/document attachments in chat\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Persisted message transcripts with timestamps in SQLite database",
             "Loaded historical message logs automatically upon channel connection",
@@ -503,11 +701,77 @@
             "Read receipts (sent, delivered, read status indicators)",
             "Final video demonstration showing multi-window real-time chat on localhost"
           ],
-          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the ChatPulse server with live emoji reactions, delivery receipts, and full video demo.",
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the ChatPulse server with live emoji reactions, delivery receipts, and full video demo.\n\n### What to do\n- Emoji reactions on messages updating in real time for all room participants\n- Read receipts (sent, delivered, read status indicators)\n- Final video demonstration showing multi-window real-time chat on localhost\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Completed the 4-week ChatPulse Real-Time Node.js WebSockets capstone!",
             "Built real-time emoji reactions, read receipts, and message persistence",
             "Demonstrated multi-user live messaging across split browser windows"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "Advanced Node Scale Application",
+      "tagline": "Master production-grade Node workflows by building a highly scalable, complete end-to-end application from scratch.",
+      "weeks": {
+        "1": {
+          "title": "Week 1: Architecture & Foundation",
+          "deliverables": [
+            "Establish the required modules for the architecture & foundation phase.",
+            "Implement robust error handling and integrate necessary dependencies for Node.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Architecture & Foundation)\nIn Week 1, you will focus on the **Architecture & Foundation** phase of your Node application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the architecture & foundation phase.\n- Implement robust error handling and integrate necessary dependencies for Node.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the architecture & foundation module for a scale Node application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "2": {
+          "title": "Week 2: Core Feature Implementation",
+          "deliverables": [
+            "Establish the required modules for the core feature implementation phase.",
+            "Implement robust error handling and integrate necessary dependencies for Node.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Core Feature Implementation)\nIn Week 2, you will focus on the **Core Feature Implementation** phase of your Node application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the core feature implementation phase.\n- Implement robust error handling and integrate necessary dependencies for Node.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the core feature implementation module for a scale Node application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "3": {
+          "title": "Week 3: Database & API Integrations",
+          "deliverables": [
+            "Establish the required modules for the database & api integrations phase.",
+            "Implement robust error handling and integrate necessary dependencies for Node.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Database & API Integrations)\nIn Week 3, you will focus on the **Database & API Integrations** phase of your Node application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the database & api integrations phase.\n- Implement robust error handling and integrate necessary dependencies for Node.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the database & api integrations module for a scale Node application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "4": {
+          "title": "Week 4: Optimization, Security & Final Deployment",
+          "deliverables": [
+            "Establish the required modules for the optimization, security & final deployment phase.",
+            "Implement robust error handling and integrate necessary dependencies for Node.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Optimization, Security & Final Deployment)\nIn Week 4, you will focus on the **Optimization, Security & Final Deployment** phase of your Node application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the optimization, security & final deployment phase.\n- Implement robust error handling and integrate necessary dependencies for Node.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the optimization, security & final deployment module for a scale Node application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
           ]
         }
       }
@@ -525,7 +789,7 @@
             "Domain entities with Jakarta Validation annotations (`@NotNull`, `@Size`, `@Email`)",
             "Base REST endpoints for account creation and balance lookups"
           ],
-          "description": "### 🎯 Project Overview (Week 1: Base Model)\nConstruct the enterprise Spring Boot backend and domain model for BankPulse.",
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nConstruct the enterprise Spring Boot backend and domain model for BankPulse.\n\n### What to do\n- Spring Boot project architecture with layered separation (Controller, Service, Repository, DTO)\n- Domain entities with Jakarta Validation annotations (`@NotNull`, `@Size`, `@Email`)\n- Base REST endpoints for account creation and balance lookups\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Structured enterprise Spring Boot architecture with Maven and layered services",
             "Built robust domain entity models with Jakarta validation rules",
@@ -539,7 +803,7 @@
             "Atomic fund transfer service with `@Transactional` rollback guarantees",
             "In-memory H2 database console running on `http://localhost:8080/h2-console`"
           ],
-          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement database persistence with Spring Data JPA and atomic transfer transactions.",
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement database persistence with Spring Data JPA and atomic transfer transactions.\n\n### What to do\n- Spring Data JPA repositories with custom derived query methods\n- Atomic fund transfer service with `@Transactional` rollback guarantees\n- In-memory H2 database console running on `http://localhost:8080/h2-console`\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Configured Spring Data JPA repositories with H2 in-memory database",
             "Implemented ACID-compliant transactional money transfer logic",
@@ -553,7 +817,7 @@
             "ModelMapper / MapStruct integration for entity-to-DTO conversion",
             "Statement generator generating monthly transaction history summaries with filters"
           ],
-          "description": "### 🎯 Project Overview (Week 3: Integrations)\nAdd global error handling, DTO mapping layer, and account statement generation.",
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nAdd global error handling, DTO mapping layer, and account statement generation.\n\n### What to do\n- Centralized exception handling with `@ControllerAdvice` and custom API errors\n- ModelMapper / MapStruct integration for entity-to-DTO conversion\n- Statement generator generating monthly transaction history summaries with filters\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Built centralized error handling with `@ControllerAdvice` and structured responses",
             "Implemented clean DTO mapping layer for secure data encapsulation",
@@ -568,7 +832,7 @@
             "JUnit 5 & Mockito service unit test suite",
             "Final video demonstration showing transaction flows and Swagger UI"
           ],
-          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the BankPulse enterprise backend with Spring Security, Swagger documentation, and unit tests.",
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the BankPulse enterprise backend with Spring Security, Swagger documentation, and unit tests.\n\n### What to do\n- Spring Security integration with Basic Auth or JWT token authentication\n- Interactive Swagger / OpenAPI UI running on `http://localhost:8080/swagger-ui.html`\n- JUnit 5 & Mockito service unit test suite\n- Final video demonstration showing transaction flows and Swagger UI\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Completed the 4-week BankPulse Java Spring Boot enterprise capstone!",
             "Integrated Spring Security authentication and interactive Swagger OpenAPI docs",
@@ -588,7 +852,7 @@
             "Product entity with SKU, price, stock quantity, and category relationships",
             "REST endpoints for product listing, filtering, and creation"
           ],
-          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational product catalog and category management REST endpoints in Spring Boot.",
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational product catalog and category management REST endpoints in Spring Boot.\n\n### What to do\n- Spring Boot 3 project setup with Lombok, DevTools, and layered package architecture\n- Product entity with SKU, price, stock quantity, and category relationships\n- REST endpoints for product listing, filtering, and creation\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Built Spring Boot 3 product catalog backend with Lombok and JPA",
             "Created product entity models with stock quantity validation",
@@ -602,7 +866,7 @@
             "Transactional order placement logic deducting stock with insufficient inventory guards",
             "Order status state machine (PENDING, PAID, SHIPPED, CANCELLED)"
           ],
-          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement relational order placement logic with automated stock deductions and rollback safety.",
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement relational order placement logic with automated stock deductions and rollback safety.\n\n### What to do\n- Order and OrderItem relational JPA entities (`@OneToMany`, `@ManyToOne`)\n- Transactional order placement logic deducting stock with insufficient inventory guards\n- Order status state machine (PENDING, PAID, SHIPPED, CANCELLED)\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Implemented transactional order placement with automated inventory decrements",
             "Built stock-level guards preventing overselling",
@@ -616,7 +880,7 @@
             "Pageable REST endpoints with sort and limit parameters",
             "Promotional discount code calculation engine"
           ],
-          "description": "### 🎯 Project Overview (Week 3: Integrations)\nImplement dynamic JPA query specifications, pagination, and promotional discount calculations.",
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nImplement dynamic JPA query specifications, pagination, and promotional discount calculations.\n\n### What to do\n- Spring Data JPA `JpaSpecificationExecutor` for dynamic multi-criteria search\n- Pageable REST endpoints with sort and limit parameters\n- Promotional discount code calculation engine\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Integrated JPA Specifications for multi-attribute product filtering",
             "Configured sorted pagination responses for high-volume catalogs",
@@ -630,11 +894,77 @@
             "JUnit 5 unit tests with Mockito mocking service dependencies",
             "Final localhost video demonstration showing order placement and inventory updates"
           ],
-          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nDocument with Swagger UI, achieve 80%+ test coverage with Mockito, and record the capstone demo.",
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nDocument with Swagger UI, achieve 80%+ test coverage with Mockito, and record the capstone demo.\n\n### What to do\n- Swagger / Springdoc OpenAPI interactive documentation\n- JUnit 5 unit tests with Mockito mocking service dependencies\n- Final localhost video demonstration showing order placement and inventory updates\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Completed the 4-week ShopSphere Spring Boot e-commerce capstone!",
             "Added comprehensive JUnit 5 & Mockito test suites",
             "Showcased complete order fulfillment pipeline and Swagger UI on video"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "Advanced Java Scale Application",
+      "tagline": "Master production-grade Java workflows by building a highly scalable, complete end-to-end application from scratch.",
+      "weeks": {
+        "1": {
+          "title": "Week 1: Architecture & Foundation",
+          "deliverables": [
+            "Establish the required modules for the architecture & foundation phase.",
+            "Implement robust error handling and integrate necessary dependencies for Java.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Architecture & Foundation)\nIn Week 1, you will focus on the **Architecture & Foundation** phase of your Java application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the architecture & foundation phase.\n- Implement robust error handling and integrate necessary dependencies for Java.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the architecture & foundation module for a scale Java application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "2": {
+          "title": "Week 2: Core Feature Implementation",
+          "deliverables": [
+            "Establish the required modules for the core feature implementation phase.",
+            "Implement robust error handling and integrate necessary dependencies for Java.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Core Feature Implementation)\nIn Week 2, you will focus on the **Core Feature Implementation** phase of your Java application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the core feature implementation phase.\n- Implement robust error handling and integrate necessary dependencies for Java.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the core feature implementation module for a scale Java application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "3": {
+          "title": "Week 3: Database & API Integrations",
+          "deliverables": [
+            "Establish the required modules for the database & api integrations phase.",
+            "Implement robust error handling and integrate necessary dependencies for Java.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Database & API Integrations)\nIn Week 3, you will focus on the **Database & API Integrations** phase of your Java application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the database & api integrations phase.\n- Implement robust error handling and integrate necessary dependencies for Java.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the database & api integrations module for a scale Java application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "4": {
+          "title": "Week 4: Optimization, Security & Final Deployment",
+          "deliverables": [
+            "Establish the required modules for the optimization, security & final deployment phase.",
+            "Implement robust error handling and integrate necessary dependencies for Java.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Optimization, Security & Final Deployment)\nIn Week 4, you will focus on the **Optimization, Security & Final Deployment** phase of your Java application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the optimization, security & final deployment phase.\n- Implement robust error handling and integrate necessary dependencies for Java.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the optimization, security & final deployment module for a scale Java application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
           ]
         }
       }
@@ -652,7 +982,7 @@
             "Baseline Convolutional Neural Network (CNN) architecture with training loop",
             "Training metric curves (Loss and Accuracy) plotted across epochs with Matplotlib"
           ],
-          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational computer vision data pipeline and baseline neural network classifier in Python.",
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational computer vision data pipeline and baseline neural network classifier in Python.\n\n### What to do\n- Image dataset loading and augmentation pipeline with PyTorch / TensorFlow / OpenCV\n- Baseline Convolutional Neural Network (CNN) architecture with training loop\n- Training metric curves (Loss and Accuracy) plotted across epochs with Matplotlib\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Engineered PyTorch image preprocessing and data augmentation pipeline",
             "Trained baseline Convolutional Neural Network with validation checkpoints",
@@ -666,7 +996,7 @@
             "Fine-tuning strategy achieving 90%+ classification accuracy",
             "Confusion matrix visualization identifying class-level misclassifications"
           ],
-          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nUpgrade your model performance with transfer learning, layer freezing, and hyperparameter optimization.",
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nUpgrade your model performance with transfer learning, layer freezing, and hyperparameter optimization.\n\n### What to do\n- Transfer learning pipeline using pre-trained ResNet / MobileNet architectures\n- Fine-tuning strategy achieving 90%+ classification accuracy\n- Confusion matrix visualization identifying class-level misclassifications\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Implemented transfer learning with fine-tuned ResNet architectures",
             "Achieved 92%+ classification accuracy with learning rate scheduling",
@@ -680,7 +1010,7 @@
             "Drag-and-drop image upload with instant top-3 class probability bars",
             "Live webcam snapshot inference mode with bounding box / heatmap visualization"
           ],
-          "description": "### 🎯 Project Overview (Week 3: Integrations)\nDeploy an interactive web interface on localhost allowing users to test images and live video feeds.",
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nDeploy an interactive web interface on localhost allowing users to test images and live video feeds.\n\n### What to do\n- Local web app interface using Gradio or Streamlit running on `http://localhost:7860`\n- Drag-and-drop image upload with instant top-3 class probability bars\n- Live webcam snapshot inference mode with bounding box / heatmap visualization\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Built interactive Gradio web application for real-time model inference",
             "Added drag-and-drop testing with dynamic confidence probability bars",
@@ -694,7 +1024,7 @@
             "FastAPI backend microservice serving high-throughput `/predict` endpoint",
             "Complete end-to-end video recording showcasing model inference on localhost"
           ],
-          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete VisionAI with visual model interpretability (Grad-CAM), high-speed REST API, and capstone presentation.",
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete VisionAI with visual model interpretability (Grad-CAM), high-speed REST API, and capstone presentation.\n\n### What to do\n- Grad-CAM visualizer highlighting image regions driving model classification decisions\n- FastAPI backend microservice serving high-throughput `/predict` endpoint\n- Complete end-to-end video recording showcasing model inference on localhost\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Completed the 4-week VisionAI Computer Vision capstone studio!",
             "Implemented Grad-CAM explainability heatmaps and FastAPI REST endpoints",
@@ -714,7 +1044,7 @@
             "TF-IDF vectorizer and Naive Bayes / Logistic Regression text classifier",
             "Model accuracy and F1-score evaluation on benchmark customer reviews dataset"
           ],
-          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild a baseline text classification pipeline for customer sentiment analysis in Python.",
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild a baseline text classification pipeline for customer sentiment analysis in Python.\n\n### What to do\n- Text tokenization, lemmatization, and stopword removal pipeline with NLTK / SpaCy\n- TF-IDF vectorizer and Naive Bayes / Logistic Regression text classifier\n- Model accuracy and F1-score evaluation on benchmark customer reviews dataset\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Built text normalization and tokenization pipeline with SpaCy",
             "Trained TF-IDF baseline sentiment classifier with Scikit-Learn",
@@ -728,7 +1058,7 @@
             "Multi-label classification (Positive, Neutral, Negative, Urgent)",
             "Confidence score extraction and sentence highlighting"
           ],
-          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nUpgrade classification with pre-trained Transformer architectures from HuggingFace.",
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nUpgrade classification with pre-trained Transformer architectures from HuggingFace.\n\n### What to do\n- HuggingFace pipeline integrating pre-trained DistilBERT / RoBERTa models\n- Multi-label classification (Positive, Neutral, Negative, Urgent)\n- Confidence score extraction and sentence highlighting\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Integrated HuggingFace Transformers (DistilBERT) for deep text comprehension",
             "Achieved 94%+ sentiment classification accuracy",
@@ -742,7 +1072,7 @@
             "Local vector similarity search using Cosine Similarity or FAISS",
             "Document search engine retrieving top-3 matching passages for user queries"
           ],
-          "description": "### 🎯 Project Overview (Week 3: Integrations)\nImplement semantic vector search across unstructured documents using FAISS or sentence embeddings.",
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nImplement semantic vector search across unstructured documents using FAISS or sentence embeddings.\n\n### What to do\n- Sentence-Transformers (`all-MiniLM-L6-v2`) generating dense text embeddings\n- Local vector similarity search using Cosine Similarity or FAISS\n- Document search engine retrieving top-3 matching passages for user queries\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Built dense vector embeddings using Sentence-Transformers",
             "Implemented in-memory FAISS semantic similarity search",
@@ -756,11 +1086,77 @@
             "Live text analysis playground with keyword wordcloud and entity visualizer",
             "Final capstone demo showcasing sentiment analysis and semantic search on video"
           ],
-          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the NeuroNLP suite with an interactive web UI, Named Entity Recognition visualizer, and video presentation.",
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the NeuroNLP suite with an interactive web UI, Named Entity Recognition visualizer, and video presentation.\n\n### What to do\n- Interactive Streamlit web app running on `http://localhost:8501`\n- Live text analysis playground with keyword wordcloud and entity visualizer\n- Final capstone demo showcasing sentiment analysis and semantic search on video\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Completed the 4-week NeuroNLP Semantic Intelligence capstone!",
             "Built interactive Streamlit web dashboard with live NER and sentiment visualizers",
             "Demonstrated semantic document search and inference on localhost"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "Advanced Machine Learning Scale Application",
+      "tagline": "Master production-grade Machine Learning workflows by building a highly scalable, complete end-to-end application from scratch.",
+      "weeks": {
+        "1": {
+          "title": "Week 1: Architecture & Foundation",
+          "deliverables": [
+            "Establish the required modules for the architecture & foundation phase.",
+            "Implement robust error handling and integrate necessary dependencies for Machine Learning.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Architecture & Foundation)\nIn Week 1, you will focus on the **Architecture & Foundation** phase of your Machine Learning application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the architecture & foundation phase.\n- Implement robust error handling and integrate necessary dependencies for Machine Learning.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the architecture & foundation module for a scale Machine Learning application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "2": {
+          "title": "Week 2: Core Feature Implementation",
+          "deliverables": [
+            "Establish the required modules for the core feature implementation phase.",
+            "Implement robust error handling and integrate necessary dependencies for Machine Learning.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Core Feature Implementation)\nIn Week 2, you will focus on the **Core Feature Implementation** phase of your Machine Learning application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the core feature implementation phase.\n- Implement robust error handling and integrate necessary dependencies for Machine Learning.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the core feature implementation module for a scale Machine Learning application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "3": {
+          "title": "Week 3: Database & API Integrations",
+          "deliverables": [
+            "Establish the required modules for the database & api integrations phase.",
+            "Implement robust error handling and integrate necessary dependencies for Machine Learning.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Database & API Integrations)\nIn Week 3, you will focus on the **Database & API Integrations** phase of your Machine Learning application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the database & api integrations phase.\n- Implement robust error handling and integrate necessary dependencies for Machine Learning.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the database & api integrations module for a scale Machine Learning application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "4": {
+          "title": "Week 4: Optimization, Security & Final Deployment",
+          "deliverables": [
+            "Establish the required modules for the optimization, security & final deployment phase.",
+            "Implement robust error handling and integrate necessary dependencies for Machine Learning.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Optimization, Security & Final Deployment)\nIn Week 4, you will focus on the **Optimization, Security & Final Deployment** phase of your Machine Learning application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the optimization, security & final deployment phase.\n- Implement robust error handling and integrate necessary dependencies for Machine Learning.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the optimization, security & final deployment module for a scale Machine Learning application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
           ]
         }
       }
@@ -779,7 +1175,7 @@
             "Automated descriptive statistics summary (shape, missing values, data types, distributions)",
             "Interactive correlation heatmap and univariate distribution charts"
           ],
-          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational **InsightHub** Exploratory Data Analysis (EDA) web application in Python.",
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational **InsightHub** Exploratory Data Analysis (EDA) web application in Python.\n\n### What to do\n- Interactive Streamlit / Dash web application running on `http://localhost:8501`\n- Dataset upload module supporting CSV, Excel, and JSON files\n- Automated descriptive statistics summary (shape, missing values, data types, distributions)\n- Interactive correlation heatmap and univariate distribution charts\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Built an interactive Exploratory Data Analysis web app with Streamlit & Plotly",
             "Automated descriptive statistics, null value identification, and summary KPIs",
@@ -794,7 +1190,7 @@
             "Outlier detection and visualization using Box Plots and Z-score methods",
             "Download cleaned dataset button in CSV/Parquet format"
           ],
-          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nExpand InsightHub with interactive sidebar filters and a visual feature engineering pipeline.",
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nExpand InsightHub with interactive sidebar filters and a visual feature engineering pipeline.\n\n### What to do\n- Dynamic data filtering sidebar (date range sliders, categorical multi-selects, value thresholds)\n- Feature transformation pipeline (log transform, scaling, one-hot encoding, binning)\n- Outlier detection and visualization using Box Plots and Z-score methods\n- Download cleaned dataset button in CSV/Parquet format\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Implemented dynamic multi-criteria filtering with real-time chart updates",
             "Built visual feature engineering pipeline (scaling, encoding, imputation)",
@@ -809,7 +1205,7 @@
             "Hyperparameter tuning controls (sliders for max depth, estimators, learning rate)",
             "Real-time prediction simulator allowing custom user feature inputs"
           ],
-          "description": "### 🎯 Project Overview (Week 3: Integrations)\nIntegrate machine learning model training and real-time inference directly into the InsightHub interface.",
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nIntegrate machine learning model training and real-time inference directly into the InsightHub interface.\n\n### What to do\n- Supervised ML training pipeline (Random Forest / Logistic Regression / XGBoost)\n- Interactive model evaluation suite (Confusion Matrix, ROC-AUC curve, Classification Report)\n- Hyperparameter tuning controls (sliders for max depth, estimators, learning rate)\n- Real-time prediction simulator allowing custom user feature inputs\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Integrated Scikit-Learn predictive modeling pipeline inside the dashboard",
             "Rendered interactive Confusion Matrix, ROC-AUC curves, and metric charts",
@@ -824,7 +1220,7 @@
             "Automated Executive PDF / HTML Summary Report generator",
             "Final capstone walkthrough showcasing full data-to-prediction lifecycle on localhost"
           ],
-          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the InsightHub platform with feature explainability, direct SQL querying, and executive summary export.",
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the InsightHub platform with feature explainability, direct SQL querying, and executive summary export.\n\n### What to do\n- Model explainability tab using SHAP / feature importance charts to explain predictions\n- Embedded SQL Query Runner allowing direct database queries on raw tables\n- Automated Executive PDF / HTML Summary Report generator\n- Final capstone walkthrough showcasing full data-to-prediction lifecycle on localhost\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Completed the 4-week InsightHub Data Science & ML platform capstone!",
             "Integrated SHAP model explainability and in-browser SQL query runner",
@@ -844,7 +1240,7 @@
             "Interactive Candlestick chart with volume bars using Plotly",
             "Summary statistics calculating Daily Returns, Volatility, and CAGR"
           ],
-          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild an interactive financial market visualizer in Python with candlestick charting on localhost.",
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild an interactive financial market visualizer in Python with candlestick charting on localhost.\n\n### What to do\n- Financial time-series data loader using `yfinance` or Pandas Datareader\n- Interactive Candlestick chart with volume bars using Plotly\n- Summary statistics calculating Daily Returns, Volatility, and CAGR\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Integrated live financial time-series data fetching with Yahoo Finance",
             "Rendered interactive OHLC Candlestick charts with volume indicators",
@@ -858,7 +1254,7 @@
             "Relative Strength Index (RSI) oscillator with overbought/oversold bands",
             "MACD (Moving Average Convergence Divergence) signal line generator"
           ],
-          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement core technical indicators and momentum oscillators into your financial charts.",
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement core technical indicators and momentum oscillators into your financial charts.\n\n### What to do\n- Moving Average calculation engine (SMA 20/50/200, Exponential Moving Averages)\n- Relative Strength Index (RSI) oscillator with overbought/oversold bands\n- MACD (Moving Average Convergence Divergence) signal line generator\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Built custom technical indicator calculation engine in Pandas",
             "Rendered multi-pane charts for RSI and MACD signal crossovers",
@@ -872,7 +1268,7 @@
             "Performance metrics calculator: Total Return, Sharpe Ratio, Max Drawdown, Win Rate",
             "Visual equity curve comparing strategy performance against Buy & Hold benchmark"
           ],
-          "description": "### 🎯 Project Overview (Week 3: Integrations)\nConstruct an automated backtesting simulation evaluating strategy profitability and Sharpe ratio.",
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nConstruct an automated backtesting simulation evaluating strategy profitability and Sharpe ratio.\n\n### What to do\n- Rule-based backtesting engine (e.g. Golden Cross SMA 50/200 Strategy)\n- Performance metrics calculator: Total Return, Sharpe Ratio, Max Drawdown, Win Rate\n- Visual equity curve comparing strategy performance against Buy & Hold benchmark\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Built an algorithmic backtesting simulation for momentum crossover strategies",
             "Calculated Sharpe Ratio, Maximum Drawdown, and cumulative returns",
@@ -886,11 +1282,77 @@
             "Prediction confidence intervals (80% and 95% uncertainty bands)",
             "Complete video walkthrough showing live backtesting and forecasting on localhost"
           ],
-          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete FinanceForecaster with predictive time-series modeling and record the capstone video.",
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete FinanceForecaster with predictive time-series modeling and record the capstone video.\n\n### What to do\n- Future price trend forecast using Facebook Prophet / ARIMA models\n- Prediction confidence intervals (80% and 95% uncertainty bands)\n- Complete video walkthrough showing live backtesting and forecasting on localhost\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Completed the 4-week FinanceForecaster Financial Analytics capstone!",
             "Implemented Prophet time-series forecasting with confidence intervals",
             "Demonstrated technical indicators and strategy backtesting on video"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "Advanced Data Science Scale Application",
+      "tagline": "Master production-grade Data Science workflows by building a highly scalable, complete end-to-end application from scratch.",
+      "weeks": {
+        "1": {
+          "title": "Week 1: Architecture & Foundation",
+          "deliverables": [
+            "Establish the required modules for the architecture & foundation phase.",
+            "Implement robust error handling and integrate necessary dependencies for Data Science.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Architecture & Foundation)\nIn Week 1, you will focus on the **Architecture & Foundation** phase of your Data Science application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the architecture & foundation phase.\n- Implement robust error handling and integrate necessary dependencies for Data Science.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the architecture & foundation module for a scale Data Science application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "2": {
+          "title": "Week 2: Core Feature Implementation",
+          "deliverables": [
+            "Establish the required modules for the core feature implementation phase.",
+            "Implement robust error handling and integrate necessary dependencies for Data Science.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Core Feature Implementation)\nIn Week 2, you will focus on the **Core Feature Implementation** phase of your Data Science application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the core feature implementation phase.\n- Implement robust error handling and integrate necessary dependencies for Data Science.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the core feature implementation module for a scale Data Science application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "3": {
+          "title": "Week 3: Database & API Integrations",
+          "deliverables": [
+            "Establish the required modules for the database & api integrations phase.",
+            "Implement robust error handling and integrate necessary dependencies for Data Science.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Database & API Integrations)\nIn Week 3, you will focus on the **Database & API Integrations** phase of your Data Science application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the database & api integrations phase.\n- Implement robust error handling and integrate necessary dependencies for Data Science.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the database & api integrations module for a scale Data Science application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "4": {
+          "title": "Week 4: Optimization, Security & Final Deployment",
+          "deliverables": [
+            "Establish the required modules for the optimization, security & final deployment phase.",
+            "Implement robust error handling and integrate necessary dependencies for Data Science.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Optimization, Security & Final Deployment)\nIn Week 4, you will focus on the **Optimization, Security & Final Deployment** phase of your Data Science application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the optimization, security & final deployment phase.\n- Implement robust error handling and integrate necessary dependencies for Data Science.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the optimization, security & final deployment module for a scale Data Science application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
           ]
         }
       }
@@ -908,7 +1370,7 @@
             "Dashboard screen with calorie progress ring, daily goals, and workout cards",
             "Custom bottom navigation bar with fluid icon transitions"
           ],
-          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational multi-screen Flutter mobile UI for FitPulse on your emulator / localhost.",
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational multi-screen Flutter mobile UI for FitPulse on your emulator / localhost.\n\n### What to do\n- Clean Flutter project structure with reusable widgets and theme palette\n- Dashboard screen with calorie progress ring, daily goals, and workout cards\n- Custom bottom navigation bar with fluid icon transitions\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Designed custom Flutter mobile UI with glassmorphic cards and theme palette",
             "Built animated calorie progress ring and workout category cards",
@@ -922,7 +1384,7 @@
             "Local database persistence with Hive or SQLite storing completed workouts",
             "Log Workout form with duration, intensity selector, and instant UI update"
           ],
-          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement state management and offline database persistence for user workout tracking.",
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement state management and offline database persistence for user workout tracking.\n\n### What to do\n- State management implementation (Provider / Riverpod / Bloc) for daily stats\n- Local database persistence with Hive or SQLite storing completed workouts\n- Log Workout form with duration, intensity selector, and instant UI update\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Integrated Provider / Riverpod state management for reactive data flow",
             "Implemented offline database persistence using Hive / SQLite",
@@ -936,7 +1398,7 @@
             "Animated circular countdown indicator with color shifting",
             "Workout history list with dismissible swipe-to-delete cards"
           ],
-          "description": "### 🎯 Project Overview (Week 3: Integrations)\nAdd an interactive interval workout timer with animated progress rings and swipeable history.",
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nAdd an interactive interval workout timer with animated progress rings and swipeable history.\n\n### What to do\n- Interactive HIIT / Rest timer with play, pause, reset, and interval counter\n- Animated circular countdown indicator with color shifting\n- Workout history list with dismissible swipe-to-delete cards\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Built an animated circular countdown interval timer in Flutter",
             "Added dismissible swipe-to-delete cards with undo snackbars",
@@ -951,7 +1413,7 @@
             "Haptic feedback and smooth hero animations across screens",
             "Final video demonstration showing complete mobile app flow"
           ],
-          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the FitPulse mobile app with weekly analytics charts, theme customization, and polished animations.",
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the FitPulse mobile app with weekly analytics charts, theme customization, and polished animations.\n\n### What to do\n- Weekly workout analytics chart using `fl_chart` visualizing burned calories\n- Dark / Light theme switcher with custom color schemes\n- Haptic feedback and smooth hero animations across screens\n- Final video demonstration showing complete mobile app flow\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Completed the 4-week FitPulse Flutter mobile application capstone!",
             "Integrated interactive weekly charts with `fl_chart` and dark mode theme engine",
@@ -971,7 +1433,7 @@
             "Recent transactions list with category icon badges and amount coloring",
             "Add Transaction floating action button with bottom sheet modal"
           ],
-          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the core financial account overview and transaction list screen in Flutter.",
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the core financial account overview and transaction list screen in Flutter.\n\n### What to do\n- Bank card carousel widget displaying total balance, income, and expenses\n- Recent transactions list with category icon badges and amount coloring\n- Add Transaction floating action button with bottom sheet modal\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Designed financial dashboard with animated account card carousel",
             "Built transaction list widgets with color-coded cashflow badges",
@@ -985,7 +1447,7 @@
             "Category picker (Food, Shopping, Bills, Travel, Entertainment)",
             "CRUD operations: create new expenses, edit amounts, and delete transactions"
           ],
-          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement offline transaction storage with SQLite/Isar and category tagging.",
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement offline transaction storage with SQLite/Isar and category tagging.\n\n### What to do\n- Local database integration with SQLite / Isar storing transactions\n- Category picker (Food, Shopping, Bills, Travel, Entertainment)\n- CRUD operations: create new expenses, edit amounts, and delete transactions\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Integrated SQLite local persistence for financial transactions",
             "Created dynamic category selector with custom icon assets",
@@ -999,7 +1461,7 @@
             "Category budget limit progress bars with warning colors when exceeding 80%",
             "Monthly date range picker filtering transactions by month and year"
           ],
-          "description": "### 🎯 Project Overview (Week 3: Integrations)\nAdd interactive spending charts and monthly budget progress monitors.",
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nAdd interactive spending charts and monthly budget progress monitors.\n\n### What to do\n- Interactive Pie/Donut spending breakdown chart using `fl_chart`\n- Category budget limit progress bars with warning colors when exceeding 80%\n- Monthly date range picker filtering transactions by month and year\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Rendered interactive Donut charts showing category expense percentages",
             "Implemented budget limit progress bars with warning threshold alerts",
@@ -1013,11 +1475,77 @@
             "Pin lock / Biometric authentication simulation screen before accessing data",
             "Final localhost video demo showing full mobile app functionality"
           ],
-          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete WalletWave with CSV financial statement export, pin protection, and video demo.",
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete WalletWave with CSV financial statement export, pin protection, and video demo.\n\n### What to do\n- CSV transaction statement export saved to device storage\n- Pin lock / Biometric authentication simulation screen before accessing data\n- Final localhost video demo showing full mobile app functionality\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Completed the 4-week WalletWave Flutter Finance application capstone!",
             "Built CSV statement export and biometric pin lock protection",
             "Demonstrated budget tracking and analytics charts on video"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "Advanced Flutter Scale Application",
+      "tagline": "Master production-grade Flutter workflows by building a highly scalable, complete end-to-end application from scratch.",
+      "weeks": {
+        "1": {
+          "title": "Week 1: Architecture & Foundation",
+          "deliverables": [
+            "Establish the required modules for the architecture & foundation phase.",
+            "Implement robust error handling and integrate necessary dependencies for Flutter.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Architecture & Foundation)\nIn Week 1, you will focus on the **Architecture & Foundation** phase of your Flutter application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the architecture & foundation phase.\n- Implement robust error handling and integrate necessary dependencies for Flutter.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the architecture & foundation module for a scale Flutter application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "2": {
+          "title": "Week 2: Core Feature Implementation",
+          "deliverables": [
+            "Establish the required modules for the core feature implementation phase.",
+            "Implement robust error handling and integrate necessary dependencies for Flutter.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Core Feature Implementation)\nIn Week 2, you will focus on the **Core Feature Implementation** phase of your Flutter application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the core feature implementation phase.\n- Implement robust error handling and integrate necessary dependencies for Flutter.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the core feature implementation module for a scale Flutter application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "3": {
+          "title": "Week 3: Database & API Integrations",
+          "deliverables": [
+            "Establish the required modules for the database & api integrations phase.",
+            "Implement robust error handling and integrate necessary dependencies for Flutter.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Database & API Integrations)\nIn Week 3, you will focus on the **Database & API Integrations** phase of your Flutter application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the database & api integrations phase.\n- Implement robust error handling and integrate necessary dependencies for Flutter.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the database & api integrations module for a scale Flutter application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "4": {
+          "title": "Week 4: Optimization, Security & Final Deployment",
+          "deliverables": [
+            "Establish the required modules for the optimization, security & final deployment phase.",
+            "Implement robust error handling and integrate necessary dependencies for Flutter.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Optimization, Security & Final Deployment)\nIn Week 4, you will focus on the **Optimization, Security & Final Deployment** phase of your Flutter application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the optimization, security & final deployment phase.\n- Implement robust error handling and integrate necessary dependencies for Flutter.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the optimization, security & final deployment module for a scale Flutter application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
           ]
         }
       }
@@ -1035,7 +1563,7 @@
             "Docker Compose configuration linking app, Redis cache, and PostgreSQL database",
             "Container healthcheck directives and environment variable isolation"
           ],
-          "description": "### 🎯 Project Overview (Week 1: Base Model)\nContainerize a full-stack application with multi-stage Docker builds and Docker Compose on localhost.",
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nContainerize a full-stack application with multi-stage Docker builds and Docker Compose on localhost.\n\n### What to do\n- Optimized multi-stage Dockerfile for a sample web application reducing image size by 70%+\n- Docker Compose configuration linking app, Redis cache, and PostgreSQL database\n- Container healthcheck directives and environment variable isolation\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Engineered production multi-stage Dockerfile with 70%+ image reduction",
             "Built Docker Compose orchestrating web app, Redis cache, and PostgreSQL",
@@ -1049,7 +1577,7 @@
             "Automated build status badges and PR verification checks",
             "Failure alerting notifications and test report artifact uploading"
           ],
-          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nBuild an automated Continuous Integration (CI) pipeline with security scanning and test execution.",
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nBuild an automated Continuous Integration (CI) pipeline with security scanning and test execution.\n\n### What to do\n- GitHub Actions CI workflow running linters, security scans (Trivy/Sonar), and unit tests\n- Automated build status badges and PR verification checks\n- Failure alerting notifications and test report artifact uploading\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Built automated GitHub Actions CI pipeline with linter and unit test gates",
             "Integrated Trivy container vulnerability scanner into build pipeline",
@@ -1063,7 +1591,7 @@
             "Gzip compression, caching headers, and rate limiting rules configured in Nginx",
             "Local self-signed SSL/TLS certificate setup testing HTTPS traffic on localhost"
           ],
-          "description": "### 🎯 Project Overview (Week 3: Integrations)\nConfigure an Nginx reverse proxy with load balancing, caching, and local HTTPS simulation.",
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nConfigure an Nginx reverse proxy with load balancing, caching, and local HTTPS simulation.\n\n### What to do\n- Nginx reverse proxy configuration routing traffic to multiple app container replicas\n- Gzip compression, caching headers, and rate limiting rules configured in Nginx\n- Local self-signed SSL/TLS certificate setup testing HTTPS traffic on localhost\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Configured Nginx reverse proxy with round-robin container load balancing",
             "Implemented Gzip compression, caching headers, and rate limiting",
@@ -1078,7 +1606,7 @@
             "Stress-test benchmark simulation with Apache Bench (`ab`) demonstrating real-time chart spikes",
             "Final video demonstration showcasing full containerized stack and Grafana metrics"
           ],
-          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the DevOps infrastructure stack with Prometheus metrics collection and a live Grafana dashboard.",
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the DevOps infrastructure stack with Prometheus metrics collection and a live Grafana dashboard.\n\n### What to do\n- Prometheus metrics exporter scraping container CPU, memory, and HTTP response codes\n- Grafana dashboard running on `http://localhost:3000` visualizing live system health\n- Stress-test benchmark simulation with Apache Bench (`ab`) demonstrating real-time chart spikes\n- Final video demonstration showcasing full containerized stack and Grafana metrics\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Completed the 4-week DevDeploy DevOps & Infrastructure capstone!",
             "Built live Prometheus & Grafana monitoring dashboards for container health",
@@ -1098,7 +1626,7 @@
             "Automated provisioning of local Docker networks, volumes, and containers via Terraform",
             "State file locking and plan validation workflows"
           ],
-          "description": "### 🎯 Project Overview (Week 1: Base Model)\nProvision and manage local Docker infrastructure resources declaratively using Terraform.",
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nProvision and manage local Docker infrastructure resources declaratively using Terraform.\n\n### What to do\n- Terraform configuration files (`main.tf`, `variables.tf`, `outputs.tf`)\n- Automated provisioning of local Docker networks, volumes, and containers via Terraform\n- State file locking and plan validation workflows\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Authored modular Terraform IaC configurations for container provisioning",
             "Managed local network and volume state declaratively",
@@ -1112,7 +1640,7 @@
             "ClusterIP and NodePort Service definitions routing internal traffic",
             "ConfigMaps and Secrets isolating sensitive connection strings"
           ],
-          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nDeploy containerized microservices onto local Kubernetes (Minikube / Kind / K3s).",
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nDeploy containerized microservices onto local Kubernetes (Minikube / Kind / K3s).\n\n### What to do\n- Kubernetes Deployment manifests with multi-replica scaling and rolling update strategies\n- ClusterIP and NodePort Service definitions routing internal traffic\n- ConfigMaps and Secrets isolating sensitive connection strings\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Wrote production-ready Kubernetes Deployment and Service manifests",
             "Configured zero-downtime rolling update deployment strategies",
@@ -1126,7 +1654,7 @@
             "Configurable `values.yaml` enabling environment-specific parameter overrides",
             "Nginx Ingress Controller routing hostnames on localhost"
           ],
-          "description": "### 🎯 Project Overview (Week 3: Integrations)\nPackage Kubernetes applications into reusable Helm charts with dynamic Ingress routing.",
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nPackage Kubernetes applications into reusable Helm charts with dynamic Ingress routing.\n\n### What to do\n- Custom Helm chart packaging application deployments, services, and values\n- Configurable `values.yaml` enabling environment-specific parameter overrides\n- Nginx Ingress Controller routing hostnames on localhost\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Packaged multi-tier applications into custom reusable Helm charts",
             "Configured parameter-driven `values.yaml` templating",
@@ -1140,11 +1668,77 @@
             "Chaos load test triggering automatic scale-up from 2 to 6 replicas",
             "Final video demonstration showing Helm deployment and dynamic pod autoscaling"
           ],
-          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete InfraGuard with Horizontal Pod Autoscaling and record the capstone video.",
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete InfraGuard with Horizontal Pod Autoscaling and record the capstone video.\n\n### What to do\n- Horizontal Pod Autoscaler (HPA) automatically scaling pods based on CPU load\n- Chaos load test triggering automatic scale-up from 2 to 6 replicas\n- Final video demonstration showing Helm deployment and dynamic pod autoscaling\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Completed the 4-week InfraGuard Kubernetes & IaC capstone!",
             "Implemented Horizontal Pod Autoscaler with dynamic replica expansion",
             "Demonstrated Helm deployments and load-based autoscaling on video"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "Advanced Devops Scale Application",
+      "tagline": "Master production-grade Devops workflows by building a highly scalable, complete end-to-end application from scratch.",
+      "weeks": {
+        "1": {
+          "title": "Week 1: Architecture & Foundation",
+          "deliverables": [
+            "Establish the required modules for the architecture & foundation phase.",
+            "Implement robust error handling and integrate necessary dependencies for Devops.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Architecture & Foundation)\nIn Week 1, you will focus on the **Architecture & Foundation** phase of your Devops application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the architecture & foundation phase.\n- Implement robust error handling and integrate necessary dependencies for Devops.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the architecture & foundation module for a scale Devops application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "2": {
+          "title": "Week 2: Core Feature Implementation",
+          "deliverables": [
+            "Establish the required modules for the core feature implementation phase.",
+            "Implement robust error handling and integrate necessary dependencies for Devops.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Core Feature Implementation)\nIn Week 2, you will focus on the **Core Feature Implementation** phase of your Devops application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the core feature implementation phase.\n- Implement robust error handling and integrate necessary dependencies for Devops.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the core feature implementation module for a scale Devops application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "3": {
+          "title": "Week 3: Database & API Integrations",
+          "deliverables": [
+            "Establish the required modules for the database & api integrations phase.",
+            "Implement robust error handling and integrate necessary dependencies for Devops.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Database & API Integrations)\nIn Week 3, you will focus on the **Database & API Integrations** phase of your Devops application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the database & api integrations phase.\n- Implement robust error handling and integrate necessary dependencies for Devops.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the database & api integrations module for a scale Devops application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "4": {
+          "title": "Week 4: Optimization, Security & Final Deployment",
+          "deliverables": [
+            "Establish the required modules for the optimization, security & final deployment phase.",
+            "Implement robust error handling and integrate necessary dependencies for Devops.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Optimization, Security & Final Deployment)\nIn Week 4, you will focus on the **Optimization, Security & Final Deployment** phase of your Devops application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the optimization, security & final deployment phase.\n- Implement robust error handling and integrate necessary dependencies for Devops.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the optimization, security & final deployment module for a scale Devops application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
           ]
         }
       }
@@ -1162,7 +1756,7 @@
             "Custom dynamic array container (`CustomVector<T>`) implementing memory allocation and iterators",
             "Real-time memory allocation tracker counting heap allocations and detecting memory leaks"
           ],
-          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational C++20 container library and heap memory allocation tracker on localhost.",
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild the foundational C++20 container library and heap memory allocation tracker on localhost.\n\n### What to do\n- CMake build configuration with C++20 standards and strict compiler flags (`-Wall -Wextra`)\n- Custom dynamic array container (`CustomVector<T>`) implementing memory allocation and iterators\n- Real-time memory allocation tracker counting heap allocations and detecting memory leaks\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Configured modern C++20 project with CMake and strict compiler diagnostics",
             "Implemented templated dynamic array container with custom iterators",
@@ -1176,7 +1770,7 @@
             "Dynamic rehashing algorithm maintaining optimal load factors (`< 0.7`)",
             "Performance benchmark comparing custom container against `std::unordered_map`"
           ],
-          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement a high-speed custom Hash Table with cache-friendly collision resolution and dynamic rehashing.",
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement a high-speed custom Hash Table with cache-friendly collision resolution and dynamic rehashing.\n\n### What to do\n- Custom Hash Table container with Robin Hood hashing / Quadratic Probing\n- Dynamic rehashing algorithm maintaining optimal load factors (`< 0.7`)\n- Performance benchmark comparing custom container against `std::unordered_map`\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Engineered custom Hash Table with Robin Hood collision resolution in C++20",
             "Implemented dynamic rehashing algorithm with automated load balancing",
@@ -1190,7 +1784,7 @@
             "Worker thread pool capable of dispatching asynchronous tasks with `std::future`",
             "Parallel data processor sorting and indexing 1,000,000+ elements concurrently"
           ],
-          "description": "### 🎯 Project Overview (Week 3: Integrations)\nBuild a multi-threaded thread pool and parallel task processor in modern C++.",
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nBuild a multi-threaded thread pool and parallel task processor in modern C++.\n\n### What to do\n- Thread-safe work queue using `std::mutex`, `std::condition_variable`, and locks\n- Worker thread pool capable of dispatching asynchronous tasks with `std::future`\n- Parallel data processor sorting and indexing 1,000,000+ elements concurrently\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Built a thread-safe task queue and worker thread pool using modern C++ concurrency",
             "Implemented asynchronous task dispatching with `std::future` and promises",
@@ -1205,7 +1799,7 @@
             "Zero memory leak verification with Valgrind / AddressSanitizer (`ASan`)",
             "Final video demonstration showcasing container benchmarks and multithreaded speed"
           ],
-          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the AlgoCore engine with an arena allocator, microbenchmarks, and sanitizer verification.",
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nComplete the AlgoCore engine with an arena allocator, microbenchmarks, and sanitizer verification.\n\n### What to do\n- Custom Arena / Pool memory allocator bypassing `malloc` overhead for high-frequency allocations\n- Microbenchmarking suite measuring nanosecond execution time and cache hits\n- Zero memory leak verification with Valgrind / AddressSanitizer (`ASan`)\n- Final video demonstration showcasing container benchmarks and multithreaded speed\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Completed the 4-week AlgoCore C++ High-Performance Data Engine capstone!",
             "Built custom Arena memory allocator delivering 5x allocation speedups",
@@ -1225,7 +1819,7 @@
             "2D Vector math library (`Vector2D`) supporting dot products, normalization, and magnitude",
             "Window initialization and primitive shape rendering pipeline"
           ],
-          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild a real-time game engine loop and 2D vector mathematics library in modern C++.",
+          "description": "### 🎯 Project Overview (Week 1: Base Model)\nBuild a real-time game engine loop and 2D vector mathematics library in modern C++.\n\n### What to do\n- C++ game engine loop with fixed-timestep delta time updating and frame capping (60 FPS)\n- 2D Vector math library (`Vector2D`) supporting dot products, normalization, and magnitude\n- Window initialization and primitive shape rendering pipeline\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Configured 60 FPS fixed-timestep game loop in C++ with SDL2/SFML",
             "Authored complete Vector2D mathematics library with operator overloading",
@@ -1239,7 +1833,7 @@
             "Axis-Aligned Bounding Box (AABB) and Circle-Circle collision detection algorithms",
             "Elastic impulse resolution bouncing bodies realistically upon impact"
           ],
-          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement Newtonian physics simulation with gravity, impulse forces, and collision resolution.",
+          "description": "### 🎯 Project Overview (Week 2: Add-Up Engine)\nImplement Newtonian physics simulation with gravity, impulse forces, and collision resolution.\n\n### What to do\n- Rigid body physics components with mass, velocity, acceleration, and gravity forces\n- Axis-Aligned Bounding Box (AABB) and Circle-Circle collision detection algorithms\n- Elastic impulse resolution bouncing bodies realistically upon impact\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Built Newtonian rigid body physics simulation with gravity and drag forces",
             "Implemented AABB and Circle collision intersection algorithms",
@@ -1253,7 +1847,7 @@
             "Spatial hash grid partitioning dividing the canvas to optimize collision checks from O(N^2) to O(N)",
             "Benchmark rendering 1,000+ simultaneous colliding particles smoothly at 60 FPS"
           ],
-          "description": "### 🎯 Project Overview (Week 3: Integrations)\nImplement a high-performance particle emitter and spatial grid partitioner.",
+          "description": "### 🎯 Project Overview (Week 3: Integrations)\nImplement a high-performance particle emitter and spatial grid partitioner.\n\n### What to do\n- Dynamic particle emitter simulating smoke, fire, and explosion bursts\n- Spatial hash grid partitioning dividing the canvas to optimize collision checks from O(N^2) to O(N)\n- Benchmark rendering 1,000+ simultaneous colliding particles smoothly at 60 FPS\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Created custom particle emitter with lifespan decay and color interpolations",
             "Built spatial hash grid reducing collision complexity to O(N)",
@@ -1267,11 +1861,77 @@
             "Interactive mouse spawning of physics bodies and obstacle placement",
             "Final video demonstration showcasing real-time physics simulation on localhost"
           ],
-          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nIntegrate Dear ImGui sandbox controls into PixelForge and record the capstone video demonstration.",
+          "description": "### 🎯 Project Overview (Week 4: Final Capstone Polish)\nIntegrate Dear ImGui sandbox controls into PixelForge and record the capstone video demonstration.\n\n### What to do\n- Dear ImGui integration with sliders adjusting gravity, elasticity, and particle count in real time\n- Interactive mouse spawning of physics bodies and obstacle placement\n- Final video demonstration showcasing real-time physics simulation on localhost\n\n### How to do it\n- **Research & Setup**: Look up documentation for the tools required and set up your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works as expected.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
           "post_highlights": [
             "Completed the 4-week PixelForge C++ Physics Engine capstone!",
             "Integrated Dear ImGui control panels for live parameter tuning",
             "Demonstrated 60 FPS particle simulations and collision physics on video"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "Advanced C++ Scale Application",
+      "tagline": "Master production-grade C++ workflows by building a highly scalable, complete end-to-end application from scratch.",
+      "weeks": {
+        "1": {
+          "title": "Week 1: Architecture & Foundation",
+          "deliverables": [
+            "Establish the required modules for the architecture & foundation phase.",
+            "Implement robust error handling and integrate necessary dependencies for C++.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 1: Architecture & Foundation)\nIn Week 1, you will focus on the **Architecture & Foundation** phase of your C++ application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the architecture & foundation phase.\n- Implement robust error handling and integrate necessary dependencies for C++.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the architecture & foundation module for a scale C++ application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "2": {
+          "title": "Week 2: Core Feature Implementation",
+          "deliverables": [
+            "Establish the required modules for the core feature implementation phase.",
+            "Implement robust error handling and integrate necessary dependencies for C++.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 2: Core Feature Implementation)\nIn Week 2, you will focus on the **Core Feature Implementation** phase of your C++ application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the core feature implementation phase.\n- Implement robust error handling and integrate necessary dependencies for C++.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the core feature implementation module for a scale C++ application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "3": {
+          "title": "Week 3: Database & API Integrations",
+          "deliverables": [
+            "Establish the required modules for the database & api integrations phase.",
+            "Implement robust error handling and integrate necessary dependencies for C++.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 3: Database & API Integrations)\nIn Week 3, you will focus on the **Database & API Integrations** phase of your C++ application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the database & api integrations phase.\n- Implement robust error handling and integrate necessary dependencies for C++.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the database & api integrations module for a scale C++ application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
+          ]
+        },
+        "4": {
+          "title": "Week 4: Optimization, Security & Final Deployment",
+          "deliverables": [
+            "Establish the required modules for the optimization, security & final deployment phase.",
+            "Implement robust error handling and integrate necessary dependencies for C++.",
+            "Refactor the codebase to ensure zero technical debt and high maintainability.",
+            "Prepare the week's deliverable for final review."
+          ],
+          "description": "### 🎯 Project Overview (Week 4: Optimization, Security & Final Deployment)\nIn Week 4, you will focus on the **Optimization, Security & Final Deployment** phase of your C++ application, applying advanced industry standards.\n\n### What to do\n- Establish the required modules for the optimization, security & final deployment phase.\n- Implement robust error handling and integrate necessary dependencies for C++.\n- Refactor the codebase to ensure zero technical debt and high maintainability.\n- Prepare the week's deliverable for final review.\n\n### How to do it\n- **Research & Setup**: Look up official documentation for the tools required and configure your project environment.\n- **Implementation**: Break down the task into smaller functions. Write clean, modular, and DRY code.\n- **Testing**: Run your code locally to ensure it handles edge cases and works flawlessly.\n- **Submission**: Deploy or commit your code, then create a short video/post on LinkedIn demonstrating it.",
+          "post_highlights": [
+            "Successfully architected the optimization, security & final deployment module for a scale C++ application",
+            "Engineered robust logic with clean error handling and maintainability",
+            "Optimized the codebase following strict production-grade standards"
           ]
         }
       }
