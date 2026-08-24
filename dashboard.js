@@ -373,16 +373,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update description based on progress
     const descEl = document.getElementById('progress-desc');
-    if (pct === 0) {
-      descEl.textContent = "You're just getting started. Submit your first LinkedIn post for a task to see your progress update once it's approved.";
-    } else if (pct < 50) {
-      descEl.textContent = `Great start! You've completed ${totalCompleted} out of ${totalAssigned} tasks. Keep the momentum going!`;
-    } else if (pct < 100) {
-      descEl.textContent = `Impressive progress! ${totalCompleted} of ${totalAssigned} tasks done. You're on track for a strong finish.`;
-    } else {
-      descEl.textContent = `Outstanding! You've completed all ${totalAssigned} assigned tasks. You're a star intern!`;
-      // Show 100% completion celebration popup every time
+    const flexCertBtn = document.getElementById('flex-cert-btn');
+    if (pct >= 50) {
+      if (pct < 100) {
+        descEl.textContent = `Impressive progress! ${totalCompleted} of ${totalAssigned} tasks done. You have met the minimum requirements to claim your certificate!`;
+      } else {
+        descEl.textContent = `Outstanding! You've completed all ${totalAssigned} assigned tasks. You're a star intern!`;
+      }
       setTimeout(() => showCompletionPopup(student, data), 800);
+      if (flexCertBtn) {
+        flexCertBtn.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 8px; color: #fff;">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span style="font-size: 1.05rem; font-weight: 600;">Internship Passed</span>
+          </div>
+          <span style="font-size: 0.75rem; color: rgba(255,255,255,0.9); font-weight: 500;">Claim Certificate Now</span>
+        `;
+        flexCertBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+        flexCertBtn.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+        flexCertBtn.onclick = () => showCompletionPopup(student, data);
+      }
+    } else {
+      if (pct === 0) {
+        descEl.textContent = "You're just getting started. Submit your first LinkedIn post for a task to see your progress update once it's approved.";
+      } else {
+        descEl.textContent = `Great start! You've completed ${totalCompleted} out of ${totalAssigned} tasks. Keep the momentum going!`;
+      }
     }
 
     // Animate ring after render
@@ -593,7 +609,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <span class="sub-status ${badgeClass}">${badgeText}</span>
           </div>
-          ${task.description ? `<p style="margin:14px 0 0 0;font-size:0.85rem;color:var(--text-secondary);line-height:1.5;">${task.description}</p>` : ''}
+          ${task.description ? `<div style="margin:14px 0 0 0;font-size:0.85rem;color:var(--text-secondary);line-height:1.5;" class="dash-markdown">${marked.parse(task.description)}</div>` : ''}
           ${sub && sub.admin_note && subStatus === 'rejected' ? `<div style="margin-top:10px;font-size:0.8rem;color:#f87171;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:8px 12px;">Admin note: ${sub.admin_note}</div>` : ''}
           ${caption ? `
           <div style="margin-top:14px;">
@@ -859,7 +875,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const certUrl = `${FRONTEND}/certificate.html?email=${encodeURIComponent(email)}&student_id=${student.id}&batch_id=${data._batch_id}&name=${encodeURIComponent(student.name)}&domain=${encodeURIComponent(domain)}`;
     const dlUrl   = `${API}/api/certificates/download/${student.id}/${data._batch_id}`;
     const lorUrl  = `${FRONTEND}/lor.html?student_id=${student.id}&batch_id=${data._batch_id}&name=${encodeURIComponent(student.name)}&domain=${encodeURIComponent(domain)}`;
-    const portfolioUrl = student.github ? `${FRONTEND}/portfolio.html?gh=${student.github}` : '#';
+    const portfolioUrl = student.id ? `${FRONTEND}/portfolio.html?student_id=${student.id}` : '#';
 
     // ── Credential quick-strip (above banner) ─────────────────────────────────
     const credStrip = document.getElementById('cred-strip');
@@ -1117,7 +1133,7 @@ function showCompletionPopup(student, data) {
   const name     = (student && student.name) || '';
   const certUrl  = `${FRONTEND}/certificate.html?email=${encodeURIComponent(email)}&student_id=${student ? student.id : ''}&batch_id=${batchId}&name=${encodeURIComponent(name)}&domain=${encodeURIComponent(domain)}`;
   const lorUrl   = `${FRONTEND}/lor.html?student_id=${student ? student.id : ''}&batch_id=${batchId}&name=${encodeURIComponent(name)}&domain=${encodeURIComponent(domain)}`;
-  const portfolioUrl = (student && student.github) ? `${FRONTEND}/portfolio.html?gh=${student.github}` : '#';
+  const portfolioUrl = student ? `${FRONTEND}/portfolio.html?student_id=${student.id}` : '#';
 
   const flexPdfBtn = document.getElementById('flex-pdf-btn');
   if (flexPdfBtn && student) {
@@ -1197,7 +1213,7 @@ function showCompletionPopup(student, data) {
         credArea.innerHTML = `
           <div style="background:rgba(201,154,78,0.08);border:1px solid rgba(201,154,78,0.2);border-radius:14px;padding:18px;text-align:center;">
             <div style="font-size:0.85rem;color:rgba(255,255,255,0.6);margin-bottom:12px;">Activate your Certificate, LOR & Portfolio with a one-time fee</div>
-            <button onclick="document.getElementById('completion-overlay').remove();setTimeout(()=>showPaymentModal(window._dashStudent,window._dashData),200);" style="background:linear-gradient(135deg,#c99a4e,#e8b96e);color:#000;border:none;border-radius:10px;padding:12px 28px;font-weight:700;font-size:0.88rem;cursor:pointer;width:100%;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">💳 Pay & Activate Everything</button>
+            <button onclick="document.getElementById('completion-overlay').remove();setTimeout(()=>showPaymentModal(window._dashStudent,window._dashData),200);" style="background:linear-gradient(135deg,#c99a4e,#e8b96e);color:#000;border:none;border-radius:10px;padding:12px 28px;font-weight:700;font-size:0.88rem;cursor:pointer;width:100%;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">Unlock My Certificate</button>
           </div>`;
       }
     } catch(e) {
@@ -1302,8 +1318,7 @@ function resolveMilestoneContext(data) {
   const referralLink = `${PROD_BASE}/apply.html?ref=${studentRefCode}`;
   // Portfolio pages are still keyed off an optional GitHub username; the new LinkedIn-based
   // submission flow doesn't collect one, so this degrades gracefully to the generic page.
-  const ghUser = (student.github || '').trim().replace(/^@/, '');
-  const portfolioUrl = ghUser ? `${PROD_BASE}/portfolio.html?gh=${encodeURIComponent(ghUser)}` : `${PROD_BASE}/portfolio.html`;
+  const portfolioUrl = student.id ? `${PROD_BASE}/portfolio.html?student_id=${student.id}` : '#';
   const offerUrl = `${PROD_BASE}/offer.html?name=${encodeURIComponent(student.name || '')}&domain=${encodeURIComponent(domain)}&student_id=${student.id || ''}&college=${encodeURIComponent(student.college || '')}`;
   const certUrl = `${PROD_BASE}/certificate.html?student_id=${student.id || ''}&domain=${encodeURIComponent(domain)}`;
 
