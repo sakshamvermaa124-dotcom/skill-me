@@ -68,3 +68,56 @@ async def get_portfolio(github_username: str):
         "domains": [b["domain"] for b in batches],
         "submissions": submissions
     }
+
+
+
+
+@router.get("/id/{student_id}")
+async def get_portfolio_by_id(student_id: int):
+    # 1. Look up student by id
+    student = await db.fetch_one(
+        "SELECT id, first_name, last_name, github_username, email, college, domain FROM students WHERE id = ?",
+        (student_id,)
+    )
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+
+    # 2. Check if student has paid for the certificate/portfolio
+    payment = await db.fetch_one(
+        "SELECT id FROM payments WHERE student_id = ? AND status = 'paid' LIMIT 1",
+        (student_id,)
+    )
+    
+    if not payment:
+        raise HTTPException(status_code=403, detail="payment_required")
+
+    # 3. Aggregate progress stats across all batches
+    stats = await db.fetch_one(
+        "SELECT COALESCE(SUM(issues_completed), 0) as total_tasks_completed, COALESCE(SUM(score), 0) as total_score FROM progress WHERE student_id = ?",
+        (student_id,)
+    )
+
+    # 4. Fetch the batches/domains they successfully completed/enrolled in
+    batches = await db.fetch_all(
+        "SELECT b.domain, b.batch_number, e.status FROM enrollments e JOIN batches b ON e.batch_id = b.id WHERE e.student_id = ? AND e.status IN ('enrolled', 'active', 'completed')",
+        (student_id,)
+    )
+
+    # 5. Fetch their approved LinkedIn submissions
+    submissions = await db.fetch_all(
+        "SELECT id, linkedin_url, week, admin_note, status, created_at FROM submissions WHERE student_id = ? AND status = 'approved' ORDER BY week ASC",
+        (student_id,)
+    )
+
+    return {
+        "student": {
+            "first_name": student["first_name"],
+            "last_name": student["last_name"],
+            "github_username": student["github_username"] or "",
+            "college": student["college"],
+            "domain": student["domain"]
+        },
+        "stats": dict(stats),
+        "domains": [b["domain"] for b in batches],
+        "submissions": [dict(s) for s in submissions]
+    }
