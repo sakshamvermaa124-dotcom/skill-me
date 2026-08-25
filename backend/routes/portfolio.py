@@ -113,7 +113,7 @@ async def get_portfolio_by_id(student_id: int):
 
     # 5. Fetch their approved LinkedIn submissions
     submissions = await db.fetch_all(
-        "SELECT id, linkedin_url, week, admin_note, status, created_at FROM submissions WHERE student_id = ? AND status = 'approved' ORDER BY week ASC",
+        "SELECT id, linkedin_url, week, admin_note, status, submitted_at, reviewed_at FROM submissions WHERE student_id = ? AND status = 'approved' ORDER BY week ASC",
         (student_id,)
     )
 
