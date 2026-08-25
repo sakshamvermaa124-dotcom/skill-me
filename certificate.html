@@ -50,8 +50,6 @@
 
   <!-- Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="config.js"></script>
   <script src="skillme-monitor.js" defer></script>
 
@@ -875,21 +873,13 @@
     <!-- Top Action Control Bar -->
     <div class="action-bar" id="action-bar">
       <div class="badge-id" id="cert-id-badge">Loading Credential...</div>
-      <button class="btn-action btn-download" onclick="downloadPDF()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="7 10 12 15 17 10" />
-          <line x1="12" y1="15" x2="12" y2="3" />
-        </svg>
-        Download High-Res PDF
-      </button>
-      <button class="btn-action btn-secondary" onclick="window.print()">
+      <button class="btn-action btn-download" onclick="window.print()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
           <polyline points="6 9 6 2 18 2 18 9" />
           <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
           <rect x="6" y="14" width="12" height="8" />
         </svg>
-        Print
+        Print / Save as PDF
       </button>
       <a class="btn-action btn-secondary" href="verify.html" id="verify-another-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
@@ -1297,60 +1287,6 @@
       } finally {
         btn.disabled = false;
         btn.textContent = 'Verify';
-      }
-    }
-
-    // 1-Click High-Res PDF Download
-    async function downloadPDF() {
-      const btn = document.querySelector('.btn-download');
-      const origText = btn ? btn.innerHTML : '';
-      try {
-        if (btn) {
-          btn.disabled = true;
-          btn.innerHTML = 'Generating PDF...';
-        }
-
-        const certEl = document.getElementById('certificate');
-        const origBR = certEl.style.borderRadius;
-        const origBS = certEl.style.boxShadow;
-        const origTransform = certEl.style.transform;
-
-        certEl.style.borderRadius = '0';
-        certEl.style.boxShadow = 'none';
-        certEl.style.transform = 'scale(1)';
-
-        const wrap = document.querySelector('.cert-wrap');
-        const origWrapH = wrap ? wrap.style.height : '';
-        if (wrap) wrap.style.height = '690px';
-
-        const canvas = await html2canvas(certEl, {
-          scale: 3,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: '#ffffff',
-          logging: false
-        });
-
-        certEl.style.borderRadius = origBR;
-        certEl.style.boxShadow = origBS;
-        certEl.style.transform = origTransform;
-        if (wrap) wrap.style.height = origWrapH;
-        scaleCertificate();
-
-        const imgData = canvas.toDataURL('image/jpeg', 1.0);
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-        const pdfW = pdf.internal.pageSize.getWidth();
-        const pdfH = pdf.internal.pageSize.getHeight();
-
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
-        const holderName = (document.getElementById('cert-name').textContent || 'Certificate').replace(/\s+/g, '_');
-        pdf.save(`SkillMe_Certificate_${holderName}.pdf`);
-      } catch (e) {
-        console.error('PDF generation error:', e);
-        alert('PDF generation error. Please try printing or saving as PDF.');
-      } finally {
-        if (btn) { btn.disabled = false; btn.innerHTML = origText; }
       }
     }
 
