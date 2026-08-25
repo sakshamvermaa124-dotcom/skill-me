@@ -75,12 +75,14 @@ async def get_stats(_: str = Depends(require_admin)):
     active_batches = await db.fetch_one("SELECT COUNT(*) as count FROM batches WHERE status = 'active'")
     pending_applications = await db.fetch_one("SELECT COUNT(*) as count FROM students WHERE status = 'applied'")
     pending_submissions = await db.fetch_one("SELECT COUNT(*) as count FROM submissions WHERE status = 'pending'")
+    pending_urgent_requests = await db.fetch_one("SELECT COUNT(*) as count FROM urgent_requests WHERE status = 'pending'")
 
     return {
         "total_students": total_students["count"] if total_students else 0,
         "active_batches": active_batches["count"] if active_batches else 0,
         "pending_applications": pending_applications["count"] if pending_applications else 0,
         "pending_submissions": pending_submissions["count"] if pending_submissions else 0,
+        "pending_urgent_requests": pending_urgent_requests["count"] if pending_urgent_requests else 0,
     }
 
 

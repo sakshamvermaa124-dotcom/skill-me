@@ -944,6 +944,7 @@ async function loadStats() {
         subBadge.style.display = 'none';
       }
     }
+    updateUrgentRequestsBadge(data.pending_urgent_requests || 0);
   } catch (e) {
     grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-text">${e.message}</div></div>`;
   }
