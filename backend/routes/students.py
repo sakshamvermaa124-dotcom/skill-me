@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 from db.database import db
 from services.email_service import email_service
 from services.submission_service import submission_service
+from services.urgent_request_service import urgent_request_service
 
 router = APIRouter(prefix="/api/students", tags=["students"])
 
@@ -35,6 +36,13 @@ class SubmitTaskRequest(BaseModel):
     batch_id: int
     week: int = Field(..., ge=1, le=4)
     linkedin_url: str = Field(..., max_length=500)
+
+
+class UrgentRequestRequest(BaseModel):
+    student_id: int
+    batch_id: int
+    request_type: str = Field("all", description="certificate | lor | portfolio | all")
+    note: str | None = Field(None, max_length=500)
 
 
 # ──────────────────────────────────────────────
@@ -229,6 +237,35 @@ async def submit_task(req: SubmitTaskRequest):
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/urgent-request", summary="Request 24h expedited certificate/LOR/portfolio processing")
+async def create_urgent_request(req: UrgentRequestRequest):
+    """
+    Student requests urgent (24h) processing of their certificate, LOR, or portfolio.
+    Requires at least 50% task completion for the batch.
+    """
+    try:
+        return await urgent_request_service.create_request(
+            student_id=req.student_id,
+            batch_id=req.batch_id,
+            request_type=req.request_type,
+            note=req.note,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/urgent-request/status/{student_id}/{batch_id}", summary="Get latest urgent request status")
+async def get_urgent_request_status(student_id: int, batch_id: int):
+    """Returns the most recent urgent request for this student + batch, or null if none exists."""
+    row = await db.fetch_one(
+        """SELECT * FROM urgent_requests
+           WHERE student_id = ? AND batch_id = ?
+           ORDER BY created_at DESC LIMIT 1""",
+        (student_id, batch_id),
+    )
+    return {"request": dict(row) if row else None}
 
 
 @router.get("/public-activity", summary="Get live public proof-of-work activity feed")

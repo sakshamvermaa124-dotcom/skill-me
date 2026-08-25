@@ -3,6 +3,29 @@ from db.database import db
 
 router = APIRouter(prefix="/api/portfolio", tags=["portfolio"])
 
+
+async def _completion_pct(student_id: int) -> int:
+    """
+    Completion % across all of a student's batches: distinct (batch_id, week)
+    pairs with issues_completed > 0, out of 4 tasks per batch they're in.
+    """
+    progress_rows = await db.fetch_all(
+        "SELECT DISTINCT batch_id, week FROM progress WHERE student_id = ? AND issues_completed > 0",
+        (student_id,),
+    )
+    batch_ids = await db.fetch_all(
+        """SELECT DISTINCT batch_id FROM (
+               SELECT batch_id FROM progress WHERE student_id = ?
+               UNION
+               SELECT batch_id FROM enrollments WHERE student_id = ?
+           )""",
+        (student_id, student_id),
+    )
+    num_batches = max(1, len(batch_ids))
+    completed = len({(r["batch_id"], r["week"]) for r in progress_rows})
+    return min(100, round(completed / (4 * num_batches) * 100))
+
+
 @router.get("/{github_username}")
 async def get_portfolio(github_username: str):
     """
@@ -19,12 +42,17 @@ async def get_portfolio(github_username: str):
 
     student_id = student["id"]
 
-    # 2. Check if student has paid for the certificate/portfolio
+    # 2. Check completion — portfolio unlocks only past 50% task completion
+    completion_pct = await _completion_pct(student_id)
+    if completion_pct < 50:
+        raise HTTPException(status_code=403, detail="incomplete_progress")
+
+    # 3. Check if student has paid for the certificate/portfolio
     payment = await db.fetch_one(
         "SELECT id FROM payments WHERE student_id = ? AND status = 'paid' LIMIT 1",
         (student_id,)
     )
-    
+
     if not payment:
         # We return a specific error code so the frontend knows to show "Portfolio not activated - Ask to pay"
         raise HTTPException(status_code=403, detail="payment_required")
@@ -82,12 +110,17 @@ async def get_portfolio_by_id(student_id: int):
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
 
-    # 2. Check if student has paid for the certificate/portfolio
+    # 2. Check completion — portfolio unlocks only past 50% task completion
+    completion_pct = await _completion_pct(student_id)
+    if completion_pct < 50:
+        raise HTTPException(status_code=403, detail="incomplete_progress")
+
+    # 3. Check if student has paid for the certificate/portfolio
     payment = await db.fetch_one(
         "SELECT id FROM payments WHERE student_id = ? AND status = 'paid' LIMIT 1",
         (student_id,)
     )
-    
+
     if not payment:
         raise HTTPException(status_code=403, detail="payment_required")
 

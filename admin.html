@@ -929,6 +929,13 @@
         Submissions
         <span class="nav-badge" id="submissions-badge" style="display:none;background:rgba(251,191,36,0.2);color:#fbbf24;">0</span>
       </div>
+      <div class="nav-item" id="nav-urgent-requests" onclick="navigate('urgent-requests')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+        Urgent Requests
+        <span class="nav-badge" id="urgent-requests-badge" style="display:none;background:rgba(251,191,36,0.2);color:#fbbf24;">0</span>
+      </div>
       <div class="nav-item" id="nav-announcements" onclick="navigate('announcements')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>
@@ -1298,6 +1305,44 @@
       </div>
     </section>
 
+    <!-- ─── URGENT REQUESTS PAGE ─── -->
+    <section class="page" id="page-urgent-requests">
+      <div class="filter-row">
+        <select class="filter-select" id="urgent-request-status-filter" onchange="loadUrgentRequests()">
+          <option value="pending">Pending</option>
+          <option value="fulfilled">Fulfilled</option>
+          <option value="rejected">Rejected</option>
+          <option value="">All</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="loadUrgentRequests()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="panel">
+        <div class="table-wrap">
+          <table id="urgent-requests-table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Batch/Domain</th>
+                <th>Type</th>
+                <th>Note</th>
+                <th>Requested At</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="urgent-requests-tbody">
+              <tr><td colspan="7"><div class="loading-overlay"><div class="spinner"></div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
     <!-- ─── ANNOUNCEMENTS PAGE ─── -->
     <section class="page" id="page-announcements">
       <div class="panel">
@@ -1444,6 +1489,7 @@ const EMAIL_TYPE_LABELS = {
 // ─── PAGE_META entry for Submissions ─────────────────────────────────────────
 if (typeof PAGE_META !== 'undefined') {
   PAGE_META['submissions'] = { title: 'Submissions', subtitle: 'Review and approve/reject weekly LinkedIn submissions' };
+  PAGE_META['urgent-requests'] = { title: 'Urgent Requests', subtitle: 'Expedited (24h) certificate/LOR/portfolio processing requests' };
 }
 
 let _emailLogOffset = 0;

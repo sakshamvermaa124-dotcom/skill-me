@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}🎉 Week {{ week }} Task Approved!{% endblock %}
+
+{% block body %}
+<p class="greeting">Congratulations, {{ first_name }}! 🎉</p>
+<p class="lead">
+  Your <strong>Week {{ week }}</strong> {{ domain_label }} task has been <strong>approved</strong> by our review team.
+  Great work — keep up the momentum!
+</p>
+
+<div class="divider"></div>
+
+<div class="info-table">
+  <div class="info-row">
+    <span class="info-label">Week</span>
+    <span class="info-value">Week {{ week }}</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Track</span>
+    <span class="info-value">{{ domain_label }}</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Score Earned</span>
+    <span class="info-value">+{{ score }} points</span>
+  </div>
+  {% if admin_note %}
+  <div class="info-row">
+    <span class="info-label">Reviewer Note</span>
+    <span class="info-value">{{ admin_note }}</span>
+  </div>
+  {% endif %}
+</div>
+
+<p class="lead" style="margin-bottom: 20px;">
+  Head over to your dashboard to check your updated progress and see what's next on your roadmap.
+</p>
+
+<div class="cta-wrap">
+  <a href="{{ dashboard_url }}" target="_blank" class="cta-btn">View My Progress &rarr;</a>
+</div>
+{% endblock %}

@@ -9,7 +9,8 @@ from pydantic import BaseModel, Field
 import logging
 from middleware.auth import require_admin
 from services.batch_service import batch_service
-from services.submission_service import submission_service
+from services.submission_service import submission_service, SCORE_PER_APPROVAL
+from services.urgent_request_service import urgent_request_service
 from services.email_service import email_service
 from db.database import db
 from config import settings
@@ -448,16 +449,44 @@ async def list_submissions(status: str | None = None, _: str = Depends(require_a
     return {"count": len(submissions), "submissions": submissions}
 
 
+async def _notify_task_approved(background_tasks: BackgroundTasks, submission_id: int, admin_note: str | None) -> None:
+    """Look up the submission's student/batch and queue a congratulations email."""
+    info = await db.fetch_one(
+        """SELECT sub.week, s.first_name, s.last_name, s.email, b.domain
+           FROM submissions sub
+           JOIN students s ON sub.student_id = s.id
+           JOIN batches b ON sub.batch_id = b.id
+           WHERE sub.id = ?""",
+        (submission_id,),
+    )
+    if not info:
+        return
+    background_tasks.add_task(
+        email_service.send_task_approved,
+        first_name=info["first_name"],
+        last_name=info["last_name"],
+        email=info["email"],
+        domain=info["domain"],
+        week=info["week"],
+        score=SCORE_PER_APPROVAL,
+        admin_note=admin_note,
+    )
+
+
 @router.post("/submissions/{submission_id}/approve", summary="Approve a submission")
 async def approve_submission(
     submission_id: int, req: ReviewSubmissionRequest = ReviewSubmissionRequest(),
+    background_tasks: BackgroundTasks = None,
     _: str = Depends(require_admin),
 ):
-    """Approve a LinkedIn submission — increments the student's progress and score."""
+    """Approve a LinkedIn submission — increments the student's progress and score, and emails the student."""
     try:
-        return await submission_service.approve_submission(submission_id, req.admin_note)
+        result = await submission_service.approve_submission(submission_id, req.admin_note)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    if not result.get("already"):
+        await _notify_task_approved(background_tasks, submission_id, req.admin_note)
+    return result
 
 
 @router.post("/submissions/{submission_id}/reject", summary="Reject a submission")
@@ -473,9 +502,14 @@ async def reject_submission(
 
 
 @router.post("/submissions/bulk-approve", summary="Approve multiple submissions at once")
-async def bulk_approve_submissions(req: BulkSubmissionRequest, _: str = Depends(require_admin)):
+async def bulk_approve_submissions(
+    req: BulkSubmissionRequest, background_tasks: BackgroundTasks, _: str = Depends(require_admin)
+):
     """Approve multiple submissions in one call — powers the review queue's select-all/bulk-approve action."""
     results = await submission_service.bulk_approve(req.submission_ids)
+    for r in results:
+        if r.get("status") == "approved" and not r.get("already"):
+            await _notify_task_approved(background_tasks, r["submission_id"], None)
     return {"status": "done", "results": results}
 
 
@@ -484,6 +518,52 @@ async def bulk_reject_submissions(req: BulkSubmissionRequest, _: str = Depends(r
     """Reject multiple submissions in one call — powers the review queue's select-all/bulk-reject action."""
     results = await submission_service.bulk_reject(req.submission_ids, req.admin_note)
     return {"status": "done", "results": results}
+
+
+# ──────────────────────────────────────────────
+# Urgent Request Review Queue
+# ──────────────────────────────────────────────
+
+@router.get("/urgent-requests", summary="List urgent processing requests")
+async def list_urgent_requests(status: str | None = None, _: str = Depends(require_admin)):
+    """List urgent requests, optionally filtered by status (pending | fulfilled | rejected)."""
+    requests = await urgent_request_service.list_requests(status=status)
+    return {"count": len(requests), "requests": requests}
+
+
+@router.post("/urgent-requests/{request_id}/fulfill", summary="Fulfill an urgent request")
+async def fulfill_urgent_request(
+    request_id: int, req: ReviewSubmissionRequest = ReviewSubmissionRequest(),
+    background_tasks: BackgroundTasks = None,
+    _: str = Depends(require_admin),
+):
+    """Mark an urgent request as fulfilled and email the student."""
+    try:
+        result = await urgent_request_service.fulfill_request(request_id, req.admin_note)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    if result.get("email"):
+        background_tasks.add_task(
+            email_service.send_urgent_request_fulfilled,
+            first_name=result["first_name"],
+            last_name=result["last_name"],
+            email=result["email"],
+            domain=result["domain"],
+            request_type=result["request_type"],
+        )
+    return result
+
+
+@router.post("/urgent-requests/{request_id}/reject", summary="Reject an urgent request")
+async def reject_urgent_request(
+    request_id: int, req: ReviewSubmissionRequest = ReviewSubmissionRequest(),
+    _: str = Depends(require_admin),
+):
+    """Reject an urgent request."""
+    try:
+        return await urgent_request_service.reject_request(request_id, req.admin_note)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 # ──────────────────────────────────────────────

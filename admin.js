@@ -32,6 +32,7 @@ const PAGE_META = {
   batches:   { title: 'Batches',   subtitle: 'Manage cohorts and enrollment' },
   email:     { title: 'Email Settings', subtitle: 'Brevo SMTP relay — test and monitor email delivery' },
   submissions: { title: 'Submissions', subtitle: 'Review and approve/reject weekly LinkedIn submissions' },
+  'urgent-requests': { title: 'Urgent Requests', subtitle: 'Expedited (24h) certificate/LOR/portfolio processing requests' },
   announcements: { title: 'Announcements', subtitle: 'Send platform-wide update emails to students' },
 };
 
@@ -855,6 +856,7 @@ function navigate(page) {
   if (page === 'batches') loadBatches();
   if (page === 'email') loadEmailStatus();
   if (page === 'submissions') loadSubmissions();
+  if (page === 'urgent-requests') loadUrgentRequests();
   if (page === 'announcements') previewAnnouncement();
 }
 
@@ -1469,6 +1471,7 @@ async function openAnalyticsModal(batchId, batchName) {
 // ─── SUBMISSIONS (LinkedIn URL Review Queue) ───
 let allSubmissions = [];
 let selectedSubmissionIds = new Set();
+let allUrgentRequests = [];
 
 async function loadSubmissions() {
   const tbody = document.getElementById('submissions-tbody');
@@ -1607,6 +1610,88 @@ async function bulkRejectSubmissions() {
     });
     toast(`Rejected ${ids.length} submission${ids.length !== 1 ? 's' : ''}`);
     loadSubmissions();
+    loadStats(true);
+  } catch(e) {
+    toast(e.message, 'error');
+  }
+}
+
+// ─── URGENT REQUESTS ───
+async function loadUrgentRequests() {
+  const tbody = document.getElementById('urgent-requests-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = `<tr><td colspan="7"><div class="loading-overlay"><div class="spinner"></div></div></td></tr>`;
+  const status = document.getElementById('urgent-request-status-filter')?.value || 'pending';
+  try {
+    const qs = status ? `?status=${encodeURIComponent(status)}` : '';
+    const data = await api(`/api/admin/urgent-requests${qs}`);
+    allUrgentRequests = data.requests || [];
+    renderUrgentRequests(allUrgentRequests);
+    updateUrgentRequestsBadge(status === 'pending' ? data.count : allUrgentRequests.length);
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-state-text">${e.message}</div></div></td></tr>`;
+  }
+}
+
+function updateUrgentRequestsBadge(count) {
+  const badge = document.getElementById('urgent-requests-badge');
+  if (!badge) return;
+  if (count > 0) {
+    badge.style.display = 'inline-flex';
+    badge.textContent = count;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function renderUrgentRequests(requests) {
+  const tbody = document.getElementById('urgent-requests-tbody');
+  if (!tbody) return;
+  if (!requests.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">⚡</div><div class="empty-state-text">No urgent requests found</div></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = requests.map(r => `
+    <tr>
+      <td>
+        <div style="font-weight:500;">${r.first_name || ''} ${r.last_name || ''}</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);">${r.email || ''}</div>
+      </td>
+      <td style="color:var(--text-secondary);font-size:0.82rem;">${r.domain || ''}${r.batch_number ? ' — Batch #' + r.batch_number : ''}</td>
+      <td>${r.request_type}</td>
+      <td style="color:var(--text-secondary);font-size:0.82rem;">${r.note || '—'}</td>
+      <td style="color:var(--text-muted);font-size:0.8rem;">${fmtDate(r.created_at)}</td>
+      <td>${statusBadge(r.status)}</td>
+      <td>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          ${r.status === 'pending' ? `
+            <button class="btn btn-sm" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.3);" onclick="fulfillUrgentRequest(${r.id})">✅ Fulfill</button>
+            <button class="btn btn-sm" style="background:rgba(251,113,133,0.15);color:#fb7185;border:1px solid rgba(251,113,133,0.3);" onclick="rejectUrgentRequest(${r.id})">❌ Reject</button>
+          ` : '—'}
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+async function fulfillUrgentRequest(id) {
+  const adminNote = prompt('Optional note for the student:') || '';
+  try {
+    await api(`/api/admin/urgent-requests/${id}/fulfill`, { method: 'POST', body: JSON.stringify({ admin_note: adminNote }) });
+    toast('Request fulfilled');
+    loadUrgentRequests();
+    loadStats(true);
+  } catch(e) {
+    toast(e.message, 'error');
+  }
+}
+
+async function rejectUrgentRequest(id) {
+  if (!confirm('Are you sure you want to reject this urgent request?')) return;
+  const adminNote = prompt('Optional note for the student:') || '';
+  try {
+    await api(`/api/admin/urgent-requests/${id}/reject`, { method: 'POST', body: JSON.stringify({ admin_note: adminNote }) });
+    toast('Request rejected');
+    loadUrgentRequests();
     loadStats(true);
   } catch(e) {
     toast(e.message, 'error');

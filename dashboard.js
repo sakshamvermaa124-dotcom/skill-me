@@ -418,6 +418,19 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         descEl.textContent = `Great start! You've completed ${totalCompleted} out of ${totalAssigned} tasks. Keep the momentum going!`;
       }
+      const tasksForUnlock = Math.ceil((totalAssigned || 4) / 2);
+      const tasksRemaining = Math.max(1, tasksForUnlock - totalCompleted);
+      const taskWord = tasksRemaining === 1 ? 'task' : 'tasks';
+      if (flexCertBtn) {
+        const flexSub = flexCertBtn.querySelector('.flex-action-sub');
+        if (flexSub) flexSub.textContent = `Complete ${totalCompleted} of ${tasksForUnlock} tasks to unlock your Certificate, LOR & Portfolio.`;
+      }
+      const nudgeBanner = document.getElementById('cred-nudge-banner');
+      if (nudgeBanner) {
+        nudgeBanner.style.display = 'inline-flex';
+        const nudgeStrong = nudgeBanner.querySelector('strong');
+        if (nudgeStrong) nudgeStrong.textContent = `${tasksRemaining} more ${taskWord}`;
+      }
     }
 
     // Animate ring after render
@@ -507,18 +520,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const credLockedStrip = document.getElementById('cred-locked-strip');
+        const credNudgeBanner = document.getElementById('cred-nudge-banner');
         if (isPaid) {
           renderCertReady(certSection, student, data);
           if (credLockedStrip) credLockedStrip.style.display = 'none';
+          if (credNudgeBanner) credNudgeBanner.style.display = 'none';
         } else if (pct === 100) {
           renderPaymentBanner(certSection, student, data);
           if (credLockedStrip) credLockedStrip.style.display = 'none';
+          if (credNudgeBanner) credNudgeBanner.style.display = 'none';
         } else {
           certSection.style.display = 'none';
           certSection.innerHTML = '';
           if (credLockedStrip) credLockedStrip.style.display = 'grid';
         }
       }
+
+      // ─── Urgent (24h) Processing Request Panel ───
+      loadUrgentRequestPanel(student, data, pct);
 
       // ─── Automated Milestone Celebration Popup Trigger ───
       // Automatically triggers celebration modal on first visit after merging a new PR / completing a task
@@ -857,11 +876,6 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.classList.remove('active');
         setTimeout(() => modal.style.display = 'none', 400); // match transition duration
       }
-      const modal2 = document.getElementById('instant-payment-modal');
-      if (modal2) {
-        modal2.classList.remove('active');
-        setTimeout(() => modal2.style.display = 'none', 400);
-      }
     };
     
     window.showPaymentModal = function(student, data) {
@@ -1011,14 +1025,138 @@ document.addEventListener('DOMContentLoaded', () => {
       modalBtn.innerHTML = 'Paid &amp; Unlocked';
       modalBtn.disabled = true;
     }
-    
-    const instBtn = document.getElementById('instant-pay-trigger-btn');
-    if (instBtn) {
-      instBtn.innerHTML = 'Paid &amp; Unlocked';
-      instBtn.disabled = true;
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // ⚡ Urgent (24h) Processing Request Panel
+  // ─────────────────────────────────────────────────────────────
+  async function loadUrgentRequestPanel(student, data, pct) {
+    const content = document.getElementById('urgent-request-content');
+    if (!content) return;
+
+    if (pct < 50) {
+      content.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.2)" stroke-width="1"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h3>Locked</h3>
+          <p>Unlocks once you reach 50% completion — you're at ${pct}%.</p>
+        </div>`;
+      return;
+    }
+
+    if (!student.id || !data._batch_id) {
+      content.innerHTML = `<div class="empty-state"><p>Missing student/batch info. Please refresh the page.</p></div>`;
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API}/api/students/urgent-request/status/${student.id}/${data._batch_id}`);
+      const resData = await res.json().catch(() => ({}));
+      renderUrgentRequestState(student, data, resData.request || null);
+    } catch (e) {
+      content.innerHTML = `<div class="empty-state"><p>Could not load request status. Please try again later.</p></div>`;
     }
   }
 
+  function renderUrgentRequestState(student, data, request) {
+    const content = document.getElementById('urgent-request-content');
+    if (!content) return;
+
+    if (!request) {
+      content.innerHTML = `
+        <div class="guide-card">
+          <div class="guide-header">
+            <div class="guide-header-icon">⚡</div>
+            <h2>Request Urgent Processing</h2>
+          </div>
+          <p class="guide-subtitle">Need your Certificate, LOR, or Portfolio sooner? Submit a request and our team will process it within 24 hours.</p>
+          <div style="margin-top: 16px;">
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;">
+              <label style="font-size: 0.85rem; color: rgba(255,255,255,0.8);"><input type="radio" name="urgent-request-type" value="certificate" checked> Certificate</label>
+              <label style="font-size: 0.85rem; color: rgba(255,255,255,0.8);"><input type="radio" name="urgent-request-type" value="lor"> Letter of Recommendation</label>
+              <label style="font-size: 0.85rem; color: rgba(255,255,255,0.8);"><input type="radio" name="urgent-request-type" value="portfolio"> Portfolio</label>
+              <label style="font-size: 0.85rem; color: rgba(255,255,255,0.8);"><input type="radio" name="urgent-request-type" value="all"> All three</label>
+            </div>
+            <textarea id="urgent-request-note" placeholder="Optional note for the admin team..." rows="3" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: #fff; outline: none; font-size: 14px; resize: vertical; margin-bottom: 14px;"></textarea>
+            <button id="urgent-request-submit-btn" class="cert-btn cert-btn-primary" onclick="window.submitUrgentRequest()">
+              Request Urgent Processing (24h)
+            </button>
+          </div>
+        </div>`;
+      return;
+    }
+
+    if (request.status === 'pending') {
+      content.innerHTML = `
+        <div class="guide-card">
+          <div class="guide-header">
+            <div class="guide-header-icon">⏳</div>
+            <h2>Request Submitted</h2>
+          </div>
+          <p class="guide-subtitle">Our team will process your <strong>${request.request_type}</strong> request within 24 hours.</p>
+          <p style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">Submitted ${new Date(request.created_at).toLocaleString()}</p>
+          ${request.note ? `<p style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">Your note: ${request.note}</p>` : ''}
+        </div>`;
+      return;
+    }
+
+    const statusLabel = request.status === 'fulfilled' ? 'Fulfilled ✅' : 'Rejected ❌';
+    content.innerHTML = `
+      <div class="guide-card">
+        <div class="guide-header">
+          <div class="guide-header-icon">${request.status === 'fulfilled' ? '✅' : '❌'}</div>
+          <h2>${statusLabel}</h2>
+        </div>
+        <p class="guide-subtitle">Your <strong>${request.request_type}</strong> request was ${request.status} on ${request.resolved_at ? new Date(request.resolved_at).toLocaleString() : ''}.</p>
+        ${request.admin_note ? `<p style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">Admin note: ${request.admin_note}</p>` : ''}
+      </div>`;
+  }
+
+  window.submitUrgentRequest = async function() {
+    const btn = document.getElementById('urgent-request-submit-btn');
+    const student = window._dashStudent;
+    const data = window._dashData;
+    if (!student || !data || !student.id || !data._batch_id) {
+      alert('Student data not loaded yet. Please refresh the page.');
+      return;
+    }
+
+    const typeInput = document.querySelector('input[name="urgent-request-type"]:checked');
+    const requestType = typeInput ? typeInput.value : 'certificate';
+    const noteInput = document.getElementById('urgent-request-note');
+    const note = noteInput ? noteInput.value.trim() : '';
+
+    if (btn) { btn.disabled = true; btn.textContent = 'Submitting...'; }
+
+    try {
+      const res = await fetch(`${API}/api/students/urgent-request`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ student_id: student.id, batch_id: data._batch_id, request_type: requestType, note: note || null })
+      });
+      const resData = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        alert(resData.detail || 'Could not submit request. Please try again.');
+        if (btn) { btn.disabled = false; btn.textContent = 'Request Urgent Processing (24h)'; }
+        return;
+      }
+
+      renderUrgentRequestState(student, data, {
+        request_type: requestType,
+        note: note || null,
+        status: 'pending',
+        admin_note: null,
+        created_at: new Date().toISOString(),
+        resolved_at: null
+      });
+    } catch (e) {
+      alert('Network error while submitting. Please try again.');
+      if (btn) { btn.disabled = false; btn.textContent = 'Request Urgent Processing (24h)'; }
+    }
+  };
 
   // Exposed globally so the onclick in the banner HTML can call it
   window.initiatePayment = async function(studentId, batchId) {
@@ -1719,116 +1857,4 @@ function triggerMilestoneConfetti() {
 }
 
 
-
-
-
-
-    window.handlePayClick = async function() {
-      const btn = document.getElementById('instant-pay-trigger-btn');
-      const discountInputInstant = document.getElementById('discount-code-instant');
-      const discountCode = discountInputInstant ? discountInputInstant.value.trim() : null;
-      
-      if (btn) {
-        btn.disabled = true;
-        btn.textContent = 'Creating order...';
-      }
-      
-      if (!window._dashStudent || !window._dashData) {
-        alert('Student data not loaded yet.');
-        if (btn) { btn.disabled = false; btn.textContent = 'Unlock Instantly — ₹129'; }
-        return;
-      }
-      
-      const studentId = window._dashStudent.id;
-      const batchId = window._dashData._batch_id;
-      
-      try {
-        const res = await fetch(`${API}/api/payments/create-order`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            student_id: studentId, 
-            batch_id: batchId,
-            discount_code: discountCode
-          })
-        });
-        const orderData = await res.json();
-        
-        if (!res.ok) {
-          alert(orderData.detail || 'Could not create payment order');
-          if (btn) { btn.disabled = false; btn.textContent = 'Unlock Instantly — ₹129'; }
-          return;
-        }
-
-        if (orderData.already_paid) {
-          alert('You have already paid! Unlocking certificate.');
-          window.location.reload();
-          return;
-        }
-
-        const options = {
-          key: orderData.key_id,
-          amount: orderData.amount,
-          currency: orderData.currency,
-          name: 'SkillMe',
-          description: 'Instant Verified Certificate + LOR',
-          order_id: orderData.order_id,
-          handler: async function (response) {
-            if (btn) btn.textContent = 'Verifying payment...';
-            try {
-              const verifyRes = await fetch(`${API}/api/payments/verify`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  student_id: studentId,
-                  batch_id: batchId,
-                  razorpay_order_id: response.razorpay_order_id,
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_signature: response.razorpay_signature,
-                  discount_code: discountCode
-                })
-              });
-              const verifyData = await verifyRes.json();
-              if (verifyRes.ok && verifyData.status === 'success') {
-                window.closePaymentModal();
-                alert('Payment successful! Your certificate is ready.');
-                window.location.reload();
-              } else {
-                alert(verifyData.detail || 'Payment verification failed.');
-                if (btn) { btn.disabled = false; btn.textContent = 'Unlock Instantly — ₹129'; }
-              }
-            } catch(e) {
-              alert('Error verifying payment.');
-              if (btn) { btn.disabled = false; btn.textContent = 'Unlock Instantly — ₹129'; }
-            }
-          },
-          prefill: {
-            name: orderData.student_name || '',
-            email: window._dashData._email || ''
-          },
-          theme: { color: '#c99a4e' },
-          modal: {
-            ondismiss: function() {
-              if (btn) { btn.disabled = false; btn.textContent = 'Unlock Instantly — ₹129'; }
-            }
-          }
-        };
-
-        if (!window.Razorpay) {
-          await new Promise((resolve, reject) => {
-            const s = document.createElement('script');
-            s.src = 'https://checkout.razorpay.com/v1/checkout.js';
-            s.onload = resolve;
-            s.onerror = () => reject(new Error('Failed to load Razorpay'));
-            document.head.appendChild(s);
-          });
-        }
-
-        const rzp = new window.Razorpay(options);
-        rzp.open();
-      } catch(e) {
-        alert('Payment initialization failed.');
-        if (btn) { btn.disabled = false; btn.textContent = 'Unlock Instantly — ₹129'; }
-      }
-    };
 

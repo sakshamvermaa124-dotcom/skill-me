@@ -58,6 +58,21 @@ async def download_certificate(student_id: int, batch_id: int):
             raise HTTPException(status_code=404, detail=f"No batch found for student {student_id}")
         batch = enrollment
 
+    # ── Completion gate ────────────────────────────────────────────────────────
+    # Certificate download requires at least 50% task completion for this batch
+    progress = await db.fetch_all(
+        "SELECT week, issues_completed FROM progress WHERE student_id = ? AND batch_id = ?",
+        (student_id, batch["id"]),
+    )
+    completed_tasks = len({int(p["week"]) for p in progress if int(p["issues_completed"]) > 0})
+    completion_pct = min(100, round(completed_tasks / 4 * 100))
+    if completion_pct < 50:
+        raise HTTPException(
+            status_code=403,
+            detail=f"You need at least 50% task completion to unlock your certificate. Current progress: {completion_pct}%.",
+        )
+    # ─────────────────────────────────────────────────────────────────────────
+
     # ── Payment gate ──────────────────────────────────────────────────────────
     # Certificate download is only available after successful payment
     payment = await db.fetch_one(
@@ -67,7 +82,7 @@ async def download_certificate(student_id: int, batch_id: int):
     if not payment:
         raise HTTPException(
             status_code=402,
-            detail="Payment required. Please complete the ₹99 payment from your dashboard to download your certificate."
+            detail="Payment required. Please complete the ₹129 payment from your dashboard to download your certificate."
         )
     # ─────────────────────────────────────────────────────────────────────────
 

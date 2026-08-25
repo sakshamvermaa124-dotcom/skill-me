@@ -234,3 +234,20 @@ CREATE TABLE IF NOT EXISTS frontend_errors (
 CREATE INDEX IF NOT EXISTS idx_frontend_errors_page ON frontend_errors(page);
 CREATE INDEX IF NOT EXISTS idx_frontend_errors_created ON frontend_errors(created_at);
 CREATE INDEX IF NOT EXISTS idx_frontend_errors_email ON frontend_errors(student_email);
+
+-- Urgent Requests — student-initiated 24h expedited certificate/LOR/portfolio processing
+CREATE TABLE IF NOT EXISTS urgent_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER NOT NULL,
+    batch_id INTEGER NOT NULL,
+    request_type TEXT NOT NULL DEFAULT 'all',   -- certificate | lor | portfolio | all
+    note TEXT,
+    status TEXT NOT NULL DEFAULT 'pending',     -- pending | fulfilled | rejected
+    admin_note TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    resolved_at TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES students(id),
+    FOREIGN KEY (batch_id) REFERENCES batches(id)
+);
+CREATE INDEX IF NOT EXISTS idx_urgent_requests_student ON urgent_requests(student_id);
+CREATE INDEX IF NOT EXISTS idx_urgent_requests_status ON urgent_requests(status);

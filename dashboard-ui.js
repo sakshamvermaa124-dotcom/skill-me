@@ -4,17 +4,19 @@
 (function () {
   'use strict';
 
-  const PANELS = ['panel-overview', 'panel-work', 'panel-credentials', 'panel-guide'];
+  const PANELS = ['panel-overview', 'panel-work', 'panel-credentials', 'panel-urgent', 'panel-guide'];
   const NAV_IDS = {
     'panel-overview':    'nav-overview',
     'panel-work':        'nav-work',
     'panel-credentials': 'nav-credentials',
+    'panel-urgent':      'nav-urgent',
     'panel-guide':       'nav-guide',
   };
   const TAB_IDS = {
     'panel-overview':    'tab-overview',
     'panel-work':        'tab-work',
     'panel-credentials': 'tab-credentials',
+    'panel-urgent':      'tab-urgent',
     'panel-guide':       'tab-guide',
   };
 

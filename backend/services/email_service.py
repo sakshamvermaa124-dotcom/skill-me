@@ -354,6 +354,58 @@ class EmailService:
             email_type="submission_flow_update",
         )
 
+    # 4. Weekly task approved
+    async def send_task_approved(
+        self,
+        first_name: str,
+        last_name: str,
+        email: str,
+        domain: str,
+        week: int,
+        score: int,
+        admin_note: str | None = None,
+    ) -> bool:
+        html = _render(
+            "task_approved.html",
+            first_name=first_name,
+            last_name=last_name,
+            domain_label=_domain_label(domain),
+            week=week,
+            score=score,
+            admin_note=admin_note,
+        )
+        return await _send_and_log(
+            email,
+            f"{first_name} {last_name}",
+            f"🎉 Week {week} Task Approved!",
+            html,
+            email_type="task_approved",
+        )
+
+    # Urgent request fulfilled
+    async def send_urgent_request_fulfilled(
+        self,
+        first_name: str,
+        last_name: str,
+        email: str,
+        domain: str,
+        request_type: str,
+    ) -> bool:
+        html = _render(
+            "urgent_request_fulfilled.html",
+            first_name=first_name,
+            last_name=last_name,
+            domain_label=_domain_label(domain),
+            request_type=request_type,
+        )
+        return await _send_and_log(
+            email,
+            f"{first_name} {last_name}",
+            "🚀 Your Urgent Request Has Been Fulfilled",
+            html,
+            email_type="urgent_request_fulfilled",
+        )
+
     # Test utility
     async def send_test_email(self, to_email: str) -> bool:
         """Send a test email to verify SMTP configuration."""
