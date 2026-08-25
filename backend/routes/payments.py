@@ -91,6 +91,25 @@ async def create_order(req: CreateOrderRequest):
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
 
+    # Gate: below 50% completion, payment is only allowed once an admin has
+    # fulfilled an urgent request for this student+batch (see urgent_request_service).
+    progress = await db.fetch_all(
+        "SELECT week, issues_completed FROM progress WHERE student_id = ? AND batch_id = ?",
+        (req.student_id, req.batch_id),
+    )
+    completed_tasks = len({int(p["week"]) for p in progress if int(p["issues_completed"]) > 0})
+    completion_pct = min(100, round(completed_tasks / 4 * 100))
+    if completion_pct < 50:
+        enrollment = await db.fetch_one(
+            "SELECT payment_unlocked_at FROM enrollments WHERE student_id = ? AND batch_id = ?",
+            (req.student_id, req.batch_id),
+        )
+        if not (enrollment and enrollment["payment_unlocked_at"]):
+            raise HTTPException(
+                status_code=403,
+                detail="Payment unlocks at 50% task completion, or once an admin approves your urgent processing request.",
+            )
+
     # Check if already paid
     paid = await db.fetch_one(
         "SELECT id FROM payments WHERE student_id = ? AND batch_id = ? AND status = 'paid'",

@@ -1,6 +1,11 @@
 """
 SkillMe — Urgent Request Service
 Handles student requests for 24h expedited certificate/LOR/portfolio processing.
+
+Students below the 50% completion threshold don't get direct payment access —
+they file a request here instead. If an admin fulfills it, payment unlocks
+for that student+batch (see fulfill_request / _resolve) even at 0% completion.
+Students at/above 50% never need this — payment is already visible to them.
 """
 
 import logging
@@ -11,26 +16,12 @@ from db.database import db
 logger = logging.getLogger("skillme.urgent_request")
 
 
-async def _completion_pct(student_id: int, batch_id: int) -> int:
-    """Same formula as the certificate download completion gate, scoped to one batch."""
-    progress = await db.fetch_all(
-        "SELECT week, issues_completed FROM progress WHERE student_id = ? AND batch_id = ?",
-        (student_id, batch_id),
-    )
-    completed_tasks = len({int(p["week"]) for p in progress if int(p["issues_completed"]) > 0})
-    return min(100, round(completed_tasks / 4 * 100))
-
-
 class UrgentRequestService:
     """Manages student-initiated urgent processing requests and admin resolution."""
 
     async def create_request(
         self, student_id: int, batch_id: int, request_type: str = "all", note: str | None = None
     ) -> dict:
-        completion_pct = await _completion_pct(student_id, batch_id)
-        if completion_pct < 50:
-            raise ValueError("You need at least 50% task completion to request urgent processing.")
-
         existing = await db.fetch_one(
             "SELECT id FROM urgent_requests WHERE student_id = ? AND batch_id = ? AND status = 'pending'",
             (student_id, batch_id),
@@ -91,7 +82,13 @@ class UrgentRequestService:
         }
 
     async def fulfill_request(self, request_id: int, admin_note: str | None = None) -> dict:
-        return await self._resolve(request_id, "fulfilled", admin_note)
+        result = await self._resolve(request_id, "fulfilled", admin_note)
+        await db.execute(
+            "UPDATE enrollments SET payment_unlocked_at = CURRENT_TIMESTAMP WHERE student_id = ? AND batch_id = ?",
+            (result["student_id"], result["batch_id"]),
+        )
+        logger.info(f"Payment unlocked for student {result['student_id']} batch {result['batch_id']} via urgent request {request_id}")
+        return result
 
     async def reject_request(self, request_id: int, admin_note: str | None = None) -> dict:
         return await self._resolve(request_id, "rejected", admin_note)

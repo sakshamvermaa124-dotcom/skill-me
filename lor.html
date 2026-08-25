@@ -811,8 +811,31 @@
     }
   }
 
+  function showLocked(reason) {
+    const doc = document.getElementById('lor-document');
+    if (!doc) return;
+    const isPayment = reason === 'payment_required';
+    doc.innerHTML = `
+      <div style="padding:60px 24px;text-align:center;">
+        <div style="font-size:2.5rem;margin-bottom:12px;">🔒</div>
+        <div style="font-size:1.2rem;font-weight:700;color:var(--dark-text);margin-bottom:8px;">
+          ${isPayment ? 'Letter of Recommendation Not Yet Unlocked' : 'Letter of Recommendation Not Found'}
+        </div>
+        <div style="color:var(--muted-text);max-width:420px;margin:0 auto;">
+          ${isPayment
+            ? 'Complete payment on your Student Dashboard — or, if you\'re below 50% completion, get your urgent processing request approved — to unlock this letter.'
+            : 'This link is invalid or the letter has not been issued yet.'}
+        </div>
+        <a href="dashboard.html" style="display:inline-block;margin-top:20px;color:var(--blue);font-weight:600;text-decoration:none;">← Return to Dashboard</a>
+      </div>`;
+    const actionsBar = document.querySelector('.actions-bar');
+    if (actionsBar) actionsBar.style.display = 'none';
+  }
+
   async function loadLOR() {
-    // Mode 1: cert_id in URL — try API verification
+    // Mode 1: cert_id in URL — public verification, same as certificate.html.
+    // A cert_id only exists once a certificate has been issued (post-payment), and
+    // this is the intentionally-public "verify this credential" path for third parties.
     if (certId) {
       try {
         const res = await fetch(`${API}/api/certificates/verify/${certId}`);
@@ -824,13 +847,12 @@
           return;
         }
       } catch(e) {}
-      const name = nameParam || 'Student';
-      populateLOR(name, domainParam, batchId, certId, null);
-      showVerify(false, name, certId, null);
+      showLocked('not_found');
       return;
     }
 
-    // Mode 2: student_id + batch_id — try metadata API
+    // Mode 2: student_id + batch_id — the student's own dashboard link.
+    // Backend requires completed payment before returning any data.
     if (studentId && batchId) {
       try {
         const res = await fetch(`${API}/api/certificates/metadata/${studentId}/${batchId}`);
@@ -841,14 +863,17 @@
           showVerify(true, name, d.cert_id, d.issued_at);
           return;
         }
+        if (res.status === 402) {
+          showLocked('payment_required');
+          return;
+        }
       } catch(e) {}
+      showLocked('not_found');
+      return;
     }
 
-    // Mode 3: fallback directly from URL params
-    const name = nameParam || 'Student';
-    const domain = domainParam || 'web-dev';
-    populateLOR(name, domain, batchId, null, null);
-    showVerify(false, name, null, null);
+    // No valid identifying params — nothing to render without a backend-verified source.
+    showLocked('not_found');
   }
 
   loadLOR();

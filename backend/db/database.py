@@ -177,6 +177,8 @@ class Database:
                 "CREATE INDEX IF NOT EXISTS idx_frontend_errors_page ON frontend_errors(page)",
                 "CREATE INDEX IF NOT EXISTS idx_frontend_errors_created ON frontend_errors(created_at)",
                 "CREATE INDEX IF NOT EXISTS idx_frontend_errors_email ON frontend_errors(student_email)",
+                # payment_unlocked_at — set on enrollments when an admin fulfills a sub-50% urgent request (v5)
+                "ALTER TABLE enrollments ADD COLUMN payment_unlocked_at TIMESTAMP",
             ]
             for migration in migrations:
                 try:

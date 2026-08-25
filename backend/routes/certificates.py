@@ -58,20 +58,10 @@ async def download_certificate(student_id: int, batch_id: int):
             raise HTTPException(status_code=404, detail=f"No batch found for student {student_id}")
         batch = enrollment
 
-    # ── Completion gate ────────────────────────────────────────────────────────
-    # Certificate download requires at least 50% task completion for this batch
-    progress = await db.fetch_all(
-        "SELECT week, issues_completed FROM progress WHERE student_id = ? AND batch_id = ?",
-        (student_id, batch["id"]),
-    )
-    completed_tasks = len({int(p["week"]) for p in progress if int(p["issues_completed"]) > 0})
-    completion_pct = min(100, round(completed_tasks / 4 * 100))
-    if completion_pct < 50:
-        raise HTTPException(
-            status_code=403,
-            detail=f"You need at least 50% task completion to unlock your certificate. Current progress: {completion_pct}%.",
-        )
-    # ─────────────────────────────────────────────────────────────────────────
+    # Completion is enforced upstream, at payment order creation (see routes/payments.py
+    # create_order): below 50%, an order can only be created once an admin has unlocked
+    # payment via a fulfilled urgent request. A 'paid' row here is therefore already
+    # sufficient proof of eligibility — no separate completion check is needed.
 
     # ── Payment gate ──────────────────────────────────────────────────────────
     # Certificate download is only available after successful payment
@@ -153,14 +143,23 @@ async def issue_cert(
 # ─── Student: get own certificate metadata ───
 @router.get("/metadata/{student_id}/{batch_id}", summary="Get certificate metadata")
 async def get_cert_metadata(student_id: int, batch_id: int):
-    """Public endpoint for a student to get their own certificate metadata."""
+    """Student's own certificate metadata — used by certificate.html and lor.html to
+    render the on-page view. Requires completed payment; the cert_id printed on it
+    can then be checked by anyone via the separate public /verify endpoint."""
     cert = await db.fetch_one(
         "SELECT * FROM certificates WHERE student_id = ? AND batch_id = ?",
         (student_id, batch_id)
     )
     if not cert:
         raise HTTPException(status_code=404, detail="Certificate not found")
-    
+
+    payment = await db.fetch_one(
+        "SELECT id FROM payments WHERE student_id = ? AND batch_id = ? AND status = 'paid'",
+        (student_id, batch_id),
+    )
+    if not payment:
+        raise HTTPException(status_code=402, detail="payment_required")
+
     # Get student info
     student = await db.fetch_one("SELECT first_name, last_name FROM students WHERE id = ?", (student_id,))
     # Get batch info

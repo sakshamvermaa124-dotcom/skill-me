@@ -1675,10 +1675,11 @@ function renderUrgentRequests(requests) {
 }
 
 async function fulfillUrgentRequest(id) {
+  if (!confirm('Fulfilling this request unlocks payment for the student even below 50% completion. Continue?')) return;
   const adminNote = prompt('Optional note for the student:') || '';
   try {
     await api(`/api/admin/urgent-requests/${id}/fulfill`, { method: 'POST', body: JSON.stringify({ admin_note: adminNote }) });
-    toast('Request fulfilled');
+    toast('Request fulfilled — payment unlocked');
     loadUrgentRequests();
     loadStats(true);
   } catch(e) {

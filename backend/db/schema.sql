@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS enrollments (
     status TEXT NOT NULL DEFAULT 'enrolled',  -- enrolled | active | completed | dropped
     joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     completed_at TIMESTAMP,
+    payment_unlocked_at TIMESTAMP,        -- set when an admin fulfills an urgent request below 50% completion
     FOREIGN KEY (student_id) REFERENCES students(id),
     FOREIGN KEY (batch_id) REFERENCES batches(id),
     UNIQUE(student_id, batch_id)

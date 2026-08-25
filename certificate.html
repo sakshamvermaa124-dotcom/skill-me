@@ -1046,17 +1046,6 @@
     const domainParam = params.get('domain');
     let resolvedName = nameParam || '';
 
-    // Deterministic Certificate ID generator (SHA-256)
-    async function generateCertId(sid, bid) {
-      const raw = `skillme-${sid || '1001'}-${bid || '1'}`;
-      const encoder = new TextEncoder();
-      const data = encoder.encode(raw);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
-      return `SM-${hashHex.substring(0, 4)}-${hashHex.substring(4, 8)}-${hashHex.substring(8, 12)}`;
-    }
-
     // Determine mode
     const hasParams = studentId || batchId || certId || email || nameParam;
 
@@ -1073,18 +1062,26 @@
       loadCertificate();
     }
 
-    async function loadCertificate() {
-      if (nameParam && studentId) {
-        const realCertId = certId || await generateCertId(studentId, batchId || '1');
-        populateCertificate({
-          holder: nameParam,
-          domain: domainParam || 'Web Development',
-          issued_at: new Date().toISOString(),
-          cert_id: realCertId,
-        });
-        return;
-      }
+    function showLocked(reason) {
+      const wrapper = document.getElementById('cert-view-wrapper');
+      if (!wrapper) return;
+      const isPayment = reason === 'payment_required';
+      wrapper.innerHTML = `
+        <div style="padding:80px 24px;text-align:center;">
+          <div style="font-size:2.5rem;margin-bottom:12px;">🔒</div>
+          <div style="font-size:1.2rem;font-weight:700;color:#f0c97a;margin-bottom:8px;">
+            ${isPayment ? 'Certificate Not Yet Unlocked' : 'Certificate Not Found'}
+          </div>
+          <div style="color:#a8a29e;max-width:420px;margin:0 auto;">
+            ${isPayment
+              ? 'Complete payment on your Student Dashboard — or, if you\'re below 50% completion, get your urgent processing request approved — to unlock this certificate.'
+              : 'This link is invalid or the certificate has not been issued yet.'}
+          </div>
+          <a href="dashboard.html" style="display:inline-block;margin-top:20px;color:#93c5fd;font-weight:600;text-decoration:none;">← Return to Dashboard</a>
+        </div>`;
+    }
 
+    async function loadCertificate() {
       if (certId) {
         await verifyCert(certId);
         return;
@@ -1127,15 +1124,13 @@
           });
           return;
         }
+        if (metaRes.status === 402) {
+          showLocked('payment_required');
+          return;
+        }
       } catch (e) { }
 
-      const fallbackCertId = await generateCertId(studentId, batchId || '1');
-      populateCertificate({
-        holder: resolvedName || `Student #${studentId}`,
-        domain: domainParam || 'Web Development',
-        issued_at: new Date().toISOString(),
-        cert_id: fallbackCertId,
-      });
+      showLocked('not_found');
     }
 
     async function verifyCert(id) {

@@ -389,28 +389,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update description based on progress
     const descEl = document.getElementById('progress-desc');
-    const flexCertBtn = document.getElementById('flex-cert-btn');
     if (pct >= 50) {
       if (pct < 100) {
         descEl.textContent = `Impressive progress! ${totalCompleted} of ${totalAssigned} tasks done. You have met the minimum requirements to claim your certificate!`;
       } else {
         descEl.textContent = `Outstanding! You've completed all ${totalAssigned} assigned tasks. You're a star intern!`;
       }
-      setTimeout(() => showCompletionPopup(student, data), 800);
-      if (flexCertBtn) {
-        flexCertBtn.classList.add('is-cert-ready');
-        flexCertBtn.innerHTML = `
-          <div class="flex-action-icon">
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-          </div>
-          <div class="flex-action-text">
-            <span class="flex-action-title">You're Eligible — Claim It</span>
-            <span class="flex-action-sub">Unlock your Certificate & LOR for ₹129</span>
-          </div>
-          <svg class="flex-action-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
-        `;
-        flexCertBtn.style.cursor = 'pointer';
-        flexCertBtn.onclick = () => showCompletionPopup(student, data);
+      // Show once per student per completion bracket (50/75/100), not on every dashboard load.
+      const eligibilitySeenKey = `skillme_eligibility_seen_s${student && student.id ? student.id : 'guest'}_pct${pct}`;
+      if (!localStorage.getItem(eligibilitySeenKey)) {
+        localStorage.setItem(eligibilitySeenKey, 'true');
+        setTimeout(() => showCompletionPopup(student, data, pct), 800);
       }
     } else {
       if (pct === 0) {
@@ -421,10 +410,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const tasksForUnlock = Math.ceil((totalAssigned || 4) / 2);
       const tasksRemaining = Math.max(1, tasksForUnlock - totalCompleted);
       const taskWord = tasksRemaining === 1 ? 'task' : 'tasks';
-      if (flexCertBtn) {
-        const flexSub = flexCertBtn.querySelector('.flex-action-sub');
-        if (flexSub) flexSub.textContent = `Complete ${totalCompleted} of ${tasksForUnlock} tasks to unlock your Certificate, LOR & Portfolio.`;
-      }
       const nudgeBanner = document.getElementById('cred-nudge-banner');
       if (nudgeBanner) {
         nudgeBanner.style.display = 'inline-flex';
@@ -504,6 +489,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       // ─── Certificate Banner (Payment Gated) ───
+      // Payment is visible directly at >=50% completion. Below that, a student must
+      // file an urgent request (panel-urgent) and have an admin fulfill it — which
+      // sets summary.payment_unlocked — before the payment banner appears.
+      const paymentUnlocked = !!(data.summary && data.summary.payment_unlocked);
       const certSection = document.getElementById('cert-section');
       if (certSection) {
         let isPaid = false;
@@ -525,7 +514,7 @@ document.addEventListener('DOMContentLoaded', () => {
           renderCertReady(certSection, student, data);
           if (credLockedStrip) credLockedStrip.style.display = 'none';
           if (credNudgeBanner) credNudgeBanner.style.display = 'none';
-        } else if (pct === 100) {
+        } else if (pct >= 50 || paymentUnlocked) {
           renderPaymentBanner(certSection, student, data);
           if (credLockedStrip) credLockedStrip.style.display = 'none';
           if (credNudgeBanner) credNudgeBanner.style.display = 'none';
@@ -537,7 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // ─── Urgent (24h) Processing Request Panel ───
-      loadUrgentRequestPanel(student, data, pct);
+      loadUrgentRequestPanel(student, data, pct, paymentUnlocked);
 
       // ─── Automated Milestone Celebration Popup Trigger ───
       // Automatically triggers celebration modal on first visit after merging a new PR / completing a task
@@ -1003,23 +992,6 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>`;
 
-    // Change the instant pay trigger button to Paid
-    const instantPayTrigger = document.getElementById('flex-cert-btn');
-    if (instantPayTrigger) {
-      instantPayTrigger.classList.add('is-cert-ready');
-      instantPayTrigger.innerHTML = `
-        <div class="flex-action-icon">
-          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-        </div>
-        <div class="flex-action-text">
-          <span class="flex-action-title">Paid &amp; Unlocked</span>
-          <span class="flex-action-sub">Certificate Ready</span>
-        </div>
-      `;
-      instantPayTrigger.style.cursor = '';
-      instantPayTrigger.onclick = null;
-    }
-
     const modalBtn = document.getElementById('modal-pay-btn');
     if (modalBtn) {
       modalBtn.innerHTML = 'Paid &amp; Unlocked';
@@ -1030,18 +1002,30 @@ document.addEventListener('DOMContentLoaded', () => {
   // ─────────────────────────────────────────────────────────────
   // ⚡ Urgent (24h) Processing Request Panel
   // ─────────────────────────────────────────────────────────────
-  async function loadUrgentRequestPanel(student, data, pct) {
+  async function loadUrgentRequestPanel(student, data, pct, paymentUnlocked) {
     const content = document.getElementById('urgent-request-content');
     if (!content) return;
 
-    if (pct < 50) {
+    if (pct >= 50) {
       content.innerHTML = `
         <div class="empty-state">
           <div class="empty-icon">
-            <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.2)" stroke-width="1"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.2)" stroke-width="1"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           </div>
-          <h3>Locked</h3>
-          <p>Unlocks once you reach 50% completion — you're at ${pct}%.</p>
+          <h3>Not Needed</h3>
+          <p>You're at ${pct}% completion — payment is already available on the Credentials tab, no request required.</p>
+        </div>`;
+      return;
+    }
+
+    if (paymentUnlocked) {
+      content.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.2)" stroke-width="1"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <h3>Approved ✅</h3>
+          <p>Your urgent request was approved — head to the Credentials tab to complete payment.</p>
         </div>`;
       return;
     }
@@ -1224,10 +1208,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // User closed Razorpay popup without completing payment
             if (btn) { btn.disabled = false; btn.innerHTML = 'Unlock My Certificate — ₹129'; }
             if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = 'Unlock My Certificate — ₹129'; }
-            const flexBtn = document.getElementById('flex-cert-btn');
-            if (flexBtn && !flexBtn.innerHTML.includes('Paid')) {
-              flexBtn.disabled = false;
-            }
           }
         },
         handler: async function (response) {
@@ -1312,7 +1292,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // ─── 100% Completion Celebration Popup ──────────────────────────────────────
-function showCompletionPopup(student, data) {
+function showCompletionPopup(student, data, pct) {
+  const isFullyComplete = typeof pct === 'number' && pct >= 100;
   // Build credential URLs from available data
   const FRONTEND = window.SKILLME_FRONTEND || window.location.origin;
   const email    = (data && data._email) || '';
@@ -1356,7 +1337,9 @@ function showCompletionPopup(student, data) {
         Congratulations, ${firstName}!
       </div>
       <div style="font-size:0.9rem;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:28px;position:relative;">
-        You've completed <strong style="color:#c99a4e;">100%</strong> of your internship tasks!<br>
+        ${isFullyComplete
+          ? `You've completed <strong style="color:#c99a4e;">100%</strong> of your internship tasks!`
+          : `You've reached <strong style="color:#c99a4e;">${pct}%</strong> completion — enough to unlock your credentials!`}<br>
         Your Certificate, LOR, and Portfolio are ready to claim.
       </div>
 

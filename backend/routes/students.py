@@ -184,6 +184,15 @@ async def get_progress(email: str):
 
     primary_domain = student.get("domain") or (progress[0]["domain"] if progress else "Web Development")
 
+    payment_unlocked = False
+    batch_id = progress[0]["batch_id"] if progress else None
+    if batch_id:
+        enrollment = await db.fetch_one(
+            "SELECT payment_unlocked_at FROM enrollments WHERE student_id = ? AND batch_id = ?",
+            (student["id"], batch_id),
+        )
+        payment_unlocked = bool(enrollment and enrollment["payment_unlocked_at"])
+
     return {
         "student": {
             "id": student["id"],
@@ -206,6 +215,7 @@ async def get_progress(email: str):
             "completion_pct": min(100, round(
                 len({int(p["week"]) for p in progress if int(p["issues_completed"]) > 0}) / 4 * 100
             )),
+            "payment_unlocked": payment_unlocked,
         },
     }
 
@@ -243,7 +253,8 @@ async def submit_task(req: SubmitTaskRequest):
 async def create_urgent_request(req: UrgentRequestRequest):
     """
     Student requests urgent (24h) processing of their certificate, LOR, or portfolio.
-    Requires at least 50% task completion for the batch.
+    Open to students below 50% task completion, who don't otherwise have direct
+    payment access — an admin reviews and, if fulfilled, unlocks payment for them.
     """
     try:
         return await urgent_request_service.create_request(
