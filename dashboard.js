@@ -920,7 +920,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const email = data._email || '';
     const domain = (data.progress[0] && data.progress[0].domain) || 'web-dev';
     const certUrl = `${FRONTEND}/certificate.html?email=${encodeURIComponent(email)}&student_id=${student.id}&batch_id=${data._batch_id}&name=${encodeURIComponent(student.name)}&domain=${encodeURIComponent(domain)}`;
-    const dlUrl   = `${API}/api/certificates/download/${student.id}/${data._batch_id}`;
     const lorUrl  = `${FRONTEND}/lor.html?student_id=${student.id}&batch_id=${data._batch_id}&name=${encodeURIComponent(student.name)}&domain=${encodeURIComponent(domain)}`;
     const portfolioUrl = student.id ? `${FRONTEND}/portfolio.html?student_id=${student.id}` : '#';
 
@@ -980,13 +979,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline>
               </svg>
               View LOR
-            </a>
-            <a href="${dlUrl}" target="_blank" class="cert-btn cert-btn-secondary">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              Download PDF
             </a>
           </div>
         </div>
