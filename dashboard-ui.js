@@ -24,7 +24,7 @@
     if (!ring) return;
     const saved = ring.style.strokeDashoffset;
     ring.style.transition = 'none';
-    ring.style.strokeDashoffset = '326.7';
+    ring.style.strokeDashoffset = '439.8';
     void ring.getBoundingClientRect();
     ring.style.transition = '';
     ring.style.strokeDashoffset = saved;
@@ -57,9 +57,63 @@
     // R4: ensure sub-cards are visible in newly-shown panel
     panel.querySelectorAll('.sub-card:not(.visible)').forEach(function (c) { c.classList.add('visible'); });
     replayRing(panel);
+    panel.classList.remove('panel-entering');
+    void panel.offsetWidth;
+    panel.classList.add('panel-entering');
     window.dispatchEvent(new Event('resize'));
   };
 
+
+  // Interactive milestone roadmap — click a week for its status/details
+  window.showMilestoneInfo = function (week, name, el) {
+    const tooltip = document.getElementById('milestone-tooltip');
+    const container = el.closest('.progress-details');
+    if (!tooltip || !container) return;
+
+    if (tooltip.classList.contains('visible') && tooltip.dataset.forEl === el.id) {
+      tooltip.classList.remove('visible');
+      return;
+    }
+
+    let message;
+    if (el.classList.contains('completed')) {
+      message = `<strong>Week ${week}: ${name}</strong><br>Completed and approved — nice work!`;
+    } else if (el.classList.contains('active')) {
+      message = `<strong>Week ${week}: ${name}</strong><br>In progress — submit your LinkedIn post in the Work tab to complete it.`;
+    } else {
+      message = `<strong>Week ${week}: ${name}</strong><br>Unlocks once you complete Week ${week - 1}.`;
+    }
+    tooltip.innerHTML = message;
+    tooltip.dataset.forEl = el.id;
+    tooltip.classList.add('visible');
+
+    const containerRect = container.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    const ttWidth = tooltip.offsetWidth;
+    const ttHeight = tooltip.offsetHeight;
+    let left = (elRect.left - containerRect.left) + elRect.width / 2 - ttWidth / 2;
+    left = Math.max(0, Math.min(left, container.offsetWidth - ttWidth));
+    let top = (elRect.top - containerRect.top) - ttHeight - 10;
+    if (top < 0) top = (elRect.bottom - containerRect.top) + 10;
+    tooltip.style.left = left + 'px';
+    tooltip.style.top = top + 'px';
+  };
+
+  document.addEventListener('click', function (e) {
+    const tooltip = document.getElementById('milestone-tooltip');
+    if (!tooltip || !tooltip.classList.contains('visible')) return;
+    if (e.target.closest('.sprint-milestone-step') || e.target.closest('.milestone-tooltip')) return;
+    tooltip.classList.remove('visible');
+  });
+
+  // Enter/Space activate div[role="button"] elements (milestone steps, ring)
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const target = e.target.closest('[role="button"]');
+    if (!target) return;
+    e.preventDefault();
+    target.click();
+  });
 
   // Sidebar visibility — MutationObserver on #dashboard-view
   document.addEventListener('DOMContentLoaded', function () {

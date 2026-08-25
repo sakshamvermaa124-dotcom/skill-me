@@ -138,6 +138,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // --- Intersection Observer for Submission Cards ---
+  // Must exist before checkExistingSession() runs below: preview mode calls
+  // renderDashboard(mockData) synchronously with no prior await, so renderSubmissionsList
+  // (which calls subObserver.observe) can run before this file finishes its top-to-bottom
+  // pass — subObserver has to be initialized ahead of that call, not just defined "later".
+  const subObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        subObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
   // Check on load
   checkExistingSession().catch(err => {
     console.warn("Session check notice:", err);
@@ -369,7 +383,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const pct = (data.summary && typeof data.summary.completion_pct === 'number')
       ? Math.min(100, Math.max(0, Math.round(data.summary.completion_pct)))
       : Math.min(100, Math.round((totalCompleted / (totalAssigned || 4)) * 100));
-    document.getElementById('progress-pct').textContent = `${pct}%`;
+    const progressPctEl = document.getElementById('progress-pct');
+    const prevPct = parseInt(progressPctEl.textContent, 10) || 0;
+    progressPctEl.textContent = prevPct;
 
     // Update description based on progress
     const descEl = document.getElementById('progress-desc');
@@ -382,15 +398,18 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       setTimeout(() => showCompletionPopup(student, data), 800);
       if (flexCertBtn) {
+        flexCertBtn.classList.add('is-cert-ready');
         flexCertBtn.innerHTML = `
-          <div style="display: flex; align-items: center; gap: 8px; color: #fff;">
+          <div class="flex-action-icon">
             <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            <span style="font-size: 1.05rem; font-weight: 600;">Internship Passed</span>
           </div>
-          <span style="font-size: 0.75rem; color: rgba(255,255,255,0.9); font-weight: 500;">Claim Certificate Now</span>
+          <div class="flex-action-text">
+            <span class="flex-action-title">You're Eligible — Claim It</span>
+            <span class="flex-action-sub">Unlock your Certificate & LOR for ₹129</span>
+          </div>
+          <svg class="flex-action-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
         `;
-        flexCertBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
-        flexCertBtn.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+        flexCertBtn.style.cursor = 'pointer';
         flexCertBtn.onclick = () => showCompletionPopup(student, data);
       }
     } else {
@@ -403,13 +422,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Animate ring after render
     setTimeout(async () => {
-      const circumference = 2 * Math.PI * 52; // r=52
+      const r = 70;
+      const cx = 82, cy = 82;
+      const circumference = 2 * Math.PI * r;
       const offset = circumference - (pct / 100) * circumference;
       const urlParams = new URLSearchParams(window.location.search);
       const isPreview = urlParams.get('preview') === '1';
-      
+
       document.getElementById('progress-ring').style.strokeDashoffset = offset;
       document.getElementById('progress-bar-inner').style.width = `${pct}%`;
+
+      // Animated count-up on the hero percentage + a leading glow dot that travels the arc
+      animateValue(progressPctEl, prevPct, pct, 1600);
+      const ringHead = document.getElementById('progress-ring-head');
+      if (ringHead) {
+        const angle = (-90 + (pct / 100) * 360) * (Math.PI / 180);
+        ringHead.style.opacity = pct > 0 ? '1' : '0';
+        ringHead.setAttribute('cx', cx + r * Math.cos(angle));
+        ringHead.setAttribute('cy', cy + r * Math.sin(angle));
+      }
+      const ringWrap = document.querySelector('.progress-ring-wrap');
+      if (ringWrap) {
+        setTimeout(() => {
+          ringWrap.classList.remove('pop');
+          void ringWrap.offsetWidth;
+          ringWrap.classList.add('pop');
+        }, 1600);
+      }
+
+      // Per-card mini progress bars
+      const approvalRate = totalCompleted > 0 ? Math.min(100, Math.round((approvedCount / totalCompleted) * 100)) : 0;
+      const bar1 = document.getElementById('stat-bar-1');
+      const bar2 = document.getElementById('stat-bar-2');
+      const bar3 = document.getElementById('stat-bar-3');
+      const bar4 = document.getElementById('stat-bar-4');
+      if (bar1) bar1.style.width = `${pct}%`;
+      if (bar2) bar2.style.width = `${approvalRate}%`;
+      if (bar3) bar3.style.width = `${pct}%`;
+      if (bar4) bar4.style.width = `${pct}%`;
 
       // Update Sprint Milestone Step Cards
       const m1 = document.getElementById('milestone-w1');
@@ -456,13 +506,17 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
 
+        const credLockedStrip = document.getElementById('cred-locked-strip');
         if (isPaid) {
           renderCertReady(certSection, student, data);
+          if (credLockedStrip) credLockedStrip.style.display = 'none';
         } else if (pct === 100) {
           renderPaymentBanner(certSection, student, data);
+          if (credLockedStrip) credLockedStrip.style.display = 'none';
         } else {
           certSection.style.display = 'none';
           certSection.innerHTML = '';
+          if (credLockedStrip) credLockedStrip.style.display = 'grid';
         }
       }
 
@@ -778,16 +832,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // --- Intersection Observer for Submission Cards ---
-  const subObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        subObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-
   // --- Animated Number Counter ---
   function animateValue(el, start, end, duration) {
     if (start === end) return;
@@ -846,23 +890,23 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="cert-banner-content">
           <div class="cert-banner-icon">✨</div>
           <div class="cert-banner-text">
-            <div class="cert-banner-title">Internship Complete! Activate Your Profile</div>
+            <div class="cert-banner-title">You've Earned Your Credentials — Claim Them</div>
             <div class="cert-banner-sub">
-              A small fee of ₹129 is required to compensate for personalized LORs, verified certificate generation, automated task assignment infrastructure, and hosting your lifetime Proof of Work portfolio link.
+              A one-time ₹129 fee covers your verified certificate, personalized LOR, and lifetime hosting for your Proof of Work portfolio — the work behind them (review, generation, hosting) doesn't happen for free.
             </div>
           </div>
           <div class="cert-banner-actions" style="flex-direction: column; align-items: flex-start; gap: 8px;">
             <div style="display: flex; gap: 8px; width: 100%;">
-              <input type="text" id="discount-code" placeholder="Discount Code (Optional)" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.5); color: #fff; outline: none; font-size: 14px; width: 180px;">
+              <input type="text" id="discount-code" placeholder="Have a discount code?" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.5); color: #fff; outline: none; font-size: 14px; width: 180px;">
               <button id="pay-btn" class="cert-btn cert-btn-primary" onclick="initiatePayment(${student.id}, ${data._batch_id})" style="flex: 1;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
                   <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
                 </svg>
-                Pay &amp; Activate Everything
+                Unlock My Certificate — ₹129
               </button>
             </div>
             <div style="font-size:11px;color:var(--text-3,#666);margin-top:4px;text-align:center; width: 100%;">
-              Secured by Razorpay · UPI / Card / NetBanking
+              🔒 Secured by Razorpay · UPI / Card / NetBanking · Every certificate is independently verifiable
             </div>
           </div>
         </div>
@@ -948,12 +992,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Change the instant pay trigger button to Paid
     const instantPayTrigger = document.getElementById('flex-cert-btn');
     if (instantPayTrigger) {
-      instantPayTrigger.innerHTML = `<div style="display: flex; align-items: center; gap: 8px;"><svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span style="font-size: 1.05rem;">Paid &amp; Unlocked</span></div><span style="font-size: 0.8rem; color: rgba(255,255,255,0.9); font-weight: 600;">Certificate Ready</span>`;
-      instantPayTrigger.style.background = 'rgba(52, 211, 153, 0.1)';
-      instantPayTrigger.style.borderColor = 'rgba(52, 211, 153, 0.2)';
-      instantPayTrigger.style.color = '#34d399';
+      instantPayTrigger.classList.add('is-cert-ready');
+      instantPayTrigger.innerHTML = `
+        <div class="flex-action-icon">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        </div>
+        <div class="flex-action-text">
+          <span class="flex-action-title">Paid &amp; Unlocked</span>
+          <span class="flex-action-sub">Certificate Ready</span>
+        </div>
+      `;
+      instantPayTrigger.style.cursor = '';
       instantPayTrigger.onclick = null;
-      instantPayTrigger.style.cursor = 'default';
     }
 
     const modalBtn = document.getElementById('modal-pay-btn');
@@ -992,8 +1042,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!orderRes.ok) {
         alert(orderData.detail || 'Could not create payment order. Try again.');
-        if (btn) { btn.disabled = false; btn.innerHTML = 'Pay the Fee &amp; Activate Profile'; }
-        if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = 'Pay the Fee &amp; Activate Profile'; }
+        if (btn) { btn.disabled = false; btn.innerHTML = 'Unlock My Certificate — ₹129'; }
+        if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = 'Unlock My Certificate — ₹129'; }
         return;
       }
 
@@ -1034,8 +1084,8 @@ document.addEventListener('DOMContentLoaded', () => {
         modal: {
           ondismiss: function () {
             // User closed Razorpay popup without completing payment
-            if (btn) { btn.disabled = false; btn.innerHTML = '⚡ Pay &amp; Activate Everything'; }
-            if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = '⚡ Pay &amp; Activate Everything'; }
+            if (btn) { btn.disabled = false; btn.innerHTML = 'Unlock My Certificate — ₹129'; }
+            if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = 'Unlock My Certificate — ₹129'; }
             const flexBtn = document.getElementById('flex-cert-btn');
             if (flexBtn && !flexBtn.innerHTML.includes('Paid')) {
               flexBtn.disabled = false;
@@ -1066,13 +1116,13 @@ document.addEventListener('DOMContentLoaded', () => {
               window.closePaymentModal();
             } else {
               alert('Payment verification failed: ' + (verifyData.detail || 'Please contact support.'));
-              if (btn) { btn.disabled = false; btn.innerHTML = 'Pay the Fee &amp; Activate Profile'; }
-              if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = 'Pay the Fee &amp; Activate Profile'; }
+              if (btn) { btn.disabled = false; btn.innerHTML = 'Unlock My Certificate — ₹129'; }
+              if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = 'Unlock My Certificate — ₹129'; }
             }
           } catch(err) {
             alert('Network error during verification. Your payment may have been processed — please refresh.');
-            if (btn) { btn.disabled = false; btn.innerHTML = 'Pay the Fee &amp; Activate Profile'; }
-            if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = 'Pay the Fee &amp; Activate Profile'; }
+            if (btn) { btn.disabled = false; btn.innerHTML = 'Unlock My Certificate — ₹129'; }
+            if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = 'Unlock My Certificate — ₹129'; }
           }
         }
       };
@@ -1169,7 +1219,7 @@ function showCompletionPopup(student, data) {
       </div>
       <div style="font-size:0.9rem;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:28px;position:relative;">
         You've completed <strong style="color:#c99a4e;">100%</strong> of your internship tasks!<br>
-        Your credentials are now unlocked and ready to share.
+        Your Certificate, LOR, and Portfolio are ready to claim.
       </div>
 
       <!-- Credential buttons — rendered by JS after payment check -->
@@ -1212,8 +1262,8 @@ function showCompletionPopup(student, data) {
         // Not paid — show pay CTA
         credArea.innerHTML = `
           <div style="background:rgba(201,154,78,0.08);border:1px solid rgba(201,154,78,0.2);border-radius:14px;padding:18px;text-align:center;">
-            <div style="font-size:0.85rem;color:rgba(255,255,255,0.6);margin-bottom:12px;">Activate your Certificate, LOR & Portfolio with a one-time fee</div>
-            <button onclick="document.getElementById('completion-overlay').remove();setTimeout(()=>showPaymentModal(window._dashStudent,window._dashData),200);" style="background:linear-gradient(135deg,#c99a4e,#e8b96e);color:#000;border:none;border-radius:10px;padding:12px 28px;font-weight:700;font-size:0.88rem;cursor:pointer;width:100%;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">Unlock My Certificate</button>
+            <div style="font-size:0.85rem;color:rgba(255,255,255,0.6);margin-bottom:12px;">One-time ₹129 unlocks your Certificate, LOR &amp; Portfolio — verified, downloadable, and yours for life</div>
+            <button onclick="document.getElementById('completion-overlay').remove();setTimeout(()=>showPaymentModal(window._dashStudent,window._dashData),200);" style="background:linear-gradient(135deg,#c99a4e,#e8b96e);color:#000;border:none;border-radius:10px;padding:12px 28px;font-weight:700;font-size:0.88rem;cursor:pointer;width:100%;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">Unlock My Certificate — ₹129</button>
           </div>`;
       }
     } catch(e) {
@@ -1685,7 +1735,7 @@ function triggerMilestoneConfetti() {
       
       if (!window._dashStudent || !window._dashData) {
         alert('Student data not loaded yet.');
-        if (btn) { btn.disabled = false; btn.textContent = 'Unlock Priority Delivery Instantly'; }
+        if (btn) { btn.disabled = false; btn.textContent = 'Unlock Instantly — ₹129'; }
         return;
       }
       
@@ -1706,7 +1756,7 @@ function triggerMilestoneConfetti() {
         
         if (!res.ok) {
           alert(orderData.detail || 'Could not create payment order');
-          if (btn) { btn.disabled = false; btn.textContent = 'Unlock Priority Delivery Instantly'; }
+          if (btn) { btn.disabled = false; btn.textContent = 'Unlock Instantly — ₹129'; }
           return;
         }
 
@@ -1745,11 +1795,11 @@ function triggerMilestoneConfetti() {
                 window.location.reload();
               } else {
                 alert(verifyData.detail || 'Payment verification failed.');
-                if (btn) { btn.disabled = false; btn.textContent = 'Unlock Priority Delivery Instantly'; }
+                if (btn) { btn.disabled = false; btn.textContent = 'Unlock Instantly — ₹129'; }
               }
             } catch(e) {
               alert('Error verifying payment.');
-              if (btn) { btn.disabled = false; btn.textContent = 'Unlock Priority Delivery Instantly'; }
+              if (btn) { btn.disabled = false; btn.textContent = 'Unlock Instantly — ₹129'; }
             }
           },
           prefill: {
@@ -1759,7 +1809,7 @@ function triggerMilestoneConfetti() {
           theme: { color: '#c99a4e' },
           modal: {
             ondismiss: function() {
-              if (btn) { btn.disabled = false; btn.textContent = 'Unlock Priority Delivery Instantly'; }
+              if (btn) { btn.disabled = false; btn.textContent = 'Unlock Instantly — ₹129'; }
             }
           }
         };
@@ -1778,7 +1828,7 @@ function triggerMilestoneConfetti() {
         rzp.open();
       } catch(e) {
         alert('Payment initialization failed.');
-        if (btn) { btn.disabled = false; btn.textContent = 'Unlock Priority Delivery Instantly'; }
+        if (btn) { btn.disabled = false; btn.textContent = 'Unlock Instantly — ₹129'; }
       }
     };
 

@@ -45,7 +45,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="dashboard.css?v=2">
+  <link rel="stylesheet" href="dashboard.css?v=9">
 
   <script src="config.js?v=2" defer></script>
   <script src="skillme-monitor.js" defer></script>
@@ -95,27 +95,27 @@
 
     <nav class="dash-sidebar-nav" id="dash-sidebar-nav" aria-label="Dashboard sections" data-lenis-prevent>
       <button class="dash-nav-item is-active" id="nav-overview" onclick="dashShowPanel('panel-overview')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/>
           <rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/>
         </svg>
         <span class="dash-nav-label">Overview</span>
       </button>
       <button class="dash-nav-item" id="nav-work" onclick="dashShowPanel('panel-work')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/>
           <path d="M9 18c-4.51 2-5-2-7-2"/>
         </svg>
         <span class="dash-nav-label">Submissions</span>
       </button>
       <button class="dash-nav-item" id="nav-credentials" onclick="dashShowPanel('panel-credentials')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
         </svg>
         <span class="dash-nav-label">Credentials</span>
       </button>
       <button class="dash-nav-item" id="nav-guide" onclick="dashShowPanel('panel-guide')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
         </svg>
         <span class="dash-nav-label">Guide</span>
@@ -256,96 +256,41 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
               Support Email
             </a>
-            <button class="dash-action-btn" id="dash-share-milestone-btn" onclick="openMilestoneShareModal()" style="border-color:rgba(201,154,78,0.4);color:#f0c97a;cursor:pointer;">
+            <button class="dash-action-btn" id="dash-share-milestone-btn" onclick="openMilestoneShareModal()" style="cursor:pointer;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
               Share Milestone 🎉
-            </button>
-          </div>
-
-          <!-- Quick Flex Actions (Task PDF & Instant Pay) -->
-          <div class="flex-actions-grid" id="flex-actions-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; width: 100%; margin-bottom: 20px;">
-            <a href="tasks.html" target="_blank" class="flex-action-btn pdf-btn" id="flex-pdf-btn" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; padding: 16px 20px; text-decoration: none;">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 01-2-2V5a2 2 012-2h5.586a1 1 01.707.293l5.414 5.414a1 1 01.293.707V19a2 2 01-2 2z"/></svg>
-                <span style="font-size: 1.05rem; color: #fff;">View Task Guide (PDF)</span>
-              </div>
-              <span style="font-size: 0.75rem; color: rgba(255,255,255,0.6); font-weight: 400;">Easy way to get done! Download &amp; solve in VS Code.</span>
-            </a>
-            <button type="button" class="flex-action-btn premium-btn" id="flex-cert-btn" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; padding: 16px 20px;" onclick="var m=document.getElementById('instant-payment-modal');if(m){m.style.display='flex';setTimeout(function(){m.classList.add('active')},10)}">
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 15l-3 1.5 1-3.5-2.5-2h3.5l1-3.5 1 3.5h3.5l-2.5 2 1 3.5z"/><circle cx="12" cy="12" r="10"/></svg>
-                <span style="font-size: 1.05rem;">Need it Instantly? Priority Unlock</span>
-              </div>
-              <span style="font-size: 0.75rem; color: rgba(255,255,255,0.6); font-weight: 400;">Instant Certificate + LOR unlocking. Continue tasks anytime!</span>
             </button>
           </div>
 
           <!-- Credential Quick-Access Strip (visible when paid) -->
           <div class="cred-strip" id="cred-strip"></div>
 
-          <!-- Stats Row (4 stat cards) -->
-          <div class="stats-grid" id="stats-grid-el">
-            <div class="stat-card" id="stat-card-1" style="--stat-accent:linear-gradient(180deg,#a78bfa,#7c3aed);--stat-icon-bg:rgba(167,139,250,0.1);--stat-icon-border:rgba(167,139,250,0.2);">
-              <div class="stat-card-row">
-                <div class="stat-icon">
-                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#a78bfa" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-                </div>
-                <span class="stat-trend" style="background:rgba(167,139,250,0.1);color:#a78bfa;border-color:rgba(167,139,250,0.2);">Assigned</span>
-              </div>
-              <div class="stat-label">Tasks Completed</div>
-              <div class="stat-value"><span id="stat-completed">0</span><span class="stat-unit"> / <span id="stat-assigned">0</span></span></div>
-            </div>
-            <div class="stat-card" id="stat-card-2" style="--stat-accent:linear-gradient(180deg,#34d399,#059669);--stat-icon-bg:rgba(52,211,153,0.1);--stat-icon-border:rgba(52,211,153,0.2);">
-              <div class="stat-card-row">
-                <div class="stat-icon">
-                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#34d399" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
-                </div>
-                <span class="stat-trend">Live Sync</span>
-              </div>
-              <div class="stat-label">Submissions Approved</div>
-              <div class="stat-value" id="stat-prs">0</div>
-            </div>
-            <div class="stat-card" id="stat-card-3" style="--stat-accent:linear-gradient(180deg,#60a5fa,#2563eb);--stat-icon-bg:rgba(96,165,250,0.1);--stat-icon-border:rgba(96,165,250,0.2);">
-              <div class="stat-card-row">
-                <div class="stat-icon">
-                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#60a5fa" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                </div>
-                <span class="stat-trend" style="background:rgba(96,165,250,0.1);color:#60a5fa;border-color:rgba(96,165,250,0.2);">Sprint Active</span>
-              </div>
-              <div class="stat-label">Current Week</div>
-              <div class="stat-value"><span id="stat-week">1</span><span class="stat-unit"> / 4</span></div>
-            </div>
-            <div class="stat-card" id="stat-card-4" style="--stat-accent:linear-gradient(180deg,#d8ac63,#b5873d);--stat-icon-bg:rgba(216,172,99,0.1);--stat-icon-border:rgba(216,172,99,0.2);">
-              <div class="stat-card-row">
-                <div class="stat-icon">
-                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#d8ac63" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                </div>
-                <span class="stat-trend" style="background:rgba(216,172,99,0.1);color:#d8ac63;border-color:rgba(216,172,99,0.2);">Top 5%</span>
-              </div>
-              <div class="stat-label">Score &amp; Proof</div>
-              <div class="stat-value"><span id="stat-score">0</span><span class="stat-unit"> pts</span></div>
-            </div>
-          </div>
-
-          <!-- Progress Bar & Milestones -->
+          <!-- ── Internship Milestone Hero — top of overview, headline moment ── -->
           <div class="progress-section" id="progress-section-el">
-            <div class="progress-card">
-              <div class="progress-ring-wrap">
-                <svg width="120" height="120" viewBox="0 0 120 120">
-                  <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8"/>
-                  <circle id="progress-ring" cx="60" cy="60" r="52" fill="none" stroke="url(#ringGrad)" stroke-width="8" stroke-linecap="round"
-                    stroke-dasharray="326.7" stroke-dashoffset="326.7"
-                    transform="rotate(-90 60 60)"
+            <div class="progress-card milestone-hero">
+              <div class="progress-ring-wrap" onclick="window.dashShowPanel('panel-work')" role="button" tabindex="0" title="View your submissions">
+                <div class="ring-ambient-halo"></div>
+                <svg width="164" height="164" viewBox="0 0 164 164">
+                  <circle cx="82" cy="82" r="70" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
+                  <circle id="progress-ring" cx="82" cy="82" r="70" fill="none" stroke="url(#ringGrad)" stroke-width="10" stroke-linecap="round"
+                    stroke-dasharray="439.8" stroke-dashoffset="439.8"
+                    transform="rotate(-90 82 82)"
                     style="transition: stroke-dashoffset 1.8s cubic-bezier(0.16, 1, 0.3, 1);"/>
+                  <circle id="progress-ring-head" cx="82" cy="12" r="5.5" fill="#ffffff" filter="url(#ringGlow)"
+                    style="opacity:0; transition: cx 1.8s cubic-bezier(0.16, 1, 0.3, 1), cy 1.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;"/>
                   <defs>
                     <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stop-color="#c99a4e"/>
-                      <stop offset="100%" stop-color="#d8ac63"/>
+                      <stop offset="0%" stop-color="#e8e6e3"/>
+                      <stop offset="100%" stop-color="#ffffff"/>
                     </linearGradient>
+                    <filter id="ringGlow" x="-200%" y="-200%" width="500%" height="500%">
+                      <feGaussianBlur stdDeviation="3.2" result="blur"/>
+                      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
                   </defs>
                 </svg>
                 <div class="progress-ring-label">
-                  <span class="progress-ring-pct" id="progress-pct">0%</span>
+                  <span class="progress-ring-pct"><span id="progress-pct">0</span><span class="progress-ring-pct-sign">%</span></span>
                   <span class="progress-ring-sub">Complete</span>
                 </div>
               </div>
@@ -361,33 +306,116 @@
                     <span><strong style="color: #f0c97a;">Eligibility Note:</strong> To be eligible for the internship certificate and credentials, you must complete and submit a minimum of <strong>two tasks (50%)</strong>. Once 2 tasks are approved by an admin, your certificate will unlock!</span>
                   </div>
                 </div>
-                <!-- 4-Week Milestone Roadmap -->
+                <!-- 4-Week Milestone Roadmap — click a week for details -->
                 <div class="sprint-milestones-row" id="sprint-milestones-row">
-                  <div class="sprint-milestone-step active" id="milestone-w1">
+                  <div class="sprint-milestone-step active" id="milestone-w1" onclick="window.showMilestoneInfo(1,'Good First Issue',this)" role="button" tabindex="0">
                     <div class="milestone-top"><span class="milestone-week">WEEK 1</span><span class="milestone-status-dot"></span></div>
                     <div class="milestone-name">Good First Issue</div>
                   </div>
-                  <div class="sprint-milestone-step" id="milestone-w2">
+                  <div class="sprint-milestone-step" id="milestone-w2" onclick="window.showMilestoneInfo(2,'Core Features',this)" role="button" tabindex="0">
                     <div class="milestone-top"><span class="milestone-week">WEEK 2</span><span class="milestone-status-dot"></span></div>
                     <div class="milestone-name">Core Features</div>
                   </div>
-                  <div class="sprint-milestone-step" id="milestone-w3">
+                  <div class="sprint-milestone-step" id="milestone-w3" onclick="window.showMilestoneInfo(3,'CI/CD &amp; Tests',this)" role="button" tabindex="0">
                     <div class="milestone-top"><span class="milestone-week">WEEK 3</span><span class="milestone-status-dot"></span></div>
                     <div class="milestone-name">CI/CD &amp; Tests</div>
                   </div>
-                  <div class="sprint-milestone-step" id="milestone-w4">
+                  <div class="sprint-milestone-step" id="milestone-w4" onclick="window.showMilestoneInfo(4,'Final Polish',this)" role="button" tabindex="0">
                     <div class="milestone-top"><span class="milestone-week">WEEK 4</span><span class="milestone-status-dot"></span></div>
                     <div class="milestone-name">Final Polish</div>
                   </div>
                 </div>
+                <div class="milestone-tooltip" id="milestone-tooltip"></div>
               </div>
             </div>
+          </div>
+
+          <!-- ── Stats — one unified section, not separate floating cards ── -->
+          <div class="stats-bar" id="stats-grid-el">
+            <div class="stats-bar-item" style="--stat-accent:linear-gradient(180deg,#a78bfa,#7c3aed);--stat-icon-bg:rgba(167,139,250,0.1);--stat-icon-border:rgba(167,139,250,0.2);">
+              <div class="stats-bar-item-top">
+                <div class="stat-icon">
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#a78bfa" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                </div>
+                <span class="stat-trend" style="background:rgba(167,139,250,0.1);color:#a78bfa;border-color:rgba(167,139,250,0.2);">Assigned</span>
+              </div>
+              <div class="stat-label">Tasks Completed</div>
+              <div class="stat-value"><span id="stat-completed">0</span><span class="stat-unit"> / <span id="stat-assigned">0</span></span></div>
+              <div class="stat-mini-bar-track"><div class="stat-mini-bar-inner" id="stat-bar-1"></div></div>
+            </div>
+            <div class="stats-bar-divider"></div>
+            <div class="stats-bar-item" style="--stat-accent:linear-gradient(180deg,#34d399,#059669);--stat-icon-bg:rgba(52,211,153,0.1);--stat-icon-border:rgba(52,211,153,0.2);">
+              <div class="stats-bar-item-top">
+                <div class="stat-icon">
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#34d399" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+                </div>
+                <span class="stat-trend pulse-badge">Live Sync</span>
+              </div>
+              <div class="stat-label">Submissions Approved</div>
+              <div class="stat-value" id="stat-prs">0</div>
+              <div class="stat-mini-bar-track"><div class="stat-mini-bar-inner" id="stat-bar-2"></div></div>
+            </div>
+            <div class="stats-bar-divider"></div>
+            <div class="stats-bar-item" style="--stat-accent:linear-gradient(180deg,#60a5fa,#2563eb);--stat-icon-bg:rgba(96,165,250,0.1);--stat-icon-border:rgba(96,165,250,0.2);">
+              <div class="stats-bar-item-top">
+                <div class="stat-icon">
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#60a5fa" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                </div>
+                <span class="stat-trend pulse-badge" style="background:rgba(96,165,250,0.1);color:#60a5fa;border-color:rgba(96,165,250,0.2);">Sprint Active</span>
+              </div>
+              <div class="stat-label">Current Week</div>
+              <div class="stat-value"><span id="stat-week">1</span><span class="stat-unit"> / 4</span></div>
+              <div class="stat-mini-bar-track"><div class="stat-mini-bar-inner" id="stat-bar-3"></div></div>
+            </div>
+            <div class="stats-bar-divider"></div>
+            <div class="stats-bar-item" style="--stat-accent:linear-gradient(180deg,#d8ac63,#b5873d);--stat-icon-bg:rgba(216,172,99,0.1);--stat-icon-border:rgba(216,172,99,0.2);">
+              <div class="stats-bar-item-top">
+                <div class="stat-icon">
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#d8ac63" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </div>
+                <span class="stat-trend" style="background:rgba(216,172,99,0.1);color:#d8ac63;border-color:rgba(216,172,99,0.2);">Top 5%</span>
+              </div>
+              <div class="stat-label">Score &amp; Proof</div>
+              <div class="stat-value"><span id="stat-score">0</span><span class="stat-unit"> pts</span></div>
+              <div class="stat-mini-bar-track"><div class="stat-mini-bar-inner" id="stat-bar-4"></div></div>
+            </div>
+          </div>
+
+          <!-- ── Next step: guide or unlock credentials ── -->
+          <div class="flex-actions-grid" id="flex-actions-container">
+            <a href="tasks.html" target="_blank" class="flex-action-btn pdf-btn" id="flex-pdf-btn">
+              <div class="flex-action-icon flex-action-icon--pdf">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span class="flex-action-icon-caption">PDF</span>
+              </div>
+              <div class="flex-action-text">
+                <span class="flex-action-title">View Task Guide (PDF)</span>
+                <span class="flex-action-sub">Easy way to get done! Download &amp; solve in VS Code.</span>
+              </div>
+              <svg class="flex-action-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
+            </a>
+            <button type="button" class="flex-action-btn premium-btn" id="flex-cert-btn" onclick="var m=document.getElementById('instant-payment-modal');if(m){m.style.display='flex';setTimeout(function(){m.classList.add('active')},10)}">
+              <div class="flex-action-icon">
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 15l-3 1.5 1-3.5-2.5-2h3.5l1-3.5 1 3.5h3.5l-2.5 2 1 3.5z"/><circle cx="12" cy="12" r="10"/></svg>
+              </div>
+              <div class="flex-action-text">
+                <span class="flex-action-title">Skip the Wait — Unlock Now</span>
+                <span class="flex-action-sub">Get your Certificate + LOR today for ₹129. Finish remaining tasks at your own pace.</span>
+              </div>
+              <svg class="flex-action-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
+            </button>
           </div>
         </div><!-- /panel-overview -->
 
         <!-- ── Panel: Work ──────────────────────────────────────────── -->
         <div class="dash-panel" id="panel-work" style="display:none;">
-          <h1 class="dash-panel-title">Submissions</h1>
+          <div class="dash-header panel-header-banner">
+            <div class="dash-header-icon" style="font-size: 2.4rem;">📋</div>
+            <div>
+              <h1 class="dash-panel-title" style="margin-bottom: 4px;">Submissions</h1>
+              <p class="panel-header-sub">Track your weekly tasks and the review status of every LinkedIn post you've submitted.</p>
+            </div>
+          </div>
 
           <!-- Assigned Tasks Section -->
           <div class="submissions-section" id="tasks-section-el" style="margin-bottom: 32px;">
@@ -428,7 +456,44 @@
 
         <!-- ── Panel: Credentials ───────────────────────────────────── -->
         <div class="dash-panel" id="panel-credentials" style="display:none;">
-          <h1 class="dash-panel-title">Credentials</h1>
+          <div class="dash-header panel-header-banner">
+            <div class="dash-header-icon" style="font-size: 2.4rem;">🎓</div>
+            <div>
+              <h1 class="dash-panel-title" style="margin-bottom: 4px;">Credentials</h1>
+              <p class="panel-header-sub">Your certificate, letter of recommendation, and public portfolio — unlocked once you hit 50% completion.</p>
+            </div>
+          </div>
+
+          <!-- Locked-state preview — shown until the certificate/LOR/portfolio unlock -->
+          <div class="cred-locked-strip" id="cred-locked-strip">
+            <div class="cred-locked-pill">
+              <div class="cred-locked-icon">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </div>
+              <div class="cred-locked-text">
+                <div class="cred-locked-label">Certificate</div>
+                <div class="cred-locked-name">Verified, with a unique ID</div>
+              </div>
+            </div>
+            <div class="cred-locked-pill">
+              <div class="cred-locked-icon">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </div>
+              <div class="cred-locked-text">
+                <div class="cred-locked-label">Letter of Recommendation</div>
+                <div class="cred-locked-name">Personalized to your work</div>
+              </div>
+            </div>
+            <div class="cred-locked-pill">
+              <div class="cred-locked-icon">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </div>
+              <div class="cred-locked-text">
+                <div class="cred-locked-label">Proof of Work</div>
+                <div class="cred-locked-name">Public link, hosted for life</div>
+              </div>
+            </div>
+          </div>
 
           <!-- Certificate Section — dashboard.js reveals with style.display = 'block' when paid -->
           <div id="cert-section" style="display:none;"></div>
@@ -457,7 +522,13 @@
 
         <!-- ── Panel: Guide (beginner → advanced → helper — R3 order locked) ── -->
         <div class="dash-panel" id="panel-guide" style="display:none;">
-          <h1 class="dash-panel-title">Guide</h1>
+          <div class="dash-header panel-header-banner">
+            <div class="dash-header-icon" style="font-size: 2.4rem;">📘</div>
+            <div>
+              <h1 class="dash-panel-title" style="margin-bottom: 4px;">Guide</h1>
+              <p class="panel-header-sub">Step-by-step instructions for completing your weekly tasks and getting them approved.</p>
+            </div>
+          </div>
 
           <div class="guide-section" id="guide-section-el">
             <div class="guide-card">
@@ -515,8 +586,8 @@
 
   <!-- Lenis smooth scroll -->
   <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js" defer></script>
-  <script src="dashboard.js?v=10" defer></script>
-  <script src="dashboard-ui.js?v=1" defer></script>
+  <script src="dashboard.js?v=17" defer></script>
+  <script src="dashboard-ui.js?v=3" defer></script>
 
   <!-- ══ Modals — siblings of .dash-page, outside panel system ════════════════
        Must NOT be inside #dashboard-view (it starts display:none).
@@ -580,22 +651,23 @@
       <div class="payment-modal-glow"></div>
       <div class="payment-modal-content">
         <div class="payment-modal-icon">🏆</div>
-        <div class="payment-modal-title">Internship Complete!</div>
-        <div class="payment-modal-desc">You've successfully finished all tasks! Activate your profile to instantly receive:</div>
+        <div class="payment-modal-title">You Did It — Now Claim It</div>
+        <div class="payment-modal-desc">You've completed every assigned task. Here's what unlocks the moment you activate your profile:</div>
         <ul class="payment-modal-list">
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span><strong>Verified Certificate</strong> with unique ID</span></li>
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span><strong>Public Proof of Work Portfolio</strong> (lifetime hosting)</span></li>
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span><strong>Personalized LOR</strong> based on your domains</span></li>
         </ul>
+        <div class="payment-modal-price">₹129 <span>one-time, covers verification &amp; lifetime hosting</span></div>
         <div style="margin-bottom: 12px; display: flex; justify-content: center;">
-          <input type="text" id="discount-code-milestone" placeholder="Discount Code (Optional)" style="padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: #fff; outline: none; font-size: 14px; width: 100%; text-align: center;">
+          <input type="text" id="discount-code-milestone" placeholder="Have a discount code?" style="padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: #fff; outline: none; font-size: 14px; width: 100%; text-align: center;">
         </div>
         <button id="modal-pay-btn" class="cert-btn cert-btn-primary" style="width: 100%; justify-content: center; font-size: 1.05rem;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-          Unlock My Certificate
+          Unlock My Certificate — ₹129
         </button>
         <div style="font-size:11px;color:var(--text-3,#666);margin-top:12px;text-align:center;">
-          Secured by Razorpay • UPI / Card / NetBanking
+          🔒 Secured by Razorpay • UPI / Card / NetBanking · Every certificate is independently verifiable
         </div>
       </div>
     </div>
@@ -610,25 +682,27 @@
       <div class="payment-modal-glow"></div>
       <div class="payment-modal-content">
         <div class="payment-modal-icon">🚀</div>
-        <div class="payment-modal-title">Instant Certificate + LOR</div>
-        <div class="payment-modal-desc">Need your certificate and LOR urgently? Activate priority delivery to unlock everything instantly!</div>
+        <div class="payment-modal-title">Unlock Now, Finish Later</div>
+        <div class="payment-modal-desc">You don't have to wait until Week 4. Unlock your credentials today and keep working through your remaining tasks at your own pace.</div>
         <ul class="payment-modal-list">
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span><strong>Verified Certificate</strong> with unique ID</span></li>
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span><strong>Personalized LOR</strong> based on your domain</span></li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span><strong>Public Proof of Work Portfolio</strong> (lifetime hosting)</span></li>
         </ul>
         <div style="background: rgba(201, 154, 78, 0.1); border: 1px dashed rgba(201, 154, 78, 0.4); border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 0.8rem; color: #f0c97a; text-align: left;">
-          💡 <strong>Note:</strong> You can still continue and complete your internship tasks at your own pace after unlocking your certificate!
+          💡 <strong>Note:</strong> Nothing is lost — your remaining tasks stay open and your progress keeps tracking normally after you unlock.
         </div>
+        <div class="payment-modal-price">₹129 <span>one-time, covers verification &amp; lifetime hosting</span></div>
         <div class="payment-modal-action">
           <div style="margin-bottom: 12px; display: flex; justify-content: center;">
-            <input type="text" id="discount-code-instant" placeholder="Discount Code (Optional)" style="padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: #fff; outline: none; font-size: 14px; width: 100%; text-align: center;">
+            <input type="text" id="discount-code-instant" placeholder="Have a discount code?" style="padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: #fff; outline: none; font-size: 14px; width: 100%; text-align: center;">
           </div>
           <button type="button" id="instant-pay-trigger-btn" class="cert-btn cert-btn-primary" style="width: 100%; justify-content: center; font-size: 1.05rem;" onclick="handlePayClick()">
-            Unlock Priority Delivery Instantly
+            Unlock Instantly — ₹129
           </button>
           <div class="payment-modal-secure" style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 12px; font-size: 0.75rem; color: var(--text-3);">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-            Secured by Razorpay • Instant Generation
+            Secured by Razorpay • Generated instantly, verifiable for life
           </div>
         </div>
       </div>
