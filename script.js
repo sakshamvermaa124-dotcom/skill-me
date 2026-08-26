@@ -295,21 +295,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // ═══════════════════════════════════════════════════════════
   const terminalBody = document.getElementById('terminal-body');
   const terminalLines = [
-    { type: 'command', prompt: '$ ', text: 'git clone https://github.com/sakshamvermaa124-dotcom/skill-me.git', delay: 0 },
+    { type: 'command', prompt: '$ ', text: 'mkdir week1-milestone && cd week1-milestone', delay: 0 },
     { type: 'output',  text: 'Cloning into \'skill-me\'...', delay: 700 },
     { type: 'output',  text: '✓ Done.', class: 'success', delay: 1200 },
     { type: 'empty',   delay: 1500 },
-    { type: 'command', prompt: '$ ', text: 'git checkout -b fix/navbar-bug', delay: 1900 },
+    { type: 'command', prompt: '$ ', text: 'npm install', delay: 1900 },
     { type: 'output',  text: 'Switched to new branch \'fix/navbar-bug\'', delay: 2600 },
     { type: 'empty',   delay: 2900 },
-    { type: 'comment', text: '# Fix the issue, write clean code...', delay: 3200 },
+    { type: 'comment', text: '# Implement the milestone task locally...', delay: 3200 },
     { type: 'empty',   delay: 3500 },
-    { type: 'command', prompt: '$ ', text: 'git add . && git commit -m "fix: resolve navbar overflow"', delay: 3900 },
-    { type: 'output',  text: '[fix/navbar-bug 3a2f1c9] fix: resolve navbar overflow', delay: 4600 },
-    { type: 'command', prompt: '$ ', text: 'git push origin fix/navbar-bug', delay: 5100 },
-    { type: 'output',  text: 'PR → https://github.com/sakshamvermaa124-dotcom/skill-me/pull/42', class: 'url', delay: 5800 },
+    { type: 'command', prompt: '$ ', text: 'npm run test', delay: 3900 },
+    { type: 'output',  text: 'All tests passed.', delay: 4600 },
+    { type: 'command', prompt: '$ ', text: '# Share progress on LinkedIn & submit on Dashboard', delay: 5100 },
+    { type: 'output',  text: 'https://www.linkedin.com/feed/update/...', class: 'url', delay: 5800 },
     { type: 'empty',   delay: 6100 },
-    { type: 'output',  text: '✅ PR merged! +350 contribution score added.', class: 'success', delay: 6600 },
+    { type: 'output',  text: '✅ Task Approved! +25 progress score added.', class: 'success', delay: 6600 },
   ];
 
   let terminalDone = false;
@@ -619,6 +619,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 });
+
 
 
 
