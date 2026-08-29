@@ -33,23 +33,42 @@ _BOUNCE_TYPES = {
 }
 
 
-def _extract_log_id(tag: str | None) -> int | None:
-    """Tags are minted as f"log{id}" in email_service._send_and_log — parse the id back out."""
-    if not tag or not tag.startswith("log"):
-        return None
-    try:
-        return int(tag[3:])
-    except ValueError:
-        return None
+def _extract_log_id(payload: dict) -> int | None:
+    """
+    Tags are minted as f"log{id}" in email_service._send_and_log — parse the id back out.
+    Brevo's field name/shape for the tag varies by payload version, so check every
+    place it's been observed to show up: "tag" (string), "tags" (list), "X-Mailin-Tag".
+    """
+    candidates = []
+    tag = payload.get("tag")
+    if isinstance(tag, str):
+        candidates.append(tag)
+    tags = payload.get("tags")
+    if isinstance(tags, list):
+        candidates.extend(t for t in tags if isinstance(t, str))
+    header_tag = payload.get("X-Mailin-Tag")
+    if isinstance(header_tag, str):
+        candidates.append(header_tag)
+
+    for candidate in candidates:
+        if candidate.startswith("log"):
+            try:
+                return int(candidate[3:])
+            except ValueError:
+                continue
+    return None
 
 
 async def _apply_event(payload: dict) -> None:
     event = (payload.get("event") or "").lower()
-    tag = payload.get("tag")
-    log_id = _extract_log_id(tag)
+    log_id = _extract_log_id(payload)
     if log_id is None:
-        # No tag (e.g. email sent before this feature shipped) — nothing to match it to.
+        # No tag matched (e.g. email sent before this feature shipped, or Brevo's
+        # payload shape doesn't match what we're parsing) — log so it's visible,
+        # but don't fail the request.
+        logger.info("Brevo webhook event %r had no matching log id — raw payload: %s", event, payload)
         return
+    logger.info("Brevo webhook event %r matched log id %s", event, log_id)
 
     now = datetime.now(timezone.utc).isoformat()
     sets = ["last_event = ?", "last_event_at = ?"]
@@ -100,6 +119,7 @@ async def brevo_webhook(request: Request, key: str | None = None):
     except Exception:
         return {"status": "ignored", "reason": "invalid JSON"}
 
+    logger.info("Brevo webhook raw body: %s", body)
     events = body if isinstance(body, list) else [body]
     for payload in events:
         if isinstance(payload, dict):
