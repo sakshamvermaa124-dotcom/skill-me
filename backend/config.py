@@ -35,6 +35,11 @@ class Settings(BaseSettings):
     smtp_from_name: str = "SkillMe Team"
     smtp_from_email: str = ""
     frontend_url: str = "https://skill-me-intern.in"
+    # Shared secret appended as ?key=... to the Brevo webhook URL to authenticate inbound event callbacks
+    brevo_webhook_secret: str = ""
+    # Brevo v3 REST API key (Settings → SMTP & API → API Keys — NOT the SMTP key) — used only
+    # by the one-off engagement backfill script to pull historical open/click/bounce events.
+    brevo_api_key: str = ""
     # Comma-separated list of allowed CORS origins.
     allowed_origins: str = "*"
 

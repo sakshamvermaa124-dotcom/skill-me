@@ -733,6 +733,30 @@ async def get_email_logs(
     }
 
 
+@router.get("/email/stats", summary="Aggregate email deliverability & engagement stats")
+async def get_email_stats(_: str = Depends(require_admin)):
+    """
+    Aggregate counts across all logged emails: sent/failed, delivered, opened,
+    clicked, bounced and marked-as-spam. Populated from Brevo webhook events
+    (see /api/webhooks/brevo) — rows sent before that webhook was configured
+    will show as sent/failed only, with no engagement data.
+    """
+    row = await db.fetch_one(
+        """SELECT
+             COUNT(*)                                   AS total,
+             SUM(CASE WHEN status = 'sent'   THEN 1 ELSE 0 END) AS sent,
+             SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) AS failed,
+             SUM(CASE WHEN delivered_at      IS NOT NULL THEN 1 ELSE 0 END) AS delivered,
+             SUM(CASE WHEN opened_at         IS NOT NULL THEN 1 ELSE 0 END) AS opened,
+             SUM(CASE WHEN clicked_at        IS NOT NULL THEN 1 ELSE 0 END) AS clicked,
+             SUM(CASE WHEN bounced_at        IS NOT NULL THEN 1 ELSE 0 END) AS bounced,
+             SUM(CASE WHEN spam_reported_at  IS NOT NULL THEN 1 ELSE 0 END) AS spam_reported,
+             SUM(CASE WHEN unsubscribed_at   IS NOT NULL THEN 1 ELSE 0 END) AS unsubscribed
+           FROM email_logs"""
+    )
+    return row or {}
+
+
 # ──────────────────────────────────────────────
 # Batch Analytics
 # ──────────────────────────────────────────────

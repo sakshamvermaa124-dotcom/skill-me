@@ -179,6 +179,20 @@ class Database:
                 "CREATE INDEX IF NOT EXISTS idx_frontend_errors_email ON frontend_errors(student_email)",
                 # payment_unlocked_at — set on enrollments when an admin fulfills a sub-50% urgent request (v5)
                 "ALTER TABLE enrollments ADD COLUMN payment_unlocked_at TIMESTAMP",
+                # Email delivery/engagement tracking via Brevo webhook events (v6)
+                "ALTER TABLE email_logs ADD COLUMN message_tag TEXT",
+                "ALTER TABLE email_logs ADD COLUMN delivered_at TIMESTAMP",
+                "ALTER TABLE email_logs ADD COLUMN opened_at TIMESTAMP",
+                "ALTER TABLE email_logs ADD COLUMN opened_count INTEGER DEFAULT 0",
+                "ALTER TABLE email_logs ADD COLUMN clicked_at TIMESTAMP",
+                "ALTER TABLE email_logs ADD COLUMN clicked_count INTEGER DEFAULT 0",
+                "ALTER TABLE email_logs ADD COLUMN bounced_at TIMESTAMP",
+                "ALTER TABLE email_logs ADD COLUMN bounce_type TEXT",
+                "ALTER TABLE email_logs ADD COLUMN spam_reported_at TIMESTAMP",
+                "ALTER TABLE email_logs ADD COLUMN unsubscribed_at TIMESTAMP",
+                "ALTER TABLE email_logs ADD COLUMN last_event TEXT",
+                "ALTER TABLE email_logs ADD COLUMN last_event_at TIMESTAMP",
+                "CREATE INDEX IF NOT EXISTS idx_email_logs_tag ON email_logs(message_tag)",
             ]
             for migration in migrations:
                 try:

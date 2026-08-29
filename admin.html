@@ -298,59 +298,6 @@
       display: flex; flex-direction: column; justify-content: space-between;
       padding: 32px;
     }
-    #runner-loop-canvas {
-      position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1;
-    }
-
-    /* Dynamic Running Stride Layer (Bobbing & Footstep Impact) */
-    .runner-character-layer {
-      position: absolute; bottom: 4%; right: 18%; width: 280px; height: 420px;
-      z-index: 3; pointer-events: none;
-      display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
-      animation: actual-run-stride 0.36s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
-    }
-    @keyframes actual-run-stride {
-      0% {
-        transform: translateY(0px) scaleY(0.96) scaleX(1.04) rotate(-2deg);
-      }
-      50% {
-        transform: translateY(-24px) scaleY(1.05) scaleX(0.96) rotate(0deg);
-      }
-      100% {
-        transform: translateY(6px) scaleY(0.94) scaleX(1.05) rotate(2deg);
-      }
-    }
-
-    /* Dynamic Shadow under running feet */
-    .runner-feet-shadow {
-      position: absolute; bottom: 2%; right: 20%; width: 140px; height: 16px;
-      background: radial-gradient(ellipse at center, rgba(0,0,0,0.85) 0%, transparent 75%);
-      z-index: 2; border-radius: 50%; pointer-events: none;
-      animation: shadow-stride 0.36s ease-in-out infinite alternate;
-    }
-    @keyframes shadow-stride {
-      0% { transform: scaleX(1.1) scaleY(1.2); opacity: 0.9; }
-      50% { transform: scaleX(0.6) scaleY(0.6); opacity: 0.3; }
-      100% { transform: scaleX(1.2) scaleY(1.3); opacity: 1; }
-    }
-
-    /* Impact Shockwave Pulse */
-    .footstep-shockwave {
-      position: absolute; bottom: 3%; right: 22%; width: 100px; height: 30px;
-      border: 2px solid rgba(255, 42, 75, 0.8); border-radius: 50%;
-      z-index: 2; pointer-events: none; opacity: 0;
-      animation: shockwave-pulse 0.72s linear infinite;
-    }
-    @keyframes shockwave-pulse {
-      0% { transform: scale(0.2); opacity: 1; border-color: #ff2a4b; }
-      50% { transform: scale(1.4); opacity: 0.4; border-color: #ffb703; }
-      100% { transform: scale(2.2); opacity: 0; }
-    }
-
-    #runner-loop-canvas {
-      position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none;
-    }
-
     /* Trending Runner Widget (Top Right of Login View) */
     .trending-runner-widget {
       align-self: flex-end; z-index: 5;
@@ -841,7 +788,7 @@
     </div>
   </div>
 
-  <!-- Right Panel: Animated Cyberpunk 3D Game Runner -->
+  <!-- Right Panel -->
   <div class="split-right">
     <div class="trending-runner-widget">
       <div class="runner-widget-top">
@@ -854,9 +801,6 @@
       <div class="runner-progress-bar"><div class="runner-progress-fill"></div></div>
       <div class="runner-coin-badge">💰 1286</div>
     </div>
-
-    <!-- Canvas for infinite looping speed lines, road grid, and floating coins -->
-    <canvas id="runner-loop-canvas"></canvas>
   </div>
 
 </div>
@@ -1212,9 +1156,11 @@
             <div class="panel-title">📋 Email Send Log</div>
             <div class="panel-subtitle">Complete history of every email sent or attempted</div>
           </div>
-          <button class="btn btn-secondary" onclick="loadEmailLogs()" style="font-size:0.8rem;padding:6px 14px;">↻ Refresh</button>
+          <button class="btn btn-secondary" onclick="loadEmailLogs(); loadEmailAggStats();" style="font-size:0.8rem;padding:6px 14px;">↻ Refresh</button>
         </div>
         <div class="panel-body">
+          <div style="font-size:0.72rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Deliverability &amp; Engagement (all-time, via Brevo webhook)</div>
+          <div id="email-agg-stats" style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;"></div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;">
             <select id="email-log-type-filter" class="filter-select" onchange="loadEmailLogs()" style="min-width:180px;">
               <option value="">All Types</option>
@@ -1246,10 +1192,11 @@
                   <th>Subject</th>
                   <th style="width:140px;">Student</th>
                   <th style="width:80px;">Status</th>
+                  <th style="width:170px;">Engagement</th>
                 </tr>
               </thead>
               <tbody id="email-log-tbody">
-                <tr><td colspan="6" style="text-align:center;color:var(--text-secondary);padding:32px;">Click Refresh to load logs</td></tr>
+                <tr><td colspan="7" style="text-align:center;color:var(--text-secondary);padding:32px;">Click Refresh to load logs</td></tr>
               </tbody>
             </table>
           </div>
@@ -1473,7 +1420,7 @@
 <div id="toast-container"></div>
 
 <script src="config.js"></script>
-<script src="admin.js?v=20260818_7"></script>
+<script src="admin.js?v=20260829_1"></script>
 <script>
 // ─── Email Logs ───────────────────────────────────────────────────────────────
 const EMAIL_TYPE_LABELS = {
@@ -1511,7 +1458,7 @@ async function loadEmailLogs(offset = 0) {
   const pageEl    = document.getElementById('email-log-pagination');
   if (!tbody) return;
 
-  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-secondary);">Loading...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-secondary);">Loading...</td></tr>';
 
   const params = new URLSearchParams({ limit: _emailLogLimit, offset });
   if (type)      params.set('email_type', type);
@@ -1547,7 +1494,7 @@ async function loadEmailLogs(offset = 0) {
 
     // ── Table rows ────────────────────────────────────────────────────
     if (logs.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-secondary);">No email logs found</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-secondary);">No email logs found</td></tr>';
     } else {
       tbody.innerHTML = logs.map(log => {
         const t = EMAIL_TYPE_LABELS[log.email_type] || { label: log.email_type, color: '#94a3b8', bg: 'rgba(148,163,184,0.1)' };
@@ -1558,7 +1505,7 @@ async function loadEmailLogs(offset = 0) {
         const timeStr = isNaN(d) ? log.sent_at : `${d.toLocaleDateString('en-IN')} ${d.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'})}`;
         const subject = log.subject?.length > 50 ? log.subject.slice(0, 50) + '…' : (log.subject || '—');
         const encodedBody = encodeURIComponent(log.body || 'No body content available.').replace(/'/g, "%27");
-        
+
         return `<tr style="cursor:pointer; transition:background-color 0.2s;" onmouseover="this.style.backgroundColor='rgba(99, 102, 241, 0.08)'" onmouseout="this.style.backgroundColor='transparent'" onclick="openEmailBodyModal('${encodedBody}')" title="Click anywhere to view full email body">
           <td style="font-size:0.78rem;color:var(--text-secondary);white-space:nowrap;">${timeStr}</td>
           <td><span style="padding:3px 10px;border-radius:10px;background:${t.bg};color:${t.color};font-size:0.72rem;font-weight:600;white-space:nowrap;">${t.label}</span></td>
@@ -1570,6 +1517,7 @@ async function loadEmailLogs(offset = 0) {
           </td>
           <td style="font-size:0.82rem;">${log.student_name || '—'}</td>
           <td>${statusBadge}</td>
+          <td>${emailEngagementBadges(log)}</td>
         </tr>`;
       }).join('');
     }
@@ -1592,6 +1540,50 @@ async function loadEmailLogs(offset = 0) {
   }
 }
 
+// Renders per-row delivery/open/click/bounce/spam badges from email_logs tracking columns.
+// These columns are only populated once the Brevo webhook is configured (see /api/webhooks/brevo) —
+// rows sent before that will show "No tracking data" here even though they were sent successfully.
+function emailEngagementBadges(log) {
+  const chips = [];
+  if (log.opened_at) chips.push(`<span title="Opened${log.opened_count > 1 ? ' ' + log.opened_count + 'x' : ''}" style="color:#34d399;">👁️ Opened${log.opened_count > 1 ? ' ×' + log.opened_count : ''}</span>`);
+  if (log.clicked_at) chips.push(`<span title="Link clicked${log.clicked_count > 1 ? ' ' + log.clicked_count + 'x' : ''}" style="color:#60a5fa;">🔗 Clicked</span>`);
+  if (log.spam_reported_at) chips.push(`<span title="Recipient marked this as spam" style="color:#f87171;">🚫 Spam</span>`);
+  if (log.bounced_at) chips.push(`<span title="Bounce type: ${log.bounce_type || 'unknown'}" style="color:#fbbf24;">⚠️ Bounced</span>`);
+  if (log.unsubscribed_at) chips.push(`<span style="color:#94a3b8;">🔕 Unsubscribed</span>`);
+  if (!chips.length && log.delivered_at) chips.push(`<span style="color:#94a3b8;">📬 Delivered</span>`);
+  if (!chips.length) return '<span style="color:var(--text-muted);font-size:0.72rem;">—</span>';
+  return `<div style="display:flex;flex-direction:column;gap:2px;font-size:0.72rem;font-weight:600;">${chips.join('')}</div>`;
+}
+
+// All-time aggregate deliverability/engagement stats (independent of the current page/filters)
+async function loadEmailAggStats() {
+  const el = document.getElementById('email-agg-stats');
+  if (!el) return;
+  try {
+    const data = await api('/api/admin/email/stats');
+    const total = data.total || 0;
+    const pct = (n) => total ? Math.round((n || 0) / total * 100) : 0;
+    const cards = [
+      { label: 'Sent',      val: data.sent || 0,      color: '#94a3b8' },
+      { label: 'Failed',    val: data.failed || 0,     color: '#f87171' },
+      { label: 'Delivered', val: data.delivered || 0,  color: '#60a5fa', pct: pct(data.delivered) },
+      { label: 'Opened',    val: data.opened || 0,     color: '#34d399', pct: pct(data.opened) },
+      { label: 'Clicked',   val: data.clicked || 0,    color: '#a78bfa', pct: pct(data.clicked) },
+      { label: 'Bounced',   val: data.bounced || 0,    color: '#fbbf24', pct: pct(data.bounced) },
+      { label: 'Marked Spam', val: data.spam_reported || 0, color: '#f87171', pct: pct(data.spam_reported) },
+    ];
+    el.innerHTML = cards.map(c => `<div style="padding:10px 16px;border-radius:8px;background:${c.color}14;border:1px solid ${c.color}33;font-size:0.8rem;min-width:110px;">
+      <div style="color:var(--text-secondary);font-size:0.72rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">${c.label}</div>
+      <div style="color:${c.color};font-weight:700;font-size:1.1rem;">${c.val}${c.pct !== undefined ? ` <span style="font-size:0.72rem;font-weight:600;opacity:0.8;">(${c.pct}%)</span>` : ''}</div>
+    </div>`).join('');
+    if (!total) {
+      el.innerHTML += `<div style="font-size:0.78rem;color:var(--text-secondary);align-self:center;">No emails logged yet.</div>`;
+    }
+  } catch (err) {
+    el.innerHTML = `<div style="font-size:0.78rem;color:#f87171;">Failed to load stats: ${err.message}</div>`;
+  }
+}
+
 // Auto-load email logs when navigating to the email page
 const _origNavigate = typeof navigate === 'function' ? navigate : null;
 if (_origNavigate) {
@@ -1602,7 +1594,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const navItems = document.querySelectorAll('.nav-item');
   navItems.forEach(item => {
     if (item.getAttribute('onclick')?.includes("'email'")) {
-      item.addEventListener('click', () => setTimeout(loadEmailLogs, 100));
+      item.addEventListener('click', () => setTimeout(() => { loadEmailLogs(); loadEmailAggStats(); }, 100));
     }
   });
 });

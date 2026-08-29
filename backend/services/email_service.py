@@ -42,16 +42,21 @@ def _render(template_name: str, **ctx) -> str:
 
 # ── SMTP sender (sync, called inside asyncio.to_thread) ─────────────────────
 
-def _send_sync(to_email: str, to_name: str, subject: str, html_body: str) -> None:
+def _send_sync(to_email: str, to_name: str, subject: str, html_body: str, tag: str | None = None) -> None:
     """
     Low-level SMTP send via Brevo relay with strict timeouts and port fallback.
     Runs synchronously — always call via asyncio.to_thread().
+
+    `tag` is echoed back by Brevo on every webhook event (delivered/opened/clicked/
+    bounced/...) for this message, which is how we match events back to email_logs rows.
     """
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"] = f"{settings.smtp_from_name} <{settings.smtp_from_email}>"
     msg["To"] = f"{to_name} <{to_email}>" if to_name else to_email
     msg["Reply-To"] = settings.smtp_from_email
+    if tag:
+        msg["X-Mailin-Tag"] = tag
 
     msg.attach(MIMEText(html_body, "html", "utf-8"))
 
@@ -87,7 +92,7 @@ def _send_sync(to_email: str, to_name: str, subject: str, html_body: str) -> Non
 
 
 
-async def _send(to_email: str, to_name: str, subject: str, html_body: str) -> bool:
+async def _send(to_email: str, to_name: str, subject: str, html_body: str, tag: str | None = None) -> bool:
     """
     Async wrapper around _send_sync.
     Returns True on success, False on failure (never raises).
@@ -99,7 +104,7 @@ async def _send(to_email: str, to_name: str, subject: str, html_body: str) -> bo
         logger.warning("SMTP credentials not configured — skipping email to %s", to_email)
         return False
     try:
-        await asyncio.to_thread(_send_sync, to_email, to_name, subject, html_body)
+        await asyncio.to_thread(_send_sync, to_email, to_name, subject, html_body, tag)
         return True
     except Exception as exc:
         logger.error("Failed to send email to %s: %s", to_email, exc)
@@ -141,17 +146,38 @@ async def _send_and_log(
         except Exception as dedup_exc:
             logger.warning("Email deduplication check warning: %s", dedup_exc)
 
-    success = await _send(to_email, to_name, subject, html_body)
-    # Log to DB (best-effort — never crash the caller)
+    # Insert a pending row first so we have an id to tag the outgoing message with —
+    # Brevo echoes this tag back on every delivery/open/click/bounce webhook event.
+    from db.database import db
+    log_id = None
     try:
-        from db.database import db
-        await db.insert(
+        log_id = await db.insert(
             """INSERT INTO email_logs
                (recipient_email, recipient_name, email_type, subject, student_id, batch_id, status, body)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-            (to_email, to_name, email_type, subject, student_id, batch_id,
-             "sent" if success else "failed", html_body),
+               VALUES (?, ?, ?, ?, ?, ?, 'pending', ?)""",
+            (to_email, to_name, email_type, subject, student_id, batch_id, html_body),
         )
+    except Exception as log_exc:
+        logger.warning("Failed to pre-log email to DB: %s", log_exc)
+
+    tag = f"log{log_id}" if log_id else None
+    success = await _send(to_email, to_name, subject, html_body, tag)
+
+    try:
+        if log_id:
+            await db.execute(
+                "UPDATE email_logs SET status = ?, message_tag = ? WHERE id = ?",
+                ("sent" if success else "failed", tag, log_id),
+            )
+        else:
+            # Pre-log insert failed — fall back to a single post-send insert (no tracking tag)
+            await db.insert(
+                """INSERT INTO email_logs
+                   (recipient_email, recipient_name, email_type, subject, student_id, batch_id, status, body)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                (to_email, to_name, email_type, subject, student_id, batch_id,
+                 "sent" if success else "failed", html_body),
+            )
     except Exception as log_exc:
         logger.warning("Failed to log email to DB: %s", log_exc)
     return success

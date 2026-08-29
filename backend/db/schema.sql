@@ -130,12 +130,25 @@ CREATE TABLE IF NOT EXISTS email_logs (
     status          TEXT NOT NULL DEFAULT 'sent',  -- sent | failed
     error_message   TEXT,           -- populated on failure
     sent_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    message_tag     TEXT,           -- unique tag sent to Brevo, used to match webhook events back to this row
+    delivered_at    TIMESTAMP,
+    opened_at       TIMESTAMP,
+    opened_count    INTEGER DEFAULT 0,
+    clicked_at      TIMESTAMP,
+    clicked_count   INTEGER DEFAULT 0,
+    bounced_at      TIMESTAMP,
+    bounce_type     TEXT,           -- soft | hard | blocked
+    spam_reported_at TIMESTAMP,
+    unsubscribed_at TIMESTAMP,
+    last_event      TEXT,           -- most recent Brevo webhook event name
+    last_event_at   TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES students(id),
     FOREIGN KEY (batch_id)   REFERENCES batches(id)
 );
 CREATE INDEX IF NOT EXISTS idx_email_logs_recipient ON email_logs(recipient_email);
 CREATE INDEX IF NOT EXISTS idx_email_logs_type      ON email_logs(email_type);
 CREATE INDEX IF NOT EXISTS idx_email_logs_sent_at   ON email_logs(sent_at);
+CREATE INDEX IF NOT EXISTS idx_email_logs_tag       ON email_logs(message_tag);
 
 -- OTP Tokens — for student magic OTP login
 CREATE TABLE IF NOT EXISTS otp_tokens (
