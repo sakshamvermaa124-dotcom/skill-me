@@ -148,7 +148,9 @@ CREATE TABLE IF NOT EXISTS email_logs (
 CREATE INDEX IF NOT EXISTS idx_email_logs_recipient ON email_logs(recipient_email);
 CREATE INDEX IF NOT EXISTS idx_email_logs_type      ON email_logs(email_type);
 CREATE INDEX IF NOT EXISTS idx_email_logs_sent_at   ON email_logs(sent_at);
-CREATE INDEX IF NOT EXISTS idx_email_logs_tag       ON email_logs(message_tag);
+-- idx_email_logs_tag is created via the migrations list in db/database.py instead of here —
+-- this file's statements run unguarded before migrations, so referencing message_tag here would
+-- crash startup on any database that pre-dates this column (ALTER TABLE migrations run after).
 
 -- OTP Tokens — for student magic OTP login
 CREATE TABLE IF NOT EXISTS otp_tokens (
