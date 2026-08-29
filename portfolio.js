@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="locked-card">
           <div class="locked-icon-wrap">🔍</div>
           <div class="locked-title">Invalid Profile Link</div>
-          <div class="locked-desc">We couldn't find a valid GitHub username in the URL. Access your verified profile using a link formatted like <code>/portfolio.html?gh=YOUR_GITHUB_USERNAME</code>.</div>
+          <div class="locked-desc">We couldn't find a valid student ID in the URL. Access your verified profile using a link formatted like <code>/portfolio.html?student_id=YOUR_ID</code>.</div>
           <a href="dashboard.html" class="nav-btn nav-btn-apply" style="display:inline-flex;">Go to Student Dashboard &rarr;</a>
         </div>
       `;
@@ -64,14 +64,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="locked-card">
           <div class="locked-icon-wrap">😕</div>
           <div class="locked-title">Profile Not Found</div>
-          <div class="locked-desc">We couldn't locate an engineering portfolio registered for GitHub username <strong>@${username}</strong>.</div>
+          <div class="locked-desc">We couldn't locate an engineering portfolio registered for student <strong>${username}</strong>.</div>
           <a href="index.html" class="nav-btn nav-btn-dash" style="display:inline-flex; margin-top:12px;">Back to Home &rarr;</a>
         </div>
       `;
       return;
     }
 
-    if (!res.ok) throw new Error("Failed to load portfolio details.");
+    if (!res.ok) {
+      let errMsg = "Failed to load portfolio details.";
+      try {
+        const errData = await res.json();
+        if (errData && errData.detail) errMsg = errData.detail;
+      } catch(e) {}
+      throw new Error(errMsg);
+    }
 
     const data = await res.json();
     renderPortfolio(data);
@@ -297,7 +304,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <span>🛡️</span> Recruiter &amp; Employer Verification Notice
           </div>
           <div class="trust-desc">
-            All engineering contributions, Pull Requests, and commits displayed on this portfolio are cryptographically validated by SkillMe maintainers. Every PR passed continuous integration testing before merging into real-world production codebases.
+            All engineering contributions, milestone tasks, and project submissions displayed on this portfolio are rigorously validated by the SkillMe admin team. Every submission is reviewed for production-grade quality before approval.
           </div>
         </div>
         <div class="trust-actions">

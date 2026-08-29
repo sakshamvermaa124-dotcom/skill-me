@@ -9,7 +9,7 @@
   <title>Certificate of Completion — SkillMe</title>
   <meta name="title" content="Certificate of Completion — SkillMe">
   <meta name="description"
-    content="Verified Certificate of Internship Completion issued by SkillMe. View cryptographically validated performance records and pull requests.">
+    content="Verified Certificate of Internship Completion issued by SkillMe. View validated performance records and milestone submissions.">
   <meta name="keywords"
     content="SkillMe certificate, certificate of completion, verified internship certificate, student certificate">
   <meta name="robots" content="index, follow">
@@ -79,7 +79,7 @@
         "@type": "EducationalOccupationalCredential",
         "@id": "https://www.skill-me-intern.in/certificate#credential",
         "name": "SkillMe Open Source Engineering Internship Certificate of Completion",
-        "description": "Cryptographically verifiable Certificate of Completion recognizing 4-week open-source engineering milestone completion, merged GitHub pull requests, and software contributions.",
+        "description": "Verifiable Certificate of Completion recognizing 4-week engineering milestone completion, approved task submissions, and software contributions.",
         "credentialCategory": "Certificate of Completion",
         "recognizedBy": {
           "@type": "EducationalOrganization",
@@ -971,8 +971,8 @@
             <div class="cert-track-name" id="cert-domain">Web Development Engineering Internship</div>
             <p class="cert-narrative" id="cert-description">
               A rigorous 4-week industry-standard software engineering internship. The candidate demonstrated competency
-              in real-world GitHub repositories, successfully implemented modular architecture, resolved assigned
-              issues, passed automated CI/CD test pipelines, and adhered to professional engineering standards.
+              through structured milestone projects, successfully implemented modular architecture, completed assigned
+              tasks, submitted verified progress reports, and adhered to professional engineering standards.
             </p>
           </div>
 
@@ -1078,6 +1078,10 @@
     }
 
     async function loadCertificate() {
+      if (params.get("preview") === "1") {
+        populateCertificate({ holder: nameParam || "John Doe", domain: domainParam || "Web Development", issued_at: new Date().toISOString(), cert_id: "PREVIEW-CERT-123" });
+        return;
+      }
       if (certId) {
         await verifyCert(certId);
         return;
@@ -1169,7 +1173,7 @@
       // Update description with dynamic domain narrative and dates
       const descEl = document.getElementById('cert-description');
       if (descEl) {
-        let domainSkills = "implementing modular architecture, resolving assigned issues, and adhering to professional engineering standards.";
+        let domainSkills = "implementing modular architecture, completing assigned tasks, and adhering to professional engineering standards.";
         const lowerDomain = rawDomain.toLowerCase();
 
         if (lowerDomain.includes('web')) {

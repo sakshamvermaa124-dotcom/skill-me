@@ -1447,7 +1447,7 @@ let milestoneShareData = {
 /**
  * Resolves the milestone and task context dynamically from live dashboard data.
  * Data now comes from admin-approved LinkedIn submissions rather than merged
- * GitHub Pull Requests / closed issues.
+ * GitHub Pull Requests / closed issues (legacy).
  */
 function resolveMilestoneContext(data) {
   const student = (data && data.student) || window._dashStudent || { name: 'Intern' };
@@ -1479,8 +1479,8 @@ function resolveMilestoneContext(data) {
   const PROD_BASE = 'https://www.skill-me-intern.in';
   const studentRefCode = `SKM-${student.id ? String(student.id).padStart(4, '0') : '2026'}`;
   const referralLink = `${PROD_BASE}/apply.html?ref=${studentRefCode}`;
-  // Portfolio pages are still keyed off an optional GitHub username; the new LinkedIn-based
-  // submission flow doesn't collect one, so this degrades gracefully to the generic page.
+  // Portfolio pages are keyed off the student's ID.
+  // The LinkedIn-based submission flow handles verification natively.
   const portfolioUrl = student.id ? `${PROD_BASE}/portfolio.html?student_id=${student.id}` : '#';
   const offerUrl = `${PROD_BASE}/offer.html?name=${encodeURIComponent(student.name || '')}&domain=${encodeURIComponent(domain)}&student_id=${student.id || ''}&college=${encodeURIComponent(student.college || '')}`;
   const certUrl = `${PROD_BASE}/certificate.html?student_id=${student.id || ''}&domain=${encodeURIComponent(domain)}`;
@@ -1580,7 +1580,7 @@ Join me on SkillMe and earn verified credentials for your resume:
 👉 Join my SkillMe Squad: ${ctx.referralLink}`;
 
   } else if (!ctx.hasCompletedTasks) {
-    // ─── Case 2: 0 PRs Merged (Offer Milestone) ───
+    // ─── Case 2: 0 Submissions Approved (Offer Milestone) ───
     badgeText = `🎉 OFFICIAL OFFER UNLOCKED`;
     titleText = `You're Enrolled at SkillMe!`;
     subText = `Your official internship offer is confirmed. Share your new engineering journey:`;

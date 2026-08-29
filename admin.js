@@ -932,7 +932,7 @@ async function updateStatus(studentId, newStatus) {
 }
 
 async function deleteStudent(studentId, name, email) {
-  if (!confirm(`Are you sure you want to PERMANENTLY DELETE "${name}" (${email}) from the database?\n\nThis will completely wipe:\n- Student profile & application\n- Batch enrollments & progress\n- Assigned issues & submissions\n- Certificates & payment records\n- OTP tokens & email logs\n- Their dedicated GitHub repository\n\nWhen this user returns, they will be treated as a completely brand-new user.\n\nThis action cannot be undone.`)) {
+  if (!confirm(`Are you sure you want to PERMANENTLY DELETE "${name}" (${email}) from the database?\n\nThis will completely wipe:\n- Student profile & application\n- Batch enrollments & progress\n- Milestone tasks & submissions\n- Certificates & payment records\n- OTP tokens & email logs\n\nWhen this user returns, they will be treated as a completely brand-new user.\n\nThis action cannot be undone.`)) {
     return;
   }
   try {
