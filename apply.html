@@ -494,66 +494,7 @@
       font-style: italic;
     }
 
-    .linkedin-confirm-checkbox {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      cursor: pointer;
-      padding: 12px 14px;
-      border-radius: var(--radius-md);
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      transition: all var(--transition-fast);
-      margin-bottom: 0 !important;
-    }
 
-    .linkedin-confirm-checkbox:hover {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: rgba(255, 255, 255, 0.15);
-    }
-
-    .linkedin-confirm-checkbox input {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .custom-checkbox, .checkbox-box {
-      width: 18px;
-      height: 18px;
-      border-radius: 4px;
-      border: 1.5px solid rgba(255, 255, 255, 0.25);
-      background: rgba(255, 255, 255, 0.04);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 2px;
-      transition: all var(--transition-fast);
-    }
-
-    .linkedin-confirm-checkbox input:checked ~ .checkbox-box {
-      background: #10b981;
-      border-color: #10b981;
-    }
-
-    .linkedin-confirm-checkbox input:checked ~ .checkbox-box::after {
-      content: '✓';
-      color: #0c0b0b;
-      font-size: 0.75rem;
-      font-weight: 900;
-    }
-
-    .checkbox-desc {
-      font-size: 0.8rem !important;
-      color: var(--text-secondary) !important;
-      font-weight: 500 !important;
-      line-height: 1.5;
-    }
-
-    .checkbox-desc strong {
-      color: var(--text-primary);
-    }
 
     /* Form Actions */
     .form-actions {
@@ -891,21 +832,12 @@
                   </a>
                   <span class="step-hint">Opens company page in new tab</span>
                 </div>
-
-                <label class="linkedin-confirm-checkbox" for="linkedin-followed-check">
-                  <input type="checkbox" id="linkedin-followed-check" name="linkedin_followed" required>
-                  <span class="checkbox-box"></span>
-                  <span class="checkbox-desc">
-                    I confirm that I have followed <strong>SkillMe (@SkillMe)</strong> on LinkedIn to receive batch updates and credential validation. <span class="required">*</span>
-                  </span>
-                </label>
-                <div class="form-error" id="linkedin-followed-error">Please follow our LinkedIn page and check the confirmation box above to proceed.</div>
               </div>
             </div>
             
             <div class="form-actions">
               <button type="button" class="btn-back" onclick="prevStep(2)">Back</button>
-              <button type="button" class="btn-next" id="btn-next-2" onclick="nextStep(2)">
+              <button type="button" class="btn-next" id="btn-next-2" onclick="nextStep(2)" disabled title="Please click the Follow button above first" style="opacity: 0.5; cursor: not-allowed;">
                 Continue
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </button>
@@ -1149,7 +1081,7 @@
       if (step === 1) {
         valid = validateField('firstName', silent) & validateField('lastName', silent) & validateEmail('email', silent) & validateField('phone', silent);
       } else if (step === 2) {
-        valid = validateField('college', silent) & validateSelect('year', silent) & validateLinkedinFollow(silent);
+        valid = validateField('college', silent) & validateSelect('year', silent);
       } else if (step === 3) {
         valid = validateDomain() & validateField('motivation', silent);
       }
@@ -1157,36 +1089,19 @@
       return valid;
     }
 
-    function validateLinkedinFollow(silent = false) {
-      const checkbox = document.getElementById('linkedin-followed-check');
-      const box = document.getElementById('linkedin-follow-card')?.querySelector('.linkedin-follow-box');
-      const error = document.getElementById('linkedin-followed-error');
-      
-      if (!checkbox || !checkbox.checked) {
-        if (!silent) {
-          if (box) {
-            box.classList.add('error-highlight');
-            box.classList.remove('verified');
-            setTimeout(() => box.classList.remove('error-highlight'), 600);
-          }
-          if (error) error.classList.add('visible');
-        }
-        return false;
-      }
 
-      if (!silent) {
-        if (box) {
-          box.classList.remove('error-highlight');
-          box.classList.add('verified');
-        }
-        if (error) error.classList.remove('visible');
-      }
-      return true;
-    }
 
     function trackLinkedinClick() {
       const box = document.getElementById('linkedin-follow-card')?.querySelector('.linkedin-follow-box');
       if (box) box.style.borderColor = 'rgba(10, 102, 194, 0.6)';
+      
+      const btnNext2 = document.getElementById('btn-next-2');
+      if (btnNext2) {
+        btnNext2.disabled = false;
+        btnNext2.style.opacity = '1';
+        btnNext2.style.cursor = 'pointer';
+        btnNext2.removeAttribute('title');
+      }
     }
 
     function validateField(id, silent = false) {
@@ -1278,22 +1193,7 @@
       });
     });
 
-    const linkedinCheck = document.getElementById('linkedin-followed-check');
-    if (linkedinCheck) {
-      linkedinCheck.addEventListener('change', () => {
-        const box = document.getElementById('linkedin-follow-card')?.querySelector('.linkedin-follow-box');
-        const error = document.getElementById('linkedin-followed-error');
-        if (linkedinCheck.checked) {
-          if (box) {
-            box.classList.add('verified');
-            box.classList.remove('error-highlight');
-          }
-          if (error) error.classList.remove('visible');
-        } else {
-          if (box) box.classList.remove('verified');
-        }
-      });
-    }
+
 
     // Form Submit
     document.getElementById('apply-form').addEventListener('submit', (e) => {
