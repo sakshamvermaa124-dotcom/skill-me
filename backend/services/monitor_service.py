@@ -16,6 +16,7 @@ import json
 import time
 import logging
 import traceback
+from pathlib import Path
 from datetime import datetime, timedelta
 
 import httpx
@@ -207,7 +208,7 @@ async def probe_database() -> dict:
     """Run test queries against every critical table to verify DB connectivity."""
     check_name = "database_connectivity"
     start = time.time()
-    tables = ["students", "batches", "enrollments", "issues", "submissions",
+    tables = ["students", "batches", "enrollments", "submissions",
               "progress", "certificates", "payments", "email_logs"]
     results = {}
     all_ok = True
@@ -235,6 +236,34 @@ async def probe_database() -> dict:
             is_regression=int(is_reg),
         )
     return {"status": status, "tables": results, "time_ms": elapsed}
+
+
+async def probe_curriculum() -> dict:
+    """Verify curriculum.json is readable and valid JSON."""
+    check_name = "curriculum_json"
+    start = time.time()
+    try:
+        curriculum_path = Path(__file__).resolve().parent / "curriculum.json"
+        with open(curriculum_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        
+        elapsed = int((time.time() - start) * 1000)
+        status = "pass"
+        is_reg = await _check_regression(check_name, status)
+        await _record_check(check_name, "probe", status, elapsed, {"keys_found": list(data.keys())})
+        return {"status": status, "keys": list(data.keys()), "time_ms": elapsed}
+    except Exception as e:
+        elapsed = int((time.time() - start) * 1000)
+        is_reg = await _check_regression(check_name, "fail")
+        await _record_check(check_name, "probe", "fail", elapsed, {"error": str(e)})
+        await _create_alert(
+            "synthetic", "critical", "api_health",
+            "Curriculum JSON unavailable or invalid",
+            f"Error reading curriculum.json: {e}",
+            component="backend/services/curriculum.json",
+            is_regression=int(is_reg),
+        )
+        return {"status": "fail", "error": str(e), "time_ms": elapsed}
 
 
 async def probe_email_smtp() -> dict:
@@ -339,6 +368,7 @@ async def run_all_probes() -> dict:
     results = {}
     results["health"] = await probe_health_endpoint()
     results["database"] = await probe_database()
+    results["curriculum"] = await probe_curriculum()
     results["email_smtp"] = await probe_email_smtp()
     results["email_delivery"] = await probe_email_delivery()
 
@@ -1023,7 +1053,7 @@ async def run_initial_audit() -> dict:
     # Overall counts
     try:
         counts = {}
-        for table in ["students", "batches", "enrollments", "issues", "submissions",
+        for table in ["students", "batches", "enrollments", "submissions",
                        "progress", "certificates", "payments", "email_logs"]:
             row = await db.fetch_one(f"SELECT COUNT(*) as cnt FROM {table}")
             counts[table] = row["cnt"] if row else 0

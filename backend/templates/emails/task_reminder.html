@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}⏰ Week {{ week_due }} Task Overdue{% endblock %}
+
+{% block body %}
+<p class="greeting">Hi {{ first_name }},</p>
+
+<p class="lead">
+  We noticed you haven't submitted your <strong>Week {{ week_due }}</strong> {{ domain_label }} task yet.
+  It's been <strong>{{ days_inactive }} days</strong> since your last activity on SkillMe &mdash;
+  your internship window is limited, and staying on track is essential.
+</p>
+
+<div class="divider"></div>
+
+<div class="info-table">
+  <div class="info-row">
+    <span class="info-label">Track</span>
+    <span class="info-value">{{ domain_label }}</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Current Week</span>
+    <span class="info-value">Week {{ week_due }} of 4</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Days Since Last Activity</span>
+    <span class="info-value" style="color:#ef4444;font-weight:800;">{{ days_inactive }} days</span>
+  </div>
+  <div class="info-row">
+    <span class="info-label">Tasks Completed</span>
+    <span class="info-value">{{ completed_tasks }}/4</span>
+  </div>
+</div>
+
+<div class="section-label">📋 What You Need To Do</div>
+<div class="steps">
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-text"><strong>Build</strong> your Week {{ week_due }} project milestone following the task guide on your dashboard.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-text"><strong>Post</strong> a demo or summary of your work on LinkedIn &mdash; tag <strong>@SkillMe</strong>.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-text"><strong>Submit</strong> the LinkedIn post URL on your SkillMe dashboard for review.</div>
+  </div>
+</div>
+
+<div class="cta-wrap">
+  <a href="{{ dashboard_url }}" target="_blank" class="cta-btn">Submit Your Task Now &rarr;</a>
+</div>
+
+<div class="note">
+  <strong>⏰ Don't delay:</strong> Your internship window is limited &mdash; the sooner you complete your milestones,
+  the sooner you earn your <strong>certificate</strong> and <strong>letter of recommendation</strong>. Make it count.
+</div>
+{% endblock %}

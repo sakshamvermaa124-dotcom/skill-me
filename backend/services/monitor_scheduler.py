@@ -15,6 +15,7 @@ from services.monitor_service import (
     run_all_probes, run_smoke_tests, run_full_e2e_tests,
     check_db_integrity, detect_stuck_students,
 )
+from apscheduler.triggers.cron import CronTrigger
 
 logger = logging.getLogger("skillme.monitor.scheduler")
 
@@ -65,5 +66,20 @@ def register_monitor_jobs(scheduler) -> None:
         misfire_grace_time=1800,
     )
     logger.info("Registered: full E2E tests (every 2 hours)")
+
+    # Task inactivity reminders — daily at 10:00 AM IST
+    async def daily_task_reminders():
+        from services.reminder_service import send_reminders
+        result = await send_reminders()
+        logger.info("Daily task reminders: %s", result)
+
+    scheduler.add_job(
+        daily_task_reminders,
+        trigger=CronTrigger(hour=10, minute=0, timezone="Asia/Kolkata"),
+        id="daily_task_reminders",
+        replace_existing=True,
+        misfire_grace_time=3600,
+    )
+    logger.info("Registered: daily task reminders (10:00 AM IST)")
 
     logger.info("All monitoring jobs registered.")

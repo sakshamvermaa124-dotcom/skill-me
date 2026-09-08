@@ -432,6 +432,38 @@ class EmailService:
             email_type="urgent_request_fulfilled",
         )
 
+    # Task inactivity reminder
+    async def send_task_reminder(
+        self,
+        first_name: str,
+        last_name: str,
+        email: str,
+        domain: str,
+        week_due: int,
+        days_inactive: int,
+        completed_tasks: int,
+        student_id: int | None = None,
+        batch_id: int | None = None,
+    ) -> bool:
+        html = _render(
+            "task_reminder.html",
+            first_name=first_name,
+            last_name=last_name,
+            domain_label=_domain_label(domain),
+            week_due=week_due,
+            days_inactive=days_inactive,
+            completed_tasks=completed_tasks,
+        )
+        return await _send_and_log(
+            email,
+            f"{first_name} {last_name}",
+            f"⏰ You're falling behind — Week {week_due} task is overdue",
+            html,
+            email_type="task_reminder",
+            student_id=student_id,
+            batch_id=batch_id,
+        )
+
     # Test utility
     async def send_test_email(self, to_email: str) -> bool:
         """Send a test email to verify SMTP configuration."""

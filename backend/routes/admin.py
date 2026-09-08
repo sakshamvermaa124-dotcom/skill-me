@@ -758,6 +758,57 @@ async def get_email_stats(_: str = Depends(require_admin)):
 
 
 # ──────────────────────────────────────────────
+# Task Reminders
+# ──────────────────────────────────────────────
+
+@router.get("/reminders/preview", summary="Preview inactive students who would receive reminders")
+async def preview_inactive_students(_: str = Depends(require_admin)):
+    """Returns a list of enrolled students who are behind on tasks and eligible for a reminder email."""
+    from services.reminder_service import get_inactive_students
+    students = await get_inactive_students()
+    return {"count": len(students), "students": students}
+
+
+class SendRemindersRequest(BaseModel):
+    student_ids: list[int] | None = Field(None, description="Optional: send only to these student IDs")
+
+
+@router.post("/reminders/send", summary="Send task reminder emails to inactive students")
+async def send_task_reminders(
+    req: SendRemindersRequest,
+    background_tasks: BackgroundTasks,
+    _: str = Depends(require_admin),
+):
+    """Trigger task reminder emails. If student_ids provided, only those students get emailed."""
+    from services.reminder_service import get_inactive_students, send_reminders
+
+    inactive = await get_inactive_students()
+
+    if req.student_ids:
+        target_ids = set(req.student_ids)
+        inactive = [s for s in inactive if int(s["student_id"]) in target_ids]
+
+    if not inactive:
+        return {"status": "no_targets", "message": "No eligible inactive students found.", "count": 0}
+
+    async def _dispatch():
+        result = await send_reminders(inactive)
+        logger.info("Admin-triggered task reminders: %s", result)
+
+    background_tasks.add_task(_dispatch)
+
+    return {
+        "status": "dispatched",
+        "message": f"Sending {len(inactive)} reminder(s) in background.",
+        "count": len(inactive),
+        "students": [
+            {"student_id": s["student_id"], "name": f"{s['first_name']} {s['last_name']}", "email": s["email"]}
+            for s in inactive
+        ],
+    }
+
+
+# ──────────────────────────────────────────────
 # Batch Analytics
 # ──────────────────────────────────────────────
 

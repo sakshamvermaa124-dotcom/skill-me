@@ -603,6 +603,7 @@ function navigate(page) {
   if (page === 'submissions') loadSubmissions();
   if (page === 'urgent-requests') loadUrgentRequests();
   if (page === 'announcements') previewAnnouncement();
+  if (page === 'reminders') loadInactiveStudents();
 }
 
 function refreshCurrentPage() { navigate(currentPage); }
@@ -1510,11 +1511,103 @@ async function sendAnnouncementNow() {
   }
 }
 
-// ─── INIT ───
-window.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.getElementById('login-overlay').style.display !== 'none') adminLogin();
-});
+// ─── TASK REMINDERS ───
+let _cachedInactiveStudents = [];
+let _pendingReminderStudentId = null;
 
+async function loadInactiveStudents() {
+  const tbody = document.getElementById('reminder-tbody');
+  const statsEl = document.getElementById('reminder-stats');
+  const sendBtn = document.getElementById('send-reminders-btn');
+  if (!tbody) return;
+
+  tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:30px;"><div class="spinner" style="margin:0 auto;"></div> Loading inactive students...</td></tr>';
+  if (statsEl) statsEl.innerHTML = '';
+  if (sendBtn) sendBtn.disabled = true;
+
+  try {
+    const data = await api('/api/admin/reminders/preview');
+    _cachedInactiveStudents = data.students || [];
+    const count = _cachedInactiveStudents.length;
+
+    // Stats card
+    if (statsEl) {
+      statsEl.innerHTML = `<div style="padding:10px 16px;border-radius:8px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.25);font-size:0.8rem;min-width:140px;">
+        <div style="color:var(--text-secondary);font-size:0.72rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Inactive Students</div>
+        <div style="color:#f59e0b;font-weight:700;font-size:1.1rem;">${count}</div>
+      </div>`;
+    }
+
+    if (count === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:30px;">✨ All students are on track — no reminders needed right now.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = _cachedInactiveStudents.map(s => {
+      const lastAct = s.last_activity ? new Date(s.last_activity).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+      return `<tr>
+        <td style="font-weight:600;">${s.first_name} ${s.last_name || ''}</td>
+        <td style="font-size:0.82rem;color:var(--text-secondary);">${s.email}</td>
+        <td>${s.domain || '—'}</td>
+        <td><span style="background:rgba(245,158,11,0.15);color:#f59e0b;padding:3px 10px;border-radius:6px;font-size:0.78rem;font-weight:700;">Week ${s.week_due}</span></td>
+        <td style="color:#f87171;font-weight:600;">${s.days_inactive} days</td>
+        <td>${s.completed_tasks}/4</td>
+        <td style="font-size:0.82rem;color:var(--text-secondary);">${lastAct}</td>
+        <td><button class="btn" style="padding:4px 8px;font-size:0.75rem;background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);" onclick="confirmSendReminders(${s.student_id})">Send</button></td>
+      </tr>`;
+    }).join('');
+
+    if (sendBtn) sendBtn.disabled = false;
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#f87171;padding:30px;">Failed to load: ${err.message}</td></tr>`;
+  }
+}
+
+function confirmSendReminders(studentId = null) {
+  _pendingReminderStudentId = studentId;
+  const count = _cachedInactiveStudents.length;
+  if (count === 0 && !studentId) {
+    toast('No inactive students to remind.', 'error');
+    return;
+  }
+  const textEl = document.getElementById('reminder-confirm-text');
+  if (textEl) {
+    if (studentId) {
+       textEl.innerHTML = `You are about to send a task reminder email to this specific student.<br><br>Are you sure you want to proceed?`;
+    } else {
+       textEl.innerHTML = `You are about to send <strong>${count}</strong> task reminder email${count > 1 ? 's' : ''} to inactive students.<br><br>Students who received a reminder in the last 7 days are already excluded.<br><br>Are you sure you want to proceed?`;
+    }
+  }
+  openModal('reminder-confirm-modal');
+}
+
+async function sendRemindersNow() {
+  closeModal('reminder-confirm-modal');
+  const resultEl = document.getElementById('reminder-send-result');
+  const sendBtn = document.getElementById('send-reminders-btn');
+  if (sendBtn) sendBtn.disabled = true;
+  if (resultEl) resultEl.textContent = '⏳ Sending reminders in background...';
+
+  const payload = _pendingReminderStudentId ? { student_ids: [_pendingReminderStudentId] } : {};
+  _pendingReminderStudentId = null;
+
+  try {
+    const data = await api('/api/admin/reminders/send', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+    toast(`${data.count} reminder(s) dispatched in background.`, 'success');
+    if (resultEl) resultEl.textContent = `✅ ${data.count} reminder(s) dispatched at ${new Date().toLocaleTimeString('en-IN')}.`;
+    // Refresh the list after a brief delay (emails take ~1s each)
+    setTimeout(() => loadInactiveStudents(), 3000);
+  } catch (err) {
+    toast(`Failed: ${err.message}`, 'error');
+    if (resultEl) resultEl.textContent = `❌ Failed: ${err.message}`;
+    if (sendBtn) sendBtn.disabled = false;
+  }
+}
+
+// ─── INIT ───
 const savedKey = localStorage.getItem('skillme_admin_key') || sessionStorage.getItem('skillme_admin_key');
 if (savedKey) {
   const input = document.getElementById('admin-key-input') || document.getElementById('api-key-input');
