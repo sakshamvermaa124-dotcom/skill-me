@@ -110,7 +110,7 @@ body {
 a { text-decoration: none; color: inherit; transition: color var(--transition-fast); }
 ul { list-style: none; }
 img { max-width: 100%; display: block; }
-.brand-logo-img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1.5px solid rgba(201, 154, 78, 0.4); flex-shrink: 0; }
+.brand-logo-img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 5px; }
