@@ -1331,20 +1331,20 @@
       </div>
     </section>
 
-    <!-- â”€â”€â”€ REMINDERS PAGE â”€â”€â”€ -->
+    <!-- ——— REMINDERS PAGE ——— -->
     <section class="page" id="page-reminders">
       <div class="panel">
         <div class="panel-header">
           <div>
-            <div class="panel-title">ðŸ”” Task Reminders</div>
+            <div class="panel-title">📣 Task Reminders</div>
             <div class="panel-subtitle">Nudge inactive students who haven't submitted their weekly tasks</div>
           </div>
           <div style="display:flex;gap:12px;align-items:center;">
             <span id="reminder-send-result" style="font-size:0.82rem;color:var(--text-secondary);"></span>
             <button class="btn" id="send-reminders-btn" style="padding:6px 14px;font-size:0.8rem;background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);" onclick="confirmSendReminders()" disabled>
-              ðŸš€ Send Reminders to All
+              🚀 Send Reminders to All
             </button>
-            <button class="btn btn-secondary" onclick="loadInactiveStudents()" style="font-size:0.8rem;padding:6px 14px;">ðŸ”„ Refresh</button>
+            <button class="btn btn-secondary" onclick="loadInactiveStudents()" style="font-size:0.8rem;padding:6px 14px;">🔄 Refresh</button>
           </div>
         </div>
         <div class="panel-body">
@@ -1373,14 +1373,9 @@
             </table>
           </div>
 
-              ðŸ“¨ Send Reminders to All Inactive Students
-            </button>
-            <span id="reminder-send-result" style="font-size:0.82rem;color:var(--text-secondary);"></span>
-          </div>
-
           <!-- Scheduler info -->
           <div class="note" style="margin-top:20px;">
-            <strong>â° Auto-Scheduler:</strong> Reminders are also sent automatically every day at <strong>10:00 AM IST</strong>.
+            <strong>⏰ Auto-Scheduler:</strong> Reminders are also sent automatically every day at <strong>10:00 AM IST</strong>.
             Students who already received a reminder in the last 7 days will be skipped (cooldown).
           </div>
         </div>
@@ -1390,7 +1385,7 @@
   </main>
 </div>
 
-<!-- â”€â”€â”€ ANNOUNCEMENT SEND CONFIRMATION MODAL â”€â”€â”€ -->
+<!-- ——— ANNOUNCEMENT SEND CONFIRMATION MODAL ——— -->
 <div class="modal-overlay" id="announcement-confirm-modal">
   <div class="modal">
     <div class="modal-header">
@@ -1407,7 +1402,7 @@
   </div>
 </div>
 
-<!-- â”€â”€â”€ REMINDER SEND CONFIRMATION MODAL â”€â”€â”€ -->
+<!-- ——— REMINDER SEND CONFIRMATION MODAL ——— -->
 <div class="modal-overlay" id="reminder-confirm-modal">
   <div class="modal">
     <div class="modal-header">
@@ -1424,7 +1419,7 @@
   </div>
 </div>
 
-<!-- â”€â”€â”€ CREATE BATCH MODAL â”€â”€â”€ -->
+<!-- ——— CREATE BATCH MODAL ——— -->
 <div class="modal-overlay" id="create-batch-modal">
   <div class="modal">
     <div class="modal-header">
@@ -1471,7 +1466,7 @@
   </div>
 </div>
 
-<!-- â”€â”€â”€ ANALYTICS MODAL â”€â”€â”€ -->
+<!-- ——— ANALYTICS MODAL ——— -->
 <div class="modal-overlay" id="modal-analytics">
   <div class="modal" style="max-width:800px; width:90%;">
     <div class="modal-header">
@@ -1484,7 +1479,7 @@
   </div>
 </div>
 
-<!-- â”€â”€â”€ EMAIL BODY MODAL â”€â”€â”€ -->
+<!-- ——— EMAIL BODY MODAL ——— -->
 <div class="modal-overlay" id="email-body-modal">
   <div class="modal" style="max-width:800px; width:90%; max-height:85vh; display:flex; flex-direction:column;">
     <div class="modal-header">
@@ -1497,13 +1492,13 @@
   </div>
 </div>
 
-<!-- â”€â”€â”€ TOAST CONTAINER â”€â”€â”€ -->
+<!-- ——— TOAST CONTAINER ——— -->
 <div id="toast-container"></div>
 
 <script src="config.js"></script>
 <script src="admin.js?v=20260908_2"></script>
 <script>
-// â”€â”€â”€ Email Logs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ——— Email Logs ———
 const EMAIL_TYPE_LABELS = {
   application_confirmation: { label: 'Application',        color: '#60a5fa', bg: 'rgba(96,165,250,0.1)' },
   shortlisted:              { label: 'Shortlisted',         color: '#a78bfa', bg: 'rgba(167,139,250,0.1)' },
@@ -1518,7 +1513,7 @@ const EMAIL_TYPE_LABELS = {
   urgent_request_fulfilled:  { label: 'Urgent Fulfilled',    color: '#ec4899', bg: 'rgba(236,72,153,0.1)' },
 };
 
-// â”€â”€â”€ PAGE_META entry for Submissions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ——— PAGE_META entry for Submissions ———
 if (typeof PAGE_META !== 'undefined') {
   PAGE_META['submissions'] = { title: 'Submissions', subtitle: 'Review and approve/reject weekly LinkedIn submissions' };
   PAGE_META['urgent-requests'] = { title: 'Urgent Requests', subtitle: 'Expedited (24h) certificate/LOR/portfolio processing requests' };
@@ -1563,7 +1558,7 @@ async function loadEmailLogs(offset = 0) {
     const logs = data.logs || [];
     const total = data.total || 0;
 
-    // â”€â”€ Stats bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ——— Stats bar ———
     const sentCount   = logs.filter(l => l.status === 'sent').length;
     const failedCount = logs.filter(l => l.status === 'failed').length;
     if (statsEl) {
@@ -1578,47 +1573,47 @@ async function loadEmailLogs(offset = 0) {
       </div>`).join('');
     }
 
-    // â”€â”€ Table rows â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ——— Table rows ———
     if (logs.length === 0) {
       tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-secondary);">No email logs found</td></tr>';
     } else {
       tbody.innerHTML = logs.map(log => {
         const t = EMAIL_TYPE_LABELS[log.email_type] || { label: log.email_type, color: '#94a3b8', bg: 'rgba(148,163,184,0.1)' };
         const statusBadge = log.status === 'sent'
-          ? '<span style="padding:2px 8px;border-radius:10px;background:rgba(52,211,153,0.12);color:#34d399;font-size:0.72rem;font-weight:600;">âœ… Sent</span>'
-          : '<span style="padding:2px 8px;border-radius:10px;background:rgba(248,113,113,0.12);color:#f87171;font-size:0.72rem;font-weight:600;">âŒ Failed</span>';
+          ? '<span style="padding:2px 8px;border-radius:10px;background:rgba(52,211,153,0.12);color:#34d399;font-size:0.72rem;font-weight:600;">✅ Sent</span>'
+          : '<span style="padding:2px 8px;border-radius:10px;background:rgba(248,113,113,0.12);color:#f87171;font-size:0.72rem;font-weight:600;">❌ Failed</span>';
         const d = new Date(log.sent_at && !log.sent_at.endsWith('Z') ? log.sent_at.replace(' ', 'T') + 'Z' : log.sent_at);
         const timeStr = isNaN(d) ? log.sent_at : `${d.toLocaleDateString('en-IN')} ${d.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'})}`;
-        const subject = log.subject?.length > 50 ? log.subject.slice(0, 50) + 'â€¦' : (log.subject || 'â€”');
+        const subject = log.subject?.length > 50 ? log.subject.slice(0, 50) + '…' : (log.subject || '—');
         const encodedBody = encodeURIComponent(log.body || 'No body content available.').replace(/'/g, "%27");
 
         return `<tr style="cursor:pointer; transition:background-color 0.2s;" onmouseover="this.style.backgroundColor='rgba(99, 102, 241, 0.08)'" onmouseout="this.style.backgroundColor='transparent'" onclick="openEmailBodyModal('${encodedBody}')" title="Click anywhere to view full email body">
           <td style="font-size:0.78rem;color:var(--text-secondary);white-space:nowrap;">${timeStr}</td>
           <td><span style="padding:3px 10px;border-radius:10px;background:${t.bg};color:${t.color};font-size:0.72rem;font-weight:600;white-space:nowrap;">${t.label}</span></td>
-          <td style="font-size:0.82rem;word-break:break-all;">${log.recipient_email || 'â€”'}</td>
+          <td style="font-size:0.82rem;word-break:break-all;">${log.recipient_email || '—'}</td>
           <td style="font-size:0.78rem;">
             <div style="font-size:0.75rem;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-primary);font-weight:500;">
-              ðŸ“„ ${subject}
+              📄 ${subject}
             </div>
           </td>
-          <td style="font-size:0.82rem;">${log.student_name || 'â€”'}</td>
+          <td style="font-size:0.82rem;">${log.student_name || '—'}</td>
           <td>${statusBadge}</td>
           <td>${emailEngagementBadges(log)}</td>
         </tr>`;
       }).join('');
     }
 
-    // â”€â”€ Pagination â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ——— Pagination ————————————————————————————————
     if (pageEl) {
       const page = Math.floor(offset / _emailLogLimit) + 1;
       const totalPages = Math.ceil(total / _emailLogLimit);
       pageEl.innerHTML = `
-        <span>${total} total emails Â· Page ${page} of ${Math.max(1, totalPages)}</span>
+        <span>${total} total emails · Page ${page} of ${Math.max(1, totalPages)}</span>
         <div style="display:flex;gap:8px;">
           <button class="btn btn-ghost" style="padding:4px 12px;font-size:0.78rem;"
-            onclick="loadEmailLogs(${Math.max(0, offset - _emailLogLimit)})" ${offset === 0 ? 'disabled' : ''}>â† Prev</button>
+            onclick="loadEmailLogs(${Math.max(0, offset - _emailLogLimit)})" ${offset === 0 ? 'disabled' : ''}>← Prev</button>
           <button class="btn btn-ghost" style="padding:4px 12px;font-size:0.78rem;"
-            onclick="loadEmailLogs(${offset + _emailLogLimit})" ${offset + _emailLogLimit >= total ? 'disabled' : ''}>Next â†’</button>
+            onclick="loadEmailLogs(${offset + _emailLogLimit})" ${offset + _emailLogLimit >= total ? 'disabled' : ''}>Next →</button>
         </div>`;
     }
   } catch (err) {
@@ -1636,13 +1631,13 @@ function emailEngagementBadges(log) {
   if (log.spam_reported_at) chips.push(`<span title="Recipient marked this as spam" style="color:#f87171;">ðŸš« Spam</span>`);
   if (log.bounced_at) chips.push(`<span title="Bounce type: ${log.bounce_type || 'unknown'}" style="color:#fbbf24;">âš ï¸ Bounced</span>`);
   if (log.unsubscribed_at) chips.push(`<span style="color:#94a3b8;">ðŸ”• Unsubscribed</span>`);
-  if (!chips.length && log.delivered_at) chips.push(`<span style="color:#94a3b8;">ðŸ“¬ Delivered</span>`);
-  if (!chips.length) return '<span style="color:var(--text-muted);font-size:0.72rem;">â€”</span>';
-  return `<div style="display:flex;flex-direction:column;gap:2px;font-size:0.72rem;font-weight:600;">${chips.join('')}</div>`;
-}
-
-// All-time aggregate deliverability/engagement stats (independent of the current page/filters)
-async function loadEmailAggStats() {
+  if (log.opened_at) chips.push(<span title="Opened${log.opened_count > 1 ? ' ' + log.opened_count + 'x' : ''}" style="color:#34d399;">👁️ Opened${log.opened_count > 1 ? ' ×' + log.opened_count : ''}</span>);
+  if (log.clicked_at) chips.push(<span title="Link clicked${log.clicked_count > 1 ? ' ' + log.clicked_count + 'x' : ''}" style="color:#60a5fa;">🔗 Clicked</span>);
+  if (log.spam_reported_at) chips.push(<span title="Recipient marked this as spam" style="color:#f87171;">🚫 Spam</span>);
+  if (log.bounced_at) chips.push(<span title="Bounce type: ${log.bounce_type || 'unknown'}" style="color:#fbbf24;">⚠️ Bounced</span>);
+  if (log.unsubscribed_at) chips.push(<span style="color:#94a3b8;">🔔 Unsubscribed</span>);
+  if (!chips.length && log.delivered_at) chips.push(<span style="color:#94a3b8;">📫 Delivered</span>);
+  if (!chips.length) return '<span style="color:var(--text-muted);font-size:0.72rem;">—</span>';
   const el = document.getElementById('email-agg-stats');
   if (!el) return;
   try {
@@ -1695,5 +1690,6 @@ function openEmailBodyModal(encodedBody) {
 </script>
 </body>
 </html>
+
 
 
