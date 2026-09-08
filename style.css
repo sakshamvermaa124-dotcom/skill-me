@@ -2756,3 +2756,8 @@ html, body {
     gap: 8px !important;
   }
 }
+
+/* Universal Fix for baked-in jagged border in the logo image */
+.brand-logo-img, img.brand-logo-img, .nav-logo img, .logo img, .cert-company-logo, .lh-logo, .sidebar-brand-icon img {
+  clip-path: circle(46% at 50% 50%) !important;
+}
