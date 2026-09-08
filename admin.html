@@ -1,11 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Console â€” SkillMe</title>
+  <title>Admin Console — SkillMe</title>
   <meta name="robots" content="noindex, nofollow" />
-  <meta name="description" content="SkillMe Admin Console â€” Manage batches, students, and task assignments." />
+  <meta name="description" content="SkillMe Admin Console — Manage batches, students, and task assignments." />
   <link rel="icon" href="assets/logo.webp" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,7 +16,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
   <style>
-    /* â”€â”€â”€ IMPECCABLE DESIGN SYSTEM: OKLCH TINTED NEUTRALS & EMBER PALETTE â”€â”€â”€ */
+    /* ─── IMPECCABLE DESIGN SYSTEM: OKLCH TINTED NEUTRALS & EMBER PALETTE ─── */
     :root {
       --bg-base: #171515;                       /* EMBER Matte Charcoal Graphite #171515 */
       --bg-surface: rgba(28, 25, 26, 0.92);      /* EMBER Matte Charcoal Glass */
@@ -49,7 +49,7 @@
       --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    /* â”€â”€â”€ RESET & ACCESSIBILITY â”€â”€â”€ */
+    /* ─── RESET & ACCESSIBILITY ─── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 16px; scroll-behavior: smooth; }
     body {
@@ -60,14 +60,14 @@
       overflow-x: hidden;
     }
 
-    /* â”€â”€â”€ CROSS-BROWSER SVG & ICON SCALE FIX (Brave, Edge, Chrome, Safari) â”€â”€â”€ */
+    /* ─── CROSS-BROWSER SVG & ICON SCALE FIX (Brave, Edge, Chrome, Safari) ─── */
     svg { max-width: 100%; max-height: 100%; display: inline-block; vertical-align: middle; box-sizing: border-box; }
     .nav-item svg { width: 18px !important; height: 18px !important; flex-shrink: 0 !important; }
     .stat-card-icon svg { width: 20px !important; height: 20px !important; flex-shrink: 0 !important; }
     .sec-badge svg { width: 16px !important; height: 16px !important; flex-shrink: 0 !important; }
     .btn svg { width: 14px !important; height: 14px !important; flex-shrink: 0 !important; }
 
-    /* â”€â”€â”€ STRICT BRAND LOGO ENCAPSULATION â”€â”€â”€ */
+    /* ─── STRICT BRAND LOGO ENCAPSULATION ─── */
     .sidebar-brand-icon {
       width: 32px !important; height: 32px !important;
       min-width: 32px !important; min-height: 32px !important;
@@ -94,7 +94,7 @@
       pointer-events: none; z-index: 250; opacity: 0;
     }
 
-    /* â”€â”€â”€ AURORA BG â”€â”€â”€ */
+    /* ─── AURORA BG ─── */
     .aurora-bg {
       position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
     }
@@ -121,14 +121,14 @@
       100% { transform: translate(40px,60px) scale(1.1); }
     }
 
-    /* â”€â”€â”€ MAIN CONTENT (EMBER Split Background Layout) â”€â”€â”€ */
+    /* ─── MAIN CONTENT (EMBER Split Background Layout) ─── */
     .main-content {
       flex: 1; margin-left: var(--sidebar-w); margin-right: 0;
       min-height: 100vh; display: flex; flex-direction: column;
       position: relative; z-index: 2; background: transparent;
     }
 
-    /* â”€â”€â”€ TOP BAR (EMBER Dark Obsidian Style) â”€â”€â”€ */
+    /* ─── TOP BAR (EMBER Dark Obsidian Style) ─── */
     .topbar {
       display: flex; align-items: center; justify-content: space-between;
       padding: 16px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -146,7 +146,7 @@
       font-size: 0.78rem; color: rgba(244, 235, 225, 0.9); font-family: var(--font-mono); font-weight: 600;
     }
 
-    /* â”€â”€â”€ EMBER SPLIT-SCREEN LOGIN OVERLAY â”€â”€â”€ */
+    /* ─── EMBER SPLIT-SCREEN LOGIN OVERLAY ─── */
     #login-overlay {
       position: fixed; inset: 0; z-index: 200;
       display: flex;
@@ -330,10 +330,10 @@
       font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700; color: #ffb703;
     }
 
-    /* â”€â”€â”€ APP SHELL (EMBER Interior Layout) â”€â”€â”€ */
+    /* ─── APP SHELL (EMBER Interior Layout) ─── */
     #app { display: flex; min-height: 100vh; position: relative; z-index: 1; }
 
-    /* â”€â”€â”€ SIDEBAR (EMBER Matte Charcoal Graphite) â”€â”€â”€ */
+    /* ─── SIDEBAR (EMBER Matte Charcoal Graphite) ─── */
     .sidebar {
       width: var(--sidebar-w);
       flex-shrink: 0;
@@ -396,14 +396,14 @@
       letter-spacing: 0.08em; text-transform: uppercase;
     }
 
-    /* â”€â”€â”€ MAIN CONTENT (EMBER Split Background Layout) â”€â”€â”€ */
+    /* ─── MAIN CONTENT (EMBER Split Background Layout) ─── */
     .main-content {
       flex: 1; margin-left: var(--sidebar-w); margin-right: 0;
       min-height: 100vh; display: flex; flex-direction: column;
       position: relative; z-index: 2; background: transparent;
     }
 
-    /* â”€â”€â”€ TOP BAR (EMBER Matte Charcoal Graphite Glass) â”€â”€â”€ */
+    /* ─── TOP BAR (EMBER Matte Charcoal Graphite Glass) ─── */
     .topbar {
       display: flex; align-items: center; justify-content: space-between;
       padding: 16px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -421,11 +421,11 @@
       font-size: 0.78rem; color: rgba(244, 235, 225, 0.9); font-family: var(--font-mono); font-weight: 600;
     }
 
-    /* â”€â”€â”€ PAGE SECTIONS â”€â”€â”€ */
+    /* ─── PAGE SECTIONS ─── */
     .page { display: none; padding: 24px 28px; }
     .page.active { display: block; animation: fade-in 0.25s var(--ease-out-snappy); }
 
-    /* â”€â”€â”€ EMBER STAT CARDS (Screenshot Match) â”€â”€â”€ */
+    /* ─── EMBER STAT CARDS (Screenshot Match) ─── */
     .stats-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
       gap: 16px; margin-bottom: 24px;
@@ -462,11 +462,11 @@
     .badge-green { background: rgba(52,211,153,0.14); color: #34d399; border: 1px solid rgba(52,211,153,0.3); }
     .badge-red { background: rgba(255,42,75,0.14); color: #ff2a4b; border: 1px solid rgba(255,42,75,0.3); }
 
-    /* â”€â”€â”€ GRID LAYOUTS (COMPACT) â”€â”€â”€ */
+    /* ─── GRID LAYOUTS (COMPACT) ─── */
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
     @media (max-width: 1024px) { .grid-2 { grid-template-columns: 1fr; } }
 
-    /* â”€â”€â”€ PANEL (COMPACT) â”€â”€â”€ */
+    /* ─── PANEL (COMPACT) ─── */
     .panel {
       background: var(--bg-glass); border: 1px solid var(--border);
       border-radius: var(--radius); backdrop-filter: blur(16px); overflow: hidden;
@@ -479,7 +479,7 @@
     .panel-subtitle { font-size: 0.75rem; color: var(--text-secondary); margin-top: 1px; }
     .panel-body { padding: 14px 18px; max-height: 480px; overflow-y: auto; }
 
-    /* â”€â”€â”€ BUTTON â”€â”€â”€ */
+    /* ─── BUTTON ─── */
     .btn {
       display: inline-flex; align-items: center; gap: 8px;
       padding: 10px 18px; border-radius: var(--radius-sm);
@@ -506,7 +506,7 @@
     .btn-danger:hover { background: rgba(251,113,133,0.25); }
     .btn-sm { padding: 6px 12px; font-size: 0.78rem; }
 
-    /* â”€â”€â”€ TABLE â”€â”€â”€ */
+    /* ─── TABLE ─── */
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; }
     thead th {
@@ -524,7 +524,7 @@
     tbody td { padding: 14px 16px; font-size: 0.88rem; vertical-align: middle; }
     tbody tr:last-child { border-bottom: none; }
 
-    /* â”€â”€â”€ BADGE â”€â”€â”€ */
+    /* ─── BADGE ─── */
     .badge {
       display: inline-flex; align-items: center; gap: 4px;
       padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 600;
@@ -537,7 +537,7 @@
     .badge-dropped { background: rgba(251,113,133,0.15); color: var(--accent-rose); }
     .badge-active { background: rgba(52,211,153,0.15); color: var(--accent-emerald); }
 
-    /* â”€â”€â”€ SEARCH & FILTER â”€â”€â”€ */
+    /* ─── SEARCH & FILTER ─── */
     .filter-row { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
     .search-input {
       flex: 1; min-width: 200px;
@@ -559,7 +559,7 @@
       outline: none; cursor: pointer;
     }
 
-    /* â”€â”€â”€ FORM â”€â”€â”€ */
+    /* ─── FORM ─── */
     .form-group { margin-bottom: 16px; }
     .form-label { font-size: 0.8rem; color: var(--text-secondary); display: block; margin-bottom: 6px; }
     .form-input {
@@ -573,7 +573,7 @@
     }
     .form-input:focus { border-color: var(--accent-purple); }
 
-    /* â”€â”€â”€ MODAL â”€â”€â”€ */
+    /* ─── MODAL ─── */
     .modal-overlay {
       position: fixed; inset: 0; z-index: 100;
       background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
@@ -605,7 +605,7 @@
     .modal-body { padding: 24px; }
     .modal-footer { display: flex; gap: 10px; padding: 16px 24px; border-top: 1px solid var(--border); }
 
-    /* â”€â”€â”€ TOAST â”€â”€â”€ */
+    /* ─── TOAST ─── */
     #toast-container {
       position: fixed; bottom: 24px; right: 24px; z-index: 300;
       display: flex; flex-direction: column; gap: 10px;
@@ -632,7 +632,7 @@
       to { opacity:0; transform: translateX(20px); }
     }
 
-    /* â”€â”€â”€ EMPTY STATE â”€â”€â”€ */
+    /* ─── EMPTY STATE ─── */
     .empty-state {
       text-align: center; padding: 48px 24px;
       color: var(--text-muted);
@@ -640,7 +640,7 @@
     .empty-state-icon { font-size: 3rem; margin-bottom: 12px; opacity: 0.5; }
     .empty-state-text { font-size: 0.9rem; }
 
-    /* â”€â”€â”€ BATCH CARD â”€â”€â”€ */
+    /* ─── BATCH CARD ─── */
     .batch-card {
       background: var(--bg-glass);
       border: 1px solid var(--border);
@@ -666,13 +666,13 @@
     }
     .progress-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); }
 
-    /* â”€â”€â”€ SCROLLBAR â”€â”€â”€ */
+    /* ─── SCROLLBAR ─── */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
-    /* â”€â”€â”€ LOADING SPINNER â”€â”€â”€ */
+    /* ─── LOADING SPINNER ─── */
     .spinner {
       width: 20px; height: 20px; border-radius: 50%;
       border: 2px solid rgba(255,255,255,0.1);
@@ -685,7 +685,7 @@
       display: flex; align-items: center; justify-content: center;
       padding: 40px; gap: 12px; color: var(--text-secondary); font-size: 0.9rem;
     }
-    /* â”€â”€â”€ TOGGLE SWITCH â”€â”€â”€ */
+    /* ─── TOGGLE SWITCH ─── */
     .toggle-switch { position: relative; display: inline-block; width: 42px; height: 24px; cursor: pointer; }
     .toggle-switch input { opacity: 0; width: 0; height: 0; }
     .toggle-slider {
@@ -725,7 +725,7 @@
 <!-- 3D Unzip & Reveal Canvas -->
 <canvas id="unzip-canvas"></canvas>
 
-<!-- â”€â”€â”€ EMBER SPLIT-SCREEN LOGIN OVERLAY â”€â”€â”€ -->
+<!-- ─── EMBER SPLIT-SCREEN LOGIN OVERLAY ─── -->
 <div id="login-overlay">
 
   <!-- Laser Seam Line -->
@@ -737,14 +737,14 @@
     <div class="card-title">ADMIN</div>
     <div class="card-sub">Please enter your passkey</div>
 
-    <form id="login-form" onsubmit="event.preventDefault(); handleLogin(event)">
+    <form id="login-form" onsubmit="handleLogin(event)">
       <div class="input-field-wrap">
-        <input type="password" class="pass-input" id="admin-key-input" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" autofocus required />
+        <input type="password" class="pass-input" id="admin-key-input" placeholder="••••••••••••••••" autofocus required />
       </div>
       <button type="submit" class="access-btn" id="admin-login-btn">
         ACCESS CONSOLE &rarr;
       </button>
-      <div class="card-sec-text">Secure â€¢ Encrypted â€¢ Verified</div>
+      <div class="card-sec-text">Secure • Encrypted • Verified</div>
       <div class="login-error" id="login-error"></div>
     </form>
   </div>
@@ -757,7 +757,7 @@
         <span style="color: #ffffff !important; -webkit-text-fill-color: #ffffff !important;">SkillMe</span>
       </a>
       <a href="dashboard.html" style="color:rgba(255,255,255,0.6); text-decoration:none; font-size:0.75rem; font-weight:600; padding:5px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.12); transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.4)';this.style.color='#fff'" onmouseout="this.style.borderColor='rgba(255,255,255,0.12)';this.style.color='rgba(255,255,255,0.6)'">
-        Student Portal â†’
+        Student Portal →
       </a>
     </div>
 
@@ -773,14 +773,14 @@
       </p>
 
       <div class="feature-list">
-        <div class="feature-row"><span class="feature-bullet">â—†</span> Real-time Analytics</div>
-        <div class="feature-row"><span class="feature-bullet">â—†</span> Secure &amp; Private</div>
-        <div class="feature-row"><span class="feature-bullet">â—†</span> Complete Control</div>
+        <div class="feature-row"><span class="feature-bullet">◆</span> Real-time Analytics</div>
+        <div class="feature-row"><span class="feature-bullet">◆</span> Secure &amp; Private</div>
+        <div class="feature-row"><span class="feature-bullet">◆</span> Complete Control</div>
       </div>
     </div>
 
     <div class="security-notice">
-      <div class="sec-badge">ðŸ”’</div>
+      <div class="sec-badge">🔒</div>
       <div>
         <div class="sec-title">AUTHORIZED ACCESS ONLY</div>
         <div class="sec-desc">All activities are logged and monitored.</div>
@@ -792,20 +792,20 @@
   <div class="split-right">
     <div class="trending-runner-widget">
       <div class="runner-widget-top">
-        <div class="runner-badge-icon">ðŸƒ</div>
+        <div class="runner-badge-icon">🏃</div>
         <div>
           <div class="runner-widget-title">TRENDING NOW</div>
           <div class="runner-widget-sub">KEEP RUNNING.<br>STAY AHEAD.</div>
         </div>
       </div>
       <div class="runner-progress-bar"><div class="runner-progress-fill"></div></div>
-      <div class="runner-coin-badge">ðŸ’° 1286</div>
+      <div class="runner-coin-badge">💰 1286</div>
     </div>
   </div>
 
 </div>
 
-<!-- â”€â”€â”€ APP SHELL â”€â”€â”€ -->
+<!-- ─── APP SHELL ─── -->
 <div id="app" style="display:none;">
 
   <!-- Sidebar -->
@@ -886,12 +886,6 @@
         </svg>
         Announcements
       </div>
-      <div class="nav-item" id="nav-reminders" onclick="navigate('reminders')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-        </svg>
-        Reminders
-      </div>
     </nav>
 
     <!-- COLLAPSIBLE DEVELOPER PREVIEWS DROP BOX -->
@@ -938,7 +932,7 @@
       </div>
       <div class="topbar-actions">
         <div class="topbar-time-capsule">
-          <span>ðŸ“…</span>
+          <span>📅</span>
           <span id="topbar-time"></span>
         </div>
         <button class="btn btn-ghost btn-sm" onclick="refreshCurrentPage()">
@@ -948,12 +942,12 @@
           Refresh
         </button>
         <button class="btn btn-danger btn-sm" onclick="logoutAdmin()" title="Lock Admin Console">
-          ðŸ”’ Lock Console
+          🔒 Lock Console
         </button>
       </div>
     </header>
 
-    <!-- â”€â”€â”€ OVERVIEW PAGE â”€â”€â”€ -->
+    <!-- ─── OVERVIEW PAGE ─── -->
     <section class="page active" id="page-overview">
       <div class="stats-grid" id="stats-grid">
         <div class="loading-overlay"><div class="spinner"></div> Loading stats...</div>
@@ -985,7 +979,7 @@
       </div>
     </section>
 
-    <!-- â”€â”€â”€ STUDENTS PAGE â”€â”€â”€ -->
+    <!-- ─── STUDENTS PAGE ─── -->
     <section class="page" id="page-students">
       <div class="filter-row">
         <input type="text" class="search-input" id="student-search" placeholder="Search by name or email..." oninput="filterStudents()" />
@@ -1024,7 +1018,7 @@
       </div>
     </section>
 
-    <!-- â”€â”€â”€ ALUMNI PAGE â”€â”€â”€ -->
+    <!-- ─── ALUMNI PAGE ─── -->
     <section class="page" id="page-alumni">
       <div class="filter-row">
         <input type="text" class="search-input" id="alumni-search" placeholder="Search alumni by name, email or domain..." oninput="filterAlumni()" />
@@ -1055,7 +1049,7 @@
       </div>
     </section>
 
-    <!-- â”€â”€â”€ BATCHES PAGE â”€â”€â”€ -->
+    <!-- ─── BATCHES PAGE ─── -->
     <section class="page" id="page-batches">
       <div style="display:flex;justify-content:flex-end;margin-bottom:20px;">
         <button class="btn btn-primary" onclick="openCreateBatchModal()">
@@ -1070,15 +1064,15 @@
       </div>
     </section>
 
-    <!-- â”€â”€â”€ EMAIL SETTINGS PAGE â”€â”€â”€ -->
+    <!-- ─── EMAIL SETTINGS PAGE ─── -->
     <section class="page" id="page-email">
       <div class="panel" style="margin-bottom:24px;">
         <div class="panel-header">
           <div>
-            <div class="panel-title">ðŸ“§ Email Service</div>
-            <div class="panel-subtitle">Brevo SMTP relay â€” send lifecycle emails to students</div>
+            <div class="panel-title">📧 Email Service</div>
+            <div class="panel-subtitle">Brevo SMTP relay — send lifecycle emails to students</div>
           </div>
-          <div id="email-status-badge" style="padding:6px 14px;border-radius:20px;font-size:0.78rem;font-weight:600;background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.3);color:#34d399;">â— Loading...</div>
+          <div id="email-status-badge" style="padding:6px 14px;border-radius:20px;font-size:0.78rem;font-weight:600;background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.3);color:#34d399;">● Loading...</div>
         </div>
         <div class="panel-body">
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px;">
@@ -1092,7 +1086,7 @@
             </div>
             <div style="background:var(--bg-card-hover);border:1px solid var(--border);border-radius:10px;padding:16px;">
               <div style="font-size:0.72rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">From Address</div>
-              <div style="font-weight:600;font-family:var(--font-mono);font-size:0.88rem;color:var(--text-primary);" id="email-from-display">â€”</div>
+              <div style="font-weight:600;font-family:var(--font-mono);font-size:0.88rem;color:var(--text-primary);" id="email-from-display">—</div>
             </div>
           </div>
 
@@ -1113,14 +1107,14 @@
       <div class="panel">
         <div class="panel-header">
           <div>
-            <div class="panel-title">ðŸ“¬ Email Types</div>
+            <div class="panel-title">📬 Email Types</div>
             <div class="panel-subtitle">Emails that are automatically sent during the student lifecycle</div>
           </div>
         </div>
         <div class="panel-body">
           <div style="display:grid;gap:12px;">
             <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg-card-hover);border:1px solid var(--border);border-radius:10px;">
-              <div style="font-size:1.4rem;">âœ…</div>
+              <div style="font-size:1.4rem;">✅</div>
               <div>
                 <div style="font-weight:600;font-size:0.88rem;color:var(--text-primary);">Application Received</div>
                 <div style="font-size:0.78rem;color:var(--text-secondary);">Sent immediately when a student submits their application</div>
@@ -1128,7 +1122,7 @@
               <div style="margin-left:auto;padding:3px 10px;border-radius:12px;font-size:0.72rem;font-weight:600;background:rgba(52,211,153,0.12);color:#34d399;">AUTO</div>
             </div>
             <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg-card-hover);border:1px solid var(--border);border-radius:10px;">
-              <div style="font-size:1.4rem;">ðŸŽ‰</div>
+              <div style="font-size:1.4rem;">🎉</div>
               <div>
                 <div style="font-weight:600;font-size:0.88rem;color:var(--text-primary);">Shortlisted Notification</div>
                 <div style="font-size:0.78rem;color:var(--text-secondary);">Sent when admin changes status to Shortlisted</div>
@@ -1136,7 +1130,7 @@
               <div style="margin-left:auto;padding:3px 10px;border-radius:12px;font-size:0.72rem;font-weight:600;background:rgba(52,211,153,0.12);color:#34d399;">AUTO</div>
             </div>
             <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg-card-hover);border:1px solid var(--border);border-radius:10px;">
-              <div style="font-size:1.4rem;">ðŸš€</div>
+              <div style="font-size:1.4rem;">🚀</div>
               <div>
                 <div style="font-weight:600;font-size:0.88rem;color:var(--text-primary);">Offer Letter</div>
                 <div style="font-size:0.78rem;color:var(--text-secondary);">Sent when admin enrolls a student into a batch</div>
@@ -1144,7 +1138,7 @@
               <div style="margin-left:auto;padding:3px 10px;border-radius:12px;font-size:0.72rem;font-weight:600;background:rgba(52,211,153,0.12);color:#34d399;">AUTO</div>
             </div>
             <div style="display:flex;align-items:center;gap:14px;padding:14px;background:var(--bg-card-hover);border:1px solid var(--border);border-radius:10px;">
-              <div style="font-size:1.4rem;">ðŸ†</div>
+              <div style="font-size:1.4rem;">🏆</div>
               <div>
                 <div style="font-weight:600;font-size:0.88rem;color:var(--text-primary);">Certificate Ready</div>
                 <div style="font-size:0.78rem;color:var(--text-secondary);">Sent when certificate is issued after successful payment</div>
@@ -1155,14 +1149,14 @@
         </div>
       </div>
 
-      <!-- â”€â”€â”€ EMAIL LOGS â”€â”€â”€ -->
+      <!-- ─── EMAIL LOGS ─── -->
       <div class="panel" style="margin-top:24px;">
         <div class="panel-header">
           <div>
-            <div class="panel-title">ðŸ“‹ Email Send Log</div>
+            <div class="panel-title">📋 Email Send Log</div>
             <div class="panel-subtitle">Complete history of every email sent or attempted</div>
           </div>
-          <button class="btn btn-secondary" onclick="loadEmailLogs(); loadEmailAggStats();" style="font-size:0.8rem;padding:6px 14px;">â†» Refresh</button>
+          <button class="btn btn-secondary" onclick="loadEmailLogs(); loadEmailAggStats();" style="font-size:0.8rem;padding:6px 14px;">↻ Refresh</button>
         </div>
         <div class="panel-body">
           <div style="font-size:0.72rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Deliverability &amp; Engagement (all-time, via Brevo webhook)</div>
@@ -1177,16 +1171,14 @@
               <option value="certificate_ready">Certificate Ready</option>
               <option value="github_invite_reminder">Invite Reminder</option>
               <option value="test">Test Email</option>
-              <option value="task_approved">Task Approved</option>
-              <option value="task_reminder">Task Reminder</option>
             </select>
             <input type="text" id="email-log-recipient-filter" class="search-input"
               placeholder="Filter by email address..." oninput="debounceEmailLogs()"
               style="flex:1;min-width:200px;max-width:320px;" />
             <select id="email-log-status-filter" class="filter-select" onchange="loadEmailLogs()" style="min-width:120px;">
               <option value="">All Status</option>
-              <option value="sent">Sent âœ…</option>
-              <option value="failed">Failed âŒ</option>
+              <option value="sent">Sent ✅</option>
+              <option value="failed">Failed ❌</option>
             </select>
           </div>
           <div id="email-log-stats" style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;"></div>
@@ -1213,7 +1205,7 @@
       </div>
     </section>
 
-    <!-- â”€â”€â”€ SUBMISSIONS PAGE â”€â”€â”€ -->
+    <!-- ─── SUBMISSIONS PAGE ─── -->
     <section class="page" id="page-submissions">
       <div class="filter-row">
         <select class="filter-select" id="submission-status-filter" onchange="loadSubmissions()">
@@ -1232,8 +1224,8 @@
       <!-- Bulk action bar -->
       <div id="submissions-bulk-bar" style="display:none;align-items:center;gap:12px;padding:12px 18px;margin-bottom:16px;background:rgba(255,42,75,0.08);border:1px solid rgba(255,42,75,0.2);border-radius:12px;">
         <span id="submissions-selected-count" style="font-size:0.85rem;font-weight:600;color:var(--text-primary);">0 selected</span>
-        <button class="btn btn-sm" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.3);" onclick="bulkApproveSubmissions()">âœ… Approve Selected</button>
-        <button class="btn btn-sm" style="background:rgba(251,113,133,0.15);color:#fb7185;border:1px solid rgba(251,113,133,0.3);" onclick="bulkRejectSubmissions()">âŒ Reject Selected</button>
+        <button class="btn btn-sm" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.3);" onclick="bulkApproveSubmissions()">✅ Approve Selected</button>
+        <button class="btn btn-sm" style="background:rgba(251,113,133,0.15);color:#fb7185;border:1px solid rgba(251,113,133,0.3);" onclick="bulkRejectSubmissions()">❌ Reject Selected</button>
         <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="clearSubmissionSelection()">Clear</button>
       </div>
 
@@ -1260,7 +1252,7 @@
       </div>
     </section>
 
-    <!-- â”€â”€â”€ URGENT REQUESTS PAGE â”€â”€â”€ -->
+    <!-- ─── URGENT REQUESTS PAGE ─── -->
     <section class="page" id="page-urgent-requests">
       <div class="filter-row">
         <select class="filter-select" id="urgent-request-status-filter" onchange="loadUrgentRequests()">
@@ -1298,12 +1290,12 @@
       </div>
     </section>
 
-    <!-- â”€â”€â”€ ANNOUNCEMENTS PAGE â”€â”€â”€ -->
+    <!-- ─── ANNOUNCEMENTS PAGE ─── -->
     <section class="page" id="page-announcements">
       <div class="panel">
         <div class="panel-header">
           <div>
-            <div class="panel-title">ðŸ“¢ Submission Flow Update</div>
+            <div class="panel-title">📢 Submission Flow Update</div>
             <div style="font-size:0.8rem;color:var(--text-secondary);margin-top:2px;">
               Notifies students that task submission moved from GitHub Pull Requests to LinkedIn posts + admin review.
             </div>
@@ -1325,14 +1317,13 @@
           </div>
 
           <button class="btn" style="background:rgba(201,154,78,0.15);color:#c99a4e;border:1px solid rgba(201,154,78,0.3);" onclick="confirmSendAnnouncement()">
-            ðŸ“¨ Send Submission Flow Update
+            📨 Send Submission Flow Update
           </button>
         </div>
       </div>
     </section>
 
-    <!-- ——— REMINDERS PAGE ——— -->
-    <section class="page" id="page-reminders">
+  <section class="page" id="page-reminders">
       <div class="panel">
         <div class="panel-header">
           <div>
@@ -1385,7 +1376,7 @@
   </main>
 </div>
 
-<!-- ——— ANNOUNCEMENT SEND CONFIRMATION MODAL ——— -->
+<!-- ─── ANNOUNCEMENT SEND CONFIRMATION MODAL ─── -->
 <div class="modal-overlay" id="announcement-confirm-modal">
   <div class="modal">
     <div class="modal-header">
@@ -1417,9 +1408,8 @@
       <button class="btn" style="background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);" onclick="sendRemindersNow()">Yes, Send Reminders</button>
     </div>
   </div>
-</div>
 
-<!-- ——— CREATE BATCH MODAL ——— -->
+<!-- ─── CREATE BATCH MODAL ─── -->
 <div class="modal-overlay" id="create-batch-modal">
   <div class="modal">
     <div class="modal-header">
@@ -1466,7 +1456,7 @@
   </div>
 </div>
 
-<!-- ——— ANALYTICS MODAL ——— -->
+<!-- ─── ANALYTICS MODAL ─── -->
 <div class="modal-overlay" id="modal-analytics">
   <div class="modal" style="max-width:800px; width:90%;">
     <div class="modal-header">
@@ -1479,7 +1469,7 @@
   </div>
 </div>
 
-<!-- ——— EMAIL BODY MODAL ——— -->
+<!-- ─── EMAIL BODY MODAL ─── -->
 <div class="modal-overlay" id="email-body-modal">
   <div class="modal" style="max-width:800px; width:90%; max-height:85vh; display:flex; flex-direction:column;">
     <div class="modal-header">
@@ -1492,13 +1482,13 @@
   </div>
 </div>
 
-<!-- ——— TOAST CONTAINER ——— -->
+<!-- ─── TOAST CONTAINER ─── -->
 <div id="toast-container"></div>
 
 <script src="config.js"></script>
-<script src="admin.js?v=20260908_2"></script>
+<script src="admin.js?v=20260831_1"></script>
 <script>
-// ——— Email Logs ———
+// ─── Email Logs ───────────────────────────────────────────────────────────────
 const EMAIL_TYPE_LABELS = {
   application_confirmation: { label: 'Application',        color: '#60a5fa', bg: 'rgba(96,165,250,0.1)' },
   shortlisted:              { label: 'Shortlisted',         color: '#a78bfa', bg: 'rgba(167,139,250,0.1)' },
@@ -1513,7 +1503,7 @@ const EMAIL_TYPE_LABELS = {
   urgent_request_fulfilled:  { label: 'Urgent Fulfilled',    color: '#ec4899', bg: 'rgba(236,72,153,0.1)' },
 };
 
-// ——— PAGE_META entry for Submissions ———
+// ─── PAGE_META entry for Submissions ─────────────────────────────────────────
 if (typeof PAGE_META !== 'undefined') {
   PAGE_META['submissions'] = { title: 'Submissions', subtitle: 'Review and approve/reject weekly LinkedIn submissions' };
   PAGE_META['urgent-requests'] = { title: 'Urgent Requests', subtitle: 'Expedited (24h) certificate/LOR/portfolio processing requests' };
@@ -1558,7 +1548,7 @@ async function loadEmailLogs(offset = 0) {
     const logs = data.logs || [];
     const total = data.total || 0;
 
-    // ——— Stats bar ———
+    // ── Stats bar ──────────────────────────────────────────────────────
     const sentCount   = logs.filter(l => l.status === 'sent').length;
     const failedCount = logs.filter(l => l.status === 'failed').length;
     if (statsEl) {
@@ -1573,7 +1563,7 @@ async function loadEmailLogs(offset = 0) {
       </div>`).join('');
     }
 
-    // ——— Table rows ———
+    // ── Table rows ────────────────────────────────────────────────────
     if (logs.length === 0) {
       tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text-secondary);">No email logs found</td></tr>';
     } else {
@@ -1603,7 +1593,7 @@ async function loadEmailLogs(offset = 0) {
       }).join('');
     }
 
-    // ——— Pagination ————————————————————————————————
+    // ── Pagination ────────────────────────────────────────────────────
     if (pageEl) {
       const page = Math.floor(offset / _emailLogLimit) + 1;
       const totalPages = Math.ceil(total / _emailLogLimit);
@@ -1630,8 +1620,8 @@ function emailEngagementBadges(log) {
   if (log.clicked_at) chips.push(`<span title="Link clicked${log.clicked_count > 1 ? ' ' + log.clicked_count + 'x' : ''}" style="color:#60a5fa;">🔗 Clicked</span>`);
   if (log.spam_reported_at) chips.push(`<span title="Recipient marked this as spam" style="color:#f87171;">🚫 Spam</span>`);
   if (log.bounced_at) chips.push(`<span title="Bounce type: ${log.bounce_type || 'unknown'}" style="color:#fbbf24;">⚠️ Bounced</span>`);
-  if (log.unsubscribed_at) chips.push(`<span style="color:#94a3b8;">🔔 Unsubscribed</span>`);
-  if (!chips.length && log.delivered_at) chips.push(`<span style="color:#94a3b8;">📫 Delivered</span>`);
+  if (log.unsubscribed_at) chips.push(`<span style="color:#94a3b8;">🔕 Unsubscribed</span>`);
+  if (!chips.length && log.delivered_at) chips.push(`<span style="color:#94a3b8;">📬 Delivered</span>`);
   if (!chips.length) return '<span style="color:var(--text-muted);font-size:0.72rem;">—</span>';
   return `<div style="display:flex;flex-direction:column;gap:2px;font-size:0.72rem;font-weight:600;">${chips.join('')}</div>`;
 }
@@ -1639,7 +1629,6 @@ function emailEngagementBadges(log) {
 // All-time aggregate deliverability/engagement stats (independent of the current page/filters)
 async function loadEmailAggStats() {
   const el = document.getElementById('email-agg-stats');
-
   if (!el) return;
   try {
     const data = await api('/api/admin/email/stats');
@@ -1691,6 +1680,4 @@ function openEmailBodyModal(encodedBody) {
 </script>
 </body>
 </html>
-
-
 
