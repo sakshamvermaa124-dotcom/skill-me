@@ -1622,23 +1622,24 @@ async function loadEmailLogs(offset = 0) {
 }
 
 // Renders per-row delivery/open/click/bounce/spam badges from email_logs tracking columns.
-// These columns are only populated once the Brevo webhook is configured (see /api/webhooks/brevo) â€”
+// These columns are only populated once the Brevo webhook is configured (see /api/webhooks/brevo) —
 // rows sent before that will show "No tracking data" here even though they were sent successfully.
 function emailEngagementBadges(log) {
   const chips = [];
-  if (log.opened_at) chips.push(`<span title="Opened${log.opened_count > 1 ? ' ' + log.opened_count + 'x' : ''}" style="color:#34d399;">ðŸ‘ï¸ Opened${log.opened_count > 1 ? ' Ã—' + log.opened_count : ''}</span>`);
-  if (log.clicked_at) chips.push(`<span title="Link clicked${log.clicked_count > 1 ? ' ' + log.clicked_count + 'x' : ''}" style="color:#60a5fa;">ðŸ”— Clicked</span>`);
-  if (log.spam_reported_at) chips.push(`<span title="Recipient marked this as spam" style="color:#f87171;">ðŸš« Spam</span>`);
-  if (log.bounced_at) chips.push(`<span title="Bounce type: ${log.bounce_type || 'unknown'}" style="color:#fbbf24;">âš ï¸ Bounced</span>`);
-  if (log.unsubscribed_at) chips.push(`<span style="color:#94a3b8;">ðŸ”• Unsubscribed</span>`);
-  if (log.opened_at) chips.push(<span title="Opened${log.opened_count > 1 ? ' ' + log.opened_count + 'x' : ''}" style="color:#34d399;">👁️ Opened${log.opened_count > 1 ? ' ×' + log.opened_count : ''}</span>);
-  if (log.clicked_at) chips.push(<span title="Link clicked${log.clicked_count > 1 ? ' ' + log.clicked_count + 'x' : ''}" style="color:#60a5fa;">🔗 Clicked</span>);
-  if (log.spam_reported_at) chips.push(<span title="Recipient marked this as spam" style="color:#f87171;">🚫 Spam</span>);
-  if (log.bounced_at) chips.push(<span title="Bounce type: ${log.bounce_type || 'unknown'}" style="color:#fbbf24;">⚠️ Bounced</span>);
-  if (log.unsubscribed_at) chips.push(<span style="color:#94a3b8;">🔔 Unsubscribed</span>);
-  if (!chips.length && log.delivered_at) chips.push(<span style="color:#94a3b8;">📫 Delivered</span>);
+  if (log.opened_at) chips.push(`<span title="Opened${log.opened_count > 1 ? ' ' + log.opened_count + 'x' : ''}" style="color:#34d399;">👁️ Opened${log.opened_count > 1 ? ' ×' + log.opened_count : ''}</span>`);
+  if (log.clicked_at) chips.push(`<span title="Link clicked${log.clicked_count > 1 ? ' ' + log.clicked_count + 'x' : ''}" style="color:#60a5fa;">🔗 Clicked</span>`);
+  if (log.spam_reported_at) chips.push(`<span title="Recipient marked this as spam" style="color:#f87171;">🚫 Spam</span>`);
+  if (log.bounced_at) chips.push(`<span title="Bounce type: ${log.bounce_type || 'unknown'}" style="color:#fbbf24;">⚠️ Bounced</span>`);
+  if (log.unsubscribed_at) chips.push(`<span style="color:#94a3b8;">🔔 Unsubscribed</span>`);
+  if (!chips.length && log.delivered_at) chips.push(`<span style="color:#94a3b8;">📫 Delivered</span>`);
   if (!chips.length) return '<span style="color:var(--text-muted);font-size:0.72rem;">—</span>';
+  return `<div style="display:flex;flex-direction:column;gap:2px;font-size:0.72rem;font-weight:600;">${chips.join('')}</div>`;
+}
+
+// All-time aggregate deliverability/engagement stats (independent of the current page/filters)
+async function loadEmailAggStats() {
   const el = document.getElementById('email-agg-stats');
+
   if (!el) return;
   try {
     const data = await api('/api/admin/email/stats');
