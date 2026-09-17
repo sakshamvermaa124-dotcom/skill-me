@@ -1,5 +1,5 @@
-<!DOCTYPE html>
-<html lang="en" data-theme="dark">
+﻿<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -41,18 +41,18 @@
 
 
 
-  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="stylesheet" href="style.css?v=20260917_1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="dashboard.css?v=9">
+  <link rel="stylesheet" href="dashboard.css?v=20260917_1">
 
-  <script src="config.js?v=20260831_1" defer></script>
+  <script src="config.js?v=20260917_1" defer></script>
   <script src="skillme-monitor.js" defer></script>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
-    .dash-markdown h3 { font-size: 1rem; color: #fff; margin-top: 12px; margin-bottom: 6px; }
+    .dash-markdown h3 { font-size: 1rem; color: var(--text-primary); margin-top: 12px; margin-bottom: 6px; }
     .dash-markdown ul { padding-left: 20px; margin-top: 4px; }
     .dash-markdown li { margin-bottom: 4px; }
     .dash-markdown p { margin-bottom: 8px; }
@@ -176,7 +176,7 @@
     <div id="login-view">
       <div class="login-card">
         <div class="login-icon">
-          <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="color: #a5b4fc;">
+          <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="color: var(--accent);">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
           </svg>
         </div>
@@ -189,14 +189,14 @@
           <div class="login-input-wrap" id="otp-wrap" style="display: none;">
             <input type="text" id="login-otp" placeholder="6-digit code" pattern="[0-9]{6}" maxlength="6">
             <div style="text-align: right; margin-top: 8px;">
-              <button type="button" id="resend-btn" style="background:none; border:none; color:#a5b4fc; cursor:pointer; font-size:14px; padding:8px 12px; margin-right: -12px; text-decoration:underline;">Resend Code</button>
+              <button type="button" id="resend-btn" style="background:none; border:none; color: var(--accent); cursor:pointer; font-size:14px; padding:8px 12px; margin-right: -12px; text-decoration:underline;">Resend Code</button>
             </div>
           </div>
           <button type="submit" class="login-btn" id="login-btn">
             Get Login Code
           </button>
           <div id="login-cancel-wrap" style="display: none; text-align: center; margin-top: 16px;">
-            <button type="button" onclick="signOut()" style="background:none; border:none; color:rgba(255,255,255,0.6); cursor:pointer; font-size:14px; padding: 12px; text-decoration:underline;">Cancel / Sign Out</button>
+            <button type="button" onclick="signOut()" style="background:none; border:none; color: var(--text-primary); cursor:pointer; font-size:14px; padding: 12px; text-decoration:underline;">Cancel / Sign Out</button>
           </div>
           <div id="login-error" class="login-error"></div>
         </form>
@@ -262,7 +262,7 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
               SkillMe Community
             </a>
-            <a href="https://t.me/SkillMeChannelTg" target="_blank" class="dash-action-btn" style="text-decoration: none; color: #0088cc; background: rgba(0,136,204,0.1); border-color: rgba(0,136,204,0.2);">
+            <a href="https://t.me/SkillMeChannelTg" target="_blank" class="dash-action-btn" style="text-decoration: none; color: var(--accent); background: var(--bg-card); border-color: var(--accent);">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
               Telegram Channel
             </a>
@@ -285,17 +285,17 @@
               <div class="progress-ring-wrap" onclick="window.dashShowPanel('panel-work')" role="button" tabindex="0" title="View your submissions">
                 <div class="ring-ambient-halo"></div>
                 <svg width="164" height="164" viewBox="0 0 164 164">
-                  <circle cx="82" cy="82" r="70" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
-                  <circle id="progress-ring" cx="82" cy="82" r="70" fill="none" stroke="url(#ringGrad)" stroke-width="10" stroke-linecap="round"
+                  <circle cx="82" cy="82" r="70" fill="none" stroke="var(--border)" stroke-width="10"/>
+                  <circle id="progress-ring" cx="82" cy="82" r="70" fill="none" stroke="var(--accent)" stroke-width="10" stroke-linecap="round"
                     stroke-dasharray="439.8" stroke-dashoffset="439.8"
                     transform="rotate(-90 82 82)"
                     style="transition: stroke-dashoffset 1.8s cubic-bezier(0.16, 1, 0.3, 1);"/>
-                  <circle id="progress-ring-head" cx="82" cy="12" r="5.5" fill="#ffffff" filter="url(#ringGlow)"
+                  <circle id="progress-ring-head" cx="82" cy="12" r="5.5" fill="var(--accent)" filter="url(#ringGlow)"
                     style="opacity:0; transition: cx 1.8s cubic-bezier(0.16, 1, 0.3, 1), cy 1.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;"/>
                   <defs>
                     <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stop-color="#e8e6e3"/>
-                      <stop offset="100%" stop-color="#ffffff"/>
+                      <stop offset="0%" stop-color="var(--bg-raised)"/>
+                      <stop offset="100%" stop-color="var(--accent)"/>
                     </linearGradient>
                     <filter id="ringGlow" x="-200%" y="-200%" width="500%" height="500%">
                       <feGaussianBlur stdDeviation="3.2" result="blur"/>
@@ -315,7 +315,7 @@
                   <div class="progress-bar-inner" id="progress-bar-inner"></div>
                 </div>
                 <div style="margin-top: 12px; margin-bottom: 14px; text-align: left;">
-                  <div style="display: inline-flex; align-items: flex-start; gap: 10px; font-size: 0.8rem; color: rgba(255, 255, 255, 0.9); background: linear-gradient(135deg, rgba(201, 154, 78, 0.15), rgba(201, 154, 78, 0.05)); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(201, 154, 78, 0.35); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); line-height: 1.5;">
+                  <div style="display: inline-flex; align-items: flex-start; gap: 10px; font-size: 0.8rem; color: var(--text-primary); background: var(--bg-card);, rgba(201, 154, 78, 0.05)); padding: 10px 14px; border-radius: 12px; border: 1px solid var(--accent); box-shadow: var(--shadow); line-height: 1.5;">
                     <span style="font-size: 1.1rem; flex-shrink: 0; line-height: 1.2;">💡</span>
                     <span><strong style="color: #f0c97a;">Eligibility Note:</strong> To be eligible for the internship certificate and credentials, you must complete and submit a minimum of <strong>two tasks (50%)</strong>. Once 2 tasks are approved by an admin, your certificate will unlock!</span>
                   </div>
@@ -346,22 +346,22 @@
 
           <!-- ── Stats — one unified section, not separate floating cards ── -->
           <div class="stats-bar" id="stats-grid-el">
-            <div class="stats-bar-item" style="--stat-accent:linear-gradient(180deg,#a78bfa,#7c3aed);--stat-icon-bg:rgba(167,139,250,0.1);--stat-icon-border:rgba(167,139,250,0.2);">
+            <div class="stats-bar-item">
               <div class="stats-bar-item-top">
                 <div class="stat-icon">
-                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#a78bfa" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#5C5346" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
                 </div>
-                <span class="stat-trend" style="background:rgba(167,139,250,0.1);color:#a78bfa;border-color:rgba(167,139,250,0.2);">Assigned</span>
+                <span class="stat-trend">Assigned</span>
               </div>
               <div class="stat-label">Tasks Completed</div>
               <div class="stat-value"><span id="stat-completed">0</span><span class="stat-unit"> / <span id="stat-assigned">0</span></span></div>
               <div class="stat-mini-bar-track"><div class="stat-mini-bar-inner" id="stat-bar-1"></div></div>
             </div>
             <div class="stats-bar-divider"></div>
-            <div class="stats-bar-item" style="--stat-accent:linear-gradient(180deg,#34d399,#059669);--stat-icon-bg:rgba(52,211,153,0.1);--stat-icon-border:rgba(52,211,153,0.2);">
+            <div class="stats-bar-item">
               <div class="stats-bar-item-top">
                 <div class="stat-icon">
-                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#34d399" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#5C5346" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
                 </div>
                 <span class="stat-trend pulse-badge">Live Sync</span>
               </div>
@@ -370,24 +370,24 @@
               <div class="stat-mini-bar-track"><div class="stat-mini-bar-inner" id="stat-bar-2"></div></div>
             </div>
             <div class="stats-bar-divider"></div>
-            <div class="stats-bar-item" style="--stat-accent:linear-gradient(180deg,#60a5fa,#2563eb);--stat-icon-bg:rgba(96,165,250,0.1);--stat-icon-border:rgba(96,165,250,0.2);">
+            <div class="stats-bar-item">
               <div class="stats-bar-item-top">
                 <div class="stat-icon">
-                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#60a5fa" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#5C5346" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
                 </div>
-                <span class="stat-trend pulse-badge" style="background:rgba(96,165,250,0.1);color:#60a5fa;border-color:rgba(96,165,250,0.2);">Sprint Active</span>
+                <span class="stat-trend pulse-badge">Sprint Active</span>
               </div>
               <div class="stat-label">Current Week</div>
               <div class="stat-value"><span id="stat-week">1</span><span class="stat-unit"> / 4</span></div>
               <div class="stat-mini-bar-track"><div class="stat-mini-bar-inner" id="stat-bar-3"></div></div>
             </div>
             <div class="stats-bar-divider"></div>
-            <div class="stats-bar-item" style="--stat-accent:linear-gradient(180deg,#d8ac63,#b5873d);--stat-icon-bg:rgba(216,172,99,0.1);--stat-icon-border:rgba(216,172,99,0.2);">
+            <div class="stats-bar-item">
               <div class="stats-bar-item-top">
                 <div class="stat-icon">
-                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#d8ac63" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#5C5346" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                 </div>
-                <span class="stat-trend" style="background:rgba(216,172,99,0.1);color:#d8ac63;border-color:rgba(216,172,99,0.2);">Top 5%</span>
+                <span class="stat-trend">Top 5%</span>
               </div>
               <div class="stat-label">Score &amp; Proof</div>
               <div class="stat-value"><span id="stat-score">0</span><span class="stat-unit"> pts</span></div>
@@ -418,7 +418,7 @@
             </div>
             <div id="tasks-empty" class="empty-state" style="display: none;">
               <div class="empty-icon">
-                <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.2)" stroke-width="1"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="rgba(28,24,18,0.2)" stroke-width="1"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
               </div>
               <h3>No assigned tasks yet</h3>
               <p>Tasks will appear here as soon as your weekly batch project is released.</p>
@@ -436,7 +436,7 @@
             </div>
             <div id="sub-empty" class="empty-state" style="display: none;">
               <div class="empty-icon">
-                <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.2)" stroke-width="1"><path d="M9 5H2v7l6.29 6.29c.94.94 2.48.94 3.42 0l3.58-3.58c.94-.94.94-2.48 0-3.42L9 5Z"/><path d="M6 9.01V9"/><path d="m15 5 6.3 6.3a2.4 2.4 0 0 1 0 3.4L17 19"/></svg>
+                <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="rgba(28,24,18,0.2)" stroke-width="1"><path d="M9 5H2v7l6.29 6.29c.94.94 2.48.94 3.42 0l3.58-3.58c.94-.94.94-2.48 0-3.42L9 5Z"/><path d="M6 9.01V9"/><path d="m15 5 6.3 6.3a2.4 2.4 0 0 1 0 3.4L17 19"/></svg>
               </div>
               <h3>No submissions yet</h3>
               <p>Once you submit a LinkedIn post for a task, it will appear here with real-time review status.</p>
@@ -455,7 +455,7 @@
           </div>
 
           <!-- Progress-nudge banner — advertises the 50% unlock -->
-          <div id="cred-nudge-banner" style="display: inline-flex; align-items: flex-start; gap: 10px; font-size: 0.85rem; color: rgba(255, 255, 255, 0.9); background: linear-gradient(135deg, rgba(201, 154, 78, 0.15), rgba(201, 154, 78, 0.05)); padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(201, 154, 78, 0.35); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); line-height: 1.5; margin-bottom: 16px;">
+          <div id="cred-nudge-banner" style="display: inline-flex; align-items: flex-start; gap: 10px; font-size: 0.85rem; color: var(--text-primary); background: var(--bg-card);, rgba(201, 154, 78, 0.05)); padding: 12px 16px; border-radius: 12px; border: 1px solid var(--accent); box-shadow: var(--shadow); line-height: 1.5; margin-bottom: 16px;">
             <span style="font-size: 1.1rem; flex-shrink: 0; line-height: 1.2;">🔓</span>
             <span><strong style="color: #f0c97a;">2 more tasks</strong> and your Certificate, LOR &amp; Portfolio unlock.</span>
           </div>
@@ -509,7 +509,7 @@
           </div>
 
           <div class="dash-quick-actions" style="margin-top:16px;">
-            <a href="offer.html?view=hod" id="dash-quick-hod" target="_blank" rel="noopener noreferrer" class="dash-action-btn" style="border-color:rgba(37,99,235,0.35);color:#93c5fd;">
+            <a href="offer.html?view=hod" id="dash-quick-hod" target="_blank" rel="noopener noreferrer" class="dash-action-btn" style="border-color: var(--accent);color: var(--accent);">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
               HOD Verification Pack 🏛️
             </a>
@@ -599,8 +599,8 @@
 
   <!-- Lenis smooth scroll -->
   <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js" defer></script>
-  <script src="dashboard.js?v=20260831_1" defer></script>
-  <script src="dashboard-ui.js?v=20260831_1" defer></script>
+  <script src="dashboard.js?v=20260917_1" defer></script>
+  <script src="dashboard-ui.js?v=20260917_1" defer></script>
 
   <!-- ══ Modals — siblings of .dash-page, outside panel system ════════════════
        Must NOT be inside #dashboard-view (it starts display:none).
@@ -648,7 +648,7 @@
           Copy Text 📋
         </button>
       </div>
-      <p style="font-size: 0.75rem; color: rgba(255,255,255,0.5); text-align: center; margin-top: 12px; font-style: italic; line-height: 1.4;">
+      <p style="font-size: 0.75rem; color: var(--text-primary); text-align: center; margin-top: 12px; font-style: italic; line-height: 1.4;">
         Note: When posting to LinkedIn, make sure to manually select <strong>@SkillMe</strong> from the dropdown menu to officially tag us!
       </p>
       <canvas id="milestone-confetti-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"></canvas>
@@ -673,7 +673,7 @@
         </ul>
         <div class="payment-modal-price">₹129 <span>one-time, covers verification &amp; lifetime hosting</span></div>
         <div style="margin-bottom: 12px; display: flex; justify-content: center;">
-          <input type="text" id="discount-code-milestone" placeholder="Have a discount code?" style="padding: 8px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: #fff; outline: none; font-size: 14px; width: 100%; text-align: center;">
+          <input type="text" id="discount-code-milestone" placeholder="Have a discount code?" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-primary); outline: none; font-size: 14px; width: 100%; text-align: center;">
         </div>
         <button id="modal-pay-btn" class="cert-btn cert-btn-primary" style="width: 100%; justify-content: center; font-size: 1.05rem;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
@@ -689,3 +689,4 @@
 
 </body>
 </html>
+

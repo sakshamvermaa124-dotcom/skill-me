@@ -78,6 +78,8 @@ async def get_inactive_students() -> list[dict]:
                 AND el.status = 'sent'
                 AND el.sent_at > datetime('now', ?)
           )
+          -- Do not send if 4 weeks (28 days) have already ended
+          AND julianday('now') - julianday(COALESCE(b.start_date, e.joined_at)) <= 28
         ORDER BY last_activity DESC
     """
     params = (
