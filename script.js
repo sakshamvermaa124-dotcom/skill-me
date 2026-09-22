@@ -547,6 +547,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // Make domain cards clickable to navigate to application
+  domainCards.forEach(card => {
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', () => {
+      const domainId = card.id.replace('domain-', '');
+      const quizDone = localStorage.getItem('skillme_quiz_result');
+      if (quizDone) {
+        window.location.href = `apply.html?domain=${domainId}`;
+      } else {
+        window.location.href = `quiz.html?domain=${domainId}`;
+      }
+    });
+  });
+
   // ═══════════════════════════════════════════════════════════
   // FAQ CATEGORY TABS & INSTANT SEARCH
   // ═══════════════════════════════════════════════════════════
