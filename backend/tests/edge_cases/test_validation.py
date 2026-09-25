@@ -59,22 +59,16 @@ class TestBoundaryValues:
         })
         assert r.status_code == 200
 
-    async def test_admin_batch_max_students_boundary(self, client, admin_headers):
-        """max_students=100 (max allowed) should succeed."""
-        r = await client.post("/api/admin/batches", json={
-            "domain": "web-dev",
-            "batch_number": 99,
-            "max_students": 100,
-        }, headers=admin_headers)
+    async def test_admin_students_limit_is_capped(self, client, admin_headers):
+        """An oversized page size is clamped instead of dumping the whole table."""
+        r = await client.get("/api/admin/students?limit=100000", headers=admin_headers)
         assert r.status_code == 200
+        assert r.json()["limit"] == 100
 
-    async def test_admin_batch_number_min_boundary(self, client, admin_headers):
-        """batch_number=1 (min allowed) should succeed."""
-        r = await client.post("/api/admin/batches", json={
-            "domain": "web-dev",
-            "batch_number": 1,
-        }, headers=admin_headers)
+    async def test_admin_students_page_zero_is_first_page(self, client, admin_headers):
+        r = await client.get("/api/admin/students?page=0", headers=admin_headers)
         assert r.status_code == 200
+        assert r.json()["page"] == 1
 
 
 @pytest.mark.edge
@@ -130,13 +124,17 @@ class TestMalformedRequests:
         )
         assert r.status_code == 422
 
-    async def test_create_batch_non_integer_batch_number(self, client, admin_headers):
-        r = await client.post(
-            "/api/admin/batches",
-            json={"domain": "web-dev", "batch_number": "not_a_number"},
+    async def test_admin_students_non_integer_page(self, client, admin_headers):
+        r = await client.get("/api/admin/students?page=abc", headers=admin_headers)
+        assert r.status_code == 422
+
+    async def test_update_student_status_unknown_value(self, client, admin_headers, test_student):
+        r = await client.patch(
+            f"/api/admin/students/{test_student['id']}/status",
+            json={"status": "graduated"},
             headers=admin_headers,
         )
-        assert r.status_code == 422
+        assert r.status_code == 400
 
     async def test_update_student_status_integer_body(self, client, admin_headers, test_student):
         r = await client.patch(

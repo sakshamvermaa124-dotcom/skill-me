@@ -9,6 +9,7 @@ from datetime import datetime
 from urllib.parse import urlparse
 
 from db.database import db
+from services.feedback_service import build_feedback, feedback_to_text
 
 logger = logging.getLogger("skillme.submission")
 
@@ -38,7 +39,7 @@ class SubmissionService:
             (student_id, batch_id),
         )
         if not enrollment:
-            raise ValueError("Student is not enrolled in this batch.")
+            raise ValueError("You are not currently enrolled, so this task can't be submitted.")
 
         existing = await db.fetch_one(
             "SELECT id, status FROM submissions WHERE student_id = ? AND batch_id = ? AND week = ?",
@@ -65,8 +66,22 @@ class SubmissionService:
                 (student_id, batch_id, week, linkedin_url),
             )
 
+        # Automatic per-task feedback, stored with this submission and emailed by the route
+        batch = await db.fetch_one("SELECT domain FROM batches WHERE id = ?", (batch_id,))
+        feedback = build_feedback((batch or {}).get("domain") or "web-dev", student_id, week)
+        feedback_text = feedback_to_text(week, feedback)
+        await db.execute(
+            "UPDATE submissions SET feedback = ? WHERE id = ?",
+            (feedback_text, submission_id),
+        )
+
         logger.info(f"Student {student_id} submitted week {week} task for batch {batch_id}: {linkedin_url}")
-        return {"submission_id": submission_id, "status": "pending"}
+        return {
+            "submission_id": submission_id,
+            "status": "pending",
+            "feedback": feedback,
+            "feedback_text": feedback_text,
+        }
 
     async def approve_submission(self, submission_id: int, admin_note: str | None = None) -> dict:
         submission = await db.fetch_one("SELECT * FROM submissions WHERE id = ?", (submission_id,))
@@ -141,10 +156,10 @@ class SubmissionService:
 
     async def list_submissions(self, status: str | None = None) -> list[dict]:
         query = """SELECT sub.*, s.first_name, s.last_name, s.email,
-                          b.domain, b.batch_number
+                          COALESCE(b.domain, s.domain) AS domain
                    FROM submissions sub
                    JOIN students s ON sub.student_id = s.id
-                   JOIN batches b ON sub.batch_id = b.id"""
+                   LEFT JOIN batches b ON sub.batch_id = b.id"""
         params: tuple = ()
         if status:
             query += " WHERE sub.status = ?"

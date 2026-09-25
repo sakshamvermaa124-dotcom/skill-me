@@ -1,0 +1,573 @@
+{
+  "domain": "flutter",
+  "tracks": [
+    {
+      "project_name": "FitPulse: Modern Mobile Fitness & Workout Companion",
+      "tagline": "Build a simple workout tracker app where you can plan workouts, log them, and see your weekly progress.",
+      "weeks": {
+        "1": {
+          "title": "Home Screen & Workout List with Widgets",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Set up Flutter and build the first two static screens of FitPulse: a home dashboard and a list of workouts. Everything uses hardcoded data this week, so you can focus completely on how widgets and layouts fit together.",
+          "learn": [
+            "How a Flutter app is structured: `main()`, `MaterialApp`, `Scaffold` and the widget tree",
+            "Layout widgets: `Column`, `Row`, `Padding`, `Container`, `Expanded` and `SizedBox`",
+            "Showing lists of data with `ListView.builder` and `Card`/`ListTile`",
+            "Creating a simple Dart model class and your own reusable widget"
+          ],
+          "steps": [
+            "Install Flutter, run `flutter doctor`, then create the project with `flutter create fitpulse` and run the counter app once to confirm your setup works.",
+            "Pick where you will run the app: an Android emulator, your own phone over USB, or Chrome with `flutter run -d chrome` if your laptop is low on RAM.",
+            "Delete the counter code and build a `HomeScreen` with an `AppBar`, a greeting, and a row of three summary cards (for example: workouts this week, minutes, streak) using hardcoded numbers.",
+            "Create a `Workout` class with `name`, `category`, `durationMinutes` and `isDone`, and make a hardcoded list of 5-6 workouts.",
+            "Build a `WorkoutListScreen` that shows the list with `ListView.builder`, using an icon and colour per category.",
+            "Pull the repeated card UI into its own `WorkoutCard` widget in a separate file so the list code stays short.",
+            "Add a `BottomNavigationBar` to switch between Home and Workouts, then set a colour theme in `ThemeData` so both screens look consistent.",
+            "Push the project to a GitHub repo with a README that includes a screenshot."
+          ],
+          "deliverables": [
+            "A Flutter project in a public GitHub repo",
+            "A Home screen with summary cards and a Workouts screen with a scrollable list",
+            "A reusable `WorkoutCard` widget and a `Workout` model class",
+            "A README with setup steps and at least one screenshot"
+          ],
+          "done_when": [
+            "The app runs without errors on an emulator, phone or Chrome",
+            "The bottom navigation switches between the Home and Workouts screens",
+            "The workout list is built from a Dart list with `ListView.builder`, not copy-pasted widgets",
+            "The workout card UI lives in its own widget file",
+            "The repo contains a README with a screenshot"
+          ],
+          "hints": [
+            "Use hot reload (press `r` in the terminal) constantly; it is the fastest way to learn layouts by trial and error.",
+            "If you see a yellow-black overflow stripe, wrap the content in `Expanded` or make the screen scrollable with `SingleChildScrollView`.",
+            "You can practise individual widgets in the browser at [DartPad](https://dartpad.dev) before adding them to your app.",
+            "The widget catalog in the [Flutter docs](https://docs.flutter.dev) shows every layout widget with a picture."
+          ],
+          "stretch": "Add a simple circular progress indicator on the home screen showing 'workouts done this week out of your weekly goal'.",
+          "post_highlights": [
+            "Built the first screens of a Flutter fitness app with a dashboard and workout list",
+            "Created a reusable workout card widget and a Dart model class",
+            "Set up bottom navigation and a consistent app theme using Material widgets"
+          ]
+        },
+        "2": {
+          "title": "Add Workouts with Forms & Navigation",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Make FitPulse interactive: users can add new workouts through a form, open a workout's detail screen, and mark it as done. This week teaches you how Flutter apps change what is on screen when data changes.",
+          "learn": [
+            "The difference between `StatelessWidget` and `StatefulWidget`, and when to call `setState`",
+            "Moving between screens with `Navigator.push` and `Navigator.pop`, including passing data back",
+            "Building forms with `Form`, `TextFormField`, `DropdownButtonFormField` and validators",
+            "Updating a list in memory and seeing the UI refresh"
+          ],
+          "steps": [
+            "Convert the screen that owns the workout list into a `StatefulWidget` so the list can change.",
+            "Add a checkbox or tap action on each workout that toggles `isDone` inside `setState`, and confirm the Home summary numbers update too.",
+            "Create a `WorkoutDetailScreen` that receives a `Workout` through its constructor and shows all its details; open it with `Navigator.push` when a card is tapped.",
+            "Add a `FloatingActionButton` that opens an `AddWorkoutScreen` with a form for name, category (dropdown) and duration.",
+            "Add validators: name must not be empty and duration must be a positive number; show error messages under the fields.",
+            "On save, return the new `Workout` with `Navigator.pop(context, workout)` and add it to the list in the previous screen.",
+            "Add a delete option (for example swipe-to-delete with `Dismissible`) and show a `SnackBar` confirming the action.",
+            "Record a short screen recording of adding, completing and deleting a workout."
+          ],
+          "deliverables": [
+            "An Add Workout form with validation",
+            "A Workout Detail screen opened from the list",
+            "Mark-as-done and delete actions that update the UI immediately",
+            "A 30-60 second screen recording of the flow"
+          ],
+          "done_when": [
+            "Submitting the form with an empty name or invalid duration shows an error and does not save",
+            "A valid new workout appears in the list right after saving",
+            "Tapping a workout opens its detail screen and the back button returns to the list",
+            "Marking a workout as done updates the summary card on the Home screen",
+            "Deleting a workout removes it and shows a SnackBar"
+          ],
+          "hints": [
+            "If the UI does not update, check that you changed the data inside `setState(() { ... })` and not outside it.",
+            "Use a `TextEditingController` or the form's `onSaved` callback to read field values, and dispose controllers in `dispose()`.",
+            "To share the list between Home and Workouts for now, keep it in the parent widget that holds the bottom navigation and pass it down.",
+            "Search 'Flutter cookbook forms' and 'Flutter cookbook navigation' in the [Flutter docs](https://docs.flutter.dev) for short worked examples."
+          ],
+          "stretch": "Add a filter row of `ChoiceChip`s at the top of the list to show only one category at a time.",
+          "post_highlights": [
+            "Added a validated form to create new workouts in my Flutter app",
+            "Implemented screen navigation with data passed between screens",
+            "Used StatefulWidget and setState to mark workouts done and delete them with instant UI updates"
+          ]
+        },
+        "3": {
+          "title": "Save Data Locally & Workout History",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Right now all workouts disappear when the app restarts. This week you save them on the device and add a history of completed workouts, handling loading and errors properly so the app never shows a blank or broken screen.",
+          "learn": [
+            "Local storage on the device with `shared_preferences` or Hive",
+            "Converting objects to and from JSON with `toJson()` and `fromJson()`",
+            "Async code in Dart: `Future`, `async` and `await`",
+            "Showing loading, empty and error states in the UI"
+          ],
+          "steps": [
+            "Choose one storage option: `shared_preferences` (simplest, stores a JSON string) or Hive (a small local database); both work on Android and Chrome.",
+            "Add `toJson()` and a `fromJson()` factory to your `Workout` class and test them with a quick `print` before connecting storage.",
+            "Write a small `WorkoutStorage` class with `loadWorkouts()` and `saveWorkouts()` methods so the rest of the app does not care how data is stored.",
+            "Load workouts when the app starts and show a `CircularProgressIndicator` until loading finishes.",
+            "Call `saveWorkouts()` after every add, toggle and delete, then restart the app completely to confirm the data is still there.",
+            "Add a `completedAt` date to workouts and build a History screen listing completed workouts grouped or sorted by date.",
+            "Wrap loading in `try/catch`: if saved data is corrupted, show a friendly message and start with an empty list instead of crashing, and show an empty-state message when there are no workouts."
+          ],
+          "deliverables": [
+            "Workouts that persist across full app restarts",
+            "A `WorkoutStorage` class that handles saving and loading",
+            "A History screen showing completed workouts with dates",
+            "Loading, empty and error states in the UI"
+          ],
+          "done_when": [
+            "Adding a workout, fully closing the app and reopening it still shows that workout",
+            "Completed workouts appear on the History screen with the date they were completed",
+            "A loading indicator is visible while data loads",
+            "With no workouts saved, the list shows a helpful empty-state message instead of a blank screen",
+            "Storage errors are caught and do not crash the app"
+          ],
+          "hints": [
+            "Hot reload keeps in-memory data, so always test persistence with a full stop and restart of the app.",
+            "`sqflite` does not work on Chrome; if you run on the web, stick with `shared_preferences` or Hive.",
+            "Store dates as ISO strings with `toIso8601String()` and read them back with `DateTime.parse()`.",
+            "Find packages and their example code on [pub.dev](https://pub.dev)."
+          ],
+          "stretch": "Add a simple rest timer screen that counts down from a chosen number of seconds using `Timer.periodic`.",
+          "post_highlights": [
+            "Added local data persistence to my Flutter fitness app so workouts survive restarts",
+            "Built a workout history screen using JSON serialisation and async Dart code",
+            "Handled loading, empty and error states for a smoother user experience"
+          ]
+        },
+        "4": {
+          "title": "Provider, Weekly Chart & Release Build",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Finish FitPulse as a portfolio-ready app. You will move your data into a simple Provider so any screen can use it, add a weekly progress chart, polish the design, and produce an installable build with a demo video.",
+          "learn": [
+            "Simple app-wide state management with `provider` and `ChangeNotifier`",
+            "Drawing a bar chart from your own data with a chart package such as `fl_chart`",
+            "Adding a dark theme and small polish details",
+            "Building a release APK or a web build"
+          ],
+          "steps": [
+            "Create a `WorkoutProvider extends ChangeNotifier` that holds the list, calls your `WorkoutStorage`, and calls `notifyListeners()` after every change.",
+            "Wrap your app in `ChangeNotifierProvider` and replace the list you were passing down through constructors with `context.watch` and `context.read`.",
+            "Check every feature from weeks 1-3 still works before adding anything new.",
+            "Add a Progress screen with a bar chart showing total workout minutes for each of the last 7 days, calculated from your saved data.",
+            "Add a dark theme with `darkTheme` and a toggle switch, plus an app name and icon so it looks finished.",
+            "Build a release with `flutter build apk --release` (or `flutter build web` if you do not have the Android SDK) and test the build.",
+            "Update the README with features, screenshots, how to run it, and what you learned, then record a 60-second demo."
+          ],
+          "deliverables": [
+            "App state managed with Provider",
+            "A Progress screen with a 7-day bar chart",
+            "A release APK (attached to a GitHub Release) or a web build",
+            "A polished README and a 60-second demo video"
+          ],
+          "done_when": [
+            "Workout data is read and changed through a Provider, not passed through constructors",
+            "The chart shows correct minutes for the last 7 days and updates when a workout is completed",
+            "Light and dark themes both look readable",
+            "A release APK or web build is available from the repo",
+            "The README explains features, setup and includes screenshots"
+          ],
+          "hints": [
+            "Use `context.watch<WorkoutProvider>()` inside `build` to listen for changes, and `context.read` inside button callbacks.",
+            "For the chart, first compute a simple `List<double>` of 7 values and print it, then feed it to the chart widget.",
+            "You can attach the APK file to a GitHub Release so recruiters can download it; see [GitHub Docs](https://docs.github.com).",
+            "The deployment section of the [Flutter docs](https://docs.flutter.dev) explains Android and web builds."
+          ],
+          "stretch": "Add a daily reminder with a local notifications package, or write two widget tests for the Add Workout form.",
+          "post_highlights": [
+            "Completed FitPulse, a Flutter workout tracker with local storage and Provider state management",
+            "Built a weekly progress bar chart and a dark theme",
+            "Shipped a release build with a documented README and demo video"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "WalletWave: Personal Finance & Smart Budget Tracker",
+      "tagline": "Build an expense tracker app that records your income and spending and shows where your money goes each month.",
+      "weeks": {
+        "1": {
+          "title": "Balance Dashboard & Transaction List",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Set up Flutter and build the main screen of WalletWave: a balance card at the top and a list of recent transactions below it. You will use hardcoded sample data so you can focus on widgets and layout.",
+          "learn": [
+            "How a Flutter app is structured: `main()`, `MaterialApp`, `Scaffold` and the widget tree",
+            "Layout widgets: `Column`, `Row`, `Container`, `Padding` and `Expanded`",
+            "Displaying lists with `ListView.builder` and `ListTile`",
+            "Creating a Dart model class and formatting numbers as currency"
+          ],
+          "steps": [
+            "Install Flutter, run `flutter doctor`, create the project with `flutter create walletwave`, and run the default app once to confirm everything works.",
+            "Choose where to run the app: Android emulator, a real phone over USB, or Chrome with `flutter run -d chrome` if your laptop is low on RAM.",
+            "Create a `Transaction` class with `title`, `amount`, `category`, `date` and `isExpense`, and make a hardcoded list of about 8 transactions.",
+            "Build a `DashboardScreen` with a balance card showing total balance, total income and total expenses, calculated from the list rather than typed in.",
+            "Below the card, show the transactions with `ListView.builder`, using a category icon, the date, and red or green amounts for expenses and income.",
+            "Move the transaction row into its own `TransactionTile` widget file and format amounts in rupees (for example with the `intl` package).",
+            "Push to a public GitHub repo with a README and a screenshot."
+          ],
+          "deliverables": [
+            "A Flutter project in a public GitHub repo",
+            "A dashboard with a balance card and a transaction list",
+            "A `Transaction` model and a reusable `TransactionTile` widget",
+            "A README with setup steps and a screenshot"
+          ],
+          "done_when": [
+            "The app runs without errors on an emulator, phone or Chrome",
+            "Balance, income and expense totals are calculated from the transaction list",
+            "Expenses and income are visually different (colour or sign)",
+            "The list uses `ListView.builder` and the row UI is its own widget",
+            "The README includes a screenshot"
+          ],
+          "hints": [
+            "Use hot reload (`r` in the terminal) to try layout changes quickly.",
+            "Use `fold` or a simple `for` loop to add up amounts; print the result first to check your maths.",
+            "Try widgets in the browser at [DartPad](https://dartpad.dev) if running the full app is slow on your laptop.",
+            "The widget catalog in the [Flutter docs](https://docs.flutter.dev) is the quickest way to find the right widget."
+          ],
+          "stretch": "Add a horizontal row of category chips above the list showing how many transactions each category has.",
+          "post_highlights": [
+            "Built the dashboard of a Flutter expense tracker with a live balance card",
+            "Displayed transactions with a reusable list tile widget and rupee formatting",
+            "Calculated income, expense and balance totals from a Dart data model"
+          ]
+        },
+        "2": {
+          "title": "Add, Edit & Delete Transactions",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Make WalletWave interactive so users can add, edit and delete transactions through a form. You will learn how state changes update the screen and how to move between screens.",
+          "learn": [
+            "`StatefulWidget` and `setState` for data that changes",
+            "Navigating between screens with `Navigator.push` and returning results with `Navigator.pop`",
+            "Forms with `TextFormField`, a category dropdown, a date picker and validation",
+            "Swipe-to-delete with `Dismissible` and undo with `SnackBar`"
+          ],
+          "steps": [
+            "Make the dashboard a `StatefulWidget` that owns the transaction list.",
+            "Add a `FloatingActionButton` that opens an `AddTransactionScreen` with fields for title, amount, category dropdown, an income/expense toggle, and a date picker using `showDatePicker`.",
+            "Validate the form: title required, amount must be a number greater than zero.",
+            "Return the new transaction with `Navigator.pop(context, transaction)` and add it inside `setState`; check that the balance card updates.",
+            "Reuse the same form for editing: tap a transaction to open the form pre-filled, and replace the old item on save.",
+            "Add swipe-to-delete with `Dismissible` and a `SnackBar` with an Undo action.",
+            "Record a short screen recording of adding, editing and deleting a transaction."
+          ],
+          "deliverables": [
+            "An Add/Edit Transaction form with validation and a date picker",
+            "Edit by tapping a transaction and delete by swiping",
+            "A balance card that updates after every change",
+            "A 30-60 second screen recording"
+          ],
+          "done_when": [
+            "Invalid input (empty title, zero or text amount) shows an error and is not saved",
+            "A new transaction appears in the list and the balance changes immediately",
+            "Editing a transaction updates it in place instead of creating a duplicate",
+            "Swiping deletes a transaction and Undo restores it"
+          ],
+          "hints": [
+            "If the screen does not refresh, make sure the list change happens inside `setState`.",
+            "Pass an optional existing `Transaction` into the form screen; if it is not null, you are editing.",
+            "Use `double.tryParse` for the amount so bad input returns null instead of throwing.",
+            "Search 'Flutter cookbook forms' in the [Flutter docs](https://docs.flutter.dev) for a validation example."
+          ],
+          "stretch": "Add a search bar that filters transactions by title as you type.",
+          "post_highlights": [
+            "Added a validated add and edit transaction form to my Flutter finance app",
+            "Implemented swipe-to-delete with undo using Dismissible and SnackBar",
+            "Used StatefulWidget and navigation results to keep the balance updated in real time"
+          ]
+        },
+        "3": {
+          "title": "Local Database & Monthly View",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Save transactions on the device so they survive restarts, and add a month selector so users can see one month at a time. You will also handle loading and error cases so the app always shows something sensible.",
+          "learn": [
+            "Storing data on the device with Hive or `sqflite`",
+            "Async Dart with `Future`, `async` and `await`",
+            "Converting model objects to and from maps or JSON",
+            "Filtering data by date and showing loading, empty and error states"
+          ],
+          "steps": [
+            "Choose Hive (works on Android and Chrome) or `sqflite` (Android/iOS only, uses SQL); pick Hive if you run on Chrome.",
+            "Add `toMap()`/`fromMap()` (or a Hive adapter) and give each transaction a unique `id` so edits and deletes target the right record.",
+            "Create a `TransactionRepository` class with `getAll`, `add`, `update` and `delete` methods, and test it with a few `print` calls.",
+            "Load transactions at startup with a loading spinner, then save through the repository on every add, edit and delete.",
+            "Fully restart the app to confirm data is kept.",
+            "Add a month selector (previous/next arrows) and show only that month's transactions and totals.",
+            "Use `try/catch` around database calls and show a friendly error message or `SnackBar` on failure, plus an empty-state message for months with no transactions."
+          ],
+          "deliverables": [
+            "Transactions stored in a local database",
+            "A `TransactionRepository` class for all data access",
+            "A month selector that filters the list and totals",
+            "Loading, empty and error states"
+          ],
+          "done_when": [
+            "Transactions are still there after fully closing and reopening the app",
+            "Editing and deleting change the correct saved record",
+            "Switching months shows only that month's transactions and correct totals",
+            "A month with no data shows an empty-state message",
+            "Database errors are caught and shown without crashing"
+          ],
+          "hints": [
+            "Hot reload does not prove persistence; always stop and restart the app to test.",
+            "Generate ids with `DateTime.now().millisecondsSinceEpoch.toString()` if you do not want another package.",
+            "Compare `date.year` and `date.month` to filter a month instead of comparing full dates.",
+            "Read the example tab of each package on [pub.dev](https://pub.dev) before writing your own code."
+          ],
+          "stretch": "Add a Settings screen where the user can clear all data after a confirmation dialog.",
+          "post_highlights": [
+            "Added a local database to my Flutter finance app so data persists across restarts",
+            "Built a repository layer and a month-by-month transaction view",
+            "Handled loading, empty and error states for reliable user experience"
+          ]
+        },
+        "4": {
+          "title": "Budgets, Pie Chart & Release Build",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Turn WalletWave into a finished portfolio app. You will move data into a Provider, add a category pie chart and a monthly budget warning, polish the design, and ship an installable build with a demo.",
+          "learn": [
+            "App-wide state management with `provider` and `ChangeNotifier`",
+            "Grouping data by category and drawing a pie chart with a package such as `fl_chart`",
+            "Comparing spending against a saved budget limit",
+            "Building a release APK or web build"
+          ],
+          "steps": [
+            "Create a `TransactionProvider extends ChangeNotifier` that uses your repository and calls `notifyListeners()` after changes.",
+            "Wrap the app in `ChangeNotifierProvider` and read data with `context.watch`/`context.read` instead of passing lists around; retest all old features.",
+            "Add an Insights screen that groups the selected month's expenses by category and shows a pie chart with a legend.",
+            "Let the user set a monthly budget (save it with `shared_preferences`), show a progress bar of spent vs budget, and turn it red with a warning when over 80%.",
+            "Polish: consistent colours, an app icon and name, and a dark theme.",
+            "Build with `flutter build apk --release` (or `flutter build web` without the Android SDK) and test the build.",
+            "Write a README with features, screenshots and setup, and record a 60-second demo."
+          ],
+          "deliverables": [
+            "State managed with Provider",
+            "An Insights screen with a category pie chart",
+            "A monthly budget with progress bar and warning",
+            "A release APK or web build, README and 60-second demo video"
+          ],
+          "done_when": [
+            "Transaction data flows through a Provider rather than constructors",
+            "The pie chart slices match the category totals for the selected month",
+            "The budget bar updates after adding an expense and shows a warning past 80%",
+            "The budget value is still set after restarting the app",
+            "A release build is available from the repo with a complete README"
+          ],
+          "hints": [
+            "Build a `Map<String, double>` of category totals first and print it before drawing the chart.",
+            "Skip categories with zero spending, or the pie chart may look empty or error out.",
+            "Attach the APK to a GitHub Release so anyone can download it.",
+            "The deployment section of the [Flutter docs](https://docs.flutter.dev) covers Android and web release builds."
+          ],
+          "stretch": "Add an Export button that creates a CSV of the month's transactions and opens the share sheet.",
+          "post_highlights": [
+            "Completed WalletWave, a Flutter expense tracker with local storage and Provider",
+            "Built a category spending pie chart and a monthly budget warning",
+            "Shipped a release build with a documented README and demo video"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "RecipeRadar: Recipe Finder App with a Free Public API",
+      "tagline": "Build a recipe app that searches real recipes from a free online API and lets you save your favourites.",
+      "weeks": {
+        "1": {
+          "title": "Recipe Screens with Sample Data",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Set up Flutter and build the two main screens of RecipeRadar, a recipe grid and a recipe detail page, using a few hardcoded recipes. You will learn layouts and images so the app looks good before any internet code is added.",
+          "learn": [
+            "How a Flutter app is structured: `MaterialApp`, `Scaffold` and the widget tree",
+            "Layouts with `Column`, `Row`, `Stack`, `Padding` and `Expanded`",
+            "Showing grids and images with `GridView.builder` and `Image.network`",
+            "Creating a Dart model class and a reusable widget"
+          ],
+          "steps": [
+            "Install Flutter, run `flutter doctor`, create the project with `flutter create reciperadar`, and run the default app once.",
+            "Choose where to run it: Android emulator, a real phone over USB, or Chrome with `flutter run -d chrome` on low-spec laptops.",
+            "Create a `Recipe` class with `id`, `name`, `category`, `area`, `imageUrl`, `ingredients` and `instructions`, and hardcode 4-6 recipes with real image URLs.",
+            "Build a `HomeScreen` with a `GridView.builder` of recipe cards showing the image and name.",
+            "Move the card into its own `RecipeCard` widget file with rounded corners and a fixed image height.",
+            "Build a `RecipeDetailScreen` layout with a large image, name, category tags, an ingredients list and the instructions in a scrollable page.",
+            "Push to a public GitHub repo with a README and screenshots."
+          ],
+          "deliverables": [
+            "A Flutter project in a public GitHub repo",
+            "A home screen showing a grid of recipe cards",
+            "A recipe detail screen layout",
+            "A README with screenshots"
+          ],
+          "done_when": [
+            "The app runs without errors on an emulator, phone or Chrome",
+            "The grid is built from a Dart list using `GridView.builder`",
+            "Recipe images load and keep a consistent size",
+            "The detail screen scrolls without overflow errors on a small phone size",
+            "The README includes screenshots"
+          ],
+          "hints": [
+            "Use `ClipRRect` for rounded image corners and `BoxFit.cover` so images fill their space neatly.",
+            "Wrap long pages in `SingleChildScrollView` to avoid the yellow-black overflow stripe.",
+            "The [Flutter docs](https://docs.flutter.dev) widget catalog shows every layout widget with examples."
+          ],
+          "stretch": "Make the grid show 2 columns on phones and 4 columns on wide screens using `MediaQuery` or `LayoutBuilder`.",
+          "post_highlights": [
+            "Built the UI of a Flutter recipe app with a responsive recipe grid",
+            "Designed a scrollable recipe detail page with images and ingredient lists",
+            "Created a reusable recipe card widget and Dart data model"
+          ]
+        },
+        "2": {
+          "title": "Navigation, Search & Favourites",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Connect the screens and make the app interactive: tapping a card opens its details, a search box filters recipes, and users can mark favourites. This week is about state and navigation, still with sample data.",
+          "learn": [
+            "`StatefulWidget` and `setState` for changing data",
+            "Navigating with `Navigator.push` and passing a recipe to the next screen",
+            "Handling text input with `TextField` and `onChanged`",
+            "Using a bottom navigation bar to switch between tabs"
+          ],
+          "steps": [
+            "Open `RecipeDetailScreen` with `Navigator.push` when a card is tapped, passing the selected `Recipe` through the constructor.",
+            "Add a search `TextField` at the top of the home screen that filters the grid by name as the user types, using `setState`.",
+            "Show a friendly 'No recipes found' message when the filter returns nothing.",
+            "Add a heart `IconButton` on the detail screen and cards that toggles a recipe in a favourites list.",
+            "Add a `BottomNavigationBar` with Home and Favourites tabs, and show only favourite recipes on the Favourites tab.",
+            "Keep the favourites list in the parent widget that holds the bottom navigation so both tabs see the same data.",
+            "Record a short video of searching, opening a recipe and adding a favourite."
+          ],
+          "deliverables": [
+            "Working navigation from grid to detail and back",
+            "Live search filtering with an empty-state message",
+            "A Favourites tab showing favourited recipes",
+            "A 30-60 second screen recording"
+          ],
+          "done_when": [
+            "Tapping any card opens the correct recipe's details",
+            "Typing in the search box filters the grid immediately and clearing it shows all recipes",
+            "A search with no matches shows an empty-state message",
+            "Favouriting a recipe makes it appear on the Favourites tab and unfavouriting removes it"
+          ],
+          "hints": [
+            "Filter with `where` and `toLowerCase()` on both the recipe name and the query for case-insensitive search.",
+            "If the Favourites tab does not update, the favourites list is probably stored in a child widget instead of the shared parent.",
+            "Search 'Flutter cookbook navigation' in the [Flutter docs](https://docs.flutter.dev) for passing data between screens."
+          ],
+          "stretch": "Add category filter chips (for example Vegetarian, Dessert, Chicken) above the grid.",
+          "post_highlights": [
+            "Added navigation and live search to my Flutter recipe app",
+            "Built a favourites feature with a separate tab using StatefulWidget",
+            "Handled empty search results with a clear empty-state message"
+          ]
+        },
+        "3": {
+          "title": "Real Recipes from a Public API",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Replace the sample data with real recipes from TheMealDB, a free recipe API that needs no sign-up for testing. You will make HTTP requests, parse JSON, and handle loading and error states the way real apps do.",
+          "learn": [
+            "Making HTTP GET requests with the `http` package",
+            "Parsing JSON into Dart objects with a `fromJson` factory",
+            "Async Dart and `FutureBuilder` for loading data",
+            "Handling loading, empty, error and no-internet states"
+          ],
+          "steps": [
+            "Open TheMealDB search URL for a word like 'chicken' (`https://www.themealdb.com/api/json/v1/1/search.php?s=chicken`) in your browser and study the JSON before writing any code.",
+            "Add the `http` package and write a `RecipeApi` class with a `searchRecipes(String query)` method that returns `Future<List<Recipe>>`.",
+            "Write `Recipe.fromJson` to map fields like `idMeal`, `strMeal`, `strMealThumb`, `strCategory` and `strInstructions`, and loop over `strIngredient1`..`strIngredient20` to build the ingredients list.",
+            "Print the parsed list in the console first, then show it in the grid using `FutureBuilder` with a loading spinner.",
+            "Connect the search box to the API so pressing search (not every keystroke) fetches new results.",
+            "Handle errors: check the status code, catch exceptions, and show an error message with a Retry button; note that the API returns `null` for meals when nothing matches.",
+            "Remove the hardcoded sample recipes once the API works."
+          ],
+          "deliverables": [
+            "A `RecipeApi` class that fetches and parses real recipes",
+            "Search that returns live results from the API",
+            "Loading, empty and error states with a Retry button",
+            "Updated README explaining the API used"
+          ],
+          "done_when": [
+            "The home screen shows real recipes from the API on launch",
+            "Searching a dish name returns matching recipes from the API",
+            "A search with no results shows an empty-state message instead of crashing",
+            "Turning off the internet and searching shows an error message with Retry",
+            "The detail screen shows ingredients and instructions from the API data"
+          ],
+          "hints": [
+            "The API returns `{\"meals\": null}` when nothing is found, so check for null before looping.",
+            "Trigger the search from `onSubmitted` or a search button to avoid sending a request on every keystroke.",
+            "If Chrome shows a network or CORS error, test on an Android emulator or phone to confirm your code is correct.",
+            "The `http` package page on [pub.dev](https://pub.dev) has a short GET example."
+          ],
+          "stretch": "Add a 'Random recipe' button that calls the API's random endpoint and opens the result.",
+          "post_highlights": [
+            "Connected my Flutter recipe app to a public REST API",
+            "Parsed JSON into Dart models and displayed live results with FutureBuilder",
+            "Handled loading, empty and offline error states with a retry option"
+          ]
+        },
+        "4": {
+          "title": "Provider, Saved Favourites & Release",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Finish RecipeRadar as a portfolio-ready app. Favourites will move into a Provider and be saved on the device, then you will polish the app and ship an installable build with a demo video.",
+          "learn": [
+            "App-wide state management with `provider` and `ChangeNotifier`",
+            "Saving favourites locally with `shared_preferences`",
+            "Small polish touches such as a dark theme and image placeholders",
+            "Building a release APK or web build"
+          ],
+          "steps": [
+            "Create a `FavouritesProvider extends ChangeNotifier` with `toggle`, `isFavourite` and a list of favourite recipes, and wrap the app in `ChangeNotifierProvider`.",
+            "Replace the favourites list you passed through constructors with `context.watch`/`context.read`, and retest the heart buttons on both tabs.",
+            "Save favourites with `shared_preferences` as a JSON list (store id, name and image), load them at startup, and confirm they survive a restart.",
+            "Make the Favourites tab work offline by showing the saved data instead of calling the API.",
+            "Polish: image loading placeholders, an error icon for broken images, a dark theme, and an app icon and name.",
+            "Build with `flutter build apk --release` (or `flutter build web`) and test it.",
+            "Write a README with features, screenshots, the API credit and setup steps, and record a 60-second demo."
+          ],
+          "deliverables": [
+            "Favourites managed with Provider",
+            "Favourites saved on the device and available offline",
+            "A release APK or web build",
+            "A polished README and 60-second demo video"
+          ],
+          "done_when": [
+            "Favourites are managed through a Provider",
+            "Favourites are still there after fully restarting the app",
+            "The Favourites tab shows saved recipes with the internet turned off",
+            "Broken images show a placeholder instead of an error",
+            "A release build and complete README are available in the repo"
+          ],
+          "hints": [
+            "Save only the fields you need for the favourites list; you can fetch full details again when online.",
+            "Use `errorBuilder` on `Image.network` to handle broken image links.",
+            "Attach the APK to a GitHub Release so recruiters can install it.",
+            "See the deployment section of the [Flutter docs](https://docs.flutter.dev) for release builds."
+          ],
+          "stretch": "Add a shopping list screen where users can tick off ingredients from a recipe, saved locally.",
+          "post_highlights": [
+            "Completed RecipeRadar, a Flutter recipe finder powered by a public API",
+            "Managed favourites with Provider and saved them on the device for offline use",
+            "Shipped a release build with a documented README and demo video"
+          ]
+        }
+      }
+    }
+  ]
+}

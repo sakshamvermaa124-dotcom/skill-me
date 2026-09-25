@@ -3,9 +3,7 @@ SkillMe - Admin CLI
 Command-line tool for quick admin operations.
 
 Usage:
-    python cli.py create-batch --domain web-dev --batch 1
-    python cli.py add-student --email john@example.com --batch-id 1
-    python cli.py batch-status --batch-id 1
+    python cli.py enroll-student --email john@example.com
     python cli.py list-students
 """
 
@@ -33,156 +31,25 @@ async def _init():
 
 @click.group()
 def cli():
-    """SkillMe Admin CLI - Manage batches and students."""
+    """SkillMe Admin CLI - Manage students and submissions."""
     pass
-
-
-# ==============================================
-# Batches
-# ==============================================
-
-@cli.command("create-batch")
-@click.option("--domain", "-d", required=True, help="Domain (e.g., web-dev, python)")
-@click.option("--batch", "-b", required=True, type=int, help="Batch number")
-@click.option("--max-students", default=30, type=int, help="Max students per batch")
-def create_batch(domain, batch, max_students):
-    """Create a new batch."""
-    async def _run():
-        await _init()
-        from services.batch_service import batch_service
-
-        try:
-            with console.status(f"Creating batch {domain} #{batch}..."):
-                result = await batch_service.create_batch(
-                    domain=domain,
-                    batch_number=batch,
-                    max_students=max_students,
-                )
-
-            console.print(Panel(
-                f"[OK] Batch created successfully!\n\n"
-                f"ID: [bold]{result['id']}[/bold]\n"
-                f"Domain: [bold]{result['domain']}[/bold]\n"
-                f"Batch #: [bold]{result['batch_number']}[/bold]\n"
-                f"Start: {result['start_date']}\n"
-                f"End: {result['end_date']}",
-                title="New Batch",
-                border_style="green",
-            ))
-        except Exception as e:
-            console.print(f"[red]Error: {e}[/red]")
-
-    run_async(_run())
-
-
-@cli.command("list-batches")
-@click.option("--status", "-s", default=None, help="Filter by status")
-def list_batches(status):
-    """List all batches."""
-    async def _run():
-        await _init()
-        from services.batch_service import batch_service
-
-        batches = await batch_service.list_batches(status=status)
-
-        if not batches:
-            console.print("[yellow]No batches found.[/yellow]")
-            return
-
-        table = Table(title="Batches", box=box.ROUNDED, show_lines=True)
-        table.add_column("ID", style="cyan", justify="center")
-        table.add_column("Domain", style="bold")
-        table.add_column("Batch #", justify="center")
-        table.add_column("Status", justify="center")
-        table.add_column("Start", justify="center")
-        table.add_column("End", justify="center")
-
-        status_colors = {
-            "active": "green",
-            "provisioning": "yellow",
-            "completed": "blue",
-            "archived": "dim",
-        }
-
-        for b in batches:
-            color = status_colors.get(b["status"], "white")
-            table.add_row(
-                str(b["id"]),
-                b["domain"],
-                str(b["batch_number"]),
-                f"[{color}]{b['status']}[/{color}]",
-                b["start_date"] or "-",
-                b["end_date"] or "-",
-            )
-
-        console.print(table)
-
-    run_async(_run())
-
-
-@cli.command("batch-status")
-@click.option("--batch-id", "-b", required=True, type=int, help="Batch ID")
-def batch_status(batch_id):
-    """Show detailed batch status with student progress."""
-    async def _run():
-        await _init()
-        from services.batch_service import batch_service
-
-        batch = await batch_service.get_batch(batch_id)
-        if not batch:
-            console.print(f"[red]Batch {batch_id} not found[/red]")
-            return
-
-        console.print(Panel(
-            f"Domain: [bold]{batch['domain']}[/bold]  |  "
-            f"Batch #: [bold]{batch['batch_number']}[/bold]  |  "
-            f"Status: [bold]{batch['status']}[/bold]\n"
-            f"Period: {batch['start_date']} → {batch['end_date']}",
-            title=f"Batch #{batch_id}",
-            border_style="blue",
-        ))
-
-        progress = await batch_service.get_batch_progress(batch_id)
-
-        if not progress:
-            console.print("[yellow]No students enrolled yet.[/yellow]")
-            return
-
-        table = Table(title="Student Progress", box=box.ROUNDED)
-        table.add_column("Student", style="bold")
-        table.add_column("Status")
-        table.add_column("Completed", justify="center")
-        table.add_column("Score", justify="center", style="bold cyan")
-
-        for s in progress:
-            table.add_row(
-                f"{s['first_name']} {s['last_name']}",
-                s["enrollment_status"],
-                str(s["total_completed"]),
-                str(s["total_score"]),
-            )
-
-        console.print(table)
-
-    run_async(_run())
 
 
 # ==============================================
 # Students
 # ==============================================
 
-@cli.command("add-student")
+@cli.command("enroll-student")
 @click.option("--email", "-e", required=True, help="Student email")
-@click.option("--batch-id", "-b", required=True, type=int, help="Batch ID to enroll in")
-def add_student(email, batch_id):
-    """Add a student to a batch (they must have already applied)."""
+def enroll_student(email):
+    """Enroll a student (they must have already applied). Does not send the offer letter."""
     async def _run():
         await _init()
         from db.database import db
-        from services.batch_service import batch_service
+        from services.enrollment_service import enrollment_service
 
         student = await db.fetch_one(
-            "SELECT * FROM students WHERE email = ?", (email,)
+            "SELECT * FROM students WHERE lower(email) = lower(?)", (email.strip(),)
         )
         if not student:
             console.print(f"[red]No student found with email: {email}[/red]")
@@ -191,15 +58,9 @@ def add_student(email, batch_id):
 
         try:
             with console.status(f"Enrolling {student['first_name']}..."):
-                await batch_service.add_student_to_batch(
-                    student_id=student["id"],
-                    batch_id=batch_id,
-                )
+                await enrollment_service.enroll_student(student["id"])
 
-            console.print(
-                f"[OK] Enrolled {student['first_name']} {student['last_name']} "
-                f"in batch {batch_id}"
-            )
+            console.print(f"[OK] Enrolled {student['first_name']} {student['last_name']}")
         except Exception as e:
             console.print(f"[red]Error: {e}[/red]")
 

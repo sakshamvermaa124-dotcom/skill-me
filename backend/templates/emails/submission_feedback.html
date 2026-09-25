@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}📝 Week {{ week }} submitted — your feedback checklist{% endblock %}
+
+{% block body %}
+<p class="greeting">Nice work, {{ first_name }}!</p>
+<p class="lead">
+  We've received your <strong>Week {{ week }}</strong> {{ domain_label }} submission for
+  <strong>{{ task_title }}</strong> ({{ project_name }}). It's now in the review queue.
+  While you wait, here's feedback for this task.
+</p>
+
+<div class="divider"></div>
+
+{% if checklist %}
+<p class="lead" style="margin-bottom: 8px;"><strong>✅ Before review, make sure your post clearly shows:</strong></p>
+<ul style="margin: 0 0 20px; padding-left: 20px; line-height: 1.7;">
+  {% for item in checklist %}<li>{{ item }}</li>{% endfor %}
+</ul>
+{% endif %}
+
+{% if stage_tip %}
+<p class="lead" style="margin-bottom: 20px;"><strong>📍 This week:</strong> {{ stage_tip }}</p>
+{% endif %}
+
+{% if domain_tips or general_tips %}
+<p class="lead" style="margin-bottom: 8px;"><strong>💡 Tips to make it stronger:</strong></p>
+<ul style="margin: 0 0 20px; padding-left: 20px; line-height: 1.7;">
+  {% for tip in domain_tips %}<li>{{ tip }}</li>{% endfor %}
+  {% for tip in general_tips %}<li>{{ tip }}</li>{% endfor %}
+</ul>
+{% endif %}
+
+<p class="lead" style="margin-bottom: 20px;">
+  If something from the checklist is missing, you can still improve your post — reviewers look at it as it is when they open it.
+</p>
+
+<div class="cta-wrap">
+  <a href="{{ dashboard_url }}" target="_blank" class="cta-btn">View My Dashboard &rarr;</a>
+</div>
+{% endblock %}

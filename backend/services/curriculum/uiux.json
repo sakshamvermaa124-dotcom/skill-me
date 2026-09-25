@@ -1,0 +1,538 @@
+{
+  "domain": "uiux",
+  "tracks": [
+    {
+      "project_name": "CanteenQ: Campus Canteen Pre-order App",
+      "tagline": "Design a mobile app that lets students order canteen food ahead and skip the queue.",
+      "weeks": {
+        "1": {
+          "title": "User Research and Problem Statement",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Talk to real students about canteen queues, turn what you hear into a persona and a clear problem statement, and map the ordering flow. Good design starts with understanding people, not with screens.",
+          "learn": [
+            "Planning and running short user interviews",
+            "Creating a persona from real findings",
+            "Writing a problem statement",
+            "Mapping a simple user flow"
+          ],
+          "steps": [
+            "Write 6-8 open-ended interview questions, such as 'Tell me about the last time you bought food at the canteen.'",
+            "Interview 3-5 students for 10 minutes each, or run a short Google Form survey with at least 15 responses.",
+            "Write each finding on a sticky note in a [FigJam](https://www.figma.com) board and group similar notes together.",
+            "Create one persona with a name, goals, frustrations and a quote taken from your research.",
+            "Write a problem statement in the form 'Students need a way to ___ because ___.'",
+            "Draw a user flow from opening the app to picking up the order, including one alternate path such as an item being sold out.",
+            "Share the FigJam link and write a short summary of your top 3 insights."
+          ],
+          "deliverables": [
+            "Interview questions and notes or survey results",
+            "Affinity map in FigJam",
+            "Persona and problem statement",
+            "User flow diagram"
+          ],
+          "done_when": [
+            "At least 3 interviews or 15 survey responses are recorded",
+            "Findings are grouped into at least 3 themes",
+            "The persona includes goals, frustrations and a real quote",
+            "The user flow covers the full order journey plus one alternate path"
+          ],
+          "hints": [
+            "Ask about past behaviour, not opinions; 'What did you do?' is better than 'Would you use...?'",
+            "Avoid leading questions such as 'Don't you hate long queues?'",
+            "Keep the persona based on what you heard, not on guesses."
+          ],
+          "stretch": "Visit the canteen at peak time, time the queue and add these observations to your research.",
+          "post_highlights": [
+            "Interviewed students to understand canteen queue problems",
+            "Created a research-based persona and problem statement",
+            "Mapped the full pre-order user flow in FigJam"
+          ]
+        },
+        "2": {
+          "title": "Low-fidelity Wireframes",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Turn your user flow into grayscale wireframes for the main screens. Wireframes let you test layout and flow quickly before spending time on colours and details.",
+          "learn": [
+            "Information hierarchy and layout",
+            "Using frames and basic shapes in Figma",
+            "Sketching multiple ideas before choosing one",
+            "Linking wireframes to the user flow"
+          ],
+          "steps": [
+            "Sketch 2-3 paper versions of the menu screen and pick the one that best solves your problem statement.",
+            "In [Figma](https://www.figma.com), create a mobile frame and build wireframes for: home, menu, item details, cart, checkout and order status.",
+            "Use only gray boxes, simple text and placeholder icons; no colours or images yet.",
+            "Place the most important action on each screen where the thumb can reach it easily.",
+            "Arrange the screens left to right in flow order and label each one.",
+            "Show the wireframes to one classmate and note anything that confused them."
+          ],
+          "deliverables": [
+            "Photo of paper sketches",
+            "Figma file with at least 6 wireframe screens",
+            "Short notes on feedback from one person"
+          ],
+          "done_when": [
+            "At least 6 screens cover the full flow from Week 1",
+            "Each screen has one clear primary action",
+            "Screens are in grayscale with no final visual styling",
+            "At least one change was made based on feedback"
+          ],
+          "hints": [
+            "Use Figma's mobile frame presets so your screens have realistic sizes.",
+            "Real content labels such as 'Masala Dosa - Rs 40' reveal layout problems better than 'Lorem ipsum'.",
+            "Search 'low fidelity wireframe examples' for reference before starting."
+          ],
+          "stretch": "Add wireframes for an empty cart and an item-sold-out state.",
+          "post_highlights": [
+            "Sketched and compared multiple layout ideas on paper",
+            "Built 6 low-fidelity wireframes in Figma for a canteen pre-order app",
+            "Improved the flow based on early feedback"
+          ]
+        },
+        "3": {
+          "title": "High-fidelity UI and Mini Design System",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Create a small design system with colours, a type scale and reusable components, then use it to turn your wireframes into polished screens. You will also check basic accessibility.",
+          "learn": [
+            "Colour styles and text styles",
+            "Reusable components and variants",
+            "Auto layout for flexible buttons and cards",
+            "Basic accessibility: colour contrast and tap target size"
+          ],
+          "steps": [
+            "Pick a primary colour, a neutral palette and one accent, and save them as colour styles.",
+            "Define a type scale of 4-5 sizes (for example 12, 14, 16, 20, 28) and save them as text styles.",
+            "Build components with auto layout: button, menu item card, input field, and bottom navigation.",
+            "Add button variants for default, pressed and disabled states.",
+            "Rebuild all 6 screens using only your styles and components.",
+            "Check text contrast with a Figma contrast plugin and make tap targets at least 44x44 pt.",
+            "Create a 'Design System' page in the file that shows all styles and components."
+          ],
+          "deliverables": [
+            "Design System page with colours, type and components",
+            "At least 6 high-fidelity screens",
+            "Screenshot of contrast checks"
+          ],
+          "done_when": [
+            "All colours and text on screens use saved styles",
+            "At least 4 reusable components exist, one with variants",
+            "Buttons and cards use auto layout",
+            "Body text meets a 4.5:1 contrast ratio",
+            "Tap targets are at least 44x44 pt"
+          ],
+          "hints": [
+            "Change a component's main copy and confirm every instance updates; if not, you detached it.",
+            "Use an 8-point spacing system (8, 16, 24, 32) for consistent layouts.",
+            "The [WCAG overview from W3C](https://www.w3.org/WAI/) explains contrast requirements."
+          ],
+          "stretch": "Create a dark mode version of two screens using the same components.",
+          "post_highlights": [
+            "Built a mini design system with colour styles, a type scale and components",
+            "Designed 6 high-fidelity screens using auto layout",
+            "Checked colour contrast and tap target sizes for accessibility"
+          ]
+        },
+        "4": {
+          "title": "Prototype, Usability Test and Case Study",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Link your screens into a clickable prototype, test it with 3 people, fix the biggest issues and write a case study. This shows your full process from research to tested design.",
+          "learn": [
+            "Prototyping with interactions in Figma",
+            "Running a simple usability test",
+            "Prioritising and fixing issues",
+            "Writing a UX case study"
+          ],
+          "steps": [
+            "Connect all screens in Figma's Prototype tab so a user can place an order from start to finish.",
+            "Write 3 tasks for testers, such as 'Order a dosa and a tea for pickup at 1 pm.'",
+            "Test with 3 people, ask them to think aloud and note where they hesitate or make mistakes.",
+            "List all issues, rank them by how many testers hit them and fix the top 3.",
+            "Write a case study on Notion, Medium or Behance covering problem, research, wireframes, UI, testing and changes.",
+            "Record a 60-second screen video of the final prototype."
+          ],
+          "deliverables": [
+            "Clickable Figma prototype link",
+            "Usability test notes for 3 testers",
+            "Before/after screenshots of fixes",
+            "Published case study link"
+          ],
+          "done_when": [
+            "A tester can complete an order in the prototype without help",
+            "3 usability tests are documented with issues found",
+            "At least 3 issues are fixed and shown before and after",
+            "The case study covers every stage from research to testing"
+          ],
+          "hints": [
+            "During testing, stay quiet and let the tester struggle a little; that is where the insights are.",
+            "Use 'Smart animate' sparingly; clear flows matter more than fancy transitions.",
+            "Start the case study with the problem and the result, then show the process."
+          ],
+          "stretch": "Measure task completion time for each tester before and after your fixes.",
+          "post_highlights": [
+            "Built a clickable Figma prototype for a canteen pre-order app",
+            "Ran usability tests with 3 students and fixed the top issues",
+            "Published a full UX case study from research to tested design"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "HabitNest: Simple Habit Tracker App",
+      "tagline": "Design a friendly mobile app that helps students build and keep daily habits.",
+      "weeks": {
+        "1": {
+          "title": "Understanding Habit Struggles",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Research why students start and abandon habits, then create a persona, problem statement and user flow. This keeps your design focused on real needs instead of adding every feature you can think of.",
+          "learn": [
+            "Writing unbiased research questions",
+            "Running interviews or a survey",
+            "Personas and problem statements",
+            "User flows"
+          ],
+          "steps": [
+            "Write 6-8 open-ended questions about habits students have tried and why they stopped.",
+            "Interview 3-5 people or collect at least 15 survey responses.",
+            "Group findings into themes on a [FigJam](https://www.figma.com) board.",
+            "Look at 2 existing habit apps and note one thing each does well and one thing that frustrates users.",
+            "Create a persona and write a problem statement based on your strongest theme.",
+            "Draw a user flow for adding a new habit and checking it off each day."
+          ],
+          "deliverables": [
+            "Research notes or survey results",
+            "Affinity map with themes",
+            "Short review of 2 existing apps",
+            "Persona, problem statement and user flow"
+          ],
+          "done_when": [
+            "At least 3 interviews or 15 survey responses are recorded",
+            "Findings are grouped into at least 3 themes",
+            "The problem statement is based on a research theme",
+            "The user flow covers adding and completing a habit"
+          ],
+          "hints": [
+            "Ask 'Tell me about the last habit you tried to build' to get real stories.",
+            "Competitor reviews on app stores are a free source of user frustrations.",
+            "Pick one core problem; a focused app is easier to design well."
+          ],
+          "stretch": "Create a second persona with a different motivation and note how their flow differs.",
+          "post_highlights": [
+            "Researched why students struggle to keep habits",
+            "Reviewed existing habit apps to find gaps",
+            "Created a persona, problem statement and user flow in FigJam"
+          ]
+        },
+        "2": {
+          "title": "Wireframing the Core Screens",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Create grayscale wireframes for the main screens of your habit tracker. Focus on making adding and checking off a habit fast and obvious.",
+          "learn": [
+            "Visual hierarchy",
+            "Frames, shapes and grids in Figma",
+            "Designing for one-handed mobile use",
+            "Getting quick feedback on layouts"
+          ],
+          "steps": [
+            "Sketch 2-3 paper versions of the home screen showing today's habits.",
+            "In [Figma](https://www.figma.com), build wireframes for: onboarding, home, add habit, habit details and weekly progress.",
+            "Keep everything grayscale and use real labels like 'Drink 8 glasses of water'.",
+            "Make checking off a habit possible with a single tap on the home screen.",
+            "Arrange screens in flow order with labels.",
+            "Get feedback from one person and write down what you changed."
+          ],
+          "deliverables": [
+            "Photo of paper sketches",
+            "Figma file with at least 5 wireframe screens",
+            "Feedback notes and changes made"
+          ],
+          "done_when": [
+            "At least 5 screens cover the flow from Week 1",
+            "A habit can be checked off in one tap on the home screen",
+            "Screens are grayscale with no final styling",
+            "At least one change was made from feedback"
+          ],
+          "hints": [
+            "Use a layout grid on your frames to keep spacing consistent.",
+            "Keep onboarding to 3 screens or fewer.",
+            "If you cannot explain a screen's purpose in one sentence, simplify it."
+          ],
+          "stretch": "Wireframe an empty state for a new user with no habits yet.",
+          "post_highlights": [
+            "Explored multiple home screen layouts through paper sketches",
+            "Wireframed 5 core screens for a habit tracker in Figma",
+            "Designed one-tap habit check-off based on user needs"
+          ]
+        },
+        "3": {
+          "title": "Visual Design and Components",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Define a small design system and apply it to create high-fidelity screens. You will learn how components and styles keep a design consistent and easy to update.",
+          "learn": [
+            "Colour and text styles",
+            "Components with variants",
+            "Auto layout",
+            "Basic accessibility checks"
+          ],
+          "steps": [
+            "Choose a calm colour palette and save primary, neutral, success and error colours as styles.",
+            "Set up a type scale of 4-5 text styles.",
+            "Build components with auto layout: habit row, checkbox, button, progress ring or bar, and tab bar.",
+            "Add variants for the habit row: not done, done and missed.",
+            "Rebuild all wireframe screens using your components.",
+            "Check contrast and make sure tap targets are at least 44x44 pt.",
+            "Document everything on a 'Design System' page."
+          ],
+          "deliverables": [
+            "Design System page",
+            "At least 5 high-fidelity screens",
+            "Screenshot of accessibility checks"
+          ],
+          "done_when": [
+            "All screens use saved colour and text styles",
+            "The habit row component has at least 3 variants",
+            "Buttons and rows use auto layout",
+            "Body text meets a 4.5:1 contrast ratio and tap targets are at least 44x44 pt"
+          ],
+          "hints": [
+            "Do not rely on colour alone to show 'done'; add a checkmark icon too.",
+            "Use an 8-point spacing system.",
+            "Name layers and components clearly so your file is easy to share."
+          ],
+          "stretch": "Design a streak celebration screen that stays accessible and not distracting.",
+          "post_highlights": [
+            "Created a design system with styles and reusable components",
+            "Designed high-fidelity habit tracker screens using auto layout",
+            "Applied accessibility checks for contrast and tap targets"
+          ]
+        },
+        "4": {
+          "title": "Prototype, Testing and Case Study",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Build a clickable prototype, run usability tests with 3 people, iterate on the design and publish a case study. This completes your first end-to-end UX project.",
+          "learn": [
+            "Prototyping interactions",
+            "Usability testing basics",
+            "Iterating from feedback",
+            "Writing a case study"
+          ],
+          "steps": [
+            "Link screens in Figma so users can add a habit, check it off and view weekly progress.",
+            "Write 3 realistic test tasks.",
+            "Test with 3 people, ask them to think aloud and note problems.",
+            "Rank issues by frequency and severity and fix the top 3.",
+            "Write a case study covering problem, research, wireframes, UI, testing and iteration.",
+            "Record a 60-second prototype walkthrough."
+          ],
+          "deliverables": [
+            "Clickable prototype link",
+            "Usability test notes",
+            "Before/after screenshots",
+            "Published case study link"
+          ],
+          "done_when": [
+            "All 3 test tasks can be completed in the prototype",
+            "3 tests are documented",
+            "At least 3 issues are fixed with before/after evidence",
+            "The case study covers every stage of the process"
+          ],
+          "hints": [
+            "Ask testers 'What do you expect will happen if you tap this?' before they tap.",
+            "Keep the case study visual: one image per section.",
+            "Mention what you would do next if you had more time."
+          ],
+          "stretch": "Add a simple interaction such as a checkbox animation using Figma's interactive components.",
+          "post_highlights": [
+            "Built and tested a clickable habit tracker prototype with 3 users",
+            "Iterated on the design to fix the top usability issues",
+            "Published a complete UX case study"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "LocalFix: Local Service Website Redesign",
+      "tagline": "Redesign the website of a local business such as a clinic, coaching centre or cafe so customers find what they need faster.",
+      "weeks": {
+        "1": {
+          "title": "Audit and Research",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Pick a local business with an outdated website, audit what is not working and talk to people who might use it. A redesign is only useful if you know which problems to fix.",
+          "learn": [
+            "Running a heuristic review of an existing site",
+            "User interviews or surveys",
+            "Personas and problem statements",
+            "Mapping the current user journey"
+          ],
+          "steps": [
+            "Choose a local clinic, coaching centre, cafe or shop whose website you find hard to use.",
+            "Take screenshots of the key pages and mark problems such as unclear navigation, small text or missing contact details.",
+            "Rate the site against 5 of Nielsen's usability heuristics and note one example for each.",
+            "Interview 3 people or survey at least 15 about what they look for on such a website.",
+            "Create a persona and a problem statement.",
+            "Draw a user flow for the most common task, such as booking an appointment or finding opening hours."
+          ],
+          "deliverables": [
+            "Annotated screenshots of the current site",
+            "Heuristic review notes",
+            "Persona and problem statement",
+            "User flow for the main task"
+          ],
+          "done_when": [
+            "At least 5 issues are identified on the current site",
+            "At least 3 interviews or 15 survey responses are recorded",
+            "The problem statement links to your findings",
+            "The user flow covers one complete task"
+          ],
+          "hints": [
+            "Search 'Nielsen 10 usability heuristics' for the list and examples.",
+            "Pick a site with clear room for improvement but not so large that the project gets out of hand.",
+            "This is a practice redesign; mention in your case study that it is an unofficial concept."
+          ],
+          "stretch": "Time how long 2 people take to find a key piece of information on the current site.",
+          "post_highlights": [
+            "Audited a local business website using usability heuristics",
+            "Interviewed potential users to understand their needs",
+            "Defined a persona, problem statement and user flow for the redesign"
+          ]
+        },
+        "2": {
+          "title": "Information Architecture and Wireframes",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Reorganise the site's content into a clear structure and create grayscale wireframes for desktop and mobile. Good structure is the biggest improvement in most redesigns.",
+          "learn": [
+            "Information architecture and sitemaps",
+            "Wireframing for desktop and mobile",
+            "Content hierarchy",
+            "Responsive layout basics"
+          ],
+          "steps": [
+            "List every piece of content on the current site and group it into logical pages.",
+            "Draw a new sitemap in [FigJam](https://www.figma.com) with no more than 5-6 top-level pages.",
+            "Wireframe the home page, the main task page and a contact page for desktop.",
+            "Create mobile versions of the same 3 pages.",
+            "Make the main task, such as 'Book appointment', reachable from the home page in one click.",
+            "Get feedback from one person and note your changes."
+          ],
+          "deliverables": [
+            "Content inventory and new sitemap",
+            "At least 3 desktop and 3 mobile wireframes",
+            "Feedback notes"
+          ],
+          "done_when": [
+            "The sitemap has no more than 6 top-level pages",
+            "Desktop and mobile wireframes exist for 3 pages",
+            "The main task is one click from the home page",
+            "At least one change was made from feedback"
+          ],
+          "hints": [
+            "Use the words your interviewees used as navigation labels.",
+            "Design mobile first if most users will visit on their phones.",
+            "Keep wireframes grayscale so feedback focuses on structure."
+          ],
+          "stretch": "Run a quick card-sorting exercise with 2 people to validate your navigation groups.",
+          "post_highlights": [
+            "Restructured a local business website with a new sitemap",
+            "Wireframed desktop and mobile versions of the key pages",
+            "Made the main customer task reachable in one click"
+          ]
+        },
+        "3": {
+          "title": "High-fidelity Design System and Pages",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Build a small design system and use it to create polished desktop and mobile pages. You will learn how consistent components make responsive design easier.",
+          "learn": [
+            "Colour and text styles",
+            "Responsive components with auto layout",
+            "Layout grids for desktop and mobile",
+            "Basic accessibility checks"
+          ],
+          "steps": [
+            "Create a colour palette that fits the business and save it as styles.",
+            "Define a type scale that works on both desktop and mobile.",
+            "Set up a 12-column grid for desktop and a 4-column grid for mobile.",
+            "Build components with auto layout: navbar, button, service card, form field and footer.",
+            "Design the 3 pages at high fidelity for both desktop and mobile.",
+            "Check contrast and make mobile tap targets at least 44x44 pt.",
+            "Document everything on a 'Design System' page."
+          ],
+          "deliverables": [
+            "Design System page",
+            "3 high-fidelity desktop pages and 3 mobile pages",
+            "Screenshot of accessibility checks"
+          ],
+          "done_when": [
+            "All pages use saved styles and components",
+            "At least 5 components are built with auto layout",
+            "Pages follow the layout grids",
+            "Body text meets a 4.5:1 contrast ratio and tap targets are at least 44x44 pt"
+          ],
+          "hints": [
+            "Set auto layout children to 'Fill container' so cards stretch correctly.",
+            "Use real photos only if you have rights to them; placeholder images are fine.",
+            "The [WCAG overview from W3C](https://www.w3.org/WAI/) explains contrast basics."
+          ],
+          "stretch": "Add a tablet layout for the home page.",
+          "post_highlights": [
+            "Built a design system with responsive components",
+            "Designed high-fidelity desktop and mobile pages for a website redesign",
+            "Checked the design for colour contrast and tap target sizes"
+          ]
+        },
+        "4": {
+          "title": "Prototype, Testing and Case Study",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Prototype the main task, test old versus new with 3 people and write a case study comparing the two. Showing measurable improvement makes your redesign convincing.",
+          "learn": [
+            "Prototyping flows in Figma",
+            "Comparative usability testing",
+            "Iterating from findings",
+            "Writing a before/after case study"
+          ],
+          "steps": [
+            "Prototype the main task flow on mobile, such as booking an appointment.",
+            "Ask 3 people to do the same task on the old site and your prototype, and note time and problems.",
+            "Fix the top 3 issues found in your prototype.",
+            "Write a case study with before/after screenshots, test results and what you learned.",
+            "Label the project clearly as an unofficial concept redesign.",
+            "Record a 60-second walkthrough of the new flow."
+          ],
+          "deliverables": [
+            "Clickable prototype link",
+            "Comparison test notes with times",
+            "Before/after screenshots",
+            "Published case study link"
+          ],
+          "done_when": [
+            "The main task can be completed in the prototype without help",
+            "3 people tested both the old site and the prototype",
+            "At least 3 issues are fixed after testing",
+            "The case study includes before/after comparisons and test results"
+          ],
+          "hints": [
+            "Give testers the same task wording for both versions to keep the comparison fair.",
+            "Report simple numbers like average time or number of errors.",
+            "Show the business name only if you make clear the work is a concept."
+          ],
+          "stretch": "Share the case study with the business owner and note their feedback.",
+          "post_highlights": [
+            "Prototyped a redesigned booking flow for a local business website",
+            "Compared the old and new designs with 3 users and measured improvements",
+            "Published a before/after UX case study"
+          ]
+        }
+      }
+    }
+  ]
+}

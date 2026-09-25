@@ -68,20 +68,16 @@ class TestStudentApplicationLifecycle:
         assert r.status_code == 200
         student_id = r.json()["student_id"]
 
-        # 2. Create batch
-        r = await client.post("/api/admin/batches", json={
-            "domain": "web-dev",
-            "batch_number": 1,
-        }, headers=admin_headers)
-        assert r.status_code == 200
-        batch_id = r.json()["batch"]["id"]
-
-        # 3. Enroll
-        r = await client.post(
-            f"/api/admin/batches/{batch_id}/students",
-            json={"student_id": student_id},
+        # 2. Shortlist
+        r = await client.patch(
+            f"/api/admin/students/{student_id}/status",
+            json={"status": "shortlisted"},
             headers=admin_headers,
         )
+        assert r.status_code == 200
+
+        # 3. Enroll (no batch selection — one click)
+        r = await client.post(f"/api/admin/students/{student_id}/enroll", headers=admin_headers)
         assert r.status_code == 200
 
         # 4. Check progress
@@ -90,6 +86,7 @@ class TestStudentApplicationLifecycle:
         data = r.json()
         assert data["student"]["email"] == "fullflow@example.com"
         assert "summary" in data
+        assert data["progress"][0]["batch_id"]  # dashboard needs the enrollment reference
 
 
 @pytest.mark.regression
@@ -130,39 +127,33 @@ class TestAuthenticationFlow:
 
 
 @pytest.mark.regression
-class TestAdminBatchLifecycle:
+class TestAdminEnrollmentLifecycle:
     """
-    REGRESSION: Batch create → enroll → delete cascade must always work.
+    REGRESSION: Shortlist → enroll → drop → re-enroll → delete must always work,
+    and re-enrolling must keep the original enrollment (so certificate IDs never change).
     """
 
-    async def test_create_batch_enroll_delete(self, client, admin_headers, test_student):
-        # Create batch
-        r = await client.post("/api/admin/batches", json={
-            "domain": "ml",
-            "batch_number": 1,
-        }, headers=admin_headers)
+    async def test_enroll_drop_reenroll_delete(self, client, admin_headers, test_student):
+        sid = test_student["id"]
+        r = await client.post(f"/api/admin/students/{sid}/enroll", headers=admin_headers)
         assert r.status_code == 200
-        batch_id = r.json()["batch"]["id"]
+        first_batch_id = r.json()["batch_id"]
 
-        # Enroll student
-        r = await client.post(
-            f"/api/admin/batches/{batch_id}/students",
-            json={"student_id": test_student["id"]},
-            headers=admin_headers,
-        )
+        r = await client.patch(f"/api/admin/students/{sid}/status", json={"status": "dropped"}, headers=admin_headers)
         assert r.status_code == 200
+        enr = await test_db.fetch_one("SELECT status FROM enrollments WHERE student_id = ?", (sid,))
+        assert enr["status"] == "dropped"
 
-        # Verify enrolled
-        r = await client.get(f"/api/admin/batches/{batch_id}/progress", headers=admin_headers)
-        assert r.json()["total_students"] == 1
-
-        # Delete batch
-        r = await client.delete(f"/api/admin/batches/{batch_id}", headers=admin_headers)
+        r = await client.post(f"/api/admin/students/{sid}/enroll", headers=admin_headers)
         assert r.status_code == 200
+        assert r.json()["batch_id"] == first_batch_id
+        assert r.json()["reactivated"] is True
+        count = await test_db.fetch_one("SELECT COUNT(*) AS n FROM enrollments WHERE student_id = ?", (sid,))
+        assert count["n"] == 1
 
-        # Verify gone
-        r = await client.get(f"/api/admin/batches/{batch_id}", headers=admin_headers)
-        assert r.status_code == 404
+        r = await client.delete(f"/api/admin/students/{sid}", headers=admin_headers)
+        assert r.status_code == 200
+        assert await test_db.fetch_one("SELECT id FROM batches WHERE id = ?", (first_batch_id,)) is None
 
 
 @pytest.mark.regression
@@ -225,8 +216,8 @@ class TestAdminAuthProtection:
 
     @pytest.mark.parametrize("method,path", [
         ("GET", "/api/admin/stats"),
-        ("GET", "/api/admin/batches"),
-        ("POST", "/api/admin/batches"),
+        ("POST", "/api/admin/students/1/enroll"),
+        ("PATCH", "/api/admin/students/1/status"),
         ("GET", "/api/admin/students"),
         ("GET", "/api/admin/email/logs"),
         ("GET", "/api/admin/submissions"),
@@ -235,5 +226,5 @@ class TestAdminAuthProtection:
         if method == "GET":
             r = await client.get(path)
         else:
-            r = await client.post(path, json={})
+            r = await client.request(method, path, json={})
         assert r.status_code == 403, f"{method} {path} returned {r.status_code}, expected 403"

@@ -1,0 +1,563 @@
+{
+  "domain": "genai",
+  "tracks": [
+    {
+      "project_name": "StudyBuddy: AI Study Assistant & Chatbot",
+      "tagline": "Build a friendly command-line chatbot that helps you revise a subject, then grow it into a remembering, well-behaved study assistant with a UI.",
+      "weeks": {
+        "1": {
+          "title": "Your First LLM API Call",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Get a free LLM API key, make your first working API call from Python, and build a simple terminal chatbot that answers one question at a time. This week is about the basic mechanics of talking to an LLM safely, before anything fancier.",
+          "learn": [
+            "Getting and using a free-tier LLM API key (Google Gemini API or Groq)",
+            "Keeping secrets out of code with a `.env` file and `python-dotenv`",
+            "Making a basic chat completion request and reading the response",
+            "Writing a simple loop that takes input and prints a reply"
+          ],
+          "steps": [
+            "Sign up for a free API key from Google AI Studio (Gemini API) or Groq, and confirm you understand the free-tier limits.",
+            "Create a project folder, install the provider's Python SDK and `python-dotenv`, and put your key in a `.env` file (never commit this file).",
+            "Add `.env` to `.gitignore` before your first commit, and double-check it is not tracked by Git.",
+            "Write a `ask_llm(prompt)` function that sends one prompt to the API and returns the text reply, and test it with a simple question.",
+            "Wrap the API call in `try`/`except` so a network error or bad key prints a friendly message instead of crashing.",
+            "Build a terminal loop that asks the user for a study question, sends it to `ask_llm`, and prints the answer, repeating until the user types `quit`.",
+            "Add a fixed instruction like 'You are a helpful study assistant for a college student' to every prompt you send, and see how it changes the tone of answers.",
+            "Commit your code (not your `.env` file) to a Git repo with a README on how to get a key and run the app."
+          ],
+          "deliverables": [
+            "A working `ask_llm(prompt)` function wrapping one provider's API",
+            "A `.env` file (untracked) holding the API key, loaded with `python-dotenv`",
+            "A terminal chat loop that answers study questions one at a time",
+            "A README with setup steps that do not expose any real key"
+          ],
+          "done_when": [
+            "Running the script and asking a question returns a real, relevant answer from the API",
+            "The API key never appears anywhere in the committed code or Git history",
+            "A deliberately broken key or no internet connection shows a friendly error, not a crash",
+            "Typing `quit` exits the loop cleanly"
+          ],
+          "hints": [
+            "If your key stops working, check you are reading it with `os.getenv('API_KEY')` and that the `.env` file is in the same folder you are running from.",
+            "Free tiers are rate-limited, so add a short `time.sleep(1)` between rapid test calls while you are experimenting.",
+            "Both the [Gemini API docs](https://ai.google.dev/gemini-api/docs) and [Groq docs](https://console.groq.com/docs) have a 'quickstart' page with a minimal working example in Python."
+          ],
+          "stretch": "Let the user pick a subject at startup (e.g. 'DBMS', 'Python') and prepend it to the system instruction so answers stay on-topic.",
+          "post_highlights": [
+            "Made my first LLM API call from Python using a free-tier provider",
+            "Built a terminal study chatbot with safe API key handling via .env",
+            "Learned to handle network and API errors gracefully instead of crashing"
+          ]
+        },
+        "2": {
+          "title": "Prompt Templates and Conversation Memory",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Make StudyBuddy actually remember the conversation and respond consistently by introducing prompt templates, a proper system prompt, and a message history list. This is the difference between a one-shot Q&A script and something that feels like a real assistant.",
+          "learn": [
+            "Writing a clear, reusable system prompt that sets the assistant's behaviour",
+            "Building prompt templates with placeholders for reusable question types",
+            "Keeping a conversation history list and sending it with each request",
+            "Managing context length by trimming old messages"
+          ],
+          "steps": [
+            "Write a system prompt in a separate `prompts.py` file that defines StudyBuddy's role, tone, and a rule like 'if you don't know, say so instead of guessing'.",
+            "Create a `Conversation` class that stores a list of `{role, content}` messages, starting with the system prompt.",
+            "Update `ask_llm` to accept the full message list instead of a single string, and send the whole conversation on every call so the model has context.",
+            "Add an `add_message(role, content)` method and call it for both the user's input and the assistant's reply after every turn.",
+            "Create 2-3 prompt templates as Python functions, such as `explain_concept(topic)` and `quiz_me(topic, num_questions)`, that build a formatted prompt string.",
+            "Add menu commands (`/explain <topic>`, `/quiz <topic>`, or plain chat) that use these templates.",
+            "Test that asking a follow-up question like 'give me an example' works correctly because the model can see the earlier messages.",
+            "Add a simple rule that trims the history to the last 10 messages (keeping the system prompt) so long chats do not break the request."
+          ],
+          "deliverables": [
+            "A `Conversation` class that tracks message history across turns",
+            "A `prompts.py` file with a system prompt and at least two prompt templates",
+            "Working `/explain` and `/quiz` commands built on the templates",
+            "A history-trimming rule that keeps requests from growing forever"
+          ],
+          "done_when": [
+            "A follow-up question like 'explain that more simply' gets a relevant answer referencing the previous topic",
+            "`/explain <topic>` and `/quiz <topic>` both produce sensibly formatted, on-topic responses",
+            "The system prompt is sent exactly once per conversation, not repeated in every message",
+            "A long chat (15+ turns) keeps working without the request growing unbounded"
+          ],
+          "hints": [
+            "Most providers expect a list of `{'role': 'user'|'assistant'|'system', 'content': ...}` dictionaries; check the exact format in your provider's chat docs.",
+            "Keep templates as plain Python f-strings first; you do not need a templating library for this.",
+            "If answers start ignoring your system prompt in long chats, that is a sign your trimming logic accidentally dropped it — keep it pinned at index 0."
+          ],
+          "stretch": "Add a `/save` command that writes the conversation history to a JSON file and a `/load` command that resumes it later.",
+          "post_highlights": [
+            "Added conversation memory to my AI study assistant using a message history list",
+            "Designed a system prompt and reusable prompt templates for explain and quiz modes",
+            "Learned to manage context length by trimming old messages safely"
+          ]
+        },
+        "3": {
+          "title": "Answer Questions from Your Own Notes",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Give StudyBuddy the ability to answer questions using your own study notes instead of only general knowledge, by building a simple retrieval system: chunk your notes, embed them, and find the most relevant pieces for each question. This is a hands-on, simplified introduction to how RAG (retrieval-augmented generation) works.",
+          "learn": [
+            "Splitting long text into overlapping chunks",
+            "Generating embeddings for text with an embeddings API",
+            "Comparing embeddings with cosine similarity to find relevant chunks",
+            "Building a prompt that includes retrieved context (a simple RAG pipeline)"
+          ],
+          "steps": [
+            "Collect 2-4 of your own study notes as `.txt` files (a few pages each) in a `notes/` folder.",
+            "Write a `chunk_text(text, size=500, overlap=50)` function that splits each file into overlapping word or character chunks, and print how many chunks you get.",
+            "Write an `embed(text)` function that calls your provider's embeddings endpoint and returns a vector, and test it on one chunk.",
+            "Embed every chunk once at startup (or cache the embeddings to a JSON/pickle file so you do not re-embed every run) and keep them alongside their source text.",
+            "Write a `cosine_similarity(a, b)` function by hand using basic vector math, or use a small library like `numpy` for the dot product and norms.",
+            "Write `retrieve(question, top_k=3)` that embeds the question and returns the `top_k` most similar chunks.",
+            "Build a RAG prompt template that inserts the retrieved chunks as context and instructs the model to answer only from that context, saying 'not covered in my notes' if it cannot.",
+            "Add a `/notes <question>` command that runs retrieval and generates an answer, and test it with a question you know is answered in your notes and one that is not."
+          ],
+          "deliverables": [
+            "A `chunk_text` function that splits notes into overlapping chunks",
+            "An embedding + caching pipeline for all chunks",
+            "A `retrieve(question)` function using cosine similarity",
+            "A `/notes <question>` command that answers using retrieved context"
+          ],
+          "done_when": [
+            "A question clearly answered in your notes returns a correct, grounded answer",
+            "A question unrelated to your notes gets an honest 'not covered' response instead of a made-up answer",
+            "Re-running the app does not re-embed every chunk from scratch (embeddings are cached)",
+            "`retrieve()` returns chunks that are genuinely relevant to the question, not random ones"
+          ],
+          "hints": [
+            "Chunk overlap matters: with no overlap, a sentence split across two chunks can lose meaning in both.",
+            "Cache embeddings as `{chunk_text: vector}` in a JSON or pickle file keyed by a hash of the chunk, so notes changes trigger a re-embed automatically.",
+            "You do not need a vector database for this scale; a Python list of chunks and vectors with a manual similarity loop works fine for a few hundred chunks."
+          ],
+          "stretch": "Show the source chunk(s) used for each answer underneath the response, so you can see exactly what the model was grounded on.",
+          "post_highlights": [
+            "Built a simple retrieval pipeline that lets my AI assistant answer from my own notes",
+            "Implemented text chunking and embeddings with cosine similarity by hand",
+            "Learned the core idea behind RAG by grounding LLM answers in retrieved context"
+          ]
+        },
+        "4": {
+          "title": "Streamlit UI, Evaluation and Guardrails",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Give StudyBuddy a proper chat UI with Streamlit, add basic guardrails so it stays on-topic and safe, and write a small evaluation set to check its answer quality. This is the polish that turns a script into a demoable product.",
+          "learn": [
+            "Building a chat interface with Streamlit's chat elements and session state",
+            "Writing simple guardrails: input filtering and instructed refusal behaviour",
+            "Building a small evaluation set and scoring answers against expected content",
+            "Documenting a GenAI project, including its known limitations"
+          ],
+          "steps": [
+            "Install Streamlit and create `app.py` using `st.chat_message` and `st.chat_input` to display the conversation, storing history in `st.session_state`.",
+            "Add a sidebar with a notes file uploader (or a folder picker) so users can add their own `.txt` notes, re-running the chunk-and-embed step on upload.",
+            "Add a simple guardrail: check the user's question against a short banned-topics list or ask the model to classify if a question is off-topic before answering, refusing politely if so.",
+            "Add a visible note in the UI that answers are AI-generated and may be incorrect, especially outside the loaded notes.",
+            "Create an `eval_questions.json` file with at least 8 question/expected-keyword pairs (e.g. a question and a word that should appear in a good answer).",
+            "Write an `evaluate.py` script that runs each question through your pipeline and checks whether the expected keyword appears in the answer, printing a pass/fail summary.",
+            "Fix at least one weak spot you find from running the evaluation (a bad prompt, a chunk size issue, or a missing guardrail).",
+            "Write a full README covering setup, how to add notes, how to run the app and the evaluation script, and known limitations, then record a 30-60 second demo."
+          ],
+          "deliverables": [
+            "A Streamlit chat UI with session-based history and a notes uploader",
+            "A basic guardrail that refuses clearly off-topic or unsafe questions",
+            "An `eval_questions.json` set and an `evaluate.py` script with a pass/fail summary",
+            "A complete README with setup, usage and known limitations, plus a demo video"
+          ],
+          "done_when": [
+            "`streamlit run app.py` opens a chat UI where messages persist across turns in the session",
+            "Uploading a new notes file makes its content usable in `/notes`-style answers within the same session",
+            "At least one deliberately off-topic or unsafe test question is refused politely",
+            "`python evaluate.py` runs at least 8 checks and reports how many passed"
+          ],
+          "hints": [
+            "Use `st.session_state` to store both the conversation and the cached embeddings, or they will reset on every Streamlit rerun.",
+            "Keep your guardrail simple: a short keyword check or one extra LLM call asking 'is this on-topic? yes/no' is enough for this stage.",
+            "The [Streamlit documentation](https://docs.streamlit.io) has a dedicated chat elements guide covering `st.chat_message` and `st.chat_input` with session state."
+          ],
+          "stretch": "Add a thumbs-up/thumbs-down button on each answer in the UI and log the feedback to a file for later review.",
+          "post_highlights": [
+            "Built a full Streamlit chat UI for my AI study assistant with persistent session history",
+            "Added guardrails so the assistant refuses off-topic or unsafe questions",
+            "Wrote an evaluation script to measure answer quality against expected keywords"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "DocuMind: Document Q&A Tool with Retrieval",
+      "tagline": "Build a tool that lets you ask questions about your own PDFs and text files and get answers grounded in their actual content.",
+      "weeks": {
+        "1": {
+          "title": "Your First LLM API Call",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Get a free LLM API key, make your first working API call, and build a terminal tool that summarises a piece of text you paste in. This week is about the basic mechanics of calling an LLM safely, which every later feature depends on.",
+          "learn": [
+            "Getting and using a free-tier LLM API key (Google Gemini API or Groq)",
+            "Keeping secrets out of code with a `.env` file and `python-dotenv`",
+            "Making a basic chat completion request and reading the response",
+            "Writing a small CLI that takes text input and returns a summary"
+          ],
+          "steps": [
+            "Sign up for a free API key from Google AI Studio (Gemini API) or Groq, and note the free-tier limits.",
+            "Create a project folder, install the provider's Python SDK and `python-dotenv`, and store your key in a `.env` file.",
+            "Add `.env` to `.gitignore` before your first commit, and confirm it is not tracked by Git.",
+            "Write a `summarize(text)` function that sends the text with an instruction like 'summarise this in 3 bullet points' and returns the reply.",
+            "Wrap the API call in `try`/`except` so a bad key or network error prints a friendly message instead of crashing.",
+            "Build a small CLI that reads a `.txt` file path from the user, prints its summary, and loops until the user types `quit`.",
+            "Test it on 2-3 different text files (an article, a set of notes) and check the summaries are genuinely useful.",
+            "Commit your code (not your `.env` file) to a Git repo with a README on how to get a key and run the app."
+          ],
+          "deliverables": [
+            "A working `summarize(text)` function wrapping one provider's API",
+            "A `.env` file (untracked) holding the API key, loaded with `python-dotenv`",
+            "A CLI that summarises any `.txt` file the user points it at",
+            "A README with setup steps that do not expose any real key"
+          ],
+          "done_when": [
+            "Running the CLI on a real text file produces a relevant, readable summary",
+            "The API key never appears anywhere in the committed code or Git history",
+            "A deliberately broken key or missing file shows a friendly error, not a crash",
+            "Typing `quit` exits the loop cleanly"
+          ],
+          "hints": [
+            "If your key stops working, check you are reading it with `os.getenv('API_KEY')` and running the script from the folder containing `.env`.",
+            "Free tiers are rate-limited, so add a short `time.sleep(1)` between rapid test calls while experimenting.",
+            "Both the [Gemini API docs](https://ai.google.dev/gemini-api/docs) and [Groq docs](https://console.groq.com/docs) have a quickstart page with a minimal Python example."
+          ],
+          "stretch": "Add a `length` parameter (`short`, `medium`, `long`) that changes the instruction sent to the model.",
+          "post_highlights": [
+            "Made my first LLM API call from Python using a free-tier provider",
+            "Built a CLI tool that summarises text files with safe API key handling",
+            "Learned to handle network and API errors gracefully instead of crashing"
+          ]
+        },
+        "2": {
+          "title": "Prompt Templates and Structured Summaries",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Add prompt templates for different document tasks and start extracting information from documents that arrive one page or section at a time. This introduces the idea of processing a document in pieces, which next week's retrieval system depends on.",
+          "learn": [
+            "Writing prompt templates for different tasks (summarise, extract key points, generate questions)",
+            "Reading a multi-page `.txt` or Markdown file and splitting it into sections",
+            "Looping over sections and combining per-section results",
+            "Keeping a small conversation history for follow-up questions"
+          ],
+          "steps": [
+            "Create a `prompts.py` file with a system prompt describing DocuMind's role, and 2-3 templates: `summarize(text)`, `key_points(text)` and `generate_questions(text)`.",
+            "Write a `split_sections(text)` function that splits a document on headings or blank-line paragraphs, and print how many sections a real document produces.",
+            "Write `summarize_document(sections)` that summarises each section individually, then combines the section summaries into one final summary with a second LLM call.",
+            "Add a `key_points` command that extracts 5-8 bullet key points from the whole document using the combined summary as input.",
+            "Add a `quiz_me` command that generates 3-5 questions (with answers) based on the document, useful for the student's own revision.",
+            "Add a small `Conversation` class so a user can ask one follow-up question about the document after seeing the summary, with the summary included as context.",
+            "Test on a document with at least 3-4 distinct sections and check the combined summary reads coherently, not like disconnected fragments.",
+            "Commit your code with an updated README describing the new commands."
+          ],
+          "deliverables": [
+            "`prompts.py` with a system prompt and at least three task templates",
+            "A `split_sections` function and a two-step summarise-then-combine pipeline",
+            "Working `key_points` and `quiz_me` commands",
+            "A follow-up question feature using a small conversation history"
+          ],
+          "done_when": [
+            "A multi-section document produces a coherent combined summary, not just concatenated fragments",
+            "`key_points` returns 5-8 relevant bullets drawn from the actual document content",
+            "`quiz_me` produces questions with answers that are actually about the document",
+            "A follow-up question after the summary gets a relevant, context-aware answer"
+          ],
+          "hints": [
+            "Split on double newlines or Markdown `#` headings first; fall back to fixed-size chunks only if a document has no clear structure.",
+            "Summarising each section separately then combining avoids exceeding the model's context limit on longer documents.",
+            "Keep the per-section summaries in a list so you can inspect them individually if the combined summary looks off."
+          ],
+          "stretch": "Add a `compare` command that takes two documents and summarises their key differences.",
+          "post_highlights": [
+            "Built a two-step summarise-then-combine pipeline for multi-section documents",
+            "Added key-point extraction and auto-generated quiz questions from real documents",
+            "Designed reusable prompt templates for different document analysis tasks"
+          ]
+        },
+        "3": {
+          "title": "Retrieval Over Your Own PDFs",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Extend DocuMind to answer specific questions about your own PDF or text files by building a simple retrieval pipeline: extract text, chunk it, embed it, and find the most relevant pieces per question. This is a hands-on, simplified introduction to RAG (retrieval-augmented generation).",
+          "learn": [
+            "Extracting text from PDF files with a library like `pypdf`",
+            "Splitting long text into overlapping chunks",
+            "Generating and comparing embeddings with cosine similarity",
+            "Building a prompt that answers only from retrieved context"
+          ],
+          "steps": [
+            "Install `pypdf` (or `pdfplumber`) and write `extract_text(pdf_path)` that returns the full text of a PDF, testing it on 2-3 real PDFs (lecture notes, an article).",
+            "Write `chunk_text(text, size=500, overlap=50)` to split extracted text into overlapping chunks, keeping track of which document each chunk came from.",
+            "Write an `embed(text)` function using your provider's embeddings endpoint, and embed every chunk once, caching the vectors to a JSON or pickle file.",
+            "Write `cosine_similarity(a, b)` using `numpy` (or by hand) and a `retrieve(question, top_k=3)` function that returns the most similar chunks across all loaded documents.",
+            "Build a RAG prompt template that includes the retrieved chunks and their source document names, instructing the model to answer only from that context and say 'not found in the documents' otherwise.",
+            "Add an `/ask <question>` command that retrieves relevant chunks and generates a grounded answer, showing which document(s) it used.",
+            "Test with a question clearly answered in one PDF, a question spanning two PDFs, and a question not covered anywhere.",
+            "Cache embeddings per file (keyed by filename and a content hash) so re-running on the same files does not re-embed everything."
+          ],
+          "deliverables": [
+            "A PDF text extraction pipeline using `pypdf`",
+            "A chunking and embedding pipeline with caching",
+            "A `retrieve(question)` function using cosine similarity across multiple documents",
+            "An `/ask <question>` command that answers with source attribution"
+          ],
+          "done_when": [
+            "A question clearly answered in one loaded PDF returns a correct, grounded answer citing that document",
+            "A question not covered by any loaded document gets an honest 'not found' response",
+            "Re-running the tool on unchanged files does not re-embed everything from scratch",
+            "`retrieve()` returns genuinely relevant chunks, verified by manually checking at least 3 test questions"
+          ],
+          "hints": [
+            "Some PDFs (scanned images, unusual fonts) extract poorly with `pypdf`; test with simple text-based PDFs first.",
+            "Chunk overlap matters: with no overlap, an answer's key sentence can get split across two chunks and lose meaning in both.",
+            "A plain Python list of `(chunk_text, vector, source_file)` with a manual similarity loop is enough for a few hundred chunks; you do not need a vector database yet."
+          ],
+          "stretch": "Add re-ranking: after retrieving the top 10 chunks by cosine similarity, ask the LLM to pick the best 3 before generating the final answer.",
+          "post_highlights": [
+            "Built a PDF retrieval pipeline that extracts, chunks and embeds real documents",
+            "Implemented cosine similarity search to find relevant chunks per question",
+            "Learned the core idea behind RAG by grounding LLM answers in retrieved, cited context"
+          ]
+        },
+        "4": {
+          "title": "Streamlit UI, Evaluation and Guardrails",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Give DocuMind a proper drag-and-drop UI with Streamlit, add guardrails so it does not make up answers outside the documents, and write a small evaluation set to check answer quality. This is the polish that turns a script into a demoable product.",
+          "learn": [
+            "Building a file-upload UI with Streamlit and handling uploaded PDFs",
+            "Writing a guardrail that keeps answers grounded in retrieved context only",
+            "Building a small evaluation set and scoring answers against expected content",
+            "Documenting a GenAI project, including its known limitations"
+          ],
+          "steps": [
+            "Install Streamlit and create `app.py` with a file uploader (`st.file_uploader`, allowing multiple PDFs) and a chat-style interface using `st.chat_message`/`st.chat_input`.",
+            "On upload, run your Week 3 extract-chunk-embed pipeline and store the chunks and vectors in `st.session_state` so they persist across questions in the session.",
+            "Show a sidebar listing the currently loaded documents and how many chunks each produced.",
+            "Add a guardrail in your RAG prompt instructing the model to say clearly when a question cannot be answered from the loaded documents, and test that it does not invent facts.",
+            "Display the source document name(s) under each answer so users can verify where the information came from.",
+            "Create an `eval_questions.json` file with at least 8 question/expected-keyword pairs based on a fixed set of test PDFs.",
+            "Write an `evaluate.py` script that runs each question through the pipeline and checks whether the expected keyword appears in the answer, printing a pass/fail summary.",
+            "Fix at least one weak spot found during evaluation, then write a full README with setup, usage, known limitations and a 30-60 second demo video."
+          ],
+          "deliverables": [
+            "A Streamlit UI with multi-file PDF upload and a chat-style Q&A interface",
+            "Source attribution displayed under every answer",
+            "An `eval_questions.json` set and an `evaluate.py` script with a pass/fail summary",
+            "A complete README with setup, usage and known limitations, plus a demo video"
+          ],
+          "done_when": [
+            "`streamlit run app.py` lets a user upload PDFs and immediately ask questions about them",
+            "Every answer shown displays which document(s) it was grounded in",
+            "A question outside the uploaded documents gets an honest 'not found' response instead of a fabricated answer",
+            "`python evaluate.py` runs at least 8 checks and reports how many passed"
+          ],
+          "hints": [
+            "Store uploaded file bytes and their processed chunks in `st.session_state` keyed by filename, since Streamlit reruns the whole script on every interaction.",
+            "Keep the guardrail simple: strong wording in the prompt ('only use the provided context; if it's not there, say so') covers most cases at this stage.",
+            "The [Streamlit documentation](https://docs.streamlit.io) has a file uploader guide and a chat elements guide, both directly useful here."
+          ],
+          "stretch": "Add a confidence indicator based on the retrieved chunks' similarity scores, showing 'high/medium/low confidence' next to each answer.",
+          "post_highlights": [
+            "Built a Streamlit document Q&A app with multi-file PDF upload and chat interface",
+            "Added source attribution so every answer shows which document it came from",
+            "Wrote an evaluation script to catch fabricated answers and measure answer quality"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "ContentForge: Prompt-Powered Content Generator",
+      "tagline": "Build a tool that generates social posts, captions and blog outlines from a topic, then turn it into a structured, controllable content pipeline.",
+      "weeks": {
+        "1": {
+          "title": "Your First LLM API Call",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Get a free LLM API key, make your first working API call, and build a terminal tool that generates a short social media caption from a topic you type in. This week is about the basic mechanics of talking to an LLM safely.",
+          "learn": [
+            "Getting and using a free-tier LLM API key (Google Gemini API or Groq)",
+            "Keeping secrets out of code with a `.env` file and `python-dotenv`",
+            "Making a basic chat completion request and reading the response",
+            "Writing a small CLI that takes a topic and returns generated text"
+          ],
+          "steps": [
+            "Sign up for a free API key from Google AI Studio (Gemini API) or Groq, and note the free-tier limits.",
+            "Create a project folder, install the provider's Python SDK and `python-dotenv`, and store your key in a `.env` file.",
+            "Add `.env` to `.gitignore` before your first commit, and confirm it is not tracked by Git.",
+            "Write a `generate_caption(topic)` function that sends a prompt like 'write a short, upbeat Instagram caption about {topic}' and returns the reply.",
+            "Wrap the API call in `try`/`except` so a bad key or network error prints a friendly message instead of crashing.",
+            "Build a CLI loop that asks for a topic, prints 2-3 caption options, and repeats until the user types `quit`.",
+            "Test it on 3-4 different topics and check the captions are genuinely different in tone, not repetitive.",
+            "Commit your code (not your `.env` file) to a Git repo with a README on how to get a key and run the app."
+          ],
+          "deliverables": [
+            "A working `generate_caption(topic)` function wrapping one provider's API",
+            "A `.env` file (untracked) holding the API key, loaded with `python-dotenv`",
+            "A CLI that generates caption options for any topic the user types",
+            "A README with setup steps that do not expose any real key"
+          ],
+          "done_when": [
+            "Running the CLI on a real topic produces relevant, readable caption text",
+            "The API key never appears anywhere in the committed code or Git history",
+            "A deliberately broken key or empty topic shows a friendly error, not a crash",
+            "Typing `quit` exits the loop cleanly"
+          ],
+          "hints": [
+            "If your key stops working, check you are reading it with `os.getenv('API_KEY')` and running the script from the folder containing `.env`.",
+            "Free tiers are rate-limited, so add a short `time.sleep(1)` between rapid test calls while experimenting.",
+            "Both the [Gemini API docs](https://ai.google.dev/gemini-api/docs) and [Groq docs](https://console.groq.com/docs) have a quickstart page with a minimal Python example."
+          ],
+          "stretch": "Add a `tone` parameter (`funny`, `professional`, `casual`) that changes the instruction sent to the model.",
+          "post_highlights": [
+            "Made my first LLM API call from Python using a free-tier provider",
+            "Built a CLI tool that generates social captions with safe API key handling",
+            "Learned to handle network and API errors gracefully instead of crashing"
+          ]
+        },
+        "2": {
+          "title": "Prompt Templates for Multiple Content Types",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Expand ContentForge to generate several content types (captions, tweets, blog outlines) from consistent, reusable prompt templates, and remember the last few topics you worked on. This week is about designing good prompts, not just calling an API.",
+          "learn": [
+            "Writing a clear system prompt that fixes ContentForge's voice and rules",
+            "Building parametrised prompt templates for different content types",
+            "Using few-shot examples in a prompt to guide style and format",
+            "Keeping a short history of generated content in memory"
+          ],
+          "steps": [
+                "Write a `prompts.py` file with a system prompt (for example 'You are a social media assistant that writes concise, platform-appropriate content') and templates for `caption(topic, tone)`, `tweet(topic)` and `blog_outline(topic)`.",
+            "Add 1-2 few-shot examples inside the `tweet` template (a topic and a good example tweet) to guide length and style, and compare output quality with and without the examples.",
+            "Build a `blog_outline` template that asks for a title and 4-6 section headings with a one-line description each, and check the model returns them in a consistent format.",
+            "Create a `ContentHistory` class that stores each generated piece (type, topic, output, timestamp) in a list in memory.",
+            "Add a menu with `1) Caption 2) Tweet 3) Blog outline 4) View history 5) Quit`, wiring each option to its template.",
+            "Add a `regenerate` option that reruns the last request with a slightly different instruction (for example 'make it shorter') to show how prompt tweaks change output.",
+            "Save the history to `history.json` on exit and load it back on startup so past generations are not lost.",
+            "Test each content type on the same topic and compare how the outputs differ in length and style."
+          ],
+          "deliverables": [
+            "`prompts.py` with a system prompt and three content-type templates",
+            "A working menu covering caption, tweet and blog outline generation",
+            "A `ContentHistory` class with save/load to `history.json`",
+            "A regenerate option that demonstrates prompt tweaking"
+          ],
+          "done_when": [
+            "All three content types produce correctly formatted, on-topic output for the same test topic",
+            "The tweet template's few-shot examples visibly improve format consistency compared to no examples",
+            "History persists correctly across a restart (old entries are still there)",
+            "The regenerate option produces a visibly different, adjusted result from the original"
+          ],
+          "hints": [
+            "Few-shot examples work best when they are short and clearly formatted the same way you want the real output formatted.",
+            "Ask the model to return the blog outline in a consistent, simple format (like numbered headings) so it is easy to read reliably.",
+            "Keep each template as a plain function returning a string; you do not need a templating library yet."
+          ],
+          "stretch": "Add a `hashtag_suggestions(topic)` template that returns 5-8 relevant hashtags, and append them automatically to generated captions.",
+          "post_highlights": [
+            "Designed prompt templates for captions, tweets and blog outlines with a consistent system prompt",
+            "Used few-shot examples to improve output format and style consistency",
+            "Built a content history feature with JSON persistence across sessions"
+          ]
+        },
+        "3": {
+          "title": "Structured JSON Output for a Content Calendar",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Make ContentForge return structured JSON instead of free text, so you can build a real content calendar: a week's worth of posts generated and organised automatically. This teaches you how to get reliable, parseable output from an LLM, a core skill for any real GenAI integration.",
+          "learn": [
+            "Asking an LLM to return valid JSON and parsing it reliably",
+            "Designing a JSON schema for structured content (post type, day, text, hashtags)",
+            "Validating and retrying when the model returns malformed output",
+            "Persisting structured data to a file and reading it back into objects"
+          ],
+          "steps": [
+            "Design a JSON schema for one content item: `{\"day\": \"Monday\", \"type\": \"caption\", \"topic\": ..., \"text\": ..., \"hashtags\": [...]}`.",
+            "Write a prompt that explicitly asks the model to 'respond with only valid JSON matching this schema' and include one example of the exact shape you want.",
+            "Write a `generate_calendar(topics, days)` function that asks for one JSON object per day covering your list of topics, requesting all days in a single response as a JSON array.",
+            "Write `parse_and_validate(response_text)` that uses `json.loads` and checks every required key is present for every item, raising a clear error if not.",
+            "Add a retry loop: if parsing or validation fails, send the response back to the model with 'this was not valid JSON, please fix it and return only JSON' and try again up to 2 times.",
+            "Save a successfully generated calendar to `calendar.json` and write a function that loads it back into a list of dictionaries.",
+            "Add a `View calendar` menu option that prints the week's plan in a readable table format from the loaded JSON.",
+            "Test with a deliberately tricky topic list to see how often the first attempt returns malformed JSON, and note how the retry logic handles it."
+          ],
+          "deliverables": [
+            "A defined JSON schema for a content calendar item",
+            "A `generate_calendar` function producing structured JSON for multiple days",
+            "A `parse_and_validate` function with a retry-on-failure loop",
+            "A saved `calendar.json` and a readable calendar view"
+          ],
+          "done_when": [
+            "`generate_calendar` produces a full week of items that all parse successfully as JSON",
+            "Every parsed item contains all the required schema keys",
+            "Deliberately feeding malformed JSON into `parse_and_validate` triggers the retry logic instead of crashing",
+            "`calendar.json` loads back correctly and displays in the calendar view"
+          ],
+          "hints": [
+            "If the model wraps JSON in markdown code fences (```json ... ```), strip those before calling `json.loads`.",
+            "Some providers support a dedicated 'JSON mode' or response schema parameter; check your provider's docs, but the prompt-plus-validation approach works everywhere as a fallback.",
+            "Keep the schema small at first (5-6 fields); it is much easier to get reliable JSON from a simple schema than a deeply nested one."
+          ],
+          "stretch": "Add a `regenerate_day(day)` function that asks the model to redo just one day's item while keeping the rest of the calendar unchanged.",
+          "post_highlights": [
+            "Built a content calendar generator that returns structured, schema-validated JSON",
+            "Implemented a retry loop to recover from malformed LLM output",
+            "Learned how to get reliable, parseable structured output from an LLM API"
+          ]
+        },
+        "4": {
+          "title": "Streamlit UI, Evaluation and Guardrails",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Give ContentForge a proper Streamlit UI for planning and editing a content calendar, add guardrails against off-brand or inappropriate output, and write a small evaluation set to check output quality. This is the polish that turns a script into a demoable product.",
+          "learn": [
+            "Building a form-based planning UI with Streamlit widgets",
+            "Editing and re-rendering structured data in a Streamlit table",
+            "Writing a guardrail that filters or blocks inappropriate generated content",
+            "Building a small evaluation set and scoring structured output"
+          ],
+          "steps": [
+            "Install Streamlit and create `app.py` with a form to enter a list of topics and the number of days to plan, calling your Week 3 `generate_calendar`.",
+            "Display the generated calendar in an editable table using `st.data_editor`, letting the user tweak text or hashtags before saving.",
+            "Add a 'Regenerate this day' button per row that calls your Week 3 regenerate function and updates just that row.",
+            "Add a guardrail: before generating, check the topic list against a short banned-words list, and after generating, scan the output text for the same list, flagging or regenerating any matches.",
+            "Add a download button (`st.download_button`) that exports the final calendar as `calendar.json` or a readable text file.",
+            "Create an `eval_prompts.json` file with at least 8 test topics and simple checks (for example, expected JSON keys present, no banned words, text under a max length).",
+            "Write an `evaluate.py` script that runs each test topic through the pipeline and reports a pass/fail summary against those checks.",
+            "Fix at least one weak spot found during evaluation, then write a full README with setup, usage and known limitations, and record a 30-60 second demo."
+          ],
+          "deliverables": [
+            "A Streamlit UI for generating, viewing and editing a content calendar",
+            "A guardrail that checks topics and generated text against a banned-words list",
+            "An `eval_prompts.json` set and an `evaluate.py` script with a pass/fail summary",
+            "A complete README with setup, usage and known limitations, plus a demo video"
+          ],
+          "done_when": [
+            "`streamlit run app.py` lets a user generate a full week's calendar from entered topics",
+            "Editing a cell in the table and a per-row regenerate button both work correctly",
+            "A deliberately inappropriate test topic is caught by the guardrail before or after generation",
+            "`python evaluate.py` runs at least 8 checks and reports how many passed"
+          ],
+          "hints": [
+            "`st.data_editor` returns an edited DataFrame; convert it back to your JSON schema before saving or exporting.",
+            "Keep the guardrail simple and explainable: a banned-words list check is enough for this stage, not a full moderation model.",
+            "The [Streamlit documentation](https://docs.streamlit.io) has a data editor guide and a download button example, both directly useful here."
+          ],
+          "stretch": "Add a 'brand voice' setting (a short description) that gets included in every generation prompt, and show a before/after comparison with and without it.",
+          "post_highlights": [
+            "Built a Streamlit content calendar planner with an editable, exportable table",
+            "Added guardrails to catch inappropriate content before and after generation",
+            "Wrote an evaluation script to measure structured output quality across test topics"
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -113,3 +113,47 @@ class TestStudentProgress:
         summary = r.json()["summary"]
         assert summary["completed_tasks"] == 4
         assert summary["completion_pct"] == 100
+
+
+@pytest.mark.students
+class TestProgressSingleEnrollment:
+    async def test_progress_ignores_stale_dropped_enrollment(self, client, test_student):
+        """Only the current enrollment's rows reach the dashboard."""
+        old = await seed_batch(test_db, domain="python", batch_number=50)
+        new = await seed_batch(test_db, domain="web-dev", batch_number=51)
+        await seed_enrollment(test_db, test_student["id"], old)
+        await test_db.execute("UPDATE enrollments SET status = 'dropped' WHERE batch_id = ?", (old,))
+        await test_db.insert(
+            "INSERT INTO progress (student_id, batch_id, week, issues_completed, score) VALUES (?, ?, 3, 1, 100)",
+            (test_student["id"], old),
+        )
+        await seed_enrollment(test_db, test_student["id"], new)
+
+        data = (await client.get(f"/api/students/progress/{test_student['email']}")).json()
+        assert {p["batch_id"] for p in data["progress"]} == {new}
+        assert data["summary"]["completed_tasks"] == 0
+        assert not any("batch_number" in p for p in data["progress"])
+
+    async def test_dropped_student_without_progress_has_no_enrollment(self, client, enrolled_student):
+        await test_db.execute("UPDATE enrollments SET status = 'dropped' WHERE student_id = ?", (enrolled_student["id"],))
+        data = (await client.get(f"/api/students/progress/{enrolled_student['email']}")).json()
+        assert data["progress"] == []
+
+    async def test_tasks_with_wrong_batch_id_use_own_enrollment(self, client, enrolled_student):
+        r = await client.get(f"/api/tasks/current/{enrolled_student['id']}/987654")
+        assert r.status_code == 200
+        assert r.json()["enrollment"]["batch_id"] == enrolled_student["batch_id"]
+
+    async def test_tasks_for_unenrolled_student_404(self, client, test_student):
+        r = await client.get(f"/api/tasks/current/{test_student['id']}/1")
+        assert r.status_code == 404
+
+
+class TestPublicActivity:
+    async def test_stats_are_real_counts_not_padded(self, client, test_student):
+        r = await client.get("/api/students/public-activity")
+        assert r.status_code == 200
+        data = r.json()
+        assert data["stats"]["total_students"] == 1
+        assert data["stats"]["total_submissions_approved"] == 0
+        assert data["activities"] == []

@@ -1,0 +1,528 @@
+{
+  "domain": "cyber",
+  "tracks": [
+    {
+      "project_name": "PassGuard: Password Strength & Breach Checker",
+      "tagline": "Build a Python tool that rates password strength and safely checks whether a password has appeared in known data breaches.",
+      "weeks": {
+        "1": {
+          "title": "Password Strength Rules in Python",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Write a command-line Python program that scores a password and explains how to make it stronger. This teaches the basics of what makes passwords weak and gets your project set up for the coming weeks.",
+          "learn": [
+            "Ethics and law: only test systems you own or have written permission to test",
+            "What makes a password weak: length, variety and predictability",
+            "Python strings, conditions and functions",
+            "Reading input safely with `getpass` so passwords are not shown on screen"
+          ],
+          "steps": [
+            "Read and note in your README: scanning or attacking systems you do not own or have written permission to test is illegal, and this project only runs on your own machine.",
+            "Create a GitHub repo and a `passguard.py` file, and set up a Python virtual environment.",
+            "Write a function `check_length(pw)` that returns a score, and test it with a few examples in the terminal.",
+            "Add checks for lowercase, uppercase, digits and symbols, each as its own small function.",
+            "Combine the checks into a total score and map it to Weak, Medium or Strong.",
+            "Print specific tips for each missing rule, such as 'Add at least one symbol'.",
+            "Use `getpass.getpass()` to read the password so it is not displayed while typing.",
+            "Record a short terminal demo using sample passwords only, never your real ones."
+          ],
+          "deliverables": [
+            "`passguard.py` command-line tool",
+            "README with the legal and ethical note and usage instructions",
+            "Screenshot or short video of the tool rating 3 sample passwords"
+          ],
+          "done_when": [
+            "The tool rates `abc123` as Weak and a long mixed password as Strong",
+            "Each missing rule produces a clear tip",
+            "The password is not shown on screen while typing",
+            "The README contains the legal and ethical note"
+          ],
+          "hints": [
+            "Use `any(c.isdigit() for c in pw)` style checks to keep code short and readable.",
+            "Never print or save the password itself; print only the score and tips.",
+            "The [OWASP](https://owasp.org) site has beginner-friendly guidance on password policies."
+          ],
+          "stretch": "Load a small list of the most common passwords from a text file and mark any match as Weak immediately.",
+          "post_highlights": [
+            "Built a Python password strength checker with clear improvement tips",
+            "Used getpass so passwords are never displayed or stored",
+            "Learned the basics of password security and ethical testing"
+          ]
+        },
+        "2": {
+          "title": "Entropy and Common Password Detection",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Make your checker smarter by estimating password entropy and detecting common patterns like dictionary words and keyboard sequences. You will also add automated tests so you can change code with confidence.",
+          "learn": [
+            "Password entropy as a simple measure of guessing difficulty",
+            "Detecting common patterns such as `qwerty`, `1234` and repeated characters",
+            "Writing unit tests with `pytest`"
+          ],
+          "steps": [
+            "Research the entropy formula `length * log2(pool_size)` and write a function that estimates it.",
+            "Add a check against a list of common passwords stored in `common.txt`.",
+            "Detect keyboard sequences, repeated characters and years like `2004` in the password.",
+            "Update the score so pattern matches lower the rating even if the password is long.",
+            "Install `pytest` and write at least 8 tests in `test_passguard.py` covering weak, medium and strong examples.",
+            "Refactor your code into small functions until all tests pass."
+          ],
+          "deliverables": [
+            "Updated `passguard.py` with entropy and pattern checks",
+            "`common.txt` word list",
+            "`test_passguard.py` with at least 8 passing tests"
+          ],
+          "done_when": [
+            "The tool shows an estimated entropy in bits",
+            "`Password2024!` is flagged for a common word and year pattern",
+            "`pytest` runs at least 8 tests and all pass",
+            "Scores stay the same for the Week 1 examples unless a new check applies"
+          ],
+          "hints": [
+            "Entropy from this formula is an estimate; patterns can make a password much weaker than it looks.",
+            "Convert the password to lowercase before checking against common words.",
+            "Run `pytest -v` to see each test name and result."
+          ],
+          "stretch": "Estimate the time to guess the password at a given number of guesses per second and show it in plain English.",
+          "post_highlights": [
+            "Added entropy estimation and common-pattern detection to my password checker",
+            "Wrote 8+ unit tests with pytest",
+            "Learned why long passwords can still be weak"
+          ]
+        },
+        "3": {
+          "title": "Safe Breach Check with k-Anonymity",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Check whether a password has appeared in known breaches using the Have I Been Pwned range API, without ever sending the password itself. You will learn how hashing and k-anonymity protect privacy, and how to handle network errors.",
+          "learn": [
+            "Hashing with SHA-1 using Python's `hashlib`",
+            "How k-anonymity lets you query a service without revealing the password",
+            "Making HTTP requests with `requests`",
+            "Handling timeouts and network errors gracefully"
+          ],
+          "steps": [
+            "Hash a sample password with `hashlib.sha1(pw.encode()).hexdigest().upper()` and print only the hash to understand the output.",
+            "Split the hash into the first 5 characters (prefix) and the rest (suffix).",
+            "Send only the prefix to the Have I Been Pwned range endpoint, as described on [haveibeenpwned.com](https://haveibeenpwned.com).",
+            "Search the returned list for your suffix and read the breach count.",
+            "Add a timeout and wrap the request in `try/except` so the tool shows a friendly message if offline.",
+            "Show the breach result alongside the strength score.",
+            "Write tests that mock the network call so they run without internet."
+          ],
+          "deliverables": [
+            "Breach check feature in `passguard.py`",
+            "README section explaining k-anonymity with a simple diagram",
+            "Tests for the breach check using a mocked response"
+          ],
+          "done_when": [
+            "`password` is reported as breached with a count greater than zero",
+            "Only the 5-character hash prefix is sent over the network",
+            "The tool shows a friendly error and does not crash when offline",
+            "All tests pass without an internet connection"
+          ],
+          "hints": [
+            "Print the request URL during development to confirm it contains only the prefix.",
+            "Use `unittest.mock.patch` to replace `requests.get` in tests.",
+            "Search 'Pwned Passwords range API' to read how the endpoint works."
+          ],
+          "stretch": "Add a local cache of prefix responses so repeated checks do not call the API again.",
+          "post_highlights": [
+            "Added a privacy-preserving breach check using SHA-1 and k-anonymity",
+            "Integrated the Have I Been Pwned range API with error handling",
+            "Wrote tests with mocked network calls"
+          ]
+        },
+        "4": {
+          "title": "Passphrase Generator and Web UI",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Add a secure passphrase generator and wrap everything in a simple web interface. Finish with a clear README and a demo that explains how the tool protects user privacy.",
+          "learn": [
+            "Generating secure random values with Python's `secrets` module",
+            "Building a simple UI with Streamlit or Flask",
+            "Writing clear security documentation"
+          ],
+          "steps": [
+            "Build a passphrase generator using `secrets.choice` and a word list, with options for number of words and separator.",
+            "Run each generated passphrase through your strength and breach checks.",
+            "Build a one-page [Streamlit](https://streamlit.io) or Flask app with a password field, results area and generator button.",
+            "Make sure the app never logs or stores entered passwords.",
+            "Write a README with features, how it works, privacy notes, setup steps and screenshots.",
+            "Record a 60-second demo using sample passwords only."
+          ],
+          "deliverables": [
+            "Passphrase generator feature",
+            "Web UI for PassGuard",
+            "Final README with privacy explanation",
+            "Demo video"
+          ],
+          "done_when": [
+            "Generated passphrases use the `secrets` module, not `random`",
+            "The web UI shows strength, entropy and breach results",
+            "No password is written to logs or files",
+            "All earlier tests still pass",
+            "Someone can run the app from the README instructions"
+          ],
+          "hints": [
+            "Use `type=\"password\"` on the Streamlit text input so characters are hidden.",
+            "The `random` module is predictable; `secrets` is designed for security.",
+            "Explain k-anonymity in one sentence in your demo; it impresses reviewers."
+          ],
+          "stretch": "Add a 'copy to clipboard' button and a strength meter bar that updates as the user types.",
+          "post_highlights": [
+            "Built a secure passphrase generator with Python's secrets module",
+            "Shipped a web interface for my password strength and breach checker",
+            "Documented how the tool protects user privacy"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "LogSentry: Brute-force Login Detector",
+      "tagline": "Build a Python tool that reads login logs and flags suspicious repeated failed sign-ins.",
+      "weeks": {
+        "1": {
+          "title": "Reading and Parsing Log Files",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Create a sample login log and write a Python script that reads it line by line and extracts the time, username, IP address and result. Parsing logs is the first skill of any security analyst.",
+          "learn": [
+            "Ethics and law: only analyse logs from systems you own or have written permission to use",
+            "What authentication logs are and why defenders read them",
+            "Reading files and splitting lines in Python",
+            "Basic regular expressions for extracting fields"
+          ],
+          "steps": [
+            "Write in your README: scanning or attacking systems you do not own or have written permission to test is illegal, and this project uses only generated sample logs.",
+            "Create `sample_auth.log` with at least 50 lines in a consistent format, mixing successful and failed logins from made-up users and private IPs like `192.168.1.x`.",
+            "Write `logsentry.py` that opens the file and prints each line.",
+            "Use a regular expression to extract timestamp, username, IP and status from each line.",
+            "Store each parsed line as a dictionary in a list.",
+            "Print a summary: total lines, successful logins and failed logins.",
+            "Skip and count lines that do not match the pattern instead of crashing."
+          ],
+          "deliverables": [
+            "`sample_auth.log` with at least 50 lines",
+            "`logsentry.py` parser",
+            "README with the legal and ethical note and a screenshot of the summary"
+          ],
+          "done_when": [
+            "The script parses every valid line into timestamp, user, IP and status",
+            "The summary counts match a manual count",
+            "Malformed lines are counted and skipped without crashing",
+            "The README contains the legal and ethical note"
+          ],
+          "hints": [
+            "Test your regex on a single line at a time before running it on the whole file.",
+            "Search 'Python re named groups' to extract fields by name.",
+            "Use `with open(...) as f:` so the file closes automatically."
+          ],
+          "stretch": "Accept the log file path as a command-line argument using `argparse`.",
+          "post_highlights": [
+            "Built a Python parser that extracts fields from authentication logs",
+            "Used regular expressions to turn raw log lines into structured data",
+            "Learned how defenders use logs to spot problems"
+          ]
+        },
+        "2": {
+          "title": "Detecting Repeated Failed Logins",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Count failed logins per IP and per user within a time window and flag anything above a threshold. This is the core logic behind many real brute-force detection rules.",
+          "learn": [
+            "Counting with dictionaries and `collections.Counter`",
+            "Working with timestamps using `datetime`",
+            "Sliding time windows and thresholds for detection"
+          ],
+          "steps": [
+            "Add a burst of failed logins from one IP to your sample log so there is something to detect.",
+            "Convert timestamps into `datetime` objects.",
+            "Count failed logins per IP and print the top 5.",
+            "Implement a rule: flag an IP with 5 or more failures within 2 minutes.",
+            "Make the threshold and window configurable at the top of the file.",
+            "Write `pytest` tests with small hand-made logs for cases that should and should not be flagged."
+          ],
+          "deliverables": [
+            "Updated `logsentry.py` with detection logic",
+            "Updated sample log with a suspicious burst",
+            "`test_logsentry.py` with at least 5 tests"
+          ],
+          "done_when": [
+            "The suspicious IP in your sample log is flagged",
+            "An IP with 5 failures spread over an hour is not flagged",
+            "Threshold and window can be changed in one place",
+            "All tests pass"
+          ],
+          "hints": [
+            "Sort events by time before checking windows.",
+            "For each IP, keep a list of failure times and check whether the oldest one is inside the window.",
+            "Start with a simple total count, then add the time window once that works."
+          ],
+          "stretch": "Also flag a single IP that fails against many different usernames, which suggests password spraying.",
+          "post_highlights": [
+            "Implemented brute-force detection with a sliding time window in Python",
+            "Made detection thresholds configurable",
+            "Wrote tests for both suspicious and normal login patterns"
+          ]
+        },
+        "3": {
+          "title": "Real Log Formats and Alert Reports",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Support a realistic log format such as Linux `auth.log` style lines from your own machine or VM, and export findings to CSV and a readable report. You will also handle messy input safely.",
+          "learn": [
+            "Common real-world log formats",
+            "Exporting results to CSV and JSON",
+            "Robust error handling for bad or missing files"
+          ],
+          "steps": [
+            "Collect a few real authentication log lines from your own Linux VM or WSL, or write sample lines that match that format.",
+            "Replace any real usernames or IPs with fake ones before committing anything to GitHub.",
+            "Add a second parser for this format and choose the parser with a `--format` option.",
+            "Handle missing files, empty files and unreadable lines with clear messages.",
+            "Export alerts to `alerts.csv` and `alerts.json` with time, IP, user, count and rule name.",
+            "Print a clean summary table in the terminal."
+          ],
+          "deliverables": [
+            "Support for a second log format",
+            "CSV and JSON alert exports",
+            "README section on supported formats and error handling"
+          ],
+          "done_when": [
+            "Both log formats parse correctly",
+            "A missing file prints a helpful message instead of a traceback",
+            "Alerts are written to both CSV and JSON",
+            "No real personal data is committed to the repo"
+          ],
+          "hints": [
+            "On Ubuntu, authentication logs are usually in `/var/log/auth.log` and need `sudo` to read.",
+            "Use Python's `csv.DictWriter` and `json.dump` for exports.",
+            "Catch specific exceptions like `FileNotFoundError` rather than using a bare `except`."
+          ],
+          "stretch": "Add a `--follow` mode that watches a log file and prints alerts as new lines appear.",
+          "post_highlights": [
+            "Extended my log analyser to support real Linux auth log formats",
+            "Exported security alerts to CSV and JSON",
+            "Added robust error handling for missing and malformed log files"
+          ]
+        },
+        "4": {
+          "title": "Dashboard and Incident Summary",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Build a small dashboard that visualises login activity and alerts, and write a short incident summary based on your sample data. This shows you can turn raw logs into decisions.",
+          "learn": [
+            "Visualising security data with charts",
+            "Building a simple Streamlit dashboard",
+            "Writing a basic incident summary with recommendations"
+          ],
+          "steps": [
+            "Build a [Streamlit](https://streamlit.io) page that lets the user upload a log file.",
+            "Show total logins, failures and alerts as summary numbers.",
+            "Add a chart of failed logins over time and a table of flagged IPs.",
+            "Write `INCIDENT.md` summarising what happened in your sample log, when and which defences would help, such as account lockout or rate limiting.",
+            "Polish the README with features, setup, screenshots and the ethical note.",
+            "Record a 60-second demo uploading a sample log and walking through the alerts."
+          ],
+          "deliverables": [
+            "Streamlit dashboard",
+            "`INCIDENT.md` summary",
+            "Final README",
+            "Demo video"
+          ],
+          "done_when": [
+            "Uploading a sample log shows summary numbers, a chart and an alerts table",
+            "The incident summary includes a timeline and at least 3 recommendations",
+            "All earlier tests still pass",
+            "The app runs from the README instructions"
+          ],
+          "hints": [
+            "Use `st.file_uploader` and read the file with `.getvalue().decode()`.",
+            "Group failures by minute with pandas for a clean time chart.",
+            "Keep the incident summary to one page: what, when, impact and recommendations."
+          ],
+          "stretch": "Map private versus public IP ranges and show them in different colours on the dashboard.",
+          "post_highlights": [
+            "Built a Streamlit dashboard to visualise login failures and brute-force alerts",
+            "Wrote an incident summary with defensive recommendations",
+            "Completed a log analysis tool from parsing to reporting"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "FileWatch: File Integrity Monitor",
+      "tagline": "Build a Python tool that detects when files in a folder are added, changed or deleted using cryptographic hashes.",
+      "weeks": {
+        "1": {
+          "title": "Hashing Files in Python",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Write a script that calculates SHA-256 hashes for files and shows how even a tiny change produces a completely different hash. Hashing is the foundation of file integrity checking.",
+          "learn": [
+            "Ethics and law: only monitor systems and folders you own or have written permission to use",
+            "What a cryptographic hash is and why it detects changes",
+            "Reading files in binary mode with Python",
+            "Using `hashlib` to compute SHA-256"
+          ],
+          "steps": [
+            "Write in your README: scanning or attacking systems you do not own or have written permission to test is illegal, and this tool only monitors your own test folder.",
+            "Create a `test_folder` with 5-10 small text files.",
+            "Write a function `hash_file(path)` that reads the file in chunks and returns its SHA-256 hash.",
+            "Print the hash of every file in `test_folder`.",
+            "Change one character in a file, run again and compare the hashes.",
+            "Handle a missing or unreadable file without crashing."
+          ],
+          "deliverables": [
+            "`filewatch.py` with `hash_file` function",
+            "README with the legal and ethical note",
+            "Screenshot showing hashes before and after a one-character change"
+          ],
+          "done_when": [
+            "The script prints a SHA-256 hash for every file in the test folder",
+            "Changing one character changes that file's hash",
+            "Running twice on unchanged files gives identical hashes",
+            "The README contains the legal and ethical note"
+          ],
+          "hints": [
+            "Open files with `'rb'` mode so hashing works for any file type.",
+            "Reading in 4096-byte chunks keeps memory low for large files.",
+            "Compare your output with `certutil -hashfile file SHA256` on Windows or `sha256sum` on Linux."
+          ],
+          "stretch": "Add an option to choose between SHA-256 and SHA-1 and explain in the README why SHA-256 is preferred.",
+          "post_highlights": [
+            "Built a Python script that computes SHA-256 hashes for files",
+            "Demonstrated how a single-character change produces a different hash",
+            "Learned the basics of file integrity and ethical monitoring"
+          ]
+        },
+        "2": {
+          "title": "Baseline and Change Detection",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Save a baseline of file hashes and compare the folder against it to detect added, modified and deleted files. This is exactly how file integrity monitors work.",
+          "learn": [
+            "Walking folders with `os.walk` or `pathlib`",
+            "Saving and loading data with JSON",
+            "Comparing two snapshots using sets and dictionaries"
+          ],
+          "steps": [
+            "Walk the test folder, including subfolders, and build a dictionary of path to hash.",
+            "Add a `baseline` command that saves this dictionary to `baseline.json`.",
+            "Add a `check` command that builds a new snapshot and compares it to the baseline.",
+            "Report added, modified and deleted files in separate sections.",
+            "Test by adding, editing and deleting files in the test folder.",
+            "Write at least 5 `pytest` tests using temporary folders."
+          ],
+          "deliverables": [
+            "`baseline` and `check` commands",
+            "`baseline.json` example",
+            "`test_filewatch.py` with at least 5 tests"
+          ],
+          "done_when": [
+            "Added, modified and deleted files are each reported correctly",
+            "Running `check` on an unchanged folder reports no changes",
+            "Subfolders are included",
+            "All tests pass"
+          ],
+          "hints": [
+            "Use set operations on dictionary keys to find added and deleted paths.",
+            "The `tmp_path` fixture in pytest gives you a fresh folder for each test.",
+            "Store relative paths in the baseline so it works if the folder moves."
+          ],
+          "stretch": "Also record file size and modified time, and show them in the change report.",
+          "post_highlights": [
+            "Built a file integrity monitor that detects added, modified and deleted files",
+            "Saved and compared hash baselines using JSON",
+            "Wrote automated tests using temporary folders"
+          ]
+        },
+        "3": {
+          "title": "Continuous Monitoring and Alerts",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Turn your checker into a monitor that runs continuously, logs changes and alerts you when something changes. You will also handle real-world problems such as locked files and ignored paths.",
+          "learn": [
+            "Running checks on a loop or with the `watchdog` library",
+            "Writing structured logs with Python's `logging` module",
+            "Ignore rules and robust error handling"
+          ],
+          "steps": [
+            "Add a `watch` command that checks the folder every N seconds, or use the `watchdog` library for file events.",
+            "Log every change with a timestamp to `filewatch.log` using the `logging` module.",
+            "Add an ignore list in a config file for patterns like `*.tmp` and `.git`.",
+            "Handle permission errors and files that disappear during scanning without stopping the monitor.",
+            "Show a desktop notification or a clear coloured terminal alert when a change is detected.",
+            "Make the monitor stop cleanly with Ctrl+C."
+          ],
+          "deliverables": [
+            "`watch` command",
+            "`filewatch.log` output example",
+            "Config file with ignore rules",
+            "README section on monitoring and configuration"
+          ],
+          "done_when": [
+            "Editing a file while `watch` runs produces a log entry and an alert within the interval",
+            "Ignored patterns never trigger alerts",
+            "A permission error is logged and the monitor keeps running",
+            "Ctrl+C exits without a traceback"
+          ],
+          "hints": [
+            "Catch `KeyboardInterrupt` around your main loop to exit cleanly.",
+            "Use `fnmatch` to match ignore patterns.",
+            "Many editors save files by writing a temp file first, so expect extra events."
+          ],
+          "stretch": "Sign the baseline file with an HMAC so the monitor can detect if the baseline itself was tampered with.",
+          "post_highlights": [
+            "Extended my file integrity monitor to watch folders continuously",
+            "Added structured logging, ignore rules and alerts",
+            "Handled permission errors so monitoring never stops unexpectedly"
+          ]
+        },
+        "4": {
+          "title": "Integrity Report and Dashboard",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Add a report view that shows change history and a simple dashboard, then document the project as a small security tool. You will explain where file integrity monitoring fits in real defence.",
+          "learn": [
+            "Summarising security events into reports",
+            "Building a simple Streamlit or Flask dashboard",
+            "Explaining a security tool's purpose and limits"
+          ],
+          "steps": [
+            "Parse `filewatch.log` into a table of change events.",
+            "Build a [Streamlit](https://streamlit.io) or Flask page showing the latest changes, counts by type and a timeline chart.",
+            "Add a button or command to generate an HTML or Markdown integrity report.",
+            "Write a README section on limitations, such as what happens if an attacker also edits the baseline.",
+            "Polish the README with features, setup, screenshots and the ethical note.",
+            "Record a 60-second demo editing files and showing the alerts and dashboard."
+          ],
+          "deliverables": [
+            "Dashboard or report view",
+            "Generated integrity report",
+            "Final README with limitations",
+            "Demo video"
+          ],
+          "done_when": [
+            "The dashboard shows recent changes and counts by type",
+            "A report can be generated from the log",
+            "The README lists at least 3 limitations and how to reduce them",
+            "All earlier tests still pass"
+          ],
+          "hints": [
+            "Log in a consistent format so parsing the log is easy.",
+            "Pandas makes grouping events by type and hour simple.",
+            "Search 'file integrity monitoring' to see how real tools describe their purpose."
+          ],
+          "stretch": "Store events in SQLite instead of a log file and add filtering by date and change type.",
+          "post_highlights": [
+            "Built a dashboard to review file integrity changes over time",
+            "Generated integrity reports from monitoring logs",
+            "Documented the tool's purpose, limits and ethical use"
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -20,10 +20,14 @@ from pydantic import BaseModel, Field
 from config import settings
 from db.database import db
 from services.certificate_service import certificate_service
+from services.enrollment_service import enrollment_service
 from services.email_service import email_service
 
 logger = logging.getLogger("skillme.payments")
 router = APIRouter(prefix="/api/payments", tags=["payments"])
+
+# Payment is asked for at the end: 3 of the 4 weekly tasks must be approved
+PAYMENT_UNLOCK_TASKS = 3
 
 
 # ──────────────────────────────────────────────
@@ -32,7 +36,7 @@ router = APIRouter(prefix="/api/payments", tags=["payments"])
 
 class CreateOrderRequest(BaseModel):
     student_id: int = Field(..., description="Student database ID")
-    batch_id: int = Field(..., description="Batch database ID")
+    batch_id: int | None = Field(None, description="Internal enrollment reference (validated server-side)")
     discount_code: str | None = Field(None, description="Optional discount code")
 
 
@@ -41,7 +45,7 @@ class VerifyPaymentRequest(BaseModel):
     razorpay_payment_id: str
     razorpay_signature: str
     student_id: int
-    batch_id: int
+    batch_id: int | None = None  # ignored when the order is on record — the order's own enrollment wins
 
 
 # ──────────────────────────────────────────────
@@ -91,35 +95,38 @@ async def create_order(req: CreateOrderRequest):
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
 
-    # Gate: below 50% completion, payment is only allowed once an admin has
-    # fulfilled an urgent request for this student+batch (see urgent_request_service).
+    batch_id = await enrollment_service.resolve_batch_id(req.student_id, req.batch_id)
+    if not batch_id:
+        raise HTTPException(status_code=400, detail="You are not enrolled in an internship yet.")
+
+    # Gate: payment unlocks once 3 of 4 tasks are approved, or earlier only if an admin
+    # has fulfilled an urgent request for this enrollment (see urgent_request_service).
     progress = await db.fetch_all(
         "SELECT week, issues_completed FROM progress WHERE student_id = ? AND batch_id = ?",
-        (req.student_id, req.batch_id),
+        (req.student_id, batch_id),
     )
     completed_tasks = len({int(p["week"]) for p in progress if int(p["issues_completed"]) > 0})
-    completion_pct = min(100, round(completed_tasks / 4 * 100))
-    if completion_pct < 50:
+    if completed_tasks < PAYMENT_UNLOCK_TASKS:
         enrollment = await db.fetch_one(
             "SELECT payment_unlocked_at FROM enrollments WHERE student_id = ? AND batch_id = ?",
-            (req.student_id, req.batch_id),
+            (req.student_id, batch_id),
         )
         if not (enrollment and enrollment["payment_unlocked_at"]):
             raise HTTPException(
                 status_code=403,
-                detail="Payment unlocks at 50% task completion, or once an admin approves your urgent processing request.",
+                detail="Payment unlocks once 3 of your 4 weekly tasks are approved, or once an admin approves your urgent processing request.",
             )
 
     # Check if already paid
     paid = await db.fetch_one(
         "SELECT id FROM payments WHERE student_id = ? AND batch_id = ? AND status = 'paid'",
-        (req.student_id, req.batch_id)
+        (req.student_id, batch_id)
     )
     if paid:
         # Certificate already purchased — check if cert exists
         cert = await db.fetch_one(
             "SELECT cert_id FROM certificates WHERE student_id = ? AND batch_id = ?",
-            (req.student_id, req.batch_id)
+            (req.student_id, batch_id)
         )
         return {
             "already_paid": True,
@@ -128,7 +135,7 @@ async def create_order(req: CreateOrderRequest):
         }
 
     amount = settings.certificate_price_paise
-    
+
     # Handle special discount code for 5 INR (500 paise)
     if req.discount_code and req.discount_code.strip().upper() == "BLACKYY":
         amount = 500
@@ -144,10 +151,10 @@ async def create_order(req: CreateOrderRequest):
             json={
                 "amount": amount,
                 "currency": "INR",
-                "receipt": f"sm_{req.student_id}_{req.batch_id}",
+                "receipt": f"sm_{req.student_id}_{batch_id}",
                 "notes": {
                     "student_id": str(req.student_id),
-                    "batch_id": str(req.batch_id),
+                    "batch_id": str(batch_id),
                     "student_name": f"{student['first_name']} {student['last_name']}",
                     "email": student["email"],
                 },
@@ -165,7 +172,7 @@ async def create_order(req: CreateOrderRequest):
         """INSERT INTO payments (student_id, batch_id, razorpay_order_id, amount, status)
            VALUES (?, ?, ?, ?, 'pending')
            ON CONFLICT(razorpay_order_id) DO NOTHING""",
-        (req.student_id, req.batch_id, order["id"], amount),
+        (req.student_id, batch_id, order["id"], amount),
     )
 
     logger.info("Created Razorpay order %s for student %s", order["id"], req.student_id)
@@ -198,19 +205,31 @@ async def verify_payment(req: VerifyPaymentRequest, background_tasks: Background
         (req.razorpay_payment_id, req.razorpay_order_id),
     )
 
+    # The order row is the source of truth for which student/enrollment was paid for
+    order_row = await db.fetch_one(
+        "SELECT student_id, batch_id FROM payments WHERE razorpay_order_id = ?",
+        (req.razorpay_order_id,),
+    )
+    student_id = order_row["student_id"] if order_row else req.student_id
+    batch_id = order_row["batch_id"] if order_row else await enrollment_service.resolve_batch_id(
+        req.student_id, req.batch_id
+    )
+    if not batch_id:
+        raise HTTPException(status_code=400, detail="No enrollment found for this payment")
+
     logger.info(
         "Payment verified: order=%s payment=%s student=%s",
-        req.razorpay_order_id, req.razorpay_payment_id, req.student_id
+        req.razorpay_order_id, req.razorpay_payment_id, student_id
     )
 
     # Issue certificate (or return existing if already issued)
     try:
-        cert_data = await certificate_service.issue_certificate(req.student_id, req.batch_id, suppress_email=True)
+        cert_data = await certificate_service.issue_certificate(student_id, batch_id, suppress_email=True)
     except ValueError:
         # May already exist — fetch it
         cert = await db.fetch_one(
             "SELECT cert_id, issued_at FROM certificates WHERE student_id = ? AND batch_id = ?",
-            (req.student_id, req.batch_id)
+            (student_id, batch_id)
         )
         if cert:
             cert_data = {"cert_id": cert["cert_id"], "issued_at": cert["issued_at"]}
@@ -219,21 +238,18 @@ async def verify_payment(req: VerifyPaymentRequest, background_tasks: Background
 
     # Send certificate email in background
     student = await db.fetch_one(
-        "SELECT first_name, last_name, email FROM students WHERE id = ?",
-        (req.student_id,)
+        """SELECT s.first_name, s.last_name, s.email, COALESCE(b.domain, s.domain) AS domain
+           FROM students s LEFT JOIN batches b ON b.id = ?
+           WHERE s.id = ?""",
+        (batch_id, student_id)
     )
-    batch = await db.fetch_one(
-        "SELECT domain, batch_number FROM batches WHERE id = ?",
-        (req.batch_id,)
-    )
-    if student and batch:
+    if student:
         background_tasks.add_task(
             email_service.send_certificate_ready,
             first_name=student["first_name"],
             last_name=student["last_name"],
             email=student["email"],
-            domain=batch["domain"],
-            batch_number=batch["batch_number"],
+            domain=student["domain"] or "web-dev",
             cert_id=cert_data["cert_id"],
         )
 
@@ -244,14 +260,18 @@ async def verify_payment(req: VerifyPaymentRequest, background_tasks: Background
     }
 
 
-@router.get("/status/{student_id}/{batch_id}", summary="Check payment status for a student+batch")
+@router.get("/status/{student_id}/{batch_id}", summary="Check a student's certificate payment status")
 async def payment_status(student_id: int, batch_id: int):
     """Check if a student has already paid for their certificate."""
+    resolved = await enrollment_service.resolve_batch_id(student_id, batch_id)
+    if not resolved:
+        return {"status": "not_paid"}
     payment = await db.fetch_one(
         """SELECT status, razorpay_payment_id, amount, created_at
            FROM payments WHERE student_id = ? AND batch_id = ?
-           ORDER BY created_at DESC LIMIT 1""",
-        (student_id, batch_id)
+           ORDER BY CASE WHEN status = 'paid' THEN 0 ELSE 1 END, created_at DESC, id DESC
+           LIMIT 1""",
+        (student_id, resolved)
     )
     if not payment:
         return {"status": "not_paid"}

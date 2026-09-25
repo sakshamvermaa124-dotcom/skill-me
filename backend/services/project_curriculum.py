@@ -6,6 +6,8 @@ Loads and serves 4-week project tracks from backend/services/curriculum.json.
 import json
 from pathlib import Path
 
+from services.task_service import task_service
+
 DATA_FILE = Path(__file__).resolve().parent / "curriculum.json"
 
 try:
@@ -14,24 +16,22 @@ try:
 except Exception:
     PROJECT_CURRICULUM = {}
 
+# task_service slugs that have no curriculum of their own → closest curriculum key
+_SLUG_TO_CURRICULUM = {
+    "datascience": "data-science",
+    "android": "flutter",
+    "dsa": "cpp",
+    "blockchain": "web-dev",
+}
+
+
 def resolve_domain_key(domain: str) -> str:
-    d = (domain or "").lower().strip().replace(" ", "-")
-    domain_map = {
-        "web": "web-dev", "front": "web-dev", "full": "web-dev", "html": "web-dev",
-        "react": "react", "next": "react",
-        "node": "node", "express": "node",
-        "data": "data-science", "analytics": "data-science",
-        "ml": "ml", "ai": "ml", "machine": "ml",
-        "python": "python", "django": "python", "flask": "python",
-        "java": "java", "spring": "java",
-        "flutter": "flutter", "dart": "flutter", "mobile": "flutter", "android": "flutter",
-        "devops": "devops", "docker": "devops", "ci": "devops", "cloud": "devops",
-        "cpp": "cpp", "c++": "cpp", "algo": "cpp", "dsa": "cpp"
-    }
-    for kw, key in domain_map.items():
-        if kw in d:
-            return key
-    return "web-dev"
+    d = (domain or "").lower().strip()
+    if d in PROJECT_CURRICULUM:
+        return d
+    slug = task_service.normalize_domain_slug(domain)
+    slug = _SLUG_TO_CURRICULUM.get(slug, slug)
+    return slug if slug in PROJECT_CURRICULUM else "web-dev"
 
 def get_project_track_for_student(domain: str, student_id: int) -> dict:
     key = resolve_domain_key(domain)

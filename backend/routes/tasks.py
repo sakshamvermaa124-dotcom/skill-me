@@ -7,15 +7,26 @@ from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
 from services.project_curriculum import get_project_track_for_student
+from services.enrollment_service import enrollment_service
 
 router = APIRouter(prefix="/api/tasks", tags=["Tasks"])
 
-@router.get("/latest/pdf")
-async def generate_task_pdf(student_id: int, batch_id: int):
+
+async def _load_student_enrollment(student_id: int, batch_id: int | None) -> tuple[dict, dict]:
+    """Student + their enrollment row (`batch_id` is validated against the student)."""
     student = await db.fetch_one("SELECT * FROM students WHERE id = ?", (student_id,))
-    batch = await db.fetch_one("SELECT * FROM batches WHERE id = ?", (batch_id,))
-    if not student or not batch:
-        raise HTTPException(status_code=404, detail="Student or Batch not found")
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    resolved = await enrollment_service.resolve_batch_id(student_id, batch_id)
+    enrollment = await db.fetch_one("SELECT * FROM batches WHERE id = ?", (resolved,)) if resolved else None
+    if not enrollment:
+        raise HTTPException(status_code=404, detail="Student is not enrolled yet")
+    return student, enrollment
+
+
+@router.get("/latest/pdf")
+async def generate_task_pdf(student_id: int, batch_id: int | None = None):
+    student, batch = await _load_student_enrollment(student_id, batch_id)
     
     project_track = get_project_track_for_student(batch["domain"], student_id)
     
@@ -47,14 +58,11 @@ async def generate_task_pdf(student_id: int, batch_id: int):
 
 @router.get("/current/{student_id}/{batch_id}")
 async def get_current_tasks(student_id: int, batch_id: int):
-    student = await db.fetch_one("SELECT * FROM students WHERE id = ?", (student_id,))
-    batch = await db.fetch_one("SELECT * FROM batches WHERE id = ?", (batch_id,))
-    if not student or not batch:
-        raise HTTPException(status_code=404, detail="Student or Batch not found")
+    student, batch = await _load_student_enrollment(student_id, batch_id)
 
     prog = await db.fetch_one(
         "SELECT week FROM progress WHERE student_id = ? AND batch_id = ? ORDER BY week DESC LIMIT 1",
-        (student_id, batch_id)
+        (student_id, batch["id"])
     )
     current_week = int(prog["week"]) if prog else 1
 
@@ -92,13 +100,15 @@ async def get_current_tasks(student_id: int, batch_id: int):
             "deliverables": w_data.get("deliverables", []),
             "post_highlights": w_data.get("post_highlights", []),
             "week_number": w,
-            "difficulty": "Foundation" if w == 1 else ("Intermediate" if w == 2 else ("Advanced" if w == 3 else "Capstone")),
+            "difficulty": w_data.get("difficulty") or {1: "Beginner", 2: "Beginner+", 3: "Intermediate"}.get(w, "Intermediate+"),
+            "est_hours": w_data.get("est_hours"),
             "is_current": (w == current_week)
         })
 
     return {
         "student": {"first_name": student["first_name"], "last_name": student["last_name"]},
-        "batch": {"domain": batch["domain"]},
+        "enrollment": {"domain": batch["domain"], "batch_id": batch["id"]},
+        "batch": {"domain": batch["domain"]},  # legacy key for frontends deployed before the rename
         "project": {
             "name": project_track["project_name"],
             "tagline": project_track["tagline"],

@@ -1,0 +1,566 @@
+{
+  "domain": "java",
+  "tracks": [
+    {
+      "project_name": "BankPulse: Enterprise Banking & Transaction Management System",
+      "tagline": "Build a simple banking app step by step, starting as a console program and ending as a small REST API backed by a real database.",
+      "weeks": {
+        "1": {
+          "title": "Accounts and Transactions in the Console",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Write a Java console program that can create bank accounts and record deposits and withdrawals in memory. This week is about getting comfortable with classes, objects and basic control flow before anything gets complicated.",
+          "learn": [
+            "Classes and objects with fields, constructors and methods",
+            "Using an `ArrayList` to store a collection of objects",
+            "Basic control flow with `if`/`else` and `while` loops",
+            "Reading user input with `Scanner`"
+          ],
+          "steps": [
+            "Create a Java project (plain `.java` files or a simple Maven project) with a class `Account` holding `accountNumber`, `holderName` and `balance`.",
+            "Add `deposit(double amount)` and `withdraw(double amount)` methods on `Account` that check for negative or too-large amounts before changing the balance.",
+            "Create a `Bank` class with a `List<Account>` and methods `openAccount(name)`, `findAccount(accountNumber)` and `listAccounts()`.",
+            "Write a `Main` class with a `Scanner`-based menu: `1) Open account 2) Deposit 3) Withdraw 4) List accounts 5) Exit`.",
+            "Wire the menu options to call your `Bank` methods, printing a clear message after each action.",
+            "Test each menu option manually, including a withdrawal larger than the balance, and make sure it is rejected with a message instead of going negative.",
+            "Commit your code to a Git repo with a README explaining how to compile and run it."
+          ],
+          "deliverables": [
+            "`Account` and `Bank` classes with working deposit/withdraw logic",
+            "A `Main` class with a working console menu",
+            "A README with build/run instructions and a sample session",
+            "A short screenshot or terminal recording of a full session"
+          ],
+          "done_when": [
+            "You can open at least two accounts and see them both in the account list",
+            "Depositing and withdrawing valid amounts updates the balance correctly",
+            "Withdrawing more than the balance is rejected with a clear message, not an exception",
+            "The program runs from a menu loop until the user chooses Exit"
+          ],
+          "hints": [
+            "Keep `Account` responsible only for its own balance logic; let `Bank` manage the list of accounts.",
+            "Use `String.format(\"%.2f\", balance)` to print money amounts with two decimal places.",
+            "The [Java Collections tutorial](https://docs.oracle.com/javase/tutorial/collections/) has a short section on `ArrayList` if you need a refresher."
+          ],
+          "stretch": "Add a simple account type field (`SAVINGS` or `CURRENT`) that blocks withdrawals below a minimum balance for savings accounts.",
+          "post_highlights": [
+            "Built a Java console banking app with account creation, deposits and withdrawals",
+            "Modeled accounts and a bank using classes and an ArrayList",
+            "Added input validation so invalid withdrawals are rejected safely"
+          ]
+        },
+        "2": {
+          "title": "Transaction History and File Storage",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Add a transaction history to every account and save all data to a file so it survives between runs. This introduces you to composition between classes and basic file I/O, two skills every backend developer needs.",
+          "learn": [
+            "Composition: an `Account` holding a list of `Transaction` objects",
+            "Using enums for fixed categories like transaction type",
+            "Reading and writing plain text files with `BufferedReader`/`BufferedWriter`",
+            "Basic exception handling with `try`/`catch`"
+          ],
+          "steps": [
+            "Create a `Transaction` class with `type` (an enum `DEPOSIT`/`WITHDRAWAL`), `amount` and `timestamp` (use `LocalDateTime.now()`).",
+            "Update `Account` to keep a `List<Transaction>` and append a new `Transaction` every time `deposit` or `withdraw` succeeds.",
+            "Add a `printStatement()` method on `Account` that lists all transactions from oldest to newest.",
+            "Write a `FileStorage` class with `saveAccounts(List<Account> accounts, String path)` and `loadAccounts(String path)` using a simple line format like `accountNumber,name,balance`.",
+            "On startup, load accounts from `accounts.txt` if the file exists; on exit, save the current accounts back to it.",
+            "Wrap file reading in `try`/`catch` so a missing or corrupted file starts the bank with zero accounts instead of crashing.",
+            "Add a `Statement` menu option that prints an account's transaction history.",
+            "Re-test the full menu after these changes to make sure Week 1 features still work."
+          ],
+          "deliverables": [
+            "A `Transaction` class and an enum for transaction type",
+            "Accounts that keep and display their transaction history",
+            "A `FileStorage` class that saves and loads accounts from a text file",
+            "Data that survives closing and reopening the program"
+          ],
+          "done_when": [
+            "Every deposit and withdrawal appears in that account's statement in the right order",
+            "Closing and restarting the program keeps the accounts and their balances",
+            "Deleting or corrupting the data file does not crash the program on startup",
+            "The account list and statements still work correctly after the refactor"
+          ],
+          "hints": [
+            "Store the transaction list inside `Account`, not as a separate global list, so each account owns its own history.",
+            "`LocalDateTime.now().toString()` is an easy way to store a timestamp as text.",
+            "Catch `IOException` around file operations, and print a friendly message instead of letting the program crash."
+          ],
+          "stretch": "Add a `transferFunds(fromAccount, toAccount, amount)` method that records a withdrawal on one account and a deposit on the other as a single operation.",
+          "post_highlights": [
+            "Added transaction history tracking to my Java banking app using composition",
+            "Implemented file-based persistence so account data survives restarts",
+            "Handled file errors gracefully with try/catch instead of crashing"
+          ]
+        },
+        "3": {
+          "title": "Spring Boot REST API with H2",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Turn BankPulse into a real web service using Spring Boot, storing accounts in an in-memory H2 database with Spring Data JPA. This is your first REST API and your first taste of how most backend jobs actually work.",
+          "learn": [
+            "Setting up a Spring Boot project with Spring Web, Spring Data JPA and H2",
+            "Mapping a class to a database table with `@Entity`",
+            "Writing a `JpaRepository` and a `@RestController` with GET/POST endpoints",
+            "Returning proper HTTP status codes for success and error cases"
+          ],
+          "steps": [
+            "Generate a new Spring Boot project from [start.spring.io](https://start.spring.io) with the Web, Spring Data JPA and H2 dependencies.",
+            "Turn your `Account` class into an `@Entity` with an `@Id` `@GeneratedValue` account id, and create `AccountRepository extends JpaRepository<Account, Long>`.",
+            "Create an `AccountService` class that holds the business logic (deposit, withdraw, transfer) you already wrote in Weeks 1-2, now calling the repository instead of a list.",
+            "Create an `AccountController` with `POST /accounts`, `GET /accounts`, `GET /accounts/{id}` and `GET /accounts/{id}/transactions`.",
+            "Add `POST /accounts/{id}/deposit` and `POST /accounts/{id}/withdraw` endpoints that accept a JSON body like `{\"amount\": 100.0}`.",
+            "Return `404` when an account id does not exist and `400` when an amount is invalid, using `ResponseEntity`.",
+            "Enable the H2 console (`spring.h2.console.enabled=true`) and check your tables and data through it in the browser.",
+            "Test every endpoint with Postman or `curl`, including at least one deliberately invalid request."
+          ],
+          "deliverables": [
+            "A Spring Boot project with `Account`, `Transaction` entities and their repositories",
+            "REST endpoints for creating accounts, deposits, withdrawals and viewing history",
+            "Correct HTTP status codes for not-found and invalid-input cases",
+            "A short doc (or Postman collection) listing each endpoint with an example request"
+          ],
+          "done_when": [
+            "The app starts with `mvn spring-boot:run` and accounts persist in the H2 in-memory database",
+            "`POST /accounts` creates an account and `GET /accounts` lists it",
+            "Depositing and withdrawing through the API updates the balance and appends a transaction",
+            "Requesting a non-existent account id returns `404`, not a stack trace",
+            "The H2 console shows the correct table structure and data"
+          ],
+          "hints": [
+            "Use `@OneToMany(mappedBy = \"account\")` on `Account` and `@ManyToOne` on `Transaction` to link the two entities.",
+            "Keep controllers thin: they should call the service layer, not contain business logic themselves.",
+            "The [Spring Boot reference docs](https://docs.spring.io/spring-boot/index.html) have a getting-started guide that walks through exactly this kind of REST + JPA setup."
+          ],
+          "stretch": "Add a `POST /accounts/{id}/transfer` endpoint that moves money between two accounts inside a single `@Transactional` method.",
+          "post_highlights": [
+            "Rebuilt my Java banking app as a Spring Boot REST API with JPA and H2",
+            "Designed endpoints for accounts, deposits, withdrawals and transaction history",
+            "Learned to return proper HTTP status codes for not-found and invalid-input cases"
+          ]
+        },
+        "4": {
+          "title": "Validation, Tests and API Docs",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Harden your API with proper input validation, a global error handler, and automated tests, then document it with Swagger so anyone can explore it. This is the polish that turns a working demo into a project you can confidently show off.",
+          "learn": [
+            "Request validation with `@Valid` and Bean Validation annotations",
+            "A global exception handler with `@ControllerAdvice`",
+            "Writing service-layer tests with JUnit and Mockito",
+            "Documenting an API with springdoc-openapi (Swagger UI)"
+          ],
+          "steps": [
+            "Add a request DTO (e.g. `DepositRequest`) with `@NotNull` and `@Positive` on the amount field, and use `@Valid` in the controller.",
+            "Create custom exceptions like `AccountNotFoundException` and `InsufficientFundsException`, thrown from the service layer.",
+            "Add a `@ControllerAdvice` class that turns those exceptions into clean JSON error responses with the right status code (`404`, `400`).",
+            "Add the springdoc-openapi dependency and confirm Swagger UI loads at `/swagger-ui.html` showing all your endpoints.",
+            "Write at least 4 JUnit tests for `AccountService` (successful deposit, successful withdrawal, withdrawal with insufficient funds, deposit to a missing account), using Mockito to fake the repository.",
+            "Add a `GET /accounts/{id}/balance` endpoint if you do not already have one, purely to have one more simple, well-tested endpoint.",
+            "Write a full README covering setup, how to run the app, how to run the tests, and example requests for every endpoint.",
+            "Record a 30-60 second demo showing Swagger UI and a couple of live requests."
+          ],
+          "deliverables": [
+            "Validated request DTOs and a global exception handler",
+            "Swagger UI documenting every endpoint",
+            "At least 4 passing JUnit/Mockito tests for the service layer",
+            "A complete README with setup, run and test instructions"
+          ],
+          "done_when": [
+            "Sending an invalid amount (negative or missing) returns a clean `400` JSON error, not a stack trace",
+            "Requesting an account that does not exist returns a clean `404` JSON error",
+            "Swagger UI at `/swagger-ui.html` lists and lets you try every endpoint",
+            "`mvn test` runs at least 4 tests and all of them pass",
+            "A new developer can set up and run the project using only the README"
+          ],
+          "hints": [
+            "Put validation annotations on a request DTO, not directly on the JPA entity, so API rules and database rules stay separate.",
+            "`@ControllerAdvice` with `@ExceptionHandler` methods is the standard way to centralise error responses in Spring.",
+            "The [Spring Boot testing docs](https://docs.spring.io/spring-boot/reference/testing/index.html) and [Mockito docs](https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html) both have short examples to copy from."
+          ],
+          "stretch": "Add simple API key authentication using a request header, checked in a Spring filter before requests reach your controllers.",
+          "post_highlights": [
+            "Added request validation and a global error handler to my Spring Boot banking API",
+            "Wrote JUnit and Mockito tests for the account service layer",
+            "Documented the API with Swagger UI for easy exploration"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "ShopSphere: Multi-Tier E-Commerce & Inventory Hub",
+      "tagline": "Build a simple shop and inventory tool step by step, from a console app to a small REST API with orders and stock tracking.",
+      "weeks": {
+        "1": {
+          "title": "Products and Stock in the Console",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Write a Java console program that manages a product catalog and tracks stock levels in memory. This week builds the object-oriented foundation the whole project will grow from.",
+          "learn": [
+            "Classes and objects with fields, constructors and methods",
+            "Storing and searching a collection with `ArrayList`",
+            "Basic control flow with `if`/`else` and loops",
+            "Reading user input with `Scanner`"
+          ],
+          "steps": [
+            "Create a Java project with a `Product` class holding `id`, `name`, `price` and `stockQuantity`.",
+            "Add `increaseStock(int amount)` and `decreaseStock(int amount)` methods that prevent stock from going negative.",
+            "Create an `Inventory` class with a `List<Product>` and methods `addProduct(...)`, `findById(id)` and `listProducts()`.",
+            "Write a `Main` class with a menu: `1) Add product 2) List products 3) Increase stock 4) Decrease stock 5) Exit`.",
+            "Wire each menu option to the right `Inventory` method, printing a confirmation or error message.",
+            "Test decreasing stock below zero and confirm it is rejected with a clear message instead of crashing.",
+            "Commit your code to a Git repo with a README explaining how to compile and run it."
+          ],
+          "deliverables": [
+            "`Product` and `Inventory` classes with working stock logic",
+            "A `Main` class with a working console menu",
+            "A README with build/run instructions and a sample session",
+            "A screenshot or short recording of a full session"
+          ],
+          "done_when": [
+            "You can add at least three products and see them listed with correct stock",
+            "Increasing and decreasing stock updates the quantity correctly",
+            "Decreasing stock below zero is rejected with a message, not allowed to go negative",
+            "The program runs from a menu loop until the user chooses Exit"
+          ],
+          "hints": [
+            "Keep stock-changing logic inside `Product`, not scattered across the menu code.",
+            "Use `String.format(\"%.2f\", price)` to print prices with two decimal places.",
+            "The [Java Collections tutorial](https://docs.oracle.com/javase/tutorial/collections/) covers `ArrayList` basics if you need a refresher."
+          ],
+          "stretch": "Add a `lowStockAlert(int threshold)` method that lists every product with stock below the given number.",
+          "post_highlights": [
+            "Built a Java console inventory app with products and stock tracking",
+            "Modeled products and inventory using classes and an ArrayList",
+            "Added stock validation so quantities can never go negative"
+          ]
+        },
+        "2": {
+          "title": "Orders and File Storage",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Add customer orders that reduce stock automatically, and save your catalog and orders to files so data survives between runs. This introduces composition between classes and basic file I/O.",
+          "learn": [
+            "Composition: an `Order` holding a list of `OrderItem` objects",
+            "Using enums for fixed categories like order status",
+            "Reading and writing plain text files with `BufferedReader`/`BufferedWriter`",
+            "Basic exception handling with `try`/`catch`"
+          ],
+          "steps": [
+            "Create an `OrderItem` class (`productId`, `quantity`, `priceAtPurchase`) and an `Order` class with a status enum (`PENDING`, `COMPLETED`, `CANCELLED`) and a `List<OrderItem>`.",
+            "Add a `placeOrder(List<OrderItem> items)` method on a new `OrderService` class that checks stock is available for every item before reducing it.",
+            "If any item in the order does not have enough stock, reject the whole order and print which item failed.",
+            "Write a `FileStorage` class with methods to save and load products and orders as simple text lines (for example `id,name,price,stock`).",
+            "On startup, load products and orders from files if they exist; on exit, save the current state back to them.",
+            "Wrap file reading in `try`/`catch` so a missing or corrupted file starts with an empty catalog instead of crashing.",
+            "Add a `View order history` menu option that lists all orders with their items and status.",
+            "Re-test the full menu after these changes to make sure Week 1 features still work."
+          ],
+          "deliverables": [
+            "`OrderItem` and `Order` classes with a status enum",
+            "An `OrderService` that places orders and reduces stock safely",
+            "File-based persistence for products and orders",
+            "An order history view in the console menu"
+          ],
+          "done_when": [
+            "Placing an order for available stock reduces the right products' quantities",
+            "Placing an order for more stock than available is rejected and changes nothing",
+            "Closing and restarting the program keeps the catalog and order history",
+            "The program does not crash if the data files are missing"
+          ],
+          "hints": [
+            "Check stock availability for all items first, before changing any stock, so a rejected order never leaves partial changes.",
+            "Store enum values as their `.name()` string when writing to a file, and use `Enum.valueOf(...)` to read them back.",
+            "Catch `IOException` around file operations and print a friendly message instead of crashing."
+          ],
+          "stretch": "Add a `cancelOrder(orderId)` method that restores stock for a pending order and marks it `CANCELLED`.",
+          "post_highlights": [
+            "Added an order system to my Java inventory app that safely reduces stock",
+            "Implemented file-based persistence for products and order history",
+            "Used enums and composition to model order status and order items"
+          ]
+        },
+        "3": {
+          "title": "Spring Boot REST API with H2",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Turn ShopSphere into a real web service using Spring Boot, storing products and orders in an in-memory H2 database with Spring Data JPA. This is your first REST API for a shop-style application.",
+          "learn": [
+            "Setting up a Spring Boot project with Spring Web, Spring Data JPA and H2",
+            "Mapping related classes to tables with `@Entity`, `@OneToMany` and `@ManyToOne`",
+            "Writing repositories and a `@RestController` with GET/POST endpoints",
+            "Returning proper HTTP status codes for success and error cases"
+          ],
+          "steps": [
+            "Generate a new Spring Boot project from [start.spring.io](https://start.spring.io) with the Web, Spring Data JPA and H2 dependencies.",
+            "Turn `Product` and `Order`/`OrderItem` into `@Entity` classes with repositories (`ProductRepository`, `OrderRepository`).",
+            "Create a `ProductService` and `OrderService` that reuse the stock-checking logic you wrote in Weeks 1-2, now backed by the database.",
+            "Create a `ProductController` with `POST /products`, `GET /products` and `GET /products/{id}`.",
+            "Create an `OrderController` with `POST /orders` (accepting a JSON list of product ids and quantities) and `GET /orders/{id}`.",
+            "Return `404` when a product or order id does not exist and `400` when an order cannot be fulfilled, using `ResponseEntity`.",
+            "Enable the H2 console (`spring.h2.console.enabled=true`) and check your tables and data through it in the browser.",
+            "Test every endpoint with Postman or `curl`, including at least one order that should be rejected for insufficient stock."
+          ],
+          "deliverables": [
+            "A Spring Boot project with `Product`, `Order` and `OrderItem` entities and repositories",
+            "REST endpoints for creating and listing products and placing/viewing orders",
+            "Correct HTTP status codes for not-found and insufficient-stock cases",
+            "A short doc (or Postman collection) listing each endpoint with an example request"
+          ],
+          "done_when": [
+            "The app starts with `mvn spring-boot:run` and data persists in the H2 in-memory database",
+            "`POST /products` creates a product and `GET /products` lists it",
+            "`POST /orders` reduces stock correctly for a valid order and is rejected for an invalid one",
+            "Requesting a non-existent product or order id returns `404`, not a stack trace",
+            "The H2 console shows the correct table structure and data"
+          ],
+          "hints": [
+            "Use `@OneToMany(mappedBy = \"order\")` on `Order` and `@ManyToOne` on `OrderItem` to link the two entities.",
+            "Keep controllers thin: they should call the service layer, not contain stock-checking logic themselves.",
+            "The [Spring Boot reference docs](https://docs.spring.io/spring-boot/index.html) have a getting-started guide covering REST + JPA setups like this one."
+          ],
+          "stretch": "Add a `GET /products/low-stock?threshold=5` endpoint that lists products below a given stock level.",
+          "post_highlights": [
+            "Rebuilt my Java inventory app as a Spring Boot REST API with JPA and H2",
+            "Designed endpoints for products, orders and stock-aware order placement",
+            "Learned to return proper HTTP status codes for not-found and insufficient-stock cases"
+          ]
+        },
+        "4": {
+          "title": "Validation, Tests and API Docs",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Harden your API with proper input validation, a global error handler, and automated tests, then document it with Swagger. This is the polish that turns ShopSphere into a project you can confidently demo.",
+          "learn": [
+            "Request validation with `@Valid` and Bean Validation annotations",
+            "A global exception handler with `@ControllerAdvice`",
+            "Writing service-layer tests with JUnit and Mockito",
+            "Documenting an API with springdoc-openapi (Swagger UI)"
+          ],
+          "steps": [
+            "Add request DTOs (e.g. `CreateProductRequest`, `PlaceOrderRequest`) with `@NotNull`, `@Positive` and `@NotEmpty` validation, and use `@Valid` in the controllers.",
+            "Create custom exceptions like `ProductNotFoundException` and `InsufficientStockException`, thrown from the service layer.",
+            "Add a `@ControllerAdvice` class that turns those exceptions into clean JSON error responses with the right status code (`404`, `400`).",
+            "Add the springdoc-openapi dependency and confirm Swagger UI loads at `/swagger-ui.html` showing all your endpoints.",
+            "Write at least 4 JUnit tests for `OrderService` (successful order, order rejected for insufficient stock, order for a missing product, stock correctly reduced after a valid order), using Mockito to fake the repositories.",
+            "Add a `GET /products/{id}/stock` endpoint if you do not already have one, purely to have one more simple, well-tested endpoint.",
+            "Write a full README covering setup, how to run the app, how to run the tests, and example requests for every endpoint.",
+            "Record a 30-60 second demo showing Swagger UI and a couple of live requests."
+          ],
+          "deliverables": [
+            "Validated request DTOs and a global exception handler",
+            "Swagger UI documenting every endpoint",
+            "At least 4 passing JUnit/Mockito tests for the service layer",
+            "A complete README with setup, run and test instructions"
+          ],
+          "done_when": [
+            "Sending an invalid product or order request returns a clean `400` JSON error, not a stack trace",
+            "Requesting a product or order that does not exist returns a clean `404` JSON error",
+            "Swagger UI at `/swagger-ui.html` lists and lets you try every endpoint",
+            "`mvn test` runs at least 4 tests and all of them pass",
+            "A new developer can set up and run the project using only the README"
+          ],
+          "hints": [
+            "Put validation annotations on request DTOs, not directly on the JPA entities, so API rules and database rules stay separate.",
+            "`@ControllerAdvice` with `@ExceptionHandler` methods is the standard way to centralise error responses in Spring.",
+            "The [Spring Boot testing docs](https://docs.spring.io/spring-boot/reference/testing/index.html) and [Mockito docs](https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html) both have short examples to copy from."
+          ],
+          "stretch": "Add a `PATCH /orders/{id}/cancel` endpoint that restores stock for a pending order inside a single `@Transactional` method.",
+          "post_highlights": [
+            "Added request validation and a global error handler to my Spring Boot shop API",
+            "Wrote JUnit and Mockito tests for the order and stock service layer",
+            "Documented the API with Swagger UI for easy exploration"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "TaskForge: Personal Task & Habit Tracker",
+      "tagline": "Build a task and habit tracking tool step by step, from a console app to a small REST API you can call from anywhere.",
+      "weeks": {
+        "1": {
+          "title": "Tasks in the Console",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Write a Java console program that lets you add, list and complete tasks in memory. This week is about getting comfortable with classes, objects and everyday control flow before anything gets more advanced.",
+          "learn": [
+            "Classes and objects with fields, constructors and methods",
+            "Storing and updating a collection with `ArrayList`",
+            "Basic control flow with `if`/`else` and loops",
+            "Reading user input with `Scanner`"
+          ],
+          "steps": [
+            "Create a Java project with a `Task` class holding `id`, `title`, `priority` and `completed` (boolean).",
+            "Create a `TaskList` class with a `List<Task>` and methods `addTask(...)`, `completeTask(id)` and `listTasks()`.",
+            "Write a `Main` class with a menu: `1) Add task 2) List tasks 3) Complete task 4) Exit`.",
+            "Wire each menu option to the right `TaskList` method, printing a confirmation or error message.",
+            "Sort the task list so incomplete tasks show first, and mark completed ones clearly (for example with a checkmark or `[DONE]`).",
+            "Test completing a task twice and confirm the program handles it sensibly instead of crashing.",
+            "Commit your code to a Git repo with a README explaining how to compile and run it."
+          ],
+          "deliverables": [
+            "A `Task` class and a `TaskList` class with working add/complete/list logic",
+            "A `Main` class with a working console menu",
+            "A README with build/run instructions and a sample session",
+            "A screenshot or short recording of a full session"
+          ],
+          "done_when": [
+            "You can add at least three tasks and see them listed correctly",
+            "Completing a task marks it as done and it appears differently in the list",
+            "Completing a task id that does not exist prints a clear message, not a crash",
+            "The program runs from a menu loop until the user chooses Exit"
+          ],
+          "hints": [
+            "Give each `Task` a unique id using a simple counter in `TaskList`, incremented every time a task is added.",
+            "Use `List<Task>.stream().sorted(...)` or a manual loop to sort by completion status, whichever feels clearer to you.",
+            "The [Java Collections tutorial](https://docs.oracle.com/javase/tutorial/collections/) covers `ArrayList` basics if you need a refresher."
+          ],
+          "stretch": "Add a `dueDate` field to `Task` and a menu option that lists only tasks due today or overdue.",
+          "post_highlights": [
+            "Built a Java console task tracker with add, list and complete features",
+            "Modeled tasks and a task list using classes and an ArrayList",
+            "Practised menu-driven console programs with input validation"
+          ]
+        },
+        "2": {
+          "title": "Categories, Streaks and File Storage",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Add categories and simple habit streaks to your tracker, and save everything to a file so it survives between runs. This introduces composition between classes and basic file I/O.",
+          "learn": [
+            "Composition: a `Task` holding a `Category`",
+            "Using enums for fixed categories like priority level",
+            "Reading and writing plain text files with `BufferedReader`/`BufferedWriter`",
+            "Basic exception handling with `try`/`catch`"
+          ],
+          "steps": [
+            "Add a `Priority` enum (`LOW`, `MEDIUM`, `HIGH`) and a `category` string field to `Task`.",
+            "Create a `Habit` class (`name`, `currentStreak`, `lastCompletedDate`) with a `markDoneToday()` method that increases the streak if completed on a new day, or resets it if a day was missed.",
+            "Add a `HabitTracker` class with a `List<Habit>` and menu options to add a habit and mark it done today.",
+            "Write a `FileStorage` class with methods to save and load tasks and habits as simple text lines.",
+            "On startup, load tasks and habits from files if they exist; on exit, save the current state back to them.",
+            "Wrap file reading in `try`/`catch` so a missing or corrupted file starts with an empty list instead of crashing.",
+            "Add a filter option that lists tasks by category or by priority.",
+            "Re-test the full menu after these changes to make sure Week 1 features still work."
+          ],
+          "deliverables": [
+            "A `Priority` enum and category field on `Task`",
+            "A `Habit` class with working streak logic",
+            "File-based persistence for tasks and habits",
+            "A filter-by-category or filter-by-priority menu option"
+          ],
+          "done_when": [
+            "Marking a habit done on consecutive days increases its streak correctly",
+            "Missing a day resets the streak the next time the habit is marked done",
+            "Closing and restarting the program keeps all tasks and habits",
+            "The program does not crash if the data files are missing"
+          ],
+          "hints": [
+            "Compare dates using `LocalDate` and `ChronoUnit.DAYS.between(...)` to check if a day was skipped.",
+            "Store enum values as their `.name()` string when writing to a file, and use `Enum.valueOf(...)` to read them back.",
+            "Catch `IOException` around file operations and print a friendly message instead of crashing."
+          ],
+          "stretch": "Add a `longestStreak` field on `Habit` that keeps the best streak ever reached, even after a reset.",
+          "post_highlights": [
+            "Added categories, priorities and habit streak tracking to my Java tracker",
+            "Implemented file-based persistence for tasks and habits",
+            "Built streak logic that resets correctly when a day is missed"
+          ]
+        },
+        "3": {
+          "title": "Spring Boot REST API with H2",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Turn TaskForge into a real web service using Spring Boot, storing tasks and habits in an in-memory H2 database with Spring Data JPA. This is your first REST API for a personal productivity app.",
+          "learn": [
+            "Setting up a Spring Boot project with Spring Web, Spring Data JPA and H2",
+            "Mapping classes to tables with `@Entity`",
+            "Writing repositories and a `@RestController` with GET/POST/PUT endpoints",
+            "Returning proper HTTP status codes for success and error cases"
+          ],
+          "steps": [
+            "Generate a new Spring Boot project from [start.spring.io](https://start.spring.io) with the Web, Spring Data JPA and H2 dependencies.",
+            "Turn `Task` and `Habit` into `@Entity` classes with repositories (`TaskRepository`, `HabitRepository`).",
+            "Create a `TaskService` and `HabitService` that reuse the logic you wrote in Weeks 1-2, now backed by the database.",
+            "Create a `TaskController` with `POST /tasks`, `GET /tasks`, `PUT /tasks/{id}/complete` and `GET /tasks?category=...`.",
+            "Create a `HabitController` with `POST /habits`, `GET /habits` and `PUT /habits/{id}/mark-done`.",
+            "Return `404` when a task or habit id does not exist, using `ResponseEntity`.",
+            "Enable the H2 console (`spring.h2.console.enabled=true`) and check your tables and data through it in the browser.",
+            "Test every endpoint with Postman or `curl`, including a request for a task id that does not exist."
+          ],
+          "deliverables": [
+            "A Spring Boot project with `Task` and `Habit` entities and repositories",
+            "REST endpoints for creating, listing, completing tasks and marking habits done",
+            "Correct HTTP status codes for not-found cases",
+            "A short doc (or Postman collection) listing each endpoint with an example request"
+          ],
+          "done_when": [
+            "The app starts with `mvn spring-boot:run` and data persists in the H2 in-memory database",
+            "`POST /tasks` creates a task and `GET /tasks` lists it",
+            "`PUT /tasks/{id}/complete` marks a task as done and `PUT /habits/{id}/mark-done` updates the streak",
+            "Requesting a non-existent task or habit id returns `404`, not a stack trace",
+            "The H2 console shows the correct table structure and data"
+          ],
+          "hints": [
+            "Keep controllers thin: they should call the service layer, not contain streak or filtering logic themselves.",
+            "Use Spring Data query methods like `findByCategory(String category)` instead of writing SQL by hand.",
+            "The [Spring Boot reference docs](https://docs.spring.io/spring-boot/index.html) have a getting-started guide covering REST + JPA setups like this one."
+          ],
+          "stretch": "Add a `GET /tasks/overdue` endpoint that returns incomplete tasks past their due date.",
+          "post_highlights": [
+            "Rebuilt my Java task tracker as a Spring Boot REST API with JPA and H2",
+            "Designed endpoints for tasks and habits with filtering and status updates",
+            "Learned to return proper HTTP status codes for not-found cases"
+          ]
+        },
+        "4": {
+          "title": "Validation, Tests and API Docs",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Harden your API with proper input validation, a global error handler, and automated tests, then document it with Swagger. This is the polish that turns TaskForge into a project you can confidently demo.",
+          "learn": [
+            "Request validation with `@Valid` and Bean Validation annotations",
+            "A global exception handler with `@ControllerAdvice`",
+            "Writing service-layer tests with JUnit and Mockito",
+            "Documenting an API with springdoc-openapi (Swagger UI)"
+          ],
+          "steps": [
+            "Add request DTOs (e.g. `CreateTaskRequest`) with `@NotBlank` on the title and `@NotNull` on priority, and use `@Valid` in the controllers.",
+            "Create custom exceptions like `TaskNotFoundException` and `HabitNotFoundException`, thrown from the service layer.",
+            "Add a `@ControllerAdvice` class that turns those exceptions into clean JSON error responses with the right status code (`404`, `400`).",
+            "Add the springdoc-openapi dependency and confirm Swagger UI loads at `/swagger-ui.html` showing all your endpoints.",
+            "Write at least 4 JUnit tests for `TaskService` and `HabitService` (successful completion, completing a missing task, streak increasing correctly, streak resetting after a missed day), using Mockito to fake the repositories.",
+            "Add a `GET /habits/{id}/streak` endpoint if you do not already have one, purely to have one more simple, well-tested endpoint.",
+            "Write a full README covering setup, how to run the app, how to run the tests, and example requests for every endpoint.",
+            "Record a 30-60 second demo showing Swagger UI and a couple of live requests."
+          ],
+          "deliverables": [
+            "Validated request DTOs and a global exception handler",
+            "Swagger UI documenting every endpoint",
+            "At least 4 passing JUnit/Mockito tests for the service layer",
+            "A complete README with setup, run and test instructions"
+          ],
+          "done_when": [
+            "Sending an invalid task or habit request returns a clean `400` JSON error, not a stack trace",
+            "Requesting a task or habit that does not exist returns a clean `404` JSON error",
+            "Swagger UI at `/swagger-ui.html` lists and lets you try every endpoint",
+            "`mvn test` runs at least 4 tests and all of them pass",
+            "A new developer can set up and run the project using only the README"
+          ],
+          "hints": [
+            "Put validation annotations on request DTOs, not directly on the JPA entities, so API rules and database rules stay separate.",
+            "`@ControllerAdvice` with `@ExceptionHandler` methods is the standard way to centralise error responses in Spring.",
+            "The [Spring Boot testing docs](https://docs.spring.io/spring-boot/reference/testing/index.html) and [Mockito docs](https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html) both have short examples to copy from."
+          ],
+          "stretch": "Add a `GET /habits/{id}/history` endpoint that returns the last 30 days of completion status as a simple list.",
+          "post_highlights": [
+            "Added request validation and a global error handler to my Spring Boot task tracker API",
+            "Wrote JUnit and Mockito tests for the task and habit service layers",
+            "Documented the API with Swagger UI for easy exploration"
+          ]
+        }
+      }
+    }
+  ]
+}

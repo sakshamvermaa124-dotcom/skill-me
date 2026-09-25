@@ -583,7 +583,6 @@
       const area = document.getElementById('result-area');
       const name = data.holder || '—';
       const domain = (data.domain || 'Internship').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      const batch = data.batch_number ? `Batch #${data.batch_number}` : '—';
       const certId = data.cert_id || '—';
       const issuedDate = data.issued_at
         ? new Date(data.issued_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -616,8 +615,8 @@
                 <div class="detail-item-value">${escapeHtml(domain)} Internship</div>
               </div>
               <div class="detail-item">
-                <div class="detail-item-label">Batch</div>
-                <div class="detail-item-value">${escapeHtml(batch)}</div>
+                <div class="detail-item-label">Status</div>
+                <div class="detail-item-value">Completed</div>
               </div>
               <div class="detail-item">
                 <div class="detail-item-label">Date of Issue</div>

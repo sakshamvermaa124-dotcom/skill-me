@@ -4,7 +4,6 @@ Detects inactive enrolled students and sends professional nudge emails.
 
 Inactivity criteria:
   - Student status = 'enrolled', enrollment active
-  - Batch is active
   - Completed < 4 tasks
   - No submission (pending or approved) in last 5 days
   - No 'task_reminder' email sent in last 7 days (cooldown)
@@ -57,7 +56,6 @@ async def get_inactive_students() -> list[dict]:
         JOIN batches b ON b.id = e.batch_id
         WHERE s.status = 'enrolled'
           AND e.status IN ('enrolled', 'active')
-          AND b.status = 'active'
           -- Not finished (completed < 4 tasks)
           AND COALESCE((
               SELECT SUM(p2.issues_completed)
@@ -90,7 +88,12 @@ async def get_inactive_students() -> list[dict]:
     rows = await db.fetch_all(query, params)
 
     results = []
+    seen: set[int] = set()
     for row in rows:
+        # Legacy students can hold more than one active enrollment — one reminder each
+        if row["student_id"] in seen:
+            continue
+        seen.add(row["student_id"])
         completed = int(row["completed_tasks"] or 0)
         week_due = min(completed + 1, 4)
 
@@ -176,5 +179,5 @@ async def send_reminders(student_list: list[dict] | None = None) -> dict:
         await asyncio.sleep(1)
 
     summary = {"sent": sent, "failed": failed, "total": sent + failed}
-    logger.info("Task reminder batch complete: %s", summary)
+    logger.info("Task reminder run complete: %s", summary)
     return summary

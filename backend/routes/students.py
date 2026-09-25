@@ -3,13 +3,17 @@ SkillMe — Student API Routes
 Public endpoints for student applications, status checks, and LinkedIn task submissions.
 """
 
+import logging
+
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from pydantic import BaseModel, Field
 from db.database import db
-from services.email_service import email_service
+from services.email_service import email_service, _domain_label
 from services.submission_service import submission_service
 from services.urgent_request_service import urgent_request_service
+from services.enrollment_service import enrollment_service
 
+logger = logging.getLogger("skillme.students")
 router = APIRouter(prefix="/api/students", tags=["students"])
 
 
@@ -28,19 +32,18 @@ class ApplicationRequest(BaseModel):
     domain: str = Field(..., description="Preferred domain")
     motivation: str | None = Field(None, max_length=1000)
     referral_source: str | None = Field(None, max_length=100)
-    referred_by: str | None = Field(None, max_length=20)  # referral code e.g. SKM-A1B2C3
 
 
 class SubmitTaskRequest(BaseModel):
     student_id: int
-    batch_id: int
+    batch_id: int | None = None  # internal enrollment reference, validated server-side
     week: int = Field(..., ge=1, le=4)
     linkedin_url: str = Field(..., max_length=500)
 
 
 class UrgentRequestRequest(BaseModel):
     student_id: int
-    batch_id: int
+    batch_id: int | None = None  # internal enrollment reference, validated server-side
     request_type: str = Field("all", description="certificate | lor | portfolio | all")
     note: str | None = Field(None, max_length=500)
 
@@ -99,14 +102,6 @@ async def apply(req: ApplicationRequest, background_tasks: BackgroundTasks):
             domain=req.domain,
         )
 
-        # Track referral if a code was provided
-        if req.referred_by:
-            try:
-                from routes.referrals import record_referral_application
-                await record_referral_application(req.email, student_id, req.referred_by)
-            except Exception:
-                pass  # Referral tracking is best-effort
-
         return {
             "status": "applied",
             "message": "Application submitted successfully! You'll hear from us within 48 hours.",
@@ -126,12 +121,10 @@ async def check_status(email: str):
     if not student:
         raise HTTPException(status_code=404, detail="No application found with this email")
 
-    enrollments = await db.fetch_all(
-        """SELECT b.domain, b.batch_number, e.status as enrollment_status
-           FROM enrollments e
-           JOIN batches b ON e.batch_id = b.id
-           WHERE e.student_id = ?""",
-        (student["id"],),
+    enrollment = await enrollment_service.get_current_enrollment(student["id"])
+    enrollments = (
+        [{"domain": enrollment["domain"], "enrollment_status": enrollment["status"]}]
+        if enrollment else []
     )
 
     return {
@@ -149,49 +142,38 @@ async def get_progress(email: str):
     if not student:
         raise HTTPException(status_code=404, detail="Student not found with this email.")
 
-    progress = await db.fetch_all(
-        """SELECT p.week, p.issues_completed, p.score,
-                  b.domain, b.batch_number, b.id as batch_id, b.start_date
-           FROM progress p
-           JOIN batches b ON p.batch_id = b.id
-           WHERE p.student_id = ?
-           ORDER BY b.domain, p.week""",
-        (student["id"],),
-    )
-
-    if not progress:
-        # Fallback to enrollments table if no progress rows exist yet
-        enrollments = await db.fetch_all(
-            """SELECT 1 as week, 0 as issues_completed, 0 as score,
-                      b.domain, b.batch_number, b.id as batch_id, b.start_date
-               FROM enrollments e
-               JOIN batches b ON e.batch_id = b.id
-               WHERE e.student_id = ? AND e.status != 'dropped'""",
-            (student["id"],),
+    # Everything on the dashboard is scoped to the student's single current enrollment,
+    # so stale rows from an old/dropped enrollment can never leak in.
+    enrollment = await enrollment_service.get_current_enrollment(student["id"])
+    progress: list[dict] = []
+    submissions: list[dict] = []
+    if enrollment:
+        batch_id = enrollment["batch_id"]
+        progress = await db.fetch_all(
+            """SELECT week, issues_completed, score, ? AS domain, ? AS batch_id, ? AS start_date
+               FROM progress
+               WHERE student_id = ? AND batch_id = ?
+               ORDER BY week""",
+            (enrollment["domain"], batch_id, enrollment["start_date"], student["id"], batch_id),
         )
-        if enrollments:
-            progress = enrollments
-
-    submissions = await db.fetch_all(
-        """SELECT s.id, s.week, s.linkedin_url, s.status, s.admin_note,
-                  s.submitted_at, s.reviewed_at, b.domain
-           FROM submissions s
-           LEFT JOIN batches b ON s.batch_id = b.id
-           WHERE s.student_id = ?
-           ORDER BY s.week ASC""",
-        (student["id"],),
-    )
-
-    primary_domain = student.get("domain") or (progress[0]["domain"] if progress else "Web Development")
-
-    payment_unlocked = False
-    batch_id = progress[0]["batch_id"] if progress else None
-    if batch_id:
-        enrollment = await db.fetch_one(
-            "SELECT payment_unlocked_at FROM enrollments WHERE student_id = ? AND batch_id = ?",
-            (student["id"], batch_id),
+        if not progress and enrollment["status"] != "dropped":
+            # No approved work yet — still expose the enrollment so the dashboard can load tasks
+            progress = [{
+                "week": 1, "issues_completed": 0, "score": 0,
+                "domain": enrollment["domain"], "batch_id": batch_id,
+                "start_date": enrollment["start_date"],
+            }]
+        submissions = await db.fetch_all(
+            """SELECT id, week, linkedin_url, status, admin_note, feedback,
+                      submitted_at, reviewed_at, ? AS domain
+               FROM submissions
+               WHERE student_id = ? AND batch_id = ?
+               ORDER BY week ASC""",
+            (enrollment["domain"], student["id"], batch_id),
         )
-        payment_unlocked = bool(enrollment and enrollment["payment_unlocked_at"])
+
+    primary_domain = student.get("domain") or (enrollment["domain"] if enrollment else "Web Development")
+    payment_unlocked = bool(enrollment and enrollment["payment_unlocked_at"])
 
     return {
         "student": {
@@ -202,7 +184,6 @@ async def get_progress(email: str):
             "email": student["email"],
             "domain": primary_domain,
             "college": student.get("college"),
-            "referral_code": student.get("referral_code"),
         },
         "progress": [dict(p) for p in progress],
         "submissions": [dict(s) for s in submissions],
@@ -233,33 +214,60 @@ async def get_progress_by_id(student_id: int):
 
 
 @router.post("/submit-task", summary="Submit a LinkedIn post URL for a week's task")
-async def submit_task(req: SubmitTaskRequest):
+async def submit_task(req: SubmitTaskRequest, background_tasks: BackgroundTasks):
     """
     Student submits a LinkedIn post URL for a given week's task.
-    The submission is queued as 'pending' until an admin reviews it.
+    The submission is queued as 'pending' until an admin reviews it, and the student is
+    emailed automatic feedback for that task.
     """
+    batch_id = await enrollment_service.resolve_batch_id(req.student_id, req.batch_id)
+    if not batch_id:
+        raise HTTPException(status_code=400, detail="You are not enrolled in an internship yet.")
     try:
-        return await submission_service.submit_linkedin_url(
+        result = await submission_service.submit_linkedin_url(
             student_id=req.student_id,
-            batch_id=req.batch_id,
+            batch_id=batch_id,
             week=req.week,
             linkedin_url=req.linkedin_url,
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+    student = await db.fetch_one(
+        """SELECT s.first_name, s.last_name, s.email, COALESCE(b.domain, s.domain) AS domain
+           FROM students s LEFT JOIN batches b ON b.id = ?
+           WHERE s.id = ?""",
+        (batch_id, req.student_id),
+    )
+    if student:
+        background_tasks.add_task(
+            email_service.send_submission_feedback,
+            first_name=student["first_name"],
+            last_name=student["last_name"],
+            email=student["email"],
+            domain=student["domain"] or "web-dev",
+            week=req.week,
+            feedback=result["feedback"],
+            student_id=req.student_id,
+            batch_id=batch_id,
+        )
+    return result
+
 
 @router.post("/urgent-request", summary="Request 24h expedited certificate/LOR/portfolio processing")
 async def create_urgent_request(req: UrgentRequestRequest):
     """
     Student requests urgent (24h) processing of their certificate, LOR, or portfolio.
-    Open to students below 50% task completion, who don't otherwise have direct
+    Open to students below the payment threshold (3 of 4 tasks approved), who don't otherwise have direct
     payment access — an admin reviews and, if fulfilled, unlocks payment for them.
     """
+    batch_id = await enrollment_service.resolve_batch_id(req.student_id, req.batch_id)
+    if not batch_id:
+        raise HTTPException(status_code=400, detail="You are not enrolled in an internship yet.")
     try:
         return await urgent_request_service.create_request(
             student_id=req.student_id,
-            batch_id=req.batch_id,
+            batch_id=batch_id,
             request_type=req.request_type,
             note=req.note,
         )
@@ -269,12 +277,15 @@ async def create_urgent_request(req: UrgentRequestRequest):
 
 @router.get("/urgent-request/status/{student_id}/{batch_id}", summary="Get latest urgent request status")
 async def get_urgent_request_status(student_id: int, batch_id: int):
-    """Returns the most recent urgent request for this student + batch, or null if none exists."""
+    """Returns the student's most recent urgent request, or null if none exists."""
+    resolved = await enrollment_service.resolve_batch_id(student_id, batch_id)
+    if not resolved:
+        return {"request": None}
     row = await db.fetch_one(
         """SELECT * FROM urgent_requests
            WHERE student_id = ? AND batch_id = ?
-           ORDER BY created_at DESC LIMIT 1""",
-        (student_id, batch_id),
+           ORDER BY created_at DESC, id DESC LIMIT 1""",
+        (student_id, resolved),
     )
     return {"request": dict(row) if row else None}
 
@@ -282,138 +293,47 @@ async def get_urgent_request_status(student_id: int, batch_id: int):
 @router.get("/public-activity", summary="Get live public proof-of-work activity feed")
 async def get_public_activity():
     """
-    Returns live proof-of-work updates, approved milestone submissions, verified credentials,
-    and verified platform metrics. Anonymizes student names and uses NO student photos.
-    Includes cold-start resilience to ensure 100% production reliability.
+    Real platform metrics and the latest admin-approved submissions (names anonymised,
+    no photos). Every number and entry comes from the database — nothing is padded or
+    invented, so an empty or small feed is expected early on.
     """
     import datetime
 
-    # Pre-curated realistic fallback activities for cold-start / network resilience
-    fallback_activities = [
-        {
-            "id": "act-1",
-            "type": "submission_approved",
-            "student_initials": "RS",
-            "student_name": "Rahul S.",
-            "college": "AKTU",
-            "domain": "Web Development",
-            "domain_slug": "web-dev",
-            "badge_text": "Week 2 Approved",
-            "action_text": "had their FastAPI Endpoint Auth milestone approved",
-            "time_ago": "3m ago",
-            "icon": "check-circle",
-            "verified": True
-        },
-        {
-            "id": "act-2",
-            "type": "cert_issued",
-            "student_initials": "SM",
-            "student_name": "Sneha M.",
-            "college": "VTU",
-            "domain": "Python Backend",
-            "domain_slug": "python",
-            "badge_text": "Verified Certificate",
-            "action_text": "completed 4-Week Python & API Track",
-            "time_ago": "11m ago",
-            "icon": "award",
-            "verified": True
-        },
-        {
-            "id": "act-3",
-            "type": "submission_approved",
-            "student_initials": "AV",
-            "student_name": "Aman V.",
-            "college": "IPU Delhi",
-            "domain": "AI & Machine Learning",
-            "domain_slug": "ml",
-            "badge_text": "Week 3 Approved",
-            "action_text": "had their Model Evaluation Pipeline milestone approved",
-            "time_ago": "19m ago",
-            "icon": "check-circle",
-            "verified": True
-        },
-        {
-            "id": "act-4",
-            "type": "lor_unlocked",
-            "student_initials": "PK",
-            "student_name": "Priya K.",
-            "college": "Anna University",
-            "domain": "React & Frontend",
-            "domain_slug": "react",
-            "badge_text": "Official LOR Unlocked",
-            "action_text": "scored 94% across all 4 milestone rubrics",
-            "time_ago": "34m ago",
-            "icon": "file-check",
-            "verified": True
-        },
-        {
-            "id": "act-5",
-            "type": "submission_approved",
-            "student_initials": "RD",
-            "student_name": "Rohan D.",
-            "college": "Pune University",
-            "domain": "Web Development",
-            "domain_slug": "web-dev",
-            "badge_text": "Week 1 Approved",
-            "action_text": "had their Responsive Grid System milestone approved",
-            "time_ago": "52m ago",
-            "icon": "check-circle",
-            "verified": True
-        },
-        {
-            "id": "act-6",
-            "type": "stipend_qualified",
-            "student_initials": "TG",
-            "student_name": "Tanvi G.",
-            "college": "RTU Kota",
-            "domain": "Python Backend",
-            "domain_slug": "python",
-            "badge_text": "Top 5% Performer",
-            "action_text": "qualified for Monthly Performance Stipend",
-            "time_ago": "1h ago",
-            "icon": "zap",
-            "verified": True
-        },
-        {
-            "id": "act-7",
-            "type": "submission_approved",
-            "student_initials": "HN",
-            "student_name": "Harsh N.",
-            "college": "GTU",
-            "domain": "Full-Stack Dev",
-            "domain_slug": "web-dev",
-            "badge_text": "Week 4 Approved",
-            "action_text": "had their Database Migration milestone approved",
-            "time_ago": "1h 15m ago",
-            "icon": "check-circle",
-            "verified": True
-        }
-    ]
+    def _time_ago(ts) -> str:
+        try:
+            then = datetime.datetime.fromisoformat(str(ts).replace("Z", "").split(".")[0])
+        except ValueError:
+            return "Recently"
+        minutes = int((datetime.datetime.utcnow() - then).total_seconds() // 60)
+        if minutes < 1:
+            return "Just now"
+        if minutes < 60:
+            return f"{minutes}m ago"
+        if minutes < 60 * 24:
+            return f"{minutes // 60}h ago"
+        return f"{minutes // (60 * 24)}d ago"
 
     try:
-        # 1. Fetch aggregate metrics
         db_approved = await db.fetch_one("SELECT count(id) as count FROM submissions WHERE status = 'approved'")
         db_students = await db.fetch_one("SELECT count(id) as count FROM students")
         db_certs = await db.fetch_one("SELECT count(id) as count FROM certificates")
         db_colleges = await db.fetch_one("SELECT count(DISTINCT college) as count FROM students WHERE college IS NOT NULL AND TRIM(college) != ''")
+        db_review = await db.fetch_one(
+            """SELECT AVG((julianday(reviewed_at) - julianday(submitted_at)) * 24) AS hours
+               FROM submissions
+               WHERE status = 'approved' AND reviewed_at IS NOT NULL
+                 AND julianday('now') - julianday(reviewed_at) <= 30"""
+        )
 
-        # Combine with live base counters for robust social proof
-        total_approved = max(428, (db_approved["count"] if db_approved else 0) + 428)
-        total_students = max(890, (db_students["count"] if db_students else 0) + 890)
-        total_certs = max(194, (db_certs["count"] if db_certs else 0) + 194)
-        total_colleges = max(68, (db_colleges["count"] if db_colleges else 0) + 68)
-
-        # 2. Fetch recent actual approved submissions if present in DB
-        db_activities = []
+        activities = []
         recent_subs = await db.fetch_all(
-            """SELECT s.week, s.submitted_at, s.reviewed_at,
+            """SELECT s.id, s.week, s.submitted_at, s.reviewed_at,
                       st.first_name, st.last_name, st.college, st.domain
                FROM submissions s
                JOIN students st ON s.student_id = st.id
                WHERE s.status = 'approved'
-               ORDER BY s.reviewed_at DESC LIMIT 5"""
+               ORDER BY s.reviewed_at DESC LIMIT 12"""
         )
-
         for sub in recent_subs:
             fname = (sub["first_name"] or "").strip()
             lname = (sub["last_name"] or "").strip()
@@ -424,11 +344,11 @@ async def get_public_activity():
                 college = college.split("(")[0].strip()
 
             domain_raw = (sub["domain"] or "web-dev").lower()
-            domain_name = "Web Development" if "web" in domain_raw else ("Python Backend" if "python" in domain_raw else "AI / Data Science")
+            domain_name = _domain_label(domain_raw)
             week = sub["week"] or 1
 
-            db_activities.append({
-                "id": f"db-sub-{week}-{initials}",
+            activities.append({
+                "id": f"db-sub-{sub['id']}",
                 "type": "submission_approved",
                 "student_initials": initials,
                 "student_name": anon_name,
@@ -437,39 +357,24 @@ async def get_public_activity():
                 "domain_slug": domain_raw,
                 "badge_text": f"Week {week} Approved",
                 "action_text": f"had their Week {week} milestone approved",
-                "time_ago": "Just now",
+                "time_ago": _time_ago(sub["reviewed_at"] or sub["submitted_at"]),
                 "icon": "check-circle",
                 "verified": True
             })
 
-        # Blend real activities first, followed by fallbacks to ensure rich ticker
-        combined_activities = db_activities + [f for f in fallback_activities if f["id"] not in [d["id"] for d in db_activities]]
-
+        hours = db_review["hours"] if db_review else None
         return {
             "status": "success",
             "stats": {
-                "total_submissions_approved": total_approved,
-                "total_students": total_students,
-                "total_certificates": total_certs,
-                "total_colleges": total_colleges,
-                "active_tracks": 12,
-                "avg_review_hours": 3.2
+                "total_submissions_approved": db_approved["count"] if db_approved else 0,
+                "total_students": db_students["count"] if db_students else 0,
+                "total_certificates": db_certs["count"] if db_certs else 0,
+                "total_colleges": db_colleges["count"] if db_colleges else 0,
+                "avg_review_hours": round(float(hours), 1) if hours is not None else None,
             },
-            "activities": combined_activities[:12],
+            "activities": activities,
             "timestamp": datetime.datetime.utcnow().isoformat()
         }
     except Exception as e:
-        # 100% resilient fallback response if DB is unreachable
-        return {
-            "status": "fallback",
-            "stats": {
-                "total_submissions_approved": 428,
-                "total_students": 890,
-                "total_certificates": 194,
-                "total_colleges": 68,
-                "active_tracks": 12,
-                "avg_review_hours": 3.2
-            },
-            "activities": fallback_activities,
-            "error_detail": str(e)
-        }
+        logger.warning("public-activity failed: %s", e)
+        return {"status": "unavailable", "stats": None, "activities": []}

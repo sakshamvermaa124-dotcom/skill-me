@@ -37,8 +37,21 @@ def _sign_payment(order_id: str, payment_id: str, secret: str = "test_secret") -
     return hmac.new(secret.encode(), body.encode(), hashlib.sha256).hexdigest()
 
 
+@pytest.fixture
+async def eligible_student(enrolled_student):
+    """Enrolled student past the payment gate (3 of 4 weeks approved)."""
+    from tests.conftest import test_db
+    for week in (1, 2, 3):
+        await test_db.insert(
+            "INSERT INTO progress (student_id, batch_id, week, issues_completed, score) VALUES (?, ?, ?, 1, 100)",
+            (enrolled_student["id"], enrolled_student["batch_id"], week),
+        )
+    return enrolled_student
+
+
 @pytest.mark.payments
 class TestCreateOrder:
+    @pytest.mark.usefixtures("eligible_student")
     async def test_create_order_success(self, client, enrolled_student, test_batch):
         """Create payment order for a student with Razorpay mocked."""
         mock_client = _make_razorpay_mock()
@@ -62,6 +75,7 @@ class TestCreateOrder:
             })
         assert r.status_code == 404
 
+    @pytest.mark.usefixtures("eligible_student")
     async def test_create_order_already_paid_returns_flag(self, client, paid_student, test_batch):
         """If already paid, should return already_paid=True without calling Razorpay."""
         r = await client.post("/api/payments/create-order", json={
@@ -72,6 +86,7 @@ class TestCreateOrder:
         data = r.json()
         assert data.get("already_paid") is True
 
+    @pytest.mark.usefixtures("eligible_student")
     async def test_create_order_discount_code(self, client, enrolled_student, test_batch):
         """BLACKYY discount code should set amount to 500 paise."""
         mock_client = _make_razorpay_mock(order_id="order_discount")
@@ -86,6 +101,7 @@ class TestCreateOrder:
         data = r.json()
         assert data.get("amount") == 500
 
+    @pytest.mark.usefixtures("eligible_student")
     async def test_create_order_razorpay_failure_returns_502(self, client, enrolled_student, test_batch):
         """Razorpay 500 should propagate as 502 Bad Gateway."""
         mock_client = _make_razorpay_mock(status_code=500)
@@ -100,6 +116,45 @@ class TestCreateOrder:
     async def test_create_order_missing_fields(self, client):
         r = await client.post("/api/payments/create-order", json={})
         assert r.status_code == 422
+
+    async def test_create_order_below_half_is_blocked(self, client, enrolled_student, test_batch):
+        r = await client.post("/api/payments/create-order", json={
+            "student_id": enrolled_student["id"],
+            "batch_id": test_batch["id"],
+        })
+        assert r.status_code == 403
+
+    async def test_create_order_two_of_four_tasks_is_blocked(self, client, enrolled_student, test_batch):
+        """Payment is asked for at the end — 2 approved weeks is not enough, 3 is."""
+        from tests.conftest import test_db
+        for week in (1, 2):
+            await test_db.insert(
+                "INSERT INTO progress (student_id, batch_id, week, issues_completed, score) VALUES (?, ?, ?, 1, 25)",
+                (enrolled_student["id"], enrolled_student["batch_id"], week),
+            )
+        r = await client.post("/api/payments/create-order", json={
+            "student_id": enrolled_student["id"],
+            "batch_id": test_batch["id"],
+        })
+        assert r.status_code == 403
+
+    async def test_create_order_not_enrolled(self, client, test_student):
+        r = await client.post("/api/payments/create-order", json={"student_id": test_student["id"]})
+        assert r.status_code == 400
+
+    @pytest.mark.usefixtures("eligible_student")
+    async def test_create_order_stale_batch_id_uses_own_enrollment(self, client, enrolled_student, test_batch):
+        """A wrong/stale enrollment reference must be resolved to the student's own enrollment."""
+        from tests.conftest import test_db
+        mock_client = _make_razorpay_mock(order_id="order_stale")
+        with patch("routes.payments.httpx.AsyncClient", return_value=mock_client):
+            r = await client.post("/api/payments/create-order", json={
+                "student_id": enrolled_student["id"],
+                "batch_id": 424242,
+            })
+        assert r.status_code == 200
+        row = await test_db.fetch_one("SELECT batch_id FROM payments WHERE razorpay_order_id = 'order_stale'")
+        assert row["batch_id"] == test_batch["id"]
 
 
 

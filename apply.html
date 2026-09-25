@@ -881,7 +881,7 @@
         <div class="success-state" id="success-state">
           <div class="success-icon">🎉</div>
           <h2>Application Submitted!</h2>
-          <p>We've received your application. You'll hear from us within <strong>48 hours</strong> with a screening quiz link.</p>
+          <p>We've received your application. You'll get an email within <strong>48 hours</strong> once you're enrolled — then log in to your dashboard to start Week 1.</p>
           <div class="success-detail">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
             Check your email for confirmation
@@ -956,10 +956,10 @@
                     p.innerHTML = 'Congratulations! Please check your email inbox for the next steps.';
                   } else if (status === 'enrolled') {
                     h2.textContent = 'You\'re Enrolled! 🚀';
-                    p.innerHTML = 'You have been assigned to a batch. Please check your email or log into the <a href="dashboard.html" style="color:#c99a4e; text-decoration:underline;">Student Dashboard</a>.';
+                    p.innerHTML = 'Your offer letter is in your inbox. Please check your email or log into the <a href="dashboard.html" style="color:#c99a4e; text-decoration:underline;">Student Dashboard</a>.';
                   } else if (status === 'dropped') {
                     h2.textContent = 'Application Dropped';
-                    p.innerHTML = 'Your application is no longer active. You can submit another application for a different domain.';
+                    p.innerHTML = 'Your internship is no longer active. To be reconsidered, write to <a href="mailto:admin@skill-me-intern.in" style="color:#c99a4e; text-decoration:underline;">admin@skill-me-intern.in</a>.';
                   }
                 }
               })
@@ -986,7 +986,10 @@
         const quiz = JSON.parse(quizRaw);
         const domainLabels = {
           'web-dev':'Web Development','python':'Python','ml':'Machine Learning',
-          'devops':'DevOps / Cloud','mobile':'Mobile Dev','ui-ux':'UI/UX Design'
+          'devops':'DevOps / CI-CD','mobile':'Mobile Dev','ui-ux':'UI/UX Design',
+          'react':'React / Next.js','nodejs':'Node.js / Express','java':'Java / Spring Boot',
+          'data-science':'Data Science','flutter':'Flutter / Mobile','cpp':'C/C++ / DSA',
+          'cloud':'Cloud / AWS','cybersecurity':'Cybersecurity','genai':'Generative AI','sql':'SQL / Databases'
         };
         const hiddenDomain = document.getElementById('hidden-domain');
         if (hiddenDomain && quiz.domain) {
@@ -1220,6 +1223,7 @@
         year_of_study: document.getElementById('year').value,
         domain: document.getElementById('hidden-domain').value,
         motivation: document.getElementById('motivation').value.trim(),
+        referral_source: document.getElementById('referral').value || null,
       };
 
       // Call API

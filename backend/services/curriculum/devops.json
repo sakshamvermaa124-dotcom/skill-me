@@ -1,0 +1,564 @@
+{
+  "domain": "devops",
+  "tracks": [
+    {
+      "project_name": "DevDeploy: Automated Multi-Stage Docker & CI/CD Pipeline Hub",
+      "tagline": "Take a tiny web app and learn to containerise it, test it automatically, and deploy it to the internet on every push.",
+      "weeks": {
+        "1": {
+          "title": "Git Basics & Your First Dockerfile",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Write a tiny notes web app, put it on GitHub, and package it into a Docker container that runs the same way on any machine. This is the foundation every later week builds on.",
+          "learn": [
+            "A basic Git workflow: `init`, `add`, `commit`, `push` and meaningful commit messages",
+            "What containers and images are, and why teams use them",
+            "Writing a `Dockerfile` with `FROM`, `WORKDIR`, `COPY`, `RUN`, `EXPOSE` and `CMD`",
+            "Running containers with port mapping and reading their logs"
+          ],
+          "steps": [
+            "Install Git and Docker Desktop (or use GitHub Codespaces if your laptop cannot run Docker), then run `docker run hello-world` to confirm Docker works.",
+            "Write a tiny web app in Python (Flask) or Node (Express) with three routes: `GET /` returns a welcome message, `GET /notes` returns a list of notes kept in memory, and `GET /health` returns `{\"status\": \"ok\"}`.",
+            "Run the app directly on your machine first and check each route in the browser before touching Docker.",
+            "Create a Git repo, add a `.gitignore`, make small commits as you go, and push to a public GitHub repo.",
+            "Write a `Dockerfile` and a `.dockerignore`, then build it with `docker build -t devdeploy .`.",
+            "Run it with `docker run -p 8000:8000 devdeploy`, open the app in your browser, and view output with `docker logs`.",
+            "Write a README listing the exact commands to build and run the container."
+          ],
+          "deliverables": [
+            "A small web app with `/`, `/notes` and `/health` routes",
+            "A `Dockerfile` and `.dockerignore`",
+            "A public GitHub repo with several meaningful commits",
+            "A README with build and run instructions"
+          ],
+          "done_when": [
+            "`docker build` finishes without errors",
+            "The running container responds on `/`, `/notes` and `/health` in the browser",
+            "The repo has at least 4 commits with clear messages",
+            "Someone else could run the app using only the README commands"
+          ],
+          "hints": [
+            "Your app must listen on `0.0.0.0`, not `localhost`, or it will not be reachable from outside the container.",
+            "Copy your dependency file (`requirements.txt` or `package.json`) and install dependencies before copying the rest of the code so rebuilds are faster.",
+            "The Get Started guide in the [Docker docs](https://docs.docker.com) walks through building and running your first image."
+          ],
+          "stretch": "Use a slim base image (for example `python:3.12-slim` or `node:20-alpine`) and compare image sizes with `docker images`.",
+          "post_highlights": [
+            "Built a small web app and packaged it into a Docker container",
+            "Wrote a Dockerfile and .dockerignore and ran the app with port mapping",
+            "Managed the project with Git using small, meaningful commits"
+          ]
+        },
+        "2": {
+          "title": "App + Database with Docker Compose",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Real apps need a database. This week you add PostgreSQL and run both the app and database together with one Docker Compose command, so notes are saved permanently instead of disappearing on restart.",
+          "learn": [
+            "Defining multiple services in a `docker-compose.yml` file",
+            "How containers talk to each other by service name on a Compose network",
+            "Keeping data safe with named volumes",
+            "Configuring apps with environment variables and a `.env` file"
+          ],
+          "steps": [
+            "Add a `POST /notes` route to your app that accepts a note and a `GET /notes` that reads from the database.",
+            "Make the app read database settings from environment variables (for example `DATABASE_URL`) instead of hardcoding them.",
+            "Write a `docker-compose.yml` with two services: `app` (built from your Dockerfile) and `db` (the official `postgres` image).",
+            "Add a named volume for Postgres data and put the password in a `.env` file that is listed in `.gitignore`, with a `.env.example` committed instead.",
+            "Start everything with `docker compose up --build`, add a few notes with curl or Postman, then run `docker compose down` and `up` again to check the notes are still there.",
+            "Make the app create its table on startup if it does not exist, and retry the database connection a few times if Postgres is not ready yet.",
+            "Update the README with the Compose commands and a short explanation of each service."
+          ],
+          "deliverables": [
+            "A `docker-compose.yml` running the app and PostgreSQL",
+            "Notes saved in the database through `POST /notes`",
+            "A `.env.example` file and no real secrets in Git",
+            "An updated README"
+          ],
+          "done_when": [
+            "`docker compose up --build` starts both services with one command",
+            "Notes created through the API are returned by `GET /notes`",
+            "Notes survive `docker compose down` followed by `docker compose up`",
+            "No passwords are committed to the repo",
+            "The app does not crash if it starts before the database is ready"
+          ],
+          "hints": [
+            "Inside Compose, the database host is the service name (`db`), not `localhost`.",
+            "Running `docker compose down -v` deletes volumes too, so only use it when you want to wipe data.",
+            "Use `docker compose logs app` to see why the app failed to start.",
+            "The Compose section of the [Docker docs](https://docs.docker.com) has a full reference for every option."
+          ],
+          "stretch": "Add a `healthcheck` to the `db` service and make `app` wait for it using `depends_on` with `condition: service_healthy`.",
+          "post_highlights": [
+            "Ran a web app and PostgreSQL together using Docker Compose",
+            "Used named volumes and environment variables to persist data and keep secrets out of Git",
+            "Added startup retries so the app handles a slow database gracefully"
+          ]
+        },
+        "3": {
+          "title": "Automated Tests & CI with GitHub Actions",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Set up a pipeline that automatically checks every push: it lints your code, runs tests, and builds the Docker image. You will also switch to a multi-stage Dockerfile so the final image is smaller and cleaner.",
+          "learn": [
+            "What Continuous Integration (CI) is and why it catches problems early",
+            "Writing a GitHub Actions workflow with triggers, jobs and steps",
+            "Writing a few simple automated tests and running a linter",
+            "Multi-stage Docker builds to keep production images small"
+          ],
+          "steps": [
+            "Write 3-5 tests with `pytest` or `jest` covering `/health`, creating a note, and rejecting an empty note with a 400 error.",
+            "Add input validation to `POST /notes` so bad input returns a clear 400 error instead of a server crash, and make your tests pass locally.",
+            "Add a linter (`flake8`/`ruff` for Python or `eslint` for Node) and fix the warnings it reports.",
+            "Create `.github/workflows/ci.yml` that runs on every push and pull request: check out code, set up the language, install dependencies, lint, and test.",
+            "Add a final CI step that runs `docker build` to prove the image still builds.",
+            "Convert your Dockerfile to multi-stage (one stage installs or tests, the final stage only copies what is needed to run) and compare image sizes.",
+            "Open a pull request with a deliberately failing test, screenshot the red CI check, then fix it and screenshot the green one."
+          ],
+          "deliverables": [
+            "A test suite with at least 3 passing tests",
+            "A GitHub Actions workflow that lints, tests and builds the image",
+            "A multi-stage Dockerfile",
+            "Screenshots of a failing and a passing CI run"
+          ],
+          "done_when": [
+            "Tests pass locally and in GitHub Actions",
+            "The workflow runs automatically on push and on pull requests",
+            "A lint error or failing test makes the workflow fail",
+            "Invalid input to `POST /notes` returns a 400 response",
+            "The README shows a CI status badge"
+          ],
+          "hints": [
+            "Keep tests independent of Postgres at first by testing validation and `/health`, or use a Postgres service container in the workflow later.",
+            "If CI fails but local passes, read the exact failing step log in the Actions tab; it is usually a missing dependency or wrong working directory.",
+            "The quickstart in the [GitHub Actions docs](https://docs.github.com/actions) shows a complete minimal workflow."
+          ],
+          "stretch": "Push your image to GitHub Container Registry (ghcr.io) from the workflow when changes land on `main`.",
+          "post_highlights": [
+            "Set up a CI pipeline with GitHub Actions that lints, tests and builds a Docker image",
+            "Wrote automated tests and added input validation to a web API",
+            "Reduced image size by converting to a multi-stage Dockerfile"
+          ]
+        },
+        "4": {
+          "title": "Auto-Deploy to the Cloud & Health Checks",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Complete the pipeline: every push to `main` that passes CI is deployed to a free host and becomes live on a public URL. You will add health checks and useful logs, then document the whole flow.",
+          "learn": [
+            "Continuous Deployment (CD): shipping automatically after tests pass",
+            "Deploying a Docker container to a free platform such as Render",
+            "Managing production configuration and secrets on a hosting platform",
+            "Health checks and structured logs for spotting problems"
+          ],
+          "steps": [
+            "Create a free hosted PostgreSQL database (for example Render's free Postgres or Neon) and note its connection URL.",
+            "Create a free Render web service from your GitHub repo using your Dockerfile, and set `DATABASE_URL` as an environment variable in the dashboard.",
+            "Set the health check path to `/health` and extend that route so it also checks the database connection and returns an error status if the database is down.",
+            "Turn off automatic deploys and instead trigger a deploy from GitHub Actions using a Render deploy hook stored as a repository secret, only after lint and tests pass on `main`.",
+            "Add simple request logging (method, path, status, time taken) and find those logs in the Render dashboard.",
+            "Make a visible change, push it, and record the full journey from commit to CI to live site.",
+            "Finish the README with a pipeline diagram (commit, CI, deploy, live URL), the live link and setup steps."
+          ],
+          "deliverables": [
+            "A live public URL for your app",
+            "A workflow that deploys only after CI passes on `main`",
+            "A `/health` route that checks the database",
+            "A README with a pipeline diagram and a 60-second demo video"
+          ],
+          "done_when": [
+            "The app is reachable at a public URL and can create and list notes",
+            "Pushing to `main` with passing tests triggers a deploy automatically",
+            "A failing test stops the deploy from happening",
+            "No secrets appear in the repo; the deploy hook and database URL are stored as secrets",
+            "Request logs are visible on the hosting dashboard"
+          ],
+          "hints": [
+            "Free Render services sleep when idle, so the first request after a while can take 30-60 seconds; mention this in your README.",
+            "Use `needs:` in your workflow so the deploy job only runs after the test job succeeds, and `if: github.ref == 'refs/heads/main'` to limit it to `main`.",
+            "See the [Render docs](https://render.com/docs) for Docker deploys and deploy hooks, and the [GitHub Actions docs](https://docs.github.com/actions) for secrets."
+          ],
+          "stretch": "Add a scheduled GitHub Actions workflow that calls your `/health` URL every hour and fails (sending you an email) if the site is down.",
+          "post_highlights": [
+            "Built a full CI/CD pipeline that tests and deploys a Dockerised app on every push",
+            "Deployed a containerised web app with a hosted PostgreSQL database to a free cloud platform",
+            "Added database-aware health checks and request logging for production monitoring"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "InfraGuard: Microservices Orchestration & Infrastructure as Code",
+      "tagline": "Build two small services that work together, run them with Docker Compose behind a gateway, and describe the setup as code.",
+      "weeks": {
+        "1": {
+          "title": "Two Small Services in Containers",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Build two tiny services: a `quotes-api` that returns a random quote as JSON, and a `web` service that calls it and shows the quote on a page. You will containerise both and connect them on a Docker network, which is the core idea behind microservices.",
+          "learn": [
+            "What a microservice is, and why you might split an app into services",
+            "Writing a `Dockerfile` for each service",
+            "Connecting containers on a user-defined Docker network so they find each other by name",
+            "A basic Git workflow with one repo holding both services"
+          ],
+          "steps": [
+            "Install Git and Docker Desktop (or use GitHub Codespaces on a low-spec laptop) and run `docker run hello-world`.",
+            "Create a repo with two folders, `quotes-api` and `web`, and write the quotes API first (Flask or Express) with `GET /quote` and `GET /health`.",
+            "Write the `web` service with one page that fetches from the quotes API using a URL read from an environment variable (for example `QUOTES_URL`).",
+            "Run both services directly on your machine first to check they work together.",
+            "Write a Dockerfile for each service and build both images.",
+            "Create a network with `docker network create infraguard`, run both containers on it, and set `QUOTES_URL=http://quotes-api:5000/quote` for the web container.",
+            "Write a README with a simple diagram (web to quotes-api) and the exact commands you ran."
+          ],
+          "deliverables": [
+            "Two services in one GitHub repo, each with its own Dockerfile",
+            "A web page that displays a quote fetched from the API service",
+            "A README with a simple architecture diagram and run commands"
+          ],
+          "done_when": [
+            "Both images build without errors",
+            "Opening the web page in a browser shows a quote that came from the quotes-api container",
+            "The web service finds the API by container name, not by IP address",
+            "The API URL comes from an environment variable, not hardcoded"
+          ],
+          "hints": [
+            "Containers only find each other by name when they are on the same user-defined network.",
+            "Make both apps listen on `0.0.0.0` so they are reachable from outside their container.",
+            "The networking section of the [Docker docs](https://docs.docker.com) explains bridge networks with examples."
+          ],
+          "stretch": "Add a `/quote?category=motivation` filter to the API and a dropdown on the web page to choose the category.",
+          "post_highlights": [
+            "Built two small services that communicate over HTTP",
+            "Containerised each service with its own Dockerfile",
+            "Connected the containers on a Docker network using service names"
+          ]
+        },
+        "2": {
+          "title": "Orchestrate Everything with Docker Compose",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Replace the long list of `docker run` commands with one `docker-compose.yml` file, and give the quotes API a database so users can add their own quotes. After this week the whole system starts with a single command.",
+          "learn": [
+            "Describing multiple services, networks and volumes in `docker-compose.yml`",
+            "Adding a database service and persisting its data with a named volume",
+            "Environment variables and `.env` files for configuration",
+            "Startup order with `depends_on` and health checks"
+          ],
+          "steps": [
+            "Write a `docker-compose.yml` with your two services and confirm `docker compose up --build` gives the same result as last week.",
+            "Add a `db` service (the official `postgres` image, or `redis` if you prefer something simpler) with a named volume for its data.",
+            "Update the quotes API to store quotes in the database, add `POST /quote`, and seed a few quotes on first start.",
+            "Add a simple form on the web page to submit a new quote to the API.",
+            "Move passwords and URLs into a `.env` file (ignored by Git) and commit a `.env.example`.",
+            "Add a `healthcheck` to the database and use `depends_on` with `condition: service_healthy` so the API waits for it.",
+            "Restart the whole stack with `docker compose down` and `up` to confirm added quotes are still there."
+          ],
+          "deliverables": [
+            "A `docker-compose.yml` running web, quotes-api and a database",
+            "A form on the web page for adding quotes",
+            "Persistent data using a named volume",
+            "A `.env.example` and updated README"
+          ],
+          "done_when": [
+            "`docker compose up --build` starts all three services with one command",
+            "A quote added through the web form later appears as a random quote",
+            "Quotes survive `docker compose down` followed by `up`",
+            "No passwords are committed to the repo",
+            "The API waits for the database to be healthy before starting"
+          ],
+          "hints": [
+            "Inside Compose, use the service name (for example `db`) as the hostname.",
+            "Use `docker compose ps` to see which services are healthy and `docker compose logs -f quotes-api` to watch logs.",
+            "The Compose file reference in the [Docker docs](https://docs.docker.com) lists every option you might need."
+          ],
+          "stretch": "Add Adminer (a small database UI) as a fourth service so you can browse the quotes table in your browser.",
+          "post_highlights": [
+            "Orchestrated a multi-service app with a database using Docker Compose",
+            "Added persistent storage and health-check-based startup ordering",
+            "Moved configuration into environment variables to keep secrets out of Git"
+          ]
+        },
+        "3": {
+          "title": "Nginx Gateway & Handling Failures",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Put an Nginx gateway in front of your services so users reach everything through one address, and make the system behave sensibly when a service goes down. This is how real microservice setups stay usable when parts fail.",
+          "learn": [
+            "What a reverse proxy does and why systems use a single entry point",
+            "Routing paths to services with Nginx `location` and `proxy_pass`",
+            "Restart policies and health checks for self-recovery",
+            "Graceful error handling when a dependent service is unavailable"
+          ],
+          "steps": [
+            "Add an `nginx` service with your own `nginx.conf` that sends `/` to `web` and `/api/` to `quotes-api`, and publish only Nginx's port to your machine.",
+            "Remove the `ports` mapping from `web` and `quotes-api` so they are reachable only through the gateway, and update the web page to call `/api/quote`.",
+            "Add `restart: unless-stopped` and a `/health`-based healthcheck to both app services.",
+            "Stop the API with `docker compose stop quotes-api` and see what the web page does.",
+            "Update the web service to catch that failure (with a timeout) and show a friendly 'quotes are unavailable right now' message instead of crashing.",
+            "Make the API return clear JSON errors (400 for an empty quote, 500 with a message for database errors).",
+            "Record a short demo: normal use, stopping the API, the friendly error, and recovery after starting it again."
+          ],
+          "deliverables": [
+            "An Nginx gateway routing `/` and `/api/` to the right services",
+            "App services reachable only through the gateway",
+            "Friendly error handling when the API is down",
+            "A demo video of failure and recovery"
+          ],
+          "done_when": [
+            "The whole app works through one port (for example `http://localhost:8080`)",
+            "`quotes-api` and `web` are not directly reachable from your browser",
+            "With the API stopped, the web page shows a friendly message instead of an error page",
+            "The system returns to normal after starting the API again",
+            "Invalid input to the API returns a JSON 400 error"
+          ],
+          "hints": [
+            "Watch the trailing slash in `proxy_pass`; `location /api/` with `proxy_pass http://quotes-api:5000/;` strips the `/api` prefix.",
+            "Always set a timeout on HTTP calls between services so one slow service cannot freeze another.",
+            "Use `docker compose logs nginx` to debug 502 Bad Gateway errors, which usually mean the service name or port is wrong."
+          ],
+          "stretch": "Run two copies of `quotes-api` with `docker compose up --scale quotes-api=2` and show Nginx spreading requests between them.",
+          "post_highlights": [
+            "Added an Nginx reverse proxy as a single entry point for a multi-service app",
+            "Configured restart policies and health checks for automatic recovery",
+            "Implemented graceful error handling when a dependent service is down"
+          ]
+        },
+        "4": {
+          "title": "Infrastructure as Code with Terraform (Local)",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Describe your infrastructure as code with a small Terraform project that creates your Docker network and containers on your own machine, with no cloud account or bill. Then polish the project with a clear README, a diagram and a demo.",
+          "learn": [
+            "What Infrastructure as Code (IaC) is and why teams use it",
+            "The Terraform workflow: `init`, `plan`, `apply` and `destroy`",
+            "Using the Docker provider with resources and variables",
+            "Documenting a system with an architecture diagram"
+          ],
+          "steps": [
+            "Install Terraform, create an `infra/` folder, and configure the `kreuzwerker/docker` provider in `main.tf`.",
+            "Start small: create just a `docker_network` resource, run `terraform init`, `plan` and `apply`, and confirm the network with `docker network ls`.",
+            "Add `docker_image` and `docker_container` resources for `quotes-api` and `web` (images can be built from your service folders), attached to the network.",
+            "Move ports and image tags into `variables.tf`, and print the app URL with an `output`.",
+            "Run `terraform destroy` and `terraform apply` again to prove you can recreate the setup from scratch.",
+            "Write the final README: an architecture diagram, how to run with Compose, how to run with Terraform, and what you learned.",
+            "Record a 60-second demo showing `terraform apply`, the working app, and `terraform destroy`."
+          ],
+          "deliverables": [
+            "A Terraform project in `infra/` that creates the network and service containers",
+            "Variables and an output for the app URL",
+            "A final README with an architecture diagram",
+            "A 60-second demo video"
+          ],
+          "done_when": [
+            "`terraform apply` creates the network and containers without errors",
+            "The app works after `terraform apply` on a machine with no containers running",
+            "`terraform destroy` removes everything it created",
+            "`.terraform/` and state files are listed in `.gitignore`",
+            "The README contains an architecture diagram and both ways to run the project"
+          ],
+          "hints": [
+            "On Windows with Docker Desktop, set the provider `host` to `npipe:////.//pipe//docker_engine` if Terraform cannot connect to Docker.",
+            "Always read `terraform plan` output before applying; it tells you exactly what will be created or destroyed.",
+            "Draw your diagram with a free tool such as draw.io or Excalidraw and export it as a PNG for the README.",
+            "The [Terraform docs](https://developer.hashicorp.com/terraform) have a Docker-based getting started tutorial."
+          ],
+          "stretch": "Add a GitHub Actions workflow that runs `terraform fmt -check` and `terraform validate` on every push.",
+          "post_highlights": [
+            "Built a multi-service system with Docker Compose and an Nginx gateway",
+            "Wrote Infrastructure as Code with Terraform to create and destroy the stack locally",
+            "Documented the system with an architecture diagram and a demo video"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "UptimeWatch: Website Uptime Monitor & Status Page",
+      "tagline": "Build a tool that checks whether your favourite websites are up, runs automatically on a schedule, and publishes a public status page.",
+      "weeks": {
+        "1": {
+          "title": "Uptime Checker Script & Git",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Write a small Python script that reads a list of websites, checks each one, and prints whether it is up along with its response time. You will manage the project with Git from day one.",
+          "learn": [
+            "A basic Git workflow: `init`, `add`, `commit`, `push`, and writing a `.gitignore`",
+            "HTTP basics: requests, status codes (200, 404, 500) and response time",
+            "Reading a config file and writing a command-line script in Python",
+            "Exit codes: why scripts return 0 for success and non-zero for failure"
+          ],
+          "steps": [
+            "Create a GitHub repo and clone it, then make a `sites.txt` file with 5-6 website URLs (include one fake URL that will fail).",
+            "Write `check.py` that reads `sites.txt` and uses the `requests` library to fetch each URL, recording status code and response time.",
+            "Print a clear table with each site, UP or DOWN, status code and time in milliseconds.",
+            "Treat a site as DOWN if the status code is 400 or higher, and wrap each request in `try/except` with a timeout so one bad site does not stop the script.",
+            "Make the script exit with code 1 if any site is down and 0 if all are up, and check it with `echo $?` (or `echo %errorlevel%` on Windows cmd).",
+            "Add a `requirements.txt`, commit in small steps, and push to GitHub.",
+            "Write a README explaining how to install and run the script, with a screenshot of the output."
+          ],
+          "deliverables": [
+            "A `check.py` script and a `sites.txt` config file",
+            "A `requirements.txt`",
+            "A public GitHub repo with several meaningful commits",
+            "A README with a screenshot of the output"
+          ],
+          "done_when": [
+            "Running `python check.py` prints the status and response time for every site",
+            "A fake or unreachable URL is reported as DOWN without crashing the script",
+            "The script exits with code 1 when any site is down",
+            "Changing `sites.txt` changes which sites are checked without editing code",
+            "The repo has at least 4 clear commits"
+          ],
+          "hints": [
+            "Always pass `timeout=5` to `requests.get`, otherwise a slow site can hang your script.",
+            "`requests.exceptions.RequestException` catches connection errors, timeouts and bad URLs in one place.",
+            "The [Git documentation](https://git-scm.com/doc) has a free Pro Git book if you get stuck on commands."
+          ],
+          "stretch": "Add a `--json` flag using `argparse` that prints the results as JSON instead of a table.",
+          "post_highlights": [
+            "Built a Python uptime checker that reports website status and response times",
+            "Handled timeouts and connection errors so one failing site never crashes the tool",
+            "Used exit codes and Git to make the script ready for automation"
+          ]
+        },
+        "2": {
+          "title": "Containerise the Checker & Save Results",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Package your checker in a Docker container so it runs the same everywhere, and make it save every check to a results file so you can see history over time.",
+          "learn": [
+            "Writing a `Dockerfile` for a Python script",
+            "Passing configuration with environment variables",
+            "Using volumes so a container can read config and write results to your machine",
+            "Storing results in a simple JSON or CSV file"
+          ],
+          "steps": [
+            "Install Docker Desktop (or use GitHub Codespaces on a low-spec laptop) and run `docker run hello-world`.",
+            "Update `check.py` to append each run's results (time, site, status, response time) to `results/history.json` or a CSV file.",
+            "Read settings such as the timeout and file paths from environment variables with sensible defaults.",
+            "Write a `Dockerfile` and `.dockerignore`, then build the image with `docker build -t uptimewatch .`.",
+            "Run it with a volume, for example `docker run -v ./results:/app/results uptimewatch`, and confirm the results file appears on your machine.",
+            "Run the container a few times and check that history grows instead of being overwritten.",
+            "Update the README with the Docker commands and an example of the results file."
+          ],
+          "deliverables": [
+            "A `Dockerfile` and `.dockerignore`",
+            "A results file that keeps a history of checks",
+            "Configuration through environment variables",
+            "An updated README"
+          ],
+          "done_when": [
+            "`docker build` finishes without errors",
+            "Running the container writes results to a folder on your machine through a volume",
+            "Running it several times adds new entries rather than replacing old ones",
+            "Changing the timeout with `-e TIMEOUT=2` changes the behaviour without rebuilding",
+            "A corrupted or missing results file does not crash the script"
+          ],
+          "hints": [
+            "Containers are temporary, so anything written inside them is lost unless it goes to a mounted volume.",
+            "On Windows PowerShell use `${PWD}/results` in the volume path if `./results` does not work.",
+            "The Get Started guide in the [Docker docs](https://docs.docker.com) covers images, containers and volumes."
+          ],
+          "stretch": "Mount `sites.txt` as a volume too, so you can change the sites without rebuilding the image.",
+          "post_highlights": [
+            "Containerised a Python monitoring tool with Docker",
+            "Used volumes and environment variables to configure the container and keep results",
+            "Recorded a history of uptime checks in a structured results file"
+          ]
+        },
+        "3": {
+          "title": "Scheduled Checks & Tests with GitHub Actions",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Let GitHub run your checker automatically every 30 minutes and save the results back to the repo, so it works even when your laptop is off. You will also add tests that run on every push.",
+          "learn": [
+            "GitHub Actions workflows: triggers, jobs and steps",
+            "Scheduled workflows with `cron` syntax",
+            "Writing simple unit tests with `pytest`",
+            "Committing files from a workflow and handling failures safely"
+          ],
+          "steps": [
+            "Refactor `check.py` so the checking logic is a function, for example `check_site(url)` that returns a result dictionary.",
+            "Write 3-4 `pytest` tests, such as: a DOWN result for an invalid URL, parsing `sites.txt` while skipping blank lines, and appending to history.",
+            "Create `.github/workflows/test.yml` that runs lint (`ruff` or `flake8`) and `pytest` on every push and pull request.",
+            "Create `.github/workflows/monitor.yml` with `on: schedule` (every 30 minutes) and `workflow_dispatch` so you can also run it by hand.",
+            "In the monitor workflow, run the checker and commit the updated results file back to the repo using the built-in `GITHUB_TOKEN` (give it `contents: write` permission).",
+            "Make sure a DOWN site does not stop the results from being saved (the commit step should run even if the checker exits with 1).",
+            "Trigger the monitor manually, then wait for a scheduled run, and screenshot both in the Actions tab."
+          ],
+          "deliverables": [
+            "A test suite with at least 3 passing tests",
+            "A test workflow that runs on push and pull request",
+            "A scheduled monitor workflow that commits results",
+            "Screenshots of successful runs"
+          ],
+          "done_when": [
+            "Tests pass locally and in GitHub Actions",
+            "The monitor workflow runs on its schedule without you doing anything",
+            "Each monitor run adds new results to the repo",
+            "Results are still saved when a site is down",
+            "The README shows a status badge for the test workflow"
+          ],
+          "hints": [
+            "Scheduled runs can be delayed by several minutes and only run on the default branch; use `workflow_dispatch` to test quickly.",
+            "Use `if: always()` on the commit step so it runs even when the checker step fails.",
+            "Check your cron expression with a site like crontab.guru before committing.",
+            "The [GitHub Actions docs](https://docs.github.com/actions) explain schedules, permissions and `GITHUB_TOKEN`."
+          ],
+          "stretch": "Run the checker inside your Docker image in the workflow instead of installing Python directly.",
+          "post_highlights": [
+            "Automated website monitoring with scheduled GitHub Actions workflows",
+            "Wrote unit tests and a CI workflow that runs on every push",
+            "Made the pipeline resilient so results are saved even when a site is down"
+          ]
+        },
+        "4": {
+          "title": "Public Status Page & Downtime Alerts",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Turn your results into a public status page hosted free on GitHub Pages, updated automatically after every check, and get an alert when a site goes down. Then polish the project into a complete portfolio piece.",
+          "learn": [
+            "Generating a static HTML page from data",
+            "Deploying to GitHub Pages from a workflow",
+            "Sending alerts through a webhook (Discord or Slack) using a repository secret",
+            "Avoiding alert spam by only notifying when status changes"
+          ],
+          "steps": [
+            "Write `build_page.py` that reads the history file and generates `site/index.html` showing each website's current status, last check time, and uptime percentage for the last 24 hours.",
+            "Open the generated page locally and style it with simple CSS (green for up, red for down).",
+            "Add steps to the monitor workflow that build the page and deploy it to GitHub Pages.",
+            "Create a Discord (or Slack) webhook, store its URL as a repository secret, and send a message when a site changes from UP to DOWN or back.",
+            "Compare the current result with the previous one so you only alert on changes, not every 30 minutes.",
+            "Finish the README with a diagram (schedule, checker, results, status page, alert), the live status page link and setup steps.",
+            "Record a 60-second demo showing the status page and an alert arriving when you add a broken URL."
+          ],
+          "deliverables": [
+            "A live status page on GitHub Pages",
+            "Automatic page updates after every scheduled check",
+            "Downtime alerts sent to Discord or Slack",
+            "A final README with a diagram and a 60-second demo video"
+          ],
+          "done_when": [
+            "The status page is live at a `github.io` URL and shows all sites",
+            "The page updates on its own after scheduled runs",
+            "Adding a broken URL triggers exactly one alert, not one every run",
+            "The webhook URL is stored as a secret and not visible in the repo",
+            "The README includes the live link and an architecture diagram"
+          ],
+          "hints": [
+            "Enable GitHub Pages in repo Settings and choose GitHub Actions as the source before your deploy step will work.",
+            "Store the last known status of each site in a small JSON file so the workflow can detect changes.",
+            "Test your webhook first with a single `requests.post` from your laptop before adding it to the workflow.",
+            "See the Pages section of [GitHub Docs](https://docs.github.com) for deploying with Actions."
+          ],
+          "stretch": "Add a small response-time chart for each site to the status page using a free JavaScript chart library.",
+          "post_highlights": [
+            "Built UptimeWatch, an automated website monitor with a public status page",
+            "Deployed an auto-updating status page to GitHub Pages from a scheduled workflow",
+            "Added Discord downtime alerts that fire only when a site's status changes"
+          ]
+        }
+      }
+    }
+  ]
+}

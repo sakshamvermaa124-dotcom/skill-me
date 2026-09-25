@@ -1,0 +1,572 @@
+{
+  "domain": "web-dev",
+  "tracks": [
+    {
+      "project_name": "Modern Interactive Portfolio & DevStudio",
+      "tagline": "Build your own personal portfolio website with HTML, CSS and JavaScript, and put it live on the internet by the end of the month.",
+      "weeks": {
+        "1": {
+          "title": "Your First Portfolio Page with HTML & CSS",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Build a single-page portfolio with a header, an About section, a Projects section and a Contact section using only HTML and CSS. This is the base you will keep improving every week, so focus on clean structure and simple, readable styling.",
+          "learn": [
+            "Semantic HTML tags like `header`, `nav`, `main`, `section` and `footer`",
+            "The CSS box model: margin, border, padding and content",
+            "Flexbox for laying out a navbar and rows of cards",
+            "Using CSS variables for colours and fonts so the design stays consistent"
+          ],
+          "steps": [
+            "Create a folder with `index.html`, `style.css` and an `images/` folder, then run `git init` and make your first commit.",
+            "Write the HTML skeleton first with no styling: a `nav` with links, then `section` blocks with ids `about`, `projects` and `contact`.",
+            "Fill in real content: a short bio, a profile photo, and 3 project cards (title, one-line description, and a link, even if it is just `#` for now).",
+            "Link `style.css` and define 3-4 colours and a font in `:root` as CSS variables.",
+            "Style the navbar with flexbox so the links sit in a row, and make the nav links jump to each section using `href=\"#about\"` style anchors.",
+            "Style the project cards as a flex row with `gap`, padding, a border radius and a light shadow.",
+            "Open the page in your browser, check every section, and commit your work with a clear message."
+          ],
+          "deliverables": [
+            "An `index.html` and `style.css` portfolio page with About, Projects and Contact sections",
+            "At least 3 styled project cards",
+            "A Git repository with at least 3 meaningful commits",
+            "A 30-60 second screen recording scrolling through the page"
+          ],
+          "done_when": [
+            "The page uses semantic tags (`header`, `nav`, `main`, `section`, `footer`) instead of only `div`s",
+            "Clicking each nav link scrolls to the matching section",
+            "Colours and fonts are defined once as CSS variables and reused",
+            "Every image has a meaningful `alt` attribute",
+            "The page has no broken images or console errors"
+          ],
+          "hints": [
+            "Build the HTML completely before writing any CSS, because it is much easier to style a finished structure.",
+            "If spacing looks wrong, use your browser DevTools (right-click, Inspect) to see the box model of each element.",
+            "Add `html { scroll-behavior: smooth; }` for smooth scrolling between sections.",
+            "Look up any tag or CSS property on [MDN Web Docs](https://developer.mozilla.org)."
+          ],
+          "stretch": "Add a simple hover effect on project cards (a small lift with `transform: translateY(-4px)` and a `transition`).",
+          "post_highlights": [
+            "Built my personal portfolio website from scratch using semantic HTML and CSS",
+            "Designed a clean layout with flexbox and a consistent colour theme using CSS variables",
+            "Structured the page into About, Projects and Contact sections with smooth in-page navigation"
+          ]
+        },
+        "2": {
+          "title": "Responsive Layout & Project Cards with JavaScript",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Make your portfolio look good on phones and start using JavaScript to control the page. You will add a mobile menu and generate your project cards from a JavaScript array, so adding a new project means editing data instead of copying HTML.",
+          "learn": [
+            "Media queries and a mobile-first approach to responsive design",
+            "Selecting elements and listening for events with `querySelector` and `addEventListener`",
+            "Storing data in an array of objects and rendering it to the page with a loop",
+            "Toggling CSS classes from JavaScript to show and hide things"
+          ],
+          "steps": [
+            "Open DevTools device mode and check your page at 375px wide to see what breaks.",
+            "Add media queries so project cards stack in one column on small screens and sit in a row on larger ones.",
+            "Create `script.js`, link it at the end of `body` (or with `defer`), and log a message to confirm it runs.",
+            "Add a hamburger button that shows only on mobile, and make clicking it toggle an `open` class on the nav.",
+            "Move your project data into a `projects` array of objects with `title`, `description`, `tags` and `link` fields.",
+            "Delete the hard-coded project cards from HTML and write a `renderProjects()` function that builds the cards from the array.",
+            "Add filter buttons (for example All, HTML/CSS, JavaScript) that re-render only the projects with the matching tag."
+          ],
+          "deliverables": [
+            "A portfolio that works on mobile, tablet and desktop widths",
+            "A working mobile hamburger menu",
+            "Project cards generated from a JavaScript array with working filter buttons",
+            "A short demo video showing the page resizing and the filters in action"
+          ],
+          "done_when": [
+            "There is no horizontal scrolling at 375px width",
+            "The hamburger menu opens and closes on small screens and is hidden on desktop",
+            "Adding a new object to the `projects` array makes a new card appear without touching HTML",
+            "Clicking a filter button shows only matching projects, and All shows every project",
+            "The browser console shows no errors"
+          ],
+          "hints": [
+            "Add `<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">` in the `head` or your media queries will not behave as expected on phones.",
+            "Build the cards with template literals and set `container.innerHTML`, clearing the container before each render.",
+            "Use `array.filter()` to pick matching projects and `array.map()` or `forEach` to build the cards.",
+            "Search 'mobile first media queries' on [MDN](https://developer.mozilla.org) if you are unsure where to start."
+          ],
+          "stretch": "Highlight the active filter button and close the mobile menu automatically when a nav link is clicked.",
+          "post_highlights": [
+            "Made my portfolio fully responsive using media queries and a mobile-first approach",
+            "Built a mobile hamburger menu with vanilla JavaScript and DOM events",
+            "Rendered project cards dynamically from a JavaScript array with category filters"
+          ]
+        },
+        "3": {
+          "title": "Live GitHub Repos & Dark Mode",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Connect your portfolio to real data by fetching your public repositories from the GitHub API and showing them on the page. You will also add a dark mode toggle that remembers the visitor's choice using localStorage.",
+          "learn": [
+            "Fetching data from a public API with `fetch` and `async`/`await`",
+            "Handling loading and error states so the page never looks broken",
+            "Saving and reading small settings with `localStorage`",
+            "Theming a site by swapping CSS variables with a class on `body`"
+          ],
+          "steps": [
+            "Open `https://api.github.com/users/<your-username>/repos` in your browser to see the JSON you will work with.",
+            "Add a new 'My GitHub Repos' section with an empty container and a 'Loading...' message.",
+            "Write an `async function loadRepos()` that fetches the URL, checks `response.ok`, and converts the result with `response.json()`.",
+            "Render each repo as a small card showing name, description, main language, star count and a link to the repo.",
+            "Wrap the fetch in `try`/`catch` and show a friendly error message in the section if it fails (test this by breaking the URL on purpose).",
+            "Add a dark theme by defining a `.dark` class on `body` that overrides your CSS colour variables.",
+            "Add a theme toggle button that switches the class and saves `'dark'` or `'light'` in `localStorage`, then apply the saved theme when the page loads."
+          ],
+          "deliverables": [
+            "A GitHub Repos section populated live from the GitHub REST API",
+            "Visible loading and error states for the repos section",
+            "A dark mode toggle that is remembered after a page refresh",
+            "A demo video showing repos loading and the theme switching"
+          ],
+          "done_when": [
+            "The repos section shows at least 5 of your real public repositories",
+            "A 'Loading...' message appears before data arrives and is removed afterwards",
+            "If the fetch fails, a readable error message is shown instead of a blank section",
+            "Refreshing the page keeps the theme the visitor last selected",
+            "Both themes are readable with good text contrast"
+          ],
+          "hints": [
+            "The GitHub API allows about 60 unauthenticated requests per hour, so avoid refreshing in a loop while testing.",
+            "Repos with no description return `null`, so show a fallback like 'No description yet'.",
+            "Sort repos by `stargazers_count` or `updated_at` with `array.sort()` before rendering to show your best work first.",
+            "Read about the Fetch API and Window.localStorage on [MDN](https://developer.mozilla.org)."
+          ],
+          "stretch": "Add a language filter dropdown built from the unique `language` values in your repos.",
+          "post_highlights": [
+            "Integrated the GitHub REST API into my portfolio using fetch and async/await",
+            "Added loading and error handling so the page stays friendly when the network fails",
+            "Built a dark mode toggle that remembers the user's preference with localStorage"
+          ]
+        },
+        "4": {
+          "title": "Contact Form, Accessibility & Going Live",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Finish your portfolio with a validated contact form, fix accessibility issues, and deploy it for free so anyone can visit it. By the end you will have a real link to put on your resume and LinkedIn profile.",
+          "learn": [
+            "Client-side form validation with JavaScript and helpful error messages",
+            "Basic accessibility: labels, keyboard navigation, focus styles and colour contrast",
+            "Auditing a page with Lighthouse and fixing what it reports",
+            "Deploying a static site to GitHub Pages or Netlify"
+          ],
+          "steps": [
+            "Build a contact form with name, email and message fields, each with a proper `label`.",
+            "On submit, call `event.preventDefault()`, check each field (not empty, valid email format, message at least 20 characters) and show an error next to any invalid field.",
+            "When the form is valid, show a success message and reset the form (a real email backend is not needed).",
+            "Navigate the whole page using only the Tab and Enter keys, and add visible `:focus` styles wherever focus is hard to see.",
+            "Run a Lighthouse audit in Chrome DevTools and fix at least the accessibility and SEO issues it lists (page title, meta description, alt text, contrast).",
+            "Write a `README.md` with a screenshot, the live link, the features, and what you learned.",
+            "Push to GitHub and deploy with GitHub Pages (Settings, Pages) or by dragging the folder into Netlify, then test the live link on your phone."
+          ],
+          "deliverables": [
+            "A contact form with client-side validation and clear error messages",
+            "A Lighthouse report screenshot with an accessibility score of 90 or higher",
+            "A public live URL for your portfolio",
+            "A README with a screenshot, live link and feature list"
+          ],
+          "done_when": [
+            "Submitting the form with empty or invalid fields shows specific error messages and does not reset the form",
+            "Every interactive element can be reached and used with the keyboard alone",
+            "Lighthouse accessibility score is 90 or above",
+            "The live URL loads correctly on both desktop and mobile",
+            "The README includes the live link and at least one screenshot"
+          ],
+          "hints": [
+            "Use `aria-live=\"polite\"` on the message area so screen readers announce form errors and success.",
+            "On GitHub Pages, file names are case-sensitive, so `Images/me.png` and `images/me.png` are different.",
+            "Check contrast with the colour picker in DevTools, which shows a contrast ratio for text.",
+            "See [GitHub Pages](https://pages.github.com) for the free hosting setup steps."
+          ],
+          "stretch": "Connect the form to a free form service like Formspree so messages actually reach your inbox.",
+          "post_highlights": [
+            "Deployed my personal portfolio live and shared it as my online resume",
+            "Built a contact form with client-side validation and accessible error messages",
+            "Improved accessibility to a 90+ Lighthouse score with keyboard support and better contrast"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "TaskFlow: Collaborative Sprint & Kanban Workspace",
+      "tagline": "Build a simple Kanban board (To Do, In Progress, Done) that runs in your browser and remembers your tasks.",
+      "weeks": {
+        "1": {
+          "title": "Kanban Board Layout with HTML & CSS",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Build the static layout of a Kanban board with three columns and a few sample task cards using HTML and CSS. Getting the structure and look right now makes adding JavaScript next week much easier.",
+          "learn": [
+            "Structuring a page with semantic HTML and sensible class names",
+            "CSS Grid or Flexbox for side-by-side columns",
+            "Styling reusable components (a task card) with one set of CSS rules",
+            "Using CSS variables for colours such as priority labels"
+          ],
+          "steps": [
+            "Create `index.html`, `style.css` and `script.js` in a new folder, run `git init` and commit.",
+            "Add a header with the app name and a simple 'Add task' form (a text input, a priority `select` and a button) that does nothing yet.",
+            "Create a board with three columns: To Do, In Progress and Done, each with a heading and a task count like `(3)`.",
+            "Inside the columns, hard-code 5-6 sample task cards with a title, a priority label (Low, Medium, High) and a due date.",
+            "Use CSS Grid (`grid-template-columns: repeat(3, 1fr)`) or Flexbox to put the columns side by side.",
+            "Style priority labels with different colours using CSS variables and a class such as `.priority-high`.",
+            "Check the layout in the browser, fix spacing with DevTools, and commit."
+          ],
+          "deliverables": [
+            "A static Kanban board with three labelled columns",
+            "At least 5 styled sample task cards with priority labels",
+            "An add-task form in the header (not functional yet)",
+            "A screenshot or short video of the board"
+          ],
+          "done_when": [
+            "The three columns appear side by side on a laptop screen",
+            "All task cards share the same CSS class and look consistent",
+            "High, Medium and Low priorities are visually different",
+            "The HTML has a clear structure with no inline styles"
+          ],
+          "hints": [
+            "Give columns a `min-height` so an empty column still looks like a drop area.",
+            "Keep class names simple and predictable, like `.column`, `.task-card` and `.task-title`, because JavaScript will use them next week.",
+            "Use the DevTools Grid or Flex badge to visualise your layout.",
+            "CSS Grid and Flexbox guides are on [MDN Web Docs](https://developer.mozilla.org)."
+          ],
+          "stretch": "Make the columns stack vertically on screens narrower than 700px using a media query.",
+          "post_highlights": [
+            "Designed and built the layout for a Kanban task board using HTML and CSS Grid",
+            "Created reusable task card styles with colour-coded priority labels",
+            "Set up the project structure and Git repository for a browser-based productivity app"
+          ]
+        },
+        "2": {
+          "title": "Add, Move & Delete Tasks with JavaScript",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Bring the board to life with JavaScript so users can add tasks, move them between columns and delete them. You will learn the key idea of keeping your data in an array and redrawing the page from it.",
+          "learn": [
+            "Keeping app data in an array of objects as the single source of truth",
+            "Handling form submit and click events with `addEventListener`",
+            "Writing a `render()` function that rebuilds the board from data",
+            "Using event delegation to handle clicks on dynamically created buttons"
+          ],
+          "steps": [
+            "Remove the hard-coded cards from the HTML and create a `tasks` array in `script.js` with a few sample objects like `{ id, title, priority, status }`.",
+            "Write `render()`, which clears each column and adds a card for every task whose `status` matches that column.",
+            "Update the column counts inside `render()` so they always match the data.",
+            "Handle the add-task form submit: prevent the page reload, ignore empty titles, push a new task with `status: 'todo'` and call `render()`.",
+            "Add small buttons on each card to move it left or right, and a delete button that asks `confirm()` before removing it.",
+            "Use one click listener on the board and check `event.target` and a `data-id` attribute to know which task and which button was clicked.",
+            "Test every action (add, move both ways, delete) and commit."
+          ],
+          "deliverables": [
+            "A working add-task form",
+            "Move-left, move-right and delete buttons on every card",
+            "Column counts that update automatically",
+            "A demo video adding a task and moving it to Done"
+          ],
+          "done_when": [
+            "Submitting the form adds a new card to To Do without reloading the page",
+            "Empty task titles are rejected",
+            "Tasks can be moved between all three columns in both directions",
+            "Deleting a task removes it after confirmation",
+            "Column counts always match the number of visible cards"
+          ],
+          "hints": [
+            "Never edit the cards directly; change the `tasks` array and then call `render()`.",
+            "Use `Date.now()` as a quick unique id for new tasks.",
+            "Store the order of statuses in an array like `['todo', 'doing', 'done']` so moving is just changing the index.",
+            "Read about event delegation and `dataset` on [MDN](https://developer.mozilla.org)."
+          ],
+          "stretch": "Let users edit a task title by double-clicking it.",
+          "post_highlights": [
+            "Made my Kanban board interactive with vanilla JavaScript and DOM events",
+            "Implemented adding, moving and deleting tasks from a single data array",
+            "Used event delegation to handle clicks on dynamically created task cards"
+          ]
+        },
+        "3": {
+          "title": "Saving Tasks & Importing Starter Data",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Make your board remember tasks after a refresh with localStorage, and let first-time users import sample tasks from a public API. You will also add search so larger boards stay easy to use.",
+          "learn": [
+            "Saving and loading data with `localStorage`, `JSON.stringify` and `JSON.parse`",
+            "Fetching data from a public API with `fetch` and `async`/`await`",
+            "Handling errors and loading states with `try`/`catch`",
+            "Filtering data live as the user types"
+          ],
+          "steps": [
+            "Write `saveTasks()` that stores the `tasks` array in `localStorage`, and call it after every change.",
+            "On page load, read saved tasks with `JSON.parse`, falling back to an empty array if nothing is saved.",
+            "Add an 'Import sample tasks' button that fetches `https://jsonplaceholder.typicode.com/todos?_limit=5`.",
+            "Convert each API item into your task shape (use `title`, set `status` to `done` if `completed` is true, otherwise `todo`).",
+            "Show 'Importing...' while loading and a friendly error message if the request fails, using `try`/`catch`.",
+            "Add a search input that filters visible cards by title as the user types, without changing the saved data.",
+            "Test by refreshing the page, importing tasks, and turning off Wi-Fi to check the error message."
+          ],
+          "deliverables": [
+            "Tasks that survive a page refresh",
+            "An import button that loads sample tasks from JSONPlaceholder",
+            "A live search box that filters task cards",
+            "A demo video showing a refresh, an import and a search"
+          ],
+          "done_when": [
+            "Adding, moving or deleting a task and then refreshing keeps the change",
+            "The import button adds 5 tasks placed in the correct columns",
+            "A clear error message appears if the import fails",
+            "Typing in the search box shows only matching cards and clearing it shows all cards again",
+            "The app does not crash if localStorage is empty"
+          ],
+          "hints": [
+            "`localStorage` only stores strings, so always use `JSON.stringify` to save and `JSON.parse` to load.",
+            "Check saved data in DevTools under Application, Local Storage.",
+            "Compare text with `.toLowerCase().includes()` so search is not case-sensitive.",
+            "The Fetch API and Web Storage API are documented on [MDN](https://developer.mozilla.org)."
+          ],
+          "stretch": "Add a 'Clear board' button and a filter dropdown to show only one priority level.",
+          "post_highlights": [
+            "Added persistence to my Kanban board using localStorage and JSON",
+            "Integrated the JSONPlaceholder API to import starter tasks with error handling",
+            "Built a live search filter that updates task cards as the user types"
+          ]
+        },
+        "4": {
+          "title": "Drag-and-Drop, Polish & Deploy",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Add drag-and-drop so tasks can be moved with the mouse, make the board responsive and accessible, and deploy it for free. This is the capstone that turns your board into a portfolio-ready app.",
+          "learn": [
+            "The HTML Drag and Drop API (`draggable`, `dragstart`, `dragover`, `drop`)",
+            "Keeping a keyboard-friendly alternative for mouse-only features",
+            "Making a multi-column layout responsive",
+            "Deploying a static site to GitHub Pages or Netlify"
+          ],
+          "steps": [
+            "Add `draggable=\"true\"` to each card and store the task id in `event.dataTransfer` on `dragstart`.",
+            "On each column, call `event.preventDefault()` in `dragover` so dropping is allowed, and add a highlight class while a card is over it.",
+            "On `drop`, read the id, update that task's `status`, save and re-render.",
+            "Keep the move buttons from Week 2 so keyboard users can still move tasks, and add clear `:focus` styles.",
+            "Add a media query so columns stack on phones, and check the board at 375px.",
+            "Write a `README.md` with a screenshot or GIF, the live link, the features, and how to run it.",
+            "Deploy to GitHub Pages or Netlify and test the live version on your phone."
+          ],
+          "deliverables": [
+            "Drag-and-drop between all three columns",
+            "A responsive, keyboard-usable board",
+            "A public live URL",
+            "A README with a screenshot, live link and feature list"
+          ],
+          "done_when": [
+            "Dragging a card to another column moves it and the change survives a refresh",
+            "The target column is visibly highlighted while dragging over it",
+            "Tasks can still be moved using only the keyboard",
+            "The board is usable on a phone-sized screen",
+            "The live URL works and is linked in the README"
+          ],
+          "hints": [
+            "If `drop` never fires, you probably forgot `event.preventDefault()` in the `dragover` handler.",
+            "Remove the highlight class on both `dragleave` and `drop` so it does not get stuck.",
+            "Native drag-and-drop does not work on most phones, which is another reason to keep the move buttons.",
+            "Search 'HTML Drag and Drop API' on [MDN](https://developer.mozilla.org) for a full example."
+          ],
+          "stretch": "Show a warning colour on cards whose due date has passed, and a small progress bar showing the percentage of tasks in Done.",
+          "post_highlights": [
+            "Implemented drag-and-drop task movement using the native HTML Drag and Drop API",
+            "Made my Kanban board responsive and keyboard accessible",
+            "Deployed TaskFlow live as a complete vanilla JavaScript productivity app"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "WeatherNow: City Weather Dashboard",
+      "tagline": "Build a weather dashboard where you search any city and see the current weather and a 7-day forecast, using a free public API.",
+      "weeks": {
+        "1": {
+          "title": "Weather Dashboard Layout with HTML & CSS",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Design and build the static layout of your weather app: a search bar, a large current-weather card and a row of forecast cards, filled with sample data. A clean layout now makes it easy to plug in real data later.",
+          "learn": [
+            "Planning a UI with a quick sketch before coding",
+            "Semantic HTML for forms, headings and sections",
+            "Flexbox for card rows and centred layouts",
+            "Consistent spacing and colours with CSS variables"
+          ],
+          "steps": [
+            "Sketch the layout on paper: search bar at the top, a big 'current weather' card, then 7 small forecast cards.",
+            "Create `index.html`, `style.css` and `script.js`, run `git init` and commit.",
+            "Build the search form with a text input, a label and a Search button.",
+            "Build the current-weather card with sample values: city name, temperature, a weather emoji or icon, wind speed and humidity.",
+            "Build a row of 7 forecast cards with a day name, an icon, and max/min temperatures.",
+            "Style everything with flexbox and CSS variables, using a calm colour palette and readable font sizes.",
+            "Review the page in the browser, tidy the spacing, and commit."
+          ],
+          "deliverables": [
+            "A static weather dashboard page with sample data",
+            "A search form, a current-weather card and 7 forecast cards",
+            "A Git repository with at least 3 commits",
+            "A screenshot or short screen recording of the layout"
+          ],
+          "done_when": [
+            "The search form has a visible label or `aria-label` for the input",
+            "The current-weather card clearly shows city, temperature and conditions",
+            "All 7 forecast cards share one CSS class and look consistent",
+            "There are no inline styles in the HTML"
+          ],
+          "hints": [
+            "Emojis like ☀️, ☁️ and 🌧️ make great free weather icons and need no image files.",
+            "Use `gap` on flex containers instead of adding margins to every card.",
+            "Keep class names clear, such as `.current-temp` and `.forecast-card`, because JavaScript will fill them in later.",
+            "Look up any HTML or CSS feature on [MDN Web Docs](https://developer.mozilla.org)."
+          ],
+          "stretch": "Make the forecast row scroll horizontally on small screens with `overflow-x: auto`.",
+          "post_highlights": [
+            "Designed and built the layout for a weather dashboard using HTML and CSS",
+            "Created reusable forecast card components with flexbox",
+            "Planned the UI with a sketch before writing code"
+          ]
+        },
+        "2": {
+          "title": "Rendering Weather Data with JavaScript",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Replace the hard-coded HTML with JavaScript that renders the dashboard from data objects, and add a Celsius/Fahrenheit toggle. This teaches you to separate data from display, which is exactly what you need before using a real API.",
+          "learn": [
+            "Representing app data as JavaScript objects and arrays",
+            "Rendering HTML from data with template literals",
+            "Handling form and button events",
+            "Writing small helper functions such as unit conversion"
+          ],
+          "steps": [
+            "Create a `sampleWeather` object in `script.js` with a `current` object and a `daily` array of 7 days.",
+            "Write `renderCurrent(data)` and `renderForecast(days)` functions that fill the cards from the data.",
+            "Remove the hard-coded forecast cards from the HTML so only JavaScript creates them.",
+            "Write a `getWeatherEmoji(condition)` helper that returns an emoji for values like 'sunny', 'cloudy' and 'rain'.",
+            "Add a °C/°F toggle button with a `unit` variable, a `toFahrenheit(c)` helper, and a re-render when the unit changes.",
+            "Handle the search form submit: prevent the reload, read the input, reject empty values, and show the typed city name on the card for now.",
+            "Test the toggle and the search form, then commit."
+          ],
+          "deliverables": [
+            "Current weather and forecast cards rendered entirely from JavaScript data",
+            "A working °C/°F toggle",
+            "A search form that updates the displayed city name",
+            "A demo video switching units and searching"
+          ],
+          "done_when": [
+            "Changing a value in `sampleWeather` changes what the page shows after a refresh",
+            "The forecast cards are created by JavaScript, not written in HTML",
+            "The unit toggle converts every temperature on the page correctly",
+            "Submitting an empty search shows a message instead of doing nothing"
+          ],
+          "hints": [
+            "The conversion is `F = C * 9 / 5 + 32`; round with `Math.round()` for display.",
+            "Always store temperatures in Celsius and convert only when rendering, so values never drift.",
+            "Use `new Date(dateString).toLocaleDateString('en-IN', { weekday: 'short' })` to show day names.",
+            "Template literals and DOM methods are covered on [MDN](https://developer.mozilla.org)."
+          ],
+          "stretch": "Change the page background colour based on the current condition (sunny, cloudy, rainy).",
+          "post_highlights": [
+            "Rendered a weather dashboard dynamically from JavaScript data objects",
+            "Built a Celsius/Fahrenheit toggle with reusable helper functions",
+            "Separated data from display to prepare the app for a live API"
+          ]
+        },
+        "3": {
+          "title": "Live Weather from the Open-Meteo API",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Connect the dashboard to real weather data using the free Open-Meteo API, which needs no API key. Users can search any city and see its current weather and 7-day forecast, with proper loading and error messages.",
+          "learn": [
+            "Calling a public REST API with `fetch` and `async`/`await`",
+            "Chaining two API calls (city name to coordinates, then coordinates to weather)",
+            "Reading JSON responses and mapping them to your own data shape",
+            "Handling loading, empty results and network errors"
+          ],
+          "steps": [
+            "Try the geocoding API in your browser first: `https://geocoding-api.open-meteo.com/v1/search?name=Pune&count=1`, and find `latitude` and `longitude` in the result.",
+            "Try the forecast API with those values: `https://api.open-meteo.com/v1/forecast?latitude=18.52&longitude=73.86&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto`.",
+            "Write `async function getCoordinates(city)` and `async function getWeather(lat, lon)` that each check `response.ok` and return JSON.",
+            "Convert the API response into the same shape as your `sampleWeather` object so your Week 2 render functions keep working.",
+            "Update `getWeatherEmoji` to use Open-Meteo `weather_code` numbers (for example 0 is clear sky, 61-65 is rain).",
+            "Show a 'Loading...' state during the requests, and show 'City not found' when the geocoding result has no matches.",
+            "Wrap everything in `try`/`catch` and show a friendly network error, then test with a real city, a fake city and Wi-Fi turned off."
+          ],
+          "deliverables": [
+            "City search that shows real current weather and a 7-day forecast",
+            "Loading, not-found and network-error messages",
+            "Weather-code to emoji mapping",
+            "A demo video searching 2-3 different cities"
+          ],
+          "done_when": [
+            "Searching a real city shows its actual current temperature and 7 forecast days",
+            "Searching a made-up city shows a 'City not found' message",
+            "A loading message appears while data is being fetched",
+            "A network failure shows an error message instead of a blank or broken page",
+            "The °C/°F toggle still works with live data"
+          ],
+          "hints": [
+            "If a city returns no `results` field at all, treat it the same as 'not found'.",
+            "Log the raw JSON with `console.log` first so you can see the exact field names before writing render code.",
+            "Disable the Search button while loading to stop users sending many requests at once.",
+            "Full parameter lists are on the [Open-Meteo](https://open-meteo.com) website."
+          ],
+          "stretch": "Add a 'Use my location' button with `navigator.geolocation` that skips the geocoding step.",
+          "post_highlights": [
+            "Integrated the free Open-Meteo API to show live weather for any city",
+            "Chained two API calls with async/await to turn a city name into a forecast",
+            "Handled loading, not-found and network errors for a smooth user experience"
+          ]
+        },
+        "4": {
+          "title": "Saved Cities, Responsive Polish & Deploy",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Let users save favourite cities that load with one click and are remembered with localStorage, then polish the app for mobile and accessibility and deploy it. You will finish with a live, useful app you can share.",
+          "learn": [
+            "Persisting a list of favourites with `localStorage`",
+            "Preventing duplicates and managing a small list in JavaScript",
+            "Responsive design with media queries",
+            "Deploying a static site to GitHub Pages or Netlify"
+          ],
+          "steps": [
+            "Add a 'Save city' button next to the current city name, and store saved cities (name, latitude, longitude) in an array.",
+            "Save the array to `localStorage` on every change and load it when the page opens.",
+            "Show saved cities as clickable chips that load that city's weather directly using the stored coordinates.",
+            "Add a small remove button on each chip and prevent saving the same city twice.",
+            "Remember the last searched city and the chosen unit so the app opens where the user left off.",
+            "Add media queries so the dashboard looks good at 375px, and check keyboard access and focus styles.",
+            "Write a `README.md` with a screenshot, live link and features, then deploy to GitHub Pages or Netlify and test on your phone."
+          ],
+          "deliverables": [
+            "Saved city chips that persist after a refresh",
+            "Last city and unit restored on page load",
+            "A responsive, keyboard-usable dashboard",
+            "A public live URL and a README with a screenshot"
+          ],
+          "done_when": [
+            "Saved cities remain after closing and reopening the browser",
+            "Clicking a saved city loads its weather without typing",
+            "The same city cannot be saved twice",
+            "The app is usable on a phone-sized screen with no horizontal scrolling",
+            "The live URL works and is linked in the README"
+          ],
+          "hints": [
+            "Compare cities using their coordinates or lowercase names to catch duplicates.",
+            "Wrap `JSON.parse` of saved data in `try`/`catch` in case old or broken data is stored.",
+            "Use real `button` elements for chips so they are keyboard accessible for free.",
+            "See [GitHub Pages](https://pages.github.com) for free hosting instructions."
+          ],
+          "stretch": "Add an hourly temperature view for today using the `hourly=temperature_2m` parameter, shown as a simple CSS bar chart.",
+          "post_highlights": [
+            "Deployed WeatherNow, a live weather dashboard built with vanilla JavaScript",
+            "Added saved favourite cities that persist with localStorage",
+            "Polished the app for mobile screens and keyboard accessibility"
+          ]
+        }
+      }
+    }
+  ]
+}

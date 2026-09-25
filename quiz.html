@@ -69,7 +69,7 @@
         "@type": "Quiz",
         "@id": "https://www.skill-me-intern.in/quiz#assessment",
         "name": "SkillMe Open Source Technical Screening Assessment",
-        "description": "Interactive domain aptitude screening assessment to qualify students for SkillMe's 4-week open-source engineering internship batches.",
+        "description": "Interactive domain aptitude screening assessment to qualify students for SkillMe's 4-week open-source engineering internship program.",
         "educationalCredentialAwarded": "Eligibility for Open Source Internship Enrollment",
         "provider": {
           "@type": "EducationalOrganization",
@@ -558,17 +558,35 @@
           <div class="sublabel">C++20 &bull; DSA &bull; Problem Solving</div>
           <div class="status-badge open">Open</div>
         </div>
-        <div class="domain-card disabled" data-domain="cloud">
+        <div class="domain-card" data-domain="cloud" onclick="selectDomain(this)">
           <div class="icon">☁️</div>
           <div class="label">Cloud / AWS</div>
-          <div class="sublabel">AWS &bull; Cloud Architecture</div>
-          <div class="status-badge soon">Coming Soon</div>
+          <div class="sublabel">AWS &bull; Serverless &bull; Storage</div>
+          <div class="status-badge open">Open</div>
         </div>
-        <div class="domain-card disabled" data-domain="cybersecurity">
+        <div class="domain-card" data-domain="cybersecurity" onclick="selectDomain(this)">
           <div class="icon">🔒</div>
           <div class="label">Cybersecurity</div>
-          <div class="sublabel">SecOps &bull; Penetration Testing</div>
-          <div class="status-badge soon">Coming Soon</div>
+          <div class="sublabel">Web Security &bull; Python &bull; OWASP</div>
+          <div class="status-badge open">Open</div>
+        </div>
+        <div class="domain-card" data-domain="ui-ux" onclick="selectDomain(this)">
+          <div class="icon">🎨</div>
+          <div class="label">UI/UX Design</div>
+          <div class="sublabel">Figma &bull; Research &bull; Prototyping</div>
+          <div class="status-badge open">Open</div>
+        </div>
+        <div class="domain-card" data-domain="genai" onclick="selectDomain(this)">
+          <div class="icon">✨</div>
+          <div class="label">Generative AI</div>
+          <div class="sublabel">LLM APIs &bull; Prompting &bull; RAG</div>
+          <div class="status-badge open">Open</div>
+        </div>
+        <div class="domain-card" data-domain="sql" onclick="selectDomain(this)">
+          <div class="icon">🗄️</div>
+          <div class="label">SQL / Databases</div>
+          <div class="sublabel">SQL &bull; PostgreSQL &bull; Data Modeling</div>
+          <div class="status-badge open">Open</div>
         </div>
       </div>
 
@@ -745,7 +763,19 @@ const DOMAIN_QUESTIONS = {
     { category: "UI/UX", text: "\"UX\" stands for:", options: ["Ultimate Experience", "User Experience", "Unified Extension", "User Execution"], answer: 1 },
     { category: "UI/UX", text: "A \"wireframe\" in design is:", options: ["A high-fidelity prototype", "A basic layout sketch of a user interface", "A design system", "A component library"], answer: 1 },
     { category: "UI/UX", text: "\"Accessibility\" in UI design means:", options: ["Making apps load faster", "Designing for users with disabilities", "Adding animations", "Using consistent colors throughout"], answer: 1 },
-    { category: "UI/UX", text: "\"Affordance\" in UX refers to:", options: ["How much a product costs to design", "Properties of an object that suggest how it should be used", "The responsiveness of a design", "The font size in a UI"], answer: 1 }
+    { category: "UI/UX", text: "\"Affordance\" in UX refers to:", options: ["How much a product costs to design", "Properties of an object that suggest how it should be used", "The responsiveness of a design", "The font size in a UI"], answer: 1 },
+  ],
+  "genai": [
+    { category: "Generative AI", text: "What does \"LLM\" stand for?", options: ["Large Language Model", "Linear Learning Machine", "Low Latency Memory", "Logical Language Module"], answer: 0 },
+    { category: "Generative AI", text: "A \"prompt\" is:", options: ["The model's training dataset", "The input text or instructions given to the model", "A GPU setting", "A type of neural network layer"], answer: 1 },
+    { category: "Generative AI", text: "When an LLM confidently states something false, it is called:", options: ["Overfitting", "Hallucination", "Tokenization", "Fine-tuning"], answer: 1 },
+    { category: "Generative AI", text: "Where should you keep an API key for your AI app?", options: ["Hardcoded in the source code", "In a public GitHub README", "In an environment variable or .env file that is not committed", "In the page's HTML"], answer: 2 }
+  ],
+  "sql": [
+    { category: "SQL", text: "Which SQL command reads data from a table?", options: ["GET", "SELECT", "READ", "FETCH ALL"], answer: 1 },
+    { category: "SQL", text: "A PRIMARY KEY is:", options: ["A column that uniquely identifies each row", "The first column in any table", "A password for the database", "A column that must contain text"], answer: 0 },
+    { category: "SQL", text: "Which clause filters rows before grouping?", options: ["HAVING", "ORDER BY", "WHERE", "LIMIT"], answer: 2 },
+    { category: "SQL", text: "An INNER JOIN returns:", options: ["All rows from both tables", "Only rows with matching values in both tables", "Only rows from the left table", "Rows with NULL values"], answer: 1 }
   ]
 };
 
@@ -945,6 +975,14 @@ function showScreen(id) {
   const submitted = localStorage.getItem('skillme_application_submitted');
   const urlParams = new URLSearchParams(window.location.search);
   const isRetake = urlParams.get('retake') === '1' || urlParams.get('retake') === 'true';
+
+  // Preselect a domain passed from the landing page (e.g. quiz.html?domain=cyber)
+  const DOMAIN_PARAM_ALIASES = { webdev: 'web-dev', datascience: 'data-science', node: 'nodejs', cyber: 'cybersecurity', uiux: 'ui-ux' };
+  const domainParam = urlParams.get('domain');
+  if (domainParam) {
+    const card = document.querySelector(`.domain-card[data-domain="${DOMAIN_PARAM_ALIASES[domainParam] || domainParam}"]`);
+    if (card && !card.classList.contains('disabled')) selectDomain(card);
+  }
 
   // If explicitly retaking via ?retake=1, clear existing result so user can start fresh
   if (isRetake) {

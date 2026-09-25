@@ -24,14 +24,15 @@ async def main():
     await db.connect()
     for c in MISSING:
         row = await db.fetch_one(
-            """SELECT b.domain, b.batch_number
+            """SELECT COALESCE(b.domain, s.domain) AS domain
                FROM certificates cert
-               JOIN batches b ON cert.batch_id = b.id
+               JOIN students s ON s.id = cert.student_id
+               LEFT JOIN batches b ON cert.batch_id = b.id
                WHERE cert.cert_id = ?""",
             (c["cert_id"],),
         )
         if not row:
-            print(f"SKIP {c['cert_id']} — batch not found")
+            print(f"SKIP {c['cert_id']} — certificate not found")
             continue
 
         print(f"Sending to {c['email']} ({c['cert_id']}, {row['domain']})...")
@@ -40,7 +41,6 @@ async def main():
             last_name=c["last_name"],
             email=c["email"],
             domain=row["domain"],
-            batch_number=row["batch_number"],
             cert_id=c["cert_id"],
             issued_date=c["issued_at"],
         )

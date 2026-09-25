@@ -206,6 +206,7 @@ def _domain_label(domain: str) -> str:
         "react": "React / Next.js",
         "React / Next.js": "React / Next.js",
         "node": "Node.js / Express",
+        "nodejs": "Node.js / Express",
         "Node.js / Express": "Node.js / Express",
         "java": "Java / Spring Boot",
         "Java / Spring Boot": "Java / Spring Boot",
@@ -215,6 +216,7 @@ def _domain_label(domain: str) -> str:
         "cpp": "C/C++ / DSA",
         "C/C++ / DSA": "C/C++ / DSA",
         "cyber": "Cybersecurity",
+        "cybersecurity": "Cybersecurity",
         "Cybersecurity": "Cybersecurity",
         "cloud": "Cloud / AWS",
         "Cloud / AWS": "Cloud / AWS",
@@ -290,7 +292,6 @@ class EmailService:
         last_name: str,
         email: str,
         domain: str,
-        batch_number: int,
         joining_date: str | None = None,
         repo_url: str | None = None,
         github_username: str | None = None,
@@ -306,7 +307,6 @@ class EmailService:
             first_name=first_name,
             last_name=last_name,
             domain_label=_domain_label(domain),
-            batch_number=batch_number,
             joining_date=joining_date,
             repo_url=repo_url or "",
             issues_url=issues_url or "",
@@ -328,7 +328,6 @@ class EmailService:
         last_name: str,
         email: str,
         domain: str,
-        batch_number: int,
         cert_id: str,
         issued_date: str | None = None,
     ) -> bool:
@@ -343,7 +342,6 @@ class EmailService:
             first_name=first_name,
             last_name=last_name,
             domain_label=_domain_label(domain),
-            batch_number=batch_number,
             cert_id=cert_id,
             issued_date=issued_date,
             certificate_url=certificate_url,
@@ -406,6 +404,36 @@ class EmailService:
             f"🎉 Week {week} Task Approved!",
             html,
             email_type="task_approved",
+        )
+
+    # Weekly task submitted — automatic per-task feedback (see feedback_service)
+    async def send_submission_feedback(
+        self,
+        first_name: str,
+        last_name: str,
+        email: str,
+        domain: str,
+        week: int,
+        feedback: dict,
+        student_id: int | None = None,
+        batch_id: int | None = None,
+    ) -> bool:
+        html = _render(
+            "submission_feedback.html",
+            first_name=first_name,
+            last_name=last_name,
+            domain_label=_domain_label(domain),
+            week=week,
+            **feedback,
+        )
+        return await _send_and_log(
+            email,
+            f"{first_name} {last_name}",
+            f"📝 Week {week} submitted — your feedback checklist",
+            html,
+            email_type="submission_feedback",
+            student_id=student_id,
+            batch_id=batch_id,
         )
 
     # Urgent request fulfilled

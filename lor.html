@@ -748,7 +748,7 @@
     'android': ['Kotlin / Java', 'Android SDK', 'UI/UX for Mobile', 'Milestone Project Delivery', 'Professional Task Execution', 'API Integration'],
   };
 
-  function populateLOR(name, rawDomain, batch, id, issuedAt) {
+  function populateLOR(name, rawDomain, id, issuedAt) {
     const domain = (rawDomain || 'web-dev').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     const dateStr = issuedAt
       ? new Date(issuedAt).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' })
@@ -840,7 +840,7 @@
         if (res.ok) {
           const d = await res.json();
           const name = d.holder || d.student_name || nameParam || 'Student';
-          populateLOR(name, d.domain || domainParam, d.batch_number, d.cert_id, d.issued_at);
+          populateLOR(name, d.domain || domainParam, d.cert_id, d.issued_at);
           showVerify(true, name, d.cert_id, d.issued_at);
           return;
         }
@@ -849,15 +849,15 @@
       return;
     }
 
-    // Mode 2: student_id + batch_id — the student's own dashboard link.
-    // Backend requires completed payment before returning any data.
-    if (studentId && batchId) {
+    // Mode 2: student_id (+ internal enrollment ref) — the student's own dashboard link.
+    // Backend requires completed payment and resolves a missing/stale ref itself.
+    if (studentId) {
       try {
-        const res = await fetch(`${API}/api/certificates/metadata/${studentId}/${batchId}`);
+        const res = await fetch(`${API}/api/certificates/metadata/${studentId}/${batchId || 0}`);
         if (res.ok) {
           const d = await res.json();
           const name = d.holder || nameParam || `${d.first_name||''} ${d.last_name||''}`.trim() || 'Student';
-          populateLOR(name, d.domain || domainParam, d.batch_number, d.cert_id, d.issued_at);
+          populateLOR(name, d.domain || domainParam, d.cert_id, d.issued_at);
           showVerify(true, name, d.cert_id, d.issued_at);
           return;
         }

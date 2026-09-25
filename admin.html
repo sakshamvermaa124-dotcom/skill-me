@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Console — SkillMe</title>
   <meta name="robots" content="noindex, nofollow" />
-  <meta name="description" content="SkillMe Admin Console — Manage batches, students, and task assignments." />
+  <meta name="description" content="SkillMe Admin Console — Shortlist and enroll students, review task submissions." />
   <link rel="icon" href="assets/logo.webp" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -640,21 +640,16 @@
     .empty-state-icon { font-size: 3rem; margin-bottom: 12px; opacity: 0.5; }
     .empty-state-text { font-size: 0.9rem; }
 
-    /* ─── BATCH CARD ─── */
-    .batch-card {
-      background: var(--bg-glass);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
-      backdrop-filter: blur(16px);
-      transition: border-color 0.25s, transform 0.25s;
-      margin-bottom: 16px;
+    /* ─── LIST PAGINATION ─── */
+    .list-pagination {
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+      flex-wrap: wrap; padding: 14px 20px; font-size: 0.82rem; color: var(--text-secondary);
+      border-top: 1px solid var(--border);
     }
-    .batch-card:hover { border-color: var(--border-glow); transform: translateY(-2px); }
-    .batch-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-    .batch-card-title { font-family: var(--font-display); font-weight: 600; font-size: 1rem; }
-    .batch-card-meta { font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px; }
-    .batch-card-actions { display: flex; gap: 8px; align-items: center; }
+    .list-pagination:empty { display: none; }
+    .list-pagination .btn[disabled] { opacity: 0.4; cursor: not-allowed; }
+
+    /* ─── PROGRESS BAR ─── */
     .progress-bar {
       height: 6px; background: rgba(255,255,255,0.08);
       border-radius: 3px; overflow: hidden; margin-bottom: 8px;
@@ -832,13 +827,6 @@
         Students
         <span class="nav-badge" id="pending-badge" style="display:none">0</span>
       </div>
-      <div class="nav-item" id="nav-batches" onclick="navigate('batches')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/>
-          <line x1="12" y1="17" x2="12" y2="21"/>
-        </svg>
-        Batches
-      </div>
       <div class="nav-item" id="nav-alumni" onclick="navigate('alumni')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 3 3 6 3s6-1 6-3v-5"/>
@@ -847,14 +835,7 @@
         <span class="nav-badge" id="alumni-badge" style="display:none;background:rgba(52,211,153,0.2);color:#34d399;">0</span>
       </div>
       <div class="nav-section-label" style="margin-top:12px;">Actions</div>
-      <div class="nav-item" onclick="openCreateBatchModal()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/>
-          <line x1="8" y1="12" x2="16" y2="12"/>
-        </svg>
-        New Batch
-      </div>
-      <div class="nav-item" onclick="navigate('students'); setTimeout(()=>document.getElementById('status-filter').value='applied',100)">
+      <div class="nav-item" onclick="showApplicationsToReview()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
         </svg>
@@ -974,11 +955,11 @@
         <div class="panel">
           <div class="panel-header">
             <div>
-              <div class="panel-title">Active Batches</div>
-              <div class="panel-subtitle">Running cohorts</div>
+              <div class="panel-title">Shortlisted — Ready to Enroll</div>
+              <div class="panel-subtitle" id="overview-shortlisted-count">Ready to enroll</div>
             </div>
           </div>
-          <div id="overview-batches">
+          <div class="table-wrap" id="overview-shortlisted">
             <div class="loading-overlay"><div class="spinner"></div></div>
           </div>
         </div>
@@ -988,7 +969,7 @@
     <!-- ─── STUDENTS PAGE ─── -->
     <section class="page" id="page-students">
       <div class="filter-row">
-        <input type="text" class="search-input" id="student-search" placeholder="Search by name or email..." oninput="filterStudents()" />
+        <input type="text" class="search-input" id="student-search" placeholder="Search by name, email, college or domain..." oninput="filterStudents()" />
         <select class="filter-select" id="status-filter" onchange="filterStudents()">
           <option value="">All Statuses</option>
           <option value="applied">Applied</option>
@@ -1021,6 +1002,7 @@
             </tbody>
           </table>
         </div>
+        <div id="students-pagination" class="list-pagination"></div>
       </div>
     </section>
 
@@ -1052,21 +1034,7 @@
             </tbody>
           </table>
         </div>
-      </div>
-    </section>
-
-    <!-- ─── BATCHES PAGE ─── -->
-    <section class="page" id="page-batches">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:20px;">
-        <button class="btn btn-primary" onclick="openCreateBatchModal()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
-          </svg>
-          Create New Batch
-        </button>
-      </div>
-      <div id="batches-list">
-        <div class="loading-overlay"><div class="spinner"></div> Loading batches...</div>
+        <div id="alumni-pagination" class="list-pagination"></div>
       </div>
     </section>
 
@@ -1139,7 +1107,7 @@
               <div style="font-size:1.4rem;">🚀</div>
               <div>
                 <div style="font-weight:600;font-size:0.88rem;color:var(--text-primary);">Offer Letter</div>
-                <div style="font-size:0.78rem;color:var(--text-secondary);">Sent when admin enrolls a student into a batch</div>
+                <div style="font-size:0.78rem;color:var(--text-secondary);">Sent when admin enrolls a student</div>
               </div>
               <div style="margin-left:auto;padding:3px 10px;border-radius:12px;font-size:0.72rem;font-weight:600;background:rgba(52,211,153,0.12);color:#34d399;">AUTO</div>
             </div>
@@ -1280,7 +1248,7 @@
             <thead>
               <tr>
                 <th>Student</th>
-                <th>Batch/Domain</th>
+                <th>Domain</th>
                 <th>Type</th>
                 <th>Note</th>
                 <th>Requested At</th>
@@ -1416,66 +1384,6 @@
   </div>
 </div>
 
-<!-- ─── CREATE BATCH MODAL ─── -->
-<div class="modal-overlay" id="create-batch-modal">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">Create New Batch</div>
-      <button class="modal-close" onclick="closeModal('create-batch-modal')">&times;</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Domain</label>
-        <select class="form-input" id="new-batch-domain">
-          <option value="web-dev">Web Development</option>
-          <option value="python">Python</option>
-          <option value="react">React / Next.js</option>
-          <option value="node">Node.js / Express</option>
-          <option value="java">Java / Spring Boot</option>
-          <option value="ml">Machine Learning</option>
-          <option value="datascience">Data Science</option>
-          <option value="flutter">Flutter / Mobile</option>
-          <option value="devops">DevOps / CI-CD</option>
-          <option value="cpp">C/C++ / DSA</option>
-          <option value="uiux">UI/UX Design</option>
-          <option value="cyber">Cybersecurity</option>
-          <option value="cloud">Cloud / AWS</option>
-          <option value="dsa">DSA / Competitive</option>
-          <option value="blockchain">Blockchain / Web3</option>
-          <option value="android">Android / Kotlin</option>
-          <option value="sql">SQL / Databases</option>
-          <option value="genai">Generative AI</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Batch Number</label>
-        <input type="number" class="form-input" id="new-batch-number" placeholder="e.g. 1" min="1" value="1" />
-      </div>
-      <div class="form-group">
-        <label class="form-label">Max Students</label>
-        <input type="number" class="form-input" id="new-batch-max" placeholder="30" min="1" max="100" value="30" />
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-primary" onclick="createBatch()">Create Batch</button>
-      <button class="btn btn-ghost" onclick="closeModal('create-batch-modal')">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- ─── ANALYTICS MODAL ─── -->
-<div class="modal-overlay" id="modal-analytics">
-  <div class="modal" style="max-width:800px; width:90%;">
-    <div class="modal-header">
-      <div class="modal-title" id="analytics-modal-title">Batch Analytics</div>
-      <button class="modal-close" onclick="closeModal('modal-analytics')">&times;</button>
-    </div>
-    <div class="modal-body" id="analytics-modal-content">
-      <!-- Analytics data will be injected here -->
-    </div>
-  </div>
-</div>
-
 <!-- ─── EMAIL BODY MODAL ─── -->
 <div class="modal-overlay" id="email-body-modal">
   <div class="modal" style="max-width:800px; width:90%; max-height:85vh; display:flex; flex-direction:column;">
@@ -1493,7 +1401,7 @@
 <div id="toast-container"></div>
 
 <script src="config.js"></script>
-<script src="admin.js?v=20260923_020524"></script>
+<script src="admin.js?v=20260925_184405"></script>
 <script>
 // ─── Email Logs ───────────────────────────────────────────────────────────────
 const EMAIL_TYPE_LABELS = {

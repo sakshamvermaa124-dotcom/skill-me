@@ -1,0 +1,571 @@
+{
+  "domain": "cloud",
+  "tracks": [
+    {
+      "project_name": "CloudFolio: Serverless Portfolio Site with Contact Form",
+      "tagline": "Host your own portfolio website on AWS and add a working contact form powered by serverless functions.",
+      "weeks": {
+        "1": {
+          "title": "Safe AWS Setup & Static Website on S3",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Set up a cloud account the safe way, with a budget alert and a separate admin user, then host a simple portfolio website on Amazon S3. By the end of the week you will have a live website URL you built and deployed yourself.",
+          "learn": [
+            "What regions, services and the AWS Management Console are",
+            "Why you never use the root account day to day, and how IAM users and MFA protect you",
+            "Setting a budget alert so you are warned before spending any money",
+            "Storing files in S3 buckets and turning a bucket into a static website"
+          ],
+          "steps": [
+            "Create an AWS account (a card is needed for verification), turn on MFA for the root user, and do not use root again after this step.",
+            "Before anything else, open AWS Budgets and create a zero-spend or 1 USD monthly budget that emails you, so you hear about any charge immediately.",
+            "In IAM, create a user for yourself with administrator permissions and MFA, then sign out and sign back in as that user.",
+            "Pick one region (for example Asia Pacific (Mumbai) `ap-south-1`) and use it for every resource in this project.",
+            "Build a simple one-page portfolio on your laptop with HTML and CSS (about you, skills, projects, and a contact form that does nothing yet).",
+            "Create an S3 bucket, upload your files, enable static website hosting, allow public read with a bucket policy, and open the website endpoint URL.",
+            "Put the site code in a public GitHub repo with a README that includes the live link and a screenshot."
+          ],
+          "deliverables": [
+            "A live portfolio website on an S3 website URL",
+            "A screenshot of your budget alert settings",
+            "A GitHub repo with the site code and README"
+          ],
+          "done_when": [
+            "A budget alert is active and sends email to you",
+            "You are signed in as an IAM user with MFA, not the root user",
+            "The portfolio loads in a browser from the S3 website endpoint",
+            "Only the website bucket is public; nothing else in the account is",
+            "The README has the live link and a screenshot"
+          ],
+          "hints": [
+            "A 403 Forbidden error usually means Block Public Access is still on or the bucket policy is missing.",
+            "Name your file `index.html` exactly and set it as the index document, or S3 will not find it.",
+            "Azure (Azure for Students credits, no card needed) or Google Cloud free tier are fine alternatives; use their static website storage equivalents.",
+            "The S3 and Billing sections of the [AWS docs](https://docs.aws.amazon.com) cover static website hosting and budgets."
+          ],
+          "stretch": "Upload the site from your terminal with the AWS CLI (or from AWS CloudShell) using `aws s3 sync`.",
+          "post_highlights": [
+            "Set up a secure AWS account with MFA, an IAM admin user and a budget alert",
+            "Hosted my personal portfolio as a static website on Amazon S3",
+            "Learned cloud basics including regions, buckets and access policies"
+          ]
+        },
+        "2": {
+          "title": "Contact Form API with Lambda & API Gateway",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Make the contact form work using serverless: a small Lambda function receives the form data through an API Gateway URL. You will learn how code can run in the cloud without managing any server.",
+          "learn": [
+            "What serverless means and how an AWS Lambda function is triggered",
+            "Creating an HTTP API in API Gateway that calls a Lambda function",
+            "Reading request data and returning JSON responses from a Lambda handler",
+            "CORS: why browsers block requests to other domains and how to allow your site"
+          ],
+          "steps": [
+            "Create a Lambda function in Python (or Node.js) that reads `name`, `email` and `message` from the request body and logs them with `print`.",
+            "Test it inside the Lambda console with a sample test event before connecting anything else.",
+            "Create an API Gateway HTTP API with a `POST /contact` route that invokes your function, and copy the invoke URL.",
+            "Test the API from your terminal with curl or from Postman, and find your logged message in CloudWatch Logs.",
+            "Enable CORS on the HTTP API for your S3 website address so the browser is allowed to call it.",
+            "Update your site's JavaScript to send the form with `fetch` and show 'Thanks, message sent!' on success, then upload the new files to S3.",
+            "Record a short demo: fill in the form on the live site, then show the message in CloudWatch Logs."
+          ],
+          "deliverables": [
+            "A Lambda function that receives contact form data",
+            "An HTTP API with a `POST /contact` route",
+            "A live contact form that calls the API",
+            "A short demo video or screenshots"
+          ],
+          "done_when": [
+            "Submitting the form on the live site shows a success message",
+            "Each submission appears in the function's CloudWatch Logs",
+            "The API works from curl or Postman as well as the browser",
+            "The browser console shows no CORS errors"
+          ],
+          "hints": [
+            "With HTTP APIs the form data arrives as a string in `event['body']`, so parse it with `json.loads` first.",
+            "Return a dictionary with `statusCode`, `headers` and a JSON string `body`, or the API will return an error.",
+            "Most 'CORS error' messages are really a 500 error in your function, so check CloudWatch Logs first.",
+            "The Lambda and API Gateway sections of the [AWS docs](https://docs.aws.amazon.com) include getting-started tutorials."
+          ],
+          "stretch": "Add a honeypot field (a hidden input bots fill in) and ignore submissions where it is not empty.",
+          "post_highlights": [
+            "Built a serverless contact form API using AWS Lambda and API Gateway",
+            "Connected a static website to a cloud API with fetch and CORS",
+            "Debugged cloud functions using CloudWatch Logs"
+          ]
+        },
+        "3": {
+          "title": "Save Messages in DynamoDB with Least-Privilege Access",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Store every contact message in a DynamoDB table and give your Lambda function only the permission it needs. You will also validate input and return clear errors, so the form behaves well when something goes wrong.",
+          "learn": [
+            "NoSQL basics with DynamoDB: tables, items and partition keys",
+            "Using the AWS SDK (`boto3` or AWS SDK for JavaScript) inside Lambda",
+            "IAM roles and least-privilege policies for services",
+            "Input validation and proper HTTP error responses"
+          ],
+          "steps": [
+            "Create a DynamoDB table named `contact-messages` with a string partition key `id`, using on-demand capacity.",
+            "Update the function to save each message with a generated `id` (for example `uuid4`), plus `name`, `email`, `message` and `createdAt`.",
+            "Run it and read the AccessDenied error in CloudWatch Logs; this is expected because the function has no database permission yet.",
+            "Open the function's execution role in IAM and add a policy allowing only `dynamodb:PutItem` on this one table's ARN, then test again.",
+            "Add validation: all fields required, a basic email format check, and a message length limit; return a 400 response with a helpful error message.",
+            "Wrap the database call in `try/except` and return a 500 with a friendly message if it fails, then show both kinds of errors nicely on the website.",
+            "Screenshot the saved items in the DynamoDB console and the IAM policy you wrote."
+          ],
+          "deliverables": [
+            "A DynamoDB table storing contact messages",
+            "A least-privilege IAM policy for the Lambda role",
+            "Validation and error handling in the function and website",
+            "Screenshots of the table items and policy"
+          ],
+          "done_when": [
+            "Every valid form submission creates a new item in DynamoDB",
+            "The Lambda role can only write to this one table, not all of DynamoDB",
+            "An empty field or invalid email returns a 400 error shown on the page",
+            "A database failure returns a friendly error instead of a blank response",
+            "The README explains the data flow from form to database"
+          ],
+          "hints": [
+            "The table ARN is shown on the table's overview page; paste it into the policy's `Resource` field.",
+            "`boto3` is already available in the Lambda Python runtime, so you do not need to upload it.",
+            "Validate on the website too for a better user experience, but always validate in the function because anyone can call your API directly.",
+            "The DynamoDB and IAM sections of the [AWS docs](https://docs.aws.amazon.com) explain keys and policies."
+          ],
+          "stretch": "Use Amazon SNS to email yourself whenever a new message arrives (remember to add `sns:Publish` to the role).",
+          "post_highlights": [
+            "Stored contact form submissions in Amazon DynamoDB from a Lambda function",
+            "Wrote a least-privilege IAM policy so the function can only write to one table",
+            "Added input validation and clear error responses to a serverless API"
+          ]
+        },
+        "4": {
+          "title": "HTTPS with CloudFront, Auto-Deploy & Architecture Diagram",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Finish CloudFolio as a professional project: serve it over HTTPS through CloudFront, deploy site changes automatically from GitHub Actions, and document the architecture. You will also clean up properly so nothing keeps costing money.",
+          "learn": [
+            "What a CDN is and how CloudFront gives your site HTTPS and faster loading",
+            "Deploying to S3 from GitHub Actions using repository secrets",
+            "Creating a separate, limited IAM user for automation",
+            "Drawing a cloud architecture diagram and cleaning up resources"
+          ],
+          "steps": [
+            "Create a CloudFront distribution with your website bucket as the origin, set it to redirect HTTP to HTTPS, and open the `cloudfront.net` URL.",
+            "Add the CloudFront address to your API's CORS allowed origins and check the contact form still works.",
+            "Create an IAM user `github-deployer` with a policy that only allows syncing to your bucket and creating CloudFront invalidations, and create an access key for it.",
+            "Store the keys as GitHub repository secrets and write a workflow that runs `aws s3 sync` and `aws cloudfront create-invalidation` on every push to `main`.",
+            "Push a small visible change and confirm it appears on the live site without any manual upload.",
+            "Draw an architecture diagram (browser, CloudFront, S3, API Gateway, Lambda, DynamoDB) and add it to the README with setup steps and a cleanup section.",
+            "Record a 60-second demo, and when the internship ends delete the distribution, API, function, table, bucket, IAM user and keys, then check the Billing page."
+          ],
+          "deliverables": [
+            "The site served over HTTPS from CloudFront",
+            "A GitHub Actions workflow that deploys on every push",
+            "A README with an architecture diagram and cleanup steps",
+            "A 60-second demo video"
+          ],
+          "done_when": [
+            "The site loads over `https://` from the CloudFront URL and the contact form works there",
+            "Pushing to `main` updates the live site automatically",
+            "The deploy user can only access your bucket and invalidations, and its keys exist only as GitHub secrets",
+            "The README includes an architecture diagram and a list of resources to delete",
+            "Your budget alert is still active and your bill shows no unexpected charges"
+          ],
+          "hints": [
+            "CloudFront changes take a few minutes to deploy, and cached files stay old until you create an invalidation.",
+            "Never commit access keys; if one leaks, delete it in IAM immediately and create a new one.",
+            "Draw the diagram with draw.io or Excalidraw using the free AWS icon set.",
+            "See the CloudFront section of the [AWS docs](https://docs.aws.amazon.com) and secrets in the [GitHub Actions docs](https://docs.github.com/actions)."
+          ],
+          "stretch": "Replace the access keys with GitHub OIDC so the workflow gets short-lived credentials from an IAM role instead.",
+          "post_highlights": [
+            "Built CloudFolio, a serverless portfolio on AWS with S3, CloudFront, Lambda, API Gateway and DynamoDB",
+            "Automated deployments to S3 and CloudFront with GitHub Actions",
+            "Documented the system with an architecture diagram and a cost-safe cleanup plan"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "SnapVault: Photo Sharing App on Cloud Storage",
+      "tagline": "Build a simple photo gallery where people can upload pictures straight to cloud storage and view them on a web page.",
+      "weeks": {
+        "1": {
+          "title": "Safe AWS Setup & Photo Gallery on S3",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Set up your cloud account safely, learn how object storage works, and publish a simple photo gallery website from an S3 bucket. You will also start using the AWS CLI, which you will rely on for the rest of the project.",
+          "learn": [
+            "Regions, the AWS console, and why you avoid the root account",
+            "IAM users, MFA and budget alerts for safe, cost-free learning",
+            "S3 basics: buckets, objects, keys and folders (prefixes)",
+            "Using the AWS CLI or AWS CloudShell to upload and list files"
+          ],
+          "steps": [
+            "Create an AWS account (a card is needed for verification), enable MFA on the root user, and stop using root after this.",
+            "Immediately create a zero-spend or 1 USD monthly budget in AWS Budgets with email alerts.",
+            "Create an IAM user for yourself with admin permissions and MFA, sign in as that user, and choose one region such as `ap-south-1` for everything.",
+            "Open AWS CloudShell (a free terminal in the browser) or install the AWS CLI, and run `aws s3 ls` to confirm it works.",
+            "Build a gallery page with HTML, CSS and a little JavaScript that reads a `photos.json` list and shows the images in a grid.",
+            "Create a bucket for the website, enable static website hosting with public read, and upload the page, `photos.json` and 6-8 photos in a `photos/` folder using `aws s3 sync`.",
+            "Push the code to GitHub with a README containing the live link and a screenshot."
+          ],
+          "deliverables": [
+            "A live gallery website hosted on S3",
+            "A screenshot of your budget alert settings",
+            "A GitHub repo with the site code and a README"
+          ],
+          "done_when": [
+            "A budget alert is active and emails you",
+            "You work as an MFA-protected IAM user, not root",
+            "The gallery loads from the S3 website URL and shows all photos",
+            "Files were uploaded using the CLI or CloudShell at least once",
+            "The README has the live link and a screenshot"
+          ],
+          "hints": [
+            "Compress photos before uploading (under about 500 KB each) so the gallery loads quickly and stays within free limits.",
+            "A 403 error on the site usually means Block Public Access is still on or the bucket policy is missing.",
+            "Azure (Azure for Students credits) with Blob Storage, or Google Cloud Storage on the free tier, are fine alternatives.",
+            "The S3 section of the [AWS docs](https://docs.aws.amazon.com) explains buckets, keys and static hosting."
+          ],
+          "stretch": "Add a lightbox so clicking a photo opens it full size with next and previous buttons.",
+          "post_highlights": [
+            "Set up a secure AWS account with MFA, an IAM user and a budget alert",
+            "Published a photo gallery website on Amazon S3",
+            "Used the AWS CLI to upload and manage files in cloud storage"
+          ]
+        },
+        "2": {
+          "title": "Direct Uploads with Presigned URLs & Lambda",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Let visitors upload photos from the web page into a private bucket. A small Lambda function hands out temporary presigned upload links, so the bucket never has to be public and your AWS keys never reach the browser.",
+          "learn": [
+            "What serverless is and how a Lambda function is invoked through API Gateway",
+            "Presigned URLs: temporary permission to upload one specific file",
+            "Keeping a bucket private while still allowing uploads",
+            "S3 CORS settings for browser uploads"
+          ],
+          "steps": [
+            "Create a second, private bucket for uploads and keep Block Public Access turned on.",
+            "Create a Lambda function in Python that takes a file name and type and returns a presigned `put_object` URL (valid for about 5 minutes) with a unique key such as `uploads/<uuid>.jpg`.",
+            "Give the function's role a small policy allowing only `s3:PutObject` on the uploads bucket, and test the function in the console.",
+            "Create an API Gateway HTTP API with `POST /upload-url` pointing to the function and enable CORS for your website address.",
+            "Add a CORS rule on the uploads bucket that allows `PUT` from your website address.",
+            "Add a file picker to the page: request an upload URL, then send the file with `fetch(url, { method: 'PUT', body: file })` and show a success message.",
+            "Upload a photo from the live site and confirm it appears in the uploads bucket in the console."
+          ],
+          "deliverables": [
+            "A private uploads bucket",
+            "A Lambda function and HTTP API that return presigned upload URLs",
+            "An upload form on the live gallery page",
+            "A short demo video of an upload landing in S3"
+          ],
+          "done_when": [
+            "Uploading a photo from the live site puts the file in the private bucket",
+            "The uploads bucket is not publicly readable",
+            "No AWS access keys appear anywhere in the website code",
+            "A presigned URL stops working after it expires",
+            "The browser console shows no CORS errors during upload"
+          ],
+          "hints": [
+            "The `Content-Type` you use when creating the presigned URL must match the one the browser sends, or S3 returns a signature error.",
+            "If you get signature errors, create the S3 client with your bucket's region, for example `boto3.client('s3', region_name='ap-south-1')`.",
+            "There are two separate CORS settings here: one on the API and one on the uploads bucket.",
+            "Search 'presigned URLs' in the S3 section of the [AWS docs](https://docs.aws.amazon.com)."
+          ],
+          "stretch": "Show an upload progress bar using `XMLHttpRequest` progress events instead of `fetch`.",
+          "post_highlights": [
+            "Built secure browser-to-S3 photo uploads using presigned URLs",
+            "Created a serverless API with AWS Lambda and API Gateway",
+            "Kept the storage bucket private while still allowing uploads"
+          ]
+        },
+        "3": {
+          "title": "Photo Records in DynamoDB with S3 Event Triggers",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Make the gallery show uploaded photos automatically. When a photo lands in S3, an event triggers a Lambda that records it in DynamoDB, and a list API returns the gallery with temporary view links. You will also validate uploads and handle errors.",
+          "learn": [
+            "Event-driven design: running code automatically when a file is uploaded",
+            "Storing records in DynamoDB tables with partition keys",
+            "Least-privilege IAM permissions for each function",
+            "Validating input and handling errors in serverless APIs"
+          ],
+          "steps": [
+            "Create a DynamoDB table `photos` with partition key `photoId` (string) using on-demand capacity.",
+            "Create a `record-photo` Lambda and add an S3 event notification on the uploads bucket for new objects under `uploads/`, so it saves `photoId`, key, size and upload time to the table.",
+            "Upload a photo and check that a new item appears in DynamoDB; use CloudWatch Logs if it does not.",
+            "Create a `list-photos` Lambda with a `GET /photos` route that reads the table and returns each photo with a presigned view URL.",
+            "Give each function only the permissions it needs (for example `dynamodb:PutItem` for one, `dynamodb:Scan` and `s3:GetObject` for the other).",
+            "Update the gallery page to load photos from `GET /photos` instead of `photos.json`, with an empty-state message when there are no photos.",
+            "Add validation: the upload-url function rejects files that are not JPG or PNG or are larger than 5 MB, and the page shows clear error messages for rejected or failed uploads."
+          ],
+          "deliverables": [
+            "A DynamoDB table recording every upload",
+            "An S3-triggered Lambda and a `GET /photos` API",
+            "A gallery page that shows uploaded photos automatically",
+            "Upload validation with clear error messages"
+          ],
+          "done_when": [
+            "A newly uploaded photo appears in the gallery after a page refresh without any manual step",
+            "Every upload creates exactly one item in DynamoDB",
+            "Each Lambda role only has the permissions it needs",
+            "Uploading a PDF or an oversized file shows an error and is not uploaded",
+            "The gallery shows an empty-state message when there are no photos"
+          ],
+          "hints": [
+            "Object keys in S3 events are URL-encoded, so decode them with `urllib.parse.unquote_plus` before using them.",
+            "Only trigger on the `uploads/` prefix to avoid accidental loops if a function ever writes back to the same bucket.",
+            "A table scan is fine for a small gallery; mention in your README that a real app would use queries and pagination.",
+            "The Lambda section of the [AWS docs](https://docs.aws.amazon.com) has a tutorial on using S3 triggers."
+          ],
+          "stretch": "Let users add a caption on upload by sending it as object metadata and storing it in DynamoDB.",
+          "post_highlights": [
+            "Built an event-driven pipeline where S3 uploads trigger a Lambda function",
+            "Stored photo records in DynamoDB and served them through a serverless API",
+            "Applied least-privilege IAM roles and upload validation"
+          ]
+        },
+        "4": {
+          "title": "Infrastructure as Code with AWS SAM",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Rebuild your backend from a single AWS SAM template so the whole app can be created or deleted with one command. You will add an automatic cleanup rule, draw an architecture diagram, and finish with a polished demo.",
+          "learn": [
+            "What Infrastructure as Code is and why it beats clicking in the console",
+            "Writing an AWS SAM template for functions, an HTTP API, a table and a bucket",
+            "Deploying and deleting stacks with `sam build`, `sam deploy` and `sam delete`",
+            "S3 lifecycle rules for automatic cleanup"
+          ],
+          "steps": [
+            "Install the AWS SAM CLI (or use AWS CloudShell, where it is already available) and run `sam init` with a Python hello-world template to see the structure.",
+            "Write `template.yaml` step by step: first the `photos` table, then the uploads bucket, then one function at a time, deploying after each addition.",
+            "Add the S3 upload event to `record-photo`, the HTTP API routes to the other two functions, and permissions using SAM policy templates such as `DynamoDBCrudPolicy`.",
+            "Add a lifecycle rule to the uploads bucket that deletes photos after 30 days.",
+            "Deploy with `sam deploy --guided`, point the gallery page at the new API URL, and test uploads and listing end to end.",
+            "Delete the old console-created resources once the SAM version works, and write the README with an architecture diagram, deploy steps and cleanup steps.",
+            "Record a 60-second demo, and when the internship ends run `sam delete`, empty and delete the website bucket, and check the Billing page."
+          ],
+          "deliverables": [
+            "A `template.yaml` that defines the whole backend",
+            "A lifecycle rule for automatic photo cleanup",
+            "A README with an architecture diagram, deploy and cleanup steps",
+            "A 60-second demo video"
+          ],
+          "done_when": [
+            "`sam deploy` creates the table, bucket, functions and API from scratch",
+            "The live gallery works end to end against the SAM-deployed backend",
+            "Old console-created backend resources have been deleted",
+            "The uploads bucket has a lifecycle rule that expires old photos",
+            "The README includes an architecture diagram and a cleanup section"
+          ],
+          "hints": [
+            "An S3 event in SAM only works for a bucket defined in the same template.",
+            "If CloudFormation reports a circular dependency, give the bucket a fixed name through a parameter and use that name in the function policy instead of `!Ref`.",
+            "`sam delete` cannot remove a bucket that still has files, so empty it first.",
+            "The AWS SAM section of the [AWS docs](https://docs.aws.amazon.com) has templates and policy template references."
+          ],
+          "stretch": "Add a 'Share' button that creates a presigned view link valid for 24 hours and copies it to the clipboard.",
+          "post_highlights": [
+            "Built SnapVault, a serverless photo sharing app on AWS S3, Lambda, API Gateway and DynamoDB",
+            "Defined the entire backend as Infrastructure as Code with AWS SAM",
+            "Documented the architecture and added lifecycle rules to keep storage costs at zero"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "LinkSnip: Serverless URL Shortener",
+      "tagline": "Build your own link shortener, like a mini bit.ly, that turns long links into short ones and counts the clicks.",
+      "weeks": {
+        "1": {
+          "title": "Safe AWS Setup & Landing Page on S3",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Set up your cloud account safely and publish the LinkSnip landing page on Amazon S3. The page will have the shortening form ready for the backend you build next week.",
+          "learn": [
+            "Regions, the AWS console, and why you never use the root account",
+            "IAM users, MFA and budget alerts for safe, cost-free learning",
+            "S3 buckets and static website hosting",
+            "Planning a small cloud app before building it"
+          ],
+          "steps": [
+            "Create an AWS account (a card is needed for verification), enable MFA on the root user, and stop using root after this.",
+            "Immediately create a zero-spend or 1 USD monthly budget in AWS Budgets with email alerts.",
+            "Create an IAM user for yourself with admin permissions and MFA, sign in as that user, and pick one region such as `ap-south-1` for all resources.",
+            "Build a landing page with HTML, CSS and JavaScript: an input for a long URL, a Shorten button, and an area to show the result (use a fake result for now).",
+            "Create a bucket, enable static website hosting with public read, upload the page, and open the website URL.",
+            "Sketch a simple plan in your README: the page calls an API, a function creates a short code, and a database stores it.",
+            "Push the code to a public GitHub repo with the live link and a screenshot."
+          ],
+          "deliverables": [
+            "A live LinkSnip landing page on S3",
+            "A screenshot of your budget alert settings",
+            "A GitHub repo with the page code and a README containing your plan"
+          ],
+          "done_when": [
+            "A budget alert is active and emails you",
+            "You work as an MFA-protected IAM user, not root",
+            "The landing page loads from the S3 website URL",
+            "Clicking Shorten shows a placeholder result without page reload",
+            "The README includes the live link, a screenshot and your plan"
+          ],
+          "hints": [
+            "A 403 Forbidden error usually means Block Public Access is still on or the bucket policy is missing.",
+            "Use `event.preventDefault()` in your form's submit handler so the page does not reload.",
+            "Azure (Azure for Students credits) or Google Cloud free tier are fine alternatives if you cannot use AWS.",
+            "The Billing and S3 sections of the [AWS docs](https://docs.aws.amazon.com) cover budgets and static websites."
+          ],
+          "stretch": "Add a 'Copy' button that copies the result to the clipboard with `navigator.clipboard.writeText`.",
+          "post_highlights": [
+            "Set up a secure AWS account with MFA, an IAM user and a budget alert",
+            "Designed and hosted the landing page of my URL shortener on Amazon S3",
+            "Planned a serverless architecture for a link shortening service"
+          ]
+        },
+        "2": {
+          "title": "Shorten & Redirect with Lambda and API Gateway",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Build the first working backend: one API route creates a short code and another redirects a short code to its long URL. You will learn how serverless functions handle requests and responses, including HTTP redirects.",
+          "learn": [
+            "What serverless is and how a Lambda function handles an API request",
+            "Creating an HTTP API with routes and path parameters such as `/{code}`",
+            "HTTP redirects with status 301/302 and the `Location` header",
+            "CORS and why Lambda memory is not a place to store data"
+          ],
+          "steps": [
+            "Create a Lambda function `shorten` in Python that reads a `url` from the request body and returns a random 6-character code.",
+            "Create a Lambda function `redirect` that reads `code` from `event['pathParameters']` and returns a 302 with a `Location` header, using a small hardcoded dictionary of codes for now.",
+            "Test both functions in the Lambda console with sample events.",
+            "Create an HTTP API with `POST /shorten` and `GET /{code}` routes pointing to the two functions, and enable CORS for your website address.",
+            "Open `<api-url>/abc123` in the browser for a hardcoded code and confirm it redirects.",
+            "Connect the landing page to `POST /shorten` with `fetch` and display the returned short link.",
+            "Write in your README why new codes will not redirect yet: the two functions do not share memory, which is why you need a database next week."
+          ],
+          "deliverables": [
+            "Two Lambda functions: `shorten` and `redirect`",
+            "An HTTP API with `POST /shorten` and `GET /{code}` routes",
+            "A landing page that calls the API and shows a short link",
+            "A short demo video of a redirect working"
+          ],
+          "done_when": [
+            "The landing page shows a short link returned by the API",
+            "Visiting a hardcoded short code in the browser redirects to the right website",
+            "An unknown code returns a 404 response instead of an error",
+            "Requests and errors are visible in CloudWatch Logs",
+            "The browser console shows no CORS errors"
+          ],
+          "hints": [
+            "Use Python's `secrets` or `random` module with letters and digits to generate codes.",
+            "A redirect response needs `statusCode: 302` and `headers: { 'Location': url }`, with no JSON body required.",
+            "Most 'CORS errors' are really a crash in your function, so check CloudWatch Logs first.",
+            "The Lambda and API Gateway sections of the [AWS docs](https://docs.aws.amazon.com) have getting-started tutorials."
+          ],
+          "stretch": "Serve a small HTML error page for unknown codes instead of plain text.",
+          "post_highlights": [
+            "Built a serverless URL shortening API with AWS Lambda and API Gateway",
+            "Implemented HTTP redirects using path parameters and the Location header",
+            "Connected a static front end to a cloud API with fetch and CORS"
+          ]
+        },
+        "3": {
+          "title": "Store Links in DynamoDB & Handle Bad Input",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Save links in DynamoDB so any short code you create works for anyone, anywhere. You will lock down permissions and handle bad input and edge cases so the service is reliable.",
+          "learn": [
+            "DynamoDB basics: tables, items and partition keys",
+            "Using the AWS SDK (`boto3`) from Lambda to write and read items",
+            "Least-privilege IAM policies for each function",
+            "Input validation, conditional writes and clear error responses"
+          ],
+          "steps": [
+            "Create a DynamoDB table `links` with partition key `code` (string) using on-demand capacity.",
+            "Update `shorten` to save `code`, `longUrl` and `createdAt` with `put_item`, then update `redirect` to look up the code with `get_item`.",
+            "Give `shorten` only `dynamodb:PutItem` and `redirect` only `dynamodb:GetItem` on this one table, using the table ARN.",
+            "Validate input in `shorten`: the URL must start with `http://` or `https://`, have a reasonable length, and not point to your own API; return a 400 with a message otherwise.",
+            "Use a conditional write (`attribute_not_exists(code)`) so a duplicate code is never overwritten, and retry with a new code if it happens.",
+            "Show validation errors on the landing page and wrap database calls in `try/except` to return friendly 500 errors.",
+            "Test the full flow: shorten a link on the live site, open the short link in a private window, and confirm the redirect."
+          ],
+          "deliverables": [
+            "A DynamoDB `links` table",
+            "Shorten and redirect functions using the database",
+            "Least-privilege IAM policies for both functions",
+            "Validation and error messages on the API and page"
+          ],
+          "done_when": [
+            "Any link shortened on the live site redirects correctly from another browser or device",
+            "Each function's role can only perform its one action on the `links` table",
+            "Invalid URLs return a 400 error shown on the page",
+            "An existing code is never overwritten",
+            "Unknown codes still return a 404 response"
+          ],
+          "hints": [
+            "`boto3` is already included in the Lambda Python runtime.",
+            "A `ConditionalCheckFailedException` means the code already exists; catch it and generate a new one.",
+            "If you see AccessDenied in CloudWatch Logs, compare the action and table ARN in the error with your policy.",
+            "The DynamoDB and IAM sections of the [AWS docs](https://docs.aws.amazon.com) explain conditional writes and policies."
+          ],
+          "stretch": "Return the existing short code if the same long URL has already been shortened (hint: a global secondary index on `longUrl`).",
+          "post_highlights": [
+            "Stored short links in Amazon DynamoDB so they work from any device",
+            "Wrote least-privilege IAM policies for each Lambda function",
+            "Added URL validation and conditional writes to prevent bad input and duplicate codes"
+          ]
+        },
+        "4": {
+          "title": "Click Analytics, Custom Aliases & Final Polish",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Finish LinkSnip with the feature that makes shorteners useful: click counting with a stats page. You will also let users choose custom short names, document the architecture, and clean up your resources safely.",
+          "learn": [
+            "Atomic counters in DynamoDB with `update_item` and `ADD`",
+            "Designing a small read-only stats API",
+            "Validating user-chosen values safely",
+            "Drawing a cloud architecture diagram and planning cleanup"
+          ],
+          "steps": [
+            "Update `redirect` to increment a `clicks` attribute with `update_item` and `ADD clicks :one` on every visit, and add `dynamodb:UpdateItem` to its policy.",
+            "Create a `stats` function with `GET /stats/{code}` that returns the long URL, creation date and click count.",
+            "Add a stats page (or section) where a user pastes a short code and sees its clicks, and show the stats link after shortening.",
+            "Add an optional 'custom alias' field: allow only 3-20 letters, numbers and dashes, and return a clear error if the alias is taken.",
+            "Test everything end to end, including invalid aliases, taken aliases and unknown codes.",
+            "Write the README with an architecture diagram (browser, S3, API Gateway, Lambda, DynamoDB), API routes, setup steps and a cleanup section.",
+            "Record a 60-second demo, and when the internship ends delete the API, functions, table and bucket, then check the Billing page."
+          ],
+          "deliverables": [
+            "Click counting on every redirect",
+            "A `GET /stats/{code}` API and a stats page",
+            "Custom aliases with validation",
+            "A README with an architecture diagram, cleanup steps and a 60-second demo video"
+          ],
+          "done_when": [
+            "Each visit to a short link increases its click count by exactly one",
+            "The stats page shows the correct long URL, creation date and clicks",
+            "A valid custom alias works and a taken or invalid alias shows a clear error",
+            "The README includes an architecture diagram and a list of resources to delete",
+            "Your budget alert is still active and your bill shows no unexpected charges"
+          ],
+          "hints": [
+            "Use `update_item` with `ADD` rather than reading, adding one and writing back, so two clicks at the same moment are both counted.",
+            "Reuse the same conditional write from week 3 to reject a custom alias that already exists.",
+            "Draw the diagram with draw.io or Excalidraw using the free AWS icon set.",
+            "The DynamoDB section of the [AWS docs](https://docs.aws.amazon.com) explains update expressions."
+          ],
+          "stretch": "Let users pick an expiry (1 day, 7 days, never) and use DynamoDB Time to Live (TTL) to delete expired links automatically.",
+          "post_highlights": [
+            "Built LinkSnip, a serverless URL shortener on AWS Lambda, API Gateway, DynamoDB and S3",
+            "Added click analytics using atomic DynamoDB counters and a stats API",
+            "Documented the architecture and followed a cost-safe cleanup plan"
+          ]
+        }
+      }
+    }
+  ]
+}

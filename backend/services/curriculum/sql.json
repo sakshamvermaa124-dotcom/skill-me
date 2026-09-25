@@ -1,0 +1,549 @@
+{
+  "domain": "sql",
+  "tracks": [
+    {
+      "project_name": "ShelfWise: Library Management Database",
+      "tagline": "Design and query a database that tracks books, members and loans for a college library.",
+      "weeks": {
+        "1": {
+          "title": "Tables, Data and Your First Queries",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Create a small library database with books, members and loans tables, fill it with sample data and answer simple questions with SELECT. This is the foundation every later week builds on, so getting clean tables now saves time later.",
+          "learn": [
+            "What tables, rows, columns and data types are",
+            "Writing CREATE TABLE and INSERT statements",
+            "Filtering and sorting with SELECT, WHERE and ORDER BY",
+            "Primary keys and why every row needs a unique id"
+          ],
+          "steps": [
+            "Install [DB Browser for SQLite](https://sqlitebrowser.org) and create a new database file called `shelfwise.db`.",
+            "On paper, list the columns you need for `books`, `members` and `loans` before writing any SQL.",
+            "Write a `schema.sql` file with three `CREATE TABLE` statements, each with an `INTEGER PRIMARY KEY` column.",
+            "Write a `seed.sql` file that inserts at least 20 books, 10 members and 25 loans with realistic values.",
+            "Run both files, then open the Browse Data tab to confirm every row looks correct.",
+            "Write 8 queries in `queries_week1.sql` using `WHERE`, `ORDER BY`, `LIMIT` and `LIKE`, each with a comment stating the question it answers.",
+            "Save the database, SQL files and a short README to a GitHub repo."
+          ],
+          "deliverables": [
+            "`schema.sql` with three tables",
+            "`seed.sql` with sample data",
+            "`queries_week1.sql` with 8 commented queries",
+            "README with a screenshot of the tables in DB Browser"
+          ],
+          "done_when": [
+            "Running `schema.sql` then `seed.sql` on an empty database finishes with no errors",
+            "Each table has a primary key",
+            "The database contains at least 20 books, 10 members and 25 loans",
+            "All 8 queries run and return the expected rows"
+          ],
+          "hints": [
+            "Store dates as text in `YYYY-MM-DD` format so they sort correctly in SQLite.",
+            "Add `DROP TABLE IF EXISTS` at the top of `schema.sql` so you can re-run it safely.",
+            "The [SQLite documentation](https://sqlite.org/docs.html) lists every data type and keyword."
+          ],
+          "stretch": "Add a `genres` column and write a query that lists all books in one genre sorted by publication year.",
+          "post_highlights": [
+            "Designed a three-table library database in SQLite",
+            "Wrote CREATE and INSERT scripts to build and seed the database from scratch",
+            "Answered 8 practical questions using SELECT, WHERE and ORDER BY"
+          ]
+        },
+        "2": {
+          "title": "Relationships, JOINs and Grouping",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Connect your tables with foreign keys and use JOINs and GROUP BY to answer questions that span several tables. You will also tidy the design so data is not repeated.",
+          "learn": [
+            "Foreign keys and constraints such as NOT NULL, UNIQUE and CHECK",
+            "INNER JOIN and LEFT JOIN",
+            "Aggregates with GROUP BY and HAVING",
+            "Basic normalisation: removing repeated data into its own table"
+          ],
+          "steps": [
+            "Look for repeated values in `books` (for example author names) and move them into an `authors` table linked by `author_id`.",
+            "Rewrite `schema.sql` with `FOREIGN KEY` references, `NOT NULL`, `UNIQUE` on member email and a `CHECK` that return dates come after loan dates.",
+            "Run `PRAGMA foreign_keys = ON;` and try inserting a loan for a member who does not exist to confirm it is rejected.",
+            "Write 4 JOIN queries, such as listing each loan with the member name and book title.",
+            "Write a LEFT JOIN query that finds books that have never been borrowed.",
+            "Write 4 GROUP BY queries, including one that uses `HAVING` to find members with more than 3 loans.",
+            "Update the README with a before/after note explaining your normalisation change."
+          ],
+          "deliverables": [
+            "Updated `schema.sql` with foreign keys and constraints",
+            "`queries_week2.sql` with at least 9 JOIN and GROUP BY queries",
+            "Screenshot showing a constraint rejecting bad data",
+            "README section on normalisation"
+          ],
+          "done_when": [
+            "An `authors` table exists and `books` references it by id",
+            "Inserting a loan with an invalid member id fails with a foreign key error",
+            "At least one query uses LEFT JOIN to find unmatched rows",
+            "At least one query uses HAVING correctly",
+            "All scripts still run cleanly on an empty database"
+          ],
+          "hints": [
+            "SQLite ignores foreign keys unless you run `PRAGMA foreign_keys = ON;` on each connection.",
+            "If a JOIN returns far too many rows, you are probably missing a join condition.",
+            "Use WHERE to filter rows before grouping and HAVING to filter groups after."
+          ],
+          "stretch": "Support books with multiple authors by adding a `book_authors` linking table and query it with two JOINs.",
+          "post_highlights": [
+            "Normalised a library database and linked tables with foreign keys",
+            "Added constraints that block invalid data at the database level",
+            "Wrote JOIN and GROUP BY queries to find popular books and active members"
+          ]
+        },
+        "3": {
+          "title": "Subqueries, Views and Indexes",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Answer harder questions with subqueries and CTEs, save useful queries as views, and make lookups faster with indexes. You will also learn to read a simple query plan.",
+          "learn": [
+            "Subqueries and Common Table Expressions (WITH)",
+            "Creating and using views",
+            "What an index is and when it helps",
+            "Reading EXPLAIN QUERY PLAN output at a basic level"
+          ],
+          "steps": [
+            "Increase your data to at least 200 loans using a small script or spreadsheet export so performance differences are visible.",
+            "Write 3 queries using subqueries, such as members who borrowed more books than the average member.",
+            "Rewrite one of them as a CTE with `WITH` and compare which version is easier to read.",
+            "Create two views: `overdue_loans` and `member_activity`, then query them like normal tables.",
+            "Run `EXPLAIN QUERY PLAN` on a query that filters loans by member, and note whether it says SCAN or SEARCH.",
+            "Add an index on `loans(member_id)`, run the plan again and record the change in your README.",
+            "Write a short note explaining one case where an index is not worth adding."
+          ],
+          "deliverables": [
+            "`queries_week3.sql` with subqueries and at least one CTE",
+            "`views.sql` with two views",
+            "`indexes.sql` with at least one index",
+            "README section with before/after query plan screenshots"
+          ],
+          "done_when": [
+            "At least 3 queries use a subquery and at least 1 uses a CTE",
+            "Both views exist and return correct rows",
+            "EXPLAIN QUERY PLAN output changes from SCAN to SEARCH after adding the index",
+            "The database has at least 200 loans"
+          ],
+          "hints": [
+            "Build complex queries in small pieces: run the inner query on its own first.",
+            "Views store the query, not the data, so they always show current rows.",
+            "Search 'SQLite EXPLAIN QUERY PLAN' to see examples of SCAN versus SEARCH output."
+          ],
+          "stretch": "Use a window function like `RANK()` to rank members by number of loans within each month.",
+          "post_highlights": [
+            "Wrote subqueries and CTEs to answer multi-step questions about library usage",
+            "Created views to simplify common reports",
+            "Added an index and verified the speed-up with EXPLAIN QUERY PLAN"
+          ]
+        },
+        "4": {
+          "title": "Library Insights Report",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Turn your database into a short analytics report that answers 8-10 real questions a librarian would ask. Finish with an ER diagram, a clean README and a demo.",
+          "learn": [
+            "Framing business questions and answering them with SQL",
+            "Drawing an ER diagram",
+            "Presenting query results clearly",
+            "Optionally connecting SQL to a simple front-end"
+          ],
+          "steps": [
+            "Write down 8-10 questions a librarian would care about, such as busiest months, most overdue members and least-borrowed genres.",
+            "Answer each question with one query in `report.sql`, reusing your views where it helps.",
+            "Draw an ER diagram of your final schema using [dbdiagram.io](https://dbdiagram.io) or [draw.io](https://www.drawio.com) and export it as an image.",
+            "Create a `REPORT.md` with each question, the query, a screenshot or table of results and a one-line insight.",
+            "Optionally build a small [Streamlit](https://streamlit.io) page that runs 3-4 of your queries and shows the results as tables or charts.",
+            "Test the whole project from a fresh clone: build the database from scripts and run the report.",
+            "Record a 60-second demo walking through the ER diagram and three insights."
+          ],
+          "deliverables": [
+            "`report.sql` answering 8-10 questions",
+            "`REPORT.md` with results and insights",
+            "ER diagram image",
+            "Demo video or screenshots, plus an optional Streamlit app"
+          ],
+          "done_when": [
+            "The report answers at least 8 distinct questions, each with a working query",
+            "Each answer includes a one-line plain-English insight",
+            "The ER diagram matches the actual tables and relationships",
+            "Someone can rebuild the database from the README instructions alone"
+          ],
+          "hints": [
+            "Good questions start with 'which', 'how many' or 'what share'; avoid questions a single SELECT * can answer.",
+            "Keep your report short and scannable: question, query, result, insight.",
+            "If you use Streamlit, `sqlite3` from the Python standard library is enough to run queries."
+          ],
+          "stretch": "Add a fines table and a query that calculates the total fine each member owes for overdue books.",
+          "post_highlights": [
+            "Built an analytics report answering 10 library questions with SQL",
+            "Documented the schema with an ER diagram and reproducible build scripts",
+            "Shared insights on borrowing trends from my own library database"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "ShopLens: E-commerce Sales Analytics",
+      "tagline": "Build a small online-store database and use SQL to find out what sells, who buys and when.",
+      "weeks": {
+        "1": {
+          "title": "Store Schema and Basic Queries",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Create tables for customers, products and orders in SQLite or PostgreSQL, add sample data and write your first queries. You will learn the core SQL that every analyst uses daily.",
+          "learn": [
+            "Tables, columns, data types and primary keys",
+            "CREATE TABLE and INSERT",
+            "SELECT with WHERE, ORDER BY and LIMIT",
+            "Using DISTINCT and simple calculated columns"
+          ],
+          "steps": [
+            "Choose SQLite with DB Browser or PostgreSQL with pgAdmin, and create a database called `shoplens`.",
+            "Sketch `customers`, `products` and `orders` tables on paper with their columns and types.",
+            "Write `schema.sql` with the three tables and a primary key on each.",
+            "Write `seed.sql` with at least 15 customers, 20 products across 4 categories and 40 orders.",
+            "Write 8 commented queries, such as the 5 most expensive products or all orders from one city.",
+            "Include one calculated column, such as `price * quantity AS line_total`.",
+            "Push the scripts and a README with a screenshot to GitHub."
+          ],
+          "deliverables": [
+            "`schema.sql` and `seed.sql`",
+            "`queries_week1.sql` with 8 commented queries",
+            "README with setup steps and a screenshot"
+          ],
+          "done_when": [
+            "Scripts run on an empty database with no errors",
+            "The database has at least 15 customers, 20 products and 40 orders",
+            "At least one query uses a calculated column with an alias",
+            "All 8 queries return sensible results"
+          ],
+          "hints": [
+            "Use a `DECIMAL` or `NUMERIC` type for prices in PostgreSQL; in SQLite, `REAL` is fine for learning.",
+            "Generate realistic sample rows in a spreadsheet and export them as CSV if typing gets slow.",
+            "The [PostgreSQL docs](https://www.postgresql.org/docs/) have a clear tutorial section for beginners."
+          ],
+          "stretch": "Add a `signup_date` column and list customers who joined in the last 90 days of your data.",
+          "post_highlights": [
+            "Designed an e-commerce database with customers, products and orders",
+            "Seeded it with realistic sample data using SQL scripts",
+            "Wrote queries to explore products, prices and order history"
+          ]
+        },
+        "2": {
+          "title": "Order Items, JOINs and Revenue by Category",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Split orders into orders and order items so one order can hold many products, then use JOINs and GROUP BY to calculate revenue. This is how real shop databases are structured.",
+          "learn": [
+            "One-to-many relationships and foreign keys",
+            "Normalisation into orders and order_items",
+            "INNER JOIN and LEFT JOIN across three tables",
+            "SUM, COUNT, AVG with GROUP BY and HAVING"
+          ],
+          "steps": [
+            "Create an `order_items` table with `order_id`, `product_id`, `quantity` and `unit_price`, and move product details out of `orders`.",
+            "Add `FOREIGN KEY`, `NOT NULL` and a `CHECK (quantity > 0)` constraint, then test that bad inserts are rejected.",
+            "Reseed the data so most orders contain 1-4 items.",
+            "Write a query that joins orders, order items, products and customers into one readable list.",
+            "Calculate total revenue per category and per month with GROUP BY.",
+            "Use HAVING to list customers who spent more than a chosen amount.",
+            "Use a LEFT JOIN to find products that have never been ordered."
+          ],
+          "deliverables": [
+            "Updated schema with `order_items` and constraints",
+            "`queries_week2.sql` with at least 8 JOIN and aggregate queries",
+            "Screenshot of a revenue-by-category result",
+            "README note explaining the one-to-many design"
+          ],
+          "done_when": [
+            "One order can contain multiple products through `order_items`",
+            "A negative or zero quantity is rejected by a CHECK constraint",
+            "Revenue per category is calculated from order items, not typed in",
+            "At least one query uses LEFT JOIN and one uses HAVING"
+          ],
+          "hints": [
+            "Store `unit_price` in `order_items` because product prices can change later.",
+            "To group by month in SQLite use `strftime('%Y-%m', order_date)`; in PostgreSQL use `date_trunc('month', order_date)`.",
+            "Check your totals by hand for one order to confirm the JOIN is correct."
+          ],
+          "stretch": "Calculate average order value per customer city and sort cities from highest to lowest.",
+          "post_highlights": [
+            "Normalised an e-commerce schema into orders and order items",
+            "Used JOINs and GROUP BY to calculate revenue by category and month",
+            "Enforced data quality with foreign keys and CHECK constraints"
+          ]
+        },
+        "3": {
+          "title": "Customer Insights with CTEs, Views and Indexes",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Load a larger free dataset or generate more rows, then use subqueries, CTEs and views to answer deeper questions about customers. You will add indexes and check their effect with EXPLAIN.",
+          "learn": [
+            "Subqueries and CTEs for multi-step logic",
+            "Views for reusable reports",
+            "Indexes and basic EXPLAIN output",
+            "Importing CSV data into a database"
+          ],
+          "steps": [
+            "Import a free e-commerce dataset from [Kaggle](https://www.kaggle.com) or generate at least 1,000 orders with a small Python script.",
+            "Handle import problems such as date formats, empty values and duplicate ids, and note each fix in the README.",
+            "Write a CTE that finds each customer's first order date and total spend.",
+            "Use a subquery to find products whose sales are above the category average.",
+            "Create views `monthly_revenue` and `customer_summary`.",
+            "Run `EXPLAIN` (or `EXPLAIN QUERY PLAN` in SQLite) on a slow filter, add an index on the filtered column and compare.",
+            "Record the before and after plans in your README."
+          ],
+          "deliverables": [
+            "Import script or steps for the larger dataset",
+            "`queries_week3.sql` with CTEs and subqueries",
+            "`views.sql` and `indexes.sql`",
+            "README section with EXPLAIN screenshots"
+          ],
+          "done_when": [
+            "The database has at least 1,000 orders",
+            "At least 2 queries use CTEs and 2 use subqueries",
+            "Both views return correct results",
+            "The query plan shows an index being used after you add it",
+            "Data cleaning decisions are documented in the README"
+          ],
+          "hints": [
+            "In DB Browser use File > Import > Table from CSV; in PostgreSQL use the `\\copy` command in psql.",
+            "Import into a staging table first, clean it, then insert into your real tables.",
+            "Indexes help most on columns used in WHERE, JOIN and ORDER BY."
+          ],
+          "stretch": "Build a simple RFM-style segmentation (recency, frequency, monetary) using CTEs.",
+          "post_highlights": [
+            "Imported and cleaned a 1,000+ order e-commerce dataset",
+            "Used CTEs and views to build reusable customer insight reports",
+            "Improved query performance with indexes and verified it using EXPLAIN"
+          ]
+        },
+        "4": {
+          "title": "Sales Analytics Report and Dashboard",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Answer 8-10 business questions a store owner would ask and present them in a clear report with an ER diagram. Optionally show the results in a small Streamlit or Metabase dashboard.",
+          "learn": [
+            "Turning business questions into SQL",
+            "Communicating results with short insights",
+            "ER diagrams for documentation",
+            "Connecting a database to a simple dashboard tool"
+          ],
+          "steps": [
+            "List 8-10 owner questions, such as top 5 products by revenue, repeat-customer rate and best-selling month.",
+            "Write one query per question in `report.sql`, reusing views from Week 3.",
+            "Draw an ER diagram of the final schema and export it as an image.",
+            "Write `REPORT.md` with each question, query, result and a one-line recommendation.",
+            "Optionally build a 1-page [Streamlit](https://streamlit.io) app or [Metabase](https://www.metabase.com) dashboard with 3-4 charts.",
+            "Rebuild the project from a fresh clone to check the README instructions work.",
+            "Record a 60-second demo showing the ER diagram, two charts and your top recommendation."
+          ],
+          "deliverables": [
+            "`report.sql` with 8-10 answered questions",
+            "`REPORT.md` with insights and recommendations",
+            "ER diagram image",
+            "Demo video or screenshots, plus an optional dashboard"
+          ],
+          "done_when": [
+            "At least 8 business questions are answered with working queries",
+            "Each result has a one-line insight or recommendation",
+            "The ER diagram matches the real schema",
+            "The README lets someone rebuild the database and run the report"
+          ],
+          "hints": [
+            "Repeat-customer rate is customers with 2+ orders divided by all customers who ordered.",
+            "Use `CAST(x AS REAL)` or `x * 1.0` to avoid integer division when calculating percentages.",
+            "Keep charts simple: one message per chart."
+          ],
+          "stretch": "Calculate month-over-month revenue growth using the `LAG()` window function.",
+          "post_highlights": [
+            "Answered 10 business questions for an online store using SQL",
+            "Presented sales insights in a report with an ER diagram",
+            "Built a small dashboard to visualise revenue and customer trends"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "StatsPitch: Cricket Stats Database",
+      "tagline": "Load real cricket match data into a database and use SQL to uncover player and team stats.",
+      "weeks": {
+        "1": {
+          "title": "Teams, Players and Simple Stats",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Build a small cricket database with teams, players and matches, and write simple queries to explore it. Starting with a small hand-made dataset helps you understand the structure before loading real data.",
+          "learn": [
+            "Tables, primary keys and data types",
+            "CREATE TABLE and INSERT",
+            "SELECT, WHERE, ORDER BY and LIMIT",
+            "Basic aggregates like COUNT and MAX on a single table"
+          ],
+          "steps": [
+            "Create a database `statspitch.db` in DB Browser for SQLite.",
+            "Design `teams`, `players` and `matches` tables on paper, deciding which column is the primary key in each.",
+            "Write `schema.sql` and `seed.sql` with 4-6 teams, 30 players and 10 matches of your choice.",
+            "Write 8 commented queries, such as all players from one team or matches played at one venue.",
+            "Use `COUNT` and `MAX` on one table, such as the number of matches per venue.",
+            "Push everything to GitHub with a README and a screenshot."
+          ],
+          "deliverables": [
+            "`schema.sql` and `seed.sql`",
+            "`queries_week1.sql` with 8 commented queries",
+            "README with a screenshot"
+          ],
+          "done_when": [
+            "Scripts build the database on a fresh file with no errors",
+            "The database has at least 4 teams, 30 players and 10 matches",
+            "All 8 queries run and each has a comment describing its question",
+            "At least one query uses an aggregate function"
+          ],
+          "hints": [
+            "Use short ids like `team_id` rather than team names as keys, because names can change.",
+            "Store match dates as `YYYY-MM-DD` text in SQLite.",
+            "The [SQLite documentation](https://sqlite.org/docs.html) covers every function you need this week."
+          ],
+          "stretch": "Add a `role` column (batter, bowler, all-rounder) and count players by role per team.",
+          "post_highlights": [
+            "Designed a cricket database with teams, players and matches",
+            "Built and seeded it using SQL scripts in SQLite",
+            "Wrote queries to explore teams, venues and players"
+          ]
+        },
+        "2": {
+          "title": "Loading Real Data with JOINs and GROUP BY",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Import a free cricket dataset, link tables with foreign keys and use JOINs and GROUP BY to compute batting and team stats. Working with real data teaches you to handle messy values.",
+          "learn": [
+            "Importing CSV files into tables",
+            "Foreign keys and constraints",
+            "JOINs across matches, teams and players",
+            "GROUP BY and HAVING for player statistics"
+          ],
+          "steps": [
+            "Download a free cricket dataset from [Kaggle](https://www.kaggle.com), such as IPL match and ball-by-ball data.",
+            "Import the CSVs into staging tables first and inspect column names and a few rows.",
+            "Map the data into your own `teams`, `players`, `matches` and `deliveries` tables with foreign keys.",
+            "Test one constraint by inserting a delivery for a match that does not exist.",
+            "Write JOIN queries such as each match with both team names and the winner.",
+            "Use GROUP BY to calculate total runs per batter and wins per team.",
+            "Use HAVING to list batters with more than a chosen number of runs."
+          ],
+          "deliverables": [
+            "Import steps documented in the README",
+            "Updated schema with foreign keys",
+            "`queries_week2.sql` with at least 8 JOIN and GROUP BY queries",
+            "Screenshot of a top-batters result"
+          ],
+          "done_when": [
+            "Real match data is loaded into your own normalised tables",
+            "Foreign keys link deliveries to matches and players",
+            "At least 4 queries use JOIN and 3 use GROUP BY",
+            "At least one query uses HAVING"
+          ],
+          "hints": [
+            "Team names may appear in several spellings; fix them with an UPDATE before building your final tables.",
+            "Remember `PRAGMA foreign_keys = ON;` in SQLite.",
+            "Check the dataset's description page to understand what each column means."
+          ],
+          "stretch": "Calculate each team's win percentage at home versus away venues.",
+          "post_highlights": [
+            "Imported real IPL match data into a normalised SQLite database",
+            "Used JOINs and GROUP BY to rank batters and teams",
+            "Cleaned inconsistent team names with SQL updates"
+          ]
+        },
+        "3": {
+          "title": "Advanced Stats with CTEs, Views and Indexes",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Compute stats like strike rate and economy using CTEs and subqueries, save them as views and speed up common queries with indexes. Ball-by-ball data is large, so indexes make a visible difference.",
+          "learn": [
+            "Subqueries and CTEs",
+            "Views for reusable stat tables",
+            "Indexes and EXPLAIN QUERY PLAN",
+            "Avoiding integer division and divide-by-zero errors"
+          ],
+          "steps": [
+            "Write a CTE that calculates runs and balls faced per batter, then compute strike rate from it.",
+            "Write a query for bowler economy rate and handle bowlers with zero overs safely.",
+            "Use a subquery to find batters whose strike rate is above the overall average.",
+            "Create views `batting_summary` and `bowling_summary`.",
+            "Time a query filtering deliveries by `match_id`, check `EXPLAIN QUERY PLAN`, add an index and compare.",
+            "Record query times and plans before and after in your README."
+          ],
+          "deliverables": [
+            "`queries_week3.sql` with CTEs and subqueries",
+            "`views.sql` with two stat views",
+            "`indexes.sql` with at least two indexes",
+            "README section with before/after plans and timings"
+          ],
+          "done_when": [
+            "Strike rate and economy are calculated correctly for at least 5 players you check by hand",
+            "No query fails or returns wrong values because of division by zero",
+            "Both views return correct results",
+            "The query plan shows an index in use after you add it"
+          ],
+          "hints": [
+            "Strike rate is runs divided by balls, times 100; multiply by `1.0` to avoid integer division.",
+            "Use `NULLIF(balls, 0)` so division by zero returns NULL instead of an error.",
+            "DB Browser shows execution time under the query results."
+          ],
+          "stretch": "Rank the top 3 run-scorers for each season using `ROW_NUMBER()` in a CTE.",
+          "post_highlights": [
+            "Calculated strike rates and economy rates from ball-by-ball data using CTEs",
+            "Built reusable batting and bowling views",
+            "Sped up queries on a large table with indexes and EXPLAIN"
+          ]
+        },
+        "4": {
+          "title": "Cricket Analytics Report",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Answer 8-10 interesting cricket questions with SQL and present them in a report with an ER diagram. Optionally build a small Streamlit page where users pick a player and see their stats.",
+          "learn": [
+            "Framing analysis questions",
+            "Presenting SQL results as insights",
+            "ER diagrams",
+            "Running parameterised queries from Python"
+          ],
+          "steps": [
+            "Write 8-10 questions, such as best death-over bowlers, toss impact on results and top venues for high scores.",
+            "Answer each with a query in `report.sql`, reusing your views.",
+            "Draw an ER diagram of your schema and export it as an image.",
+            "Write `REPORT.md` with each question, query, result and a one-line insight.",
+            "Optionally build a [Streamlit](https://streamlit.io) page with a player dropdown that runs a parameterised query.",
+            "Test the README setup steps from a fresh clone.",
+            "Record a 60-second demo of your top three insights."
+          ],
+          "deliverables": [
+            "`report.sql` with 8-10 answered questions",
+            "`REPORT.md` with insights",
+            "ER diagram image",
+            "Demo video or screenshots, plus an optional Streamlit app"
+          ],
+          "done_when": [
+            "At least 8 questions are answered with working queries",
+            "Each answer has a short plain-English insight",
+            "The ER diagram matches the real schema",
+            "The project can be rebuilt from the README"
+          ],
+          "hints": [
+            "In Python, pass values with `?` placeholders in `cursor.execute` instead of building SQL strings.",
+            "Pick questions that surprise you; they make the best LinkedIn posts.",
+            "Keep each insight to one sentence with a number in it."
+          ],
+          "stretch": "Compare a player's stats across seasons and show the trend as a line chart.",
+          "post_highlights": [
+            "Answered 10 cricket analytics questions using SQL on real IPL data",
+            "Documented the database with an ER diagram and reproducible scripts",
+            "Built a small Streamlit page to explore player stats"
+          ]
+        }
+      }
+    }
+  ]
+}

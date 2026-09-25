@@ -221,8 +221,8 @@
                 <span id="student-domain" style="text-transform: capitalize;">Loading...</span>
             </div>
             <div>
-                <strong>Batch</strong>
-                <span id="student-batch">Loading...</span>
+                <strong>Duration</strong>
+                <span id="student-duration">4 Weeks · Remote</span>
             </div>
         </div>
 
@@ -283,32 +283,37 @@
             let batchId = urlParams.get('batch_id');
 
             try {
-                if (!studentId || !batchId) {
+                if (!studentId) {
                     const token = localStorage.getItem('token');
                     const authRes = await fetch(`${API}/api/auth/me`, {
                         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
                         credentials: 'include'
                     });
-                    if (authRes.ok) {
-                        const dashData = await authRes.json();
-                        studentId = dashData.id;
-                        batchId = dashData.batch_id || 1;
-                    } else {
-                        studentId = 1;
-                        batchId = 1;
+                    if (!authRes.ok) {
+                        // Never fall back to someone else's record — ask the student to sign in.
+                        document.getElementById('loading').innerHTML = 'Please <a href="dashboard.html">log in to your dashboard</a> to view your tasks.';
+                        return;
                     }
+                    const dashData = await authRes.json();
+                    studentId = dashData.id;
+                    batchId = dashData.batch_id;
                 }
 
-                const res = await fetch(`${API}/api/tasks/current/${studentId}/${batchId}`);
+                // batch_id is an internal enrollment reference; the backend resolves it (0 = "mine").
+                const res = await fetch(`${API}/api/tasks/current/${studentId}/${batchId || 0}`);
+                if (res.status === 404) {
+                    document.getElementById('loading').innerHTML = 'Your tasks will appear here once you are enrolled. <a href="dashboard.html">Back to dashboard</a>';
+                    return;
+                }
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
                 
                 const fullName = `${data.student.first_name} ${data.student.last_name}`.trim();
-                const domain = (data.batch.domain || "Web Development").replace('-', ' ');
+                const enrollment = data.enrollment || data.batch || {};
+                const domain = (enrollment.domain || "Web Development").replace(/-/g, ' ');
                 
                 document.getElementById('student-name').textContent = fullName;
                 document.getElementById('student-domain').textContent = domain;
-                document.getElementById('student-batch').textContent = `Batch #${batchId}`;
                 
                 if (data.project) {
                     document.getElementById('project-title').textContent = data.project.name;

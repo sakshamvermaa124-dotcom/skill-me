@@ -21,7 +21,6 @@ async def main():
         last_name="Student",
         email=target_email,
         domain="web-dev",
-        batch_number=2,
         joining_date=None,   # will be set to today automatically
         repo_url="https://github.com/sakshamvermaa124-dotcom/web-dev-batch-2",
         github_username="test-student",

@@ -1,0 +1,566 @@
+{
+  "domain": "cpp",
+  "tracks": [
+    {
+      "project_name": "AlgoCore: A Command-Line Data Toolkit",
+      "tagline": "Build a small C++ command-line tool that stores and searches records, learning core language features and the STL along the way.",
+      "weeks": {
+        "1": {
+          "title": "Structs, Functions and a Console Menu",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Write a C++ program that stores a list of student records in memory and lets you add and print them from a text menu. This gets your toolchain working and practises the basics every later week builds on.",
+          "learn": [
+            "Compiling and running a C++ program from the terminal (`g++`)",
+            "`struct` to group related data together",
+            "`std::vector` to store a growing list of records",
+            "Passing data by reference (`&`) to avoid copies",
+            "A simple menu loop with `switch` and `std::cin`"
+          ],
+          "steps": [
+            "Install a C++ compiler (g++ via MinGW/WSL, or use an online compiler first) and confirm `g++ --version` works.",
+            "Define a `struct Student { std::string name; int roll; double marks; };`.",
+            "Create a `std::vector<Student>` to hold all records and write an `addStudent` function that pushes a new one onto it.",
+            "Write a `printAll(const std::vector<Student>&)` function that prints a neat table.",
+            "Build a menu loop: `1) Add  2) Show All  3) Quit`, reading choices with `std::cin`.",
+            "Validate input: if `roll` or `marks` entry fails (e.g. text where a number is expected), clear the error and ask again instead of crashing.",
+            "Compile with `g++ -Wall -Wextra -o toolkit main.cpp` and fix every warning it shows.",
+            "Commit your code with a short README explaining how to build and run it."
+          ],
+          "deliverables": [
+            "`main.cpp` with a `Student` struct and a working add/list/quit menu",
+            "Input validation that survives bad input without crashing",
+            "A README with build and run instructions",
+            "A short terminal recording or screenshots showing the menu in use"
+          ],
+          "done_when": [
+            "The program compiles with `-Wall -Wextra` and shows no warnings",
+            "Adding several students and choosing 'Show All' lists them correctly",
+            "Typing letters where a number is expected does not crash the program",
+            "Choosing Quit exits cleanly"
+          ],
+          "hints": [
+            "If your program crashes on bad input, check `std::cin.fail()` and call `std::cin.clear(); std::cin.ignore(...)` to recover.",
+            "Pass vectors as `const std::vector<Student>&` when you only read them — it's faster and documents intent.",
+            "[cppreference](https://en.cppreference.com/) is the best place to look up any standard function or container."
+          ],
+          "stretch": "Add a 'Show Top Scorer' menu option that finds the student with the highest marks.",
+          "post_highlights": [
+            "Built a C++ command-line tool using structs and std::vector to manage records",
+            "Wrote input validation that keeps the program running on bad input",
+            "Compiled clean with -Wall -Wextra and no warnings"
+          ]
+        },
+        "2": {
+          "title": "Classes, File Saving and Sorting",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Turn your struct into a proper class with encapsulated data, save and load records to a file so nothing is lost between runs, and add search and sort features using the STL.",
+          "learn": [
+            "Classes with private members, constructors and getter methods",
+            "Reading and writing plain text files with `std::ifstream` / `std::ofstream`",
+            "`std::sort` with a custom comparator (lambda)",
+            "Linear search with `std::find_if`",
+            "Splitting code into a `.h` header and `.cpp` source file"
+          ],
+          "steps": [
+            "Convert `Student` into a class with private fields and a constructor, plus `getName()`, `getMarks()` etc.",
+            "Move the class into `Student.h`/`Student.cpp` and keep `main.cpp` focused on the menu.",
+            "Write `saveToFile(path)` that writes one comma-separated line per student, and `loadFromFile(path)` that rebuilds the vector on startup.",
+            "Add a 'Sort by Marks' option using `std::sort(vec.begin(), vec.end(), [](auto&a, auto&b){ return a.getMarks() > b.getMarks(); })`.",
+            "Add a 'Search by Name' option using `std::find_if` with a lambda that compares names.",
+            "Re-test every Week 1 menu option to make sure splitting the code into files didn't break anything.",
+            "Handle the case where the save file doesn't exist yet on first run (create it instead of crashing).",
+            "Update the README with the new file format and menu options."
+          ],
+          "deliverables": [
+            "A `Student` class in its own header/source files with encapsulated data",
+            "Save/load to a text file so data survives between runs",
+            "Sort-by-marks and search-by-name menu options",
+            "An updated README describing the saved file format"
+          ],
+          "done_when": [
+            "Adding students, quitting, and restarting the program shows the same data",
+            "Sort by Marks lists students highest-to-lowest correctly",
+            "Search by Name finds a student even with partial or different-case input handled sensibly",
+            "The program still runs cleanly if the save file is missing"
+          ],
+          "hints": [
+            "Keep the file format simple: one field per comma, one student per line — you can always improve it later.",
+            "A lambda like `[](const Student&a, const Student&b){ return a.getMarks() > b.getMarks(); }` is exactly what `std::sort`'s third argument wants.",
+            "Test save/load with just 2-3 students first before trusting it with more."
+          ],
+          "stretch": "Support multiple save 'profiles' by asking for a filename at startup instead of hardcoding one.",
+          "post_highlights": [
+            "Refactored a C++ CLI tool into a proper class with file-based persistence",
+            "Implemented sorting and searching using the STL (std::sort, std::find_if, lambdas)",
+            "Split code across header and source files for a cleaner project structure"
+          ]
+        },
+        "3": {
+          "title": "A Hand-Built Data Structure and Recursion",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Add a feature that needs a data structure or algorithm you implement yourself, not just an STL call, so you understand what's happening underneath. You'll add a simple linked-list based history log and a recursive search or sort.",
+          "learn": [
+            "Implementing a singly linked list from scratch (nodes and pointers)",
+            "Recursion, using it to implement binary search or merge sort by hand",
+            "Time complexity basics (why binary search is O(log n) vs linear O(n))",
+            "Smart pointers (`std::unique_ptr`) as a safer alternative to raw `new`/`delete`",
+            "Basic exception handling with `try`/`catch`"
+          ],
+          "steps": [
+            "Design a simple `HistoryNode` linked list (using `std::unique_ptr<HistoryNode> next`) that logs every add/edit/delete action as a string with a timestamp.",
+            "Add a 'Show History' menu option that walks the linked list and prints every entry in order.",
+            "Implement binary search by hand (recursive or iterative) over your marks-sorted vector, and compare its result against `std::find_if` to check correctness.",
+            "Write a short recursive function (e.g. merge sort, or a recursive sum/average) and use it in at least one feature, with a comment explaining the base case and recursive case.",
+            "Wrap file operations in `try`/`catch` and print a friendly error message instead of crashing if the file can't be opened.",
+            "Time your binary search against a linear search on a larger generated dataset (50-100 students) and print both timings to see the difference.",
+            "Make sure there are no memory leaks: if you use any raw `new`, replace it with `std::unique_ptr` or a container.",
+            "Update the README with a short paragraph explaining your linked list and why binary search needs sorted data."
+          ],
+          "deliverables": [
+            "A hand-built singly linked list tracking an action history",
+            "A hand-written binary search (or merge sort) used somewhere in the app",
+            "try/catch error handling around file operations",
+            "A short written comparison of binary search vs linear search timing"
+          ],
+          "done_when": [
+            "Show History correctly lists actions in the order they happened",
+            "Your binary search returns the same result as a linear search on the same sorted data",
+            "Deliberately breaking the save file (or removing write permission) shows a friendly message instead of a crash",
+            "No raw `new` without a matching `delete` or a smart pointer remains in the code"
+          ],
+          "hints": [
+            "Draw your linked list on paper first — get the pointer connections right before typing code.",
+            "Binary search bugs are almost always off-by-one errors in the `low`/`high`/`mid` bounds — trace through a 3-element example by hand.",
+            "`std::unique_ptr` deletes its memory automatically when it goes out of scope, which is why it avoids most leaks."
+          ],
+          "stretch": "Add an 'Undo last action' feature that pops the most recent entry off your history and reverses it.",
+          "post_highlights": [
+            "Implemented a linked list and binary search from scratch in C++",
+            "Added error handling with try/catch and replaced raw pointers with smart pointers",
+            "Measured and compared binary search vs linear search performance"
+          ]
+        },
+        "4": {
+          "title": "Polish, Bulk Import and a Final Report",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Finish the project with a feature that ties everything together: importing many records at once from a CSV file, generating a summary report, and cleaning up the codebase for a strong final demo.",
+          "learn": [
+            "Reading and parsing a CSV file with `std::stringstream`",
+            "Generating a formatted text report (averages, min/max, grade distribution)",
+            "Basic unit testing by writing small standalone test functions",
+            "Code cleanup: consistent naming, removing dead code, adding comments"
+          ],
+          "steps": [
+            "Write an `importFromCSV(path)` function that reads a CSV of students using `std::stringstream` to split each line, and reports how many rows succeeded or were skipped as invalid.",
+            "Add a 'Generate Report' option that prints class average, highest/lowest scorer, and a simple grade distribution (A/B/C/D counts).",
+            "Write 4-5 small test functions (e.g. `testBinarySearch()`, `testSort()`) that check known inputs against expected outputs and print PASS/FAIL, called from a `--test` command-line flag.",
+            "Do a full read-through of your code: rename any unclear variables, remove commented-out old code, and add a short comment above every function explaining what it does.",
+            "Test the whole program end-to-end: import a CSV, sort, search, generate a report, check history, and save.",
+            "Time-box one polish item — better table formatting, coloured terminal output, or a progress message during import.",
+            "Write a final README section: what the project does, how to build it, how to run the tests, and 2-3 screenshots.",
+            "Record a 30-60 second demo showing import, a search, a sort, and the final report."
+          ],
+          "deliverables": [
+            "CSV bulk import with a summary of successes/skipped rows",
+            "A 'Generate Report' feature with averages and grade distribution",
+            "At least 4 small self-checking test functions runnable via a `--test` flag",
+            "A polished README with build/run/test instructions and screenshots"
+          ],
+          "done_when": [
+            "Importing a CSV with a few deliberately bad rows still loads the good ones and reports the bad ones",
+            "The generated report's average matches a manual calculation on the same data",
+            "Running with `--test` prints PASS for every test function",
+            "The code compiles warning-free and has no leftover debug prints or dead code"
+          ],
+          "hints": [
+            "`std::stringstream` plus `std::getline(ss, field, ',')` is the simplest way to split a CSV line without a library.",
+            "Keep your test functions tiny and obvious — a test you can't trust is worse than no test.",
+            "Doing the polish pass last, after everything works, keeps you from over-engineering earlier weeks."
+          ],
+          "stretch": "Export the generated report to a `.txt` or `.csv` file instead of only printing it to the terminal.",
+          "post_highlights": [
+            "Added CSV bulk import and an automated summary report to a C++ CLI tool",
+            "Wrote self-checking test functions to verify core logic",
+            "Polished and documented a 4-week C++ project from scratch to a working demo"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "PixelForge: A Terminal 2D Game",
+      "tagline": "Build a small ASCII/terminal-based 2D game in C++, adding movement, collisions and simple physics week by week.",
+      "weeks": {
+        "1": {
+          "title": "A Moving Character on a Grid",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Draw a simple grid in the terminal and make a character move on it using keyboard input. This is the smallest playable slice of the game and sets up the structure every later week extends.",
+          "learn": [
+            "Representing a 2D grid with a `std::vector<std::vector<char>>`",
+            "Reading single keypresses in a loop (or turn-based input with `std::cin`)",
+            "Basic 2D coordinates and updating a position (`x`, `y`)",
+            "Clearing and redrawing the terminal screen each frame/turn"
+          ],
+          "steps": [
+            "Pick a simple input style to start: turn-based (press Enter after each move) is fine and much easier than real-time key capture.",
+            "Create a `Grid` of fixed size (e.g. 10x10) filled with `.` characters, and a player position `(x, y)` marked with `@`.",
+            "Write a `draw(grid)` function that prints the whole grid to the terminal each turn.",
+            "Read a direction from the user (`w/a/s/d`) and update the player's `x`/`y`, checking the new position stays inside the grid bounds.",
+            "Add a `system(\"cls\")` (Windows) or `system(\"clear\")` (Mac/Linux) call before each redraw so the grid doesn't scroll endlessly.",
+            "Place a static goal tile `G` somewhere on the grid and print a win message when the player reaches it.",
+            "Add a move counter and print it each turn.",
+            "Commit your code with a README describing the controls."
+          ],
+          "deliverables": [
+            "A working terminal grid game where a character can move with w/a/s/d",
+            "Boundary checking so the player can't move off the grid",
+            "A goal tile and win condition",
+            "A README explaining the controls and how to run the game"
+          ],
+          "done_when": [
+            "The player can move in all four directions and the grid redraws correctly each turn",
+            "Trying to move off the edge of the grid is blocked, not crashed or wrapped",
+            "Reaching the goal tile prints a clear win message and the game ends",
+            "The move counter increases by exactly one per valid move"
+          ],
+          "hints": [
+            "Turn-based input (press a key, then Enter) is much simpler to get right than real-time key capture — start there and only look at libraries like `conio.h`/ncurses later if you want real-time movement as a stretch.",
+            "Store the grid as rows of characters and remember `grid[y][x]`, not `grid[x][y]` — mixing this up is the most common bug.",
+            "[cppreference on std::vector](https://en.cppreference.com/w/cpp/container/vector) is worth a skim if 2D vectors feel unfamiliar."
+          ],
+          "stretch": "Add a second, randomly-placed goal tile and track which one is closer to the player.",
+          "post_highlights": [
+            "Built a terminal-based 2D grid game in C++ with keyboard-controlled movement",
+            "Implemented boundary checking and a win condition on a custom grid",
+            "Designed a simple turn-based game loop with redraw and move tracking"
+          ]
+        },
+        "2": {
+          "title": "Obstacles, Collisions and Classes",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Add obstacles the player must avoid, detect collisions, and refactor the game into classes so the code stays organised as features grow.",
+          "learn": [
+            "Designing a `Player` class and an `Entity`/`Obstacle` class",
+            "Collision detection by comparing coordinates",
+            "Using `std::vector` to manage a list of obstacles",
+            "Randomly placing items on a grid without overlapping the player or each other"
+          ],
+          "steps": [
+            "Create a `Player` class holding position and a `move(dx, dy)` method that respects grid bounds.",
+            "Create an `Obstacle` struct/class with a position and a symbol (e.g. `#`).",
+            "Generate 5-8 obstacles at random grid positions at game start, making sure none overlap the player's start position, each other, or the goal.",
+            "In the move logic, check if the player's new position matches any obstacle; if so, block the move (or end the game — your choice, but document it).",
+            "Add a 'lives' counter: if you choose to end the game on collision, give the player 3 lives and only end after all are lost.",
+            "Refactor `draw()` to take the player and the obstacle list and render everything together.",
+            "Re-test Week 1's win condition to make sure it still works with obstacles added.",
+            "Update the README with the new rules (obstacles, lives)."
+          ],
+          "deliverables": [
+            "Player and Obstacle classes with clean, separated responsibilities",
+            "Randomly generated obstacles that don't overlap the player, goal, or each other",
+            "Working collision detection with a lives system",
+            "An updated README describing the new rules"
+          ],
+          "done_when": [
+            "Obstacles never spawn on top of the player, the goal, or each other",
+            "Colliding with an obstacle correctly reduces lives (or ends the game, per your design)",
+            "Losing all lives ends the game with a clear message",
+            "The win condition from Week 1 still works correctly"
+          ],
+          "hints": [
+            "A simple 'try random position, check if taken, retry' loop is enough for non-overlapping placement at this scale.",
+            "Keep collision detection as simple integer comparisons (`player.x == obstacle.x && player.y == obstacle.y`) — no need for anything fancier on a grid.",
+            "If lives are hard to test, temporarily set lives to 1 while debugging, then change it back."
+          ],
+          "stretch": "Add one obstacle that moves one step every turn (even a simple back-and-forth pattern) to make the game feel more alive.",
+          "post_highlights": [
+            "Refactored a terminal game into Player and Obstacle classes",
+            "Implemented collision detection with a lives system",
+            "Added randomly generated, non-overlapping obstacles to a C++ game"
+          ]
+        },
+        "3": {
+          "title": "Simple Physics: Gravity and Velocity",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Add basic physics so the player has velocity and gravity instead of just teleporting one grid cell per key press — the first real step from 'grid puzzle' toward 'game engine' thinking.",
+          "learn": [
+            "Representing velocity as a change applied each tick instead of an instant jump",
+            "A simple fixed-timestep game loop (update, then draw, then sleep briefly)",
+            "Basic gravity: velocity increases downward each tick until blocked by the ground/floor",
+            "Clamping values (so velocity or position never exceeds sensible limits)"
+          ],
+          "steps": [
+            "Add a `vy` (vertical velocity) field to `Player`, and a fixed `GRAVITY` constant added to `vy` every tick.",
+            "Change movement to a real loop: each tick, apply `vy` to `y`, then apply horizontal input, then check collisions with the ground/obstacles, then redraw. Use `std::this_thread::sleep_for` to pace ticks (e.g. 150ms).",
+            "Add a 'jump' key that gives the player a one-time upward `vy` if they are standing on the ground, and let gravity pull them back down.",
+            "Clamp the player's `y` so they can't fall through the floor or fly above the grid top.",
+            "Test edge cases: jumping repeatedly in the air should do nothing (no double-jump unless you explicitly want that as a feature).",
+            "Add a platform or two (a row of `#` the player can land on) partway up the grid, and make sure landing on one stops the fall correctly.",
+            "Write down (in the README) the tick rate and gravity value you chose and why, so the pacing is documented.",
+            "Re-test Week 1 and Week 2 features (movement, win, obstacles, lives) still work in the new tick-based loop."
+          ],
+          "deliverables": [
+            "A tick-based game loop with a fixed timestep",
+            "Gravity and jump mechanics using a velocity value",
+            "At least one mid-air platform the player can land on",
+            "Clamped position values so the player can't leave the grid"
+          ],
+          "done_when": [
+            "The player falls automatically when not on ground or a platform",
+            "Jump only works when standing on something solid, and gravity pulls the player back down afterward",
+            "The player cannot fall through the floor or a platform they're standing on",
+            "The game loop runs at a steady, visible pace (not instant, not frozen)"
+          ],
+          "hints": [
+            "Get vertical movement working alone first (ignore horizontal movement) before combining both.",
+            "If the player 'jitters' near a platform, it's usually because you check collision before clamping position — apply movement, then correct position, then check.",
+            "`std::this_thread::sleep_for(std::chrono::milliseconds(150));` needs `#include <thread>` and `#include <chrono>`."
+          ],
+          "stretch": "Add a second, higher platform requiring a well-timed double jump input sequence (not necessarily a true double jump mechanic) to reach.",
+          "post_highlights": [
+            "Implemented a tick-based game loop with gravity and jump physics in C++",
+            "Added velocity-based movement instead of instant grid teleportation",
+            "Built and debugged platform collision for a simple physics system"
+          ]
+        },
+        "4": {
+          "title": "Levels, Scoring and a Polished Demo",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Turn your prototype into a small finished game: add a second level, a scoring system, and polish that makes it demo-ready.",
+          "learn": [
+            "Loading level layouts from a simple text file instead of hardcoding them",
+            "A basic scoring system (points for coins collected, time bonus, etc.)",
+            "A simple game-state machine (menu → playing → game over → restart)",
+            "Writing small test functions to check collision and scoring logic"
+          ],
+          "steps": [
+            "Design 2 level layouts as plain text files (rows of characters: `.` floor, `#` obstacle/platform, `@` start, `G` goal, `C` coin) and write a `loadLevel(path)` function to read one into your grid.",
+            "Add collectible coins (`C`) that disappear and add to a score when the player walks over them.",
+            "Add a simple state machine: show a start menu, run the level, then show a 'Game Over / You Win' screen with the final score and a 'play again?' prompt.",
+            "Wire up level progression: reaching the goal on level 1 loads level 2; reaching the goal on level 2 shows a final win screen.",
+            "Write 3-4 small test functions for your core logic (e.g. collision detection, score addition, gravity clamp) that print PASS/FAIL, runnable via a `--test` flag.",
+            "Do a full playtest of both levels start to finish, fixing anything that feels broken or unfair.",
+            "Clean up the code: consistent naming, comments on non-obvious logic, remove leftover debug prints.",
+            "Write a final README with controls, how to run, how to run tests, and a 30-60 second demo video or screenshots of both levels."
+          ],
+          "deliverables": [
+            "Two playable levels loaded from text files",
+            "A coin collection and scoring system",
+            "A start-menu / playing / game-over state machine",
+            "At least 3 self-checking test functions and a polished README"
+          ],
+          "done_when": [
+            "Both levels load correctly from their text files and are fully playable",
+            "Collecting a coin removes it and increases the score exactly once",
+            "Finishing level 1 loads level 2, and finishing level 2 shows a final win screen with the score",
+            "`--test` prints PASS for every test function, and the code has no leftover debug output"
+          ],
+          "hints": [
+            "Keep level files tiny at first (5x5) to debug loading before making them bigger.",
+            "A `enum class GameState { Menu, Playing, GameOver }` with a `switch` in your main loop is a clean way to manage state transitions.",
+            "Playtest with fresh eyes after a break — you'll spot unfair or confusing parts you got used to while building."
+          ],
+          "stretch": "Add a simple high-score file that remembers the best score across runs.",
+          "post_highlights": [
+            "Shipped a 2-level terminal game in C++ with physics, coins and scoring",
+            "Implemented level loading from text files and a game-state machine",
+            "Wrote automated tests for core game logic and polished the project for a public demo"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "DataVault: A Simple In-Memory Database Engine",
+      "tagline": "Build a tiny command-line database engine in C++ that stores records, indexes them for fast lookup, and supports simple queries.",
+      "weeks": {
+        "1": {
+          "title": "Records, Tables and Basic Commands",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Build the core of a tiny database: a table that stores key-value style records in memory and a command interface to insert and view them.",
+          "learn": [
+            "Modelling a database 'table' with `std::vector<std::map<std::string, std::string>>`",
+            "Parsing simple text commands from user input",
+            "String splitting and trimming in C++",
+            "Basic error messages for invalid commands instead of crashing"
+          ],
+          "steps": [
+            "Decide on a simple record shape: each record is a `std::map<std::string, std::string>` (e.g. `{\"name\": \"Asha\", \"age\": \"21\"}`).",
+            "Store all records in a `std::vector` representing one table.",
+            "Write a command parser that reads a line like `INSERT name=Asha age=21` and splits it into a command and key=value pairs.",
+            "Implement `INSERT`, `SELECT ALL`, and `QUIT` commands in a loop.",
+            "Print `SELECT ALL` results as a readable table, aligning columns.",
+            "Handle malformed commands (e.g. missing `=`) by printing an error instead of crashing.",
+            "Add a `HELP` command listing all supported commands.",
+            "Commit your code with a README documenting the command syntax."
+          ],
+          "deliverables": [
+            "A working command loop supporting INSERT, SELECT ALL, HELP and QUIT",
+            "Records stored as key-value maps in a vector (your 'table')",
+            "Friendly error messages for malformed commands",
+            "A README documenting every supported command"
+          ],
+          "done_when": [
+            "INSERT followed by SELECT ALL shows the inserted record correctly",
+            "A malformed command shows an error message, not a crash",
+            "HELP lists every implemented command",
+            "QUIT exits the program cleanly"
+          ],
+          "hints": [
+            "`std::istringstream` plus `std::getline(ss, token, ' ')` is a simple way to split a command line into tokens.",
+            "Keep your first version's columns fixed (name, age) before generalising to arbitrary fields — get something working first.",
+            "[cppreference on std::map](https://en.cppreference.com/w/cpp/container/map) is worth a quick read if maps are new to you."
+          ],
+          "stretch": "Support an arbitrary number of key=value fields per record, not just a fixed set.",
+          "post_highlights": [
+            "Built a command-line database engine core in C++ with an INSERT/SELECT command loop",
+            "Modelled table records with std::map and std::vector",
+            "Implemented a command parser with friendly error handling"
+          ]
+        },
+        "2": {
+          "title": "Filtering, Updating and Deleting",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Add the rest of basic CRUD: filter records with a WHERE-style condition, update matching records, and delete them, plus persist the table to disk.",
+          "learn": [
+            "Filtering a vector of records with a simple condition (`std::copy_if` or a manual loop)",
+            "Updating fields in place vs building a new filtered vector",
+            "Saving and loading structured data to a text file (a simple custom format)",
+            "Separating parsing logic from execution logic (a `Command` struct)"
+          ],
+          "steps": [
+            "Extend the parser to support `SELECT WHERE field=value`, `UPDATE WHERE field=value SET field2=value2`, and `DELETE WHERE field=value`.",
+            "Implement `SELECT WHERE` by looping through records and printing only matches.",
+            "Implement `UPDATE WHERE ... SET ...` by looping through matches and modifying their map in place.",
+            "Implement `DELETE WHERE` using `std::vector::erase` with a condition (or building a new vector of the ones that don't match, which is often simpler to get right).",
+            "Write `saveTable(path)` and `loadTable(path)` using a simple line-based format (e.g. one record per line, fields separated by `;`, key=value within).",
+            "Load the table automatically on startup if the save file exists, and save automatically on QUIT.",
+            "Re-test every Week 1 command to make sure nothing broke.",
+            "Update the README with the new command syntax and file format."
+          ],
+          "deliverables": [
+            "Working SELECT WHERE, UPDATE WHERE ... SET, and DELETE WHERE commands",
+            "Save-on-quit and load-on-start persistence to a text file",
+            "A documented on-disk file format",
+            "Regression-tested Week 1 commands still working"
+          ],
+          "done_when": [
+            "SELECT WHERE returns only records matching the condition",
+            "UPDATE WHERE correctly changes only the matching records' specified field",
+            "DELETE WHERE removes exactly the matching records and no others",
+            "Restarting the program after QUIT shows the same data as before"
+          ],
+          "hints": [
+            "Building a new vector of records you want to KEEP is often less error-prone than erasing in place while iterating.",
+            "Test WHERE conditions with a small dataset (3-4 records) where you know by hand exactly which should match.",
+            "If your load function silently produces an empty table, print the number of records loaded to catch parsing bugs early."
+          ],
+          "stretch": "Support a second condition with AND, e.g. `SELECT WHERE age=21 AND name=Asha`.",
+          "post_highlights": [
+            "Implemented UPDATE and DELETE with WHERE-style filtering in a custom C++ database engine",
+            "Added file-based persistence with a custom save/load format",
+            "Extended a command parser to support conditional queries"
+          ]
+        },
+        "3": {
+          "title": "Indexing for Fast Lookup",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Add an index so lookups by a chosen field are fast instead of scanning every record, and measure the speed difference — the core idea behind how real databases work.",
+          "learn": [
+            "Why linear scans get slow as data grows, and what an index trades off (memory for speed)",
+            "Using `std::unordered_map` to build a hash-based index",
+            "Keeping an index in sync when records are inserted, updated or deleted",
+            "Basic timing/benchmarking with `<chrono>`"
+          ],
+          "steps": [
+            "Pick one field to index first (e.g. `name`) and build a `std::unordered_map<std::string, std::vector<int>>` mapping value to record positions.",
+            "Rebuild the index whenever the table is loaded, and update it incrementally on INSERT/UPDATE/DELETE so it never goes stale.",
+            "Add a `SELECT WHERE name=X` fast path that checks the index first instead of scanning every record, while keeping the slow scan as a fallback for other fields.",
+            "Generate a larger test dataset (1000+ records) with a small script or loop, and time indexed vs non-indexed lookups using `<chrono>`.",
+            "Print both timings so the speed difference is visible in your demo.",
+            "Write a short paragraph in the README explaining, in your own words, why the indexed lookup is faster.",
+            "Add an `INDEX field` command that lets the user build an index on a different field at runtime.",
+            "Re-test all Week 1-2 commands with the index in place to make sure it never goes out of sync with the data."
+          ],
+          "deliverables": [
+            "A hash-based index on at least one field, kept in sync with the data",
+            "A fast lookup path that uses the index when available",
+            "A timing comparison between indexed and non-indexed lookups on 1000+ records",
+            "A short written explanation of why the index is faster"
+          ],
+          "done_when": [
+            "Indexed lookups return exactly the same results as a full scan on the same data",
+            "The index stays correct after INSERT, UPDATE and DELETE operations",
+            "The timing test clearly shows the indexed lookup is faster on a large dataset",
+            "The INDEX command can build an index on a different field at runtime"
+          ],
+          "hints": [
+            "If your index goes out of sync, it's almost always because you forgot to update it in one of INSERT/UPDATE/DELETE — check all three.",
+            "1000 records generated with a loop (`name + std::to_string(i)`) is plenty to see a clear timing difference; you don't need real data.",
+            "`std::chrono::high_resolution_clock::now()` before and after, then subtract, gives you an easy duration to print."
+          ],
+          "stretch": "Support indexing on more than one field at a time and let SELECT WHERE pick whichever index is available.",
+          "post_highlights": [
+            "Built a hash-based index in C++ to speed up record lookups",
+            "Measured and demonstrated the performance difference between indexed and linear-scan queries",
+            "Kept an index correctly synced across insert, update and delete operations"
+          ]
+        },
+        "4": {
+          "title": "Multiple Tables, Tests and a Final Demo",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Extend your engine to support more than one table, add automated tests for your core logic, and polish the project into a demo-ready mini database.",
+          "learn": [
+            "Managing multiple named tables in one engine (`std::map<std::string, Table>`)",
+            "A `CREATE TABLE` / `USE TABLE` style command set",
+            "Writing small, focused unit tests for core logic (insert, index, query)",
+            "Final code cleanup and documentation for a public-facing project"
+          ],
+          "steps": [
+            "Refactor your single table into a `Table` class, and store multiple named tables in a `std::map<std::string, Table>`.",
+            "Add `CREATE TABLE name` and `USE TABLE name` commands so the user can switch which table subsequent commands apply to.",
+            "Make sure save/load now handles multiple tables (e.g. one file per table, or one combined file with table markers).",
+            "Write 5-6 small test functions covering insert, WHERE filtering, update, delete, and indexed lookup correctness, runnable via a `--test` flag, each printing PASS/FAIL.",
+            "Do a full walkthrough: create two tables, insert into both, query each, save, restart, and confirm both tables reload correctly.",
+            "Clean up the codebase: consistent naming, comments on tricky logic, remove any leftover debug prints or commented-out code.",
+            "Write a final README covering all commands, the file format, how to run tests, and a short architecture overview (table → records → index).",
+            "Record a 30-60 second demo showing multiple tables, a query using the index, and a timing comparison."
+          ],
+          "deliverables": [
+            "Support for multiple named tables with CREATE TABLE / USE TABLE",
+            "Persistence that correctly saves and loads multiple tables",
+            "At least 5 automated test functions covering core engine logic",
+            "A polished README with full command reference and architecture overview"
+          ],
+          "done_when": [
+            "Two or more tables can be created, populated and queried independently without interfering with each other",
+            "Restarting the program restores all tables correctly from disk",
+            "Running with `--test` prints PASS for every test function",
+            "The README fully documents every command and the on-disk format"
+          ],
+          "hints": [
+            "Get multi-table save/load working with a tiny example (2 tables, 1 record each) before trusting it with real data.",
+            "If tests are hard to write for indexed lookups, first assert they match a plain linear scan on the same query — that's a strong correctness check.",
+            "Save the polish pass for last; a working, well-documented simple engine beats a half-finished complex one."
+          ],
+          "stretch": "Add a simple `JOIN`-like command that combines matching records from two tables on a shared field.",
+          "post_highlights": [
+            "Extended a C++ database engine to support multiple tables with CREATE/USE commands",
+            "Wrote automated tests covering insert, query, update, delete and index correctness",
+            "Shipped a documented, demo-ready mini database engine built from scratch in C++"
+          ]
+        }
+      }
+    }
+  ]
+}

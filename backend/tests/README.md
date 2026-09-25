@@ -59,7 +59,7 @@ You can run the full suite safely at any time without touching production.
 .\.venv\Scripts\python -m pytest tests/students/ -v
 ```
 
-### Changed admin endpoints (batches, enrollment, student management)?
+### Changed admin endpoints (enrollment, student management)?
 ```bash
 .\.venv\Scripts\python -m pytest tests/admin/ -v
 ```
@@ -77,11 +77,6 @@ You can run the full suite safely at any time without touching production.
 ### Changed the GitHub webhook handler?
 ```bash
 .\.venv\Scripts\python -m pytest tests/webhooks/ -v
-```
-
-### Changed referral code / discount logic?
-```bash
-.\.venv\Scripts\python -m pytest tests/referrals/ -v
 ```
 
 ### Changed portfolio endpoint?
@@ -112,7 +107,6 @@ pytest -m students     # Student application + progress
 pytest -m admin        # All admin endpoints
 pytest -m certificates # Certificate verify + issue + download
 pytest -m payments     # Razorpay order + verify + status
-pytest -m referrals    # Referral codes + stats + discounts
 pytest -m portfolio    # Portfolio endpoint
 pytest -m webhooks     # GitHub webhook events
 pytest -m regression   # Critical end-to-end flows (run this always)
@@ -159,8 +153,7 @@ tests/
 │   ├── test_apply.py
 │   └── test_progress.py
 │
-├── admin/                    <- batch CRUD, enrollment, student mgmt, stats
-│   ├── test_batch_crud.py
+├── admin/                    <- enrollment, student mgmt (pagination/search), stats
 │   ├── test_enrollment.py
 │   ├── test_student_mgmt.py
 │   └── test_stats.py
@@ -171,9 +164,6 @@ tests/
 │
 ├── payments/                 <- Razorpay order creation, HMAC verify, status
 │   └── test_payments.py
-│
-├── referrals/                <- code generation, stats, apply-with-referral
-│   └── test_referral_flow.py
 │
 ├── portfolio/                <- payment gate, public portfolio data
 │   └── test_portfolio.py
@@ -237,7 +227,7 @@ When you add a new feature or endpoint:
 | `client` | httpx async test client (no auth) |
 | `admin_headers` | `{"X-Admin-Key": "test-admin-key"}` |
 | `test_student` | seeded student row (dict) |
-| `test_batch` | seeded batch row (dict) |
+| `test_batch` | seeded internal enrollment record (`batches` row — never shown to users) |
 | `enrolled_student` | student enrolled in test_batch |
 | `paid_student` | student with completed payment |
 | `student_headers` | `Authorization: Bearer <token>` header |

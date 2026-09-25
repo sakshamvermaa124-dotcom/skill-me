@@ -22,6 +22,37 @@ class TestSubmitTask:
         data = r.json()
         assert data["status"] == "pending"
 
+    async def test_submit_task_stores_and_emails_task_feedback(self, client, enrolled_student):
+        """Submitting generates feedback from that week's deliverables, stores it, and emails it."""
+        import routes.students as students_route
+        from services.project_curriculum import get_project_track_for_student
+        r = await client.post(
+            "/api/students/submit-task",
+            json={
+                "student_id": enrolled_student["id"],
+                "batch_id": enrolled_student["batch_id"],
+                "week": 2,
+                "linkedin_url": "https://www.linkedin.com/posts/test-post",
+            },
+        )
+        assert r.status_code == 200
+        data = r.json()
+        week2 = get_project_track_for_student("web-dev", enrolled_student["id"])["weeks"]["2"]
+        assert data["feedback"]["task_title"] == week2["title"]
+        assert data["feedback"]["checklist"] == week2["deliverables"]
+        assert len(data["feedback"]["general_tips"]) == 3
+
+        row = await test_db.fetch_one("SELECT feedback FROM submissions WHERE id = ?", (data["submission_id"],))
+        assert week2["deliverables"][0] in row["feedback"]
+
+        send = students_route.email_service.send_submission_feedback
+        assert send.call_count == 1
+        assert send.call_args.kwargs["week"] == 2
+        assert send.call_args.kwargs["email"] == enrolled_student["email"]
+
+        progress = (await client.get(f"/api/students/progress/{enrolled_student['email']}")).json()
+        assert progress["submissions"][0]["feedback"] == row["feedback"]
+
     async def test_submit_task_rejects_non_linkedin_url(self, client, enrolled_student):
         r = await client.post(
             "/api/students/submit-task",

@@ -15,7 +15,7 @@ SkillMe operates 4-week structured remote engineering internships designed to br
 
 ### Workflow & Evaluation
 1. **Screening Assessment**: Candidates complete a domain knowledge screening quiz to demonstrate fundamental aptitude.
-2. **Repository Assignment**: Interns are provisioned dedicated GitHub repositories and real-world issues corresponding to their chosen batch and domain.
+2. **Repository Assignment**: Interns are provisioned dedicated GitHub repositories and real-world issues corresponding to their chosen domain.
 3. **Weekly GitHub Sprints**:
    - Week 1: Environment setup, codebase navigation, debugging, and initial issue fixes.
    - Week 2: Feature development, component integration, and writing test suites.

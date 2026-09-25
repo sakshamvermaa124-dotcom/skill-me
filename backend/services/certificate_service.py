@@ -60,7 +60,11 @@ C_BORDER_GOLD = Color(0.72, 0.53, 0.04, alpha=0.25)
 
 
 def _cert_id_from_student(student_id: int, batch_id: int) -> str:
-    """Generate a deterministic, short certificate ID."""
+    """Generate a deterministic, short certificate ID.
+
+    `batch_id` is the student's internal enrollment reference. Do NOT change this
+    formula or the inputs — every issued certificate would stop verifying.
+    """
     raw = f"skillme-{student_id}-{batch_id}"
     h = hashlib.sha256(raw.encode()).hexdigest()[:12].upper()
     return f"SM-{h[:4]}-{h[4:8]}-{h[8:12]}"
@@ -186,7 +190,7 @@ def _draw_title(c: rl_canvas.Canvas, w: float, h: float):
     c.restoreState()
 
 
-def _draw_body(c: rl_canvas.Canvas, w: float, h: float, student: dict, batch: dict, cert_id: str, issued_on: str):
+def _draw_body(c: rl_canvas.Canvas, w: float, h: float, student: dict, enrollment: dict, cert_id: str, issued_on: str):
     """Main certificate body content."""
     mid_y = h / 2 + 6 * mm
 
@@ -213,7 +217,7 @@ def _draw_body(c: rl_canvas.Canvas, w: float, h: float, student: dict, batch: di
     c.drawCentredString(w / 2, mid_y - 3 * mm, "has successfully completed the")
 
     # Domain name
-    domain = batch.get("domain", "").replace("-", " ").title()
+    domain = (enrollment.get("domain") or student.get("domain") or "").replace("-", " ").title()
     c.setFillColor(C_BLUE)
     c.setFont("Helvetica-Bold", 17)
     c.drawCentredString(w / 2, mid_y - 13 * mm, f"{domain} Developer Internship")
@@ -230,8 +234,8 @@ def _draw_body(c: rl_canvas.Canvas, w: float, h: float, student: dict, batch: di
         c.drawCentredString(w / 2, desc_y - i * 10, line)
 
 
-def _draw_details_row(c: rl_canvas.Canvas, w: float, h: float, batch: dict):
-    """Horizontal details bar with Duration/Batch/Mode/Status."""
+def _draw_details_row(c: rl_canvas.Canvas, w: float, h: float):
+    """Horizontal details bar with Duration/Mode/Status."""
     row_y = 52 * mm
     row_h = 14 * mm
 
@@ -342,12 +346,14 @@ def _draw_qr(c: rl_canvas.Canvas, w: float, h: float, cert_id: str):
         logger.warning(f"QR code generation failed: {e}")
 
 
-def generate_certificate_pdf(student: dict, batch: dict) -> tuple[bytes, str]:
+def generate_certificate_pdf(student: dict, enrollment: dict, cert_id: str | None = None) -> tuple[bytes, str]:
     """
     Generate a PDF certificate for a student.
+    `enrollment` is the student's internal enrollment row (needs `id` and `domain`).
+    Pass the stored `cert_id` when one exists so the PDF always matches the registry.
     Returns (pdf_bytes, cert_id).
     """
-    cert_id = _cert_id_from_student(student["id"], batch["id"])
+    cert_id = cert_id or _cert_id_from_student(student["id"], enrollment["id"])
     issued_on = datetime.utcnow().strftime("%d %B %Y")
 
     buffer = io.BytesIO()
@@ -360,8 +366,8 @@ def generate_certificate_pdf(student: dict, batch: dict) -> tuple[bytes, str]:
     _draw_borders(c, w, h)
     _draw_company_header(c, w, h)
     _draw_title(c, w, h)
-    _draw_body(c, w, h, student, batch, cert_id, issued_on)
-    _draw_details_row(c, w, h, batch)
+    _draw_body(c, w, h, student, enrollment, cert_id, issued_on)
+    _draw_details_row(c, w, h)
     _draw_footer(c, w, h, cert_id, issued_on)
     _draw_qr(c, w, h, cert_id)  # QR code for verification
 
@@ -380,13 +386,13 @@ class CertificateService:
         suppress_email: bool = False,
     ) -> dict:
         """
-        Issue a certificate for a student who completed a batch.
+        Issue a certificate for a student who completed their internship.
         Records the certificate and — on first issuance only — sends the
         certificate_ready notification email.
 
         Args:
             student_id: The student's DB id.
-            batch_id:   The batch's DB id.
+            batch_id:   The student's internal enrollment reference.
             suppress_email: Set True when the caller will send the email
                             itself (e.g. payments.py, admin issue endpoint).
                             Defaults to False so that any code path that
@@ -398,7 +404,7 @@ class CertificateService:
 
         batch = await db.fetch_one("SELECT * FROM batches WHERE id = ?", (batch_id,))
         if not batch:
-            raise ValueError(f"Batch {batch_id} not found")
+            raise ValueError(f"Enrollment {batch_id} not found")
 
         # Check if already issued
         existing = await db.fetch_one(
@@ -406,7 +412,8 @@ class CertificateService:
             (student_id, batch_id),
         )
 
-        cert_id = _cert_id_from_student(student_id, batch_id)
+        # Always prefer the stored ID so a PDF/email never shows an ID that won't verify
+        cert_id = existing["cert_id"] if existing else _cert_id_from_student(student_id, batch_id)
         issued_on = datetime.utcnow().strftime("%d %B %Y")
         is_new = not existing
 
@@ -416,7 +423,7 @@ class CertificateService:
                    VALUES (?, ?, ?, CURRENT_TIMESTAMP)""",
                 (student_id, batch_id, cert_id),
             )
-            logger.info(f"Issued certificate {cert_id} to student {student_id} for batch {batch_id}")
+            logger.info(f"Issued certificate {cert_id} to student {student_id} (enrollment {batch_id})")
 
             # Send notification email unless the caller handles it themselves.
             if not suppress_email:
@@ -426,7 +433,6 @@ class CertificateService:
                         last_name=student["last_name"],
                         email=student["email"],
                         domain=batch["domain"],
-                        batch_number=batch["batch_number"],
                         cert_id=cert_id,
                         issued_date=issued_on,
                     )
@@ -439,10 +445,8 @@ class CertificateService:
             "cert_id": cert_id,
             "student_name": f"{student['first_name']} {student['last_name']}",
             "domain": batch["domain"],
-            "batch_number": batch["batch_number"],
             "issued_on": issued_on,
             "student": dict(student),
-            "batch": dict(batch),
         }
 
     async def get_student_certificate(self, student_id: int, batch_id: int) -> dict | None:

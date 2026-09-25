@@ -21,7 +21,10 @@ CREATE TABLE IF NOT EXISTS students (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Batches — each batch is a group of students in a domain/cohort
+-- Batches — INTERNAL ONLY. There is no batch/cohort concept in the product any more:
+-- every enrollment gets its own private row here (max_students = 1) and `batch_id`
+-- elsewhere is just an opaque enrollment reference. Certificate IDs are a hash of
+-- (student_id, batch_id), so never renumber, merge or reuse these rows.
 CREATE TABLE IF NOT EXISTS batches (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     domain TEXT NOT NULL,              -- web-dev, python, react, etc.
@@ -35,7 +38,7 @@ CREATE TABLE IF NOT EXISTS batches (
     UNIQUE(domain, batch_number)
 );
 
--- Enrollment — links students to batches (many-to-many)
+-- Enrollment — one per student internship (re-enrolling after a drop reactivates the same row)
 CREATE TABLE IF NOT EXISTS enrollments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     student_id INTEGER NOT NULL,
@@ -58,6 +61,7 @@ CREATE TABLE IF NOT EXISTS submissions (
     linkedin_url TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'pending',  -- pending | approved | rejected
     admin_note TEXT,
+    feedback TEXT,                      -- auto-generated per-task feedback sent on submission
     submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     reviewed_at TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES students(id),
@@ -82,6 +86,9 @@ CREATE TABLE IF NOT EXISTS progress (
 -- Index for common queries
 CREATE INDEX IF NOT EXISTS idx_students_email ON students(email);
 CREATE INDEX IF NOT EXISTS idx_students_github ON students(github_username);
+-- Admin student list: newest-first pages, optionally filtered by status
+CREATE INDEX IF NOT EXISTS idx_students_created ON students(created_at);
+CREATE INDEX IF NOT EXISTS idx_students_status_created ON students(status, created_at);
 CREATE INDEX IF NOT EXISTS idx_enrollments_student ON enrollments(student_id);
 CREATE INDEX IF NOT EXISTS idx_enrollments_batch ON enrollments(batch_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_student ON submissions(student_id);
@@ -108,7 +115,7 @@ CREATE TABLE IF NOT EXISTS payments (
     batch_id INTEGER NOT NULL,
     razorpay_order_id TEXT UNIQUE,         -- rzp order id from Razorpay
     razorpay_payment_id TEXT,              -- filled on successful payment
-    amount INTEGER NOT NULL,               -- amount in paise (24900 = ₹249)
+    amount INTEGER NOT NULL,               -- amount in paise (12900 = ₹129)
     currency TEXT DEFAULT 'INR',
     status TEXT DEFAULT 'pending',         -- pending | paid | failed
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

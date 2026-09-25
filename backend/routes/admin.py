@@ -1,6 +1,6 @@
 """
 SkillMe — Admin API Routes
-Protected endpoints for batch management, student enrollment,
+Protected endpoints for student shortlisting/enrollment
 and LinkedIn submission review. Requires X-Admin-Key header.
 """
 
@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from pydantic import BaseModel, Field
 import logging
 from middleware.auth import require_admin
-from services.batch_service import batch_service
+from services.enrollment_service import enrollment_service
 from services.submission_service import submission_service, SCORE_PER_APPROVAL
 from services.urgent_request_service import urgent_request_service
 from services.email_service import email_service
@@ -23,19 +23,14 @@ router = APIRouter(prefix="/api/admin", tags=["admin"])
 # Request / Response Models
 # ──────────────────────────────────────────────
 
-class CreateBatchRequest(BaseModel):
-    domain: str = Field(..., description="Domain name, e.g. 'web-dev', 'python'")
-    batch_number: int = Field(..., ge=1, description="Sequential batch number")
-    max_students: int = Field(30, ge=1, le=100)
-    start_date: str | None = Field(None, description="ISO date (YYYY-MM-DD)")
-
-
-class AddStudentRequest(BaseModel):
-    student_id: int = Field(..., description="Student database ID")
+# applied → shortlisted → enrolled → completed, or dropped at any point.
+STUDENT_STATUSES = ("applied", "shortlisted", "enrolled", "completed", "dropped")
+STUDENTS_PAGE_SIZE = 15
+STUDENTS_MAX_PAGE_SIZE = 100
 
 
 class UpdateStudentStatusRequest(BaseModel):
-    status: str = Field(..., description="New status: shortlisted | enrolled | completed | dropped")
+    status: str = Field(..., description="New status: applied | shortlisted | enrolled | completed | dropped")
 
 
 class ReviewSubmissionRequest(BaseModel):
@@ -70,232 +65,147 @@ ANNOUNCEMENTS = {
 
 @router.get("/stats", summary="Get admin dashboard stats")
 async def get_stats(_: str = Depends(require_admin)):
-    """Get aggregated stats for the admin dashboard."""
-    total_students = await db.fetch_one("SELECT COUNT(*) as count FROM students")
-    active_batches = await db.fetch_one("SELECT COUNT(*) as count FROM batches WHERE status = 'active'")
-    pending_applications = await db.fetch_one("SELECT COUNT(*) as count FROM students WHERE status = 'applied'")
-    pending_submissions = await db.fetch_one("SELECT COUNT(*) as count FROM submissions WHERE status = 'pending'")
-    pending_urgent_requests = await db.fetch_one("SELECT COUNT(*) as count FROM urgent_requests WHERE status = 'pending'")
-
-    return {
-        "total_students": total_students["count"] if total_students else 0,
-        "active_batches": active_batches["count"] if active_batches else 0,
-        "pending_applications": pending_applications["count"] if pending_applications else 0,
-        "pending_submissions": pending_submissions["count"] if pending_submissions else 0,
-        "pending_urgent_requests": pending_urgent_requests["count"] if pending_urgent_requests else 0,
-    }
+    """Get aggregated stats for the admin dashboard (single round-trip)."""
+    row = await db.fetch_one(
+        """SELECT
+             (SELECT COUNT(*) FROM students) AS total_students,
+             (SELECT COUNT(*) FROM students WHERE status = 'applied') AS pending_applications,
+             (SELECT COUNT(*) FROM students WHERE status = 'shortlisted') AS shortlisted_students,
+             (SELECT COUNT(*) FROM students WHERE status = 'enrolled') AS enrolled_students,
+             (SELECT COUNT(DISTINCT student_id) FROM payments WHERE status = 'paid') AS total_alumni,
+             (SELECT COUNT(*) FROM submissions WHERE status = 'pending') AS pending_submissions,
+             (SELECT COUNT(*) FROM urgent_requests WHERE status = 'pending') AS pending_urgent_requests"""
+    ) or {}
+    keys = ("total_students", "pending_applications", "shortlisted_students", "enrolled_students",
+            "total_alumni", "pending_submissions", "pending_urgent_requests")
+    return {k: row.get(k) or 0 for k in keys}
 
 
 # ──────────────────────────────────────────────
-# Batch Management
+# Enrollment
 # ──────────────────────────────────────────────
 
-@router.post("/batches", summary="Create a new batch")
-async def create_batch(req: CreateBatchRequest, _: str = Depends(require_admin)):
-    """Creates a new batch record."""
-    try:
-        batch = await batch_service.create_batch(
-            domain=req.domain,
-            batch_number=req.batch_number,
-            max_students=req.max_students,
-            start_date=req.start_date,
+async def _enroll_and_notify(student_id: int, background_tasks: BackgroundTasks) -> dict:
+    """Enroll a student and queue the offer letter. Raises ValueError on invalid state."""
+    result = await enrollment_service.enroll_student(student_id)
+    student = await db.fetch_one(
+        "SELECT first_name, last_name, email FROM students WHERE id = ?", (student_id,)
+    )
+    if student:
+        background_tasks.add_task(
+            email_service.send_offer_letter,
+            first_name=student["first_name"],
+            last_name=student["last_name"],
+            email=student["email"],
+            domain=result["domain"],
         )
-        return {"status": "created", "batch": batch}
-    except ValueError as e:
-        raise HTTPException(status_code=409, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to create batch: {str(e)}")
+    return result
 
 
-@router.get("/batches", summary="List all batches")
-async def list_batches(status: str | None = None, _: str = Depends(require_admin)):
-    """List all batches with enrolled student counts, optionally filtered by status."""
-    batches = await batch_service.list_batches(status=status)
-
-    enrollment_counts = await db.fetch_all(
-        "SELECT batch_id, COUNT(*) as count FROM enrollments WHERE status != 'dropped' GROUP BY batch_id"
-    )
-    counts_by_batch = {row["batch_id"]: row["count"] for row in enrollment_counts}
-    for b in batches:
-        b["enrolled_students"] = counts_by_batch.get(b["id"], 0)
-
-    return {"batches": batches, "count": len(batches)}
-
-
-@router.get("/batches/{batch_id}", summary="Get batch details")
-async def get_batch(batch_id: int, _: str = Depends(require_admin)):
-    """Get a specific batch with enrollment count."""
-    batch = await batch_service.get_batch(batch_id)
-    if not batch:
-        raise HTTPException(status_code=404, detail="Batch not found")
-
-    enrollment_count = await db.fetch_one(
-        "SELECT COUNT(*) as count FROM enrollments WHERE batch_id = ? AND status != 'dropped'",
-        (batch_id,),
-    )
-    batch["enrolled_students"] = enrollment_count["count"] if enrollment_count else 0
-
-    return batch
-
-
-@router.get("/batches/{batch_id}/progress", summary="Get batch progress for all students")
-async def get_batch_progress(batch_id: int, _: str = Depends(require_admin)):
-    """Get aggregated progress for all students in a batch."""
-    batch = await batch_service.get_batch(batch_id)
-    if not batch:
-        raise HTTPException(status_code=404, detail="Batch not found")
-
-    progress = await batch_service.get_batch_progress(batch_id)
-    return {
-        "batch": batch,
-        "students": progress,
-        "total_students": len(progress),
-    }
-
-
-@router.delete("/batches/{batch_id}", summary="Delete a batch and all related data")
-async def delete_batch(batch_id: int, _: str = Depends(require_admin)):
-    """Delete a batch entirely. Cascades to all related progress, submissions, enrollments, etc."""
-    batch = await batch_service.get_batch(batch_id)
-    if not batch:
-        raise HTTPException(status_code=404, detail="Batch not found")
-
-    try:
-        await db.execute("DELETE FROM progress WHERE batch_id = ?", (batch_id,))
-        await db.execute("DELETE FROM submissions WHERE batch_id = ?", (batch_id,))
-        await db.execute("DELETE FROM enrollments WHERE batch_id = ?", (batch_id,))
-        await db.execute("DELETE FROM certificates WHERE batch_id = ?", (batch_id,))
-        await db.execute("DELETE FROM payments WHERE batch_id = ?", (batch_id,))
-        await db.execute("DELETE FROM email_logs WHERE batch_id = ?", (batch_id,))
-        await db.execute("DELETE FROM batches WHERE id = ?", (batch_id,))
-
-        return {"status": "success", "message": f"Batch {batch_id} completely deleted from database."}
-    except Exception as e:
-        logger.error(f"Failed to delete batch {batch_id}: {e}")
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-
-
-# ──────────────────────────────────────────────
-# Student Enrollment
-# ──────────────────────────────────────────────
-
-@router.post("/students/{student_id}/enroll", summary="Auto-enroll student into a dedicated batch")
-async def auto_enroll_student_endpoint(
+@router.post("/students/{student_id}/enroll", summary="Enroll a student")
+async def enroll_student_endpoint(
     student_id: int,
     background_tasks: BackgroundTasks,
     _: str = Depends(require_admin),
 ):
-    """Enrolls a student into a dedicated batch for their domain and sends the offer letter."""
+    """Enrolls a student (applied, shortlisted or previously dropped) and sends the offer letter."""
     try:
-        result = await batch_service.auto_enroll_student(student_id)
-
-        student = await db.fetch_one(
-            "SELECT first_name, last_name, email, domain FROM students WHERE id = ?",
-            (student_id,)
-        )
-
-        if student:
-            background_tasks.add_task(
-                email_service.send_offer_letter,
-                first_name=student["first_name"],
-                last_name=student["last_name"],
-                email=student["email"],
-                domain=result["domain"],
-                batch_number=result["batch_number"],
-            )
-
+        result = await _enroll_and_notify(student_id, background_tasks)
         return {"status": "enrolled", **result}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        logger.error(f"Error auto-enrolling student {student_id}: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Failed to auto-enroll student: {str(e)}")
-
-
-@router.post("/batches/{batch_id}/students", summary="Add a student to a batch")
-async def add_student_to_batch(
-    batch_id: int, req: AddStudentRequest,
-    background_tasks: BackgroundTasks,
-    _: str = Depends(require_admin)
-):
-    """Enroll a student in a batch and send the offer letter email."""
-    try:
-        result = await batch_service.add_student_to_batch(req.student_id, batch_id)
-
-        student = await db.fetch_one(
-            "SELECT first_name, last_name, email FROM students WHERE id = ?",
-            (req.student_id,)
-        )
-        batch = await db.fetch_one(
-            "SELECT domain, batch_number FROM batches WHERE id = ?",
-            (batch_id,)
-        )
-        if student and batch:
-            background_tasks.add_task(
-                email_service.send_offer_letter,
-                first_name=student["first_name"],
-                last_name=student["last_name"],
-                email=student["email"],
-                domain=batch["domain"],
-                batch_number=batch["batch_number"],
-            )
-
-        return {"status": "enrolled", **result}
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        logger.error(f"Error enrolling student {req.student_id} into batch {batch_id}: {e}", exc_info=True)
+        logger.error(f"Error enrolling student {student_id}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to enroll student: {str(e)}")
-
-
-@router.delete("/batches/{batch_id}/students/{student_id}", summary="Remove student from batch")
-async def remove_student_from_batch(
-    batch_id: int, student_id: int, _: str = Depends(require_admin)
-):
-    """Remove a student from a batch."""
-    await batch_service.remove_student_from_batch(student_id, batch_id)
-    return {"status": "removed", "student_id": student_id, "batch_id": batch_id}
 
 
 # ──────────────────────────────────────────────
 # Student Management
 # ──────────────────────────────────────────────
 
-@router.get("/students", summary="List all students")
+# Correlated subquery returning the student's current enrollment reference
+# (same ordering as enrollment_service.get_current_enrollment). Needed by the
+# admin "Certificate" action; never rendered.
+_CURRENT_BATCH_ID_SUBQUERY = """(
+    SELECT e.batch_id FROM enrollments e
+    WHERE e.student_id = s.id
+    ORDER BY CASE WHEN e.status = 'dropped' THEN 1 ELSE 0 END,
+             EXISTS (SELECT 1 FROM payments pay WHERE pay.student_id = e.student_id
+                     AND pay.batch_id = e.batch_id AND pay.status = 'paid') DESC,
+             EXISTS (SELECT 1 FROM certificates c WHERE c.student_id = e.student_id
+                     AND c.batch_id = e.batch_id) DESC,
+             (SELECT COUNT(*) FROM progress p WHERE p.student_id = e.student_id
+                     AND p.batch_id = e.batch_id AND p.issues_completed > 0) DESC,
+             e.id DESC
+    LIMIT 1
+)"""
+
+
+@router.get("/students", summary="List students (server-side paginated)")
 async def list_students(
     status: str | None = None,
-    limit: int = 50,
+    q: str | None = None,
+    paid: bool | None = None,
+    page: int | None = None,
+    limit: int = STUDENTS_PAGE_SIZE,
     offset: int = 0,
     _: str = Depends(require_admin),
 ):
-    """List all students, optionally filtered by status."""
+    """
+    List students, newest first, `limit` (default 15) per page.
+    - status: applied | shortlisted | enrolled | completed | dropped
+    - q:      case-insensitive search over name, email, college and domain
+    - paid:   true → alumni (have a paid certificate), false → everyone else
+    - page:   1-based page number (takes precedence over offset)
+    """
+    limit = max(1, min(limit, STUDENTS_MAX_PAGE_SIZE))
+    if page is not None:
+        offset = (max(1, page) - 1) * limit
+    offset = max(0, offset)
+
+    conditions: list[str] = []
+    params: list = []
     if status:
-        students = await db.fetch_all(
-            """SELECT s.*, e.batch_id,
-               CASE WHEN p.id IS NOT NULL THEN 1 ELSE 0 END as has_paid
-               FROM students s
-               LEFT JOIN enrollments e ON s.id = e.student_id AND e.status != 'dropped'
-               LEFT JOIN payments p ON s.id = p.student_id AND p.status = 'paid'
-               WHERE s.status = ?
-               ORDER BY s.created_at DESC LIMIT ? OFFSET ?""",
-            (status, limit, offset),
+        conditions.append("s.status = ?")
+        params.append(status)
+    if q and q.strip():
+        like = f"%{q.strip().lower()}%"
+        conditions.append(
+            "(LOWER(s.first_name || ' ' || s.last_name) LIKE ? OR LOWER(s.email) LIKE ?"
+            " OR LOWER(COALESCE(s.college, '')) LIKE ? OR LOWER(COALESCE(s.domain, '')) LIKE ?)"
         )
-    else:
-        students = await db.fetch_all(
-            """SELECT s.*, e.batch_id,
-               CASE WHEN p.id IS NOT NULL THEN 1 ELSE 0 END as has_paid
-               FROM students s
-               LEFT JOIN enrollments e ON s.id = e.student_id AND e.status != 'dropped'
-               LEFT JOIN payments p ON s.id = p.student_id AND p.status = 'paid'
-               ORDER BY s.created_at DESC LIMIT ? OFFSET ?""",
-            (limit, offset),
-        )
+        params.extend([like, like, like, like])
+    paid_exists = "EXISTS (SELECT 1 FROM payments p WHERE p.student_id = s.id AND p.status = 'paid')"
+    if paid is True:
+        conditions.append(paid_exists)
+    elif paid is False:
+        conditions.append(f"NOT {paid_exists}")
+    where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
 
-    total = await db.fetch_one(
-        "SELECT COUNT(*) as count FROM students" + (f" WHERE status = '{status}'" if status else ""),
+    students = await db.fetch_all(
+        f"""SELECT s.id, s.first_name, s.last_name, s.email, s.phone, s.github_username,
+                   s.linkedin_url, s.college, s.year_of_study, s.domain, s.status,
+                   s.created_at, s.updated_at,
+                   {_CURRENT_BATCH_ID_SUBQUERY} AS batch_id,
+                   CASE WHEN {paid_exists} THEN 1 ELSE 0 END AS has_paid
+            FROM students s
+            {where}
+            ORDER BY s.created_at DESC, s.id DESC
+            LIMIT ? OFFSET ?""",
+        (*params, limit, offset),
     )
+    total_row = await db.fetch_one(f"SELECT COUNT(*) AS count FROM students s {where}", tuple(params))
+    total = int(total_row["count"]) if total_row and total_row["count"] is not None else 0
 
-    return {"students": students, "count": len(students), "total": total["count"] if total else 0}
+    return {
+        "students": students,
+        "count": len(students),
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "page": offset // limit + 1,
+        "total_pages": max(1, -(-total // limit)),
+    }
 
 
 @router.get("/students/{student_id}", summary="Get student details")
@@ -305,20 +215,10 @@ async def get_student(student_id: int, _: str = Depends(require_admin)):
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
 
-    enrollments = await db.fetch_all(
-        """SELECT e.*, b.domain, b.batch_number, b.status as batch_status
-           FROM enrollments e
-           JOIN batches b ON e.batch_id = b.id
-           WHERE e.student_id = ?""",
-        (student_id,),
-    )
-
-    progress = await batch_service.get_student_progress(student_id)
-
     return {
         "student": student,
-        "enrollments": enrollments,
-        "progress": progress,
+        "enrollment": await enrollment_service.get_current_enrollment(student_id),
+        "progress": await enrollment_service.get_student_progress(student_id),
     }
 
 
@@ -329,53 +229,64 @@ async def update_student_status(
     _: str = Depends(require_admin)
 ):
     """Update a student's application status and send lifecycle emails."""
+    new_status = (req.status or "").strip().lower()
+    if new_status not in STUDENT_STATUSES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid status '{req.status}'. Allowed: {', '.join(STUDENT_STATUSES)}",
+        )
+
     student = await db.fetch_one(
-        "SELECT id, first_name, last_name, email FROM students WHERE id = ?",
+        "SELECT id, first_name, last_name, email, domain, status FROM students WHERE id = ?",
         (student_id,)
     )
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
 
+    active = await enrollment_service.get_current_enrollment(student_id, include_dropped=False)
+
+    # "enrolled" must go through the enrollment flow so the student actually gets an
+    # enrollment (tasks, submissions, certificate) — never just a bare status flip.
+    if new_status == "enrolled" and not active:
+        try:
+            await _enroll_and_notify(student_id, background_tasks)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        return {"status": "updated", "student_id": student_id, "new_status": "enrolled"}
+
+    if new_status in ("applied", "shortlisted") and active:
+        raise HTTPException(
+            status_code=400,
+            detail="Student is already enrolled. Drop them first if you need to move them back.",
+        )
+
     await db.execute(
         "UPDATE students SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-        (req.status, student_id),
+        (new_status, student_id),
     )
 
-    if req.status == "shortlisted":
-        student_domain = await db.fetch_one(
-            "SELECT domain FROM students WHERE id = ?",
-            (student_id,)
-        )
-        domain = student_domain["domain"] if student_domain and student_domain.get("domain") else "open-source"
+    if new_status == "shortlisted" and student["status"] != "shortlisted":
         background_tasks.add_task(
             email_service.send_shortlist_notification,
             first_name=student["first_name"],
             last_name=student["last_name"],
             email=student["email"],
-            domain=domain,
+            domain=student.get("domain") or "open-source",
         )
-    elif req.status == "dropped":
-        active_enrollments = await db.fetch_all(
-            "SELECT batch_id FROM enrollments WHERE student_id = ? AND status != 'dropped'",
-            (student_id,)
-        )
-        for enr in active_enrollments:
-            try:
-                await batch_service.remove_student_from_batch(student_id, enr["batch_id"])
-                logger.info(f"Removed dropped student {student_id} from batch {enr['batch_id']}")
-            except Exception as e:
-                logger.error(f"Error removing dropped student {student_id} from batch {enr['batch_id']}: {e}")
+    elif new_status == "dropped":
+        dropped = await enrollment_service.drop_student(student_id)
+        if dropped:
+            logger.info(f"Dropped student {student_id} ({dropped} enrollment(s) deactivated)")
 
-    return {"status": "updated", "student_id": student_id, "new_status": req.status}
+    return {"status": "updated", "student_id": student_id, "new_status": new_status}
 
 
 @router.delete("/students/{student_id}", summary="Delete student and all associated records")
 async def delete_student(student_id: int, _: str = Depends(require_admin)):
     """
     Permanently delete a student and all their associated records from the database:
-    - Submissions, weekly progress, certificates, payment records, batch enrollments,
-      referral codes & conversions, OTP login tokens, email logs, and any dedicated
-      1-student batches created for them.
+    - Submissions, weekly progress, certificates, payment records, enrollments,
+      urgent requests, referral codes & conversions, OTP login tokens and email logs.
 
     After deletion, when this user returns they will act as a completely new user.
     """
@@ -386,15 +297,16 @@ async def delete_student(student_id: int, _: str = Depends(require_admin)):
     email = student["email"]
 
     try:
-        enrolled_batches = await db.fetch_all(
+        enrolled = await db.fetch_all(
             "SELECT batch_id FROM enrollments WHERE student_id = ?", (student_id,)
         )
-        batch_ids = [b["batch_id"] for b in enrolled_batches]
+        batch_ids = {row["batch_id"] for row in enrolled}
 
         await db.execute("DELETE FROM submissions WHERE student_id = ?", (student_id,))
         await db.execute("DELETE FROM progress WHERE student_id = ?", (student_id,))
         await db.execute("DELETE FROM certificates WHERE student_id = ?", (student_id,))
         await db.execute("DELETE FROM payments WHERE student_id = ?", (student_id,))
+        await db.execute("DELETE FROM urgent_requests WHERE student_id = ?", (student_id,))
         await db.execute("DELETE FROM enrollments WHERE student_id = ?", (student_id,))
         await db.execute("DELETE FROM referral_codes WHERE student_id = ?", (student_id,))
         await db.execute(
@@ -404,18 +316,20 @@ async def delete_student(student_id: int, _: str = Depends(require_admin)):
         await db.execute("DELETE FROM email_logs WHERE student_id = ? OR LOWER(recipient_email) = LOWER(?)", (student_id, email))
         await db.execute("DELETE FROM otp_tokens WHERE LOWER(email) = LOWER(?)", (email,))
 
-        # Clean up any dedicated 1-student batches
+        # Remove the student's private enrollment rows once nothing else references them
         for b_id in batch_ids:
-            batch = await db.fetch_one("SELECT max_students FROM batches WHERE id = ?", (b_id,))
-            if batch and batch.get("max_students") == 1:
-                active_enrollments = await db.fetch_one(
-                    "SELECT COUNT(*) as count FROM enrollments WHERE batch_id = ?", (b_id,)
-                )
-                if not active_enrollments or active_enrollments["count"] == 0:
-                    await db.execute("DELETE FROM progress WHERE batch_id = ?", (b_id,))
-                    await db.execute("DELETE FROM submissions WHERE batch_id = ?", (b_id,))
-                    await db.execute("DELETE FROM batches WHERE id = ?", (b_id,))
-                    logger.info(f"Cleaned up dedicated 1-student batch {b_id}")
+            refs = await db.fetch_one(
+                """SELECT (SELECT COUNT(*) FROM enrollments WHERE batch_id = ?)
+                        + (SELECT COUNT(*) FROM certificates WHERE batch_id = ?)
+                        + (SELECT COUNT(*) FROM payments WHERE batch_id = ?) AS refs""",
+                (b_id, b_id, b_id),
+            )
+            if not refs or refs["refs"] == 0:
+                await db.execute("DELETE FROM progress WHERE batch_id = ?", (b_id,))
+                await db.execute("DELETE FROM submissions WHERE batch_id = ?", (b_id,))
+                await db.execute("DELETE FROM urgent_requests WHERE batch_id = ?", (b_id,))
+                await db.execute("UPDATE email_logs SET batch_id = NULL WHERE batch_id = ?", (b_id,))
+                await db.execute("DELETE FROM batches WHERE id = ?", (b_id,))
 
         try:
             await db.execute("DELETE FROM monitor_alerts WHERE student_id = ? OR LOWER(student_email) = LOWER(?)", (student_id, email))
@@ -452,12 +366,13 @@ async def list_submissions(status: str | None = None, _: str = Depends(require_a
 
 
 async def _notify_task_approved(background_tasks: BackgroundTasks, submission_id: int, admin_note: str | None) -> None:
-    """Look up the submission's student/batch and queue a congratulations email."""
+    """Look up the submission's student and queue a congratulations email."""
     info = await db.fetch_one(
-        """SELECT sub.week, s.first_name, s.last_name, s.email, b.domain
+        """SELECT sub.week, s.first_name, s.last_name, s.email,
+                  COALESCE(b.domain, s.domain) AS domain
            FROM submissions sub
            JOIN students s ON sub.student_id = s.id
-           JOIN batches b ON sub.batch_id = b.id
+           LEFT JOIN batches b ON sub.batch_id = b.id
            WHERE sub.id = ?""",
         (submission_id,),
     )
@@ -805,82 +720,4 @@ async def send_task_reminders(
             {"student_id": s["student_id"], "name": f"{s['first_name']} {s['last_name']}", "email": s["email"]}
             for s in inactive
         ],
-    }
-
-
-# ──────────────────────────────────────────────
-# Batch Analytics
-# ──────────────────────────────────────────────
-
-@router.get("/batches/{batch_id}/analytics", summary="Batch analytics overview")
-async def get_batch_analytics(batch_id: int, _: str = Depends(require_admin)):
-    """
-    Returns aggregated analytics for a batch:
-    - Enrollment counts (total, active, dropped, completed)
-    - Per-week task completion rates
-    - Submission stats (pending, approved, rejected)
-    - Revenue from certificate payments
-    """
-    batch = await db.fetch_one("SELECT * FROM batches WHERE id = ?", (batch_id,))
-    if not batch:
-        raise HTTPException(status_code=404, detail="Batch not found")
-
-    enrollment_stats = await db.fetch_one(
-        """SELECT
-             COUNT(*) as total,
-             SUM(CASE WHEN e.status = 'enrolled' OR e.status = 'active' THEN 1 ELSE 0 END) as active,
-             SUM(CASE WHEN e.status = 'dropped' THEN 1 ELSE 0 END) as dropped,
-             SUM(CASE WHEN e.status = 'completed' THEN 1 ELSE 0 END) as completed
-           FROM enrollments e WHERE e.batch_id = ?""",
-        (batch_id,)
-    )
-
-    weekly_progress = await db.fetch_all(
-        """SELECT week, SUM(issues_completed) as completed
-           FROM progress WHERE batch_id = ?
-           GROUP BY week ORDER BY week""",
-        (batch_id,)
-    )
-
-    submission_stats = await db.fetch_one(
-        """SELECT
-             COUNT(*) as total_submissions,
-             SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved,
-             SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected,
-             SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending
-           FROM submissions WHERE batch_id = ?""",
-        (batch_id,)
-    )
-
-    revenue = await db.fetch_one(
-        """SELECT
-             COUNT(*) as total_payments,
-             SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) as total_paise
-           FROM payments WHERE batch_id = ?""",
-        (batch_id,)
-    )
-
-    student_grid = await db.fetch_all(
-        """SELECT s.id, s.first_name, s.last_name,
-                  e.status as enrollment_status,
-                  SUM(p.issues_completed) as tasks_completed
-           FROM enrollments e
-           JOIN students s ON s.id = e.student_id
-           LEFT JOIN progress p ON p.student_id = s.id AND p.batch_id = e.batch_id
-           WHERE e.batch_id = ?
-           GROUP BY s.id
-           ORDER BY tasks_completed DESC""",
-        (batch_id,)
-    )
-
-    return {
-        "batch": dict(batch),
-        "enrollments": dict(enrollment_stats) if enrollment_stats else {},
-        "weekly_progress": [dict(w) for w in weekly_progress],
-        "submission_stats": dict(submission_stats) if submission_stats else {},
-        "revenue": {
-            "total_payments": revenue["total_payments"] if revenue else 0,
-            "total_inr": (revenue["total_paise"] or 0) // 100 if revenue else 0,
-        },
-        "student_grid": [dict(s) for s in student_grid],
     }

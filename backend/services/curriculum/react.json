@@ -1,0 +1,573 @@
+{
+  "domain": "react",
+  "tracks": [
+    {
+      "project_name": "OmniStore: Modern Next.js E-Commerce & SaaS Marketplace",
+      "tagline": "Build a small online store in React where shoppers can browse products, fill a cart and go through a practice checkout.",
+      "weeks": {
+        "1": {
+          "title": "Product Grid with Components & Props",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Set up a React project with Vite and build the store's home page from small, reusable components: a header, a product card and a product grid. You will learn how React breaks a page into pieces and passes data between them.",
+          "learn": [
+            "Creating and running a React project with Vite",
+            "Writing components in JSX",
+            "Passing data to components with props",
+            "Rendering lists with `.map()` and the `key` prop"
+          ],
+          "steps": [
+            "Run `npm create vite@latest omnistore -- --template react`, then `npm install` and `npm run dev`, and open the local URL.",
+            "Delete the Vite demo content in `App.jsx` and `App.css` so you start from a blank page, then commit.",
+            "Create a `src/data/products.js` file exporting an array of 8-10 product objects with `id`, `title`, `price`, `category` and `image`.",
+            "Build a `Header` component with the store name and a cart icon showing a fixed number like 0.",
+            "Build a `ProductCard` component that receives one product as props and shows its image, title, category and price.",
+            "Build a `ProductGrid` component that maps over the products array and renders a `ProductCard` for each, using `product.id` as the key.",
+            "Style the grid with CSS Grid so it shows several cards per row, then commit."
+          ],
+          "deliverables": [
+            "A Vite + React project that runs with `npm run dev`",
+            "`Header`, `ProductCard` and `ProductGrid` components in separate files",
+            "A styled grid of at least 8 products from a local data file",
+            "A short demo video or screenshots of the store page"
+          ],
+          "done_when": [
+            "The app starts with `npm run dev` without errors",
+            "Each component lives in its own file under `src/components`",
+            "`ProductCard` gets all its data through props (no hard-coded product text)",
+            "The browser console shows no 'unique key' warning",
+            "Adding a product to the data file makes a new card appear"
+          ],
+          "hints": [
+            "Component names must start with a capital letter, or React treats them as HTML tags.",
+            "Free product images can come from placeholder services or your own screenshots stored in `public/`.",
+            "Format prices with `price.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })`.",
+            "The official tutorial at [react.dev](https://react.dev) explains components and props clearly."
+          ],
+          "stretch": "Add a `Footer` component and a small badge on cards for products marked as `onSale`.",
+          "post_highlights": [
+            "Set up a React project with Vite and built a product catalogue for an online store",
+            "Broke the UI into reusable components and passed data with props",
+            "Rendered a dynamic product grid from a data file using map and keys"
+          ]
+        },
+        "2": {
+          "title": "Shopping Cart & Search with State",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Make the store interactive by adding a working cart and a search box using React state. You will learn how state makes the UI update automatically and how to share state between components.",
+          "learn": [
+            "Storing changing data with the `useState` hook",
+            "Handling click and input events in React",
+            "Lifting state up to a parent component and passing functions as props",
+            "Calculating derived values like cart totals from state"
+          ],
+          "steps": [
+            "In `App`, create `const [cart, setCart] = useState([])` where each item looks like `{ id, title, price, qty }`.",
+            "Add an 'Add to cart' button in `ProductCard` that calls an `onAddToCart(product)` function passed down from `App`.",
+            "In `onAddToCart`, increase `qty` if the product is already in the cart, otherwise add it with `qty: 1`, always creating a new array.",
+            "Build a `Cart` panel that lists items with + and - buttons, a remove button, and the total price.",
+            "Show the total item count on the header cart icon using a value calculated from `cart`.",
+            "Add a search input with its own state and show only products whose title includes the search text.",
+            "Test adding, changing quantities, removing and searching, then commit."
+          ],
+          "deliverables": [
+            "Add-to-cart buttons on every product",
+            "A cart panel with quantity controls, remove buttons and a live total",
+            "A header cart count that updates instantly",
+            "A working search box and a demo video of the cart in action"
+          ],
+          "done_when": [
+            "Adding the same product twice increases its quantity instead of adding a duplicate row",
+            "Reducing quantity to 0 removes the item from the cart",
+            "The total price and header count are always correct",
+            "Search filters products as you type and shows a 'No products found' message when nothing matches",
+            "State is never changed directly (no `cart.push`)"
+          ],
+          "hints": [
+            "Use `cart.map()` to update one item and `cart.filter()` to remove one, so you always return a new array.",
+            "Do not store the total in state; calculate it with `cart.reduce()` on every render.",
+            "A controlled input uses both `value={search}` and `onChange={e => setSearch(e.target.value)}`.",
+            "Read 'Adding Interactivity' and 'Managing State' on [react.dev](https://react.dev)."
+          ],
+          "stretch": "Add category filter buttons that work together with the search box.",
+          "post_highlights": [
+            "Built a working shopping cart in React using the useState hook",
+            "Lifted state up to share cart data between the product grid, header and cart panel",
+            "Added live product search with controlled inputs"
+          ]
+        },
+        "3": {
+          "title": "Real Products, Detail Pages & Routing",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Replace your local data with real products from the free DummyJSON API and add a separate page for each product using React Router. You will learn how React apps load data and move between pages without reloading.",
+          "learn": [
+            "Fetching data inside `useEffect` and storing it in state",
+            "Showing loading and error states while data loads",
+            "Client-side routing with React Router (`Routes`, `Route`, `Link`)",
+            "Reading URL parameters with `useParams`"
+          ],
+          "steps": [
+            "Open `https://dummyjson.com/products?limit=30` in your browser to see the data shape (`products`, `title`, `price`, `thumbnail`, `category`).",
+            "In `App`, fetch the products inside a `useEffect` with an empty dependency array and save them in state, along with `loading` and `error` state.",
+            "Show a 'Loading products...' message while loading and a friendly error message if the fetch fails.",
+            "Install React Router with `npm install react-router-dom` and set up routes for `/` (the grid) and `/product/:id` (details).",
+            "Wrap each product card in a `Link` to its detail page.",
+            "Build a `ProductDetail` page that reads the id with `useParams`, fetches `https://dummyjson.com/products/<id>`, and shows images, description, rating and an Add to cart button.",
+            "Add a 404 route for unknown URLs and test navigation with the browser back button."
+          ],
+          "deliverables": [
+            "A product grid loaded from the DummyJSON API",
+            "A product detail page for every product at `/product/:id`",
+            "Loading and error messages on both pages",
+            "A demo video browsing from the grid to a product and back"
+          ],
+          "done_when": [
+            "The home page shows products from the API, not the local file",
+            "Clicking a card opens its detail page without a full page reload",
+            "Refreshing on a detail page still shows the correct product",
+            "A failed request shows an error message instead of a blank screen",
+            "Visiting an unknown URL shows a Not Found page"
+          ],
+          "hints": [
+            "Forgetting the dependency array in `useEffect` causes an infinite fetch loop.",
+            "Check `response.ok` before calling `response.json()` so HTTP errors are caught.",
+            "Your cart from Week 2 still works, as long as API products have an `id`, `title` and `price`.",
+            "See [reactrouter.com](https://reactrouter.com) for setup and the `useParams` hook."
+          ],
+          "stretch": "Fetch categories from `https://dummyjson.com/products/categories` and add a category filter.",
+          "post_highlights": [
+            "Connected my React store to the DummyJSON API using useEffect and fetch",
+            "Added product detail pages with React Router and URL parameters",
+            "Handled loading and error states for a smoother shopping experience"
+          ]
+        },
+        "4": {
+          "title": "Global Cart with Context & Checkout",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Move the cart into React Context so any page can use it, save it in localStorage, and build a practice checkout form with validation. You will finish with a complete, deployed mini store and a clear README.",
+          "learn": [
+            "Sharing state across pages with `createContext` and `useContext`",
+            "Syncing state to `localStorage` with `useEffect`",
+            "Building and validating a controlled form",
+            "Deploying a Vite app to a free host"
+          ],
+          "steps": [
+            "Create a `CartContext` with a `CartProvider` that holds the cart state and the add, remove and update functions.",
+            "Wrap your app in `CartProvider` and replace the cart props with `useContext(CartContext)` in the header, cards, detail page and cart.",
+            "Load the initial cart from `localStorage` and save it in a `useEffect` whenever the cart changes.",
+            "Add a `/checkout` route with a form for name, phone, address and pincode, with an order summary beside it.",
+            "Validate the form on submit (required fields, 10-digit phone, 6-digit pincode) and show errors next to each field.",
+            "On success, clear the cart and show an 'Order placed' page with a fake order number (no real payment).",
+            "Write a README with screenshots and setup steps, then deploy with `npm run build` to Netlify or Vercel's free plan."
+          ],
+          "deliverables": [
+            "A `CartContext` used by every component that needs the cart",
+            "A cart that survives a page refresh",
+            "A validated checkout form and an order confirmation page",
+            "A live URL and a README with screenshots"
+          ],
+          "done_when": [
+            "No component receives cart data or functions through props anymore",
+            "Refreshing the page keeps the cart contents",
+            "Submitting the checkout with invalid data shows field-level errors",
+            "A valid order clears the cart and shows a confirmation",
+            "The deployed app works, including refreshing on a detail page"
+          ],
+          "hints": [
+            "Put the context and provider in their own file like `src/context/CartContext.jsx` to keep things tidy.",
+            "Pass a function to `useState` to read localStorage only once: `useState(() => JSON.parse(localStorage.getItem('cart')) || [])`.",
+            "If refreshing a route gives a 404 on Netlify, add a `_redirects` file in `public/` with `/* /index.html 200`.",
+            "Read 'Passing Data Deeply with Context' on [react.dev](https://react.dev)."
+          ],
+          "stretch": "Add a coupon code field that applies a 10% discount for the code `SKILLME10`.",
+          "post_highlights": [
+            "Built a complete React e-commerce store with a global cart using Context",
+            "Persisted the cart with localStorage and added a validated checkout flow",
+            "Deployed OmniStore live with product pages, search and cart"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "StreamVibe: Interactive Media & Video Streaming Hub",
+      "tagline": "Build a Netflix-style app in React to browse TV shows, watch a trailer, filter by genre and keep your own watchlist.",
+      "weeks": {
+        "1": {
+          "title": "Show Catalogue with Components & Props",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Set up a React project with Vite and build the StreamVibe home page: a navbar, a hero section with a video, and rows of show cards. You will learn how to split a page into reusable components and pass data with props.",
+          "learn": [
+            "Creating and running a React project with Vite",
+            "Writing components in JSX",
+            "Passing data to components with props",
+            "Rendering lists with `.map()` and keys"
+          ],
+          "steps": [
+            "Run `npm create vite@latest streamvibe -- --template react`, then `npm install` and `npm run dev`.",
+            "Clear out the Vite demo code and commit a blank starting point.",
+            "Create `src/data/shows.js` with 10-12 show objects containing `id`, `title`, `genre`, `year`, `rating` and `poster`.",
+            "Build a `Navbar` component and a `Hero` component that shows a featured title, a short description and a native `<video controls>` element playing a short sample clip saved in `public/`.",
+            "Build a `ShowCard` component that receives one show as props and shows its poster, title, year and rating.",
+            "Build a `ShowRow` component that takes a `title` and a list of shows, and renders them in a horizontal row.",
+            "In `App`, render two or three `ShowRow`s such as 'Trending' and 'Comedy' by filtering the data, then style with a dark theme and commit."
+          ],
+          "deliverables": [
+            "A Vite + React project that runs locally",
+            "`Navbar`, `Hero`, `ShowCard` and `ShowRow` components in separate files",
+            "A dark-themed home page with at least two rows of shows and a playable hero video",
+            "A short demo video scrolling through the page"
+          ],
+          "done_when": [
+            "The app starts with `npm run dev` without errors",
+            "`ShowCard` and `ShowRow` get their data only through props",
+            "The same `ShowRow` component is reused for every row",
+            "The hero video plays with native controls",
+            "There are no key warnings in the console"
+          ],
+          "hints": [
+            "Keep the sample video short and small (a few MB) so it loads quickly and fits in your repo.",
+            "Use `overflow-x: auto` and `display: flex` on rows to get the sideways-scrolling Netflix look.",
+            "Posters can be any free images you have the right to use, or plain coloured boxes with the title for now.",
+            "Components and props are explained in the tutorial on [react.dev](https://react.dev)."
+          ],
+          "stretch": "Add a hover effect that slightly enlarges a card and shows its genre.",
+          "post_highlights": [
+            "Built the home page of a Netflix-style streaming app with React and Vite",
+            "Created reusable ShowCard and ShowRow components driven by props",
+            "Added a hero section with a playable video using the HTML video element"
+          ]
+        },
+        "2": {
+          "title": "Genre Filters, Details & Watchlist with State",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Make StreamVibe interactive with React state: filter shows by genre, open a details modal, and add shows to a watchlist. You will learn how state and events drive what the user sees.",
+          "learn": [
+            "Storing changing data with `useState`",
+            "Handling click events and passing handler functions as props",
+            "Conditional rendering (showing or hiding a modal)",
+            "Lifting state up so several components share it"
+          ],
+          "steps": [
+            "Add genre buttons (All, Drama, Comedy, Sci-Fi and so on) and a `selectedGenre` state in `App` that filters the shows shown.",
+            "Add a `selectedShow` state and make clicking a `ShowCard` set it.",
+            "Build a `ShowModal` component that appears only when `selectedShow` is not null and shows the full details with a Close button.",
+            "Add a `watchlist` state in `App` holding show ids, and an 'Add to Watchlist' / 'Remove' toggle button in the modal and on cards.",
+            "Add a 'My Watchlist' row at the top that shows only shows in the watchlist, or a friendly message when it is empty.",
+            "Show the watchlist count in the navbar and test every interaction before committing."
+          ],
+          "deliverables": [
+            "Working genre filter buttons",
+            "A details modal that opens and closes",
+            "A watchlist row with add and remove buttons",
+            "A demo video filtering, opening a show and adding it to the watchlist"
+          ],
+          "done_when": [
+            "Choosing a genre shows only matching shows, and All shows everything",
+            "Clicking a card opens a modal with that show's details, and Close hides it",
+            "The watchlist button text changes between Add and Remove correctly",
+            "A show cannot appear twice in the watchlist",
+            "The navbar count always matches the watchlist row"
+          ],
+          "hints": [
+            "Store only ids in the watchlist and look up full show objects when rendering.",
+            "Use `watchlist.includes(show.id)` to decide which button label to show.",
+            "Close the modal when the dark background is clicked, but stop the click inside the modal with `event.stopPropagation()`.",
+            "See 'Adding Interactivity' on [react.dev](https://react.dev)."
+          ],
+          "stretch": "Let users close the modal with the Escape key.",
+          "post_highlights": [
+            "Added genre filtering and a show details modal to my React streaming app",
+            "Built a watchlist feature using useState and lifted state",
+            "Used conditional rendering and event handlers to create a smooth browsing experience"
+          ]
+        },
+        "3": {
+          "title": "Live Shows from the TVMaze API & Routing",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Replace your local data with real TV shows from the free TVMaze API, add live search, and give every show its own page with React Router. You will learn how to load data in React and build a multi-page app.",
+          "learn": [
+            "Fetching data with `fetch` inside `useEffect`",
+            "Handling loading, empty and error states",
+            "Client-side routing with React Router and `useParams`",
+            "Re-running an effect when a value such as a search term changes"
+          ],
+          "steps": [
+            "Open `https://api.tvmaze.com/shows` in your browser and note the fields you need: `id`, `name`, `genres`, `image.medium`, `rating.average` and `summary`.",
+            "Fetch the shows in a `useEffect` in `App`, store them in state, and adapt your components to the new field names.",
+            "Show a loading message while fetching and an error message if the request fails.",
+            "Add a search box that calls `https://api.tvmaze.com/search/shows?q=<term>` when the user submits, and shows the results in a row.",
+            "Install `react-router-dom` and set up routes for `/` and `/show/:id`, linking each card to its page.",
+            "Build a `ShowPage` that reads the id with `useParams`, fetches `https://api.tvmaze.com/shows/<id>`, and shows the poster, genres, rating, summary and a watchlist button.",
+            "Test searching for a show, opening it, and using the browser back button."
+          ],
+          "deliverables": [
+            "A home page filled with shows from the TVMaze API",
+            "A working search that shows live results",
+            "A show page for each show at `/show/:id`",
+            "A demo video searching for a show and opening its page"
+          ],
+          "done_when": [
+            "The home page shows real shows from TVMaze",
+            "Searching a title shows matching results, and a search with no results shows a message",
+            "Clicking a show opens its page without a full reload",
+            "Refreshing a show page still loads the correct show",
+            "A network failure shows an error message instead of a blank page"
+          ],
+          "hints": [
+            "Search results are wrapped: each item looks like `{ score, show }`, so use `item.show`.",
+            "Some shows have no image or rating, so add fallbacks to avoid `Cannot read properties of null` errors.",
+            "The `summary` field contains HTML tags; strip them with `summary.replace(/<[^>]+>/g, '')` before displaying.",
+            "See [reactrouter.com](https://reactrouter.com) for routing basics."
+          ],
+          "stretch": "Show the cast on the show page using `https://api.tvmaze.com/shows/<id>/cast`.",
+          "post_highlights": [
+            "Connected my React streaming app to the TVMaze API using useEffect and fetch",
+            "Added live show search and individual show pages with React Router",
+            "Handled loading, empty and error states for real-world API data"
+          ]
+        },
+        "4": {
+          "title": "Watchlist with Context, Ratings & Deploy",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Move the watchlist into React Context so it works on every page, save it with localStorage, and let users give their own star ratings. Then polish the layout for mobile and deploy StreamVibe for free.",
+          "learn": [
+            "Sharing state across pages with `createContext` and `useContext`",
+            "Persisting state with `localStorage` and `useEffect`",
+            "Building a small reusable interactive component (star rating)",
+            "Building and deploying a Vite app"
+          ],
+          "steps": [
+            "Create a `WatchlistContext` with a provider that holds the watchlist and `add`, `remove` and `isInWatchlist` functions.",
+            "Replace the watchlist props with `useContext` in cards, the modal and the show page.",
+            "Store full show objects (id, name, image) in the watchlist so a `/watchlist` page can show them without refetching.",
+            "Save the watchlist to `localStorage` whenever it changes and load it on startup.",
+            "Build a `StarRating` component (1-5 clickable stars) and save each user's rating per show id in the same context.",
+            "Make the layout responsive for phones and write a README with screenshots and setup steps.",
+            "Run `npm run build` and deploy to Netlify or Vercel's free plan, then test the live link."
+          ],
+          "deliverables": [
+            "A `WatchlistContext` used across the app",
+            "A `/watchlist` page that survives a refresh",
+            "A reusable `StarRating` component with saved ratings",
+            "A live URL and a README with screenshots"
+          ],
+          "done_when": [
+            "The watchlist works on the home page, show pages and watchlist page without prop drilling",
+            "Watchlist items and ratings are still there after closing and reopening the browser",
+            "Clicking a star sets the rating and the stars update to show it",
+            "The app is usable on a phone-sized screen",
+            "The deployed app loads and routes correctly"
+          ],
+          "hints": [
+            "Initialise state from localStorage with a function: `useState(() => JSON.parse(localStorage.getItem('watchlist')) || [])`.",
+            "Render stars with `[1, 2, 3, 4, 5].map()` and compare each number with the current rating.",
+            "On Netlify, add `public/_redirects` containing `/* /index.html 200` so refreshing deep links works.",
+            "Read 'Passing Data Deeply with Context' on [react.dev](https://react.dev)."
+          ],
+          "stretch": "Build custom play, pause and mute buttons for the hero video using `useRef`.",
+          "post_highlights": [
+            "Built a global watchlist in React using Context and localStorage",
+            "Created a reusable star rating component for personal show ratings",
+            "Deployed StreamVibe live as a complete React media browsing app"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "RecipeBox: Recipe Finder & Meal Planner",
+      "tagline": "Build a React app to search recipes, save your favourites and plan your meals for the week.",
+      "weeks": {
+        "1": {
+          "title": "Recipe Cards with Components & Props",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Set up a React project with Vite and build a page of recipe cards from a local data file. You will learn how to build a UI out of small components that receive data through props.",
+          "learn": [
+            "Creating and running a React project with Vite",
+            "Writing components in JSX",
+            "Passing data with props, including arrays",
+            "Rendering lists with `.map()` and keys"
+          ],
+          "steps": [
+            "Run `npm create vite@latest recipebox -- --template react`, then `npm install` and `npm run dev`.",
+            "Remove the Vite demo code and commit a clean start.",
+            "Create `src/data/recipes.js` with 6-8 recipes, each with `id`, `name`, `category`, `time` (minutes), `image` and an `ingredients` array.",
+            "Build a `Header` component with the app name and a short tagline.",
+            "Build a `RecipeCard` component that shows the image, name, category and cooking time from props.",
+            "Build an `IngredientList` component that receives the `ingredients` array and renders a `ul`, and use it inside `RecipeCard`.",
+            "Render all recipes in a responsive CSS Grid in `App`, then commit."
+          ],
+          "deliverables": [
+            "A Vite + React project that runs locally",
+            "`Header`, `RecipeCard` and `IngredientList` components in separate files",
+            "A grid of at least 6 recipe cards from local data",
+            "Screenshots or a short demo video"
+          ],
+          "done_when": [
+            "The app starts without errors",
+            "`RecipeCard` shows only data passed in through props",
+            "`IngredientList` is a separate component used inside each card",
+            "There are no key warnings in the console",
+            "Adding a recipe to the data file adds a new card"
+          ],
+          "hints": [
+            "Include recipes you actually cook at home, which makes your demo more personal.",
+            "Use `ingredients.map((item, index) => ...)` and prefer a real id over the index when you have one.",
+            "Keep cards the same height by limiting how many ingredients show and adding a 'more...' note.",
+            "Learn the basics in the tutorial at [react.dev](https://react.dev)."
+          ],
+          "stretch": "Add a small 'Veg' or 'Non-veg' badge on each card based on a `veg` field.",
+          "post_highlights": [
+            "Set up RecipeBox, a recipe app built with React and Vite",
+            "Built reusable RecipeCard and IngredientList components using props",
+            "Rendered a responsive grid of recipes from a local data file"
+          ]
+        },
+        "2": {
+          "title": "Search, Filters & Favourites with State",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Add interactivity with React state so users can search recipes, filter by category and mark favourites. You will learn how state changes make React update the page for you.",
+          "learn": [
+            "Storing changing values with `useState`",
+            "Controlled inputs for search boxes",
+            "Handling click events and passing handlers as props",
+            "Deriving filtered lists from state instead of storing copies"
+          ],
+          "steps": [
+            "Add a search input in `App` with `search` state, and show only recipes whose name includes the search text.",
+            "Add category buttons (All, Breakfast, Lunch, Dinner, Dessert) with a `category` state that works together with search.",
+            "Add a `favourites` state holding recipe ids, and a heart button on each card that toggles the recipe in or out.",
+            "Add a 'Show favourites only' toggle that filters the grid to favourite recipes.",
+            "Show a friendly 'No recipes found' message when the filters match nothing.",
+            "Test combinations of search, category and favourites, then commit."
+          ],
+          "deliverables": [
+            "A working search box",
+            "Category filter buttons",
+            "Favourite toggles and a favourites-only view",
+            "A demo video using search, filters and favourites together"
+          ],
+          "done_when": [
+            "Search is case-insensitive and updates as you type",
+            "Category and search filters work at the same time",
+            "The heart button clearly shows whether a recipe is a favourite",
+            "The favourites-only toggle shows exactly the favourite recipes",
+            "An empty result shows a message instead of a blank area"
+          ],
+          "hints": [
+            "Compute `visibleRecipes` with `recipes.filter(...)` during render; do not keep it in separate state.",
+            "Toggle a favourite with `favourites.includes(id) ? favourites.filter(f => f !== id) : [...favourites, id]`.",
+            "Highlight the active category button with a conditional class name.",
+            "See 'Managing State' on [react.dev](https://react.dev)."
+          ],
+          "stretch": "Add a 'Max cooking time' slider that hides recipes that take longer.",
+          "post_highlights": [
+            "Added live search and category filters to my React recipe app",
+            "Built a favourites feature with useState and event handlers",
+            "Combined multiple filters by deriving data from state"
+          ]
+        },
+        "3": {
+          "title": "Real Recipes from TheMealDB & Routing",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Connect RecipeBox to TheMealDB, a free recipe API, so users can search thousands of real dishes and open a detail page for each. You will learn to fetch data in React and build a multi-page app with React Router.",
+          "learn": [
+            "Fetching data with `fetch` inside `useEffect` or an event handler",
+            "Handling loading, empty and error states",
+            "Client-side routing with React Router and `useParams`",
+            "Transforming messy API data into a clean shape"
+          ],
+          "steps": [
+            "Try `https://www.themealdb.com/api/json/v1/1/search.php?s=chicken` in your browser and look at `strMeal`, `strMealThumb`, `strCategory` and `idMeal`.",
+            "Change the search box to call the API when the form is submitted, and store results, `loading` and `error` in state.",
+            "Load a default search (for example `s=paneer`) in a `useEffect` when the app first opens.",
+            "Show 'No recipes found' when the API returns `meals: null`, and a friendly error if the request fails.",
+            "Install `react-router-dom`, add routes for `/` and `/recipe/:id`, and link each card to its detail page.",
+            "Build a `RecipePage` that fetches `https://www.themealdb.com/api/json/v1/1/lookup.php?i=<id>` and shows the image, category, cuisine, instructions and ingredients.",
+            "Write a helper that turns `strIngredient1..20` and `strMeasure1..20` into a clean array, skipping empty values."
+          ],
+          "deliverables": [
+            "Recipe search powered by TheMealDB",
+            "A detail page for every recipe at `/recipe/:id`",
+            "An ingredient-list helper that cleans the API data",
+            "A demo video searching a dish and opening its recipe"
+          ],
+          "done_when": [
+            "Searching shows real recipes from TheMealDB",
+            "A search with no matches shows a 'No recipes found' message",
+            "Clicking a card opens the recipe page without a full reload",
+            "The recipe page shows a clean ingredient list with no empty rows",
+            "A network error shows a friendly message"
+          ],
+          "hints": [
+            "The API returns `null` (not an empty array) when nothing is found, so check for it before calling `.map()`.",
+            "Build the ingredient list with a loop from 1 to 20 reading `meal['strIngredient' + i]`.",
+            "Your favourites can keep working if you store `idMeal` values instead of your old ids.",
+            "API details are on [TheMealDB](https://www.themealdb.com) website, and routing on [reactrouter.com](https://reactrouter.com)."
+          ],
+          "stretch": "Add a 'Surprise me' button that loads `random.php` and opens that recipe.",
+          "post_highlights": [
+            "Connected my React recipe app to TheMealDB API for real recipe search",
+            "Added recipe detail pages with React Router and URL parameters",
+            "Cleaned up messy API data into a readable ingredient list"
+          ]
+        },
+        "4": {
+          "title": "Meal Planner with Context & Deploy",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Build a weekly meal planner where users add recipes to days of the week, backed by React Context and localStorage. Finish by generating a shopping list, polishing for mobile, and deploying RecipeBox.",
+          "learn": [
+            "Sharing state across pages with `createContext` and `useContext`",
+            "Working with nested state (an object of days holding recipe lists)",
+            "Persisting state with `localStorage`",
+            "Building and deploying a Vite app"
+          ],
+          "steps": [
+            "Create a `PlannerContext` that stores favourites and a `plan` object like `{ Mon: [], Tue: [], ... }`.",
+            "Move favourites into the context and use `useContext` wherever they are needed.",
+            "On the recipe page, add a day dropdown and an 'Add to plan' button that saves the recipe's id, name and ingredients to that day.",
+            "Build a `/planner` page showing the 7 days with their recipes and a remove button on each.",
+            "Generate a shopping list on the planner page by combining all ingredients from the week and removing duplicates.",
+            "Save the context data to `localStorage` whenever it changes and load it on startup.",
+            "Make the planner responsive, write a README with screenshots, then build and deploy to Netlify or Vercel's free plan."
+          ],
+          "deliverables": [
+            "A `PlannerContext` used for favourites and the meal plan",
+            "A `/planner` page with 7 days and a generated shopping list",
+            "Plans and favourites that survive a refresh",
+            "A live URL and a README with screenshots"
+          ],
+          "done_when": [
+            "A recipe can be added to any day and removed again",
+            "The shopping list updates when the plan changes and has no duplicate ingredients",
+            "Plans and favourites remain after closing and reopening the browser",
+            "No component receives planner data through long prop chains",
+            "The deployed app works on desktop and mobile"
+          ],
+          "hints": [
+            "Update nested state with a copy: `setPlan({ ...plan, [day]: [...plan[day], recipe] })`.",
+            "Use a `Set` to remove duplicate ingredient names: `[...new Set(list)]`.",
+            "Add `public/_redirects` with `/* /index.html 200` on Netlify so refreshing `/planner` works.",
+            "Read about Context on [react.dev](https://react.dev)."
+          ],
+          "stretch": "Let users tick off shopping list items and keep the ticks saved.",
+          "post_highlights": [
+            "Built a weekly meal planner in React using Context and localStorage",
+            "Generated an automatic shopping list from planned recipes",
+            "Deployed RecipeBox live with search, favourites and meal planning"
+          ]
+        }
+      }
+    }
+  ]
+}

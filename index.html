@@ -155,7 +155,7 @@
             "name": "What are the requirements for the SkillMe internship?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "The entire 4-week internship — tasks, GitHub access, offer letter, and guidance — is open to all students who pass the screening quiz. You work remotely at your own pace and submit your pull requests on GitHub."
+              "text": "The entire 4-week internship — tasks, offer letter, and guidance — is free for every student who takes the screening quiz. You work remotely at your own pace, build each week's project, and submit it as a LinkedIn post. The only fee is an optional ₹129 for the verified certificate + LOR, which unlocks at the end, once 3 of your 4 weekly milestones are approved."
             }
           },
           {
@@ -163,7 +163,7 @@
             "name": "How is my performance evaluated during the SkillMe internship?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Your performance is tracked through automated test builds and code reviews. Scores are based on the number of issues resolved, PR quality, code review standards, and task difficulty. Top performers are highlighted to our hiring partners for direct referrals."
+              "text": "Every weekly submission is reviewed by the SkillMe team against that week's acceptance criteria. Your progress is the number of approved milestones out of 4. Top performers are highlighted to our hiring partners for direct referrals."
             }
           },
           {
@@ -179,7 +179,7 @@
             "name": "What is the duration and commitment required for SkillMe?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "The internship is 4 weeks long. Each week, you receive GitHub issues to solve. You work at your own pace within the weekly deadlines. Most students spend 2–4 hours per day on tasks — it's fully remote and flexible."
+              "text": "The internship is 4 weeks long, with one project milestone per week. You work at your own pace within your 4-week window. Most students spend 2–4 hours per day on tasks — it's fully remote and flexible."
             }
           },
           {
@@ -192,10 +192,10 @@
           },
           {
             "@type": "Question",
-            "name": "How do the weekly GitHub tasks work in SkillMe?",
+            "name": "How do the weekly tasks work in SkillMe?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Each week, you're assigned GitHub issues in your batch's repository. Fork the repo, fix the issue, raise a Pull Request. Our automated tests verify your solution. This is the exact same workflow used at real software companies — it's genuinely valuable experience."
+              "text": "Each week has one milestone on your project, with clear requirements and acceptance criteria in your dashboard. Build it, share it as a LinkedIn post using the caption we provide, and paste the post link into your dashboard. The SkillMe team reviews it and approves the milestone or tells you what to fix."
             }
           },
           {
@@ -211,7 +211,7 @@
             "name": "Can I do internships in multiple domains at SkillMe?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Absolutely. Each domain is an independent internship with its own batch, timeline, and certificate. Many students do 2–3 domains to build a diverse GitHub portfolio. Each one adds a new set of contributions and a new certificate to your profile."
+              "text": "Absolutely. Each domain is an independent internship with its own timeline, projects, and certificate. Many students do 2–3 domains to build a diverse GitHub portfolio. Each one adds a new set of contributions and a new certificate to your profile."
             }
           }
         ]
@@ -309,22 +309,22 @@
 
     <div class="hero-visual reveal reveal-delay-2" style="margin-top: 48px; width: 100%;">
       <!-- Aesthetic Floating Proof-of-Work Status Pill -->
-      <div class="terminal-status-tag" id="live-activity-ribbon" role="region" aria-label="Live Activity Status" style="margin: 0 auto 24px;">
+      <div class="terminal-status-tag" id="live-activity-ribbon" role="region" aria-label="Live Activity Status" style="margin: 0 auto 24px; display: none;">
         <div class="status-live-beacon">
           <span class="live-pulse-dot"></span>
           <span class="status-beacon-text">LIVE ACTIVITY</span>
         </div>
         <div class="status-ticker-text" id="live-ticker-track">
           <div class="live-ticker-item" id="live-ticker-item">
-            <span class="activity-avatar" id="ticker-avatar">RS</span>
-            <span class="activity-user" id="ticker-user">Rahul S.</span>
-            <span class="activity-college-pill" id="ticker-college">AKTU</span>
-            <span class="activity-action" id="ticker-action">merged PR for FastAPI Auth</span>
-            <span class="activity-time" id="ticker-time">3m ago</span>
+            <span class="activity-avatar" id="ticker-avatar"></span>
+            <span class="activity-user" id="ticker-user"></span>
+            <span class="activity-college-pill" id="ticker-college"></span>
+            <span class="activity-action" id="ticker-action"></span>
+            <span class="activity-time" id="ticker-time"></span>
           </div>
         </div>
         <div class="status-stat-pill" id="live-ticker-stat">
-          <strong id="ticker-pr-count">428+</strong> Milestones Approved Across <strong id="ticker-college-count">68+</strong> Colleges
+          <strong id="ticker-pr-count"></strong> Milestones Approved Across <strong id="ticker-college-count"></strong> Colleges
         </div>
       </div>
 
@@ -488,7 +488,7 @@
           <div>
             <span class="step-badge">Step 02</span>
             <h3>Official Offer Letter</h3>
-            <p>Receive a verified offer letter with your assigned batch, domain, and start date.</p>
+            <p>Receive a verified offer letter with your domain and start date.</p>
           </div>
         </div>
 
@@ -583,13 +583,13 @@
         <span class="section-label">Domains</span>
         <h2 class="section-title">Choose Your Track</h2>
         <p class="section-subtitle">
-          12+ domains across the tech landscape. Pick the one that matches your interest and skill level.
+          15 domains across the tech landscape. Pick the one that matches your interest and skill level.
         </p>
       </div>
 
       <!-- Domain Category Tabs -->
       <div class="domain-filter-tabs reveal" role="tablist" aria-label="Domain Category Filter">
-        <button class="filter-tab active" data-category="all" role="tab" aria-selected="true">All Tracks (12)</button>
+        <button class="filter-tab active" data-category="all" role="tab" aria-selected="true">All Tracks (15)</button>
         <button class="filter-tab" data-category="fullstack" role="tab" aria-selected="false">Web &amp; Full Stack</button>
         <button class="filter-tab" data-category="ai" role="tab" aria-selected="false">AI &amp; Python</button>
         <button class="filter-tab" data-category="systems" role="tab" aria-selected="false">DevOps &amp; Core</button>
@@ -680,17 +680,41 @@
         <div class="domain-card reveal reveal-delay-6" id="domain-cloud" data-category="mobile">
           <div>
             <h3>Cloud / AWS</h3>
-            <span class="domain-tech">AWS • Cloud Architecture</span>
+            <span class="domain-tech">AWS • Serverless • Storage</span>
           </div>
-          <span class="domain-badge coming-soon">Coming Soon</span>
+          <span class="domain-badge open">Open</span>
         </div>
 
         <div class="domain-card reveal reveal-delay-6" id="domain-cyber" data-category="systems">
           <div>
             <h3>Cybersecurity</h3>
-            <span class="domain-tech">SecOps • Penetration Testing</span>
+            <span class="domain-tech">Web Security • Python • OWASP</span>
           </div>
-          <span class="domain-badge coming-soon">Coming Soon</span>
+          <span class="domain-badge open">Open</span>
+        </div>
+
+        <div class="domain-card reveal reveal-delay-6" id="domain-uiux" data-category="fullstack">
+          <div>
+            <h3>UI/UX Design</h3>
+            <span class="domain-tech">Figma • Research • Prototyping</span>
+          </div>
+          <span class="domain-badge open">Open</span>
+        </div>
+
+        <div class="domain-card reveal reveal-delay-6" id="domain-genai" data-category="ai">
+          <div>
+            <h3>Generative AI</h3>
+            <span class="domain-tech">LLM APIs • Prompting • RAG</span>
+          </div>
+          <span class="domain-badge open">Open</span>
+        </div>
+
+        <div class="domain-card reveal reveal-delay-6" id="domain-sql" data-category="systems">
+          <div>
+            <h3>SQL / Databases</h3>
+            <span class="domain-tech">SQL • PostgreSQL • Data Modeling</span>
+          </div>
+          <span class="domain-badge open">Open</span>
         </div>
       </div>
     </div>
@@ -734,7 +758,7 @@
 
         <div class="benefit-card reveal reveal-delay-5" id="benefit-offer">
           <h3>Official Offer Letter</h3>
-          <p>Receive a proper internship offer letter with joining date, batch details, and domain assignment. Exactly what you need for your resume and college records.</p>
+          <p>Receive a proper internship offer letter with joining date and domain assignment. Exactly what you need for your resume and college records.</p>
         </div>
 
         <div class="benefit-card reveal reveal-delay-6" id="benefit-github">
@@ -774,7 +798,7 @@
         <div class="cert-showcase-info">
           <span class="showcase-tag">Tamper-Proof Proof of Work</span>
           <h3>Recruiters Verify Your Actual Code Commits</h3>
-          <p>Unlike generic completion certificates that anyone can edit, every SkillMe certificate is linked directly to your GitHub Pull Requests, mentor review score, and cryptographic timestamp.</p>
+          <p>Unlike generic completion certificates that anyone can edit, every SkillMe certificate has a unique ID that anyone can check on our verification page, backed by your approved weekly submissions.</p>
           <ul class="showcase-features">
             <li><span>✓</span> <strong>Instant QR Code Validation:</strong> Any employer can scan and verify authenticity in seconds.</li>
             <li><span>✓</span> <strong>Letter of Recommendation (LOR):</strong> Performance-based endorsement highlighting your code contributions.</li>
@@ -851,7 +875,7 @@
                 <span class="faq-icon">+</span>
               </button>
               <div class="faq-answer">
-                <p>The entire 4-week internship — tasks, GitHub access, offer letter, and guidance — is open to all students who pass the screening quiz. You work remotely at your own pace and submit your pull requests on GitHub.</p>
+                <p>The entire 4-week internship — tasks, offer letter, and guidance — is free for every student who takes the screening quiz. You work remotely at your own pace, build each week's project, and submit it as a LinkedIn post. The only fee is an optional ₹129 for the verified certificate + LOR, which unlocks at the end, once 3 of your 4 weekly milestones are approved.</p>
                 <div class="faq-tag-row">
                   <span class="faq-tag">Screening Quiz</span>
                   <span class="faq-tag">100% Remote</span>
@@ -870,8 +894,8 @@
               <div class="faq-answer">
                 <p>Your performance is tracked through verified milestone submissions and admin reviews. Scores are based on the number of tasks resolved, submission quality, and project completion. Top performers are highlighted to our hiring partners for direct referrals.</p>
                 <div class="faq-tag-row">
-                  <span class="faq-tag">CI/CD Tests</span>
-                  <span class="faq-tag">Code Review</span>
+                  <span class="faq-tag">Weekly Review</span>
+                  <span class="faq-tag">4 Milestones</span>
                 </div>
               </div>
             </div>
@@ -902,7 +926,7 @@
                 <span class="faq-icon">+</span>
               </button>
               <div class="faq-answer">
-                <p>The internship is 4 weeks long. Each week, you receive GitHub issues to solve. You work at your own pace within the weekly deadlines. Most students spend 2–4 hours per day on tasks — it's fully remote and flexible.</p>
+                <p>The internship is 4 weeks long, with one project milestone per week. You work at your own pace within your 4-week window. Most students spend 2–4 hours per day on tasks — it's fully remote and flexible.</p>
                 <div class="faq-tag-row">
                   <span class="faq-tag">4 Weeks</span>
                   <span class="faq-tag">Flexible Hours</span>
@@ -931,12 +955,12 @@
               <button class="faq-question" aria-expanded="false">
                 <div class="faq-q-left">
                   <span class="faq-num">06</span>
-                  <span>How do the weekly GitHub tasks work?</span>
+                  <span>How do the weekly tasks work?</span>
                 </div>
                 <span class="faq-icon">+</span>
               </button>
               <div class="faq-answer">
-                <p>Each week, you're assigned GitHub issues in your batch's repository. Fork the repo, fix the issue, raise a Pull Request. Our automated tests verify your solution. This is the exact same workflow used at real software companies — it's genuinely valuable experience.</p>
+                <p>Each week has one milestone on your project, with clear requirements and acceptance criteria in your dashboard. Build it, share it as a LinkedIn post using the caption we provide, and paste the post link into your dashboard. The SkillMe team reviews it and approves the milestone or tells you what to fix.</p>
                 <div class="faq-tag-row">
                   <span class="faq-tag">Verified Tasks</span>
                   <span class="faq-tag">Real Projects</span>
@@ -970,7 +994,7 @@
                 <span class="faq-icon">+</span>
               </button>
               <div class="faq-answer">
-                <p>Absolutely. Each domain is an independent internship with its own batch, timeline, and certificate. Many students do 2–3 domains to build a diverse GitHub portfolio. Each one adds a new set of contributions and a new certificate to your profile.</p>
+                <p>Absolutely. Each domain is an independent internship with its own timeline, projects, and certificate. Many students do 2–3 domains to build a diverse GitHub portfolio. Each one adds a new set of contributions and a new certificate to your profile.</p>
                 <div class="faq-tag-row">
                   <span class="faq-tag">Multi-Track</span>
                   <span class="faq-tag">Diverse Portfolio</span>
@@ -992,7 +1016,7 @@
         <!-- Top Live Badge & Counter -->
         <div class="cta-top-badge">
           <span class="cta-live-beacon"></span>
-          <span class="cta-badge-text">APPLICATIONS OPEN • LIMITED TO 250 INTERNS</span>
+          <span class="cta-badge-text">APPLICATIONS OPEN</span>
         </div>
 
         <h2 class="cta-main-title">Join SkillMe. Build Portfolio. Get Placed.</h2>
@@ -1031,7 +1055,7 @@
         <!-- Enrollment Status Pill -->
         <div class="cta-cohort-status">
           <span class="cohort-dot"></span>
-          <span>Enrollment Open for <strong>Upcoming Sprints</strong> • <strong>84% Slots Reserved</strong></span>
+          <span>Enrollment Open for <strong>Upcoming Sprints</strong></span>
         </div>
 
         <!-- 4-Bento Trust Feature Chips -->
@@ -1040,7 +1064,7 @@
             <div class="bento-icon emerald">✓</div>
             <div class="bento-text">
               <strong>Zero Upfront Risk</strong>
-              <span>Screening quiz &amp; enrollment are free to start</span>
+              <span>Quiz, enrollment &amp; tasks are free · ₹129 only if you want the verified certificate + LOR</span>
             </div>
           </div>
           <div class="cta-bento-card">

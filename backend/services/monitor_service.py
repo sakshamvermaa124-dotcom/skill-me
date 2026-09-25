@@ -440,10 +440,10 @@ async def test_certificate_verify() -> dict:
             return {"status": "pass", "note": "no certificates to verify", "time_ms": elapsed}
 
         row = await db.fetch_one(
-            """SELECT c.*, s.first_name, s.last_name, b.domain, b.batch_number
+            """SELECT c.*, s.first_name, s.last_name, COALESCE(b.domain, s.domain) AS domain
                FROM certificates c
                JOIN students s ON c.student_id = s.id
-               JOIN batches b ON c.batch_id = b.id
+               LEFT JOIN batches b ON c.batch_id = b.id
                WHERE c.cert_id = ?""",
             (cert["cert_id"],),
         )
@@ -487,10 +487,10 @@ async def test_lor_generation() -> dict:
     try:
         cert = await db.fetch_one(
             """SELECT c.cert_id, c.student_id, c.batch_id, s.first_name, s.last_name,
-                      b.domain, b.batch_number
+                      COALESCE(b.domain, s.domain) AS domain
                FROM certificates c
                JOIN students s ON c.student_id = s.id
-               JOIN batches b ON c.batch_id = b.id
+               LEFT JOIN batches b ON c.batch_id = b.id
                LIMIT 1"""
         )
         if not cert:
@@ -501,10 +501,10 @@ async def test_lor_generation() -> dict:
 
         # Test 1: Certificate verify returns data LOR needs
         verify_row = await db.fetch_one(
-            """SELECT c.cert_id, s.first_name, s.last_name, b.domain, b.batch_number, c.issued_at
+            """SELECT c.cert_id, s.first_name, s.last_name, COALESCE(b.domain, s.domain) AS domain, c.issued_at
                FROM certificates c
                JOIN students s ON c.student_id = s.id
-               JOIN batches b ON c.batch_id = b.id
+               LEFT JOIN batches b ON c.batch_id = b.id
                WHERE c.cert_id = ?""",
             (cert["cert_id"],),
         )
@@ -713,7 +713,7 @@ async def test_admin_auth_protection() -> dict:
     start = time.time()
     try:
         urls = _get_candidate_backend_urls()
-        protected_paths = ["/api/admin/stats", "/api/admin/batches", "/api/admin/students"]
+        protected_paths = ["/api/admin/stats", "/api/admin/submissions", "/api/admin/students"]
         failures = []
         async with httpx.AsyncClient(timeout=10) as client:
             working_url = None
@@ -813,7 +813,7 @@ async def check_db_integrity() -> dict:
         if orphaned:
             await _create_alert("system", "warning", "db_integrity",
                 f"{len(orphaned)} orphaned enrollment records",
-                f"Enrollments referencing deleted students/batches: {json.dumps(orphaned, default=str)}",
+                f"Enrollments referencing deleted students/enrollment records: {json.dumps(orphaned, default=str)}",
                 component="backend/db/database.py")
     except Exception as e:
         results["orphaned_enrollments"] = {"error": str(e)}
@@ -830,7 +830,7 @@ async def check_db_integrity() -> dict:
         if orphaned:
             await _create_alert("system", "warning", "db_integrity",
                 f"{len(orphaned)} orphaned submission records",
-                "Submissions referencing deleted batches/students",
+                "Submissions referencing deleted enrollments/students",
                 component="backend/services/submission_service.py")
     except Exception as e:
         results["orphaned_submissions"] = {"error": str(e)}
@@ -1071,12 +1071,12 @@ async def run_initial_audit() -> dict:
     except Exception as e:
         audit["student_status_distribution"] = {"error": str(e)}
 
-    # Batch status distribution
+    # Enrollment status distribution
     try:
-        dist = await db.fetch_all("SELECT status, COUNT(*) as cnt FROM batches GROUP BY status")
-        audit["batch_status_distribution"] = {r["status"]: r["cnt"] for r in dist}
+        dist = await db.fetch_all("SELECT status, COUNT(*) as cnt FROM enrollments GROUP BY status")
+        audit["enrollment_status_distribution"] = {r["status"]: r["cnt"] for r in dist}
     except Exception as e:
-        audit["batch_status_distribution"] = {"error": str(e)}
+        audit["enrollment_status_distribution"] = {"error": str(e)}
 
     audit["db_integrity"] = await check_db_integrity()
     audit["stuck_students"] = await detect_stuck_students()
@@ -1108,8 +1108,7 @@ async def run_initial_audit() -> dict:
     # Zero-progress enrolled students
     try:
         rows = await db.fetch_all(
-            """SELECT s.id, s.first_name, s.last_name, s.email, b.domain, b.batch_number,
-                      b.start_date, b.status as batch_status
+            """SELECT s.id, s.first_name, s.last_name, s.email, b.domain, b.start_date
                FROM students s JOIN enrollments e ON e.student_id = s.id
                JOIN batches b ON e.batch_id = b.id
                WHERE e.status != 'dropped' AND s.email != ?
@@ -1209,8 +1208,8 @@ async def get_student_journey(email: str) -> dict:
     journey = {"student": dict(student)}
 
     journey["enrollments"] = await db.fetch_all(
-        """SELECT e.*, b.domain, b.batch_number, b.status as batch_status
-           FROM enrollments e JOIN batches b ON e.batch_id = b.id WHERE e.student_id = ?""", (sid,))
+        """SELECT e.*, b.domain, b.start_date
+           FROM enrollments e LEFT JOIN batches b ON e.batch_id = b.id WHERE e.student_id = ?""", (sid,))
     journey["progress"] = await db.fetch_all(
         "SELECT * FROM progress WHERE student_id = ? ORDER BY week", (sid,))
     journey["submissions"] = await db.fetch_all(

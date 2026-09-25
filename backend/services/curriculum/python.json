@@ -1,0 +1,564 @@
+{
+  "domain": "python",
+  "tracks": [
+    {
+      "project_name": "PyAnalytics: Local Automation & Data Processing Hub",
+      "tagline": "Build a friendly Python tool that reads your spending data from CSV files, cleans it up and turns it into clear reports, ending with a small web dashboard.",
+      "weeks": {
+        "1": {
+          "title": "Read a CSV and Summarise It",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Write a small Python program that reads a CSV file of expenses and prints useful totals in the terminal. This is the foundation of the whole project, and it practises the everyday Python skills (functions, loops, files and dictionaries) that every later week depends on.",
+          "learn": [
+            "Reading files safely with `with open(...)` and the built-in `csv` module",
+            "Splitting a program into small functions that each do one job",
+            "Using dictionaries to group and total values by category",
+            "Building a simple text menu with `input()` and a `while` loop"
+          ],
+          "steps": [
+            "Create a project folder with `main.py` and a `data/expenses.csv` file containing 15-20 sample rows with the columns `date,category,description,amount`.",
+            "Write a `load_expenses(path)` function that uses `csv.DictReader` to return a list of dictionaries, and print the result to check it works.",
+            "Convert the `amount` column to `float` inside the loader so every later calculation gets numbers, not strings.",
+            "Write `total_spent(expenses)` and `totals_by_category(expenses)` functions, and test each one by printing its result before moving on.",
+            "Add a `biggest_expense(expenses)` function that returns the single largest row.",
+            "Build a menu loop in `main()` with options like `1) Show all  2) Totals by category  3) Biggest expense  4) Quit`.",
+            "Print results in neat aligned columns using f-strings such as `f'{category:<12} {amount:>8.2f}'`.",
+            "Commit your code to a Git repo with a short README explaining how to run `python main.py`."
+          ],
+          "deliverables": [
+            "`main.py` with separate functions for loading, totalling and displaying data",
+            "A sample `data/expenses.csv` file with at least 15 rows",
+            "A working menu-driven CLI you can run with `python main.py`",
+            "A README with run instructions and a screenshot of the output"
+          ],
+          "done_when": [
+            "Running `python main.py` shows a menu and each option prints the correct result",
+            "The category totals add up to the overall total printed by the program",
+            "Choosing Quit exits cleanly without an error",
+            "The code has at least four functions and no copy-pasted logic"
+          ],
+          "hints": [
+            "If your totals look like text glued together, you forgot to convert `amount` to `float`.",
+            "Use `totals[cat] = totals.get(cat, 0) + amount` to add to a category without a `KeyError`.",
+            "The [Python docs](https://docs.python.org/3/) have a short, readable page on the `csv` module; search for `csv.DictReader`."
+          ],
+          "stretch": "Add a menu option that shows totals per month by taking the first 7 characters of the date (for example `2025-03`).",
+          "post_highlights": [
+            "Built a menu-driven Python CLI that reads expense data from a CSV file",
+            "Wrote reusable functions to calculate totals, category breakdowns and the biggest expense",
+            "Formatted clean terminal reports using f-strings and dictionaries"
+          ]
+        },
+        "2": {
+          "title": "Classes, Modules and Clean Data",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Reorganise your code into classes and modules, and make it handle messy real-world data. You will also let users add new expenses and export a report, so the tool starts to feel like a real app.",
+          "learn": [
+            "Writing classes with `__init__` and methods (an `Expense` and an `ExpenseTracker`)",
+            "Splitting code into modules and importing between files",
+            "Cleaning and validating data such as blank rows, bad numbers and extra spaces",
+            "Writing data back to files as CSV and JSON"
+          ],
+          "steps": [
+            "Create an `Expense` class with `date`, `category`, `description` and `amount` attributes, plus a `__str__` method for nice printing.",
+            "Create an `ExpenseTracker` class that holds a list of `Expense` objects, and move your Week 1 functions into it as methods.",
+            "Move the classes into `tracker.py` and file reading and writing into `storage.py`, keeping only the menu in `main.py`.",
+            "Add a few messy rows to your CSV (an empty amount, `abc` as an amount, ` Food ` with spaces) and update the loader to skip or fix them while counting how many rows were skipped.",
+            "Add an `Add expense` menu option that asks for each field, validates the amount, and appends the new row to the CSV.",
+            "Add a `Search` option that finds expenses whose description contains a keyword, ignoring upper and lower case.",
+            "Add an `Export report` option that writes the category totals to `report.json` using the `json` module.",
+            "Re-run every menu option after the refactor to make sure nothing from Week 1 broke."
+          ],
+          "deliverables": [
+            "`tracker.py`, `storage.py` and `main.py` modules with classes in use",
+            "A loader that reports how many bad rows it skipped",
+            "New menu options for adding, searching and exporting",
+            "A generated `report.json` committed as a sample output"
+          ],
+          "done_when": [
+            "The program runs without crashing on a CSV that contains blank and invalid rows",
+            "A newly added expense still appears after you quit and restart the program",
+            "Searching for a word finds matches regardless of capital letters",
+            "`report.json` opens and contains the correct category totals",
+            "`main.py` contains only menu code and the logic lives in the classes"
+          ],
+          "hints": [
+            "Wrap `float(value)` in `try/except ValueError` to catch bad numbers without crashing.",
+            "Use `.strip().title()` to normalise categories so ` food ` and `Food` count as the same category.",
+            "If `import tracker` fails, make sure you are running Python from inside the project folder."
+          ],
+          "stretch": "Let the user set a monthly budget per category and show a warning next to any category that goes over it.",
+          "post_highlights": [
+            "Refactored my Python expense tool into classes and separate modules",
+            "Added data cleaning that safely skips invalid rows instead of crashing",
+            "Built add, search and JSON export features into the command-line app"
+          ]
+        },
+        "3": {
+          "title": "Save to SQLite and Handle Errors",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Replace the CSV file with a real SQLite database using Python's built-in `sqlite3` module, and add proper command-line arguments. This teaches you how most apps store data and how to make a program fail gracefully.",
+          "learn": [
+            "Creating tables and running `INSERT` and `SELECT` queries with `sqlite3`",
+            "Using parameterised queries (`?` placeholders) to avoid SQL injection",
+            "Handling errors with `try/except` and giving clear messages",
+            "Adding command-line arguments and subcommands with `argparse`"
+          ],
+          "steps": [
+            "Create a `db.py` module with a function that connects to `expenses.db` and creates an `expenses` table if it does not exist.",
+            "Write `add_expense`, `get_all` and `totals_by_category` functions using SQL, with `GROUP BY category` for the totals.",
+            "Write an `import_csv(path)` function that loads your old CSV into the database, reusing your Week 2 cleaning logic.",
+            "Update `ExpenseTracker` to read from and write to the database instead of the CSV file.",
+            "Add `argparse` subcommands so users can run `python main.py import data/expenses.csv`, `python main.py summary` and `python main.py add`.",
+            "Handle likely failures (missing file, wrong columns, bad amount) with `try/except` and a friendly one-line message instead of a traceback.",
+            "Add a `--month 2025-03` filter to `summary` using a `WHERE date LIKE ?` query.",
+            "Test each command in the terminal, including at least two deliberate mistakes such as a wrong file path."
+          ],
+          "deliverables": [
+            "`db.py` with table creation and query functions",
+            "CLI subcommands `import`, `add` and `summary` (with `--month`)",
+            "Friendly error messages for missing files and bad input",
+            "An updated README listing every command with an example"
+          ],
+          "done_when": [
+            "Running `import` twice on the same file does not crash and either skips duplicates or shows a clear message",
+            "`summary` prints the same totals as your Week 2 version for the same data",
+            "Passing a file that does not exist prints a clear error, not a Python traceback",
+            "All SQL uses `?` placeholders instead of f-strings",
+            "`python main.py --help` lists all the commands"
+          ],
+          "hints": [
+            "Call `conn.commit()` after an `INSERT`, or your new rows will disappear when the program ends.",
+            "The free DB Browser for SQLite app lets you look inside `expenses.db` to check your data.",
+            "Read the `sqlite3` and `argparse` pages in the [Python docs](https://docs.python.org/3/); both include short examples."
+          ],
+          "stretch": "Add a `delete <id>` command and an `export --format csv` command that writes the database back out to a CSV file.",
+          "post_highlights": [
+            "Moved my Python expense tracker from CSV files to a SQLite database",
+            "Built a command-line interface with argparse subcommands and filters",
+            "Added error handling so the tool shows clear messages instead of crashing"
+          ]
+        },
+        "4": {
+          "title": "Web Dashboard, Tests and Demo",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Put a small web dashboard on top of your database using Flask, and protect your core logic with a few automated tests. You finish with a complete, documented project that you can demo in under a minute.",
+          "learn": [
+            "Creating routes and HTML templates with Flask",
+            "Handling a simple HTML form with GET and POST",
+            "Writing unit tests with `pytest`",
+            "Writing a clear README for someone who has never seen your project"
+          ],
+          "steps": [
+            "Install Flask (`pip install flask`) and create `app.py` with a `/` route that shows the total spent and a table of category totals from your database.",
+            "Create `templates/index.html` and use a Jinja `for` loop to render the table.",
+            "Add an `/expenses` page listing all expenses, with a month filter using a query parameter like `?month=2025-03`.",
+            "Add an `Add expense` HTML form that posts to Flask, validates the amount, and redirects back to the list.",
+            "Install pytest and write at least 4 tests for your core logic (cleaning a bad row, category totals, the month filter, adding an expense) using a temporary test database.",
+            "Add a `requirements.txt` and update the README with setup steps, screenshots, and how to run the app and the tests.",
+            "Record a 30-60 second demo: import a CSV from the CLI, then show the dashboard and add an expense in the browser."
+          ],
+          "deliverables": [
+            "A Flask dashboard with summary, expense list and add-expense pages",
+            "At least 4 passing pytest tests",
+            "`requirements.txt` and a complete README with screenshots",
+            "A 30-60 second demo video"
+          ],
+          "done_when": [
+            "`flask --app app run` opens a dashboard at `http://127.0.0.1:5000`",
+            "Adding an expense through the form shows it on the list page straight away",
+            "Submitting the form with an invalid amount shows an error instead of saving",
+            "`pytest` runs at least 4 tests and all of them pass",
+            "A new person can set up and run the project by following only the README"
+          ],
+          "hints": [
+            "Keep database logic in `db.py` and import it into Flask instead of rewriting SQL inside your routes.",
+            "Use pytest's built-in `tmp_path` fixture to create a throwaway database for each test.",
+            "The [Flask docs](https://flask.palletsprojects.com) quickstart covers routes, templates and forms, and the [pytest docs](https://docs.pytest.org) cover fixtures."
+          ],
+          "stretch": "Add a bar chart of category totals using Chart.js from a CDN, or a button that downloads the monthly report as a CSV file.",
+          "post_highlights": [
+            "Built a Flask web dashboard on top of my SQLite expense tracker",
+            "Wrote automated pytest tests for my data cleaning and reporting logic",
+            "Shipped a complete, documented Python project with both a CLI and a web interface"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "PySentinel: Automated Web Intelligence & System Monitor",
+      "tagline": "Build a Python monitor that checks your computer's health and whether your favourite websites are up, and tells you when something goes wrong.",
+      "weeks": {
+        "1": {
+          "title": "System Health Snapshot",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Write a Python script that prints a quick health report of your computer (disk space, folder sizes and the largest files) and saves a summary to a log file. You will practise core Python using only the standard library, so there is nothing to install.",
+          "learn": [
+            "Using the `os`, `shutil` and `datetime` standard-library modules",
+            "Walking through folders with `os.walk` and working with file sizes",
+            "Writing reusable functions with parameters and return values",
+            "Appending lines to a log file"
+          ],
+          "steps": [
+            "Create `monitor.py` and write a `disk_usage(path)` function using `shutil.disk_usage` that returns total, used and free space in GB.",
+            "Write a `folder_size(path)` function that uses `os.walk` to add up the size of every file in a folder, and test it on your Downloads folder.",
+            "Write `largest_files(path, n)` that returns the `n` biggest files as a list of `(size, filepath)` tuples, largest first.",
+            "Write a helper `human_size(num_bytes)` that turns numbers like `5242880` into `5.0 MB`.",
+            "Print a neat report that combines all three checks with a timestamp from `datetime.now()`.",
+            "Append a one-line summary (time, free disk %, folder size) to `health_log.txt` every time the script runs.",
+            "Ask the user which folder to scan with `input()`, and fall back to the current folder if they just press Enter."
+          ],
+          "deliverables": [
+            "`monitor.py` with at least four functions",
+            "A printed health report in the terminal",
+            "`health_log.txt` showing several runs",
+            "A README with how to run it and a sample output"
+          ],
+          "done_when": [
+            "Running `python monitor.py` prints disk space, folder size and the top 5 largest files",
+            "Sizes are shown in readable units (KB, MB, GB), not raw bytes",
+            "Each run adds exactly one new line to `health_log.txt` without deleting old lines",
+            "Entering a folder that does not exist prints a friendly message instead of crashing"
+          ],
+          "hints": [
+            "Use `os.path.getsize(os.path.join(root, name))` inside the `os.walk` loop to get each file's size.",
+            "Open the log with mode `'a'` (append), not `'w'`, or you will wipe out old entries.",
+            "Some system files raise `PermissionError`, so wrap the size call in `try/except` and skip them.",
+            "The `os` and `shutil` pages in the [Python docs](https://docs.python.org/3/) have short examples."
+          ],
+          "stretch": "Add a check that counts files by extension (for example 40 `.jpg` and 12 `.pdf`) in the scanned folder.",
+          "post_highlights": [
+            "Built a Python system health script using only the standard library",
+            "Scanned folders with os.walk to report disk usage and the largest files",
+            "Logged timestamped health snapshots to a file on every run"
+          ]
+        },
+        "2": {
+          "title": "Configurable Checks with Classes",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Turn your script into a small monitoring tool where each check is a class that returns a clear OK, WARN or FAIL result. Settings move into a JSON config file, so users can change thresholds without touching the code.",
+          "learn": [
+            "Writing a simple base class and subclasses that share a method name",
+            "Reading settings from a JSON config file",
+            "Organising code into modules (`checks.py`, `config.py`, `main.py`)",
+            "Using thresholds to turn raw numbers into a status"
+          ],
+          "steps": [
+            "Create a base class `Check` with a `name` and a `run()` method that returns a dictionary like `{'name': ..., 'status': 'OK', 'detail': ...}`.",
+            "Rewrite your Week 1 functions as subclasses (`DiskSpaceCheck`, `FolderSizeCheck`, `LargeFileCheck`), each with its own `run()`.",
+            "Create `config.json` with values like `min_free_percent`, `max_folder_mb` and the folders to watch, and load it in `config.py`.",
+            "Make each check return `WARN` or `FAIL` when a threshold is crossed, and `OK` otherwise.",
+            "In `main.py`, build a list of check objects from the config, loop over them, and print one coloured line per result using ANSI colour codes.",
+            "Save every run's results to `history.json` as a list, keeping only the last 50 runs.",
+            "Add a `--summary` option (or a menu choice) that reads `history.json` and prints how many times each check failed."
+          ],
+          "deliverables": [
+            "`checks.py` with a base class and at least three check subclasses",
+            "`config.json` that controls thresholds and folders",
+            "Colour-coded status output in the terminal",
+            "`history.json` with saved results from several runs"
+          ],
+          "done_when": [
+            "Changing a threshold in `config.json` changes the output without editing any Python code",
+            "Every check returns the same dictionary shape (name, status, detail)",
+            "Setting an impossible threshold makes that check show FAIL",
+            "`history.json` never grows beyond 50 entries",
+            "The summary option prints the correct failure counts"
+          ],
+          "hints": [
+            "If ANSI colours do not show on Windows, call `os.system('')` once at startup or use Windows Terminal.",
+            "Use `json.dump(data, f, indent=2)` so your JSON files stay readable.",
+            "Adding a new check should only mean writing a new class; if you have to edit the main loop, rethink the design."
+          ],
+          "stretch": "Add a `FileAgeCheck` that warns if a chosen backup folder has no files newer than 7 days.",
+          "post_highlights": [
+            "Redesigned my Python monitor so each health check is its own class",
+            "Moved thresholds into a JSON config file so behaviour changes without code edits",
+            "Saved run history and built a failure summary report"
+          ]
+        },
+        "3": {
+          "title": "Website Uptime Checks with requests",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Add website monitoring with the `requests` library: check whether sites respond, how fast they are, and what went wrong when they fail. Real networks are unreliable, so this week is all about handling errors properly.",
+          "learn": [
+            "Making HTTP GET requests with the `requests` library",
+            "Understanding status codes (200, 404, 500) and response times",
+            "Catching network errors like timeouts and connection failures",
+            "Saving results to a CSV file for later analysis"
+          ],
+          "steps": [
+            "Install requests (`pip install requests`), add it to `requirements.txt`, and try `requests.get('https://example.com', timeout=5)` in a small scratch script first.",
+            "Add a `sites` list to `config.json` with 5-8 URLs, including one made-up URL that will fail.",
+            "Create a `WebsiteCheck` class that sends a GET request, measures the response time, and returns OK for 2xx, WARN for slow responses and FAIL for errors or bad status codes.",
+            "Catch `requests.exceptions.Timeout`, `ConnectionError` and the general `RequestException` separately, and put a clear reason in the `detail` field.",
+            "Plug `WebsiteCheck` objects into your existing check loop so system and website checks print together.",
+            "Append each website result (time, URL, status code, response ms, status) to `uptime.csv` using the `csv` module.",
+            "Add a report option that reads `uptime.csv` and prints the uptime percentage and average response time for each site."
+          ],
+          "deliverables": [
+            "A `WebsiteCheck` class integrated with the existing checks",
+            "A config with a list of sites to monitor",
+            "An `uptime.csv` log of website results",
+            "An uptime report showing percentage and average response time per site"
+          ],
+          "done_when": [
+            "A made-up or unreachable URL shows FAIL with a readable reason and the program keeps running",
+            "Every request uses a timeout so the program never hangs",
+            "The uptime percentages in the report match the rows in `uptime.csv`",
+            "Turning off Wi-Fi and running the monitor produces FAIL results, not a crash"
+          ],
+          "hints": [
+            "Always pass `timeout=` to `requests.get`, because without it a request can wait forever.",
+            "Use `response.elapsed.total_seconds()` or `time.perf_counter()` to measure the response time.",
+            "`requests` does not raise an error for a 404 by default, so check `response.status_code` yourself.",
+            "The [requests docs](https://requests.readthedocs.io) have a clear quickstart page."
+          ],
+          "stretch": "Also check that each page contains an expected word (such as the site name) to catch pages that load but show an error.",
+          "post_highlights": [
+            "Added website uptime monitoring to my Python project using the requests library",
+            "Handled timeouts and connection errors so the monitor never crashes",
+            "Logged response times to CSV and generated per-site uptime reports"
+          ]
+        },
+        "4": {
+          "title": "Scheduled Monitoring, Alerts and Tests",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Make PySentinel run on its own every minute or so, raise an alert when something stays broken, and publish a simple HTML status page. Add a few pytest tests and a good README so the project is ready to show.",
+          "learn": [
+            "Running tasks on a timer with a loop and `time.sleep`",
+            "Simple alert logic that only fires after repeated failures",
+            "Generating an HTML file from Python",
+            "Writing unit tests with `pytest`, including faking a network call"
+          ],
+          "steps": [
+            "Add a `watch` mode (`python main.py watch --every 60`) that runs all checks in a loop, sleeps between rounds, and stops cleanly on Ctrl+C.",
+            "Track consecutive failures per check and raise an alert only after 2 failures in a row, then print a `RECOVERED` message when it is OK again.",
+            "Write alerts to the terminal and to `alerts.log`.",
+            "After each round, write `status.html` with a table of every check, its status colour and the last-checked time, and open it in your browser.",
+            "Install pytest and write at least 4 tests: threshold logic, the alert counter, the uptime report maths, and a `WebsiteCheck` failure using `unittest.mock.patch` to fake `requests.get`.",
+            "Update the README with features, config options, screenshots of the terminal and status page, and how to run the tests.",
+            "Record a 30-60 second demo: start watch mode, add a broken site to the config, and show the alert and the status page updating."
+          ],
+          "deliverables": [
+            "A `watch` mode that runs checks on a schedule",
+            "Alert logic with `alerts.log` and recovery messages",
+            "An auto-generated `status.html` page",
+            "At least 4 passing pytest tests and a complete README"
+          ],
+          "done_when": [
+            "Watch mode runs at least 3 rounds and exits cleanly with Ctrl+C",
+            "A site that fails once does not alert, but a site that fails twice in a row does",
+            "`status.html` opens in a browser and shows the latest results",
+            "`pytest` passes with at least 4 tests, including one that fakes a network call",
+            "No test makes a real internet request"
+          ],
+          "hints": [
+            "Catch `KeyboardInterrupt` around your loop to print a goodbye message instead of a traceback.",
+            "Keep the alert counters in a dictionary like `{check_name: fail_count}`.",
+            "Add `<meta http-equiv='refresh' content='60'>` to the HTML head so the status page reloads itself.",
+            "The [pytest docs](https://docs.pytest.org) and the `unittest.mock` page in the [Python docs](https://docs.python.org/3/) explain patching."
+          ],
+          "stretch": "Serve the status page from a tiny Flask app instead of a static file, or show a desktop notification when an alert fires.",
+          "post_highlights": [
+            "Turned my Python monitor into a scheduled watcher with failure alerts",
+            "Generated an auto-refreshing HTML status page for system and website checks",
+            "Wrote pytest tests with mocked network calls to verify my alert logic"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "QuizCraft: Flashcard & Quiz Trainer",
+      "tagline": "Build a quiz and flashcard app that helps you revise any subject, starting in the terminal and ending as a small web app.",
+      "weeks": {
+        "1": {
+          "title": "Terminal Quiz from a Text File",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Build a quiz game that reads questions from a file, asks them one by one, and shows your score at the end. It is small, fun to demo, and practises loops, conditions, functions and file reading.",
+          "learn": [
+            "Reading and parsing a text file line by line",
+            "Using lists and dictionaries to store questions and answers",
+            "Writing functions and `for`/`while` loops for game flow",
+            "Comparing user input fairly by ignoring case and extra spaces"
+          ],
+          "steps": [
+            "Create `questions.txt` with at least 10 questions in the format `question|answer`, one per line, on a subject you are studying.",
+            "Write `load_questions(path)` that reads the file, splits each line on `|`, and returns a list of dictionaries.",
+            "Write `ask_question(q)` that prints the question, reads the answer, and returns `True` or `False`.",
+            "Compare answers using `.strip().lower()` on both sides so `Paris`, ` paris ` and `PARIS` all count as correct.",
+            "Shuffle the questions with `random.shuffle` and let the user choose how many to answer.",
+            "Show the score and percentage at the end, plus a list of the questions they got wrong with the correct answers.",
+            "Add a `Play again? (y/n)` loop."
+          ],
+          "deliverables": [
+            "`quiz.py` with separate functions for loading, asking and scoring",
+            "`questions.txt` with at least 10 questions",
+            "An end-of-quiz summary with score, percentage and wrong answers",
+            "A README explaining how to run the quiz and add questions"
+          ],
+          "done_when": [
+            "The quiz runs from start to finish and shows the correct score",
+            "Answers are accepted regardless of capital letters or extra spaces",
+            "Questions appear in a different order on each run",
+            "Blank or badly formatted lines in `questions.txt` are skipped without crashing"
+          ],
+          "hints": [
+            "Call `line.strip()` before splitting so the newline character does not end up in the answer.",
+            "If a line has no `|`, skip it and print a warning instead of crashing.",
+            "The `random` page in the [Python docs](https://docs.python.org/3/) explains `shuffle` and `sample`."
+          ],
+          "stretch": "Support several accepted answers separated by commas, like `question|colour,color`.",
+          "post_highlights": [
+            "Built a terminal quiz game in Python that loads questions from a file",
+            "Added shuffling, scoring and a review of wrong answers",
+            "Practised functions, loops and string handling by building a revision tool"
+          ]
+        },
+        "2": {
+          "title": "Decks, Classes and Saved Progress",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Organise questions into decks (like DSA, DBMS or Python) using classes, and add multiple-choice questions. Save each player's progress to a JSON file so the app remembers how they did last time.",
+          "learn": [
+            "Designing classes (`Question`, `Deck`, `QuizSession`)",
+            "Reading and writing JSON with the `json` module",
+            "Splitting code into modules",
+            "Tracking stats over time, such as attempts and best score"
+          ],
+          "steps": [
+            "Convert your questions into a `decks.json` file with at least 2 decks, where each question has `text`, `answer` and an optional `choices` list for multiple choice.",
+            "Create a `Question` class with a `check(answer)` method, and a `Deck` class that builds its questions from the JSON data.",
+            "For multiple-choice questions, print the options as `A) B) C) D)` and accept the letter as the answer.",
+            "Create a `QuizSession` class that runs one round and returns a result (deck, score, total, date).",
+            "Ask for the player's name at the start and save each result to `progress.json` under that name.",
+            "Add a main menu: choose deck, play, view my stats (attempts and best score per deck), quit.",
+            "Move the classes into `models.py` and file handling into `storage.py`, keeping the menu in `main.py`."
+          ],
+          "deliverables": [
+            "`models.py`, `storage.py` and `main.py` modules",
+            "`decks.json` with at least 2 decks and some multiple-choice questions",
+            "`progress.json` that stores results per player",
+            "A stats screen showing attempts and best score per deck"
+          ],
+          "done_when": [
+            "Players can pick a deck and answer both typed and multiple-choice questions",
+            "Stats are still there after closing and reopening the program",
+            "Two different player names keep separate stats",
+            "A missing `progress.json` is created automatically on the first run"
+          ],
+          "hints": [
+            "Catch `FileNotFoundError` when loading `progress.json` and start with an empty dictionary.",
+            "Store dates as strings with `datetime.now().isoformat()` because JSON cannot store datetime objects.",
+            "Keep `print` and `input()` out of `Question` and `Deck` where possible so they are easy to test later."
+          ],
+          "stretch": "Add a 'practise mistakes' mode that only asks the questions the player got wrong last time.",
+          "post_highlights": [
+            "Refactored my Python quiz app into classes and separate modules",
+            "Added decks, multiple-choice questions and per-player progress saved as JSON",
+            "Built a stats screen that tracks attempts and best scores"
+          ]
+        },
+        "3": {
+          "title": "Import Questions from a Free API",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Connect QuizCraft to the free Open Trivia Database API so players can pull fresh questions on many topics. You will learn how to call a web API, read its JSON response and cope when things go wrong.",
+          "learn": [
+            "Calling a REST API with the `requests` library",
+            "Reading nested JSON responses and sending query parameters",
+            "Handling network errors, timeouts and unexpected data",
+            "Cleaning HTML-encoded text with `html.unescape`"
+          ],
+          "steps": [
+            "Install requests and, in a scratch script, fetch `https://opentdb.com/api.php?amount=5&type=multiple` and print the JSON to understand its shape.",
+            "Write `fetch_questions(amount, difficulty=None)` in `api.py` that builds the request with the `params=` argument and a `timeout`.",
+            "Convert each API result into your `Question` class, mixing the correct answer in with the incorrect ones and shuffling the choices.",
+            "Decode text like `&quot;` and `&#039;` with `html.unescape` before displaying it.",
+            "Check the API's `response_code` field and handle timeouts, no internet and bad responses with clear messages, falling back to your local decks.",
+            "Add an `Online quiz` menu option that asks for the number of questions and difficulty, then plays using your existing `QuizSession`.",
+            "Let the player save an online round as a new deck in `decks.json` so it works offline later."
+          ],
+          "deliverables": [
+            "`api.py` with a function that fetches and converts API questions",
+            "An `Online quiz` menu option with a difficulty choice",
+            "A fallback to local decks when the API is unavailable",
+            "The ability to save fetched questions as a local deck"
+          ],
+          "done_when": [
+            "An online quiz of 5-10 questions plays correctly with shuffled choices",
+            "No question shows raw codes like `&quot;`",
+            "Disconnecting from the internet shows a friendly message and the app keeps working",
+            "Every request uses a `timeout` value",
+            "Saved online decks appear in the deck list after a restart"
+          ],
+          "hints": [
+            "The API limits how often one computer can call it, so avoid calling it in a tight loop.",
+            "Call `response.raise_for_status()` inside `try/except requests.RequestException` to catch HTTP errors as well.",
+            "Browse opentdb.com to see which categories and parameters the API accepts."
+          ],
+          "stretch": "Fetch the list of categories from the API and let the player choose one before starting an online quiz.",
+          "post_highlights": [
+            "Integrated the free Open Trivia Database API into my Python quiz app",
+            "Handled network errors and timeouts with an offline fallback to local decks",
+            "Parsed and cleaned JSON API data into my own Question classes"
+          ]
+        },
+        "4": {
+          "title": "Web Quiz with Flask and Tests",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Give QuizCraft a simple web interface with Flask so anyone can play in a browser, and add pytest tests for your core classes. You finish with a polished, documented app and a short demo video.",
+          "learn": [
+            "Building pages with Flask routes and Jinja templates",
+            "Handling forms and keeping quiz state in Flask's `session`",
+            "Writing unit tests with `pytest`",
+            "Documenting a project with a clear README"
+          ],
+          "steps": [
+            "Install Flask and create `app.py` with a home page that lists your decks and links to an online quiz.",
+            "Build a `/play/<deck>` route that shows one question at a time in a form, keeping the current question number and score in `session`.",
+            "Show a results page with the score and the correct answers for any mistakes, and save the result to `progress.json` using your existing code.",
+            "Add a `/stats` page that shows each player's attempts and best scores.",
+            "Write at least 4 pytest tests: answer checking with odd spacing and case, multiple-choice checking, loading a deck, and converting an API result from sample JSON.",
+            "Add basic CSS so the pages look clean and readable on a phone screen.",
+            "Update the README with setup steps, screenshots, and how to run the app and tests, then record a 30-60 second demo."
+          ],
+          "deliverables": [
+            "A Flask web app with deck list, quiz, results and stats pages",
+            "At least 4 passing pytest tests",
+            "`requirements.txt` and an updated README with screenshots",
+            "A 30-60 second demo video"
+          ],
+          "done_when": [
+            "A full quiz can be played in the browser from the first question to the results page",
+            "Refreshing the page mid-quiz does not reset or double-count the score",
+            "Results from the web app show up on the stats page",
+            "`pytest` passes with at least 4 tests and makes no real network calls",
+            "The app runs locally with `flask --app app run` by following the README"
+          ],
+          "hints": [
+            "Flask's `session` needs `app.secret_key` to be set, otherwise you will get an error.",
+            "Return a `redirect(...)` after handling each POST so refreshing the page does not resubmit an answer.",
+            "The [Flask docs](https://flask.palletsprojects.com) quickstart covers routes, templates, forms and sessions."
+          ],
+          "stretch": "Add a countdown timer for each question, or a leaderboard page showing the top 5 scores for each deck.",
+          "post_highlights": [
+            "Built a Flask web version of my Python quiz and flashcard app",
+            "Managed quiz state across pages using Flask sessions and forms",
+            "Wrote pytest tests for answer checking and API data conversion"
+          ]
+        }
+      }
+    }
+  ]
+}

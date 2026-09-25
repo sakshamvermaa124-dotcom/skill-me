@@ -25,8 +25,8 @@ SkillMe is officially recognized by the Ministry of Micro, Small & Medium Enterp
 
 ## Essential URLs
 
-- [Home](https://www.skill-me-intern.in/): Main landing page, batch schedules, and curriculum details.
-- [Screening Quiz](https://www.skill-me-intern.in/quiz): Technical assessment to qualify for upcoming batches.
+- [Home](https://www.skill-me-intern.in/): Main landing page, program schedule, and curriculum details.
+- [Screening Quiz](https://www.skill-me-intern.in/quiz): Technical assessment to qualify for the internship program.
 - [Apply Portal](https://www.skill-me-intern.in/apply): Direct enrollment portal for qualified candidates.
 - [Student Dashboard](https://www.skill-me-intern.in/dashboard): Active intern workspace, issue tracking, and milestone progression.
 - [Certificate Portal](https://www.skill-me-intern.in/certificate): Download and share verified credentials.

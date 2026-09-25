@@ -2,10 +2,10 @@
 SkillMe — Urgent Request Service
 Handles student requests for 24h expedited certificate/LOR/portfolio processing.
 
-Students below the 50% completion threshold don't get direct payment access —
+Students below the payment threshold (3 of 4 tasks approved) don't get direct payment access —
 they file a request here instead. If an admin fulfills it, payment unlocks
-for that student+batch (see fulfill_request / _resolve) even at 0% completion.
-Students at/above 50% never need this — payment is already visible to them.
+for that student's enrollment (see fulfill_request / _resolve) even at 0% completion.
+Students at/above 3 approved tasks never need this — payment is already visible to them.
 """
 
 import logging
@@ -27,7 +27,7 @@ class UrgentRequestService:
             (student_id, batch_id),
         )
         if existing:
-            raise ValueError("You already have a pending urgent request for this batch.")
+            raise ValueError("You already have a pending urgent request.")
 
         request_id = await db.insert(
             """INSERT INTO urgent_requests (student_id, batch_id, request_type, note, status)
@@ -39,10 +39,10 @@ class UrgentRequestService:
 
     async def list_requests(self, status: str | None = None) -> list[dict]:
         query = """SELECT u.*, s.first_name, s.last_name, s.email,
-                          b.domain, b.batch_number
+                          COALESCE(b.domain, s.domain) AS domain
                    FROM urgent_requests u
                    JOIN students s ON u.student_id = s.id
-                   JOIN batches b ON u.batch_id = b.id"""
+                   LEFT JOIN batches b ON u.batch_id = b.id"""
         params: tuple = ()
         if status:
             query += " WHERE u.status = ?"
@@ -62,10 +62,10 @@ class UrgentRequestService:
         )
 
         info = await db.fetch_one(
-            """SELECT s.first_name, s.last_name, s.email, b.domain
-               FROM students s, batches b
-               WHERE s.id = ? AND b.id = ?""",
-            (row["student_id"], row["batch_id"]),
+            """SELECT s.first_name, s.last_name, s.email, COALESCE(b.domain, s.domain) AS domain
+               FROM students s LEFT JOIN batches b ON b.id = ?
+               WHERE s.id = ?""",
+            (row["batch_id"], row["student_id"]),
         )
 
         logger.info(f"Urgent request {request_id} marked {status}")

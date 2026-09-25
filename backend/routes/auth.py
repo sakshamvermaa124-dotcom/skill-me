@@ -10,6 +10,7 @@ from typing import Optional
 
 from services.auth_service import request_otp, verify_otp, decode_jwt
 from services.email_service import email_service, _send_and_log
+from services.enrollment_service import enrollment_service
 from middleware.student_auth import require_student
 from db.database import db
 from config import settings
@@ -122,20 +123,20 @@ async def get_me(
         raise HTTPException(status_code=401, detail="Session expired. Please log in again.")
 
     student_id = int(payload["sub"])
-    student = await db.fetch_one(
-        """SELECT s.*, e.batch_id, b.domain, b.batch_number,
-                  b.start_date, e.status as enrollment_status
-           FROM students s
-           LEFT JOIN enrollments e ON e.student_id = s.id AND e.status != 'dropped'
-           LEFT JOIN batches b ON b.id = e.batch_id
-           WHERE s.id = ?
-           LIMIT 1""",
-        (student_id,)
-    )
+    student = await db.fetch_one("SELECT * FROM students WHERE id = ?", (student_id,))
     if not student:
         raise HTTPException(status_code=401, detail="Student not found.")
 
-    return dict(student)
+    enrollment = await enrollment_service.get_current_enrollment(student_id, include_dropped=False)
+    result = dict(student)
+    result.update({
+        "batch_id": enrollment["batch_id"] if enrollment else None,  # internal enrollment reference
+        "start_date": enrollment["start_date"] if enrollment else None,
+        "enrollment_status": enrollment["status"] if enrollment else None,
+    })
+    if enrollment and enrollment["domain"]:
+        result["domain"] = enrollment["domain"]
+    return result
 
 
 @router.post("/logout", summary="Log out student")

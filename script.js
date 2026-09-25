@@ -404,16 +404,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!ribbon || !item) return;
 
-    // Resilient starter pool for instant render without network lag
-    let activities = [
-      { initials: "RS", name: "Rahul S.", college: "AKTU", action: "merged PR for FastAPI Endpoint Auth", time: "3m ago" },
-      { initials: "SM", name: "Sneha M.", college: "VTU", action: "completed 4-Week Python & API Track", time: "11m ago" },
-      { initials: "AV", name: "Aman V.", college: "IPU Delhi", action: "merged Model Evaluation Pipeline", time: "19m ago" },
-      { initials: "PK", name: "Priya K.", college: "Anna Univ", action: "unlocked Verified Full-Stack LOR", time: "34m ago" },
-      { initials: "RD", name: "Rohan D.", college: "Pune Univ", action: "resolved Responsive Grid System issue", time: "52m ago" },
-      { initials: "TG", name: "Tanvi G.", college: "RTU Kota", action: "qualified for Monthly Performance Stipend", time: "1h ago" },
-      { initials: "HN", name: "Harsh N.", college: "GTU", action: "merged PR #33 on SQLite Database Client", time: "1h 15m ago" }
-    ];
+    // Only real approved submissions from the API — the ribbon stays hidden until there are some
+    let activities = [];
 
     let currentIndex = 0;
     let isPaused = false;
@@ -460,15 +452,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (res.ok) {
           const data = await res.json();
           if (data && data.activities && data.activities.length > 0) {
+            const firstLoad = activities.length === 0;
             activities = data.activities;
+            if (firstLoad) {
+              currentIndex = 0;
+              renderItem(activities[0]);
+              ribbon.style.display = '';
+            }
           }
           if (data && data.stats) {
-            if (prCountEl && data.stats.total_submissions_approved) {
-              prCountEl.textContent = `${data.stats.total_submissions_approved}+`;
-            }
-            if (collegeCountEl && data.stats.total_colleges) {
-              collegeCountEl.textContent = `${data.stats.total_colleges}+`;
-            }
+            if (prCountEl) prCountEl.textContent = `${data.stats.total_submissions_approved || 0}`;
+            if (collegeCountEl) collegeCountEl.textContent = `${data.stats.total_colleges || 0}`;
           }
         }
       } catch (err) {

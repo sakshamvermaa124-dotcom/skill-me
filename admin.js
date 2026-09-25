@@ -22,14 +22,18 @@ try {
 let adminKey = '';
 let allStudents = [];
 let allAlumni = [];
-let allBatches = [];
 let currentPage = 'overview';
+let appStarted = false;
+
+const STUDENTS_PAGE_SIZE = 15;
+// Server-side paginated lists — only one page (15 rows) is ever in memory/DOM.
+const studentsState = { page: 1, q: '', status: '', total: 0, totalPages: 1 };
+const alumniState   = { page: 1, q: '', total: 0, totalPages: 1 };
 
 const PAGE_META = {
   overview:  { title: 'Overview',  subtitle: 'Platform summary and recent activity' },
-  students:  { title: 'Students',  subtitle: 'Manage applications and enrollments' },
+  students:  { title: 'Students',  subtitle: 'Shortlist and enroll applicants' },
   alumni:    { title: 'Alumni',    subtitle: 'Students who completed their internship' },
-  batches:   { title: 'Batches',   subtitle: 'Manage cohorts and enrollment' },
   email:     { title: 'Email Settings', subtitle: 'Brevo SMTP relay — test and monitor email delivery' },
   submissions: { title: 'Submissions', subtitle: 'Review and approve/reject weekly LinkedIn submissions' },
   'urgent-requests': { title: 'Urgent Requests', subtitle: 'Expedited (24h) certificate/LOR/portfolio processing requests' },
@@ -45,6 +49,8 @@ let bgScene, bgCamera, bgRenderer, bgMesh, bgParticles;
 function initAdminBgLattice() {
   const canvas = document.getElementById('admin-bg-canvas');
   if (!canvas || typeof THREE === 'undefined') return;
+  // The canvas is hidden via CSS — don't burn GPU on a 60fps loop nobody can see.
+  if (getComputedStyle(canvas).display === 'none') return;
 
   bgRenderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
   bgRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -256,12 +262,6 @@ async function adminLogin() {
     if (errEl) errEl.textContent = e.message || 'Could not connect to backend.';
     if (btn) { btn.disabled = false; btn.textContent = 'ACCESS CONSOLE →'; }
   }
-}
-
-function logoutAdmin() {
-  localStorage.removeItem('skillme_admin_key');
-  sessionStorage.removeItem('skillme_admin_key');
-  window.location.reload();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -524,6 +524,10 @@ function showApp() {
   if (app) {
     app.style.display = 'flex';
   }
+  // Both the saved-key check and adminLogin() can land here on page load —
+  // only start the render loops, clock and data fetches once.
+  if (appStarted) return;
+  appStarted = true;
   try { initAdminBgLattice(); } catch(e) {}
   try { initAdmin3DCrystalEngine(); } catch(e) {}
   startClock();
@@ -598,7 +602,6 @@ function navigate(page) {
   if (page === 'overview') loadOverview();
   if (page === 'students') loadStudents();
   if (page === 'alumni') loadAlumni();
-  if (page === 'batches') loadBatches();
   if (page === 'email') loadEmailStatus();
   if (page === 'submissions') loadSubmissions();
   if (page === 'urgent-requests') loadUrgentRequests();
@@ -627,7 +630,12 @@ function toast(message, type = 'success') {
   const icon = type === 'success' ? '✅' : '❌';
   const el = document.createElement('div');
   el.className = `toast ${type}`;
-  el.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+  // textContent, never innerHTML — messages often contain student-supplied names
+  const iconEl = document.createElement('span');
+  iconEl.textContent = icon;
+  const msgEl = document.createElement('span');
+  msgEl.textContent = message;
+  el.append(iconEl, msgEl);
   container.appendChild(el);
   setTimeout(() => {
     el.style.animation = 'toast-out 0.3s ease forwards';
@@ -644,9 +652,18 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
 });
 
+// ─── ESCAPING (student-supplied data is untrusted) ───
+function esc(v) {
+  return String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+// Safe literal for inline onclick handlers — survives names like O'Brien.
+function jsArg(v) { return esc(JSON.stringify(String(v ?? ''))); }
+function safeUrl(u) { return /^https?:\/\//i.test(String(u || '')) ? esc(u) : ''; }
+
 // ─── STATUS BADGE ───
 function statusBadge(status) {
-  return `<span class="badge badge-${status}">${status}</span>`;
+  const s = esc(status);
+  return `<span class="badge badge-${s}">${s}</span>`;
 }
 
 // ─── FORMAT DATE ───
@@ -659,7 +676,7 @@ function fmtDate(iso) {
 async function loadOverview() {
   loadStats();
   loadRecentApplications();
-  loadOverviewBatches();
+  loadShortlisted();
 }
 
 async function loadStats() {
@@ -668,32 +685,24 @@ async function loadStats() {
     const data = await api('/api/admin/stats');
     grid.innerHTML = `
       ${statCard('👥', data.total_students, 'Total Students', 'rgba(201,154,78,0.12)', '#c99a4e')}
-      ${statCard('🟢', data.active_batches, 'Active Batches', 'rgba(79,163,107,0.15)', '#4fa36b')}
       ${statCard('📋', data.pending_applications, 'Pending Applications', 'rgba(201,154,78,0.15)', '#d8ac63')}
+      ${statCard('🟢', data.enrolled_students, 'Enrolled Students', 'rgba(79,163,107,0.15)', '#4fa36b')}
       ${statCard('📝', data.pending_submissions, 'Pending Submissions', 'rgba(181,135,61,0.15)', '#b5873d')}
     `;
-    const badge = document.getElementById('pending-badge');
-    if (badge) {
-      if (data.pending_applications > 0) {
-        badge.style.display = 'inline-flex';
-        badge.textContent = data.pending_applications;
-      } else {
-        badge.style.display = 'none';
-      }
-    }
-    const subBadge = document.getElementById('submissions-badge');
-    if (subBadge) {
-      if (data.pending_submissions > 0) {
-        subBadge.style.display = 'inline-flex';
-        subBadge.textContent = data.pending_submissions;
-      } else {
-        subBadge.style.display = 'none';
-      }
-    }
+    setNavBadge('pending-badge', data.pending_applications);
+    setNavBadge('submissions-badge', data.pending_submissions);
+    setNavBadge('alumni-badge', data.total_alumni);
     updateUrgentRequestsBadge(data.pending_urgent_requests || 0);
   } catch (e) {
-    grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-text">${e.message}</div></div>`;
+    grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-text">${esc(e.message)}</div></div>`;
   }
+}
+
+function setNavBadge(id, count) {
+  const badge = document.getElementById(id);
+  if (!badge) return;
+  badge.style.display = count > 0 ? 'inline-flex' : 'none';
+  badge.textContent = count || 0;
 }
 
 function statCard(icon, value, label, bg, color) {
@@ -707,113 +716,162 @@ function statCard(icon, value, label, bg, color) {
     </div>`;
 }
 
+// Action buttons shared by every student table. Lifecycle is just
+// applied → shortlisted → enrolled (→ completed), with drop / re-enroll.
+function studentActions(s, { compact = false } = {}) {
+  const name = jsArg(`${s.first_name} ${s.last_name}`);
+  const email = jsArg(s.email);
+  const btns = [];
+  if (s.status === 'applied') {
+    btns.push(`<button class="btn btn-sm" style="background:rgba(201,154,78,0.12);color:#c99a4e;border:1px solid rgba(201,154,78,0.22);" onclick="updateStatus(${s.id},'shortlisted', this)">Shortlist</button>`);
+  }
+  if (['applied', 'shortlisted', 'dropped'].includes(s.status)) {
+    btns.push(`<button class="btn btn-sm" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.25);" onclick="enrollStudent(${s.id}, ${name}, this)">${s.status === 'dropped' ? 'Re-enroll' : 'Enroll'}</button>`);
+  }
+  if (!compact && ['enrolled', 'completed'].includes(s.status) && s.batch_id) {
+    btns.push(`<button class="btn btn-sm" style="background:rgba(212,168,83,0.15);color:#d4a853;border:1px solid rgba(212,168,83,0.3);" onclick="issueCertificate(${s.id}, ${Number(s.batch_id)}, ${name})">🏅 Certificate</button>`);
+  }
+  if (!compact && s.status !== 'dropped') {
+    btns.push(`<button class="btn btn-sm" style="background:rgba(251,113,133,0.12);color:#fb7185;border:1px solid rgba(251,113,133,0.2);" onclick="dropStudent(${s.id}, ${name}, this)">Drop</button>`);
+  }
+  btns.push(`<button class="btn btn-sm" style="background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.25);" onclick="deleteStudent(${s.id}, ${name}, ${email})" title="Permanently delete entire record from database">🗑️${compact ? '' : ' Delete'}</button>`);
+  return `<div style="display:flex;gap:6px;flex-wrap:wrap;">${btns.join('')}</div>`;
+}
+
+function compactStudentTable(students, emptyIcon, emptyText) {
+  if (!students.length) {
+    return `<div class="empty-state"><div class="empty-state-icon">${emptyIcon}</div><div class="empty-state-text">${emptyText}</div></div>`;
+  }
+  return `
+    <table>
+      <thead><tr><th>Name</th><th>Domain</th><th>Applied</th><th>Action</th></tr></thead>
+      <tbody>
+        ${students.map(s => `
+          <tr>
+            <td>
+              <div style="font-weight:500;">${esc(s.first_name)} ${esc(s.last_name)}</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);">${esc(s.email)}</div>
+            </td>
+            <td>${esc(s.domain || '—')}</td>
+            <td>${fmtDate(s.created_at)}</td>
+            <td>${studentActions(s, { compact: true })}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
 async function loadRecentApplications(silent = false) {
   const el = document.getElementById('recent-applications');
+  if (!el) return;
   if (!silent && !el.querySelector('table')) {
     el.innerHTML = `<div class="loading-overlay"><div class="spinner"></div></div>`;
   }
   try {
     const data = await api('/api/admin/students?status=applied&limit=5');
-    if (!data.students.length) {
-      el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🎉</div><div class="empty-state-text">No pending applications</div></div>`;
-      return;
-    }
-    el.innerHTML = `
-      <table>
-        <thead><tr><th>Name</th><th>Domain</th><th>Applied</th><th>Action</th></tr></thead>
-        <tbody>
-          ${data.students.map(s => `
-            <tr>
-              <td>
-                <div style="font-weight:500;">${s.first_name} ${s.last_name}</div>
-                <div style="font-size:0.75rem;color:var(--text-muted);">${s.email}</div>
-              </td>
-              <td>${s.domain || '—'}</td>
-              <td>${fmtDate(s.created_at)}</td>
-              <td>
-                <div style="display:flex;gap:6px;">
-                  <button class="btn btn-sm" style="background:rgba(201,154,78,0.12);color:#c99a4e;border:1px solid rgba(201,154,78,0.22);" onclick="updateStatus(${s.id},'shortlisted')">Shortlist</button>
-                  <button class="btn btn-sm" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.25);" onclick="autoEnrollStudent(${s.id},'${s.first_name} ${s.last_name}', this)">Enroll</button>
-                  <button class="btn btn-sm" style="background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.22);" onclick="deleteStudent(${s.id},'${s.first_name} ${s.last_name}','${s.email}')" title="Permanently delete entire record from database">🗑️</button>
-                </div>
-              </td>
-            </tr>`).join('')}
-        </tbody>
-      </table>`;
+    el.innerHTML = compactStudentTable(data.students || [], '🎉', 'No pending applications');
   } catch(e) {
-    if (!silent) {
-      el.innerHTML = `<div class="empty-state"><div class="empty-state-text">${e.message}</div></div>`;
-    }
+    if (!silent) el.innerHTML = `<div class="empty-state"><div class="empty-state-text">${esc(e.message)}</div></div>`;
   }
 }
 
-async function loadOverviewBatches(silent = false) {
-  const el = document.getElementById('overview-batches');
-  if (!silent && !el.querySelector('div')) {
+async function loadShortlisted(silent = false) {
+  const el = document.getElementById('overview-shortlisted');
+  if (!el) return;
+  if (!silent && !el.querySelector('table')) {
     el.innerHTML = `<div class="loading-overlay"><div class="spinner"></div></div>`;
   }
   try {
-    const data = await api('/api/admin/batches?status=active');
-    if (!data.batches.length) {
-      el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📦</div><div class="empty-state-text">No active batches</div></div>`;
-      return;
-    }
-    el.innerHTML = data.batches.slice(0,3).map(b => {
-      const fill = Math.min(100, Math.round((b.enrolled_students || 0) / (b.max_students || 30) * 100));
-      return `
-        <div style="padding:16px 24px;border-bottom:1px solid var(--border);">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-            <div>
-              <div style="font-weight:500;font-size:0.9rem;">${b.domain} — Batch #${b.batch_number}</div>
-              <div style="font-size:0.75rem;color:var(--text-muted);">${b.enrolled_students || 0} / ${b.max_students} students</div>
-            </div>
-            ${statusBadge(b.status)}
-          </div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${fill}%"></div></div>
-        </div>`;
-    }).join('');
+    const data = await api('/api/admin/students?status=shortlisted&limit=5');
+    el.innerHTML = compactStudentTable(data.students || [], '✅', 'No shortlisted students waiting to be enrolled');
+    const sub = document.getElementById('overview-shortlisted-count');
+    if (sub) sub.textContent = data.total ? `${data.total} waiting to be enrolled` : 'Ready to enroll';
   } catch(e) {
-    if (!silent) {
-      el.innerHTML = `<div class="empty-state"><div class="empty-state-text">${e.message}</div></div>`;
-    }
+    if (!silent) el.innerHTML = `<div class="empty-state"><div class="empty-state-text">${esc(e.message)}</div></div>`;
   }
+}
+
+function refreshStudentViews() {
+  if (currentPage === 'overview') {
+    loadRecentApplications(true);
+    loadShortlisted(true);
+  }
+  if (currentPage === 'students') loadStudents(true);
+  if (currentPage === 'alumni') loadAlumni(true);
+  loadStats();
+}
+
+// ─── PAGINATION ───
+function renderPager(elId, state, loaderName) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (!state.total) { el.innerHTML = ''; return; }
+  const from = (state.page - 1) * STUDENTS_PAGE_SIZE + 1;
+  const to = Math.min(state.total, state.page * STUDENTS_PAGE_SIZE);
+  el.innerHTML = `
+    <span>Showing ${from}–${to} of ${state.total} · Page ${state.page} of ${state.totalPages}</span>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost btn-sm" onclick="${loaderName}(${state.page - 1})" ${state.page <= 1 ? 'disabled' : ''}>← Prev</button>
+      <button class="btn btn-ghost btn-sm" onclick="${loaderName}(${state.page + 1})" ${state.page >= state.totalPages ? 'disabled' : ''}>Next →</button>
+    </div>`;
+}
+
+function debounce(fn, ms) {
+  let t;
+  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
 }
 
 // ─── STUDENTS ───
+let _studentsReq = 0;
 async function loadStudents(silent = false) {
   const tbody = document.getElementById('students-tbody');
+  if (!tbody) return;
   if (!silent) {
     tbody.innerHTML = `<tr><td colspan="6"><div class="loading-overlay"><div class="spinner"></div></div></td></tr>`;
   }
+  const reqId = ++_studentsReq;
+  const params = new URLSearchParams({ page: studentsState.page, limit: STUDENTS_PAGE_SIZE, paid: 'false' });
+  if (studentsState.status) params.set('status', studentsState.status);
+  if (studentsState.q) params.set('q', studentsState.q);
   try {
-    const data = await api('/api/admin/students?limit=200');
-    const all = data.students || [];
-    // Separate alumni (paid students) from active students
-    allStudents = all.filter(s => !Number(s.has_paid));
-    allAlumni = all.filter(s => Number(s.has_paid));
-    renderStudents(allStudents);
-    // Update alumni badge
-    const badge = document.getElementById('alumni-badge');
-    if (badge) {
-      badge.textContent = allAlumni.length;
-      badge.style.display = allAlumni.length > 0 ? 'inline-flex' : 'none';
+    const data = await api(`/api/admin/students?${params}`);
+    if (reqId !== _studentsReq) return; // a newer search/page request superseded this one
+    studentsState.total = data.total || 0;
+    studentsState.totalPages = data.total_pages || 1;
+    // Deleting the last row of the last page — step back instead of showing an empty page
+    if (!data.students.length && studentsState.page > 1 && studentsState.total) {
+      studentsState.page = studentsState.totalPages;
+      return loadStudents(silent);
     }
+    allStudents = data.students || [];
+    renderStudents(allStudents);
+    renderPager('students-pagination', studentsState, 'goToStudentsPage');
   } catch(e) {
+    if (reqId !== _studentsReq) return;
     if (!silent) {
-      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-text">${e.message}</div></div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-text">${esc(e.message)}</div></div></td></tr>`;
     }
   }
 }
 
+function goToStudentsPage(page) {
+  studentsState.page = Math.max(1, Math.min(page, studentsState.totalPages || 1));
+  loadStudents();
+}
+
+const _debouncedStudentSearch = debounce(() => loadStudents(), 300);
 function filterStudents() {
-  const q = document.getElementById('student-search').value.toLowerCase();
-  const status = document.getElementById('status-filter').value;
-  const filtered = allStudents.filter(s => {
-    const matchQ = !q || `${s.first_name} ${s.last_name} ${s.email} ${s.github_username || ''}`.toLowerCase().includes(q);
-    const matchStatus = !status || s.status === status;
-    return matchQ && matchStatus;
-  });
-  renderStudents(filtered);
+  studentsState.q = (document.getElementById('student-search')?.value || '').trim();
+  studentsState.status = document.getElementById('status-filter')?.value || '';
+  studentsState.page = 1;
+  _debouncedStudentSearch();
+}
+
+function showApplicationsToReview() {
+  const sel = document.getElementById('status-filter');
+  if (sel) sel.value = 'applied';
+  studentsState.status = 'applied';
+  studentsState.page = 1;
+  navigate('students');
 }
 
 function renderStudents(students) {
@@ -826,268 +884,164 @@ function renderStudents(students) {
     <tr>
       <td>
         <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#c99a4e,#b5873d);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;flex-shrink:0;">${(s.first_name[0]||'?').toUpperCase()}</div>
+          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#c99a4e,#b5873d);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;flex-shrink:0;">${esc(((s.first_name || '?')[0] || '?').toUpperCase())}</div>
           <div>
-            <div style="font-weight:500;">${s.first_name} ${s.last_name}</div>
-            ${s.github_username ? `<div style="font-size:0.72rem;color:var(--text-muted);">@${s.github_username}</div>` : ''}
+            <div style="font-weight:500;">${esc(s.first_name)} ${esc(s.last_name)}</div>
+            ${s.college ? `<div style="font-size:0.72rem;color:var(--text-muted);">${esc(s.college)}</div>` : ''}
           </div>
         </div>
       </td>
-      <td style="color:var(--text-secondary);font-size:0.82rem;">${s.email}</td>
-      <td>${s.domain || '—'}</td>
+      <td style="color:var(--text-secondary);font-size:0.82rem;">${esc(s.email)}</td>
+      <td>${esc(s.domain || '—')}</td>
       <td>${statusBadge(s.status)}</td>
       <td style="color:var(--text-muted);font-size:0.82rem;">${fmtDate(s.created_at)}</td>
-      <td>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          ${s.status === 'applied' ? `<button class="btn btn-sm" style="background:rgba(201,154,78,0.12);color:#c99a4e;border:1px solid rgba(201,154,78,0.22);" onclick="updateStatus(${s.id},'shortlisted')">Shortlist</button>` : ''}
-          ${(s.status === 'shortlisted' || s.status === 'applied') ? `<button class="btn btn-sm" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.25);" onclick="autoEnrollStudent(${s.id},'${s.first_name} ${s.last_name}', this)">Enroll</button>` : ''}
-          ${(s.status === 'completed' || s.status === 'enrolled') && s.batch_id ? `<button class="btn btn-sm" style="background:rgba(212,168,83,0.15);color:#d4a853;border:1px solid rgba(212,168,83,0.3);" onclick="issueCertificate(${s.id},${s.batch_id},'${s.first_name} ${s.last_name}')">🏅 Certificate</button>` : ''}
-          ${s.status !== 'dropped' ? `<button class="btn btn-sm" style="background:rgba(251,113,133,0.12);color:#fb7185;border:1px solid rgba(251,113,133,0.2);" onclick="updateStatus(${s.id},'dropped')">Drop</button>` : ''}
-          <button class="btn btn-sm" style="background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.25);" onclick="deleteStudent(${s.id},'${s.first_name} ${s.last_name}','${s.email}')" title="Permanently delete entire record from database">🗑️ Delete</button>
-        </div>
-      </td>
+      <td>${studentActions(s)}</td>
     </tr>`).join('');
 }
 
 // ─── ALUMNI ───
+let _alumniReq = 0;
 async function loadAlumni(silent = false) {
   const tbody = document.getElementById('alumni-tbody');
   if (!tbody) return;
   if (!silent) {
     tbody.innerHTML = `<tr><td colspan="6"><div class="loading-overlay"><div class="spinner"></div></div></td></tr>`;
   }
+  const reqId = ++_alumniReq;
+  const params = new URLSearchParams({ page: alumniState.page, limit: STUDENTS_PAGE_SIZE, paid: 'true' });
+  if (alumniState.q) params.set('q', alumniState.q);
   try {
-    const data = await api('/api/admin/students?limit=200');
-    const all = data.students || [];
-    allStudents = all.filter(s => !Number(s.has_paid));
-    allAlumni = all.filter(s => Number(s.has_paid));
-    renderAlumni(allAlumni);
-    // Update badge
-    const badge = document.getElementById('alumni-badge');
-    if (badge) {
-      badge.textContent = allAlumni.length;
-      badge.style.display = allAlumni.length > 0 ? 'inline-flex' : 'none';
+    const data = await api(`/api/admin/students?${params}`);
+    if (reqId !== _alumniReq) return;
+    alumniState.total = data.total || 0;
+    alumniState.totalPages = data.total_pages || 1;
+    if (!data.students.length && alumniState.page > 1 && alumniState.total) {
+      alumniState.page = alumniState.totalPages;
+      return loadAlumni(silent);
     }
+    allAlumni = data.students || [];
+    renderAlumni(allAlumni);
+    renderPager('alumni-pagination', alumniState, 'goToAlumniPage');
+    if (!alumniState.q) setNavBadge('alumni-badge', alumniState.total);
   } catch(e) {
+    if (reqId !== _alumniReq) return;
     if (!silent) {
-      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-text">${e.message}</div></div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-text">${esc(e.message)}</div></div></td></tr>`;
     }
   }
 }
 
+function goToAlumniPage(page) {
+  alumniState.page = Math.max(1, Math.min(page, alumniState.totalPages || 1));
+  loadAlumni();
+}
+
+const _debouncedAlumniSearch = debounce(() => loadAlumni(), 300);
 function filterAlumni() {
-  const q = (document.getElementById('alumni-search')?.value || '').toLowerCase();
-  const filtered = allAlumni.filter(s => {
-    return !q || `${s.first_name} ${s.last_name} ${s.email} ${s.domain || ''} ${s.github_username || ''}`.toLowerCase().includes(q);
-  });
-  renderAlumni(filtered);
+  alumniState.q = (document.getElementById('alumni-search')?.value || '').trim();
+  alumniState.page = 1;
+  _debouncedAlumniSearch();
 }
 
 function renderAlumni(alumni) {
   const tbody = document.getElementById('alumni-tbody');
   if (!tbody) return;
   if (!alumni.length) {
-    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">🎓</div><div class="empty-state-text">No alumni yet — students appear here after completing payment</div></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">🎓</div><div class="empty-state-text">${alumniState.q ? 'No alumni match your search' : 'No alumni yet — students appear here after completing payment'}</div></div></td></tr>`;
     return;
   }
-  tbody.innerHTML = alumni.map(s => `
+  tbody.innerHTML = alumni.map(s => {
+    const name = jsArg(`${s.first_name} ${s.last_name}`);
+    return `
     <tr>
       <td>
         <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#34d399,#059669);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;flex-shrink:0;">${(s.first_name[0]||'?').toUpperCase()}</div>
+          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#34d399,#059669);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;flex-shrink:0;">${esc(((s.first_name || '?')[0] || '?').toUpperCase())}</div>
           <div>
-            <div style="font-weight:500;">${s.first_name} ${s.last_name}</div>
-            ${s.github_username ? `<div style="font-size:0.72rem;color:var(--text-muted);">@${s.github_username}</div>` : ''}
+            <div style="font-weight:500;">${esc(s.first_name)} ${esc(s.last_name)}</div>
+            ${s.college ? `<div style="font-size:0.72rem;color:var(--text-muted);">${esc(s.college)}</div>` : ''}
           </div>
         </div>
       </td>
-      <td style="color:var(--text-secondary);font-size:0.82rem;">${s.email}</td>
-      <td>${s.domain || '—'}</td>
+      <td style="color:var(--text-secondary);font-size:0.82rem;">${esc(s.email)}</td>
+      <td>${esc(s.domain || '—')}</td>
       <td><span style="padding:4px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.3);color:#34d399;">✓ Paid</span></td>
       <td style="color:var(--text-muted);font-size:0.82rem;">${fmtDate(s.created_at)}</td>
       <td>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          ${s.batch_id ? `<button class="btn btn-sm" style="background:rgba(212,168,83,0.15);color:#d4a853;border:1px solid rgba(212,168,83,0.3);" onclick="issueCertificate(${s.id},${s.batch_id},'${s.first_name} ${s.last_name}')">🏅 Certificate</button>` : ''}
-          <button class="btn btn-sm" style="background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.25);" onclick="deleteStudent(${s.id},'${s.first_name} ${s.last_name}','${s.email}')" title="Permanently delete entire record from database">🗑️ Delete</button>
+          ${s.batch_id ? `<button class="btn btn-sm" style="background:rgba(212,168,83,0.15);color:#d4a853;border:1px solid rgba(212,168,83,0.3);" onclick="issueCertificate(${s.id}, ${Number(s.batch_id)}, ${name})">🏅 Certificate</button>` : ''}
+          <button class="btn btn-sm" style="background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.25);" onclick="deleteStudent(${s.id}, ${name}, ${jsArg(s.email)})" title="Permanently delete entire record from database">🗑️ Delete</button>
         </div>
       </td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 }
 
-async function updateStatus(studentId, newStatus) {
+// ─── STUDENT ACTIONS ───
+function setBusy(btn, label) {
+  if (!btn) return () => {};
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<span style="display:inline-block;width:11px;height:11px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:4px;"></span> ${label}`;
+  return () => { btn.disabled = false; btn.innerHTML = orig; };
+}
+
+async function updateStatus(studentId, newStatus, btn) {
+  const restore = setBusy(btn, 'Saving...');
   try {
     await api(`/api/admin/students/${studentId}/status`, {
       method: 'PATCH',
       body: JSON.stringify({ status: newStatus })
     });
     toast(`Student status updated to "${newStatus}"`);
-    if (currentPage === 'overview') {
-      loadRecentApplications(true);
-      loadOverviewBatches(true);
-    }
-    loadStudents(true);
-    loadStats(true);
+    refreshStudentViews();
   } catch(e) {
     toast(e.message, 'error');
+    restore();
   }
 }
 
+async function dropStudent(studentId, name, btn) {
+  if (!confirm(`Drop ${name}?\n\nTheir progress, payments and certificates are kept — you can re-enroll them later and they will continue where they left off.`)) return;
+  return updateStatus(studentId, 'dropped', btn);
+}
+
 async function deleteStudent(studentId, name, email) {
-  if (!confirm(`Are you sure you want to PERMANENTLY DELETE "${name}" (${email}) from the database?\n\nThis will completely wipe:\n- Student profile & application\n- Batch enrollments & progress\n- Milestone tasks & submissions\n- Certificates & payment records\n- OTP tokens & email logs\n\nWhen this user returns, they will be treated as a completely brand-new user.\n\nThis action cannot be undone.`)) {
+  if (!confirm(`Are you sure you want to PERMANENTLY DELETE "${name}" (${email}) from the database?\n\nThis will completely wipe:\n- Student profile & application\n- Enrollment & weekly progress\n- Task submissions & urgent requests\n- Certificates & payment records\n- OTP tokens & email logs\n\nWhen this user returns, they will be treated as a completely brand-new user.\n\nThis action cannot be undone.`)) {
     return;
   }
   try {
-    const data = await api(`/api/admin/students/${studentId}`, {
-      method: 'DELETE'
-    });
+    await api(`/api/admin/students/${studentId}`, { method: 'DELETE' });
     toast(`🗑️ Permanently deleted ${name} (${email}) from database.`);
-    if (currentPage === 'overview') {
-      loadRecentApplications(true);
-      loadOverviewBatches(true);
-    }
-    loadStudents(true);
-    loadStats(true);
-    if (currentPage === 'batches') {
-      loadBatches(true);
-    }
+    refreshStudentViews();
   } catch(e) {
     toast(`Failed to delete student: ${e.message}`, 'error');
   }
 }
 
 async function issueCertificate(studentId, batchId, name) {
+  // Open the tab synchronously so popup blockers allow it, then point it at the certificate.
+  const win = window.open('', '_blank');
   try {
     const data = await api(`/api/certificates/issue/${studentId}/${batchId}`, { method: 'POST' });
     toast(`Certificate ${data.cert_id} issued to ${name}!`);
-    // Open certificate in new tab
-    const certUrl = `${window.SKILLME_FRONTEND || 'http://localhost:8080'}/certificate.html?student_id=${studentId}&batch_id=${batchId}&name=${encodeURIComponent(name)}`;
-    window.open(certUrl, '_blank');
+    const certUrl = `${window.SKILLME_FRONTEND || window.location.origin}/certificate.html?cert_id=${encodeURIComponent(data.cert_id)}`;
+    if (win) win.location.href = certUrl; else window.open(certUrl, '_blank');
   } catch(e) {
+    if (win) win.close();
     toast(e.message, 'error');
   }
 }
 
-async function autoEnrollStudent(studentId, name, btnEl) {
-  const btn = btnEl || (typeof event !== 'undefined' ? event.currentTarget : null);
-  const origHtml = btn ? btn.innerHTML : '';
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = `<span style="display:inline-block;width:11px;height:11px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:4px;"></span> Enrolling...`;
-  }
+async function enrollStudent(studentId, name, btn) {
+  const restore = setBusy(btn, 'Enrolling...');
   try {
-    const data = await api(`/api/admin/students/${studentId}/enroll`, {
-      method: 'POST'
-    });
-    toast(`✅ Enrolled ${name}!`);
-    if (currentPage === 'overview') {
-      loadRecentApplications(true);
-      loadOverviewBatches(true);
-    }
-    loadStudents(true);
-    loadStats(true);
-    if (currentPage === 'batches') {
-      loadBatches(true);
-    }
+    const data = await api(`/api/admin/students/${studentId}/enroll`, { method: 'POST' });
+    toast(data.reactivated ? `✅ Re-enrolled ${name} — previous progress kept` : `✅ Enrolled ${name}! Offer letter is on its way.`);
+    refreshStudentViews();
   } catch(e) {
     toast(`Enrollment failed: ${e.message}`, 'error');
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = origHtml;
-    }
-  }
-}
-
-// ─── BATCHES ───
-async function loadBatches(silent = false) {
-  const el = document.getElementById('batches-list');
-  if (!silent) {
-    el.innerHTML = '<div class="loading-overlay"><div class="spinner"></div> Loading batches...</div>';
-  }
-  try {
-    const data = await api('/api/admin/batches');
-    allBatches = data.batches || [];
-    if (!allBatches.length) {
-      el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">&#128230;</div><div class="empty-state-text">No batches yet. Create your first batch!</div></div>`;
-      return;
-    }
-    el.innerHTML = allBatches.map(b => {
-      const fill = Math.min(100, Math.round((b.enrolled_students || 0) / (b.max_students || 30) * 100));
-      return `
-        <div class="batch-card" id="batch-card-${b.id}">
-          <div class="batch-card-header">
-            <div>
-              <div class="batch-card-title">${b.domain.replace('-',' ').replace(/\b\w/g, c=>c.toUpperCase())} — Batch #${b.batch_number}</div>
-              <div class="batch-card-meta">${b.enrolled_students || 0} / ${b.max_students} students &nbsp;&middot;&nbsp; Started ${fmtDate(b.start_date)}</div>
-            </div>
-            <div class="batch-card-actions">
-              ${statusBadge(b.status)}
-              <button class="btn btn-ghost btn-sm" onclick="openAnalyticsModal(${b.id}, '${b.domain} Batch #${b.batch_number}')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
-                Analytics
-              </button>
-              <button class="btn btn-ghost btn-sm" style="color:#f87171;" onclick="deleteBatch(${b.id}, '${b.domain} Batch #${b.batch_number}')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-                Delete
-              </button>
-            </div>
-          </div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${fill}%"></div></div>
-          <div class="progress-labels">
-            <span>${fill}% enrolled</span>
-            <span>${b.max_students - (b.enrolled_students || 0)} slots remaining</span>
-          </div>
-        </div>`;
-    }).join('');
-  } catch(e) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-state-text">${e.message}</div></div>`;
-  }
-}
-
-async function deleteBatch(batchId, batchName) {
-  if (!confirm(`Are you sure you want to permanently delete "${batchName}"?\n\nThis will instantly wipe all progress, submissions, email logs, and enrollments associated with this batch. This action cannot be undone.`)) {
-    return;
-  }
-  try {
-    await api(`/api/admin/batches/${batchId}`, { method: 'DELETE' });
-    toast(`Batch ${batchName} deleted successfully`);
-    loadBatches(true);
-    loadOverviewBatches(true);
-  } catch(e) {
-    toast(`Failed to delete batch: ${e.message}`, 'error');
-  }
-}
-
-function openCreateBatchModal() {
-  openModal('create-batch-modal');
-}
-
-async function createBatch() {
-  const domain = document.getElementById('new-batch-domain').value;
-  const batchNum = parseInt(document.getElementById('new-batch-number').value);
-  const maxStudents = parseInt(document.getElementById('new-batch-max').value) || 30;
-  try {
-    const btn = document.querySelector('#create-batch-modal .btn-primary');
-    btn.textContent = 'Creating...'; btn.disabled = true;
-    const res = await api('/api/admin/batches', {
-      method: 'POST',
-      body: JSON.stringify({ domain, batch_number: batchNum, max_students: maxStudents })
-    });
-    if (res.warning) {
-      toast(`Batch created, but: ${res.warning}`, 'error');
-    } else {
-      toast(`Batch ${domain} #${batchNum} created!`);
-    }
-    closeModal('create-batch-modal');
-    if (currentPage === 'overview') {
-      loadOverviewBatches(true);
-    }
-    loadBatches(true);
-    loadStats(true);
-    btn.textContent = 'Create Batch'; btn.disabled = false;
-  } catch(e) {
-    toast(e.message, 'error');
-    const btn = document.querySelector('#create-batch-modal .btn-primary');
-    btn.textContent = 'Create Batch'; btn.disabled = false;
+    restore();
   }
 }
 
@@ -1153,68 +1107,6 @@ async function sendTestEmail() {
   }
 }
 
-async function openAnalyticsModal(batchId, batchName) {
-  openModal('modal-analytics');
-  document.getElementById('analytics-modal-title').textContent = `${batchName} Analytics`;
-  const contentEl = document.getElementById('analytics-modal-content');
-  contentEl.innerHTML = '<div class="loading-overlay"><div class="spinner"></div> Loading analytics...</div>';
-
-  try {
-    const data = await api(`/api/admin/batches/${batchId}/analytics`);
-    const enrollments = data.enrollments || {};
-    const subs = data.submission_stats || {};
-    const revenue = data.revenue || {};
-    const students = data.student_grid || [];
-
-    let html = `
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:24px;">
-        <div style="background:var(--bg-card); padding:16px; border-radius:8px; border:1px solid var(--border);">
-          <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">Enrollments</div>
-          <div style="font-size:1.5rem; font-weight:700;">${enrollments.active || 0} <span style="font-size:1rem; color:var(--text-muted); font-weight:normal;">active</span></div>
-          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:4px;">${enrollments.dropped || 0} dropped, ${enrollments.completed || 0} completed</div>
-        </div>
-        <div style="background:var(--bg-card); padding:16px; border-radius:8px; border:1px solid var(--border);">
-          <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">Submissions</div>
-          <div style="font-size:1.5rem; font-weight:700;">${subs.approved || 0} <span style="font-size:1rem; color:var(--text-muted); font-weight:normal;">approved</span></div>
-          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:4px;">${subs.total_submissions || 0} total, ${subs.pending || 0} pending, ${subs.rejected || 0} rejected</div>
-        </div>
-        <div style="background:var(--bg-card); padding:16px; border-radius:8px; border:1px solid var(--border);">
-          <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">Revenue</div>
-          <div style="font-size:1.5rem; font-weight:700;">₹${revenue.total_inr || 0}</div>
-          <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:4px;">${revenue.total_payments || 0} certificates paid</div>
-        </div>
-      </div>
-
-      <h3 style="margin-bottom:12px; font-size:1rem;">Student Progress Grid</h3>
-      <div class="table-wrap" style="max-height: 400px; overflow-y: auto;">
-        <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
-          <thead style="position:sticky; top:0; background:var(--bg-surface); z-index:1;">
-            <tr>
-              <th style="text-align:left; padding:10px; border-bottom:1px solid var(--border);">Student</th>
-              <th style="text-align:left; padding:10px; border-bottom:1px solid var(--border);">Status</th>
-              <th style="text-align:center; padding:10px; border-bottom:1px solid var(--border);">Tasks Completed</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${students.map(s => `
-              <tr>
-                <td style="padding:10px; border-bottom:1px solid var(--border);">
-                  <div style="font-weight:500;">${s.first_name} ${s.last_name}</div>
-                </td>
-                <td style="padding:10px; border-bottom:1px solid var(--border);">${statusBadge(s.enrollment_status)}</td>
-                <td style="padding:10px; border-bottom:1px solid var(--border); text-align:center;">${s.tasks_completed || 0}</td>
-              </tr>
-            `).join('') || '<tr><td colspan="3" style="padding:20px; text-align:center; color:var(--text-muted);">No student data available.</td></tr>'}
-          </tbody>
-        </table>
-      </div>
-    `;
-    contentEl.innerHTML = html;
-  } catch(e) {
-    contentEl.innerHTML = `<div class="empty-state"><div class="empty-state-text">Failed to load analytics: ${e.message}</div></div>`;
-  }
-}
-
 // ─── SUBMISSIONS (LinkedIn URL Review Queue) ───
 let allSubmissions = [];
 let selectedSubmissionIds = new Set();
@@ -1248,12 +1140,12 @@ function renderSubmissions(submissions) {
     <tr>
       <td><input type="checkbox" class="submission-row-check" data-id="${s.id}" ${selectedSubmissionIds.has(s.id) ? 'checked' : ''} onchange="toggleSubmissionSelected(${s.id}, this.checked)" /></td>
       <td>
-        <div style="font-weight:500;">${s.first_name || ''} ${s.last_name || ''}</div>
-        <div style="font-size:0.75rem;color:var(--text-muted);">${s.domain || ''}${s.batch_number ? ' — Batch #' + s.batch_number : ''}</div>
+        <div style="font-weight:500;">${esc(s.first_name)} ${esc(s.last_name)}</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);">${esc(s.domain)}</div>
       </td>
-      <td style="color:var(--text-secondary);font-size:0.82rem;">${s.email || '—'}</td>
-      <td>Week ${s.week}</td>
-      <td>${s.linkedin_url ? `<a href="${s.linkedin_url}" target="_blank" rel="noopener noreferrer" style="color:#38bdf8;">View Post ↗</a>` : '—'}</td>
+      <td style="color:var(--text-secondary);font-size:0.82rem;">${esc(s.email || '—')}</td>
+      <td>Week ${Number(s.week) || '—'}</td>
+      <td>${safeUrl(s.linkedin_url) ? `<a href="${safeUrl(s.linkedin_url)}" target="_blank" rel="noopener noreferrer" style="color:#38bdf8;">View Post ↗</a>` : esc(s.linkedin_url || '—')}</td>
       <td style="color:var(--text-muted);font-size:0.8rem;">${fmtDate(s.submitted_at)}</td>
       <td>${statusBadge(s.status)}</td>
       <td>
@@ -1401,12 +1293,12 @@ function renderUrgentRequests(requests) {
   tbody.innerHTML = requests.map(r => `
     <tr>
       <td>
-        <div style="font-weight:500;">${r.first_name || ''} ${r.last_name || ''}</div>
-        <div style="font-size:0.75rem;color:var(--text-muted);">${r.email || ''}</div>
+        <div style="font-weight:500;">${esc(r.first_name)} ${esc(r.last_name)}</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);">${esc(r.email)}</div>
       </td>
-      <td style="color:var(--text-secondary);font-size:0.82rem;">${r.domain || ''}${r.batch_number ? ' — Batch #' + r.batch_number : ''}</td>
-      <td>${r.request_type}</td>
-      <td style="color:var(--text-secondary);font-size:0.82rem;">${r.note || '—'}</td>
+      <td style="color:var(--text-secondary);font-size:0.82rem;">${esc(r.domain)}</td>
+      <td>${esc(r.request_type)}</td>
+      <td style="color:var(--text-secondary);font-size:0.82rem;">${esc(r.note || '—')}</td>
       <td style="color:var(--text-muted);font-size:0.8rem;">${fmtDate(r.created_at)}</td>
       <td>${statusBadge(r.status)}</td>
       <td>
@@ -1471,9 +1363,9 @@ async function previewAnnouncement() {
           <tbody>
             ${announcementPreviewCache.map(s => `
               <tr>
-                <td>${s.first_name} ${s.last_name}</td>
-                <td>${s.email}</td>
-                <td>${s.domain || '-'}</td>
+                <td>${esc(s.first_name)} ${esc(s.last_name)}</td>
+                <td>${esc(s.email)}</td>
+                <td>${esc(s.domain || '-')}</td>
               </tr>`).join('')}
           </tbody>
         </table>
@@ -1546,9 +1438,9 @@ async function loadInactiveStudents() {
     tbody.innerHTML = _cachedInactiveStudents.map(s => {
       const lastAct = s.last_activity ? new Date(s.last_activity).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
       return `<tr>
-        <td style="font-weight:600;">${s.first_name} ${s.last_name || ''}</td>
-        <td style="font-size:0.82rem;color:var(--text-secondary);">${s.email}</td>
-        <td>${s.domain || '—'}</td>
+        <td style="font-weight:600;">${esc(s.first_name)} ${esc(s.last_name)}</td>
+        <td style="font-size:0.82rem;color:var(--text-secondary);">${esc(s.email)}</td>
+        <td>${esc(s.domain || '—')}</td>
         <td><span style="background:rgba(245,158,11,0.15);color:#f59e0b;padding:3px 10px;border-radius:6px;font-size:0.78rem;font-weight:700;">Week ${s.week_due}</span></td>
         <td style="color:#f87171;font-weight:600;">${s.days_inactive} days</td>
         <td>${s.completed_tasks}/4</td>

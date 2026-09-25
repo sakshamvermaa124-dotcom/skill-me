@@ -25,7 +25,6 @@ from routes.students import router as students_router
 from routes.certificates import router as certificates_router
 from routes.payments import router as payments_router
 from routes.auth import router as auth_router
-from routes.referrals import router as referrals_router
 from routes.portfolio import router as portfolio_router
 from routes.monitor import router as monitor_router
 from routes.tasks import router as tasks_router
@@ -83,7 +82,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="SkillMe API",
-    description="Backend API for SkillMe — India's open-source internship platform. Manages batches, students, and progress tracking.",
+    description="Backend API for SkillMe — India's open-source internship platform. Manages student applications, enrollment, and progress tracking.",
     version="0.1.0",
     lifespan=lifespan,
     docs_url="/docs",
@@ -132,7 +131,6 @@ app.include_router(students_router)
 app.include_router(certificates_router)
 app.include_router(payments_router)
 app.include_router(auth_router)
-app.include_router(referrals_router)
 app.include_router(portfolio_router)
 app.include_router(monitor_router)
 app.include_router(tasks_router)

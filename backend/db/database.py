@@ -193,6 +193,8 @@ class Database:
                 "ALTER TABLE email_logs ADD COLUMN last_event TEXT",
                 "ALTER TABLE email_logs ADD COLUMN last_event_at TIMESTAMP",
                 "CREATE INDEX IF NOT EXISTS idx_email_logs_tag ON email_logs(message_tag)",
+                # Auto-generated feedback emailed to the student when they submit a week's task (v7)
+                "ALTER TABLE submissions ADD COLUMN feedback TEXT",
             ]
             for migration in migrations:
                 try:
@@ -207,6 +209,32 @@ class Database:
     async def disconnect(self):
         """No-op since connections are created per-query."""
         pass
+
+    @staticmethod
+    def _coerce_hrana_value(v):
+        """
+        Turso's HTTP (Hrana) API wraps every column value as {"type": ..., "value": ...},
+        and — matching how request args are encoded above — sends integer values as a
+        STRING (e.g. {"type": "integer", "value": "5"}), not a JSON number. Any code doing
+        arithmetic on a fetch_one/fetch_all result (COUNT(*), SUM(...), etc.) needs the
+        real type back, or it silently gets a str and blows up on first use (e.g. `-x`).
+        """
+        if not isinstance(v, dict):
+            return v
+        vtype, value = v.get("type"), v.get("value")
+        if value is None:
+            return None
+        if vtype == "integer":
+            try:
+                return int(value)
+            except (TypeError, ValueError):
+                return value
+        if vtype == "float":
+            try:
+                return float(value)
+            except (TypeError, ValueError):
+                return value
+        return value
 
     def _run_turso_http(self, query: str, params: tuple = ()):
         """Query Turso Cloud DB via HTTP Pipeline API when libsql_experimental native driver is unavailable."""
@@ -252,7 +280,7 @@ class Database:
             cols = [c["name"] for c in result.get("cols", [])]
             rows = []
             for r in result.get("rows", []):
-                row_vals = [v.get("value") if isinstance(v, dict) else v for v in r]
+                row_vals = [self._coerce_hrana_value(v) for v in r]
                 rows.append(dict(zip(cols, row_vals)))
             last_id = result.get("last_insert_rowid")
             if last_id is not None and str(last_id).isdigit():

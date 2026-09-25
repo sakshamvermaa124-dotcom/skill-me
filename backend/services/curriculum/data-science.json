@@ -1,0 +1,556 @@
+{
+  "domain": "data-science",
+  "tracks": [
+    {
+      "project_name": "InsightHub: Interactive Data Intelligence & ML Dashboard",
+      "tagline": "Explore a real-world dataset, clean it up, build a simple prediction model, and finish with a small interactive dashboard.",
+      "weeks": {
+        "1": {
+          "title": "Explore a Dataset with Pandas",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Load the classic Titanic dataset into pandas and explore it: what columns exist, what is missing, and what basic patterns show up. This is the foundation every data science project starts from, and it builds comfort with pandas and simple charts.",
+          "learn": [
+            "Loading data with `pandas.read_csv` and inspecting it with `.head()`, `.info()`, `.describe()`",
+            "Selecting, filtering and grouping data with pandas",
+            "Finding missing values with `.isnull().sum()`",
+            "Making basic charts with matplotlib or seaborn"
+          ],
+          "steps": [
+            "Set up a Jupyter notebook or Google Colab notebook and download the Titanic dataset (available from `seaborn.load_dataset('titanic')` or Kaggle's Titanic competition).",
+            "Load the data with pandas and run `.head()`, `.info()` and `.describe()` to understand the columns and types.",
+            "Check for missing values with `.isnull().sum()` and note which columns need cleaning later.",
+            "Use `.groupby()` to compare survival rate by passenger class and by sex, printing the resulting tables.",
+            "Plot a bar chart of survival rate by class and a histogram of passenger ages using matplotlib or seaborn.",
+            "Write 3-4 sentences in a markdown cell summarising what you noticed (for example, which group had the best survival rate).",
+            "Save the notebook and export at least two charts as PNG images."
+          ],
+          "deliverables": [
+            "A notebook that loads and explores the Titanic dataset",
+            "At least two clear charts (bar chart and histogram, or similar)",
+            "A short written summary of your findings in markdown",
+            "A README explaining how to open and run the notebook"
+          ],
+          "done_when": [
+            "The notebook runs top to bottom without errors",
+            "`.isnull().sum()` output correctly identifies the columns with missing data",
+            "At least two charts are visible in the notebook with titles and axis labels",
+            "The written summary references actual numbers from your analysis"
+          ],
+          "hints": [
+            "If `seaborn.load_dataset('titanic')` fails, download the CSV directly from the Kaggle Titanic competition page instead.",
+            "Always label your axes and give charts a title, or it is hard to remember what they show a week later.",
+            "The [pandas documentation](https://pandas.pydata.org/docs/) has a short 'getting started' tutorial on grouping and aggregating."
+          ],
+          "stretch": "Add a heatmap of correlations between numeric columns using `seaborn.heatmap(df.corr())`.",
+          "post_highlights": [
+            "Explored the Titanic dataset using pandas, groupby and descriptive statistics",
+            "Identified missing data and survival patterns by class and sex",
+            "Built my first data visualizations with matplotlib and seaborn"
+          ]
+        },
+        "2": {
+          "title": "Clean Data and Engineer Features",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Clean the missing and messy values you found last week and create a few new columns that make the data more useful for analysis or modeling. This is the unglamorous but essential skill of turning raw data into something usable.",
+          "learn": [
+            "Handling missing values with `.fillna()` and `.dropna()`",
+            "Creating new columns from existing ones (feature engineering)",
+            "Converting categories to numbers with `pandas.get_dummies` or label encoding",
+            "Detecting outliers with boxplots and simple thresholds"
+          ],
+          "steps": [
+            "Decide a strategy for each missing column from Week 1 (for example, fill missing `age` with the median, fill missing `embarked` with the most common value) and justify it in a markdown cell.",
+            "Write a `clean_data(df)` function that applies your cleaning steps and returns a new DataFrame, so the raw data stays untouched.",
+            "Create at least two new columns, such as `family_size` (siblings + parents + self) and `is_alone` (True if `family_size` is 1).",
+            "Use `pandas.get_dummies()` to convert the `sex` and `embarked` columns into numeric columns.",
+            "Draw a boxplot of `fare` to spot outliers, and decide whether to cap or keep them, explaining your choice.",
+            "Re-run your Week 1 groupby analysis on the cleaned data and check the numbers still make sense.",
+            "Save the cleaned DataFrame to `data/titanic_clean.csv` so next week can load it directly."
+          ],
+          "deliverables": [
+            "A `clean_data(df)` function that handles missing values",
+            "At least two engineered feature columns",
+            "One-hot or label-encoded categorical columns",
+            "A saved `titanic_clean.csv` file"
+          ],
+          "done_when": [
+            "`clean_data(df).isnull().sum()` shows zero missing values in the columns you chose to clean",
+            "The new feature columns (`family_size`, `is_alone`) contain correct, sensible values",
+            "The categorical columns are numeric after encoding",
+            "`titanic_clean.csv` loads back into pandas with the expected shape and columns"
+          ],
+          "hints": [
+            "Always clean a copy (`df.copy()`) or work through a function so you can compare cleaned and raw data side by side.",
+            "Use the median instead of the mean for skewed columns like `age`, since it is less affected by outliers.",
+            "The [pandas documentation](https://pandas.pydata.org/docs/) has a dedicated page on working with missing data."
+          ],
+          "stretch": "Bucket `age` into groups (child, teen, adult, senior) using `pandas.cut` and compare survival rate across the buckets.",
+          "post_highlights": [
+            "Cleaned missing values in a real dataset with a documented, repeatable strategy",
+            "Engineered new features like family size to improve analysis",
+            "Encoded categorical data and saved a clean dataset for modeling"
+          ]
+        },
+        "3": {
+          "title": "Train a Prediction Model with scikit-learn",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Use your cleaned dataset to train a simple machine learning model that predicts survival, and evaluate how good it really is. This is your first hands-on experience with the standard scikit-learn workflow used across most ML projects.",
+          "learn": [
+            "Splitting data into train and test sets with `train_test_split`",
+            "Training a classifier such as `LogisticRegression` or `RandomForestClassifier`",
+            "Evaluating a model with accuracy, precision, recall and a confusion matrix",
+            "Avoiding data leakage by fitting transformations only on training data"
+          ],
+          "steps": [
+            "Load `titanic_clean.csv` and select your feature columns (`pclass`, `sex_male`, `age`, `fare`, `family_size`, etc.) and the target column `survived`.",
+            "Split the data into training and test sets using `train_test_split(X, y, test_size=0.2, random_state=42)`.",
+            "Train a `LogisticRegression` model on the training set and check it runs without errors.",
+            "Predict on the test set and print `accuracy_score`, `precision_score`, `recall_score` and a confusion matrix using `sklearn.metrics`.",
+            "Train a `RandomForestClassifier` on the same split and compare its metrics to logistic regression in a small table.",
+            "Print `feature_importances_` (for the random forest) or the coefficients (for logistic regression) to see which features mattered most.",
+            "Write 3-4 sentences explaining which model performed better and why that might be, referencing actual numbers.",
+            "Save the better-performing model to disk with `joblib.dump`."
+          ],
+          "deliverables": [
+            "A train/test split with a fixed `random_state` for reproducibility",
+            "Two trained models (logistic regression and random forest) with evaluation metrics",
+            "A short comparison table or printout of accuracy, precision and recall for both",
+            "A saved model file (`model.joblib` or similar)"
+          ],
+          "done_when": [
+            "The train/test split does not mix rows between the two sets",
+            "Both models train and produce predictions on the test set without errors",
+            "Accuracy, precision, recall and a confusion matrix are printed for both models",
+            "The saved model file can be reloaded with `joblib.load` and still makes predictions"
+          ],
+          "hints": [
+            "Always fit encoders and scalers on the training data only, then apply (`.transform`) them to the test data, to avoid leaking test information.",
+            "A confusion matrix with `ConfusionMatrixDisplay` from scikit-learn is easier to read than raw numbers.",
+            "The [scikit-learn user guide](https://scikit-learn.org/stable/user_guide.html) has clear examples for classification metrics and model training."
+          ],
+          "stretch": "Use `GridSearchCV` to tune the random forest's `n_estimators` and `max_depth` and see if it improves the test accuracy.",
+          "post_highlights": [
+            "Trained logistic regression and random forest models to predict Titanic survival",
+            "Evaluated models with accuracy, precision, recall and a confusion matrix",
+            "Compared feature importance across models to understand what drove predictions"
+          ]
+        },
+        "4": {
+          "title": "Streamlit Dashboard and Write-Up",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Turn your analysis and model into an interactive Streamlit dashboard that anyone can explore in a browser, and write a clear README that tells the story of your project. This is where your work becomes something you can actually show people.",
+          "learn": [
+            "Building an interactive app with Streamlit widgets and layout",
+            "Loading a saved model and making live predictions from user input",
+            "Displaying charts and tables inside a Streamlit app",
+            "Writing a project README that tells a clear data story"
+          ],
+          "steps": [
+            "Install Streamlit (`pip install streamlit`) and create `app.py` with a title and a short project description.",
+            "Add a page section that shows your Week 1-2 charts (survival by class, age histogram) using `st.pyplot()` or `st.bar_chart()`.",
+            "Add input widgets (`st.selectbox` for class and sex, `st.slider` for age and fare) so a user can enter a hypothetical passenger.",
+            "Load your saved model with `joblib.load` and use the widget values to make a live prediction, showing 'Survived' or 'Did not survive' with the predicted probability.",
+            "Add a sidebar or table showing the model's test accuracy and a brief explanation of which features mattered most.",
+            "Test the app by trying at least three different combinations of inputs and checking the predictions change sensibly.",
+            "Write a full README with the project story: the question you explored, what you found, how the model performs, and how to run the app.",
+            "Record a 30-60 second demo of the dashboard, including making at least one live prediction."
+          ],
+          "deliverables": [
+            "A working Streamlit app (`app.py`) with charts and a live prediction form",
+            "A model loaded from disk and used for real-time predictions",
+            "`requirements.txt` and a complete README telling the project's data story",
+            "A 30-60 second demo video"
+          ],
+          "done_when": [
+            "`streamlit run app.py` opens a working dashboard in the browser",
+            "Changing the input widgets changes the predicted outcome and probability",
+            "The dashboard shows at least one chart from your earlier analysis",
+            "A new person can set up and run the dashboard using only the README"
+          ],
+          "hints": [
+            "Cache the model loading with `@st.cache_resource` so it does not reload on every interaction.",
+            "Keep `app.py` focused on the UI; put data loading and prediction logic in a separate `model_utils.py` if it gets long.",
+            "The [Streamlit documentation](https://docs.streamlit.io) has a clear getting-started guide covering widgets, layout and caching."
+          ],
+          "stretch": "Add a page that lets a user upload their own CSV of passengers and see predictions for all of them in a table.",
+          "post_highlights": [
+            "Built an interactive Streamlit dashboard for my Titanic survival analysis",
+            "Connected a trained scikit-learn model to live user input for real-time predictions",
+            "Wrote a complete project README telling the full data story from raw data to dashboard"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "FinanceForecaster: Algorithmic Market & Crypto Trend Engine",
+      "tagline": "Pull real stock price data, explore trends, build a simple forecasting model, and finish with an interactive dashboard (not financial advice).",
+      "weeks": {
+        "1": {
+          "title": "Pull Stock Data and Explore Trends",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Download real historical stock price data with yfinance and explore its basic trends and volatility. This introduces you to time-series data, which behaves differently from the flat tables you may have seen before.",
+          "learn": [
+            "Downloading historical price data with the `yfinance` library",
+            "Working with a `DatetimeIndex` in pandas",
+            "Calculating daily returns and rolling averages",
+            "Plotting time series with matplotlib"
+          ],
+          "steps": [
+            "Install yfinance (`pip install yfinance`) and download 2 years of daily data for 2-3 tickers (for example `AAPL`, `MSFT`, `TSLA`) with `yf.download(ticker, period='2y')`.",
+            "Inspect the DataFrame with `.head()` and `.info()`, and confirm the index is a proper `DatetimeIndex`.",
+            "Plot the closing price over time for each ticker on the same chart, with a legend and clear labels.",
+            "Calculate daily percentage returns with `.pct_change()` and plot a histogram of returns for one ticker.",
+            "Calculate a 20-day and 50-day rolling average of the closing price with `.rolling(window=...).mean()` and plot them alongside the price.",
+            "Compute the standard deviation of daily returns for each ticker as a simple volatility measure, and print a small comparison table.",
+            "Write 3-4 sentences in a markdown cell about which ticker looked most volatile and any visible trend, and add a clear 'not financial advice' note."
+          ],
+          "deliverables": [
+            "A notebook that downloads and explores price data for 2-3 tickers",
+            "A closing-price chart and a rolling-average chart",
+            "A volatility comparison based on daily returns",
+            "A README with a 'not financial advice' disclaimer and run instructions"
+          ],
+          "done_when": [
+            "The notebook runs top to bottom and downloads data without errors",
+            "The closing-price chart clearly shows multiple tickers with a legend",
+            "Rolling averages are visibly smoother than the raw price line on the chart",
+            "The written summary references actual computed volatility numbers"
+          ],
+          "hints": [
+            "If `yfinance` returns empty data, check the ticker symbol is correct and that you have an internet connection.",
+            "Use `df['Close'].pct_change()` for daily returns; the first row will be `NaN`, which is expected.",
+            "The [yfinance documentation](https://ranaroussi.github.io/yfinance/) has quick examples for downloading and working with price history."
+          ],
+          "stretch": "Add a candlestick-style high/low/close chart for one ticker using matplotlib or `mplfinance`.",
+          "post_highlights": [
+            "Downloaded and explored real stock price history using yfinance and pandas",
+            "Calculated daily returns and rolling averages to spot trends",
+            "Compared volatility across multiple tickers with basic time-series analysis"
+          ]
+        },
+        "2": {
+          "title": "Clean Data and Engineer Trading Features",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Clean gaps in the price data and engineer features that describe price momentum and trend, the building blocks any forecasting model needs. This week is about turning raw prices into meaningful signals.",
+          "learn": [
+            "Handling missing dates and forward-filling time-series gaps",
+            "Engineering lag and momentum features from price data",
+            "Computing a simple moving-average crossover signal",
+            "Saving and reloading engineered data with pandas"
+          ],
+          "steps": [
+            "Check for missing trading days (for example around holidays) and decide whether to forward-fill or leave gaps, explaining your choice in markdown.",
+            "Write a `add_features(df)` function that adds `return_1d` (1-day percentage return), `ma_20` and `ma_50` (20 and 50-day moving averages).",
+            "Add a `lag_1` column containing the previous day's closing price, useful later as a simple model input.",
+            "Add a `signal` column that is `1` when `ma_20` crosses above `ma_50` (a simple 'bullish' signal) and `-1` when it crosses below, using `.shift()` to compare with the previous day.",
+            "Count how many bullish and bearish signals occurred over the 2-year period and print the result.",
+            "Plot the closing price with markers at each signal point to visually sanity-check the crossover logic.",
+            "Save the engineered DataFrame for each ticker to `data/<ticker>_features.csv`."
+          ],
+          "deliverables": [
+            "An `add_features(df)` function producing return, moving-average and lag columns",
+            "A moving-average crossover signal column",
+            "A chart showing price with signal markers",
+            "Saved feature CSV files for each ticker"
+          ],
+          "done_when": [
+            "`add_features(df)` produces no unexpected `NaN` values beyond the first `window` rows",
+            "The crossover signal correctly matches points where `ma_20` and `ma_50` cross on the chart",
+            "The saved CSV files load back into pandas with all the new columns present",
+            "The signal counts printed are consistent with what the chart shows"
+          ],
+          "hints": [
+            "Use `df['ma_20'].shift(1) < df['ma_50'].shift(1)` compared with the current day to detect the exact crossover point.",
+            "Expect `NaN` values in the first 49 rows of `ma_50` since there is not enough history yet; that is normal, not a bug.",
+            "The [pandas documentation](https://pandas.pydata.org/docs/) has a page on window functions (`rolling`, `shift`) with runnable examples."
+          ],
+          "stretch": "Add a Relative Strength Index (RSI) feature computed from daily price changes over a 14-day window.",
+          "post_highlights": [
+            "Engineered momentum and moving-average features from raw stock price data",
+            "Built a moving-average crossover signal to flag potential trend changes",
+            "Practised handling gaps and lag features in real time-series data"
+          ]
+        },
+        "3": {
+          "title": "Forecast Prices with Linear Regression",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Train a simple linear regression model to forecast next-day closing price using your engineered features, and honestly evaluate how well it actually performs. This teaches you the standard regression workflow and, just as importantly, healthy skepticism about forecasting stock prices.",
+          "learn": [
+            "Framing a forecasting problem as supervised regression with a shifted target",
+            "Training and evaluating `LinearRegression` with scikit-learn",
+            "Using a time-based train/test split instead of a random split",
+            "Evaluating with MAE and RMSE and comparing against a naive baseline"
+          ],
+          "steps": [
+            "Create a target column `next_close` by shifting the closing price one day backward (`df['Close'].shift(-1)`), and drop the final row that now has no target.",
+            "Select your features from Week 2 (`ma_20`, `ma_50`, `return_1d`, `lag_1`) as `X` and `next_close` as `y`.",
+            "Split the data by time, not randomly: use the first 80% of rows (in date order) for training and the last 20% for testing.",
+            "Train a `LinearRegression` model on the training set and predict on the test set.",
+            "Compute a naive baseline that simply predicts 'tomorrow's price equals today's price', and calculate its MAE and RMSE too.",
+            "Compute your model's MAE and RMSE with `sklearn.metrics` and compare them honestly against the naive baseline.",
+            "Plot actual vs. predicted prices on the test period on one chart.",
+            "Write 3-4 sentences on whether your model actually beats the naive baseline, and add a clear 'not financial advice, for learning only' note."
+          ],
+          "deliverables": [
+            "A time-ordered train/test split (no shuffling)",
+            "A trained `LinearRegression` model with MAE/RMSE on the test set",
+            "A naive baseline comparison with its own MAE/RMSE",
+            "A chart of actual vs. predicted prices with a written, honest evaluation"
+          ],
+          "done_when": [
+            "The train and test sets are split by date, with all test dates after all training dates",
+            "MAE and RMSE are printed for both the model and the naive baseline",
+            "The actual-vs-predicted chart covers the full test period",
+            "The written summary honestly states whether the model beat the baseline, with numbers"
+          ],
+          "hints": [
+            "Never shuffle time-series data before splitting; a random split lets the model 'see the future', which is a common beginner mistake.",
+            "It is normal and instructive if linear regression barely beats or even loses to the naive baseline; stock prices are genuinely hard to predict.",
+            "The [scikit-learn user guide](https://scikit-learn.org/stable/user_guide.html) covers `LinearRegression` and the regression metrics you need."
+          ],
+          "stretch": "Try a `RandomForestRegressor` with the same features and compare its MAE/RMSE against linear regression and the naive baseline.",
+          "post_highlights": [
+            "Built a next-day price forecasting model using linear regression",
+            "Used a proper time-based train/test split to avoid look-ahead bias",
+            "Compared model performance honestly against a naive baseline with MAE and RMSE"
+          ]
+        },
+        "4": {
+          "title": "Streamlit Dashboard and Write-Up",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Package your analysis and forecasting model into an interactive Streamlit dashboard where a user can pick a ticker and see trends and forecasts, and write a clear README. This turns your analysis into something demoable and honest about its limits.",
+          "learn": [
+            "Building a multi-section Streamlit app with charts and user input",
+            "Fetching data live inside a Streamlit app with caching",
+            "Displaying model predictions and metrics alongside charts",
+            "Writing a README that clearly states a project's assumptions and limitations"
+          ],
+          "steps": [
+            "Install Streamlit and create `app.py` with a title, a short description, and a prominent 'not financial advice, for educational purposes only' notice.",
+            "Add a `st.selectbox` for the user to choose a ticker from your 2-3 tracked stocks.",
+            "Fetch or load that ticker's price history and display the closing price chart with moving averages, using `@st.cache_data` to avoid refetching on every click.",
+            "Show the crossover signal count and the most recent signal (bullish, bearish or none) as a summary metric using `st.metric`.",
+            "Load your trained model and display its predicted next-day close alongside the naive baseline prediction and the model's test-set MAE/RMSE.",
+            "Add a date range slider or picker so users can zoom into a specific period of the price chart.",
+            "Write a full README explaining the project, the forecasting approach, its known limitations, and how to run the dashboard.",
+            "Record a 30-60 second demo switching between tickers and showing the forecast section."
+          ],
+          "deliverables": [
+            "A working Streamlit app with ticker selection, charts and forecast display",
+            "Live or cached data fetching integrated into the app",
+            "Model predictions shown alongside the naive baseline and error metrics",
+            "A complete README with a clear disclaimer, and a 30-60 second demo video"
+          ],
+          "done_when": [
+            "`streamlit run app.py` opens a working dashboard and switching tickers updates all charts",
+            "The forecast section shows both the model's prediction and the naive baseline for comparison",
+            "The 'not financial advice' disclaimer is clearly visible on the main page",
+            "A new person can set up and run the dashboard using only the README"
+          ],
+          "hints": [
+            "Use `@st.cache_data(ttl=3600)` around your yfinance download function so the app does not refetch on every widget change.",
+            "Keep the model file and any per-ticker artifacts organized in a `models/` folder so the app can load the right one for each ticker.",
+            "The [Streamlit documentation](https://docs.streamlit.io) covers caching, `st.metric` and layout with columns, all useful here."
+          ],
+          "stretch": "Add a simple backtest section showing what a $1000 investment would be worth if you had followed the crossover signal versus just holding.",
+          "post_highlights": [
+            "Built an interactive Streamlit dashboard for stock trend analysis and forecasting",
+            "Connected a trained regression model to live ticker selection with cached data fetching",
+            "Presented model performance honestly alongside a naive baseline with a clear disclaimer"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "SurveyLens: Public Survey & Opinion Data Explorer",
+      "tagline": "Explore a real public survey dataset, clean and summarise it, and build a small interactive dashboard that tells its story.",
+      "weeks": {
+        "1": {
+          "title": "Explore a Survey Dataset",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Load a free public survey dataset (for example the Stack Overflow Developer Survey or a UCI dataset) into pandas and explore its structure, respondents and basic patterns. This builds the everyday pandas skills every later week depends on.",
+          "learn": [
+            "Loading data with `pandas.read_csv` and inspecting it with `.head()`, `.info()`, `.describe()`",
+            "Counting and grouping categorical answers with `.value_counts()` and `.groupby()`",
+            "Finding missing values with `.isnull().sum()`",
+            "Making basic charts with matplotlib or seaborn"
+          ],
+          "steps": [
+            "Download a free public survey CSV (for example a recent Stack Overflow Developer Survey sample, or a UCI dataset like the Adult Census Income survey) and set up a Jupyter or Colab notebook.",
+            "Load the data with pandas and run `.head()`, `.info()` and `.describe()` to understand the columns and types.",
+            "Pick 3-4 interesting categorical columns and run `.value_counts()` on each to see the distribution of answers.",
+            "Check for missing values with `.isnull().sum()` and note which columns need cleaning later.",
+            "Use `.groupby()` to compare one numeric column (such as age or years of experience) across one categorical column (such as country or role).",
+            "Plot a bar chart of the top 10 values for your most interesting categorical column.",
+            "Write 3-4 sentences in a markdown cell summarising the most interesting pattern you found."
+          ],
+          "deliverables": [
+            "A notebook that loads and explores a public survey dataset",
+            "At least two summary tables from `.value_counts()` or `.groupby()`",
+            "One clear bar chart with a title and labeled axes",
+            "A README explaining the dataset source and how to run the notebook"
+          ],
+          "done_when": [
+            "The notebook runs top to bottom without errors",
+            "`.isnull().sum()` output correctly identifies columns with missing data",
+            "The bar chart is legible with a title, axis labels and readable category names",
+            "The written summary references actual numbers from your analysis"
+          ],
+          "hints": [
+            "If the dataset is very large, load a sample first with `pd.read_csv(path, nrows=5000)` to explore quickly before working with the full file.",
+            "Sort `.value_counts()` results before plotting so the bar chart reads top-to-bottom by frequency.",
+            "The [pandas documentation](https://pandas.pydata.org/docs/) has a short 'getting started' tutorial covering `value_counts` and `groupby`."
+          ],
+          "stretch": "Cross-tabulate two categorical columns with `pandas.crosstab` and visualise it as a heatmap.",
+          "post_highlights": [
+            "Explored a real public survey dataset using pandas and value_counts",
+            "Identified missing data and interesting response patterns across groups",
+            "Built my first survey data visualizations with matplotlib"
+          ]
+        },
+        "2": {
+          "title": "Clean Responses and Engineer Features",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Clean messy survey responses (free text, inconsistent categories, missing answers) and engineer a few new columns that make group comparisons easier. Real survey data is messy, and cleaning it well is most of the actual work in data science.",
+          "learn": [
+            "Standardising inconsistent text categories with `.str` methods",
+            "Handling missing values with `.fillna()` and a documented strategy",
+            "Creating grouped or bucketed features from continuous columns",
+            "Converting categories to numbers with `pandas.get_dummies`"
+          ],
+          "steps": [
+            "Pick a free-text or inconsistent column (for example country names typed differently) and write a `clean_categories(df)` function using `.str.strip()`, `.str.lower()` and a mapping dictionary to standardise it.",
+            "Decide a strategy for missing values in your key columns (drop the row, fill with 'Unknown', or fill with the median) and justify each choice in markdown.",
+            "Create at least one bucketed feature, such as grouping years of experience into `Junior`, `Mid`, `Senior`, using `pandas.cut` or manual conditions.",
+            "Use `pandas.get_dummies()` to encode 2-3 categorical columns you plan to analyse further.",
+            "Re-run your Week 1 group comparisons on the cleaned data and confirm the numbers still make sense.",
+            "Print a before/after comparison showing how many unique values your standardised category column had before and after cleaning.",
+            "Save the cleaned DataFrame to `data/survey_clean.csv`."
+          ],
+          "deliverables": [
+            "A `clean_categories(df)` function that standardises messy text categories",
+            "A documented missing-value strategy applied consistently",
+            "At least one bucketed feature column",
+            "A saved `survey_clean.csv` file"
+          ],
+          "done_when": [
+            "The standardised category column has noticeably fewer unique values than the raw column",
+            "`survey_clean.csv` has zero missing values in the columns you chose to clean",
+            "The bucketed feature column contains only the expected category labels",
+            "`survey_clean.csv` loads back into pandas with the expected shape and columns"
+          ],
+          "hints": [
+            "Build your cleaning mapping by first printing `.unique()` on the messy column to see exactly what values you are dealing with.",
+            "Keep a copy of the raw data so you can always compare cleaned results against the original.",
+            "The [pandas documentation](https://pandas.pydata.org/docs/) has a page on string methods (`.str`) useful for cleaning text columns."
+          ],
+          "stretch": "Write a small test function that checks your cleaned category column only contains values from an expected allow-list.",
+          "post_highlights": [
+            "Cleaned messy survey categories using pandas string methods and mapping dictionaries",
+            "Documented and applied a consistent missing-value strategy",
+            "Engineered bucketed features to make group comparisons clearer"
+          ]
+        },
+        "3": {
+          "title": "Analyse Patterns with Grouped Stats and a Simple Model",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Dig deeper into your cleaned survey with grouped statistical comparisons, then train a simple classifier to predict one categorical outcome from the others. This connects exploratory analysis to a real, evaluated machine learning model.",
+          "learn": [
+            "Comparing groups with grouped means, medians and simple significance checks",
+            "Preparing survey data for modeling with encoding and train/test split",
+            "Training and evaluating a classifier such as `LogisticRegression`",
+            "Reading a confusion matrix and classification report"
+          ],
+          "steps": [
+            "Pick a clear question your data can answer (for example, 'does years of experience predict which role someone has?') and compute grouped statistics to explore it.",
+            "Use `scipy.stats` (or simple grouped `.describe()` comparisons) to check whether the difference between two groups looks meaningfully large, not just visually.",
+            "Select a target column with a small number of categories (such as your role bucket) and pick 3-5 feature columns to predict it.",
+            "Split the data into training and test sets with `train_test_split(X, y, test_size=0.2, random_state=42)`.",
+            "Train a `LogisticRegression` classifier (using `multi_class='auto'` if there are more than two categories) on the training set.",
+            "Evaluate with `classification_report` and a confusion matrix from `sklearn.metrics`, and identify which category the model struggles with most.",
+            "Write 3-4 sentences explaining what the model got right and wrong, referencing actual numbers from the report."
+          ],
+          "deliverables": [
+            "A grouped statistical comparison answering a clear survey question",
+            "A train/test split with encoded features and a target column",
+            "A trained classifier with a printed classification report and confusion matrix",
+            "A short written interpretation of the model's strengths and weaknesses"
+          ],
+          "done_when": [
+            "The grouped comparison clearly states which group differs and by how much",
+            "The classifier trains and predicts on the test set without errors",
+            "The classification report shows precision, recall and F1 for every class",
+            "The written interpretation correctly references the confusion matrix"
+          ],
+          "hints": [
+            "If one category is much rarer than the others, expect low recall for it; that is a normal and worth discussing, not a bug.",
+            "Fit `LabelEncoder` or `get_dummies` on the training data conventions and apply the same encoding to the test data.",
+            "The [scikit-learn user guide](https://scikit-learn.org/stable/user_guide.html) covers `classification_report` and confusion matrices with runnable examples."
+          ],
+          "stretch": "Compare `LogisticRegression` against a `RandomForestClassifier` on the same split and note which handles the rarer categories better.",
+          "post_highlights": [
+            "Answered a real question about survey respondents using grouped statistics",
+            "Trained a classifier to predict a categorical outcome from survey features",
+            "Interpreted a classification report and confusion matrix to explain model performance"
+          ]
+        },
+        "4": {
+          "title": "Streamlit Dashboard and Write-Up",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Turn your survey analysis into an interactive Streamlit dashboard so anyone can filter and explore the results themselves, and write a README that tells the full story. This is where your analysis becomes a shareable, demoable project.",
+          "learn": [
+            "Building a filterable dashboard with Streamlit widgets",
+            "Updating charts dynamically based on user selections",
+            "Displaying a trained model's predictions from user input",
+            "Writing a project README that clearly tells a data story"
+          ],
+          "steps": [
+            "Install Streamlit and create `app.py` with a title, short description and your Week 1 dataset summary.",
+            "Add filter widgets (`st.multiselect` or `st.selectbox`) for 2-3 key categorical columns, such as country or role.",
+            "Make your main chart update live based on the selected filters, showing the filtered group's response distribution.",
+            "Add a section showing the grouped statistics and classifier results from Week 3, with the confusion matrix displayed as an image or table.",
+            "Add a small interactive form using your Week 3 model: let the user pick feature values and see the predicted category live.",
+            "Test the dashboard by trying at least three different filter combinations and confirming the charts update correctly each time.",
+            "Write a full README with the dataset source, your key findings, the model's performance, and how to run the dashboard.",
+            "Record a 30-60 second demo showing filtering and a live prediction."
+          ],
+          "deliverables": [
+            "A working Streamlit app with live filters and updating charts",
+            "A displayed classification report or confusion matrix from Week 3",
+            "A live prediction form using the trained model",
+            "A complete README and a 30-60 second demo video"
+          ],
+          "done_when": [
+            "`streamlit run app.py` opens a working dashboard and filters correctly update the charts",
+            "The prediction form returns a category prediction for any valid input combination",
+            "The dashboard shows at least one summary of model performance from Week 3",
+            "A new person can set up and run the dashboard using only the README"
+          ],
+          "hints": [
+            "Cache the data loading step with `@st.cache_data` so filtering feels instant instead of reloading the CSV every time.",
+            "Use `st.columns()` to lay out filters and charts side by side for a cleaner look.",
+            "The [Streamlit documentation](https://docs.streamlit.io) has examples for multiselect filters and layout with columns."
+          ],
+          "stretch": "Add a downloadable button (`st.download_button`) that lets users export the currently filtered data as a CSV.",
+          "post_highlights": [
+            "Built an interactive Streamlit dashboard for exploring public survey data",
+            "Connected live filters to dynamic charts and a trained classification model",
+            "Shipped a complete, documented data story from raw survey data to dashboard"
+          ]
+        }
+      }
+    }
+  ]
+}

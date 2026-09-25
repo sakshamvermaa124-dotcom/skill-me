@@ -24,19 +24,16 @@ class TestAdminAuthEnforced:
         r = await client.get("/api/admin/stats", headers=admin_headers)
         assert r.status_code == 200
 
-    async def test_admin_list_batches_no_key(self, client):
-        r = await client.get("/api/admin/batches")
+    async def test_admin_enroll_student_no_key(self, client):
+        r = await client.post("/api/admin/students/1/enroll")
         assert r.status_code == 403
 
     async def test_admin_list_students_no_key(self, client):
         r = await client.get("/api/admin/students")
         assert r.status_code == 403
 
-    async def test_admin_create_batch_no_key(self, client):
-        r = await client.post(
-            "/api/admin/batches",
-            json={"domain": "web-dev", "batch_number": 1},
-        )
+    async def test_admin_update_status_no_key(self, client):
+        r = await client.patch("/api/admin/students/1/status", json={"status": "shortlisted"})
         assert r.status_code == 403
 
     async def test_admin_email_logs_no_key(self, client):

@@ -1,0 +1,574 @@
+{
+  "domain": "node",
+  "tracks": [
+    {
+      "project_name": "CloudVault: RESTful Secure API & Resource Management Hub",
+      "tagline": "Build a REST API with Node.js and Express that stores your notes and links, and keeps each user's items private with a login.",
+      "weeks": {
+        "1": {
+          "title": "Your First Express API",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Set up a Node.js project with Express and build your first API endpoints that return vault items (notes and links) from an in-memory array. You will learn how a server receives a request and sends back JSON.",
+          "learn": [
+            "Setting up a Node project with `npm init` and installing packages",
+            "Creating an Express server and defining routes",
+            "Sending JSON responses and using route parameters like `/items/:id`",
+            "Testing an API with a browser and Thunder Client or Postman"
+          ],
+          "steps": [
+            "Create a folder, run `npm init -y` and `npm install express`, and add `node_modules` to a `.gitignore` file.",
+            "Create `server.js` that starts an Express app on port 3000 and responds to `GET /` with `{ message: 'CloudVault API is running' }`.",
+            "Add an `items` array with 4-5 sample objects like `{ id, title, type, content }`, where `type` is `note` or `link`.",
+            "Add `GET /api/items` that returns all items as JSON.",
+            "Add `GET /api/items/:id` that returns one item, or a 404 status with `{ error: 'Item not found' }` if the id does not exist.",
+            "Add `GET /api/items?type=note` support by filtering on `req.query.type` inside the list route.",
+            "Test every route in the browser and in Thunder Client or Postman, then commit."
+          ],
+          "deliverables": [
+            "A Node + Express project that starts with `node server.js` or `npm start`",
+            "Three working GET routes: list, single item, and filter by type",
+            "A `.gitignore` that excludes `node_modules`",
+            "A short demo video calling the routes in Thunder Client or Postman"
+          ],
+          "done_when": [
+            "`GET /api/items` returns all sample items as JSON",
+            "`GET /api/items/1` returns one item and `GET /api/items/999` returns status 404 with an error message",
+            "`GET /api/items?type=link` returns only links",
+            "`node_modules` is not committed to Git",
+            "The server logs a message showing which port it is running on"
+          ],
+          "hints": [
+            "`req.params.id` is always a string, so convert it with `Number()` before comparing with numeric ids.",
+            "Install `nodemon` as a dev dependency and add a `dev` script so the server restarts when you save.",
+            "Thunder Client is a free VS Code extension that is quicker to set up than Postman.",
+            "The 'Getting started' guide on [expressjs.com](https://expressjs.com) covers routing basics."
+          ],
+          "stretch": "Add a `GET /api/stats` route that returns how many notes and how many links exist.",
+          "post_highlights": [
+            "Built my first REST API with Node.js and Express",
+            "Created routes with URL parameters, query filters and proper 404 responses",
+            "Tested API endpoints using Thunder Client"
+          ]
+        },
+        "2": {
+          "title": "Full CRUD, Validation & Middleware",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Turn your read-only API into a full CRUD API so items can be created, updated and deleted, with input validation and correct status codes. You will also write your first custom middleware.",
+          "learn": [
+            "The four CRUD operations mapped to POST, GET, PUT/PATCH and DELETE",
+            "Reading JSON request bodies with `express.json()`",
+            "Validating input and returning the right HTTP status codes (200, 201, 400, 404)",
+            "What middleware is and how to write a simple logger"
+          ],
+          "steps": [
+            "Add `app.use(express.json())` near the top of `server.js` so `req.body` works.",
+            "Add `POST /api/items` that creates an item with a new id and returns it with status 201.",
+            "Validate the body: `title` is required and under 100 characters, `type` must be `note` or `link`, and links must have a `content` starting with `http`; return 400 with a clear message otherwise.",
+            "Add `PUT /api/items/:id` to update an item (with the same validation) and `DELETE /api/items/:id` to remove it, returning 404 for unknown ids.",
+            "Write a logger middleware that prints the method, URL and time of every request, and register it with `app.use`.",
+            "Move the item routes into `routes/items.js` using `express.Router()` to keep `server.js` short.",
+            "Test every route, including bad input, and save your requests as a Thunder Client or Postman collection."
+          ],
+          "deliverables": [
+            "Working create, read, update and delete routes for items",
+            "Validation with clear 400 error messages",
+            "A custom logger middleware",
+            "An exported Thunder Client or Postman collection in the repo"
+          ],
+          "done_when": [
+            "Creating an item returns status 201 and the new item",
+            "Posting an item without a title returns status 400 and a helpful error",
+            "Updating or deleting an unknown id returns status 404",
+            "Every request is printed in the terminal by your logger",
+            "Item routes live in their own router file"
+          ],
+          "hints": [
+            "If `req.body` is `undefined`, you forgot `express.json()` or did not set the `Content-Type: application/json` header.",
+            "Write a small `validateItem(body)` function that returns an error message or `null`, and reuse it for POST and PUT.",
+            "Always call `next()` at the end of your middleware or requests will hang.",
+            "Read the 'Using middleware' guide on [expressjs.com](https://expressjs.com)."
+          ],
+          "stretch": "Add a `tags` array to items and support `GET /api/items?tag=study`.",
+          "post_highlights": [
+            "Built a full CRUD REST API with Node.js and Express",
+            "Added input validation and correct HTTP status codes for every route",
+            "Wrote custom logging middleware and organised routes with Express Router"
+          ]
+        },
+        "3": {
+          "title": "Saving Data with SQLite & Error Handling",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Replace the in-memory array with a SQLite database so your data survives a server restart. You will also add search, simple pagination and a central error handler so the API behaves well when things go wrong.",
+          "learn": [
+            "Storing data in a SQLite database with basic SQL (CREATE, INSERT, SELECT, UPDATE, DELETE)",
+            "Using parameterised queries to avoid SQL injection",
+            "Pagination and search with query parameters",
+            "Central error-handling middleware in Express"
+          ],
+          "steps": [
+            "Install `better-sqlite3` and create `db.js` that opens `vault.db` and runs `CREATE TABLE IF NOT EXISTS items (...)`.",
+            "Rewrite each route to use SQL with `?` placeholders, for example `db.prepare('SELECT * FROM items WHERE id = ?').get(id)`.",
+            "Restart the server and confirm items you created are still there.",
+            "Add `GET /api/items?search=react` using `WHERE title LIKE ?` with `%` around the search term.",
+            "Add pagination with `?page=1&limit=10` using `LIMIT` and `OFFSET`, and return `{ page, limit, total, items }`.",
+            "Add an error-handling middleware `(err, req, res, next)` at the end of `server.js` that logs the error and returns status 500 with a generic message.",
+            "Test search, pagination, restarts and a deliberately broken query to see the error handler work."
+          ],
+          "deliverables": [
+            "A SQLite-backed API where data survives restarts",
+            "Search and pagination on the list route",
+            "A central error-handling middleware",
+            "A demo video creating an item, restarting the server and fetching it again"
+          ],
+          "done_when": [
+            "Items created before a server restart are still returned after it",
+            "All SQL queries use placeholders instead of string concatenation",
+            "`?search=` returns only matching items and `?page=2&limit=5` returns the correct slice",
+            "Any unexpected error returns status 500 with JSON instead of crashing the server",
+            "The `.db` file is listed in `.gitignore`"
+          ],
+          "hints": [
+            "If `better-sqlite3` fails to install on your machine, store the data in a `data.json` file with `fs/promises` instead and keep the same routes.",
+            "Use a free tool like DB Browser for SQLite to look inside your database file.",
+            "Validate `page` and `limit` as positive numbers and cap `limit` at something like 50.",
+            "SQL syntax is documented on [sqlite.org](https://sqlite.org)."
+          ],
+          "stretch": "Add a `created_at` column and support `?sort=newest` and `?sort=oldest`.",
+          "post_highlights": [
+            "Connected my Express API to a SQLite database so data persists across restarts",
+            "Added search and pagination using safe parameterised SQL queries",
+            "Built central error-handling middleware to keep the API stable"
+          ]
+        },
+        "4": {
+          "title": "User Login with JWT & API Docs",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Add user accounts so each person can register, log in and see only their own vault items. Finish by writing clear API documentation in your README and recording a full demo.",
+          "learn": [
+            "Hashing passwords with `bcryptjs` instead of storing them in plain text",
+            "Issuing and checking JSON Web Tokens (JWT) with `jsonwebtoken`",
+            "Protecting routes with an auth middleware",
+            "Keeping secrets in environment variables with a `.env` file"
+          ],
+          "steps": [
+            "Install `bcryptjs`, `jsonwebtoken` and `dotenv`, and put a `JWT_SECRET` in a `.env` file that is listed in `.gitignore`.",
+            "Create a `users` table and a `POST /api/auth/register` route that validates email and password length and stores a bcrypt hash.",
+            "Create `POST /api/auth/login` that checks the password with `bcrypt.compare` and returns a token signed with `jwt.sign`.",
+            "Write an `auth` middleware that reads the `Authorization: Bearer <token>` header, verifies it, and sets `req.user` or returns 401.",
+            "Add a `user_id` column to items, protect all item routes with the middleware, and make every query filter by `req.user.id`.",
+            "Write a README with setup steps, a `.env.example`, and a table of every endpoint with an example request and response.",
+            "Record a demo: register, log in, create items, and show that a second user cannot see the first user's items."
+          ],
+          "deliverables": [
+            "Register and login routes with hashed passwords",
+            "An auth middleware protecting all item routes",
+            "Per-user items that other users cannot read or change",
+            "A README with setup steps and full endpoint documentation"
+          ],
+          "done_when": [
+            "Passwords are stored only as bcrypt hashes",
+            "Calling an item route without a valid token returns status 401",
+            "User A cannot read, update or delete User B's items",
+            "The `.env` file is not committed, and a `.env.example` is",
+            "Someone else could run the project by following the README alone"
+          ],
+          "hints": [
+            "Use `bcryptjs` rather than `bcrypt` because it is pure JavaScript and installs easily on Windows.",
+            "Give tokens an expiry like `{ expiresIn: '1h' }` and return the same vague error for a wrong email or password.",
+            "Load `dotenv` at the very top of `server.js` with `require('dotenv').config()`.",
+            "Node.js docs are at [nodejs.org](https://nodejs.org/docs) and Express guides at [expressjs.com](https://expressjs.com)."
+          ],
+          "stretch": "Add a simple rate limit on the login route with the `express-rate-limit` package.",
+          "post_highlights": [
+            "Added secure user registration and login with bcrypt and JWT to my Node.js API",
+            "Protected routes with auth middleware so each user only sees their own data",
+            "Documented every endpoint with example requests in a clear README"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "ChatPulse: Real-Time WebSockets Messaging & Collab Server",
+      "tagline": "Build a real-time chat app with Node.js, Express and Socket.IO, with chat rooms, saved history and a simple web page to chat from.",
+      "weeks": {
+        "1": {
+          "title": "A Simple Message Board with Express",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Build an Express server that stores messages in memory and serves a basic web page where people can post and read messages. This gives you a working chat without real-time features, so you understand the request-response model before moving to WebSockets.",
+          "learn": [
+            "Setting up a Node project and an Express server",
+            "Serving static HTML, CSS and JavaScript files with `express.static`",
+            "Building GET and POST API routes with in-memory data",
+            "Calling your own API from the browser with `fetch`"
+          ],
+          "steps": [
+            "Run `npm init -y` and `npm install express`, add a `.gitignore` for `node_modules`, and create `server.js`.",
+            "Create a `public/` folder with `index.html`, `style.css` and `app.js`, and serve it with `app.use(express.static('public'))`.",
+            "Add a `messages` array and a `GET /api/messages` route that returns it.",
+            "Add `POST /api/messages` that accepts `{ name, text }`, adds a timestamp, pushes it to the array and returns status 201.",
+            "In `index.html`, build a message list, a name input, a text input and a Send button.",
+            "In `app.js`, load messages with `fetch` on page load, send new messages with a POST, and reload the list after sending.",
+            "Open the page in two browser tabs, send messages from both, and notice you must refresh to see the other tab's messages."
+          ],
+          "deliverables": [
+            "An Express server that serves a chat page from `public/`",
+            "GET and POST message routes",
+            "A web page that shows and sends messages",
+            "A demo video posting messages from two tabs"
+          ],
+          "done_when": [
+            "Opening `http://localhost:3000` shows the chat page",
+            "`GET /api/messages` returns all messages as JSON",
+            "Sending a message adds it with a name, text and timestamp",
+            "Empty messages are rejected with status 400",
+            "`node_modules` is not committed"
+          ],
+          "hints": [
+            "Add `app.use(express.json())` or `req.body` will be `undefined` in your POST route.",
+            "Display timestamps with `new Date(msg.time).toLocaleTimeString()`.",
+            "Use `textContent` instead of `innerHTML` when showing messages so users cannot inject HTML.",
+            "See 'Serving static files' on [expressjs.com](https://expressjs.com)."
+          ],
+          "stretch": "Make the page fetch new messages automatically every 3 seconds with `setInterval` and notice the downsides of polling.",
+          "post_highlights": [
+            "Built a message board app with Node.js and Express",
+            "Served a front-end page and connected it to my own REST API with fetch",
+            "Learned the request-response model before moving to real-time chat"
+          ]
+        },
+        "2": {
+          "title": "Going Real-Time with Socket.IO",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Replace the refresh-to-see-messages approach with Socket.IO so messages appear instantly in every open browser. You will learn how real-time events work and how the server broadcasts to all connected users.",
+          "learn": [
+            "What WebSockets are and how they differ from normal HTTP requests",
+            "Setting up Socket.IO on the server and in the browser",
+            "Emitting and listening for custom events",
+            "Broadcasting to all clients or to everyone except the sender"
+          ],
+          "steps": [
+            "Install `socket.io`, create an HTTP server with `http.createServer(app)`, and attach Socket.IO to it.",
+            "Load the client with `<script src=\"/socket.io/socket.io.js\"></script>` and call `io()` in `app.js`.",
+            "Log a message on the server when a user connects and disconnects to confirm it works.",
+            "Ask for a nickname when the page opens and send it to the server with a `join` event.",
+            "On send, emit a `chat message` event; on the server, add it to the array and use `io.emit` to send it to everyone.",
+            "Broadcast 'Asha joined' and 'Asha left' notices using `socket.broadcast.emit` on join and disconnect.",
+            "Test with 2-3 tabs and confirm messages appear everywhere instantly without refreshing."
+          ],
+          "deliverables": [
+            "A Socket.IO server and client",
+            "Instant message delivery to all open tabs",
+            "Nicknames and join/leave notices",
+            "A demo video with two windows side by side chatting in real time"
+          ],
+          "done_when": [
+            "A message sent in one tab appears in all other tabs within a second, without refreshing",
+            "Each message shows the sender's nickname",
+            "Join and leave notices appear for other users",
+            "New users still see earlier messages when they join (sent from the in-memory array)",
+            "The server does not crash when a tab is closed"
+          ],
+          "hints": [
+            "Use `server.listen(3000)` instead of `app.listen` once Socket.IO is attached, or the client script will not load.",
+            "Store the nickname on the socket (`socket.data.name = name`) so you know who left on `disconnect`.",
+            "Send existing messages to only the new user with `socket.emit('history', messages)`.",
+            "The official guide and chat tutorial are on [socket.io](https://socket.io)."
+          ],
+          "stretch": "Show your own messages on the right and others' on the left, like a messaging app.",
+          "post_highlights": [
+            "Upgraded my Node.js chat app to real-time messaging with Socket.IO",
+            "Broadcast messages and join/leave notices to all connected users instantly",
+            "Learned how WebSockets differ from regular HTTP requests"
+          ]
+        },
+        "3": {
+          "title": "Chat Rooms & Saved Message History",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Add chat rooms so users can join different channels, and save messages to a SQLite database so history survives a server restart. You will also validate incoming events so bad data cannot break the server.",
+          "learn": [
+            "Socket.IO rooms with `socket.join` and `io.to(room).emit`",
+            "Saving and loading data with SQLite and parameterised queries",
+            "Validating data that arrives through socket events",
+            "Handling errors so one bad event does not crash the server"
+          ],
+          "steps": [
+            "Add a room picker on the page with 3 fixed rooms such as General, Study and Random.",
+            "When a user picks a room, call `socket.join(room)` on the server and leave the previous room.",
+            "Send chat messages only to that room with `io.to(room).emit(...)`.",
+            "Install `better-sqlite3`, create a `messages` table (id, room, name, text, created_at), and insert every message using `?` placeholders.",
+            "When a user joins a room, load the last 50 messages for that room from the database and send them only to that user.",
+            "Validate every message on the server (text not empty, under 500 characters, room is one of the allowed rooms), and emit an `error message` event back to the sender if invalid.",
+            "Wrap database calls in `try`/`catch`, restart the server, and confirm history is still there."
+          ],
+          "deliverables": [
+            "Three working chat rooms",
+            "Message history stored in SQLite and loaded per room",
+            "Server-side validation with error feedback to the sender",
+            "A demo video switching rooms and restarting the server to show saved history"
+          ],
+          "done_when": [
+            "Messages in one room do not appear in other rooms",
+            "Switching rooms shows that room's recent history",
+            "History is still there after restarting the server",
+            "Sending an empty or very long message shows an error to the sender only",
+            "All SQL uses placeholders and the `.db` file is in `.gitignore`"
+          ],
+          "hints": [
+            "If `better-sqlite3` will not install, save messages to a `messages.json` file with `fs/promises` instead.",
+            "Store the current room on `socket.data.room` so you know which room to leave when switching.",
+            "Never trust data from the browser, even from your own page, because anyone can send socket events.",
+            "See the Rooms section of the docs on [socket.io](https://socket.io)."
+          ],
+          "stretch": "Let users create a new room by typing a name, with validation on allowed characters.",
+          "post_highlights": [
+            "Added chat rooms to my real-time app using Socket.IO rooms",
+            "Persisted message history in SQLite so chats survive server restarts",
+            "Validated incoming socket events and handled errors to keep the server stable"
+          ]
+        },
+        "4": {
+          "title": "Typing Indicators, Online Users & Docs",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Add the features that make chat feel alive: a live list of online users in each room and a 'someone is typing' indicator. Then polish the UI and write a README that documents your socket events so others can run and extend your server.",
+          "learn": [
+            "Tracking connected users on the server with a `Map`",
+            "Throttling frequent events like typing with timers",
+            "Keeping server state correct when users disconnect",
+            "Documenting a real-time API (event names and payloads)"
+          ],
+          "steps": [
+            "Keep a `Map` of socket id to `{ name, room }` and update it on join, room switch and disconnect.",
+            "After every change, emit a `room users` event with the list of names in that room and show it in a sidebar.",
+            "In the browser, emit `typing` when the user types, and `stop typing` after 1-2 seconds without a keypress using `setTimeout`.",
+            "On the server, forward typing events to others in the room, and show 'Asha is typing...' under the message list.",
+            "Polish the UI: auto-scroll to the newest message, disable Send for empty input, and make the page usable on a phone.",
+            "Write a README with setup steps, screenshots, and a table of every socket event, who sends it and what data it carries.",
+            "Record a final demo with two or three windows showing rooms, history, online users and typing indicators."
+          ],
+          "deliverables": [
+            "A live online-users list per room",
+            "A typing indicator that appears and disappears correctly",
+            "A polished, mobile-friendly chat page",
+            "A README documenting setup and all socket events"
+          ],
+          "done_when": [
+            "The online list updates within a second when someone joins, switches room or closes their tab",
+            "The typing indicator shows for other users only and disappears after the user stops typing",
+            "The chat auto-scrolls to new messages",
+            "The README lists every socket event with its payload",
+            "Someone else can run the project by following the README alone"
+          ],
+          "hints": [
+            "Clear the previous timer with `clearTimeout` on every keypress so `stop typing` fires only after a real pause.",
+            "Remove the user from your `Map` in the `disconnect` handler or ghost users will stay online.",
+            "Use `socket.to(room).emit` for typing so the sender does not see their own indicator.",
+            "The Socket.IO docs on [socket.io](https://socket.io) have an emit cheatsheet that helps with broadcasting."
+          ],
+          "stretch": "Add emoji reactions to messages that update live for everyone in the room.",
+          "post_highlights": [
+            "Built ChatPulse, a real-time chat server with rooms and saved history using Node.js and Socket.IO",
+            "Added live online-user lists and typing indicators",
+            "Documented every socket event so others can run and extend the project"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "LinkShort: URL Shortener API",
+      "tagline": "Build your own link shortener with Node.js and Express that turns long URLs into short codes and counts every click.",
+      "weeks": {
+        "1": {
+          "title": "Short Codes & Redirects with Express",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Set up an Express server that can create short codes for long URLs and redirect visitors, using an in-memory array. You will learn how routes, request bodies and redirects work in a real, useful app.",
+          "learn": [
+            "Setting up a Node project and an Express server",
+            "Reading JSON request bodies with `express.json()`",
+            "Route parameters and HTTP redirects with `res.redirect`",
+            "Generating random short codes in JavaScript"
+          ],
+          "steps": [
+            "Run `npm init -y` and `npm install express`, add a `.gitignore`, and create `server.js` listening on port 3000.",
+            "Create a `links` array to hold objects like `{ code, url, createdAt }`.",
+            "Write a `makeCode()` function that returns a random 6-character string of letters and numbers.",
+            "Add `POST /api/links` that reads `url` from the body, creates a link with a new code, and returns it with status 201.",
+            "Add `GET /api/links` that returns all links as JSON.",
+            "Add `GET /:code` that finds the link and calls `res.redirect(link.url)`, or returns 404 if the code is unknown.",
+            "Create a link with Thunder Client or Postman, then open `http://localhost:3000/<code>` in your browser to see the redirect."
+          ],
+          "deliverables": [
+            "An Express server with create, list and redirect routes",
+            "A random short-code generator",
+            "A Thunder Client or Postman request for creating links",
+            "A demo video creating a short link and opening it in the browser"
+          ],
+          "done_when": [
+            "`POST /api/links` returns status 201 with the new code",
+            "Opening `/<code>` in a browser redirects to the original URL",
+            "An unknown code returns status 404 with a message",
+            "`GET /api/links` lists every created link"
+          ],
+          "hints": [
+            "Build codes by picking random characters from a string like `'abcdefghijklmnopqrstuvwxyz0123456789'` with `Math.random()`.",
+            "Define `GET /:code` after your `/api` routes so it does not catch API requests by mistake.",
+            "Use `nodemon` during development so the server restarts on save.",
+            "Routing and `res.redirect` are explained on [expressjs.com](https://expressjs.com)."
+          ],
+          "stretch": "Make sure a newly generated code never matches an existing one.",
+          "post_highlights": [
+            "Built a URL shortener API with Node.js and Express",
+            "Implemented short-code generation and HTTP redirects",
+            "Tested API routes with Thunder Client and live browser redirects"
+          ]
+        },
+        "2": {
+          "title": "Full CRUD, Custom Aliases & Validation",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Complete the API so links can be viewed, edited and deleted, and let users choose their own custom alias. You will add proper validation and status codes so the API gives helpful errors instead of silently accepting bad data.",
+          "learn": [
+            "Mapping CRUD actions to GET, POST, PUT and DELETE",
+            "Validating URLs with the built-in `URL` class",
+            "Using status codes 400, 404 and 409 correctly",
+            "Writing and registering custom middleware"
+          ],
+          "steps": [
+            "Validate the `url` in `POST /api/links` by trying `new URL(url)` inside `try`/`catch`, and only allow `http:` and `https:` protocols.",
+            "Accept an optional `alias`; allow only letters, numbers and hyphens (3-20 characters), and return 409 if it is already taken.",
+            "Add `GET /api/links/:code` to return one link's details.",
+            "Add `PUT /api/links/:code` to change the target URL (with the same validation) and `DELETE /api/links/:code` to remove a link.",
+            "Write a logger middleware that prints the method, path and response time of each request.",
+            "Move the API routes into `routes/links.js` using `express.Router()`.",
+            "Test every success and error case and save them as a Thunder Client or Postman collection."
+          ],
+          "deliverables": [
+            "Create, read, update and delete routes for links",
+            "Custom alias support with duplicate checks",
+            "URL validation with clear error messages",
+            "An exported API collection in the repo"
+          ],
+          "done_when": [
+            "Creating a link with an invalid URL returns status 400 and a helpful message",
+            "Creating a link with a taken alias returns status 409",
+            "Updating a link changes where its short code redirects",
+            "Deleting a link makes its short code return 404",
+            "Every request is logged by your middleware"
+          ],
+          "hints": [
+            "`new URL('hello')` throws an error, which makes it an easy validity check.",
+            "A regular expression like `/^[a-zA-Z0-9-]{3,20}$/` checks alias rules in one line.",
+            "Reserve words like `api` so nobody can create an alias that clashes with your routes.",
+            "See the `URL` reference on [MDN](https://developer.mozilla.org) and middleware guides on [expressjs.com](https://expressjs.com)."
+          ],
+          "stretch": "Add an optional `expiresAt` date after which the link returns 410 Gone.",
+          "post_highlights": [
+            "Completed a full CRUD API for my URL shortener with Express Router",
+            "Added custom aliases with validation and duplicate detection",
+            "Used proper HTTP status codes and custom logging middleware"
+          ]
+        },
+        "3": {
+          "title": "Saving Links in SQLite & Click Tracking",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Store links in a SQLite database so they survive restarts, and count every click so users can see how popular each link is. You will also add a central error handler so the API fails gracefully.",
+          "learn": [
+            "Creating tables and running queries with SQLite",
+            "Parameterised queries to prevent SQL injection",
+            "Updating a counter on every request",
+            "Central error-handling middleware in Express"
+          ],
+          "steps": [
+            "Install `better-sqlite3` and create `db.js` that creates a `links` table with `code` (unique), `url`, `clicks` (default 0) and `created_at` columns.",
+            "Rewrite each route to use SQL with `?` placeholders instead of the array.",
+            "In the redirect route, run `UPDATE links SET clicks = clicks + 1, last_clicked = ? WHERE code = ?` before redirecting.",
+            "Add `GET /api/links/:code/stats` that returns the clicks, creation date and last click time.",
+            "Add `GET /api/links?sort=popular` that orders links by clicks, highest first.",
+            "Add an error-handling middleware at the end of `server.js` that logs errors and returns status 500 as JSON.",
+            "Restart the server to confirm links and click counts are kept, then commit."
+          ],
+          "deliverables": [
+            "A SQLite-backed link store",
+            "Click counting on every redirect",
+            "A stats route and a popular-links sort",
+            "A demo video clicking a link several times and showing the stats"
+          ],
+          "done_when": [
+            "Links still work after a server restart",
+            "Each visit to a short link increases its click count by 1",
+            "The stats route returns clicks and dates for a link",
+            "`?sort=popular` returns links ordered by clicks",
+            "Unexpected errors return JSON with status 500 instead of crashing the server"
+          ],
+          "hints": [
+            "The `UNIQUE` constraint on `code` gives you duplicate protection at the database level too.",
+            "If `better-sqlite3` will not install, keep the links in a `links.json` file with `fs/promises` instead.",
+            "Browsers may request `/favicon.ico`, which hits your `/:code` route, so ignore that path.",
+            "SQL syntax is documented on [sqlite.org](https://sqlite.org)."
+          ],
+          "stretch": "Store each click in a separate `clicks` table and return clicks per day for the last 7 days.",
+          "post_highlights": [
+            "Moved my URL shortener to a SQLite database for persistent storage",
+            "Added click tracking and a stats endpoint for every short link",
+            "Built central error handling to keep the API stable"
+          ]
+        },
+        "4": {
+          "title": "Web Dashboard, API Key & Docs",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Build a simple web page served by your Express app where anyone can shorten a link and see its stats, and protect edit and delete routes with an API key. Finish with a README that documents every endpoint.",
+          "learn": [
+            "Serving a front-end from Express with `express.static`",
+            "Calling your API from the browser with `fetch`",
+            "Protecting routes with a simple API-key middleware",
+            "Keeping secrets in a `.env` file and writing API documentation"
+          ],
+          "steps": [
+            "Create `public/index.html` with a form (URL and optional alias) and serve it with `express.static`.",
+            "In `public/app.js`, submit the form with `fetch`, show the new short link with a Copy button using `navigator.clipboard.writeText`, and show any error message from the API.",
+            "Add a table below the form that lists links with their click counts, loaded from `GET /api/links`.",
+            "Install `dotenv`, put an `ADMIN_KEY` in `.env`, and write a middleware that checks the `x-api-key` header.",
+            "Apply the API-key middleware only to the PUT and DELETE routes, returning 401 when the key is missing or wrong.",
+            "Write a README with setup steps, a `.env.example`, screenshots, and a table of every endpoint with an example request and response.",
+            "Record a final demo: shorten a link on the web page, open it, and show the click count going up."
+          ],
+          "deliverables": [
+            "A web page for shortening links and viewing stats",
+            "A Copy-to-clipboard button for new short links",
+            "API-key protection on edit and delete routes",
+            "A README with setup steps and endpoint documentation"
+          ],
+          "done_when": [
+            "Links can be created from the web page without Thunder Client or Postman",
+            "API errors such as a bad URL are shown on the page",
+            "PUT and DELETE return 401 without the correct `x-api-key` header",
+            "The `.env` file is not committed, and a `.env.example` is",
+            "Someone else can run the project by following the README alone"
+          ],
+          "hints": [
+            "Register `express.static` before your `/:code` route so `index.html` and `app.js` load correctly.",
+            "Refresh the links table after creating a link so the new one appears straight away.",
+            "Load `dotenv` at the very top of `server.js` with `require('dotenv').config()`.",
+            "Node.js documentation lives at [nodejs.org](https://nodejs.org/docs)."
+          ],
+          "stretch": "Generate a QR code for each short link using the free `qrcode` npm package and show it on the page.",
+          "post_highlights": [
+            "Built LinkShort, a full URL shortener with Node.js, Express and SQLite",
+            "Created a web dashboard for shortening links and tracking clicks",
+            "Protected admin routes with API-key middleware and documented every endpoint"
+          ]
+        }
+      }
+    }
+  ]
+}

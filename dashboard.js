@@ -5,6 +5,8 @@
 
 // API base URL — reads from config.js (auto-detects local vs production)
 const API = window.SKILLME_API || '${API}';
+// Certificate payment is asked for at the end — 3 of 4 approved tasks (see backend PAYMENT_UNLOCK_TASKS)
+const PAYMENT_UNLOCK_PCT = 75;
 const FRONTEND = window.SKILLME_FRONTEND || '${FRONTEND}';
 
 // --- Lenis Smooth Scrolling (from darkroomengineering/lenis) ---
@@ -49,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const completedCount = isProgress ? 1 : 4;
         const mockData = {
             student: { id: 999, first_name: "Saksham", last_name: "Verma", name: "Saksham Verma", email: "test@example.com", domain: "Web Development", college: "Test College" },
-            progress: [{ week: isProgress ? 1 : 4, issues_completed: completedCount, score: isProgress ? 100 : 300, domain: "web-dev", batch_number: 1, batch_id: 1, start_date: new Date().toISOString() }],
+            progress: [{ week: isProgress ? 1 : 4, issues_completed: completedCount, score: isProgress ? 100 : 300, domain: "web-dev", batch_id: 1, start_date: new Date().toISOString() }],
             submissions: [
               { id: 1, week: 1, linkedin_url: "https://www.linkedin.com/posts/example", status: "approved", admin_note: null, submitted_at: new Date().toISOString(), reviewed_at: new Date().toISOString(), domain: "web-dev" }
             ],
@@ -348,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const mobileDashDomain = document.getElementById('mobile-dash-domain');
       if (mobileDashDomain) mobileDashDomain.innerHTML = domainHtml;
 
-      // Calculate week based on batch start_date if available
+      // Calculate week based on the enrollment start_date if available
       if (latest.start_date) {
         try {
           const startDate = new Date(latest.start_date);
@@ -363,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
         maxWeek = Math.max(maxWeek, p.week || 1);
       });
 
-      // Store batch_id for certificate download
+      // Store the internal enrollment reference (batch_id) for tasks/payments/certificate links
       data._batch_id = latest.batch_id || data._batch_id;
     }
 
@@ -389,13 +391,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update description based on progress
     const descEl = document.getElementById('progress-desc');
-    if (pct >= 50) {
+    if (pct >= PAYMENT_UNLOCK_PCT) {
       if (pct < 100) {
         descEl.textContent = `Impressive progress! ${totalCompleted} of ${totalAssigned} tasks done. You have met the minimum requirements to claim your certificate!`;
       } else {
         descEl.textContent = `Outstanding! You've completed all ${totalAssigned} assigned tasks. You're a star intern!`;
       }
-      // Show once per student per completion bracket (50/75/100), not on every dashboard load.
+      // Show once per student per completion bracket (75/100), not on every dashboard load.
       const eligibilitySeenKey = `skillme_eligibility_seen_s${student && student.id ? student.id : 'guest'}_pct${pct}`;
       if (!localStorage.getItem(eligibilitySeenKey)) {
         localStorage.setItem(eligibilitySeenKey, 'true');
@@ -407,7 +409,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         descEl.textContent = `Great start! You've completed ${totalCompleted} out of ${totalAssigned} tasks. Keep the momentum going!`;
       }
-      const tasksForUnlock = Math.ceil((totalAssigned || 4) / 2);
+      const tasksForUnlock = Math.ceil((totalAssigned || 4) * PAYMENT_UNLOCK_PCT / 100);
       const tasksRemaining = Math.max(1, tasksForUnlock - totalCompleted);
       const taskWord = tasksRemaining === 1 ? 'task' : 'tasks';
       const nudgeBanner = document.getElementById('cred-nudge-banner');
@@ -489,7 +491,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       // ─── Certificate Banner (Payment Gated) ───
-      // Payment is visible directly at >=50% completion. Below that, a student must
+      // Payment is visible directly at >=75% completion (3 of 4 tasks). Below that, a student must
       // file an urgent request (panel-urgent) and have an admin fulfill it — which
       // sets summary.payment_unlocked — before the payment banner appears.
       const paymentUnlocked = !!(data.summary && data.summary.payment_unlocked);
@@ -514,7 +516,7 @@ document.addEventListener('DOMContentLoaded', () => {
           renderCertReady(certSection, student, data);
           if (credLockedStrip) credLockedStrip.style.display = 'none';
           if (credNudgeBanner) credNudgeBanner.style.display = 'none';
-        } else if (pct >= 50 || paymentUnlocked) {
+        } else if (pct >= PAYMENT_UNLOCK_PCT || paymentUnlocked) {
           renderPaymentBanner(certSection, student, data);
           if (credLockedStrip) credLockedStrip.style.display = 'none';
           if (credNudgeBanner) credNudgeBanner.style.display = 'none';
@@ -639,7 +641,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       sortedTasks.forEach((task, i) => {
         const week = task.week_number || (i + 1);
-        const diffColor = task.difficulty === 'easy' ? '#34d399' : (task.difficulty === 'medium' ? '#fbbf24' : '#f87171');
+        const diffColor = { 'Beginner': '#34d399', 'Beginner+': '#a3e635', 'Intermediate': '#fbbf24', 'Intermediate+': '#fb923c' }[task.difficulty] || '#fbbf24';
         const sub = (submissions || []).find(s => Number(s.week) === Number(week));
         const subStatus = sub ? (sub.status || 'pending').toLowerCase() : 'not_submitted';
         const caption = (templates && templates[String(week)]) || '';
@@ -667,12 +669,18 @@ document.addEventListener('DOMContentLoaded', () => {
               <div class="sub-meta">
                 <span>Week ${week}</span>
                 <span style="color:${diffColor};font-weight:600;">${(task.difficulty || 'medium').toUpperCase()}</span>
+                ${task.est_hours ? `<span>~${task.est_hours} hrs</span>` : ''}
               </div>
             </div>
             <span class="sub-status ${badgeClass}">${badgeText}</span>
           </div>
           ${task.description ? `<div style="margin:14px 0 0 0;font-size:0.85rem;color:var(--text-secondary);line-height:1.5;" class="dash-markdown">${marked.parse(task.description)}</div>` : ''}
           ${sub && sub.admin_note && subStatus === 'rejected' ? `<div style="margin-top:10px;font-size:0.8rem;color:#f87171;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:8px 12px;">Admin note: ${sub.admin_note}</div>` : ''}
+          ${sub && sub.feedback ? `
+          <details style="margin-top:12px;">
+            <summary style="cursor:pointer;font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">📝 Feedback for this submission</summary>
+            <pre data-lenis-prevent style="white-space:pre-wrap;font-family:inherit;font-size:0.8rem;color:var(--text-secondary);background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:10px 14px;margin-top:8px;max-height:220px;overflow-y:auto;">${sub.feedback.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+          </details>` : ''}
           ${caption ? `
           <div style="margin-top:14px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
@@ -704,7 +712,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Submit a week's LinkedIn post URL for admin review ---
   window.submitTaskForReview = async function(studentId, batchId, week, btn) {
     if (!studentId || !batchId) {
-      alert('Missing student/batch info. Please refresh the page and try again.');
+      alert('Missing enrollment info. Please refresh the page and try again.');
       return;
     }
     const input = document.getElementById(`sub-url-input-w${week}`);
@@ -747,6 +755,7 @@ document.addEventListener('DOMContentLoaded', () => {
           linkedin_url: url,
           status: resData.status || 'pending',
           admin_note: null,
+          feedback: resData.feedback_text || null,
           submitted_at: new Date().toISOString(),
           reviewed_at: null
         };
@@ -998,7 +1007,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const content = document.getElementById('urgent-request-content');
     if (!content) return;
 
-    if (pct >= 50) {
+    if (pct >= PAYMENT_UNLOCK_PCT) {
       content.innerHTML = `
         <div class="empty-state">
           <div class="empty-icon">
@@ -1023,7 +1032,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (!student.id || !data._batch_id) {
-      content.innerHTML = `<div class="empty-state"><p>Missing student/batch info. Please refresh the page.</p></div>`;
+      content.innerHTML = `<div class="empty-state"><p>Missing enrollment info. Please refresh the page.</p></div>`;
       return;
     }
 
@@ -1242,7 +1251,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch(err) {
       console.error('Payment error:', err);
       alert('Payment service unavailable. Please try again.');
-      if (btn) { btn.disabled = false; btn.innerHTML = '💳 Pay ₹249 &amp; Get Certificate'; }
+      if (btn) { btn.disabled = false; btn.innerHTML = '💳 Pay ₹129 &amp; Get Certificate'; }
     }
   };
 
@@ -1438,7 +1447,7 @@ let currentShareTab = 'linkedin';
 let milestoneShareData = {
   linkedInText: '',
   whatsAppText: '',
-  referralLink: '',
+  inviteLink: '',
   portfolioUrl: '',
   offerUrl: '',
   linkedinUrl: ''
@@ -1477,8 +1486,7 @@ function resolveMilestoneContext(data) {
   const domainHashtag = domain.replace(/[^a-zA-Z0-9]/g, '') || 'Tech';
 
   const PROD_BASE = 'https://www.skill-me-intern.in';
-  const studentRefCode = `SKM-${student.id ? String(student.id).padStart(4, '0') : '2026'}`;
-  const referralLink = `${PROD_BASE}/apply.html?ref=${studentRefCode}`;
+  const inviteLink = `${PROD_BASE}/apply`;
   // Portfolio pages are keyed off the student's ID.
   // The LinkedIn-based submission flow handles verification natively.
   const portfolioUrl = student.id ? `${PROD_BASE}/portfolio.html?student_id=${student.id}` : '#';
@@ -1523,7 +1531,7 @@ function resolveMilestoneContext(data) {
     taskNum: weekNum,
     taskTitle,
     validatedLinkedinUrl,
-    referralLink,
+    inviteLink,
     portfolioUrl,
     offerUrl,
     certUrl
@@ -1577,7 +1585,7 @@ Check out my verified Proof of Work portfolio:
 👉 ${ctx.portfolioUrl}
 
 Join me on SkillMe and earn verified credentials for your resume:
-👉 Join my SkillMe Squad: ${ctx.referralLink}`;
+👉 Join my SkillMe Squad: ${ctx.inviteLink}`;
 
   } else if (!ctx.hasCompletedTasks) {
     // ─── Case 2: 0 Submissions Approved (Offer Milestone) ───
@@ -1608,7 +1616,7 @@ Check out my verified digital Offer Letter:
 👉 ${ctx.offerUrl}
 
 Join me to solve real engineering tasks and build verified Proof of Work for your resume:
-👉 Join my SkillMe Squad: ${ctx.referralLink}`;
+👉 Join my SkillMe Squad: ${ctx.inviteLink}`;
 
   } else {
     // ─── Case 3: After Every Approved LinkedIn Submission / Task Completion ───
@@ -1645,13 +1653,13 @@ ${ctx.validatedLinkedinUrl ? `Check out my verified milestone post:\n👉 ${ctx.
 👉 ${ctx.portfolioUrl}
 
 Join me on SkillMe to complete real engineering tasks and level up your resume:
-👉 Join my SkillMe Sprint Squad: ${ctx.referralLink}`;
+👉 Join my SkillMe Sprint Squad: ${ctx.inviteLink}`;
   }
 
   milestoneShareData = {
     linkedInText: linkedInPost,
     whatsAppText: whatsAppInvite,
-    referralLink: ctx.referralLink,
+    inviteLink: ctx.inviteLink,
     portfolioUrl: ctx.portfolioUrl,
     offerUrl: ctx.offerUrl,
     linkedinUrl: ctx.validatedLinkedinUrl || ''
@@ -1757,7 +1765,7 @@ window.executeShareAction = function() {
 };
 
 window.copyShareContent = function() {
-  const textToCopy = currentShareTab === 'linkedin' ? milestoneShareData.linkedInText : milestoneShareData.referralLink;
+  const textToCopy = currentShareTab === 'linkedin' ? milestoneShareData.linkedInText : milestoneShareData.inviteLink;
   navigator.clipboard.writeText(textToCopy).then(() => {
     const copyBtn = document.getElementById('btn-copy-share');
     if (copyBtn) {

@@ -1,0 +1,571 @@
+{
+  "domain": "ml",
+  "tracks": [
+    {
+      "project_name": "VisionAI: Local Computer Vision & Multi-Modal Intelligence Studio",
+      "tagline": "Teach a computer to recognise handwritten digits, starting with scikit-learn and finishing with a draw-a-digit web app.",
+      "weeks": {
+        "1": {
+          "title": "Your First Image Classifier with scikit-learn",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "You will load a small dataset of handwritten digit images, look at them, and train your first classifier with scikit-learn. This teaches the core machine learning loop you will reuse all month: load data, split it, train, and measure on data the model has never seen.",
+          "learn": [
+            "How images are stored as grids of pixel numbers",
+            "Features (X) and labels (y) in supervised learning",
+            "Why we split data into training and test sets",
+            "Training and scoring a K-Nearest Neighbours classifier"
+          ],
+          "steps": [
+            "Set up a Google Colab notebook (or a local virtual environment) and install `scikit-learn`, `matplotlib` and `numpy`.",
+            "Load the dataset with `from sklearn.datasets import load_digits` and print `digits.images.shape` and `digits.target[:10]` to see what you have.",
+            "Plot the first 10 images in a grid with `plt.imshow(..., cmap='gray')` and use their labels as titles.",
+            "Use `digits.data` (each 8x8 image flattened to 64 numbers) as X and `digits.target` as y, then split with `train_test_split(X, y, test_size=0.2, random_state=42)`.",
+            "Train a `KNeighborsClassifier` on the training set only, then call `.score()` on the test set to get accuracy.",
+            "Try `n_neighbors` values of 1, 3, 5 and 9 and record the test accuracy of each in a small table.",
+            "Plot 10 test images with 'predicted vs actual' titles and colour the wrong predictions red."
+          ],
+          "deliverables": [
+            "A notebook (`week1_digits.ipynb`) that runs top to bottom without errors",
+            "A grid of sample digit images with their labels",
+            "A table of test accuracy for different `n_neighbors` values",
+            "A prediction grid showing predicted vs actual labels on test images"
+          ],
+          "done_when": [
+            "The notebook runs from a fresh kernel with no errors",
+            "The model is trained only on the training split and scored on the test split",
+            "Test accuracy is printed and is above 90%",
+            "At least 4 values of `n_neighbors` are compared in a table",
+            "The README states the dataset, the model and the best test accuracy"
+          ],
+          "hints": [
+            "If `.score()` returns exactly 1.0, check that you did not score on the training data by mistake.",
+            "Always set `random_state=42` in the split so your numbers stay the same every run.",
+            "The [scikit-learn docs](https://scikit-learn.org) include a short 'Recognizing hand-written digits' example that is worth reading first."
+          ],
+          "stretch": "Train a `LogisticRegression` model on the same split and see whether it beats your best KNN score.",
+          "post_highlights": [
+            "Built my first image classifier in Python using scikit-learn's handwritten digits dataset",
+            "Trained a K-Nearest Neighbours model that scored over 90% accuracy on a held-out test set",
+            "Visualised the model's predictions and compared results for different values of k"
+          ]
+        },
+        "2": {
+          "title": "Compare Models and Learn from Mistakes",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "You will compare several classifiers fairly, find out which digits your model confuses, and move up to the full-size MNIST dataset. Knowing how to evaluate a model honestly matters more than any single algorithm.",
+          "learn": [
+            "Comparing models fairly with cross-validation",
+            "Reading a confusion matrix to see which classes get mixed up",
+            "Why feature scaling helps some models",
+            "Saving a trained model to a file with `joblib`"
+          ],
+          "steps": [
+            "Start from your Week 1 notebook and keep the same train/test split so results are comparable.",
+            "Train `LogisticRegression`, `KNeighborsClassifier`, `SVC` and `RandomForestClassifier`, and score each with `cross_val_score(model, X_train, y_train, cv=5)`.",
+            "Show the mean cross-validation score of each model in a bar chart and pick the best one.",
+            "Wrap the best model in a `Pipeline` with `StandardScaler` and check whether scaling changes its score.",
+            "Score only your final chosen model on the test set, then draw its confusion matrix with `ConfusionMatrixDisplay.from_estimator`.",
+            "Show a gallery of 10 misclassified test images and write two sentences on why the model may have got them wrong.",
+            "Load MNIST (28x28 images) with `fetch_openml('mnist_784', as_frame=False)`, divide pixels by 255, train your best model on a 10,000-image subset, and note its test accuracy.",
+            "Save the final MNIST model with `joblib.dump(model, 'digit_model.joblib')` so you can reuse it next week."
+          ],
+          "deliverables": [
+            "A bar chart comparing cross-validation scores of at least 4 models",
+            "A confusion matrix and a gallery of misclassified images",
+            "A trained MNIST model saved as `digit_model.joblib`",
+            "A results section in the README explaining which model won and why"
+          ],
+          "done_when": [
+            "At least 4 models are compared using 5-fold cross-validation on the training data",
+            "The test set is used only once, for the final chosen model",
+            "The confusion matrix is shown and the README names the two digits most often confused",
+            "The MNIST model reaches at least 93% test accuracy",
+            "`digit_model.joblib` loads in a fresh notebook and makes predictions"
+          ],
+          "hints": [
+            "Use cross-validation to choose the model and the test set only at the very end, otherwise the test score is no longer honest.",
+            "`SVC` on all 60,000 MNIST images is slow, so a 10,000-image subset is plenty for this week.",
+            "`fetch_openml` downloads about 50 MB the first time, so use Colab if your internet is slow.",
+            "If you choose `SVC`, create it with `probability=True` now, because next week's app needs `predict_proba`."
+          ],
+          "stretch": "Use `GridSearchCV` to tune two hyperparameters of your best model and report whether the score improved.",
+          "post_highlights": [
+            "Compared four scikit-learn classifiers fairly using 5-fold cross-validation",
+            "Used a confusion matrix and a gallery of mistakes to understand where my model fails",
+            "Scaled my digit classifier up to the full 28x28 MNIST dataset and saved it for reuse"
+          ]
+        },
+        "3": {
+          "title": "Draw-a-Digit Web App with Gradio",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "You will wrap your saved MNIST model in a Gradio web app where anyone can draw or upload a digit and see the prediction. Real users send messy input, so this week is about preparing images correctly and handling errors gracefully.",
+          "learn": [
+            "Turning a real image into the exact format the model was trained on",
+            "Building a simple web interface with Gradio",
+            "Showing prediction confidence with `predict_proba`",
+            "Handling bad input without crashing the app"
+          ],
+          "steps": [
+            "Create `app.py`, load `digit_model.joblib` once at the top, and print a clear message if the file is missing.",
+            "Write a `preprocess(image)` function that converts to grayscale, resizes to 28x28, inverts colours if the background is white, scales to 0-1 and flattens to 784 values.",
+            "Test `preprocess` in a notebook on 3 MNIST test images first and confirm the model still predicts them correctly.",
+            "Build a `gr.Interface` with a sketchpad input and a `gr.Label(num_top_classes=3)` output that shows the top-3 digits with probabilities.",
+            "Add an image upload option so users can also upload a photo of a handwritten digit.",
+            "Handle errors by returning a friendly message for an empty canvas, a non-image file, or an image that fails to load.",
+            "Draw 20 digits yourself, count how many the app gets right, and write this 'real-world accuracy' in the README."
+          ],
+          "deliverables": [
+            "A Gradio app (`app.py`) that runs locally with `python app.py`",
+            "Sketchpad and upload inputs that show the top-3 predictions with confidence",
+            "Friendly error messages for empty or invalid input",
+            "A `requirements.txt` and a README with run instructions and your real-world accuracy"
+          ],
+          "done_when": [
+            "The app starts with `python app.py` after installing from `requirements.txt`",
+            "Drawing a digit shows the top-3 predictions with probabilities",
+            "An empty canvas and an invalid file each show a message instead of a crash",
+            "The model is loaded once, not on every prediction",
+            "The README reports your real-world accuracy on 20 hand-drawn digits"
+          ],
+          "hints": [
+            "If every drawing predicts the same digit, your image is probably not inverted, because MNIST digits are white on a black background.",
+            "In recent Gradio versions the sketchpad returns a dictionary, and the drawn image is under the `'composite'` key.",
+            "Print the shape and min/max values of your preprocessed array to confirm it matches the training data.",
+            "The [Gradio docs](https://www.gradio.app) have quickstart examples for `gr.Interface` and the sketchpad component."
+          ],
+          "stretch": "Crop and centre the drawn digit before resizing (as MNIST does) and measure whether your real-world accuracy improves.",
+          "post_highlights": [
+            "Built a draw-a-digit web app with Gradio that predicts handwritten digits live",
+            "Wrote an image preprocessing step that converts real drawings into MNIST format",
+            "Added confidence scores and error handling, and measured accuracy on my own drawings"
+          ]
+        },
+        "4": {
+          "title": "Capstone: Add a Neural Network and Ship It",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "You will train a small convolutional neural network (CNN) with Keras, compare it with your scikit-learn model, and let users pick either model in your app. You finish with a polished README and a demo video that tells the story of your project.",
+          "learn": [
+            "What layers, epochs and loss mean in a neural network",
+            "How a small CNN learns patterns from images",
+            "Plotting training vs validation accuracy to spot overfitting",
+            "Presenting a project clearly with a README and demo"
+          ],
+          "steps": [
+            "In a Colab notebook with the free GPU turned on, load MNIST with `keras.datasets.mnist.load_data()` and scale pixels to 0-1.",
+            "Build a small CNN: two `Conv2D` + `MaxPooling2D` blocks, then `Flatten`, one `Dense` layer and a 10-unit softmax output.",
+            "Train for 5 epochs with `validation_split=0.1` and plot training vs validation accuracy for each epoch.",
+            "Evaluate on the test set and add the CNN to a results table next to your scikit-learn model.",
+            "Save the model with `model.save('digit_cnn.keras')`, then add a dropdown in your Gradio app that switches between the scikit-learn model and the CNN.",
+            "Re-test your 20 hand-drawn digits with both models and record which one does better on real drawings.",
+            "Polish the README with a project summary, screenshots, the results table, how to run it, and what you would improve next.",
+            "Record a 60-second demo: draw a few digits, switch models, and show the results table."
+          ],
+          "deliverables": [
+            "A CNN training notebook with an accuracy-per-epoch plot",
+            "An updated Gradio app with a model switcher",
+            "A results table comparing both models on the test set and on your own drawings",
+            "A final README and a 60-second demo video"
+          ],
+          "done_when": [
+            "The CNN reaches at least 97% test accuracy",
+            "The app lets a user switch models and both return predictions",
+            "The results table shows test accuracy and real-world accuracy for both models",
+            "A new person can install and run the app by following the README",
+            "The demo video is under 90 seconds and shows the app working live"
+          ],
+          "hints": [
+            "The CNN expects input shaped `(1, 28, 28, 1)`, so reshape the image for it instead of flattening it.",
+            "If validation accuracy falls while training accuracy keeps rising, you are overfitting, so train fewer epochs or add a `Dropout` layer.",
+            "The [Keras docs](https://keras.io) have a 'Simple MNIST convnet' example you can follow closely."
+          ],
+          "stretch": "Add a Fashion-MNIST mode that classifies clothing images using the same app structure.",
+          "post_highlights": [
+            "Trained a convolutional neural network with Keras that reached over 97% accuracy on MNIST",
+            "Compared a deep learning model with a classic scikit-learn model on test data and real drawings",
+            "Shipped a draw-a-digit Gradio app with a model switcher and a clear README"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "NeuroNLP: Semantic Text Intelligence & Sentiment Studio",
+      "tagline": "Build a tool that reads movie or product reviews and tells you whether they are positive or negative.",
+      "weeks": {
+        "1": {
+          "title": "Your First Sentiment Classifier",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "You will load 50,000 IMDB movie reviews, turn the text into numbers, and train a scikit-learn model that predicts positive or negative sentiment. This is the foundation of every text classification project.",
+          "learn": [
+            "Loading and exploring a text dataset with pandas",
+            "Basic text cleaning: lowercasing and removing HTML tags and punctuation",
+            "Turning text into numbers with bag-of-words (`CountVectorizer`)",
+            "Training and testing a Logistic Regression classifier"
+          ],
+          "steps": [
+            "Download the 'IMDB Dataset of 50K Movie Reviews' CSV from Kaggle and load it with `pd.read_csv`.",
+            "Explore it: print 3 full reviews, check the positive/negative balance with `value_counts()`, and plot a histogram of review lengths.",
+            "Write a `clean_text(text)` function that lowercases, removes `<br />` tags and strips punctuation, then test it on 3 reviews.",
+            "Map labels to numbers (positive = 1, negative = 0) and split into train and test sets with `test_size=0.2` and `random_state=42`.",
+            "Fit `CountVectorizer(max_features=10000)` on the training text only, then transform both the train and test text.",
+            "Train `LogisticRegression(max_iter=1000)` and print the test accuracy.",
+            "Write a `predict_sentiment(text)` function and try it on 5 sentences you write yourself, including a tricky one like 'not bad at all'."
+          ],
+          "deliverables": [
+            "A notebook that loads, cleans, vectorises and classifies the reviews",
+            "A review-length histogram and a class balance check",
+            "The printed test accuracy of the Logistic Regression model",
+            "A `predict_sentiment()` function tested on 5 of your own sentences"
+          ],
+          "done_when": [
+            "The notebook runs from a fresh kernel with no errors",
+            "The vectorizer is fitted on the training text only",
+            "Test accuracy is above 85%",
+            "Predictions for 5 custom sentences are shown, with a note on any the model got wrong",
+            "The README states the dataset, the method and the test accuracy"
+          ],
+          "hints": [
+            "Fitting the vectorizer on all the data before splitting leaks test information, so always `fit` on train and only `transform` on test.",
+            "If training is slow on your laptop, use a 20,000-review sample while you experiment.",
+            "The [scikit-learn docs](https://scikit-learn.org) tutorial 'Working With Text Data' explains `CountVectorizer` step by step."
+          ],
+          "stretch": "Remove common English words with `stop_words='english'` and check whether accuracy goes up or down.",
+          "post_highlights": [
+            "Built a movie review sentiment classifier in Python using scikit-learn",
+            "Cleaned 50,000 IMDB reviews and turned text into features with bag-of-words",
+            "Reached over 85% accuracy on a held-out test set and tested the model on my own sentences"
+          ]
+        },
+        "2": {
+          "title": "Better Features and Honest Evaluation",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "You will improve your classifier with TF-IDF and word pairs, measure it with more than accuracy, and look inside the model to see which words drive its decisions. You end the week with one saved pipeline that you can load in an app.",
+          "learn": [
+            "TF-IDF and n-grams as better text features",
+            "Precision, recall, F1 score and the confusion matrix",
+            "Reading model coefficients to find the most positive and negative words",
+            "Bundling the vectorizer and model into one scikit-learn pipeline"
+          ],
+          "steps": [
+            "Build a pipeline with `make_pipeline(TfidfVectorizer(), LogisticRegression(max_iter=1000))` so raw text goes in and a prediction comes out.",
+            "Compare 3 variations on the same split: single words only, words plus word pairs (`ngram_range=(1, 2)`), and `MultinomialNB` instead of Logistic Regression.",
+            "Record accuracy and F1 score for each variation in a table and choose the best one.",
+            "Print a `classification_report` and plot a confusion matrix for the best model.",
+            "Extract the 15 most positive and 15 most negative words from the model coefficients and plot them as a horizontal bar chart.",
+            "Read 5 reviews the model got wrong and write down a pattern you notice, such as sarcasm or mixed opinions.",
+            "Save the whole pipeline with `joblib.dump(pipeline, 'sentiment_pipeline.joblib')` and reload it to confirm it still predicts."
+          ],
+          "deliverables": [
+            "A comparison table of 3 model variations with accuracy and F1 score",
+            "A confusion matrix and classification report for the best model",
+            "A bar chart of the top positive and negative words",
+            "A saved `sentiment_pipeline.joblib` file"
+          ],
+          "done_when": [
+            "At least 3 variations are compared on the same train/test split",
+            "The best model beats your Week 1 test accuracy",
+            "The top-words chart shows sensible words, such as 'excellent' as positive and 'worst' as negative",
+            "The saved pipeline loads in a fresh notebook and predicts raw text correctly",
+            "The README explains in 2-3 sentences what precision and recall mean for your model"
+          ],
+          "hints": [
+            "With `make_pipeline`, step names are lowercase class names, so use `pipeline.named_steps['tfidfvectorizer'].get_feature_names_out()` with the model's `coef_`.",
+            "Accuracy works here because the classes are balanced, but F1 matters much more when one class is rare.",
+            "Word pairs help with phrases like 'not good', which single words miss."
+          ],
+          "stretch": "Use `GridSearchCV` to tune the `C` value of Logistic Regression and the `min_df` value of the vectorizer.",
+          "post_highlights": [
+            "Improved my sentiment model with TF-IDF and word-pair features in a scikit-learn pipeline",
+            "Evaluated the model with precision, recall, F1 score and a confusion matrix",
+            "Visualised the words that push a review towards positive or negative"
+          ]
+        },
+        "3": {
+          "title": "Sentiment Analyzer Web App with Streamlit",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "You will turn your saved pipeline into a Streamlit web app that analyses a single review or a whole CSV file of reviews. You will also validate input and handle errors so the app never crashes in front of a user.",
+          "learn": [
+            "Building an interactive web app with Streamlit",
+            "Loading a model only once with `st.cache_resource`",
+            "Processing a batch of texts from an uploaded CSV",
+            "Validating input and showing friendly error messages"
+          ],
+          "steps": [
+            "Create `app.py`, load `sentiment_pipeline.joblib` inside a function decorated with `@st.cache_resource`, and run it with `streamlit run app.py`.",
+            "Add a text area and an 'Analyze' button that shows the label, a confidence score from `predict_proba`, and a coloured result box.",
+            "Show a warning instead of a prediction when the text is empty or shorter than 3 words.",
+            "Add a second tab where the user uploads a CSV, picks the text column from a dropdown, and sees a prediction for every row in a table.",
+            "Handle bad uploads (wrong file type, empty file, blank rows) with clear `st.error` or `st.warning` messages.",
+            "Show a bar or pie chart of positive vs negative counts for the uploaded file and add a 'Download results' button.",
+            "Test the app with a CSV of 20 reviews you collect from a movie or shopping site, and take screenshots of the results."
+          ],
+          "deliverables": [
+            "A Streamlit app with single-review and batch CSV modes",
+            "A confidence score and a summary chart for predictions",
+            "Error handling for empty text and bad CSV files",
+            "A `requirements.txt` and a README with run instructions and screenshots"
+          ],
+          "done_when": [
+            "`streamlit run app.py` starts the app with no errors after installing from `requirements.txt`",
+            "Single-review mode shows a label and a confidence score",
+            "Batch mode processes a 20-row CSV and lets the user download the results",
+            "Empty text, a non-CSV file and an empty CSV each show a friendly message instead of a crash",
+            "The model is loaded once and not reloaded on every click"
+          ],
+          "hints": [
+            "Streamlit re-runs the whole script on every click, which is why caching the model matters.",
+            "Use `st.tabs` to separate the single-review and batch modes cleanly.",
+            "Convert the results DataFrame with `df.to_csv(index=False)` and pass it to `st.download_button`.",
+            "The [Streamlit docs](https://streamlit.io) have short examples for file uploads, tabs and caching."
+          ],
+          "stretch": "Highlight the words in a review that pushed the prediction the most, using the coefficients you extracted in Week 2.",
+          "post_highlights": [
+            "Built a Streamlit web app that predicts the sentiment of any movie or product review",
+            "Added batch analysis for CSV files with a summary chart and downloadable results",
+            "Handled invalid input gracefully so the app never crashes for users"
+          ]
+        },
+        "4": {
+          "title": "Capstone: Compare with a Pre-trained Transformer",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "You will add a pre-trained transformer model from Hugging Face to your app and compare it fairly with the model you trained yourself. You finish with a polished README and a demo video that explains what you built and learned.",
+          "learn": [
+            "What a pre-trained transformer model is and when to use one",
+            "Running a Hugging Face `pipeline` for sentiment analysis",
+            "Comparing two models fairly on accuracy and speed",
+            "Presenting a project clearly with a README and demo"
+          ],
+          "steps": [
+            "Install `transformers` and `torch`, then run `pipeline('sentiment-analysis')` on 5 sentences in a notebook to see its output format.",
+            "Take 300 reviews from your Week 1 test set and run both models on them, recording accuracy and average time per review.",
+            "Put the results in a table and write 3 sentences on the trade-off between accuracy and speed.",
+            "Add a 'Compare models' mode to your Streamlit app that shows both predictions side by side for the same text.",
+            "Cache the transformer with `@st.cache_resource` and pass `truncation=True` so long reviews do not crash it.",
+            "Polish the app with a title, a short 'How it works' section, clickable example reviews and consistent styling.",
+            "Finish the README with a project summary, screenshots, the results table, how to run it and ideas for next steps.",
+            "Record a 60-second demo that analyses a review, uploads a CSV and shows the model comparison."
+          ],
+          "deliverables": [
+            "A notebook comparing your model and the transformer on 300 test reviews",
+            "A 'Compare models' mode in the Streamlit app",
+            "A final README with a results table and screenshots",
+            "A 60-second demo video"
+          ],
+          "done_when": [
+            "Both models are scored on the same 300 test reviews, with accuracy and time per review reported",
+            "The app shows both predictions side by side without crashing on long reviews",
+            "The transformer is loaded once, not on every click",
+            "A new person can install and run the app by following the README",
+            "The demo video is under 90 seconds and shows the app working live"
+          ],
+          "hints": [
+            "Pass the model name explicitly, e.g. `model='distilbert-base-uncased-finetuned-sst-2-english'`, so results stay the same across versions.",
+            "The first run downloads the model (about 250 MB), so do it once on good internet.",
+            "If the transformer is slow on your laptop, compare on 100 reviews instead of 300 and say so in the README.",
+            "The [Hugging Face docs](https://huggingface.co/docs) explain the `pipeline` function with short examples."
+          ],
+          "stretch": "Add a 'Find similar reviews' search using `sentence-transformers` embeddings and cosine similarity.",
+          "post_highlights": [
+            "Compared my own scikit-learn model with a pre-trained Hugging Face transformer on accuracy and speed",
+            "Added a side-by-side model comparison mode to my Streamlit sentiment app",
+            "Documented the results and trade-offs and recorded a live demo of the finished project"
+          ]
+        }
+      }
+    },
+    {
+      "project_name": "PriceWise: House Price Prediction App",
+      "tagline": "Predict house prices from simple features and let users explore 'what if' questions in a web app.",
+      "weeks": {
+        "1": {
+          "title": "Explore the Data and Build a First Price Model",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "You will explore the California Housing dataset, plot how features relate to price, and train your first regression model. You will also learn to judge a model by checking that it beats a simple baseline.",
+          "learn": [
+            "Regression: predicting a number instead of a category",
+            "Exploring a dataset with pandas and scatter plots",
+            "Training `LinearRegression` and measuring error with MAE",
+            "Why every model must beat a simple baseline"
+          ],
+          "steps": [
+            "Load the data with `fetch_california_housing(as_frame=True)` and look at `df.head()`, `df.describe()` and the column descriptions in `.DESCR`.",
+            "Plot a histogram of house prices and scatter plots of price against median income and house age.",
+            "Write down 3 observations from the plots, such as which feature seems most related to price.",
+            "Split the data into train and test sets with `test_size=0.2` and `random_state=42`.",
+            "Create a baseline that always predicts the average training price and compute its MAE on the test set.",
+            "Train `LinearRegression`, compute its test MAE, and check that it beats the baseline.",
+            "Plot predicted vs actual prices on the test set with a diagonal 'perfect prediction' line."
+          ],
+          "deliverables": [
+            "An exploration notebook with a price histogram and at least 2 scatter plots",
+            "Baseline and Linear Regression MAE printed side by side",
+            "A predicted vs actual scatter plot",
+            "A README with 3 data observations and your results"
+          ],
+          "done_when": [
+            "The notebook runs from a fresh kernel with no errors",
+            "The model is trained on the training split and evaluated on the test split only",
+            "Linear Regression has a lower test MAE than the average-price baseline",
+            "The README explains MAE in plain words, such as 'on average the prediction is off by $X'",
+            "All charts have titles and axis labels"
+          ],
+          "hints": [
+            "Prices are in units of $100,000, so an MAE of 0.5 means about $50,000 off on average.",
+            "House values are capped at 5.0 in this dataset, which is a data limitation worth mentioning.",
+            "The [scikit-learn docs](https://scikit-learn.org) page for `fetch_california_housing` explains what each column means."
+          ],
+          "stretch": "Also report RMSE and R² and explain in one sentence how each differs from MAE.",
+          "post_highlights": [
+            "Explored the California Housing dataset with pandas and matplotlib",
+            "Built a Linear Regression model that beat a simple average-price baseline",
+            "Visualised predicted vs actual house prices on a held-out test set"
+          ]
+        },
+        "2": {
+          "title": "Better Models and Avoiding Overfitting",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "You will try tree-based models, compare them with cross-validation, and learn to spot overfitting by comparing training and test error. You end the week with a saved best model and a chart showing which features matter most.",
+          "learn": [
+            "Decision trees and random forests for regression",
+            "Overfitting: when a model memorises the training data",
+            "Comparing models fairly with cross-validation",
+            "Feature importance and saving models with `joblib`"
+          ],
+          "steps": [
+            "Train a `DecisionTreeRegressor` with no depth limit and compare its training MAE with its test MAE.",
+            "Retrain it with `max_depth` values of 3, 5, 10 and 20 and plot training vs test MAE to see where overfitting starts.",
+            "Train a `RandomForestRegressor(n_estimators=100, max_depth=12, random_state=42)` and compare it with Linear Regression and your best tree using `cross_val_score(..., scoring='neg_mean_absolute_error')`.",
+            "Add one new feature, such as the bedroom-to-room ratio (`AveBedrms / AveRooms`), and check whether it improves your best model.",
+            "Plot the feature importances of the random forest as a horizontal bar chart.",
+            "Evaluate only the final chosen model on the test set and save it with `joblib.dump(model, 'price_model.joblib')`."
+          ],
+          "deliverables": [
+            "A training vs test MAE plot for different tree depths",
+            "A model comparison table based on cross-validation",
+            "A feature importance chart",
+            "A saved `price_model.joblib` file"
+          ],
+          "done_when": [
+            "The depth plot clearly shows the gap between training and test error growing for deep trees",
+            "At least 3 models are compared with 5-fold cross-validation on the training data",
+            "The best model has a lower test MAE than your Week 1 Linear Regression",
+            "The README explains overfitting in your own words using your plot",
+            "`price_model.joblib` loads in a fresh notebook and makes predictions"
+          ],
+          "hints": [
+            "`cross_val_score` returns negative MAE, so multiply it by -1 before reporting it.",
+            "A training MAE close to zero with a much larger test MAE is the classic sign of overfitting.",
+            "Limiting `max_depth` keeps the saved random forest file small enough to push to GitHub.",
+            "Pass `n_jobs=-1` to the random forest to use all your CPU cores."
+          ],
+          "stretch": "Try `HistGradientBoostingRegressor` and see whether it beats your random forest.",
+          "post_highlights": [
+            "Compared Linear Regression, decision trees and random forests with cross-validation",
+            "Diagnosed overfitting by plotting training vs test error across tree depths",
+            "Identified the features that drive house prices using feature importance"
+          ]
+        },
+        "3": {
+          "title": "House Price Web App with Streamlit",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "You will build a Streamlit app where a user sets house features with sliders and instantly sees a predicted price. You will also make the app robust by validating input and handling missing files cleanly.",
+          "learn": [
+            "Building an interactive form with Streamlit widgets",
+            "Matching app input to the exact feature order the model expects",
+            "Validating input and setting sensible value ranges",
+            "Handling errors such as a missing model file"
+          ],
+          "steps": [
+            "Create `app.py` and load `price_model.joblib` in a function with `@st.cache_resource`, showing `st.error` if the file is missing.",
+            "Add sliders or number inputs for each feature, using the minimum and maximum from the training data as limits.",
+            "Build a one-row DataFrame from the inputs with the same column names and order as training (including your Week 2 feature), then call `predict`.",
+            "Display the prediction as a dollar amount with `st.metric`, clearly labelled as an estimate.",
+            "Add a histogram of all house prices with a vertical line showing where the prediction falls.",
+            "Add input checks, such as warning when bedrooms exceed rooms, and skip the prediction until the input makes sense.",
+            "Test 5 input combinations, including extreme values, and note any odd predictions in the README."
+          ],
+          "deliverables": [
+            "A Streamlit app that predicts a price from user inputs",
+            "A chart showing the prediction against the price distribution",
+            "Input validation and a clear message for a missing model file",
+            "A `requirements.txt` and a README with run instructions and screenshots"
+          ],
+          "done_when": [
+            "`streamlit run app.py` starts the app with no errors after installing from `requirements.txt`",
+            "Changing any input updates the predicted price",
+            "The app's prediction for a test row matches the notebook's prediction for the same row",
+            "Impossible input shows a warning instead of a prediction",
+            "Deleting the model file shows a clear error message instead of a crash"
+          ],
+          "hints": [
+            "If predictions look wrong, print your input DataFrame and compare its columns with `model.feature_names_in_`.",
+            "Multiply the prediction by 100,000 before showing it as a dollar amount.",
+            "The [Streamlit docs](https://streamlit.io) cover `st.slider`, `st.metric` and caching with short examples."
+          ],
+          "stretch": "Add a 'Compare two houses' mode that shows two predictions side by side.",
+          "post_highlights": [
+            "Built a Streamlit web app that predicts house prices from interactive sliders",
+            "Connected a saved scikit-learn model to a user interface with matching feature handling",
+            "Added input validation and error handling so the app behaves sensibly on bad input"
+          ]
+        },
+        "4": {
+          "title": "Capstone: What-If Explorer and Final Polish",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "You will add a what-if explorer that shows how the predicted price changes as one feature changes, plus a map of the houses. You finish with a polished README and a demo video that walks through your project.",
+          "learn": [
+            "Using a model to answer 'what if' questions",
+            "Plotting data on a map with latitude and longitude",
+            "Explaining model behaviour in plain language",
+            "Presenting a project with a README and demo"
+          ],
+          "steps": [
+            "Write a function that takes the current inputs, varies one chosen feature across 30 values between its minimum and maximum, and returns the predicted price for each.",
+            "Test the function in a notebook first and plot the result as a line chart, such as price vs median income.",
+            "Add a 'What-if' section to the app with a dropdown to pick the feature and a line chart with the current value marked.",
+            "Add a map of a 2,000-house sample using `st.map` with the latitude and longitude columns.",
+            "Write a short 'What drives price?' section in the app that explains your feature importance and what-if findings in plain words.",
+            "Polish the layout with inputs in the sidebar, clear headings, and a note that estimates are based on 1990 census data.",
+            "Finish the README with a summary, screenshots, your Week 2 results table, how to run it and its limitations.",
+            "Record a 60-second demo: change sliders, use the what-if chart and show the map."
+          ],
+          "deliverables": [
+            "A what-if chart section in the app",
+            "A map of house locations",
+            "A final README with results and limitations",
+            "A 60-second demo video"
+          ],
+          "done_when": [
+            "Choosing a feature in the what-if dropdown draws a line chart of predicted price across its range",
+            "The map shows at least 1,000 houses without slowing the app noticeably",
+            "The app explains in plain words which features matter most",
+            "A new person can install and run the app by following the README",
+            "The demo video is under 90 seconds and shows the app working live"
+          ],
+          "hints": [
+            "Build all 30 input rows as one DataFrame and call `predict` once, which is much faster than 30 separate calls.",
+            "Tree models give step-shaped what-if lines; that is expected and worth explaining in your demo.",
+            "`st.map` expects columns named `latitude` and `longitude` (or `lat` and `lon`), so rename them first."
+          ],
+          "stretch": "Deploy the app for free on Streamlit Community Cloud and add the live link to your README.",
+          "post_highlights": [
+            "Built a what-if explorer that shows how predicted house prices change with each feature",
+            "Added an interactive map of California housing data to my Streamlit app",
+            "Shipped a documented house price prediction app with a live demo"
+          ]
+        }
+      }
+    }
+  ]
+}

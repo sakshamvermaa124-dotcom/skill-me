@@ -65,21 +65,6 @@ class TestApplicationHappyPath:
         assert r.status_code == 200
         assert r.json()["status"] == "applied"
 
-    async def test_apply_with_referral_code(self, client):
-        """Application with referral code should succeed and track referral."""
-        # Seed a referrer student
-        from tests.conftest import seed_student, test_db
-        referrer_id = await seed_student(test_db, email="referrer@example.com")
-        await test_db.insert(
-            "INSERT INTO referral_codes (student_id, code) VALUES (?, ?)",
-            (referrer_id, "SKM-REF001"),
-        )
-
-        payload = {**VALID_APPLICATION, "referred_by": "SKM-REF001"}
-        r = await client.post("/api/students/apply", json=payload)
-        assert r.status_code == 200
-        assert r.json()["status"] == "applied"
-
 
 @pytest.mark.students
 class TestApplicationDuplicatePrevention:

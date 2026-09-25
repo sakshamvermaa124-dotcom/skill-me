@@ -3,7 +3,7 @@ Admin Tests — Student Management
 Tests listing, getting, and updating students.
 """
 import pytest
-from tests.conftest import test_db, seed_student
+from tests.conftest import test_db, seed_student, seed_batch, seed_enrollment, seed_payment
 
 
 @pytest.mark.admin
@@ -44,6 +44,68 @@ class TestListStudents:
         assert r2.status_code == 200
         assert r2.json()["count"] == 2
 
+    async def test_list_students_default_page_size_is_15(self, client, admin_headers):
+        for i in range(20):
+            await seed_student(test_db, email=f"p{i}@example.com")
+        r = await client.get("/api/admin/students", headers=admin_headers)
+        data = r.json()
+        assert data["count"] == 15
+        assert data["total"] == 20
+        assert data["page"] == 1
+        assert data["total_pages"] == 2
+
+        r2 = await client.get("/api/admin/students?page=2", headers=admin_headers)
+        d2 = r2.json()
+        assert d2["count"] == 5
+        assert d2["page"] == 2
+        ids_page1 = {s["id"] for s in data["students"]}
+        assert not ids_page1 & {s["id"] for s in d2["students"]}
+
+    async def test_list_students_page_past_end_is_empty(self, client, admin_headers, test_student):
+        r = await client.get("/api/admin/students?page=9", headers=admin_headers)
+        assert r.status_code == 200
+        assert r.json()["students"] == []
+        assert r.json()["total"] == 1
+
+    async def test_list_students_search(self, client, admin_headers):
+        await seed_student(test_db, email="alice@example.com", first_name="Alice", last_name="Smith")
+        await seed_student(test_db, email="bob@example.com", first_name="Bob", last_name="Jones")
+        for q in ("alice", "ALICE SMITH", "alice@exa"):
+            r = await client.get("/api/admin/students", params={"q": q}, headers=admin_headers)
+            data = r.json()
+            assert data["total"] == 1, q
+            assert data["students"][0]["email"] == "alice@example.com"
+
+    async def test_list_students_search_is_injection_safe(self, client, admin_headers, test_student):
+        r = await client.get("/api/admin/students", params={"q": "' OR 1=1 --"}, headers=admin_headers)
+        assert r.status_code == 200
+        assert r.json()["total"] == 0
+        r = await client.get("/api/admin/students", params={"status": "applied' OR '1'='1"}, headers=admin_headers)
+        assert r.status_code == 200
+        assert r.json()["total"] == 0
+
+    async def test_list_students_paid_filter_splits_alumni(self, client, admin_headers, paid_student):
+        await seed_student(test_db, email="unpaid@example.com")
+        alumni = (await client.get("/api/admin/students?paid=true", headers=admin_headers)).json()
+        active = (await client.get("/api/admin/students?paid=false", headers=admin_headers)).json()
+        assert [s["email"] for s in alumni["students"]] == [paid_student["email"]]
+        assert alumni["students"][0]["has_paid"] == 1
+        assert [s["email"] for s in active["students"]] == ["unpaid@example.com"]
+
+    async def test_list_students_no_duplicate_rows(self, client, admin_headers, paid_student, test_batch):
+        """Multiple payments/enrollments must not duplicate a student row."""
+        await test_db.insert(
+            "INSERT INTO payments (student_id, batch_id, razorpay_order_id, amount, status) VALUES (?, ?, 'order_dup_2', 9900, 'paid')",
+            (paid_student["id"], test_batch["id"]),
+        )
+        extra = await seed_batch(test_db, batch_number=2)
+        await seed_enrollment(test_db, paid_student["id"], extra)
+        r = await client.get("/api/admin/students", headers=admin_headers)
+        assert r.json()["total"] == 1
+        assert r.json()["count"] == 1
+        # the enrollment reference points at the paid enrollment
+        assert r.json()["students"][0]["batch_id"] == test_batch["id"]
+
     async def test_list_students_multiple_with_all_statuses(self, client, admin_headers):
         """Filter should only return matching status."""
         await seed_student(test_db, email="s1@e.com", status="applied")
@@ -63,7 +125,7 @@ class TestGetStudent:
         data = r.json()
         assert data["student"]["id"] == test_student["id"]
         assert data["student"]["email"] == test_student["email"]
-        assert "enrollments" in data
+        assert "enrollment" in data
         assert "progress" in data
 
     async def test_get_nonexistent_student(self, client, admin_headers):
@@ -131,7 +193,9 @@ class TestAdminStats:
         assert r.status_code == 200
         data = r.json()
         assert "total_students" in data
-        assert "active_batches" in data
+        assert "active_batches" not in data
+        assert "enrolled_students" in data
+        assert "total_alumni" in data
         assert "pending_applications" in data
         assert "pending_submissions" in data
 
@@ -139,7 +203,7 @@ class TestAdminStats:
         r = await client.get("/api/admin/stats", headers=admin_headers)
         data = r.json()
         assert data["total_students"] >= 0
-        assert data["active_batches"] >= 0
+        assert data["enrolled_students"] >= 0
         assert data["pending_applications"] >= 0
         assert data["pending_submissions"] >= 0
 

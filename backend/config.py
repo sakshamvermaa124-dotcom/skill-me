@@ -54,10 +54,6 @@ class Settings(BaseSettings):
     jwt_expire_days: int = 30
     otp_expiry_minutes: int = 10
 
-    # ── Referral System ──────────────────────────
-    referral_discount_paise: int = 2000   # ₹20 off certificate per referral
-    referral_ambassador_threshold: int = 5  # referrals needed for Ambassador badge
-
     @property
     def db_path(self) -> str:
         """Returns the database URL (Turso remote or local SQLite path)."""

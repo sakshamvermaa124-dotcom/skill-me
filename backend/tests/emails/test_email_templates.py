@@ -34,7 +34,6 @@ class TestEmailTemplatesRendering:
             last_name="Verma",
             domain_label="Web Development Engineering",
             joining_date="16 August 2026",
-            batch_number=1,
             repo_url="https://github.com/skill-me/web-dev-1",
             issues_url="https://github.com/skill-me/web-dev-1/issues?assignee=sakshamverma124",
             github_username="sakshamverma124",
@@ -120,6 +119,18 @@ class TestEmailTemplatesRendering:
         assert "https://skill-me-intern.in/certificate.html" in html
         assert '<span class="info-label">Cohort Batch</span>' not in html
 
+    def test_submission_feedback_template(self):
+        """submission_feedback.html renders the week's checklist and tips."""
+        from services.feedback_service import build_feedback
+        fb = build_feedback("python", 1, 3)
+        html = _render("submission_feedback.html", first_name="Asha", last_name="K",
+                       domain_label="Python", week=3, **fb)
+        assert "Week 3" in html
+        assert "Asha" in html
+        assert fb["checklist"] and fb["domain_tips"] and len(fb["general_tips"]) == 3
+        assert "Before review, make sure your post clearly shows" in html
+        assert "Tips to make it stronger" in html
+
 
 @pytest.mark.asyncio
 class TestEmailServiceDispatch:
@@ -146,7 +157,6 @@ class TestEmailServiceDispatch:
             last_name="Kapoor",
             email="dev@example.com",
             domain="web-dev",
-            batch_number=1,
             github_username="devkapoor",
             repo_url="https://github.com/skill-me/web-dev-1",
         )
