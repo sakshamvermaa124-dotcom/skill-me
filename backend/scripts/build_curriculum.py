@@ -18,7 +18,11 @@ import json
 import sys
 from pathlib import Path
 
-SERVICES_DIR = Path(__file__).resolve().parent.parent / "services"
+BACKEND_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(BACKEND_DIR))
+from services.showcase import showcase_for  # noqa: E402
+
+SERVICES_DIR = BACKEND_DIR / "services"
 SOURCE_DIR = SERVICES_DIR / "curriculum"
 OUTPUT_FILE = SERVICES_DIR / "curriculum.json"
 
@@ -82,8 +86,9 @@ def validate(data: dict, source: str) -> list[str]:
     return errors
 
 
-def render_description(week_no: str, week: dict) -> str:
+def render_description(domain: str, week_no: str, week: dict) -> str:
     """Markdown shown on the dashboard (rendered with marked.js)."""
+    showcase = showcase_for(domain)
     lines = [
         f"### 🎯 This Week's Goal",
         week["goal"],
@@ -106,11 +111,10 @@ def render_description(week_no: str, week: dict) -> str:
         week["stretch"],
         "",
         "### 📤 Submission",
-        "Push your code (or design file) with a short README, then share a LinkedIn post with a "
-        "30–60 second demo video or 2–3 screenshots and submit the post link on your dashboard.",
+        showcase["submission"],
     ]
     if week_no != "1":
-        lines.insert(1, f"This week builds on your Week {int(week_no) - 1} project — keep working in the same repo.\n")
+        lines.insert(1, f"This week builds on your Week {int(week_no) - 1} work — {showcase['continue']}.\n")
     return "\n".join(lines)
 
 
@@ -125,7 +129,7 @@ def render_domain(data: dict) -> list[dict]:
                 "difficulty": week["difficulty"],
                 "est_hours": week["est_hours"],
                 "deliverables": week["deliverables"],
-                "description": render_description(wk, week),
+                "description": render_description(data["domain"], wk, week),
                 "post_highlights": week["post_highlights"],
             }
         tracks.append({"project_name": track["project_name"], "tagline": track["tagline"], "weeks": weeks})

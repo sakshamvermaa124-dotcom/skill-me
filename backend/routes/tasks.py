@@ -6,7 +6,9 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
-from services.project_curriculum import get_project_track_for_student
+from services.project_curriculum import get_project_track_for_student, resolve_domain_key
+from services.showcase import showcase_for, hashtags_for
+from services.email_service import _domain_label
 from services.enrollment_service import enrollment_service
 
 router = APIRouter(prefix="/api/tasks", tags=["Tasks"])
@@ -68,25 +70,25 @@ async def get_current_tasks(student_id: int, batch_id: int):
 
     project_track = get_project_track_for_student(batch["domain"], student_id)
     
-    # Generate correlated 4-week post templates
-    name = f"{student['first_name']} {student['last_name']}".strip()
-    domain_clean = batch["domain"].replace("-", " ").title()
+    # Generate correlated 4-week post templates, worded for how this domain shows its work
+    domain_key = resolve_domain_key(batch["domain"])
+    showcase = showcase_for(domain_key)
+    domain_clean = _domain_label(batch["domain"])
     proj_name = project_track["project_name"]
-    hashtag = batch["domain"].replace("-", "").capitalize()
+    hashtags = hashtags_for(domain_key)
 
     linkedin_templates = {}
     weeks_dict = project_track.get("weeks", {})
     for w in [1, 2, 3, 4]:
         w_data = weeks_dict.get(str(w), weeks_dict.get(w, {}))
         bullets = "\n".join([f"• {pt}" for pt in w_data.get("post_highlights", [])])
-        
+
         linkedin_templates[w] = (
             f"🚀 Excited to share my Week {w} milestone for '{proj_name}' in the {domain_clean} Virtual Internship at @SkillMe!\n\n"
-            f"During Week {w}, I built and tested the following features locally on localhost in VS Code:\n\n"
-            f"🎯 Week {w} Milestone Highlights:\n"
+            f"{showcase['caption_did'].format(week=w)}\n"
             f"{bullets}\n\n"
-            f"Check out the quick video demonstration below to see the project running live on localhost! 💡\n\n"
-            f"#SkillMe #SkillMeInternship #{hashtag} #Coding #BuildInPublic #LocalhostProject #SoftwareEngineering #TechInternship"
+            f"{showcase['caption_demo']}\n\n"
+            f"{hashtags}"
         )
 
     # Return ALL 4 weeks of tasks unified in one document

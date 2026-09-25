@@ -9,12 +9,13 @@ phrased as a checklist and suggestions and never claims anything about what the 
 """
 
 from services.project_curriculum import get_project_track_for_student, resolve_domain_key
+from services.showcase import showcase_for
 
 STAGE_TIPS = {
-    1: "Week 1 is the foundation everything else builds on. Keep a clean folder structure and a README with setup steps now — it saves you time in weeks 2–4.",
+    1: "Week 1 is the foundation everything else builds on.",
     2: "Week 2 builds on week 1. Re-test your week 1 features after adding the new ones so nothing broke along the way.",
     3: "Week 3 is where projects start to feel real. Check how your work handles bad input, empty states and errors, not just the happy path.",
-    4: "Week 4 is about finishing well. Do a full end-to-end run, remove leftover debug code, and update your README with final screenshots.",
+    4: "Week 4 is about finishing well.",
 }
 
 DOMAIN_TIPS = {
@@ -84,24 +85,31 @@ GENERAL_TIPS = [
     "Open your LinkedIn post with the outcome in one line — what you built and why it matters. Most people only read the first two lines.",
     "Show, don't just tell: a 30–60 second screen recording or 2–3 screenshots makes your work much easier to evaluate.",
     "Mention one problem you got stuck on and how you solved it — the reasoning is often more impressive than the feature list.",
-    "Push your code to a public GitHub repo with a README (what it does, how to run it, screenshots) and share the link in your post or its comments.",
-    "Keep commits small with clear messages — it shows how you work, not just what you shipped.",
-    "Tag the main technologies you used (e.g. #JavaScript, #Python) so your post reaches people in that field.",
+    "Add 3–5 hashtags for your field and tools (e.g. #Python, #Figma, #AWS) so your post reaches people who care about that work.",
 ]
+# Weeks 1 and 4 get an extra, domain-specific line from services/showcase.py (README vs Figma pages vs cleanup)
+STAGE_TIP_EXTRA = {1: "week1_tip", 4: "week4_tip"}
 
 
 def build_feedback(domain: str, student_id: int, week: int) -> dict:
     """Feedback for one student's submission of one week's task."""
     track = get_project_track_for_student(domain, student_id) or {}
     week_data = (track.get("weeks") or {}).get(str(week)) or {}
-    offset = (int(week) - 1) * 3 % len(GENERAL_TIPS)  # rotate so each week reads differently
+    domain_key = resolve_domain_key(domain)
+    showcase = showcase_for(domain_key)
+    # Shared tips plus the ones for how this domain shows its work (repo vs Figma vs live URL)
+    general = GENERAL_TIPS + showcase["tips"]
+    offset = (int(week) - 1) * 3 % len(general)  # rotate so each week reads differently
+    stage_tip = STAGE_TIPS.get(int(week), "")
+    if int(week) in STAGE_TIP_EXTRA:
+        stage_tip = f"{stage_tip} {showcase[STAGE_TIP_EXTRA[int(week)]]}"
     return {
         "project_name": track.get("project_name") or "your project",
         "task_title": week_data.get("title") or f"Week {week} task",
         "checklist": list(week_data.get("deliverables") or []),
-        "stage_tip": STAGE_TIPS.get(int(week), ""),
-        "domain_tips": DOMAIN_TIPS.get(resolve_domain_key(domain), []),
-        "general_tips": [GENERAL_TIPS[(offset + i) % len(GENERAL_TIPS)] for i in range(3)],
+        "stage_tip": stage_tip,
+        "domain_tips": DOMAIN_TIPS.get(domain_key, []),
+        "general_tips": [general[(offset + i) % len(general)] for i in range(3)],
     }
 
 
