@@ -429,7 +429,7 @@ class EmailService:
         return await _send_and_log(
             email,
             f"{first_name} {last_name}",
-            f"📝 Week {week} submitted — your feedback checklist",
+            f"Week {week} submission received — {_domain_label(domain)}",
             html,
             email_type="submission_feedback",
             student_id=student_id,

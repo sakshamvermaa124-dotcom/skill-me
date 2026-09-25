@@ -120,16 +120,21 @@ class TestEmailTemplatesRendering:
         assert '<span class="info-label">Cohort Batch</span>' not in html
 
     def test_submission_feedback_template(self):
-        """submission_feedback.html renders the week's checklist and tips."""
+        """submission_feedback.html is a short receipt with that task's checklist.
+        Tips/stage advice live on the dashboard, not in the email — long, tip-heavy
+        emails get sorted into Gmail's Promotions tab instead of Primary."""
         from services.feedback_service import build_feedback
         fb = build_feedback("python", 1, 3)
         html = _render("submission_feedback.html", first_name="Asha", last_name="K",
                        domain_label="Python", week=3, **fb)
         assert "Week 3" in html
         assert "Asha" in html
-        assert fb["checklist"] and fb["domain_tips"] and len(fb["general_tips"]) == 3
-        assert "Before review, make sure your post clearly shows" in html
-        assert "Tips to make it stronger" in html
+        assert fb["checklist"]
+        assert "Checklist for this task" in html
+        assert "Pending review" in html
+        # Keep the email short/transactional — no tips essay, no promo-style CTA copy
+        assert "Tips to make it stronger" not in html
+        assert "Before review, make sure your post clearly shows" not in html
 
 
 @pytest.mark.asyncio
