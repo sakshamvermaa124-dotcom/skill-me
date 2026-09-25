@@ -11,9 +11,18 @@
     'ml': 'Machine Learning',
     'data-science': 'Data Science',
     'flutter': 'Flutter App Development',
+    'datascience': 'Data Science',
     'devops': 'DevOps',
-    'cpp': 'C++ Development'
+    'cpp': 'C++ Development',
+    'cloud': 'Cloud / AWS',
+    'cyber': 'Cybersecurity',
+    'uiux': 'UI/UX Design',
+    'genai': 'Generative AI',
+    'sql': 'SQL & Databases'
   };
+
+  // Hashtag for the kind of work, used in the share post (designers aren't #SoftwareEngineering)
+  const FIELD_HASHTAG = { uiux: 'UXDesign', cloud: 'CloudComputing', cyber: 'CyberSecurity' };
 
   const SKILL_MAP = {
     'web-dev': ['HTML5', 'CSS3', 'JavaScript', 'Responsive Design', 'REST APIs', 'Git'],
@@ -25,9 +34,15 @@
     'data-science': ['Python', 'Pandas', 'NumPy', 'SQL', 'Data Visualization', 'Git'],
     'flutter': ['Flutter', 'Dart', 'Mobile UI', 'State Management', 'REST APIs', 'Git'],
     'devops': ['Docker', 'CI/CD', 'Linux', 'Bash', 'Cloud Deployment', 'Git'],
-    'cpp': ['C++', 'Data Structures', 'Algorithms', 'OOP', 'STL', 'Git']
+    'cpp': ['C++', 'Data Structures', 'Algorithms', 'OOP', 'STL', 'Git'],
+    'cloud': ['AWS', 'Serverless', 'S3', 'IAM', 'Cloud Architecture', 'Cost Management'],
+    'cyber': ['Python', 'Web Security', 'OWASP', 'Hashing', 'Log Analysis', 'Security Reporting'],
+    'uiux': ['Figma', 'User Research', 'Wireframing', 'Prototyping', 'Design Systems', 'Usability Testing'],
+    'genai': ['Python', 'LLM APIs', 'Prompt Engineering', 'Embeddings', 'Streamlit', 'Git'],
+    'sql': ['SQL', 'Database Design', 'Joins & Aggregations', 'Indexes', 'Data Analysis', 'ER Diagrams']
   };
-  const DEFAULT_SKILLS = ['Git', 'Project Delivery', 'Technical Writing'];
+  SKILL_MAP['datascience'] = SKILL_MAP['data-science'];
+  const DEFAULT_SKILLS = ['Project Delivery', 'Technical Writing', 'Problem Solving'];
 
   const ICONS = {
     check: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
@@ -244,7 +259,7 @@
               <div class="eyebrow"><span class="pulse"></span> Verified Proof of Work</div>
               <h1 class="hero-name">${esc(name)}</h1>
               <p class="hero-role">
-                <span>Engineering Intern at <strong>SkillMe</strong></span>
+                <span>${domains.length === 1 ? esc(domainLabel(domains[0])) + ' ' : ''}Intern at <strong>SkillMe</strong></span>
                 ${college ? `<span class="sep">•</span><span>${esc(college)}</span>` : ''}
               </p>
               ${domainTagsHtml ? `<div class="domain-row">${domainTagsHtml}</div>` : ''}
@@ -361,7 +376,7 @@ Check out my live portfolio:
 
 Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
 
-#SkillMe #ProofOfWork #SoftwareEngineering #Internship`;
+#SkillMe #ProofOfWork #${FIELD_HASHTAG[domains[0]] || 'SoftwareEngineering'} #Internship`;
         window.open(`https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(text)}`, '_blank', 'noopener');
       });
     }

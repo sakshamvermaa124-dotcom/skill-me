@@ -698,6 +698,7 @@ document.addEventListener('DOMContentLoaded', () => {
               ${btnLabel}
             </button>
           </div>
+          ${isApproved ? '' : `<div style="margin-top:6px;font-size:0.72rem;color:var(--text-muted);">On your LinkedIn post, click <strong>⋯ → Copy link to post</strong>. Your GitHub, Figma, notebook or live-site links go inside the post, not here.</div>`}
         `;
         tasksList.appendChild(card);
         // Add visible class immediately for the initial fade-in to prevent invisible cards
@@ -707,6 +708,25 @@ document.addEventListener('DOMContentLoaded', () => {
       if (tasksEmpty) tasksEmpty.style.display = 'block';
       if (tasksCount) tasksCount.textContent = '0 Tasks';
     }
+  }
+
+  // Explain the common wrong-link cases (a Figma/GitHub/live-site link, or a profile link)
+  // instead of a generic "invalid URL", since designers and cloud interns have several links.
+  function linkedinPostUrlProblem(url) {
+    const lower = url.toLowerCase();
+    const where = 'Add it to your LinkedIn post (or its first comment), then paste the link to the post here.';
+    if (!/^https:\/\/(www\.)?linkedin\.com\//i.test(url)) {
+      if (lower.includes('figma.com')) return `That's your Figma link. ${where}`;
+      if (lower.includes('github.com') || lower.includes('github.io')) return `That's a GitHub link. ${where}`;
+      if (lower.includes('colab.research.google.com') || lower.includes('kaggle.com')) return `That's your notebook link. ${where}`;
+      if (/amazonaws\.com|cloudfront\.net|netlify\.app|vercel\.app|onrender\.com|web\.app/.test(lower)) return `That looks like your live project link. ${where}`;
+      if (lower.includes('lnkd.in')) return 'That\'s a shortened LinkedIn link. Open it in your browser and paste the full linkedin.com address instead.';
+      return 'Please paste the link to your LinkedIn post. It starts with https://www.linkedin.com/';
+    }
+    if (/linkedin\.com\/in\/[^/]+\/?$/i.test(url)) {
+      return 'That\'s your LinkedIn profile link, not a post. Open your post, click ⋯ → Copy link to post, and paste that here.';
+    }
+    return null;
   }
 
   // --- Submit a week's LinkedIn post URL for admin review ---
@@ -721,8 +741,9 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Please paste your LinkedIn post URL first.');
       return;
     }
-    if (!/^https:\/\/(www\.)?linkedin\.com\//i.test(url)) {
-      alert('Please enter a valid linkedin.com post URL.');
+    const urlProblem = linkedinPostUrlProblem(url);
+    if (urlProblem) {
+      alert(urlProblem);
       return;
     }
 
@@ -1454,6 +1475,49 @@ let milestoneShareData = {
 };
 
 /**
+ * Display label, hashtags and a "what kind of work" phrase for a student's domain, so share
+ * posts read right for designers and cloud interns as well as coders. Accepts any stored
+ * domain value (slug like "ui-ux" or label like "UI/UX Design").
+ */
+function describeDomain(rawDomain) {
+  const key = String(rawDomain || '').toLowerCase().replace(/[^a-z0-9+]/g, '');
+  const DOMAINS = [
+    // [match, label, hashtag, kind]
+    ['uiux',        'UI/UX Design',       'UIUX',           'design'],
+    ['design',      'UI/UX Design',       'UIUX',           'design'],
+    ['genai',       'Generative AI',      'GenerativeAI',   'code'],
+    ['generative',  'Generative AI',      'GenerativeAI',   'code'],
+    ['cyber',       'Cybersecurity',      'CyberSecurity',  'code'],
+    ['security',    'Cybersecurity',      'CyberSecurity',  'code'],
+    ['datascien',   'Data Science',       'DataScience',    'code'],
+    ['devops',      'DevOps / CI-CD',     'DevOps',         'code'],  // before cloud: old label "DevOps / Cloud"
+    ['cloud',       'Cloud / AWS',        'AWS',            'cloud'],
+    ['aws',         'Cloud / AWS',        'AWS',            'cloud'],
+    ['react',       'React / Next.js',    'ReactJS',        'code'],
+    ['node',        'Node.js / Express',  'NodeJS',         'code'],
+    ['java',        'Java / Spring Boot', 'Java',           'code'],
+    ['flutter',     'Flutter / Mobile',   'Flutter',        'code'],
+    ['mobile',      'Flutter / Mobile',   'Flutter',        'code'],
+    ['sql',         'SQL / Databases',    'SQL',            'code'],
+    ['cpp',         'C++ / Algorithms',   'CPlusPlus',      'code'],
+    ['c++',         'C++ / Algorithms',   'CPlusPlus',      'code'],
+    ['machinelearning', 'Machine Learning', 'MachineLearning', 'code'],
+    ['ml',          'Machine Learning',   'MachineLearning', 'code'],
+    ['python',      'Python',             'Python',         'code'],
+    ['web',         'Web Development',    'WebDevelopment', 'code'],
+  ];
+  const hit = DOMAINS.find(([match]) => key === match || key.includes(match));
+  const fallbackLabel = String(rawDomain || 'Tech').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const [, label, hashtag, kind] = hit || [null, fallbackLabel, fallbackLabel.replace(/[^a-zA-Z0-9]/g, '') || 'Tech', 'code'];
+  const KINDS = {
+    code:   { work: 'hands-on projects',        fieldHashtag: 'SoftwareEngineering' },
+    design: { work: 'hands-on design projects', fieldHashtag: 'UXDesign' },
+    cloud:  { work: 'hands-on cloud projects',  fieldHashtag: 'CloudComputing' },
+  };
+  return { label, hashtag, ...KINDS[kind] };
+}
+
+/**
  * Resolves the milestone and task context dynamically from live dashboard data.
  * Data now comes from admin-approved LinkedIn submissions rather than merged
  * GitHub Pull Requests / closed issues (legacy).
@@ -1480,10 +1544,9 @@ function resolveMilestoneContext(data) {
   }
   const totalApproved = approvedSubmissions.length;
 
-  const domain = (student.domain || (rawProgress[0] && rawProgress[0].domain) || 'Web Development')
-    .replace(/-/g, ' ')
-    .replace(/\b\w/g, l => l.toUpperCase());
-  const domainHashtag = domain.replace(/[^a-zA-Z0-9]/g, '') || 'Tech';
+  const domainInfo = describeDomain(student.domain || (rawProgress[0] && rawProgress[0].domain) || 'web-dev');
+  const domain = domainInfo.label;
+  const domainHashtag = domainInfo.hashtag;
 
   const PROD_BASE = 'https://www.skill-me-intern.in';
   const inviteLink = `${PROD_BASE}/apply`;
@@ -1502,7 +1565,7 @@ function resolveMilestoneContext(data) {
     || (totalAssigned > 0 && totalCompleted >= totalAssigned);
 
   let weekNum = 1;
-  let taskTitle = 'Engineering Task';
+  let taskTitle = 'Weekly Task';
   let validatedLinkedinUrl = null;
   let latestTaskId = 0;
 
@@ -1519,6 +1582,8 @@ function resolveMilestoneContext(data) {
     student,
     domain,
     domainHashtag,
+    work: domainInfo.work,
+    fieldHashtag: domainInfo.fieldHashtag,
     totalAssigned,
     totalCompleted,
     totalPrs: totalApproved,
@@ -1560,16 +1625,16 @@ window.openMilestoneShareModal = function(customData) {
 
     linkedInPost = `I'm thrilled to announce that I have successfully completed the 4-week ${ctx.domain} Virtual Internship at SkillMe (@SkillMe)! 🎓🚀
 
-Over the past month, I solved real production-grade engineering tasks, got ${ctx.totalPrs} weekly submissions approved, and built verifiable Proof of Work. It was an incredible hands-on engineering journey!
+Over the past month, I completed ${ctx.work} every week, got ${ctx.totalPrs} weekly submissions approved, and built verifiable Proof of Work. It was an incredible hands-on learning journey!
 
 📊 Verified Sprint Summary:
-• Track: ${ctx.domain} Engineering Sprint
+• Track: ${ctx.domain}
 • Progress: 100% Curriculum Completed (All 4 Weeks)
 • Total Task Submissions Approved: ${ctx.totalPrs}
-• Engineering XP Score: ${ctx.totalScore} pts
+• XP Score: ${ctx.totalScore} pts
 • Final Milestone Task: Week ${ctx.weekNum} — ${ctx.taskTitle}
 
-${linkedinBlock}🌐 View my live Proof of Work portfolio & codebase:
+${linkedinBlock}🌐 View my live Proof of Work portfolio:
 👉 ${ctx.portfolioUrl}
 
 📄 View my verified digital Certificate & LOR:
@@ -1577,7 +1642,7 @@ ${linkedinBlock}🌐 View my live Proof of Work portfolio & codebase:
 
 Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
 
-#SkillMe #ProofOfWork #${ctx.domainHashtag} #SoftwareEngineering #TechInternship`;
+#SkillMe #ProofOfWork #${ctx.domainHashtag} #${ctx.fieldHashtag} #TechInternship`;
 
     whatsAppInvite = `🏆 I just completed the SkillMe ${ctx.domain} internship with 100% tasks solved and ${ctx.totalPrs} submissions approved!
 
@@ -1591,15 +1656,15 @@ Join me on SkillMe and earn verified credentials for your resume:
     // ─── Case 2: 0 Submissions Approved (Offer Milestone) ───
     badgeText = `🎉 OFFICIAL OFFER UNLOCKED`;
     titleText = `You're Enrolled at SkillMe!`;
-    subText = `Your official internship offer is confirmed. Share your new engineering journey:`;
+    subText = `Your official internship offer is confirmed. Share the news:`;
 
     linkedInPost = `I'm thrilled to share that I have been selected for the ${ctx.domain} Virtual Internship at SkillMe (@SkillMe)! 🚀
 
-Over the next 4 weeks, I will be completing real engineering tasks, sharing my progress on LinkedIn, and building verifiable Proof of Work.
+Over the next 4 weeks, I will be working on ${ctx.work}, sharing my progress on LinkedIn, and building verifiable Proof of Work.
 
 🎯 Program Highlights:
-• Track: ${ctx.domain} Engineering Sprint
-• Hands-on weekly engineering tasks with admin-reviewed submissions
+• Track: ${ctx.domain}
+• A new project milestone every week, reviewed by the SkillMe team
 • MSME Recognized & Cryptographically Verifiable Credentials
 • Lifetime Public Proof-of-Work Portfolio
 
@@ -1608,14 +1673,14 @@ Over the next 4 weeks, I will be completing real engineering tasks, sharing my p
 
 Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
 
-#SkillMe #ProofOfWork #${ctx.domainHashtag} #SoftwareEngineering #TechInternship`;
+#SkillMe #ProofOfWork #${ctx.domainHashtag} #${ctx.fieldHashtag} #TechInternship`;
 
     whatsAppInvite = `🚀 Hey! I've been selected for the SkillMe ${ctx.domain} Virtual Internship!
 
 Check out my verified digital Offer Letter:
 👉 ${ctx.offerUrl}
 
-Join me to solve real engineering tasks and build verified Proof of Work for your resume:
+Join me to work on real projects and build verified Proof of Work for your resume:
 👉 Join my SkillMe Squad: ${ctx.inviteLink}`;
 
   } else {
@@ -1632,27 +1697,27 @@ Join me to solve real engineering tasks and build verified Proof of Work for you
 
 My submission for "${ctx.taskTitle}" was just approved for the ${ctx.domain} Virtual Internship.
 
-SkillMe is India's premier engineering platform where interns complete real-world tasks and build tamper-proof Proof of Work.
+At SkillMe, interns complete real-world projects week by week and build tamper-proof Proof of Work.
 
 📊 Milestone Highlights:
 • Milestone: Week ${ctx.weekNum} — ${ctx.taskTitle}
 • Status: Submission Approved & Verified ✅
 • Total Submissions Approved: ${ctx.totalPrs}
-• Current Engineering Score: ${ctx.totalScore} pts
+• Current Score: ${ctx.totalScore} pts
 
 ${linkedinBlock}🌐 View my live Proof of Work portfolio:
 👉 ${ctx.portfolioUrl}
 
 Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
 
-#SkillMe #ProofOfWork #${ctx.domainHashtag} #SoftwareEngineering #TechInternship`;
+#SkillMe #ProofOfWork #${ctx.domainHashtag} #${ctx.fieldHashtag} #TechInternship`;
 
     whatsAppInvite = `🚀 Milestone update! My Week ${ctx.weekNum} submission ("${ctx.taskTitle}") at SkillMe was just approved!
 
 ${ctx.validatedLinkedinUrl ? `Check out my verified milestone post:\n👉 ${ctx.validatedLinkedinUrl}\n\n` : ''}View my live Proof of Work portfolio:
 👉 ${ctx.portfolioUrl}
 
-Join me on SkillMe to complete real engineering tasks and level up your resume:
+Join me on SkillMe to work on real projects and level up your resume:
 👉 Join my SkillMe Sprint Squad: ${ctx.inviteLink}`;
   }
 
