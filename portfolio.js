@@ -3,14 +3,14 @@
   const WEEKS_PER_TRACK = 4;
 
   const DOMAIN_LABELS = {
-    'web-dev': 'Web Development',
+    'web-dev': 'Full Stack Engineer',
     'python': 'Python Development',
-    'react': 'React Development',
-    'node': 'Node.js Backend',
+    'react': 'Frontend Engineer',
+    'node': 'Backend Engineer',
     'java': 'Java Development',
     'ml': 'Machine Learning',
     'data-science': 'Data Science',
-    'flutter': 'Flutter App Development',
+    'flutter': 'App Developer',
     'datascience': 'Data Science',
     'devops': 'DevOps',
     'cpp': 'C++ Development',
@@ -18,11 +18,19 @@
     'cyber': 'Cybersecurity',
     'uiux': 'UI/UX Design',
     'genai': 'Generative AI',
-    'sql': 'SQL & Databases'
+    'sql': 'SQL & Databases',
+    'ai-engineer': 'AI Engineer',
+    'fde': 'Forward Deployed Engineer',
+    'sde': 'SDE / SWE',
+    'ai-pm': 'AI Product Management',
+    'qa': 'Software Quality'
   };
 
   // Hashtag for the kind of work, used in the share post (designers aren't #SoftwareEngineering)
-  const FIELD_HASHTAG = { uiux: 'UXDesign', cloud: 'CloudComputing', cyber: 'CyberSecurity' };
+  const FIELD_HASHTAG = {
+    uiux: 'UXDesign', cloud: 'CloudComputing', cyber: 'CyberSecurity',
+    'ai-pm': 'ProductManagement', qa: 'QualityAssurance'
+  };
 
   const SKILL_MAP = {
     'web-dev': ['HTML5', 'CSS3', 'JavaScript', 'Responsive Design', 'REST APIs', 'Git'],
@@ -39,9 +47,15 @@
     'cyber': ['Python', 'Web Security', 'OWASP', 'Hashing', 'Log Analysis', 'Security Reporting'],
     'uiux': ['Figma', 'User Research', 'Wireframing', 'Prototyping', 'Design Systems', 'Usability Testing'],
     'genai': ['Python', 'LLM APIs', 'Prompt Engineering', 'Embeddings', 'Streamlit', 'Git'],
-    'sql': ['SQL', 'Database Design', 'Joins & Aggregations', 'Indexes', 'Data Analysis', 'ER Diagrams']
+    'sql': ['SQL', 'Database Design', 'Joins & Aggregations', 'Indexes', 'Data Analysis', 'ER Diagrams'],
+    'ai-engineer': ['Python', 'LLM APIs', 'RAG', 'Tool Calling', 'Vector Search', 'Evals'],
+    'fde': ['API Integration', 'Python', 'Technical Docs', 'Client Tools', 'Debugging', 'Git'],
+    'sde': ['Data Structures', 'Algorithms', 'System Design', 'Testing', 'Clean Architecture', 'Git'],
+    'ai-pm': ['Product Strategy', 'PRDs', 'AI/LLM Evals', 'User Research', 'Roadmapping', 'Notion'],
+    'qa': ['Manual Testing', 'Test Automation', 'Selenium/Playwright', 'Bug Reporting', 'Test Planning', 'Postman']
   };
   SKILL_MAP['datascience'] = SKILL_MAP['data-science'];
+  SKILL_MAP['swe'] = SKILL_MAP['sde'];
   const DEFAULT_SKILLS = ['Project Delivery', 'Technical Writing', 'Problem Solving'];
 
   const ICONS = {

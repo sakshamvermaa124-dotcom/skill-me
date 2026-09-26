@@ -1,0 +1,190 @@
+{
+  "domain": "ai-pm",
+  "tracks": [
+    {
+      "project_name": "SmartRecap: AI Meeting Notes Feature",
+      "tagline": "Take an AI feature from a rough idea to a PRD, an eval spec, a competitive analysis and a clickable prototype — the full product thinking loop, no repo required.",
+      "weeks": {
+        "1": {
+          "title": "Problem Framing and Competitive Analysis",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Pick a real AI feature idea (an AI meeting-notes summarizer for a team collaboration tool), talk to potential users about the problem, and study how existing products solve it. Good PM work starts with a sharp problem statement, not a feature list.",
+          "learn": [
+            "Framing an AI feature around a user problem, not a technology",
+            "Running short user interviews to validate a problem exists",
+            "Structuring a competitive analysis for AI features specifically",
+            "Writing a clear problem statement and success metric"
+          ],
+          "steps": [
+            "Write 6-8 open-ended interview questions about how people currently handle meeting notes and follow-ups (e.g. 'Tell me about the last meeting where something got missed afterward.').",
+            "Interview 3-5 people who attend regular meetings (classmates, coworkers, club members) for 10-15 minutes each, or run a short survey with at least 15 responses.",
+            "Group your findings into themes on a doc or board (Notion, FigJam, or even a shared spreadsheet) and identify the single strongest recurring pain point.",
+            "Research 3 existing products with AI meeting-notes features (e.g. Otter.ai, Fireflies.ai, Zoom AI Companion) and document for each: what it does, how it's positioned, and one gap or complaint you find in reviews.",
+            "Write a one-paragraph problem statement in the form 'Teams struggle to ___ because ___, which leads to ___.'",
+            "Define one primary success metric for the feature (e.g. '% of meetings with an accurate action-item list produced within 5 minutes of the meeting ending') and explain why you chose it over alternatives.",
+            "Write a half-page research summary covering your top 3 interview insights, the competitive gaps you found, and your problem statement and metric."
+          ],
+          "deliverables": [
+            "Interview questions and notes, or survey results",
+            "A competitive analysis of 3 existing AI meeting-notes products",
+            "A one-paragraph problem statement",
+            "A defined success metric with a one-sentence justification"
+          ],
+          "done_when": [
+            "At least 3 interviews or 15 survey responses are documented with direct quotes or notes",
+            "The competitive analysis names a specific gap or complaint for each of the 3 products, not just a feature list",
+            "The problem statement is grounded in a specific theme from your research, not a generic assumption",
+            "The success metric is measurable (you could describe exactly how you'd calculate it from real usage data)"
+          ],
+          "hints": [
+            "Ask about past behavior ('What happened last time?') rather than hypotheticals ('Would you use a feature that...?') — hypothetical answers are unreliable.",
+            "App store and G2/Capterra reviews are a fast, free source of real user complaints about competitor AI features.",
+            "A success metric like 'users like it' isn't measurable; 'X% of summaries rated accurate by the meeting owner' is."
+          ],
+          "stretch": "Add a fourth competitor that is not an AI-first tool (e.g. plain manual meeting notes in Notion) to sharpen the specific value of the AI angle.",
+          "post_highlights": [
+            "Interviewed real meeting attendees to validate a problem behind an AI feature idea",
+            "Ran a competitive analysis of 3 existing AI meeting-notes products and found real gaps",
+            "Wrote a grounded problem statement and a measurable success metric for an AI feature"
+          ]
+        },
+        "2": {
+          "title": "PRD and Prompt/Eval Spec",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Turn last week's research into a full PRD for the AI meeting-notes feature, plus a lightweight prompt and eval spec — the artifact that tells engineers not just what to build, but how to judge whether the AI part is actually working. This is the core skill that separates AI PM work from general PM work.",
+          "learn": [
+            "Structuring a PRD for a feature with a probabilistic (AI-generated) component",
+            "Writing user stories and acceptance criteria for an AI feature",
+            "Designing a lightweight prompt spec: inputs, instructions, and output format",
+            "Defining an eval spec: what 'good enough' output looks like and how to check for it"
+          ],
+          "steps": [
+            "Write a PRD in a doc tool (Notion, Google Docs, or plain Markdown) with sections: problem statement, goals and non-goals, user stories, functional requirements, and success metrics — reusing Week 1's research.",
+            "Write 4-6 user stories in the form 'As a [meeting attendee], I want [X], so that [Y]', covering the core summary flow and at least one edge case (e.g. a meeting with no clear action items).",
+            "For each user story, write 2-3 acceptance criteria that are objectively checkable (e.g. 'Summary includes a bulleted list of action items, each with an owner name if one was mentioned').",
+            "Write a lightweight prompt spec: the exact instruction you'd hand an engineer, describing the model's inputs (transcript, meeting title, attendee list), the task, and the required output format (e.g. structured JSON with `summary`, `action_items`, `decisions`).",
+            "Write an eval spec: a table of 8-10 example meeting transcripts (can be short and invented) each paired with what a 'good' summary must contain, and one clear failure mode to watch for (e.g. hallucinated action items not mentioned in the transcript).",
+            "Define explicit non-goals for this version of the feature (e.g. 'not translating non-English meetings', 'not detecting sentiment') to keep scope honest.",
+            "Share the draft PRD with one other person (classmate, mentor, or even an AI reviewer) and revise based on at least one piece of real feedback.",
+            "Finalize the PRD and eval spec as a published doc link."
+          ],
+          "deliverables": [
+            "A full PRD covering problem, goals/non-goals, user stories and functional requirements",
+            "4-6 user stories with objectively checkable acceptance criteria",
+            "A prompt spec defining inputs, instructions and required output format",
+            "An eval spec with 8-10 example cases and expected content plus a named failure mode"
+          ],
+          "done_when": [
+            "The PRD clearly separates goals from non-goals for this version",
+            "Every user story has acceptance criteria specific enough that two different readers would judge a real output the same way",
+            "The prompt spec is precise enough that someone else could write the actual prompt from it without asking clarifying questions",
+            "The eval spec names a concrete failure mode (like hallucination) and how you'd detect it, not just 'check if it's good'"
+          ],
+          "hints": [
+            "If an acceptance criterion could be argued either way by two reasonable people, it's too vague — make it about presence/absence of something specific.",
+            "A good prompt spec separates 'here is the data' from 'here is the instruction' from 'here is the required output shape' as distinct sections, mirroring how you'd actually structure an LLM prompt.",
+            "Hallucination in a meeting-notes feature usually shows up as invented action items or wrong owners — make sure at least one eval case specifically tests for this."
+          ],
+          "stretch": "Add a 'confidence' field to the required output format and write a rule for when the product should show a low-confidence warning to the user.",
+          "post_highlights": [
+            "Wrote a full PRD for an AI feature covering goals, non-goals and acceptance criteria",
+            "Designed a prompt and eval spec defining exactly what 'good' AI output looks like",
+            "Named a concrete AI failure mode (hallucination) and specified how to detect it"
+          ]
+        },
+        "3": {
+          "title": "Clickable Spec and Stakeholder Narrative",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Turn the PRD into something people can actually react to: a clickable spec or lightweight prototype showing the feature in context, plus a stakeholder narrative explaining trade-offs. PMs ship decisions and clarity, not just documents — this week is about making the feature tangible before any engineer writes code.",
+          "learn": [
+            "Building a clickable spec or lightweight prototype without code (Figma, or a slide-based clickthrough)",
+            "Writing a stakeholder narrative that explains trade-offs, not just features",
+            "Anticipating and addressing likely engineering and design pushback in writing",
+            "Prioritizing scope for a first version (v1) versus later iterations"
+          ],
+          "steps": [
+            "Using Figma (or a no-code tool like a linked slide deck), design 4-6 key screens showing the feature: meeting ends, summary generation state, the summary view with action items, and an edit/correction state.",
+            "Link the screens into a clickable flow so someone can click through the experience of receiving and reviewing an AI-generated summary, including the case where the user edits a wrong action item.",
+            "Write a one-page 'stakeholder narrative' aimed at engineering and design leads: what we're building, why now, what we're explicitly NOT building in v1, and the single biggest technical risk you're aware of.",
+            "List 3 likely objections a skeptical engineer or designer might raise (e.g. 'what if the model hallucinates an action item with a wrong owner's name') and write your planned mitigation for each, referencing your Week 2 eval spec.",
+            "Write a v1 scope cut: take your full PRD's functional requirements and mark each as 'v1' or 'later', with a one-line reason for every cut.",
+            "Share the clickable spec and narrative with one other person and run a 15-minute walkthrough, noting their questions and any point of confusion.",
+            "Revise the prototype or narrative based on at least two pieces of real feedback from that walkthrough.",
+            "Publish the clickable spec link and the stakeholder narrative as a linked doc."
+          ],
+          "deliverables": [
+            "A clickable prototype or spec with at least 4-6 linked screens",
+            "A one-page stakeholder narrative covering rationale, scope and biggest risk",
+            "A list of 3 likely objections with planned mitigations",
+            "A v1 scope cut of the PRD's requirements with reasons for each cut"
+          ],
+          "done_when": [
+            "Someone unfamiliar with the project can click through the prototype and describe back what the feature does",
+            "The stakeholder narrative names a real technical risk, not a vague one, and ties it to your eval spec's failure mode",
+            "Each of the 3 objections has a specific, actionable mitigation, not just 'we'll be careful'",
+            "The v1 scope cut has a stated reason for every single item marked 'later'"
+          ],
+          "hints": [
+            "The prototype does not need visual polish — grayscale wireframes with real example text (an actual sample summary) communicate the idea better than a beautiful mockup with lorem ipsum.",
+            "A strong stakeholder narrative reads like a memo, not a slide deck: state the decision and reasoning in plain sentences before adding any visuals.",
+            "Cutting scope is a PM skill, not a cop-out — a v1 that ships something narrow and reliable beats a v1 that tries to do everything and ships nothing."
+          ],
+          "stretch": "Record a 60-second video walkthrough of the clickable prototype as if presenting it in a real stakeholder review meeting.",
+          "post_highlights": [
+            "Built a clickable prototype to make an AI feature tangible before any code was written",
+            "Wrote a stakeholder narrative addressing real technical risk and scope trade-offs",
+            "Practiced cutting a v1 scope with clear, defensible reasoning for every deferred item"
+          ]
+        },
+        "4": {
+          "title": "Launch Plan, Metrics Dashboard Spec and Case Study",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Close the loop from idea to launch: write a lightweight launch plan and a metrics dashboard spec for measuring the feature post-launch, then publish a full case study telling the whole story from research to spec. This is the deliverable a hiring manager or team would actually read to judge your PM thinking end to end.",
+          "learn": [
+            "Writing a lightweight launch plan (phasing, rollout, guardrails)",
+            "Specifying a metrics dashboard for an AI feature (adoption, quality, safety signals)",
+            "Structuring a PM case study that tells a complete, honest story",
+            "Presenting a body of product work clearly to an outside reader"
+          ],
+          "steps": [
+            "Write a lightweight launch plan: rollout phasing (e.g. internal dogfood, then 10% of teams, then full rollout), and one guardrail for pausing rollout (e.g. 'pause if hallucination reports exceed X per week').",
+            "Design a metrics dashboard spec (a doc describing the dashboard, not a built dashboard): list 6-8 metrics split into adoption (e.g. % of meetings summarized), quality (e.g. % of summaries edited, a proxy for accuracy), and safety (e.g. hallucination reports per week).",
+            "For each metric, write the exact data source or event that would produce it (e.g. 'edited_action_item event fired when a user changes an owner field'), so it's clear this isn't just a wish list.",
+            "Define one clear 'kill or iterate' decision rule using these metrics (e.g. 'if summary edit rate exceeds 40% after 2 weeks, revisit the prompt spec before wider rollout').",
+            "Assemble the full case study as a single published doc or site (Notion page, or a simple site) walking through: problem (Week 1), PRD and eval spec (Week 2), clickable spec and stakeholder narrative (Week 3), and this week's launch plan and metrics spec.",
+            "Add a short 'what I'd do differently' reflection section, naming at least one real weakness in your own spec or process.",
+            "Have one outside reader (someone who hasn't seen the project) read the full case study cold and tell you what's unclear; revise based on their feedback.",
+            "Publish the final case study link and do a final pass ensuring every week's artifact (research notes, PRD, eval spec, prototype, launch plan) is linked or embedded in one place."
+          ],
+          "deliverables": [
+            "A lightweight launch plan with rollout phasing and a guardrail",
+            "A metrics dashboard spec with 6-8 metrics and their exact data sources",
+            "A stated kill-or-iterate decision rule tied to real metrics",
+            "A published end-to-end case study linking all four weeks of work, with a self-critical reflection"
+          ],
+          "done_when": [
+            "The launch plan names a specific, checkable condition for pausing or slowing rollout",
+            "Every metric in the dashboard spec has a named, plausible data source, not just a label",
+            "The kill-or-iterate rule references an actual number or threshold, not a vague 'if it's bad'",
+            "An outside reader can read the case study cold and accurately summarize the problem, the solution, and the biggest risk back to you"
+          ],
+          "hints": [
+            "A metrics dashboard spec is a doc, not a build — you are specifying what should exist, which is exactly what a PM hands to a data/eng team.",
+            "'Edit rate' (how often a human corrects the AI's output) is one of the most useful proxy signals for AI feature quality when you don't have ground-truth labels at scale.",
+            "The strongest case studies are honest about weaknesses — a reflection section naming a real gap reads as more credible than one that claims everything went perfectly."
+          ],
+          "stretch": "Write a one-paragraph 'v2' pitch for a natural next feature (e.g. auto-syncing action items to a task tracker) building on adoption data you'd expect from v1.",
+          "post_highlights": [
+            "Wrote a launch plan and metrics dashboard spec with real data sources and a kill-or-iterate rule",
+            "Published a full PM case study taking an AI feature from research to launch plan",
+            "Got outside feedback on my case study and revised it for clarity before publishing"
+          ]
+        }
+      }
+    }
+  ]
+}

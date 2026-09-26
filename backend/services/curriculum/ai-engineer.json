@@ -1,0 +1,191 @@
+{
+  "domain": "ai-engineer",
+  "tracks": [
+    {
+      "project_name": "TicketPilot: Support Ticket Triage Agent",
+      "tagline": "Build an AI agent that reads incoming support tickets, calls tools to look up real information, and decides what to do next — then prove it actually works with evals.",
+      "weeks": {
+        "1": {
+          "title": "Your First Tool-Calling LLM Call",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Get a free LLM API key and make your first tool-calling request: instead of just replying with text, the model decides to call a Python function you defined. This is the core mechanic every agent in this track builds on.",
+          "learn": [
+            "Getting and using a free-tier LLM API key with tool/function-calling support (Google Gemini API or Groq)",
+            "Defining a tool schema (name, description, parameters) that the model can call",
+            "Reading a tool-call response and executing the matching Python function",
+            "Sending the tool's result back to the model for a final answer"
+          ],
+          "steps": [
+            "Sign up for a free API key from Google AI Studio (Gemini API) or Groq, and confirm the SDK version you install supports function calling.",
+            "Create a project folder, install the provider's Python SDK and `python-dotenv`, and store your key in a `.env` file (add it to `.gitignore` immediately).",
+            "Write one real tool function, `lookup_order_status(order_id: str) -> dict`, backed by a small hardcoded dictionary of 5-6 fake orders.",
+            "Define the tool's JSON schema (name, description, parameter types) in the format your provider expects and pass it to the chat request.",
+            "Send a user message like 'What's the status of order A123?' and inspect the raw response to find the tool-call the model wants to make.",
+            "Write the glue code that reads the tool name and arguments from the response, calls `lookup_order_status`, and sends the result back as a tool response message.",
+            "Print the model's final natural-language answer after it receives the tool result, and confirm it correctly reports the order status.",
+            "Commit your code (not `.env`) with a README explaining what a tool call is and how to run the script."
+          ],
+          "deliverables": [
+            "A working `lookup_order_status` tool function with sample data",
+            "A tool schema definition wired into a chat completion request",
+            "Glue code that executes a model-requested tool call and returns the result",
+            "A README explaining the tool-calling flow end to end"
+          ],
+          "done_when": [
+            "Asking about a known order ID returns a correct, tool-grounded answer, not a guess",
+            "Asking about an unknown order ID makes the tool return 'not found' and the model reports that honestly",
+            "The API key never appears anywhere in committed code or Git history",
+            "Printing the raw API response shows a clear tool-call step before the final answer"
+          ],
+          "hints": [
+            "Tool-calling response shapes differ by provider; read the 'function calling' or 'tool use' section of your provider's docs closely before writing glue code.",
+            "Keep the tool's description specific ('Look up the current shipping status of an order by its ID') — vague descriptions make the model call the tool at the wrong times.",
+            "The [Gemini function calling docs](https://ai.google.dev/gemini-api/docs/function-calling) and [Groq tool use docs](https://console.groq.com/docs/tool-use) both have minimal working examples."
+          ],
+          "stretch": "Add a second tool, `lookup_customer(email: str)`, and see if the model can chain both tools in one conversation to answer a two-part question.",
+          "post_highlights": [
+            "Made my first tool-calling LLM request where the model chose which function to run",
+            "Wired a Python function into an LLM agent's tool-calling loop end to end",
+            "Learned how tool schemas and tool responses fit into a real agent request"
+          ]
+        },
+        "2": {
+          "title": "Multi-Tool Triage Agent",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Turn last week's single tool call into a real triage agent that reads a support ticket, classifies it, and calls the right combination of tools to gather context before drafting a reply. This is where 'an LLM that can call one function' becomes 'an agent that reasons about which tools to use.'",
+          "learn": [
+            "Designing a small toolset for one workflow (lookup, classify, escalate)",
+            "Writing a system prompt that defines an agent's role, tools, and boundaries",
+            "Handling a multi-turn tool-calling loop where the model can call more than one tool per ticket",
+            "Structuring ticket data and agent output for a real workflow"
+          ],
+          "steps": [
+            "Write a `tickets.json` file with 10-15 fake support tickets (subject, body, customer email, order ID where relevant).",
+            "Add two more tools: `classify_ticket_category(text: str)` (return `billing`, `shipping`, `bug`, or `other` using simple keyword rules) and `check_refund_eligibility(order_id: str)`.",
+            "Write an agent system prompt describing the triage agent's job: read a ticket, gather needed context via tools, then draft a short reply and a suggested category.",
+            "Build a loop that keeps calling the model and executing requested tools until the model returns a final (non-tool-call) message, instead of stopping after one round.",
+            "Add a safety cap (e.g. max 5 tool-call rounds) so a confused agent cannot loop forever, and log a warning if it hits the cap.",
+            "Run the agent over all 10-15 tickets in `tickets.json` and print each ticket's category, tools called, and drafted reply.",
+            "Manually review the outputs and fix at least one case where the agent picked the wrong tool or category by adjusting the system prompt or tool descriptions.",
+            "Commit your code with a README describing the toolset and the multi-round tool-calling loop."
+          ],
+          "deliverables": [
+            "A `tickets.json` file with realistic sample tickets",
+            "Three working tools: order lookup, category classification, refund eligibility",
+            "A multi-round tool-calling loop with a max-rounds safety cap",
+            "A batch run over all sample tickets with printed categories, tool calls and drafted replies"
+          ],
+          "done_when": [
+            "Running the agent over all sample tickets produces a category and draft reply for each one",
+            "At least one ticket in the sample set requires the agent to call two different tools before replying",
+            "The safety cap is verified by testing with a deliberately confusing ticket and confirming the loop stops",
+            "A previously wrong category or tool choice is fixed and verified after a prompt or description tweak"
+          ],
+          "hints": [
+            "Keep `classify_ticket_category` simple (keyword matching) for now — the model deciding when to call it is the interesting part this week, not the classifier itself.",
+            "Log every tool call with its arguments and result to the console; this is the single most useful debugging habit for agent work.",
+            "If the model stops calling tools too early, make the system prompt explicit: 'Always check order and refund status before replying about a refund.'"
+          ],
+          "stretch": "Add an `escalate_to_human(reason: str)` tool the agent can call for tickets it isn't confident about, and track how often it gets used across your sample set.",
+          "post_highlights": [
+            "Built a multi-tool support ticket triage agent with a real tool-calling loop",
+            "Designed a toolset and system prompt so an LLM could gather context before replying",
+            "Added a safety cap to prevent runaway tool-calling loops in an autonomous agent"
+          ]
+        },
+        "3": {
+          "title": "RAG for Policy-Grounded Replies",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Give the triage agent a company policy knowledge base so its drafted replies are grounded in real refund/shipping rules instead of the model's guesses. This combines retrieval-augmented generation with the tool-calling loop from Week 2 into one working agent.",
+          "learn": [
+            "Chunking and embedding a small internal knowledge base",
+            "Exposing retrieval as a callable tool (`search_policy_docs`) rather than a fixed pre-step",
+            "Combining RAG with tool-calling in a single agent loop",
+            "Grounding generated text in retrieved context and citing the source"
+          ],
+          "steps": [
+            "Write 4-6 short policy documents as `.txt` files (e.g. `refund_policy.txt`, `shipping_policy.txt`, `escalation_policy.txt`) with concrete rules.",
+            "Write a `chunk_text` function and embed every chunk once, caching vectors to a JSON file keyed by a hash of the chunk.",
+            "Write a `search_policy_docs(query: str, top_k=3)` function using cosine similarity, and expose it to the model as a tool alongside Week 2's tools.",
+            "Update the system prompt to instruct the agent to call `search_policy_docs` before drafting any reply that mentions a refund, deadline, or policy rule.",
+            "Update the drafted-reply output format to include which policy chunk(s) were used, so every policy claim is traceable.",
+            "Run the agent over the sample tickets again and check that refund/shipping-related replies now cite real chunk content instead of generic language.",
+            "Test a ticket asking about a policy that doesn't exist in your docs and confirm the agent says it cannot confirm rather than inventing a rule.",
+            "Commit your code with an updated README describing the policy knowledge base and how retrieval fits into the tool-calling loop."
+          ],
+          "deliverables": [
+            "4-6 policy documents forming a small internal knowledge base",
+            "A `search_policy_docs` retrieval tool with cached embeddings",
+            "An updated agent that calls retrieval before drafting policy-related replies",
+            "Replies that show which policy chunk(s) grounded each claim"
+          ],
+          "done_when": [
+            "A refund-related ticket produces a reply that correctly cites a real rule from `refund_policy.txt`",
+            "A question about a policy not covered by any document gets an honest 'cannot confirm' response instead of a fabricated rule",
+            "Re-running the agent does not re-embed the policy documents from scratch (cache is used)",
+            "At least 3 sample tickets show retrieval being called before the reply is drafted"
+          ],
+          "hints": [
+            "Keep chunks reasonably small (200-400 words) so `search_policy_docs` returns focused, relevant text rather than whole documents.",
+            "It's fine for retrieval to be 'just another tool' the model chooses to call — you do not need to force it before every single ticket, only policy-related ones.",
+            "If citations look wrong, print the retrieved chunks alongside the final reply to check whether retrieval or generation is at fault."
+          ],
+          "stretch": "Add a `top_k` sensitivity test: compare retrieved chunks and reply quality at `top_k=1` vs `top_k=3` on 3 tricky tickets.",
+          "post_highlights": [
+            "Built a policy knowledge base and exposed retrieval as a callable tool in an AI agent",
+            "Combined RAG with tool-calling so agent replies cite real, retrieved policy rules",
+            "Verified the agent gives an honest 'cannot confirm' answer instead of fabricating policy"
+          ]
+        },
+        "4": {
+          "title": "API, Evals and Guardrails",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Wrap the triage agent in a small API, write an evaluation set to measure how often it triages correctly, and add guardrails so it fails safely. This is the engineering polish that turns a working prototype into something you could hand to another team.",
+          "learn": [
+            "Exposing an agent as an HTTP endpoint with a lightweight framework (FastAPI or Flask)",
+            "Writing an evaluation set with expected categories and required policy citations",
+            "Measuring agent accuracy and tool-call correctness against ground truth",
+            "Adding guardrails: input validation, rate limiting basics, and safe failure modes"
+          ],
+          "steps": [
+            "Install FastAPI (or Flask) and build a `POST /triage` endpoint that accepts a ticket JSON body and returns the agent's category, drafted reply, and tools used.",
+            "Add input validation (reject empty subject/body) and wrap the full agent call in `try`/`except` so a tool failure or API timeout returns a clear error response instead of a 500 crash.",
+            "Create an `eval_tickets.json` with at least 10 tickets, each with an expected category and, where relevant, an expected policy topic that should be cited.",
+            "Write `evaluate.py` that runs every eval ticket through `/triage` (or the agent function directly), checks the category matches and the right policy topic was retrieved, and prints a pass/fail summary with an overall accuracy percentage.",
+            "Add a guardrail: if the agent's category confidence is low or it calls zero tools on a policy-related ticket, force an `escalate_to_human` outcome rather than guessing.",
+            "Run the eval, find at least one failing case, and fix it (prompt tweak, tool description tweak, or added policy chunk), then re-run to confirm improvement.",
+            "Add basic request logging (ticket ID, category, tools called, timestamp) to a local log file for later review.",
+            "Write a full README covering setup, running the API, running the eval script, and known limitations, then record a 30-60 second demo of a ticket being triaged end to end."
+          ],
+          "deliverables": [
+            "A `POST /triage` API endpoint wrapping the full agent",
+            "Input validation and safe error handling on the endpoint",
+            "An `eval_tickets.json` set and `evaluate.py` script reporting accuracy",
+            "A guardrail that escalates low-confidence or under-grounded triage decisions"
+          ],
+          "done_when": [
+            "`POST /triage` with a real ticket body returns a category, reply and tool trace within a reasonable time",
+            "A deliberately malformed request (empty body) returns a clean error, not a crash",
+            "`python evaluate.py` runs at least 10 checks and reports an overall accuracy percentage",
+            "A ticket engineered to be low-confidence or ungrounded is escalated instead of answered with a guess"
+          ],
+          "hints": [
+            "Keep the API thin — it should call the same agent function your eval script calls, so you are testing the real code path, not a duplicate.",
+            "An eval accuracy number only means something if you also read a few failing transcripts by hand; don't optimize blindly against the score.",
+            "The [FastAPI docs](https://fastapi.tiangolo.com) 'first steps' page has a minimal working endpoint you can adapt directly."
+          ],
+          "stretch": "Add a `/triage/batch` endpoint that accepts a list of tickets and returns results with total latency and per-ticket timing, useful for a simple load check.",
+          "post_highlights": [
+            "Wrapped my AI triage agent in a FastAPI endpoint with input validation and error handling",
+            "Built an evaluation suite that measures triage accuracy against ground-truth tickets",
+            "Added a guardrail that escalates low-confidence tickets instead of letting the agent guess"
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -500,7 +500,7 @@
             <div class="domain-grid" id="domain-grid">
         <div class="domain-card" data-domain="web-dev" onclick="selectDomain(this)">
           <div class="icon">🌐</div>
-          <div class="label">Web Development</div>
+          <div class="label">Full Stack Engineer</div>
           <div class="sublabel">HTML5 &bull; CSS3 &bull; JavaScript</div>
           <div class="status-badge open">Open</div>
         </div>
@@ -512,13 +512,13 @@
         </div>
         <div class="domain-card" data-domain="react" onclick="selectDomain(this)">
           <div class="icon">⚛️</div>
-          <div class="label">React / Next.js</div>
+          <div class="label">Frontend Engineer</div>
           <div class="sublabel">React 18 &bull; Next.js &bull; TypeScript</div>
           <div class="status-badge open">Open</div>
         </div>
         <div class="domain-card" data-domain="nodejs" onclick="selectDomain(this)">
           <div class="icon">🟩</div>
-          <div class="label">Node.js / Express</div>
+          <div class="label">Backend Engineer</div>
           <div class="sublabel">Node &bull; Express &bull; REST APIs</div>
           <div class="status-badge open">Open</div>
         </div>
@@ -542,7 +542,7 @@
         </div>
         <div class="domain-card" data-domain="flutter" onclick="selectDomain(this)">
           <div class="icon">📱</div>
-          <div class="label">Flutter / Mobile</div>
+          <div class="label">App Developer</div>
           <div class="sublabel">Dart &bull; Flutter &bull; Cross-Platform</div>
           <div class="status-badge open">Open</div>
         </div>
@@ -586,6 +586,36 @@
           <div class="icon">🗄️</div>
           <div class="label">SQL / Databases</div>
           <div class="sublabel">SQL &bull; PostgreSQL &bull; Data Modeling</div>
+          <div class="status-badge open">Open</div>
+        </div>
+        <div class="domain-card" data-domain="ai-engineer" onclick="selectDomain(this)">
+          <div class="icon">🧠</div>
+          <div class="label">AI Engineer</div>
+          <div class="sublabel">LLM APIs &bull; RAG &bull; Agents</div>
+          <div class="status-badge open">Open</div>
+        </div>
+        <div class="domain-card" data-domain="fde" onclick="selectDomain(this)">
+          <div class="icon">🛠️</div>
+          <div class="label">Forward Deployed Engineer</div>
+          <div class="sublabel">API Integration &bull; Client Tools &bull; Docs</div>
+          <div class="status-badge open">Open</div>
+        </div>
+        <div class="domain-card" data-domain="sde" onclick="selectDomain(this)">
+          <div class="icon">💻</div>
+          <div class="label">SDE / SWE</div>
+          <div class="sublabel">Data Structures &bull; System Design &bull; Testing</div>
+          <div class="status-badge open">Open</div>
+        </div>
+        <div class="domain-card" data-domain="ai-pm" onclick="selectDomain(this)">
+          <div class="icon">📋</div>
+          <div class="label">AI Product Management</div>
+          <div class="sublabel">PRDs &bull; AI Evals &bull; Roadmapping</div>
+          <div class="status-badge open">Open</div>
+        </div>
+        <div class="domain-card" data-domain="qa" onclick="selectDomain(this)">
+          <div class="icon">🧪</div>
+          <div class="label">Software Quality</div>
+          <div class="sublabel">Test Automation &bull; Selenium &bull; Bug Reports</div>
           <div class="status-badge open">Open</div>
         </div>
       </div>
@@ -776,6 +806,36 @@ const DOMAIN_QUESTIONS = {
     { category: "SQL", text: "A PRIMARY KEY is:", options: ["A column that uniquely identifies each row", "The first column in any table", "A password for the database", "A column that must contain text"], answer: 0 },
     { category: "SQL", text: "Which clause filters rows before grouping?", options: ["HAVING", "ORDER BY", "WHERE", "LIMIT"], answer: 2 },
     { category: "SQL", text: "An INNER JOIN returns:", options: ["All rows from both tables", "Only rows with matching values in both tables", "Only rows from the left table", "Rows with NULL values"], answer: 1 }
+  ],
+  "ai-engineer": [
+    { category: "AI Engineer", text: "What is \"RAG\" (retrieval-augmented generation) primarily used for?", options: ["Training a model from scratch", "Grounding an LLM's answers in retrieved, relevant context", "Speeding up GPU inference", "Compressing model weights"], answer: 1 },
+    { category: "AI Engineer", text: "In an LLM app, \"tool calling\" (or \"function calling\") lets the model:", options: ["Directly edit its own weights", "Request that your code run a specific function and return the result", "Change its own system prompt permanently", "Skip the API rate limit"], answer: 1 },
+    { category: "AI Engineer", text: "An \"embedding\" is best described as:", options: ["A compressed image format", "A numeric vector representing the meaning of text for similarity search", "A type of database index only for numbers", "A caching layer for HTTP requests"], answer: 1 },
+    { category: "AI Engineer", text: "Why do AI engineers write an \"eval set\" for their app?", options: ["To bill the API provider correctly", "To measure whether the app's answers meet a quality bar as prompts/code change", "To generate marketing content", "To reduce the model's context window"], answer: 1 }
+  ],
+  "fde": [
+    { category: "Forward Deployed Engineer", text: "A Forward Deployed Engineer typically spends most of their time on:", options: ["Pure research with no client contact", "Integrating and adapting a product to fit a specific customer's systems and workflows", "Writing marketing copy", "Managing company payroll"], answer: 1 },
+    { category: "Forward Deployed Engineer", text: "When calling a third-party API that occasionally fails, the best practice is to:", options: ["Ignore errors and hope it works next time", "Assume it always succeeds", "Handle errors explicitly, e.g. with retries or clear fallback messages", "Restart the whole server on any failure"], answer: 2 },
+    { category: "Forward Deployed Engineer", text: "A good runbook/setup doc for a handoff should:", options: ["Assume the reader already knows the whole codebase", "Explain steps clearly enough for someone new to follow without extra context", "Only contain a list of file names", "Be written after the client complains"], answer: 1 },
+    { category: "Forward Deployed Engineer", text: "\"Config-driven\" in a client tool generally means:", options: ["The tool cannot be customized at all", "Behavior can be changed via settings/config rather than editing code", "The tool only runs from the command line", "Configuration is stored only in the client's head"], answer: 1 }
+  ],
+  "sde": [
+    { category: "SDE / SWE", text: "Which data structure gives O(1) average lookup by key?", options: ["Linked list", "Hash map", "Binary search tree", "Array (unsorted, by value)"], answer: 1 },
+    { category: "SDE / SWE", text: "In layered/clean architecture, the main benefit of separating controller, service and repository layers is:", options: ["It makes the code run faster automatically", "Each layer has one responsibility, making the code easier to test and change", "It removes the need for tests", "It is required by all programming languages"], answer: 1 },
+    { category: "SDE / SWE", text: "A unit test that covers an \"edge case\" is testing:", options: ["Only the most common, expected input", "Unusual or boundary inputs like empty lists, zero, or very large values", "The visual design of the UI", "The company's deployment schedule"], answer: 1 },
+    { category: "SDE / SWE", text: "Big-O notation is used to describe:", options: ["How many developers wrote the code", "How an algorithm's time or space needs grow with input size", "The number of bugs in a codebase", "The programming language's file extension"], answer: 1 }
+  ],
+  "ai-pm": [
+    { category: "AI Product Management", text: "A PRD (Product Requirements Document) primarily exists to:", options: ["Replace all team communication", "Clearly define the problem, users, and requirements for a feature before building it", "List the company's org chart", "Track individual developer performance"], answer: 1 },
+    { category: "AI Product Management", text: "When defining success metrics for an AI feature, a good practice is to:", options: ["Skip metrics since AI output is subjective", "Define measurable signals (e.g. accuracy, user satisfaction) tied to the user problem", "Only measure how many API calls were made", "Wait until after launch to think about it"], answer: 1 },
+    { category: "AI Product Management", text: "\"Eval\" in the context of an AI product feature usually refers to:", options: ["A legal contract", "A structured way of checking whether the AI's outputs meet a quality bar", "The onboarding tutorial", "A pricing model"], answer: 1 },
+    { category: "AI Product Management", text: "Competitive analysis in product management is used to:", options: ["Copy a competitor's product exactly", "Understand the market landscape and find gaps or differentiation opportunities", "Determine developer salaries", "Set the company's holiday calendar"], answer: 1 }
+  ],
+  "qa": [
+    { category: "Software Quality", text: "A good bug report should include:", options: ["Just the word \"broken\"", "Clear reproduction steps, expected vs actual result, and severity", "Only a screenshot with no description", "The tester's opinion on the developer"], answer: 1 },
+    { category: "Software Quality", text: "\"Test coverage\" refers to:", options: ["How many testers are on the team", "The proportion of code or functionality exercised by tests", "How fast the test suite runs", "The number of bugs found in production"], answer: 1 },
+    { category: "Software Quality", text: "Tools like Selenium or Playwright are primarily used for:", options: ["Writing product requirement docs", "Automating browser/UI interactions for testing", "Managing cloud billing", "Designing UI mockups"], answer: 1 },
+    { category: "Software Quality", text: "Testing only the \"happy path\" of a feature means:", options: ["Testing every possible edge case", "Testing only the expected, successful flow and missing failure/edge cases", "Testing with a smile", "Testing in production only"], answer: 1 }
   ]
 };
 

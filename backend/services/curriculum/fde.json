@@ -1,0 +1,192 @@
+{
+  "domain": "fde",
+  "tracks": [
+    {
+      "project_name": "ClientBridge: Third-Party API Integration Dashboard",
+      "tagline": "Wrap a real third-party API into a small internal tool for a 'client', complete with a config-driven dashboard, runbook docs, and handling for the messy edge cases real integrations hit.",
+      "weeks": {
+        "1": {
+          "title": "Wrapping a Third-Party API",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Pick a real public API (weather, currency exchange, GitHub, or similar) and build a clean Python wrapper around it, as if you were the engineer a client hired to 'just make this API work for us'. This is the core skill of forward-deployed work: making someone else's API usable and reliable.",
+          "learn": [
+            "Reading third-party API docs and identifying auth requirements and rate limits",
+            "Wrapping raw HTTP calls in a small client class with clear methods",
+            "Handling API errors, timeouts and rate limits gracefully",
+            "Keeping API keys out of code with `.env` and `python-dotenv`"
+          ],
+          "steps": [
+            "Pick a free public API with clear docs (OpenWeatherMap, exchangerate.host, or the GitHub REST API) and sign up for a key if one is required.",
+            "Create a project folder, install `requests` and `python-dotenv`, and store any key in a `.env` file added to `.gitignore` before your first commit.",
+            "Write an `ApiClient` class with one method per useful operation (e.g. `get_current_weather(city)`, `get_forecast(city, days)`), each returning clean Python dicts, not raw response objects.",
+            "Wrap every request in `try`/`except` handling network errors, non-200 status codes, and JSON decode errors, raising a custom `ApiClientError` with a clear message.",
+            "Add basic retry logic (2 retries with a short delay) for transient failures like timeouts or 5xx responses.",
+            "Write a small CLI script that calls 2-3 client methods with real inputs and prints the results, to prove the wrapper works end to end.",
+            "Test at least one deliberate failure case (invalid city name, bad API key) and confirm your client raises `ApiClientError` instead of crashing with a raw traceback.",
+            "Commit your code (not `.env`) with a README on how to get a key, install dependencies, and run the CLI."
+          ],
+          "deliverables": [
+            "An `ApiClient` class wrapping at least 2 real endpoints of a chosen third-party API",
+            "Custom error handling with a clear `ApiClientError` for failures",
+            "Basic retry logic for transient errors",
+            "A CLI script proving the client works against the live API"
+          ],
+          "done_when": [
+            "Calling each client method with valid input returns clean, correctly-typed Python data",
+            "A deliberately invalid input (bad city, bad symbol) raises `ApiClientError` with a readable message, not a raw traceback",
+            "The API key never appears anywhere in committed code or Git history",
+            "The CLI script runs successfully end to end against the live API"
+          ],
+          "hints": [
+            "Read the rate-limit section of your chosen API's docs first — free tiers often cap you at 60 requests/minute or less, which affects how you test.",
+            "Keep the wrapper's public methods returning plain dicts or small dataclasses, not the `requests.Response` object, so the rest of your code never touches raw HTTP details.",
+            "[OpenWeatherMap's API docs](https://openweathermap.org/api) and [exchangerate.host docs](https://exchangerate.host/#/docs) both have a free tier with no credit card needed."
+          ],
+          "stretch": "Add response caching (an in-memory dict keyed by request params, with a 5-minute expiry) to avoid hitting rate limits during repeated testing.",
+          "post_highlights": [
+            "Built a clean Python wrapper around a real third-party API with proper error handling",
+            "Added retry logic for transient network failures in an API client",
+            "Learned to turn a raw external API into a reliable internal tool"
+          ]
+        },
+        "2": {
+          "title": "Config-Driven Dashboard for a 'Client'",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Turn last week's API wrapper into a small internal dashboard for an imagined client, where what's shown is driven by a config file rather than hardcoded — because real clients always want to add or change tracked items without you editing code every time.",
+          "learn": [
+            "Designing a simple config file format (JSON or YAML) to drive an app's behaviour",
+            "Building a lightweight dashboard UI with Streamlit",
+            "Separating configuration from code so non-engineers could plausibly edit it",
+            "Displaying live data pulled through your Week 1 API client"
+          ],
+          "steps": [
+            "Invent a realistic client scenario (e.g. 'TravelCo tracks weather for 5 client cities' or 'FxDesk tracks 5 currency pairs') and write it down in one paragraph.",
+            "Design a `config.json` (or `.yaml`) listing the tracked items (city names, currency pairs) plus a couple of display preferences (units, refresh interval).",
+            "Write a `load_config(path)` function that validates the config has the required keys and raises a clear error naming the missing key if not.",
+            "Install Streamlit and build `app.py` that reads the config, calls your Week 1 `ApiClient` for each tracked item, and displays results in a table or set of cards.",
+            "Add a manual 'Refresh data' button that re-fetches from the live API, and show a 'last updated' timestamp.",
+            "Handle the case where one tracked item fails (e.g. a typo'd city name) by showing an inline error for that row while the rest of the dashboard still renders.",
+            "Test the dashboard with a config containing one deliberately broken entry and confirm the rest of the dashboard still works.",
+            "Commit your code with an updated README explaining the config file format with an example."
+          ],
+          "deliverables": [
+            "A `config.json`/`config.yaml` describing tracked items for a fictional client",
+            "A `load_config` function with clear validation errors",
+            "A Streamlit dashboard showing live data per config entry with a manual refresh",
+            "Graceful per-row error handling for one bad config entry"
+          ],
+          "done_when": [
+            "Editing `config.json` to add or remove a tracked item changes the dashboard without any code changes",
+            "The dashboard clearly shows when data was last refreshed",
+            "A config with one invalid entry (bad city/symbol) still renders the dashboard for the valid entries, with a visible error for the bad one",
+            "Running `load_config` on a config missing a required key raises a clear, specific error"
+          ],
+          "hints": [
+            "Keep the config schema small (5-8 fields) at first; it's easier to add fields later than to redesign a bloated schema.",
+            "Streamlit reruns the whole script on every interaction, so keep the config load and API calls cheap, or cache them with `st.cache_data`.",
+            "The [Streamlit documentation](https://docs.streamlit.io) has a caching guide and layout examples (columns, metrics) useful for a dashboard like this."
+          ],
+          "stretch": "Add a config field for a per-item alert threshold (e.g. temperature above X, exchange rate above Y) and highlight rows that cross it.",
+          "post_highlights": [
+            "Built a config-driven internal dashboard so a client could add tracked items without code changes",
+            "Designed a validated config file format for a small internal tool",
+            "Handled partial failures gracefully so one bad config entry didn't break the whole dashboard"
+          ]
+        },
+        "3": {
+          "title": "Edge Cases, Support Scenarios and Logging",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Simulate the messy reality of supporting a live integration: rate limits, partial outages, malformed client configs, and a support ticket asking 'why is this wrong?'. This week is about building the resilience and observability that separates a demo from something a client can actually depend on.",
+          "learn": [
+            "Simulating and handling rate-limit and outage scenarios",
+            "Structured logging for debugging a live integration after the fact",
+            "Writing a support-style root-cause investigation from logs alone",
+            "Defensive config validation against realistic client mistakes"
+          ],
+          "steps": [
+            "Add structured logging (Python's `logging` module) to your API client and dashboard: log every request made, its duration, and its outcome (success/error/rate-limited) to a `app.log` file.",
+            "Simulate a rate limit by adding a `--simulate-rate-limit` flag or env var that makes your API client randomly return a fake 429 response some percentage of the time, and handle it with a backoff-and-retry.",
+            "Simulate a partial outage: make one tracked item's API call always fail for a stretch of time, and confirm the dashboard degrades gracefully (shows stale/cached data with a warning, not a crash).",
+            "Add at least 3 more realistic config validation checks (duplicate entries, an item type your API doesn't support, an out-of-range preference value) with clear error messages.",
+            "Write 3 fictional 'client support tickets' describing symptoms (e.g. 'the dashboard showed the wrong currency rate at 3pm yesterday') and, using only your `app.log`, write a short root-cause note for each.",
+            "Add a `/health` or `Diagnostics` view (CLI command or dashboard tab) that reports current API reachability, last successful fetch time per item, and recent error counts.",
+            "Fix at least one real bug or gap you find while writing the support-ticket investigations.",
+            "Commit your code with an updated README documenting the logging format and the diagnostics view."
+          ],
+          "deliverables": [
+            "Structured request/error logging across the API client and dashboard",
+            "Simulated rate-limit handling with backoff-and-retry",
+            "Graceful degradation during a simulated partial outage",
+            "3 written root-cause investigations based only on log evidence",
+            "A diagnostics view reporting API health and recent errors"
+          ],
+          "done_when": [
+            "Running with rate-limit simulation on shows retries in the log and the app still completes successfully",
+            "A simulated outage on one item shows a clear 'stale data' warning in the dashboard rather than a crash",
+            "All 3 support-ticket root-cause notes correctly identify the actual injected cause using only the logs",
+            "The diagnostics view accurately reflects a deliberately broken item's status"
+          ],
+          "hints": [
+            "Log at INFO for normal requests and WARNING/ERROR for retries and failures, so `grep`-ing the log file for 'ERROR' surfaces real problems fast.",
+            "When simulating an outage, make it deterministic (e.g. always fail for 'Paris' for the first 20 seconds) so your root-cause notes can be checked against a known ground truth.",
+            "Real support work is 80% reading logs carefully — resist the urge to guess the cause before checking the timestamps and error messages."
+          ],
+          "stretch": "Add a simple alerting rule: if an item has been failing for more than N minutes, write a highlighted line to a separate `alerts.log`.",
+          "post_highlights": [
+            "Simulated rate limits and partial outages to test an integration's resilience",
+            "Added structured logging and a diagnostics view for debugging a live client tool",
+            "Practiced support-style root-cause investigation using only application logs"
+          ]
+        },
+        "4": {
+          "title": "Setup Docs, Runbook and Client Handoff",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Package the whole integration the way you'd actually hand it to a client team: clear setup docs, a runbook for common issues, and a short demo. This week is entirely about the documentation and polish that make forward-deployed work usable by people who didn't build it.",
+          "learn": [
+            "Writing setup documentation for a non-engineer or junior engineer audience",
+            "Writing an operational runbook: common issues, symptoms, and fixes",
+            "Structuring a handoff so someone else could operate the tool without you",
+            "Presenting a technical integration clearly to a non-technical stakeholder"
+          ],
+          "steps": [
+            "Write a `SETUP.md` with numbered steps to get the dashboard running from a clean machine: dependencies, getting an API key, filling in `.env` and `config.json`, and starting the app.",
+            "Have someone unfamiliar with your project (a classmate, or yourself after a day away) follow `SETUP.md` exactly and note every point of confusion.",
+            "Fix at least 2 real gaps found during that walkthrough (a missing step, an unclear instruction, a wrong assumption).",
+            "Write a `RUNBOOK.md` covering at least 5 realistic issues (rate limited, one tracked item down, bad config entry, stale data, dashboard won't start), each with symptoms, likely cause, and fix steps.",
+            "Add a `CHANGELOG.md` or 'known limitations' section listing what the tool does not handle yet, so a client team has honest expectations.",
+            "Write a one-page 'client summary' (non-technical) explaining what the tool does, what data it shows, and how to ask for changes via the config file.",
+            "Record a 2-3 minute demo video walking through the dashboard, one simulated failure from the runbook, and how you'd diagnose it live.",
+            "Do a final pass on the whole repo: consistent naming, a top-level README linking to `SETUP.md` and `RUNBOOK.md`, and no leftover debug prints or dead code."
+          ],
+          "deliverables": [
+            "A `SETUP.md` verified by an outside walkthrough with fixes applied",
+            "A `RUNBOOK.md` covering at least 5 realistic operational issues",
+            "A known-limitations section and a one-page non-technical client summary",
+            "A 2-3 minute demo video showing the dashboard and a live runbook scenario"
+          ],
+          "done_when": [
+            "Someone unfamiliar with the project can get the dashboard running using only `SETUP.md`",
+            "`RUNBOOK.md` has at least 5 issues each with symptom, cause and fix",
+            "The client summary is understandable without any code or API knowledge",
+            "The demo video shows one real failure scenario being diagnosed using the runbook"
+          ],
+          "hints": [
+            "Write `SETUP.md` by literally running the steps yourself on paper first — commands you 'just know' from memory are exactly the ones that go missing.",
+            "A good runbook entry reads like: 'Symptom: dashboard shows stale timestamp for one row. Likely cause: that item's API call is failing. Fix: check `app.log` for ERROR lines matching that item's name.'",
+            "Keep the client summary to one page and free of jargon; if you can't explain a feature in one plain sentence, the feature or the explanation needs work."
+          ],
+          "stretch": "Turn `RUNBOOK.md` into an interactive checklist inside the dashboard itself (a 'Troubleshooting' tab listing the same issues and fixes).",
+          "post_highlights": [
+            "Wrote setup docs and a runbook that let someone else operate my integration without me",
+            "Validated my own onboarding docs with a real outside walkthrough and fixed the gaps found",
+            "Presented a technical client integration clearly to a non-technical audience"
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -85,6 +85,40 @@ NOTEBOOK = {
 SHOWCASE["ml"] = {**NOTEBOOK, "hashtags": ["DataScience", "Python", "LearningByDoing"]}
 SHOWCASE["data-science"] = {**NOTEBOOK, "hashtags": ["DataAnalytics", "Python", "LearningByDoing"]}
 
+SHOWCASE["ai-pm"] = {
+    "submission": (
+        "No code needed. Share a LinkedIn post with a link to your PRD/case-study doc (Notion or Google Docs, "
+        "set to **Anyone with the link can view**) and 2-3 screenshots of your key artifacts (spec, prototype, or "
+        "eval results), then submit the post link on your dashboard."
+    ),
+    "continue": "keep building on the same case study",
+    "caption_demo": "Here's the product thinking behind it 👇 (full PRD/case study in the comments)",
+    "hashtags": ["ProductManagement", "AIProductManagement", "PRD", "LearningByDoing"],
+    "tips": [
+        "Share your doc link with view access and open it in a private browser window to confirm it works before posting.",
+        "Lead with the user problem and the decision you made, not just a list of features — that's what makes PM thinking visible.",
+    ],
+    "week1_tip": "Keep your research notes and competitive analysis in one clearly organised doc now — it becomes the backbone of your week 4 case study.",
+    "week4_tip": "Read your PRD end to end as if you were a new engineer picking it up cold, and tighten anything that assumes context the reader doesn't have.",
+}
+
+SHOWCASE["qa"] = {
+    "submission": (
+        "Push your test suite and reports to GitHub with a short README, then share a LinkedIn post with a "
+        "screenshot of your test results/coverage report and a 30-60 second demo of your automated tests running, "
+        "and submit the post link on your dashboard."
+    ),
+    "continue": "keep testing the same application",
+    "caption_demo": "Here's my test suite catching real bugs 👇",
+    "hashtags": ["QualityAssurance", "SoftwareTesting", "TestAutomation", "LearningByDoing"],
+    "tips": [
+        "Push your test suite to a public GitHub repo with a README (what it tests, how to run it) and share the link in your post or its comments.",
+        "Show a bug you actually found, with a clear repro — that's more convincing than a wall of passing tests.",
+    ],
+    "week1_tip": "Keep a running bug-tracking sheet or issues list from day one — it makes your week 4 report far easier to write.",
+    "week4_tip": "Run your full suite one more time from a clean checkout to make sure it's not silently relying on leftover state.",
+}
+
 
 # The main hashtag people in each field actually follow
 DOMAIN_HASHTAG = {
@@ -92,6 +126,8 @@ DOMAIN_HASHTAG = {
     "java": "Java", "ml": "MachineLearning", "data-science": "DataScience", "flutter": "Flutter",
     "devops": "DevOps", "cpp": "CPlusPlus", "cloud": "AWS", "cyber": "CyberSecurity",
     "uiux": "UIUX", "genai": "GenerativeAI", "sql": "SQL",
+    "ai-engineer": "AIEngineering", "fde": "SoftwareEngineering", "sde": "SoftwareEngineering",
+    "ai-pm": "ProductManagement", "qa": "QualityAssurance",
 }
 
 

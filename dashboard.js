@@ -1501,26 +1501,39 @@ function describeDomain(rawDomain) {
     ['devops',      'DevOps / CI-CD',     'DevOps',         'code'],  // before cloud: old label "DevOps / Cloud"
     ['cloud',       'Cloud / AWS',        'AWS',            'cloud'],
     ['aws',         'Cloud / AWS',        'AWS',            'cloud'],
-    ['react',       'React / Next.js',    'ReactJS',        'code'],
-    ['node',        'Node.js / Express',  'NodeJS',         'code'],
+    ['react',       'Frontend Engineer',  'ReactJS',        'code'],
+    ['node',        'Backend Engineer',   'NodeJS',         'code'],
     ['java',        'Java / Spring Boot', 'Java',           'code'],
-    ['flutter',     'Flutter / Mobile',   'Flutter',        'code'],
-    ['mobile',      'Flutter / Mobile',   'Flutter',        'code'],
+    ['flutter',     'App Developer',      'Flutter',        'code'],
+    ['mobile',      'App Developer',      'Flutter',        'code'],
     ['sql',         'SQL / Databases',    'SQL',            'code'],
     ['cpp',         'C++ / Algorithms',   'CPlusPlus',      'code'],
     ['c++',         'C++ / Algorithms',   'CPlusPlus',      'code'],
     ['machinelearning', 'Machine Learning', 'MachineLearning', 'code'],
     ['ml',          'Machine Learning',   'MachineLearning', 'code'],
     ['python',      'Python',             'Python',         'code'],
-    ['web',         'Web Development',    'WebDevelopment', 'code'],
+    ['aiengineer',  'AI Engineer',        'AIEngineering',  'code'],
+    ['llmengineer', 'AI Engineer',        'AIEngineering',  'code'],
+    ['fde',         'Forward Deployed Engineer', 'SoftwareEngineering', 'code'],
+    ['forwarddeployed', 'Forward Deployed Engineer', 'SoftwareEngineering', 'code'],
+    ['sde',         'SDE / SWE',          'SoftwareEngineering', 'code'],
+    ['swe',         'SDE / SWE',          'SoftwareEngineering', 'code'],
+    ['aipm',        'AI Product Management', 'ProductManagement', 'product'],
+    ['productmanag', 'AI Product Management', 'ProductManagement', 'product'],
+    ['qa',          'Software Quality',   'QualityAssurance', 'qa'],
+    ['softwarequality', 'Software Quality', 'QualityAssurance', 'qa'],
+    ['softwaretesting', 'Software Quality', 'QualityAssurance', 'qa'],
+    ['web',         'Full Stack Engineer', 'WebDevelopment', 'code'],
   ];
   const hit = DOMAINS.find(([match]) => key === match || key.includes(match));
   const fallbackLabel = String(rawDomain || 'Tech').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   const [, label, hashtag, kind] = hit || [null, fallbackLabel, fallbackLabel.replace(/[^a-zA-Z0-9]/g, '') || 'Tech', 'code'];
   const KINDS = {
-    code:   { work: 'hands-on projects',        fieldHashtag: 'SoftwareEngineering' },
-    design: { work: 'hands-on design projects', fieldHashtag: 'UXDesign' },
-    cloud:  { work: 'hands-on cloud projects',  fieldHashtag: 'CloudComputing' },
+    code:    { work: 'hands-on projects',        fieldHashtag: 'SoftwareEngineering' },
+    design:  { work: 'hands-on design projects', fieldHashtag: 'UXDesign' },
+    cloud:   { work: 'hands-on cloud projects',  fieldHashtag: 'CloudComputing' },
+    product: { work: 'hands-on product work',    fieldHashtag: 'ProductManagement' },
+    qa:      { work: 'hands-on testing projects', fieldHashtag: 'QualityAssurance' },
   };
   return { label, hashtag, ...KINDS[kind] };
 }

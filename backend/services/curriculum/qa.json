@@ -1,0 +1,191 @@
+{
+  "domain": "qa",
+  "tracks": [
+    {
+      "project_name": "QuestGuard: Test Plan, Bugs and Automation Suite for a Real App",
+      "tagline": "Build a full QA workflow around a real public web app: a test plan, real bug reports, an automated UI test suite, an API test suite, and a coverage report that proves it all holds together.",
+      "weeks": {
+        "1": {
+          "title": "Test Planning and Manual Test Execution",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Pick a real public web app (a to-do list app, a demo e-commerce site, or similar), write a proper test plan for its core flow, and manually execute it to find real bugs. Good automation later depends on a clear, well-scoped test plan now.",
+          "learn": [
+            "Writing a test plan: scope, test cases, priorities, and pass/fail criteria",
+            "Designing test cases covering happy path, edge cases and negative cases",
+            "Manual test execution and recording results objectively",
+            "Distinguishing a bug from expected behavior"
+          ],
+          "steps": [
+            "Pick a real public demo app with a clear core flow (e.g. `saucedemo.com`, a public to-do app, or a demo shopping cart) and define its scope: the one core flow you will test (e.g. login through checkout, or add/edit/delete a task).",
+            "Write a test plan document listing: scope, out-of-scope items, test environment (browser/OS), and a numbered list of test cases.",
+            "Write at least 15 test cases covering the happy path (3-5), edge cases (5-7, e.g. empty fields, max-length input, special characters), and negative cases (3-5, e.g. invalid login, deleting an already-deleted item).",
+            "For each test case, write: preconditions, steps, expected result, and priority (High/Medium/Low).",
+            "Manually execute all 15+ test cases against the live app, recording actual result and pass/fail for each in a spreadsheet or table.",
+            "For any failing test case, double check it against the app's actual intended behavior (read its docs or use common sense) before calling it a bug, to avoid false positives.",
+            "Summarize results: total cases, pass count, fail count, and a one-line risk assessment of the areas most likely to have further issues.",
+            "Publish the test plan and execution results as a doc or spreadsheet link."
+          ],
+          "deliverables": [
+            "A written test plan with scope, environment and out-of-scope items",
+            "At least 15 test cases covering happy path, edge cases and negative cases",
+            "A test execution record with actual results and pass/fail status per case",
+            "A results summary with pass/fail counts and a risk assessment"
+          ],
+          "done_when": [
+            "The test plan clearly states what is in scope and explicitly what is out of scope",
+            "At least 15 test cases exist, spanning all three categories (happy path, edge, negative)",
+            "Every test case has a precondition, steps, and an expected result written before execution",
+            "At least one real, reproducible failure was found and confirmed against actual app behavior (not a misunderstanding of intended behavior)"
+          ],
+          "hints": [
+            "`saucedemo.com` is a free, stable demo site built specifically for practicing QA and test automation, with several intentionally buggy user accounts.",
+            "Edge cases worth testing on almost any form: empty required field, maximum length input, leading/trailing whitespace, special characters, and double-submitting a form.",
+            "Write the expected result before you run the test, not after — writing it after seeing the actual result biases you toward confirming whatever happened."
+          ],
+          "stretch": "Add 3 test cases specifically targeting accessibility (keyboard-only navigation through the core flow, and checking form fields have visible labels).",
+          "post_highlights": [
+            "Wrote a full test plan with 15+ test cases spanning happy path, edge and negative scenarios",
+            "Manually executed a test plan against a real app and found a reproducible bug",
+            "Learned to write expected results before execution to avoid biased pass/fail judgments"
+          ]
+        },
+        "2": {
+          "title": "Bug Reports and Regression Tracking",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Turn last week's found issues into proper bug reports that a real engineering team could act on without back-and-forth, and build a lightweight regression checklist to re-test after fixes. Writing a bug report that gets fixed on the first read is its own skill.",
+          "learn": [
+            "Writing a bug report with clear repro steps, expected vs actual, and severity",
+            "Assigning severity and priority independently and justifying each",
+            "Capturing evidence (screenshots, console logs, network requests)",
+            "Building a lightweight regression checklist for re-testing after a fix"
+          ],
+          "steps": [
+            "For each bug found in Week 1 (or at least 5 bugs, finding more if needed by testing further edge cases), write a full bug report: title, environment, precondition, numbered repro steps, expected result, actual result, severity, priority.",
+            "Justify severity (impact if unfixed: crash, data loss, cosmetic) separately from priority (how soon it should be fixed) for each bug, since they don't always match (a rare crash can be high severity but lower priority than a cosmetic issue everyone sees).",
+            "Capture at least one piece of hard evidence per bug: a screenshot with the issue circled/annotated, or for a web app, the relevant browser console error or failed network request from DevTools.",
+            "Organize all bug reports in a tracker-style spreadsheet or a free tool (GitHub Issues on a personal repo, or a Notion/Trello board) with columns for status (New/In Progress/Fixed/Won't Fix).",
+            "Pick your 3 highest-priority bugs and write a minimal, precise repro (the fewest possible steps that still reliably reproduces the issue) for each — a skill called repro minimization.",
+            "Build a regression checklist: 8-10 short checks covering the core flow plus every bug you reported, meant to be re-run quickly after any fix to confirm nothing broke.",
+            "Simulate a 'fix' being deployed (re-test the app after a day, or note if the demo app's behavior differs) and run your regression checklist against it, recording results.",
+            "Publish the bug tracker link and the regression checklist as a doc."
+          ],
+          "deliverables": [
+            "At least 5 fully written bug reports with severity and priority justified separately",
+            "Evidence (screenshot or console/network capture) attached to each bug report",
+            "A bug tracker (spreadsheet, GitHub Issues, or board) with status tracking",
+            "A regression checklist of 8-10 checks covering the core flow and reported bugs"
+          ],
+          "done_when": [
+            "Each bug report has numbered repro steps specific enough that someone unfamiliar with the app could reproduce the issue on the first try",
+            "Severity and priority are each justified with a one-line reason, and at least one bug shows they don't match (high severity, lower priority or vice versa)",
+            "Every bug report has at least one piece of visual or technical evidence attached",
+            "The regression checklist can be executed in under 15 minutes and covers every reported bug plus the core flow"
+          ],
+          "hints": [
+            "A repro that says 'sometimes it fails' is not done; keep narrowing steps until it fails consistently, or explicitly note it as intermittent with the frequency you observed.",
+            "Browser DevTools' Network tab (filter by 'Fetch/XHR') and Console tab are the two fastest places to find hard evidence for a web bug.",
+            "Severity is about the bug itself (what breaks); priority is about business context (how many users hit it, how soon). A crash on a rarely-used settings page can be high severity, low priority."
+          ],
+          "stretch": "Write one bug report as a 'won't fix' status with a clear justification, practicing the judgment call of when NOT to push for a fix.",
+          "post_highlights": [
+            "Wrote detailed bug reports with minimized repro steps and evidence a team could act on immediately",
+            "Learned to justify severity and priority independently instead of treating them as the same thing",
+            "Built a regression checklist to quickly verify fixes without breaking other flows"
+          ]
+        },
+        "3": {
+          "title": "Automated UI Test Suite",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Automate the core flow from your test plan using Playwright (or Selenium), turning your manual test cases into a repeatable suite that catches regressions automatically. This is where QA work becomes engineering.",
+          "learn": [
+            "Setting up Playwright (or Selenium) with Python for browser automation",
+            "Writing reliable locators and avoiding flaky waits/sleeps",
+            "Structuring automated tests with setup/teardown and reusable helper functions",
+            "Generating a readable test report from an automated run"
+          ],
+          "steps": [
+            "Install Playwright for Python (`pip install pytest-playwright`, then `playwright install`) and confirm a basic script can open your chosen app's page.",
+            "Automate 5-8 of your Week 1 test cases as Playwright tests: at minimum the full happy path plus 2-3 edge/negative cases (e.g. invalid login, empty required field).",
+            "Use Playwright's built-in auto-waiting and explicit locator strategies (`get_by_role`, `get_by_label`, `get_by_text`) instead of fixed `time.sleep()` calls, to avoid flaky tests.",
+            "Write a small `pages/` helper module using the Page Object pattern (one class per page with methods like `login(username, password)`) so tests read as clear steps, not raw selector soup.",
+            "Add assertions for both UI state (e.g. an error message is visible) and, where relevant, URL or page title changes after an action.",
+            "Run the suite 3 times in a row and confirm consistent pass/fail results each time (no flakiness) before considering a test done.",
+            "Configure `pytest-playwright` to generate an HTML report (`--html=report.html` via `pytest-html`, or Playwright's own trace/report tooling) after each run.",
+            "Commit the test suite with a README on how to install dependencies and run the tests, and note any test that's still occasionally flaky along with your best guess why."
+          ],
+          "deliverables": [
+            "A Playwright (or Selenium) test suite automating 5-8 test cases from Week 1",
+            "A Page Object helper module used by the tests",
+            "Reliable locators with no fixed `time.sleep()` waits",
+            "An HTML (or equivalent) test report generated from a run"
+          ],
+          "done_when": [
+            "Running the suite 3 times in a row produces the same pass/fail results each time",
+            "At least one automated test correctly fails when run against a deliberately broken input (proving it actually checks something)",
+            "The suite has zero fixed `time.sleep()` calls used purely to wait for page state",
+            "An HTML test report is generated showing individual test results, not just a pass/fail count in the terminal"
+          ],
+          "hints": [
+            "`get_by_role`, `get_by_label` and `get_by_text` are far more stable than CSS selectors tied to auto-generated class names, which change often.",
+            "If a test is flaky, it's almost always waiting on the wrong thing — replace any sleep with an explicit wait for the specific element or state the next step depends on.",
+            "The [Playwright Python docs](https://playwright.dev/python/docs/intro) have a dedicated 'Page Object Models' guide with a working example structure."
+          ],
+          "stretch": "Add a visual regression check on one key page using Playwright's screenshot comparison (`expect(page).to_have_screenshot()`).",
+          "post_highlights": [
+            "Built a Playwright automated UI test suite covering happy path and edge cases",
+            "Used the Page Object pattern to keep automated tests readable and maintainable",
+            "Eliminated flaky waits by switching from fixed sleeps to explicit element-state waits"
+          ]
+        },
+        "4": {
+          "title": "API Test Suite, Coverage Report and CI",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Add an API-level automated test suite (faster and more precise than UI tests for many checks), wire both suites into CI, and produce a coverage report tying test cases back to your original test plan. This is the deliverable that shows a complete, professional QA process.",
+          "learn": [
+            "Writing automated API tests with `requests` or Postman/Newman",
+            "Testing status codes, response schemas and error responses at the API layer",
+            "Mapping test cases to a traceability/coverage report against the original test plan",
+            "Running both UI and API suites automatically in CI"
+          ],
+          "steps": [
+            "Identify the API your chosen app's UI calls (use browser DevTools' Network tab) or use its documented public API if it has one, and pick 4-6 endpoints tied to your core flow.",
+            "Write API tests using Python's `requests` + `pytest` (or a Postman collection run via Newman) covering: a successful request, a request with invalid input (expect 4xx), and a request checking the response schema has expected fields.",
+            "Add at least one test asserting on response time (e.g. 'responds within 2 seconds') as a basic non-functional check.",
+            "Build a traceability/coverage report: a table mapping every Week 1 test case to whether it's now covered by (a) manual only, (b) automated UI, (c) automated API, or (d) not automated, with a reason for anything left manual-only.",
+            "Set up a GitHub Actions workflow that installs dependencies and runs both the Playwright suite and the API test suite on every push, failing the build if either suite fails.",
+            "Intentionally break one thing (e.g. temporarily point a test at a wrong expected value) to confirm CI actually fails when a test fails, then revert it.",
+            "Write a final QA summary report: total test cases, automation coverage percentage, bugs found across all weeks with current status, and known gaps or risks not yet covered.",
+            "Publish the CI workflow, coverage report and final summary as linked docs, and record a 2-3 minute demo showing a CI run and the reports."
+          ],
+          "deliverables": [
+            "An automated API test suite covering 4-6 endpoints with status, schema and response-time checks",
+            "A traceability/coverage report mapping every original test case to its automation status",
+            "A GitHub Actions CI workflow running both UI and API suites on every push",
+            "A final QA summary report with coverage percentage, bug status and known gaps"
+          ],
+          "done_when": [
+            "The API suite includes at least one 2xx success case, one 4xx error case, and one schema-shape assertion per tested endpoint",
+            "The coverage report accounts for all 15+ original test cases with a clear status for each",
+            "Pushing a commit triggers CI and both suites run automatically, with a deliberate failure confirmed to break the build",
+            "The final summary report states an overall automation coverage percentage and lists at least one honest known gap"
+          ],
+          "hints": [
+            "Browser DevTools' Network tab, filtered to Fetch/XHR while performing the core flow manually, is the fastest way to find the real API calls a UI-only app makes.",
+            "A traceability report doesn't need a full tool — a spreadsheet with columns `test_case_id | description | automation_status | test_file_reference` is enough to prove the mapping.",
+            "GitHub Actions' free Ubuntu runners support installing Playwright browsers via `playwright install --with-deps`, which is needed in CI (unlike a local machine with browsers already installed)."
+          ],
+          "stretch": "Add a scheduled (cron) GitHub Actions run of the full suite once a day against the live app, separate from the on-push run, to catch regressions from the app's own side.",
+          "post_highlights": [
+            "Built an automated API test suite checking status codes, schemas and response times",
+            "Produced a full traceability report mapping every test case to its automation coverage",
+            "Wired UI and API test suites into CI so every push is automatically checked for regressions"
+          ]
+        }
+      }
+    }
+  ]
+}

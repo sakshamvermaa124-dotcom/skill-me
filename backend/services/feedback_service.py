@@ -79,6 +79,26 @@ DOMAIN_TIPS = {
         "Include your schema (or an ER diagram) so reviewers can follow your queries.",
         "Format queries with one clause per line and add a short comment on what each one answers.",
     ],
+    "ai-engineer": [
+        "Log every prompt and response you send during development — it's the fastest way to debug why an agent did something unexpected.",
+        "Set a hard limit on tool calls or retries per request so a bad loop can't burn through your API quota.",
+    ],
+    "fde": [
+        "Write your setup doc as if the next person has never seen the project — vague steps are the #1 cause of failed handoffs.",
+        "Handle the third-party API's error responses explicitly; don't assume every call succeeds.",
+    ],
+    "sde": [
+        "Write unit tests for your core logic before you consider a feature done, including at least one edge case.",
+        "Pick the data structure that matches how you access the data (lookup vs order vs uniqueness), and say why in a comment if it's not obvious.",
+    ],
+    "ai-pm": [
+        "Ground every feature decision in a user problem, not just what's technically possible — say who has this problem and how you know.",
+        "Include success metrics in your PRD — how would you know, after launch, whether this feature actually worked?",
+    ],
+    "qa": [
+        "Write test cases that cover edge cases and failure paths, not just the happy path.",
+        "Include clear reproduction steps, expected vs actual result, and severity in every bug report.",
+    ],
 }
 
 GENERAL_TIPS = [

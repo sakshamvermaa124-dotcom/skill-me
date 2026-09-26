@@ -10,6 +10,9 @@ EXPECTED_DOMAINS = {
     "devops", "cpp", "cloud", "cyber", "uiux", "genai", "sql",
 }
 
+# New domains launch with a single project track (see TRACK_COUNT_OVERRIDES in build_curriculum.py)
+NEW_SINGLE_TRACK_DOMAINS = {"ai-engineer", "fde", "sde", "ai-pm", "qa"}
+
 
 @pytest.mark.edge
 class TestCurriculumContent:
@@ -36,6 +39,47 @@ class TestCurriculumContent:
 
 
 @pytest.mark.edge
+class TestNewDomainCurriculum:
+    def test_all_new_domains_present(self):
+        assert NEW_SINGLE_TRACK_DOMAINS <= set(PROJECT_CURRICULUM)
+
+    @pytest.mark.parametrize("domain", sorted(NEW_SINGLE_TRACK_DOMAINS))
+    def test_domain_has_one_track(self, domain):
+        tracks = PROJECT_CURRICULUM[domain]
+        assert len(tracks) == 1
+
+    @pytest.mark.parametrize("domain", sorted(NEW_SINGLE_TRACK_DOMAINS))
+    def test_weeks_ramp_up_in_difficulty(self, domain):
+        for track in PROJECT_CURRICULUM[domain]:
+            weeks = track["weeks"]
+            assert [weeks[w]["difficulty"] for w in "1234"] == ["Beginner", "Beginner+", "Intermediate", "Intermediate+"]
+            for w in "1234":
+                assert weeks[w]["description"].strip()
+                assert len(weeks[w]["deliverables"]) >= 3
+                assert len(weeks[w]["post_highlights"]) == 3
+
+    @pytest.mark.parametrize("domain", sorted(NEW_SINGLE_TRACK_DOMAINS))
+    def test_feedback_builds_for_every_week(self, domain):
+        from services.feedback_service import build_feedback
+        for week in range(1, 5):
+            fb = build_feedback(domain, 1, week)
+            assert fb["checklist"]
+            assert fb["domain_tips"], f"{domain} is missing a DOMAIN_TIPS entry"
+
+    def test_ai_pm_footer_is_non_code(self):
+        desc = PROJECT_CURRICULUM["ai-pm"][0]["weeks"]["1"]["description"]
+        assert "No code needed" in desc
+
+    def test_qa_footer_mentions_test_results(self):
+        desc = PROJECT_CURRICULUM["qa"][0]["weeks"]["1"]["description"]
+        assert "test results" in desc.lower() or "test suite" in desc.lower()
+
+    def test_swe_aliases_to_sde(self):
+        assert resolve_domain_key("SWE") == "sde"
+        assert resolve_domain_key("swe") == "sde"
+
+
+@pytest.mark.edge
 class TestDomainResolution:
     @pytest.mark.parametrize("label,key", [
         ("web-dev", "web-dev"),
@@ -56,6 +100,22 @@ class TestDomainResolution:
         ("Blockchain / Web3", "web-dev"),
         ("", "web-dev"),
         (None, "web-dev"),
+        # Role-based renames
+        ("Full Stack Engineer", "web-dev"),
+        ("Frontend Engineer", "react"),
+        ("Backend Engineer", "node"),
+        ("App Developer", "flutter"),
+        # New domains
+        ("AI Engineer", "ai-engineer"),
+        ("ai-engineer", "ai-engineer"),
+        ("Forward Deployed Engineer", "fde"),
+        ("fde", "fde"),
+        ("SDE", "sde"),
+        ("SWE", "sde"),
+        ("AI Product Management", "ai-pm"),
+        ("ai-pm", "ai-pm"),
+        ("Software Quality", "qa"),
+        ("qa", "qa"),
     ])
     def test_resolves(self, label, key):
         assert resolve_domain_key(label) == key

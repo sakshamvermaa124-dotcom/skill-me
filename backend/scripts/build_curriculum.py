@@ -27,6 +27,14 @@ SOURCE_DIR = SERVICES_DIR / "curriculum"
 OUTPUT_FILE = SERVICES_DIR / "curriculum.json"
 
 TRACKS_PER_DOMAIN = 3
+# New domains launch with a single project track; existing domains keep 3.
+TRACK_COUNT_OVERRIDES = {
+    "ai-engineer": 1,
+    "fde": 1,
+    "sde": 1,
+    "ai-pm": 1,
+    "qa": 1,
+}
 WEEK_DIFFICULTY = {"1": "Beginner", "2": "Beginner+", "3": "Intermediate", "4": "Intermediate+"}
 
 # field -> (type, min items, max items); lists only
@@ -49,9 +57,10 @@ def validate(data: dict, source: str) -> list[str]:
 
     if not isinstance(data.get("domain"), str) or not data["domain"]:
         err("missing 'domain'")
+    expected_tracks = TRACK_COUNT_OVERRIDES.get(data.get("domain"), TRACKS_PER_DOMAIN)
     tracks = data.get("tracks")
-    if not isinstance(tracks, list) or len(tracks) != TRACKS_PER_DOMAIN:
-        err(f"'tracks' must be a list of exactly {TRACKS_PER_DOMAIN}")
+    if not isinstance(tracks, list) or len(tracks) != expected_tracks:
+        err(f"'tracks' must be a list of exactly {expected_tracks}")
         return errors
 
     names = set()

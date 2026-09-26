@@ -1,0 +1,191 @@
+{
+  "domain": "sde",
+  "tracks": [
+    {
+      "project_name": "ShelfSpace: Library Lending Service",
+      "tagline": "Build a small layered backend service for tracking books and loans, with real automated tests and applied data-structure work baked into actual features.",
+      "weeks": {
+        "1": {
+          "title": "Core Domain Model and In-Memory Service",
+          "difficulty": "Beginner",
+          "est_hours": "6-8",
+          "goal": "Design the core data model for a library lending service and implement it as clean, layered Python code with an in-memory store, before touching a database or API. Getting the domain logic right first makes everything later easier to test and extend.",
+          "learn": [
+            "Separating domain models from storage and application logic",
+            "Designing classes for a small real-world domain (books, copies, loans)",
+            "Writing a service layer that enforces business rules",
+            "Basic unit testing with `pytest`"
+          ],
+          "steps": [
+            "Design `Book` (title, author, isbn) and `Copy` (copy_id, book, is_available) dataclasses, and a `Loan` dataclass (loan_id, copy, borrower_name, due_date, returned).",
+            "Set up the project structure with separate modules: `models.py` (dataclasses), `store.py` (in-memory repositories), and `library_service.py` (business logic).",
+            "Implement an in-memory `BookRepository` and `LoanRepository` with `add`, `get`, `list` methods backed by plain Python dicts keyed by ID.",
+            "Implement `LibraryService.checkout(isbn, borrower_name)` that finds an available copy, marks it unavailable, and creates a `Loan` with a due date 14 days out — raising a clear `NoCopyAvailableError` if none are free.",
+            "Implement `LibraryService.return_copy(loan_id)` that marks the loan returned and the copy available again, raising `LoanNotFoundError` for a bad ID.",
+                "Install `pytest` and write unit tests covering: successful checkout, checkout with no copies available, successful return, and returning an already-returned loan.",
+            "Run `pytest -v` and get all tests passing, then check coverage of your service logic by eye (every method has at least one happy-path and one error-path test).",
+            "Commit your code with a README describing the module layout and how to run the tests."
+          ],
+          "deliverables": [
+            "`models.py` with `Book`, `Copy` and `Loan` dataclasses",
+            "In-memory `BookRepository` and `LoanRepository`",
+            "A `LibraryService` enforcing checkout/return business rules with custom exceptions",
+            "A `pytest` suite covering happy paths and error paths"
+          ],
+          "done_when": [
+            "`pytest -v` runs and all tests pass with no warnings",
+            "Checking out the last available copy of a book then attempting one more raises `NoCopyAvailableError`",
+            "Returning a loan twice raises a clear error instead of silently succeeding or crashing",
+            "The domain logic in `library_service.py` has no direct dependency on any storage implementation detail beyond calling the repository interface"
+          ],
+          "hints": [
+            "Keep repositories dumb (just storage and lookups) and business rules (like 'no copies available') entirely in the service layer — this split is what makes layer 3's database swap painless.",
+            "Use Python's `dataclasses` module for `Book`, `Copy` and `Loan`; it gives you free `__init__` and `__repr__` with less boilerplate.",
+            "The [pytest documentation](https://docs.pytest.org) 'getting started' page has everything needed for this week's tests."
+          ],
+          "stretch": "Add a `LibraryService.list_overdue(today)` method that returns all loans past their due date, with a test using a fixed fake 'today' date.",
+          "post_highlights": [
+            "Designed a layered library service with domain models, repositories and business logic cleanly separated",
+            "Wrote a pytest suite covering both happy paths and real error conditions",
+            "Learned to keep business rules out of the storage layer for easier testing and future changes"
+          ]
+        },
+        "2": {
+          "title": "Search, Ranking and a REST API",
+          "difficulty": "Beginner+",
+          "est_hours": "8-10",
+          "goal": "Expose last week's service as a real HTTP API, and add a search feature with relevance ranking — an applied use of sorting and string-matching data structures inside a real feature, not an isolated algorithm exercise.",
+          "learn": [
+            "Building a REST API with FastAPI (or Flask) over an existing service layer",
+            "Implementing simple relevance-ranked search using string matching and scoring",
+            "Using a sort with a custom key function to rank results",
+            "Writing API-level tests with a test client, separate from unit tests"
+          ],
+          "steps": [
+            "Install FastAPI (or Flask) and build endpoints: `POST /checkout`, `POST /return/{loan_id}`, `GET /books`, `GET /loans/{loan_id}` that call your Week 1 `LibraryService`.",
+            "Map your service's custom exceptions (`NoCopyAvailableError`, `LoanNotFoundError`) to proper HTTP status codes (409, 404) in the API layer, not inside the service.",
+            "Add a `search_books(query)` method to `LibraryService` that scores each book by: +10 for exact title match, +5 for title contains query, +3 for author contains query, using case-insensitive substring checks.",
+            "Sort search results by score descending using `sorted(..., key=..., reverse=True)`, and return the top 10 as a `GET /books/search?q=...` endpoint.",
+            "Seed the in-memory store with at least 20 varied books (overlapping words in titles/authors) so ranking behaviour is actually visible and testable.",
+            "Write API tests using FastAPI's `TestClient` (or Flask's test client) covering: checkout success, checkout with no copies (expect 409), get on unknown loan (expect 404), and a search query producing correctly ordered results.",
+            "Test that a search for a common word returns multiple books in a sensible order (exact matches before partial matches).",
+            "Commit your code with an updated README documenting the API endpoints and example requests."
+          ],
+          "deliverables": [
+            "A REST API exposing checkout, return, book listing and loan lookup",
+            "Proper HTTP status code mapping from service exceptions",
+            "A scored, ranked `search_books` feature with a search endpoint",
+            "API-level tests using a test client, separate from Week 1's unit tests"
+          ],
+          "done_when": [
+            "`GET /books/search?q=<word>` returns results ordered with exact title matches before partial matches",
+            "Attempting to check out a book with zero available copies returns HTTP 409, not a 500 error",
+            "Looking up a nonexistent loan ID returns HTTP 404 with a clear error body",
+            "All API tests pass and are clearly separate (by file or folder) from Week 1's unit tests"
+          ],
+          "hints": [
+            "Keep the scoring rule simple and explicit (a small dict or if/elif chain) — the goal is applying a sort with a custom key inside a real feature, not building a search engine.",
+            "FastAPI's `TestClient` (from `fastapi.testclient`) lets you call your endpoints directly in tests without running a live server.",
+            "The [FastAPI tutorial](https://fastapi.tiangolo.com/tutorial/) covers path/query params and exception handlers, both directly useful this week."
+          ],
+          "stretch": "Add pagination to `GET /books` (`?page=1&page_size=10`) and a test confirming page boundaries are correct.",
+          "post_highlights": [
+            "Built a REST API over a layered service, mapping domain errors to correct HTTP status codes",
+            "Implemented ranked search with a custom scoring function and sort key",
+            "Wrote API-level tests with a test client separate from my unit test suite"
+          ]
+        },
+        "3": {
+          "title": "Persistence, Caching and Concurrency Safety",
+          "difficulty": "Intermediate",
+          "est_hours": "10-12",
+          "goal": "Swap the in-memory store for a real SQLite database, and add a small LRU-style in-memory cache for repeated lookups — applying a hash-map-backed cache data structure inside a real performance feature, plus handling concurrent checkout attempts safely.",
+          "learn": [
+            "Persisting a domain model to SQLite with `sqlite3` or a lightweight ORM",
+            "Implementing a simple LRU cache using a dict plus an ordered structure",
+            "Handling a race condition: two near-simultaneous checkouts for the last copy",
+            "Writing integration tests against a real (temporary) database"
+          ],
+          "steps": [
+            "Design SQLite tables for `books`, `copies` and `loans` mirroring Week 1's models, and write migration/setup SQL run at startup.",
+            "Implement `SqliteBookRepository` and `SqliteLoanRepository` matching the same interface as Week 1's in-memory repositories, so `LibraryService` needs no changes to use them.",
+            "Point the API at the SQLite-backed repositories (behind a config flag or environment variable so tests can still use in-memory for speed).",
+            "Implement a small `LRUCache` class (max size, dict + doubly-linked-list or `collections.OrderedDict`) and use it to cache `search_books` results keyed by query string, invalidating the whole cache on any checkout/return.",
+            "Write a test proving the cache actually avoids re-querying the database on a repeated identical search (e.g. by counting DB calls with a mock or counter).",
+            "Simulate a race condition: write a test where two checkout calls for a book with exactly one copy left run in quick succession, and ensure only one succeeds (use a database-level constraint or a lock, not just application logic that can be beaten by timing).",
+            "Add a `sold_out` integration test hitting the real SQLite file (a temp file per test run) end to end through the service layer, not mocks.",
+            "Commit your code with an updated README describing the persistence layer, the cache, and the concurrency safeguard."
+          ],
+          "deliverables": [
+            "SQLite-backed repositories implementing the same interface as the in-memory ones",
+            "A hand-implemented `LRUCache` used for search result caching with invalidation",
+            "A concurrency safeguard preventing double-checkout of the last available copy",
+            "Integration tests running against a real temporary SQLite database"
+          ],
+          "done_when": [
+            "Switching the config flag from in-memory to SQLite requires no changes to `LibraryService` code",
+            "A test proves the search cache is hit on a repeated identical query (fewer underlying DB calls on the second call)",
+            "A test simulating two concurrent checkouts for the last copy results in exactly one success and one clear failure, never both succeeding",
+            "Integration tests pass against a real temporary SQLite file and clean up after themselves"
+          ],
+          "hints": [
+            "SQLite supports `UNIQUE` constraints and transactions; a `BEGIN IMMEDIATE` transaction around the checkout's read-then-write is a simple, real way to prevent the race condition.",
+            "`collections.OrderedDict` gives you `move_to_end` and `popitem(last=False)` for free, which is enough to implement LRU eviction without a custom linked list.",
+            "Use `tempfile.NamedTemporaryFile` or `:memory:` SQLite carefully — file-based temp DBs are more representative of the real race-condition test."
+          ],
+          "stretch": "Add a cache hit/miss counter exposed at `GET /stats` so you can observe cache effectiveness while using the API.",
+          "post_highlights": [
+            "Swapped an in-memory repository for SQLite persistence without changing any service-layer code",
+            "Implemented a hand-written LRU cache for search results with proper invalidation",
+            "Fixed a real race condition allowing double-checkout of the last available copy"
+          ]
+        },
+        "4": {
+          "title": "CI, Load Handling and Deployment Readiness",
+          "difficulty": "Intermediate+",
+          "est_hours": "10-14",
+          "goal": "Add automated CI, handle a batch-import feature efficiently using an appropriate data structure for deduplication, and get the service into a state you could actually hand off or deploy. This week is the engineering polish that makes the project real, not just working on your machine.",
+          "learn": [
+            "Setting up continuous integration to run the full test suite automatically",
+            "Efficient batch processing using a set for deduplication instead of repeated linear scans",
+            "Basic structured logging and a health-check endpoint",
+            "Packaging a service for deployment (environment config, `requirements.txt`, run instructions)"
+          ],
+          "steps": [
+            "Set up a GitHub Actions workflow that installs dependencies and runs the full `pytest` suite (unit + API + integration) on every push.",
+            "Add a `POST /books/import` endpoint accepting a list of books (title, author, isbn) for bulk-adding, used to seed large catalogs.",
+            "Implement de-duplication in the import path using a `set` of seen ISBNs so importing a list with repeated ISBNs adds each book only once, and returns a count of skipped duplicates — avoid an O(n²) linear scan against existing books for each new one.",
+            "Write a test importing a list of 500+ books including deliberate duplicates, asserting the correct number were added versus skipped, and that it completes quickly.",
+            "Add structured logging (request method, path, status code, duration) as middleware, and a `GET /health` endpoint reporting DB connectivity and cache size.",
+            "Write a `DEPLOY.md` covering environment variables, how to run migrations, how to start the service in production mode, and how to run the test suite in CI.",
+            "Do a final review pass: remove dead code and debug prints, ensure `requirements.txt` (or `pyproject.toml`) is complete and pinned, and confirm the CI workflow passes on a fresh clone.",
+            "Record a 2-3 minute demo walking through checkout, search, the import endpoint with duplicates, and the CI run passing on GitHub."
+          ],
+          "deliverables": [
+            "A working GitHub Actions CI workflow running the full test suite on push",
+            "A bulk `POST /books/import` endpoint using set-based deduplication",
+            "Structured request logging middleware and a `GET /health` endpoint",
+            "A `DEPLOY.md` and a clean, pinned dependency file"
+          ],
+          "done_when": [
+            "Pushing a commit triggers CI and the full test suite passes in the Actions log",
+            "Importing 500+ books with duplicate ISBNs adds each unique book exactly once and reports the correct skipped count",
+            "`GET /health` correctly reports a healthy status when the DB is reachable",
+            "A fresh clone of the repo can install dependencies and pass `pytest` using only `DEPLOY.md` and the README"
+          ],
+          "hints": [
+            "A `set` lookup is O(1) average case versus an O(n) scan through a list of existing ISBNs for every new book — this is the difference that matters at 500+ imported rows.",
+            "GitHub Actions' official `python-app.yml` starter workflow is a good base; you mainly need to add your dependency install and `pytest` invocation steps.",
+            "Time the import test both with and without the set-based deduplication (temporarily reverting to a linear scan) to see the real performance difference on 500+ rows."
+          ],
+          "stretch": "Add a rate limit on `/checkout` (e.g. max 10 requests per IP per minute) using a simple in-memory token bucket, with a test confirming the 11th rapid request is rejected.",
+          "post_highlights": [
+            "Set up CI so every push automatically runs the full backend test suite",
+            "Used a set for O(1) deduplication in a bulk import handling 500+ records efficiently",
+            "Got a small backend service to a real deploy-ready state with health checks and docs"
+          ]
+        }
+      }
+    }
+  ]
+}

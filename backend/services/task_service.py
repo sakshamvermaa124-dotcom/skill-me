@@ -36,6 +36,18 @@ class TaskService:
         "Android / Kotlin": "android",
         "SQL / Databases": "sql",
         "Generative AI": "genai",
+        # Role-based display names (renamed domains)
+        "Full Stack Engineer": "web-dev",
+        "Frontend Engineer": "react",
+        "Backend Engineer": "node",
+        "App Developer": "flutter",
+        # New domains — form display values
+        "AI Engineer": "ai-engineer",
+        "Forward Deployed Engineer": "fde",
+        "SDE": "sde",
+        "SWE": "sde",
+        "AI Product Management": "ai-pm",
+        "Software Quality": "qa",
         # Lowercase / hyphenated / common synonyms
         "web-dev": "web-dev",
         "web development": "web-dev",
@@ -104,6 +116,40 @@ class TaskService:
         "generative ai": "genai",
         "generative-ai": "genai",
         "gen-ai": "genai",
+        # Role-based renames — lowercase synonyms
+        "full stack engineer": "web-dev",
+        "full stack": "web-dev",
+        "fullstack": "web-dev",
+        "frontend engineer": "react",
+        "front end engineer": "react",
+        "backend engineer": "node",
+        "back end engineer": "node",
+        "app developer": "flutter",
+        "mobile app developer": "flutter",
+        # New domains — lowercase / synonym variants
+        "ai-engineer": "ai-engineer",
+        "ai engineer": "ai-engineer",
+        "ai engineering": "ai-engineer",
+        "llm engineer": "ai-engineer",
+        "fde": "fde",
+        "forward deployed engineer": "fde",
+        "forward deployed": "fde",
+        "sde": "sde",
+        "swe": "sde",
+        "software development engineer": "sde",
+        "software engineer": "sde",
+        "software engineering": "sde",
+        "ai-pm": "ai-pm",
+        "ai pm": "ai-pm",
+        "ai product management": "ai-pm",
+        "ai product manager": "ai-pm",
+        "product management": "ai-pm",
+        "qa": "qa",
+        "software quality": "qa",
+        "software testing": "qa",
+        "quality assurance": "qa",
+        "qa / testing": "qa",
+        "sdet": "qa",
     }
 
     def normalize_domain_slug(self, domain: str | None) -> str:
@@ -159,7 +205,21 @@ class TaskService:
             return "ml"
         if "python" in alnum or "django" in clean_lower or "fastapi" in clean_lower:
             return "python"
-        if "web" in alnum or "frontend" in clean_lower or "fullstack" in clean_lower:
+        if "swe" in alnum or "sde" in alnum or "softwaredevelopmentengineer" in alnum or "softwareengineer" in alnum:
+            return "sde"
+        if "forwarddeployed" in alnum or alnum == "fde":
+            return "fde"
+        if "aiengineer" in alnum or "llmengineer" in alnum:
+            return "ai-engineer"
+        if "aiproductmanag" in alnum or ("product" in clean_lower and "manag" in clean_lower):
+            return "ai-pm"
+        if "sdet" in alnum or "qualityassurance" in alnum or ("qa" in alnum and "quality" in clean_lower) or "softwarequality" in alnum or "softwaretesting" in alnum:
+            return "qa"
+        if "frontend" in clean_lower or "front-end" in clean_lower:
+            return "react"
+        if "backend" in clean_lower or "back-end" in clean_lower:
+            return "node"
+        if "web" in alnum or "fullstack" in clean_lower:
             return "web-dev"
 
         # Fallback sanitized slug
