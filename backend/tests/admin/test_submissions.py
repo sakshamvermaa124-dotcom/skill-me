@@ -156,6 +156,44 @@ class TestSubmissionReviewQueue:
         assert r2.status_code == 200
         assert r2.json()["status"] == "pending"
 
+    async def test_approved_blocks_resubmit_and_shows_on_dashboard(self, client, admin_headers, enrolled_student):
+        payload = {
+            "student_id": enrolled_student["id"],
+            "batch_id": enrolled_student["batch_id"],
+            "week": 1,
+            "linkedin_url": "https://www.linkedin.com/posts/test-post",
+        }
+        submission_id = (await client.post("/api/students/submit-task", json=payload)).json()["submission_id"]
+        await client.post(f"/api/admin/submissions/{submission_id}/approve", json={}, headers=admin_headers)
+
+        r = await client.post("/api/students/submit-task", json=payload)
+        assert r.status_code == 400
+
+        dash = (await client.get(f"/api/students/progress/id/{enrolled_student['id']}")).json()
+        assert dash["summary"]["completed_tasks"] == 1
+        assert [(s["week"], s["status"]) for s in dash["submissions"]] == [(1, "approved")]
+
+    async def test_reject_after_approve_rolls_back_progress(self, client, admin_headers, enrolled_student):
+        sub = await client.post(
+            "/api/students/submit-task",
+            json={
+                "student_id": enrolled_student["id"],
+                "batch_id": enrolled_student["batch_id"],
+                "week": 1,
+                "linkedin_url": "https://www.linkedin.com/posts/test-post",
+            },
+        )
+        submission_id = sub.json()["submission_id"]
+        await client.post(f"/api/admin/submissions/{submission_id}/approve", json={}, headers=admin_headers)
+        await client.post(f"/api/admin/submissions/{submission_id}/reject", json={}, headers=admin_headers)
+
+        progress = await test_db.fetch_one(
+            "SELECT issues_completed, score FROM progress WHERE student_id = ? AND batch_id = ? AND week = 1",
+            (enrolled_student["id"], enrolled_student["batch_id"]),
+        )
+        assert progress["issues_completed"] == 0
+        assert progress["score"] == 0
+
     async def test_bulk_approve_submissions(self, client, admin_headers, test_batch):
         student_ids = []
         from tests.conftest import seed_student

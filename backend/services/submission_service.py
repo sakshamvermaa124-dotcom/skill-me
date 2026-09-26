@@ -128,11 +128,26 @@ class SubmissionService:
         if not submission:
             raise ValueError(f"Submission {submission_id} not found")
 
+        was_approved = submission["status"] == "approved"
+
         now = datetime.utcnow().isoformat()
         await db.execute(
             "UPDATE submissions SET status = 'rejected', admin_note = ?, reviewed_at = ? WHERE id = ?",
             (admin_note, now, submission_id),
         )
+
+        if was_approved:
+            # Reversing a previously-approved submission — undo the credit so
+            # progress/completion_pct stays in sync with submissions.status.
+            await db.execute(
+                """UPDATE progress
+                   SET issues_completed = MAX(0, issues_completed - 1),
+                       score = MAX(0, score - ?),
+                       updated_at = CURRENT_TIMESTAMP
+                   WHERE student_id = ? AND batch_id = ? AND week = ?""",
+                (SCORE_PER_APPROVAL, submission["student_id"], submission["batch_id"], submission["week"]),
+            )
+
         logger.info(f"Rejected submission {submission_id}: {admin_note or ''}")
         return {"submission_id": submission_id, "status": "rejected"}
 

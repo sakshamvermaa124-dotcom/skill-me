@@ -651,10 +651,17 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (subStatus === 'approved') { badgeClass = 'merged'; badgeText = 'Approved ✓'; }
         else if (subStatus === 'rejected') { badgeClass = 'failed'; badgeText = 'Rejected — you can resubmit'; }
 
-        const isApproved = subStatus === 'approved';
+        // Only a rejected (or never-submitted) task accepts a new link — the backend enforces the same rule.
+        const isLocked = subStatus === 'approved' || subStatus === 'pending';
         const inputId = `sub-url-input-w${week}`;
         const btnId = `sub-submit-btn-w${week}`;
-        const btnLabel = isApproved ? 'Approved' : (subStatus === 'rejected' ? 'Resubmit' : (subStatus === 'pending' ? 'Update Submission' : 'Submit for Review'));
+        const btnLabel = { approved: 'Approved ✓', pending: 'Under Review', rejected: 'Resubmit' }[subStatus] || 'Submit for Review';
+        const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        const guidance = {
+          approved: { color: '#34d399', text: 'This task is approved and counts toward your progress. No further submission is needed.' },
+          pending: { color: '#fbbf24', text: 'Your LinkedIn post is under review. You can submit a new link only if this one is rejected.' },
+          rejected: { color: '#f87171', text: 'This submission was rejected. Check the admin note below, fix your LinkedIn post, and resubmit the new post link.' },
+        }[subStatus];
 
         const card = document.createElement('div');
         card.className = 'sub-card task-card';
@@ -675,7 +682,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="sub-status ${badgeClass}">${badgeText}</span>
           </div>
           ${task.description ? `<div style="margin:14px 0 0 0;font-size:0.85rem;color:var(--text-secondary);line-height:1.5;" class="dash-markdown">${marked.parse(task.description)}</div>` : ''}
-          ${sub && sub.admin_note && subStatus === 'rejected' ? `<div style="margin-top:10px;font-size:0.8rem;color:#f87171;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:8px 12px;">Admin note: ${sub.admin_note}</div>` : ''}
+          ${guidance ? `<div style="margin-top:12px;font-size:0.8rem;color:${guidance.color};line-height:1.5;">${guidance.text}</div>` : ''}
+          ${sub && sub.admin_note && subStatus === 'rejected' ? `<div style="margin-top:10px;font-size:0.8rem;color:#f87171;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:8px 12px;">Admin note: ${esc(sub.admin_note)}</div>` : ''}
           ${sub && sub.feedback ? `
           <details style="margin-top:12px;">
             <summary style="cursor:pointer;font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">📝 Feedback for this submission</summary>
@@ -691,14 +699,14 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>` : ''}
           <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
             <div class="login-input-wrap" style="flex:1;min-width:220px;margin-bottom:0;">
-              <input type="url" id="${inputId}" placeholder="Paste your LinkedIn post URL" value="${sub && sub.linkedin_url ? sub.linkedin_url : ''}" ${isApproved ? 'disabled' : ''}>
+              <input type="url" id="${inputId}" placeholder="Paste your LinkedIn post URL" value="${sub && sub.linkedin_url ? esc(sub.linkedin_url) : ''}" ${isLocked ? 'disabled' : ''}>
             </div>
-            <button id="${btnId}" class="cert-btn cert-btn-primary" style="flex-shrink:0;" ${isApproved ? 'disabled' : ''}
+            <button id="${btnId}" class="cert-btn cert-btn-primary" style="flex-shrink:0;" ${isLocked ? 'disabled' : ''}
               onclick="window.submitTaskForReview(${ctx ? ctx.studentId : 'null'}, ${ctx ? ctx.batchId : 'null'}, ${week}, this)">
               ${btnLabel}
             </button>
           </div>
-          ${isApproved ? '' : `<div style="margin-top:6px;font-size:0.72rem;color:var(--text-muted);">On your LinkedIn post, click <strong>⋯ → Copy link to post</strong>. Your GitHub, Figma, notebook or live-site links go inside the post, not here.</div>`}
+          ${isLocked ? '' : `<div style="margin-top:6px;font-size:0.72rem;color:var(--text-muted);">On your LinkedIn post, click <strong>⋯ → Copy link to post</strong>. Your GitHub, Figma, notebook or live-site links go inside the post, not here.</div>`}
         `;
         tasksList.appendChild(card);
         // Add visible class immediately for the initial fade-in to prevent invisible cards
