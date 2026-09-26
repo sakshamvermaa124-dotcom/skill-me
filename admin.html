@@ -138,13 +138,6 @@
     .topbar-title { font-family: var(--font-display); font-size: 1.35rem; font-weight: 800; color: #ffffff; letter-spacing: -0.01em; }
     .topbar-subtitle { font-size: 0.82rem; color: rgba(244, 235, 225, 0.6); margin-top: 2px; }
     .topbar-actions { display: flex; align-items: center; gap: 12px; }
-    .topbar-time-capsule {
-      display: flex; align-items: center; gap: 8px;
-      padding: 6px 14px; border-radius: 8px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      font-size: 0.78rem; color: rgba(244, 235, 225, 0.9); font-family: var(--font-mono); font-weight: 600;
-    }
 
     /* ─── EMBER SPLIT-SCREEN LOGIN OVERLAY ─── */
     #login-overlay {
@@ -413,13 +406,6 @@
     .topbar-title { font-family: var(--font-display); font-size: 1.35rem; font-weight: 800; color: #ffffff; letter-spacing: -0.01em; }
     .topbar-subtitle { font-size: 0.82rem; color: rgba(244, 235, 225, 0.6); margin-top: 2px; }
     .topbar-actions { display: flex; align-items: center; gap: 12px; }
-    .topbar-time-capsule {
-      display: flex; align-items: center; gap: 8px;
-      padding: 6px 14px; border-radius: 8px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      font-size: 0.78rem; color: rgba(244, 235, 225, 0.9); font-family: var(--font-mono); font-weight: 600;
-    }
 
     /* ─── PAGE SECTIONS ─── */
     .page { display: none; padding: 24px 28px; }
@@ -924,10 +910,6 @@
         <div class="topbar-subtitle" id="topbar-subtitle">Platform summary and recent activity</div>
       </div>
       <div class="topbar-actions">
-        <div class="topbar-time-capsule">
-          <span>📅</span>
-          <span id="topbar-time"></span>
-        </div>
         <button class="btn btn-ghost btn-sm" onclick="refreshCurrentPage()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
             <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>

@@ -531,7 +531,6 @@ function showApp() {
   appStarted = true;
   try { initAdminBgLattice(); } catch(e) {}
   try { initAdmin3DCrystalEngine(); } catch(e) {}
-  startClock();
   loadOverview();
 }
 
@@ -577,18 +576,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 });
-
-function startClock() {
-  const el = document.getElementById('topbar-time');
-  if (!el) return;
-  const tick = () => {
-    const d = new Date();
-    const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    const timeStr = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
-    el.textContent = `${dateStr} - ${timeStr}`;
-  };
-  tick(); setInterval(tick, 1000);
-}
 
 // ─── NAVIGATION ───
 function navigate(page) {
@@ -969,7 +956,7 @@ function renderAlumni(alumni) {
       <td style="color:var(--text-secondary);font-size:0.82rem;">${esc(s.email)}</td>
       <td>${esc(s.domain || '—')}</td>
       <td><span style="padding:4px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.3);color:#34d399;">✓ Paid</span></td>
-      <td style="color:var(--text-muted);font-size:0.82rem;">${fmtDate(s.created_at)}</td>
+      <td style="color:var(--text-muted);font-size:0.82rem;">${fmtDate(s.paid_at || s.created_at)}</td>
       <td>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           ${s.batch_id ? `<button class="btn btn-sm" style="background:rgba(212,168,83,0.15);color:#d4a853;border:1px solid rgba(212,168,83,0.3);" onclick="issueCertificate(${s.id}, ${Number(s.batch_id)}, ${name})">🏅 Certificate</button>` : ''}

@@ -188,7 +188,10 @@ async def list_students(
                    s.linkedin_url, s.college, s.year_of_study, s.domain, s.status,
                    s.created_at, s.updated_at,
                    {_CURRENT_BATCH_ID_SUBQUERY} AS batch_id,
-                   CASE WHEN {paid_exists} THEN 1 ELSE 0 END AS has_paid
+                   CASE WHEN {paid_exists} THEN 1 ELSE 0 END AS has_paid,
+                   (SELECT p.updated_at FROM payments p
+                     WHERE p.student_id = s.id AND p.status = 'paid'
+                     ORDER BY p.updated_at DESC LIMIT 1) AS paid_at
             FROM students s
             {where}
             ORDER BY s.created_at DESC, s.id DESC
