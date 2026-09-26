@@ -1671,8 +1671,6 @@ async function sendRemindersNow() {
 // chart before drawing a new one instead of leaking canvases/listeners.
 const _analyticsCharts = {};
 
-const CHART_PALETTE = ['#c99a4e', '#4fa36b', '#38bdf8', '#818cf8', '#fb7185', '#f59e0b', '#34d399', '#a78bfa'];
-
 function _drawChart(canvasId, config) {
   const canvas = document.getElementById(canvasId);
   if (!canvas || typeof Chart === 'undefined') return;
@@ -1686,45 +1684,153 @@ const CHART_BASE_OPTIONS = {
   plugins: { legend: { labels: { color: 'rgba(244,235,225,0.75)', boxWidth: 12, font: { size: 11 } } } },
   scales: {
     x: { ticks: { color: 'rgba(244,235,225,0.55)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
-    y: { ticks: { color: 'rgba(244,235,225,0.55)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true },
+    y: { ticks: { color: 'rgba(244,235,225,0.55)', font: { size: 10 }, precision: 0 }, grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true },
   },
 };
 
+const fmtINR = n => `₹${Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
+
+function _monthLabel(ym) {
+  const [y, m] = String(ym).split('-');
+  return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
+}
+
+let _analyticsReq = 0;
 async function loadAnalytics() {
   const grid = document.getElementById('analytics-funnel-grid');
   if (!grid) return;
+  const reqId = ++_analyticsReq;
   try {
     const data = await api('/api/admin/analytics');
+    if (reqId !== _analyticsReq) return;
     renderAnalyticsFunnel(data.funnel || {});
-    renderApplicationsTrendChart(data.applications_trend || []);
-    renderRevenueTrendChart(data.revenue || {});
-    renderDomainBreakdownChart(data.domains || []);
     renderWeeklyCompletionChart(data.weekly_completion || []);
+    renderRevenue(data.revenue || {});
+    renderDomainBreakdownChart(data.domains || []);
+    renderApplicationsTrendChart(data.applications_trend || []);
     renderDomainTable(data.domains || []);
   } catch (e) {
+    if (reqId !== _analyticsReq) return;
     grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-text">${esc(e.message)}</div></div>`;
   }
+}
+
+function analyticsCard(icon, value, label, sub) {
+  return `
+    <div class="stat-card">
+      <div class="stat-card-top">
+        <div class="stat-card-label">${label}</div>
+        <div class="stat-card-icon">${icon}</div>
+      </div>
+      <div class="stat-card-value">${typeof value === 'number' ? value.toLocaleString('en-IN') : value}</div>
+      ${sub ? `<div class="stat-card-sub">${sub}</div>` : ''}
+    </div>`;
 }
 
 function renderAnalyticsFunnel(f) {
   const grid = document.getElementById('analytics-funnel-grid');
   if (!grid) return;
-  const completionRate = f.total ? Math.round(((f.completed || 0) / f.total) * 100) : 0;
-  const dropoutRate = f.total ? Math.round(((f.dropped || 0) / f.total) * 100) : 0;
   grid.innerHTML = `
-    ${statCard('📋', f.total, 'Total Applicants', 'rgba(201,154,78,0.12)', '#c99a4e')}
-    ${statCard('🟢', f.enrolled, 'Currently Enrolled', 'rgba(79,163,107,0.15)', '#4fa36b')}
-    ${statCard('🏁', f.completed, 'Completed', 'rgba(129,140,248,0.15)', '#818cf8')}
-    ${statCard('📉', `${dropoutRate}%`, 'Dropout Rate', 'rgba(251,113,133,0.15)', '#fb7185')}
-    ${statCard('✅', `${completionRate}%`, 'Completion Rate', 'rgba(56,189,248,0.15)', '#38bdf8')}
+    ${analyticsCard('👥', f.total || 0, 'Total Applicants', `${(f.never_started || 0).toLocaleString('en-IN')} haven't started yet`)}
+    ${analyticsCard('🚀', f.started || 0, 'Started Tasks', `${f.start_rate || 0}% of applicants`)}
+    ${analyticsCard('🏁', f.completed || 0, 'Completed 4/4 Weeks', `${f.completion_rate || 0}% of those who started`)}
+    ${analyticsCard('🎓', f.certified || 0, 'Certificates Issued', 'includes early unlocks')}
+    ${analyticsCard('💳', f.paid || 0, 'Paying Students', `${f.paid_rate || 0}% of applicants`)}
   `;
+}
+
+function renderWeeklyCompletionChart(weekly) {
+  _drawChart('chart-weekly-completion', {
+    type: 'bar',
+    data: {
+      labels: weekly.map(w => `Week ${w.week}`),
+      datasets: [
+        { label: 'Approved', data: weekly.map(w => w.approved), backgroundColor: '#34d399', borderRadius: 4 },
+        { label: 'Pending review', data: weekly.map(w => w.pending), backgroundColor: '#f59e0b', borderRadius: 4 },
+        { label: 'Rejected', data: weekly.map(w => w.rejected), backgroundColor: '#fb7185', borderRadius: 4 },
+      ],
+    },
+    options: {
+      ...CHART_BASE_OPTIONS,
+      scales: {
+        x: { ...CHART_BASE_OPTIONS.scales.x, stacked: true },
+        y: { ...CHART_BASE_OPTIONS.scales.y, stacked: true },
+      },
+    },
+  });
+}
+
+function renderRevenue(r) {
+  const subtitle = document.getElementById('analytics-revenue-subtitle');
+  if (subtitle) {
+    subtitle.textContent = `${fmtINR(r.total_revenue_rupees)} from ${r.paid_orders || 0} verified payment${r.paid_orders === 1 ? '' : 's'} · avg ${fmtINR(r.avg_order_rupees)}`;
+  }
+
+  const TIER_META = {
+    full:       { label: 'Full price',    color: '#4fa36b' },
+    discounted: { label: 'Discount code', color: '#38bdf8' },
+    legacy:     { label: 'Older price',   color: '#818cf8' },
+  };
+  const tiersEl = document.getElementById('analytics-revenue-tiers');
+  if (tiersEl) {
+    const tiers = r.tiers || [];
+    tiersEl.innerHTML = tiers.length ? tiers.map(t => {
+      const m = TIER_META[t.kind] || TIER_META.legacy;
+      return `
+        <div style="padding:10px 14px;border-radius:8px;background:${m.color}1a;border:1px solid ${m.color}4d;font-size:0.8rem;min-width:150px;">
+          <div style="color:var(--text-secondary);font-size:0.68rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">${m.label} · ${fmtINR(t.price_rupees)}</div>
+          <div style="color:${m.color};font-weight:700;font-size:1.05rem;">${fmtINR(t.revenue_rupees)}</div>
+          <div style="color:var(--text-muted);font-size:0.72rem;">${t.orders} order${t.orders === 1 ? '' : 's'}</div>
+        </div>`;
+    }).join('') : `<div style="font-size:0.8rem;color:var(--text-secondary);">No verified payments yet.</div>`;
+  }
+
+  const noteEl = document.getElementById('analytics-revenue-note');
+  if (noteEl) {
+    const parts = [];
+    if (r.abandoned_checkouts) parts.push(`${r.abandoned_checkouts} student${r.abandoned_checkouts === 1 ? '' : 's'} opened checkout but never paid.`);
+    if (r.excluded_test_orders) parts.push(`${r.excluded_test_orders} test payment record${r.excluded_test_orders === 1 ? '' : 's'} (${fmtINR(r.excluded_test_rupees)}) excluded.`);
+    noteEl.textContent = parts.join(' ');
+  }
+
+  const trend = r.trend || [];
+  _drawChart('chart-revenue-trend', {
+    type: 'bar',
+    data: {
+      labels: trend.map(t => _monthLabel(t.month)),
+      datasets: [{ label: 'Revenue (₹)', data: trend.map(t => t.revenue_rupees), backgroundColor: '#4fa36b', borderRadius: 4 }],
+    },
+    options: {
+      ...CHART_BASE_OPTIONS,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => `${fmtINR(ctx.parsed.y)} · ${trend[ctx.dataIndex].orders} orders` } },
+      },
+    },
+  });
+}
+
+function renderDomainBreakdownChart(domains) {
+  _drawChart('chart-domain-breakdown', {
+    type: 'bar',
+    data: {
+      labels: domains.map(d => d.label),
+      datasets: [
+        { label: 'Applicants', data: domains.map(d => d.total), backgroundColor: 'rgba(201,154,78,0.55)', borderRadius: 4 },
+        { label: 'Started', data: domains.map(d => d.started), backgroundColor: '#38bdf8', borderRadius: 4 },
+        { label: 'Completed', data: domains.map(d => d.completed), backgroundColor: '#34d399', borderRadius: 4 },
+        { label: 'Paid', data: domains.map(d => d.paid), backgroundColor: '#818cf8', borderRadius: 4 },
+      ],
+    },
+    options: { ...CHART_BASE_OPTIONS, indexAxis: 'y' },
+  });
 }
 
 function renderApplicationsTrendChart(trend) {
   _drawChart('chart-applications-trend', {
     type: 'line',
     data: {
-      labels: trend.map(t => t.month),
+      labels: trend.map(t => _monthLabel(t.month)),
       datasets: [{
         label: 'Applications',
         data: trend.map(t => t.count),
@@ -1738,82 +1844,33 @@ function renderApplicationsTrendChart(trend) {
   });
 }
 
-function renderRevenueTrendChart(revenue) {
-  const trend = revenue.trend || [];
-  const subtitle = document.getElementById('analytics-revenue-subtitle');
-  if (subtitle) {
-    subtitle.textContent = `₹${(revenue.total_revenue_rupees || 0).toLocaleString('en-IN')} total · ${revenue.paid_orders || 0} paid orders`;
-  }
-  _drawChart('chart-revenue-trend', {
-    type: 'bar',
-    data: {
-      labels: trend.map(t => t.month),
-      datasets: [{
-        label: 'Revenue (₹)',
-        data: trend.map(t => t.revenue_rupees),
-        backgroundColor: '#4fa36b',
-        borderRadius: 4,
-      }],
-    },
-    options: { ...CHART_BASE_OPTIONS, plugins: { legend: { display: false } } },
-  });
-}
-
-function renderDomainBreakdownChart(domains) {
-  _drawChart('chart-domain-breakdown', {
-    type: 'bar',
-    data: {
-      labels: domains.map(d => d.domain),
-      datasets: [
-        { label: 'Enrolled', data: domains.map(d => d.enrolled), backgroundColor: '#4fa36b', borderRadius: 4 },
-        { label: 'Completed', data: domains.map(d => d.completed), backgroundColor: '#818cf8', borderRadius: 4 },
-        { label: 'Dropped', data: domains.map(d => d.dropped), backgroundColor: '#fb7185', borderRadius: 4 },
-      ],
-    },
-    options: CHART_BASE_OPTIONS,
-  });
-}
-
-function renderWeeklyCompletionChart(weekly) {
-  _drawChart('chart-weekly-completion', {
-    type: 'bar',
-    data: {
-      labels: weekly.map(w => `Week ${w.week}`),
-      datasets: [
-        { label: 'Approved', data: weekly.map(w => w.approved), backgroundColor: '#34d399', borderRadius: 4 },
-        { label: 'Rejected', data: weekly.map(w => w.rejected), backgroundColor: '#fb7185', borderRadius: 4 },
-        { label: 'Pending', data: weekly.map(w => w.pending), backgroundColor: '#f59e0b', borderRadius: 4 },
-      ],
-    },
-    options: { ...CHART_BASE_OPTIONS, scales: { ...CHART_BASE_OPTIONS.scales, x: { ...CHART_BASE_OPTIONS.scales.x, stacked: true }, y: { ...CHART_BASE_OPTIONS.scales.y, stacked: true } } },
-  });
-}
-
 function renderDomainTable(domains) {
   const tbody = document.getElementById('analytics-domain-tbody');
   if (!tbody) return;
   if (!domains.length) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text-secondary);padding:32px;">No students yet.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:32px;">No students yet.</td></tr>`;
     return;
   }
   tbody.innerHTML = domains.map(d => {
-    const rate = d.total ? Math.round((d.completed / d.total) * 100) : 0;
+    const rate = d.completion_rate || 0;
+    const rateCell = d.started
+      ? `<div style="display:flex;align-items:center;gap:8px;">
+           <div style="flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,0.08);overflow:hidden;">
+             <div style="width:${Math.min(rate, 100)}%;height:100%;background:#34d399;"></div>
+           </div>
+           <span style="font-size:0.78rem;color:var(--text-secondary);min-width:40px;">${rate}%</span>
+         </div>`
+      : `<span style="font-size:0.78rem;color:var(--text-muted);">No one started</span>`;
     return `
     <tr>
-      <td style="font-weight:600;">${esc(d.domain)}</td>
+      <td><div style="font-weight:600;">${esc(d.label)}</div><div style="font-size:0.7rem;color:var(--text-muted);">${esc(d.domain)}</div></td>
       <td>${d.total}</td>
-      <td style="color:#4fa36b;">${d.enrolled}</td>
-      <td style="color:#818cf8;">${d.completed}</td>
-      <td style="color:#fb7185;">${d.dropped}</td>
-      <td>${d.paid_alumni}</td>
-      <td>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div style="flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,0.08);overflow:hidden;">
-            <div style="width:${rate}%;height:100%;background:#38bdf8;"></div>
-          </div>
-          <span style="font-size:0.78rem;color:var(--text-secondary);min-width:34px;">${rate}%</span>
-        </div>
-      </td>
+      <td style="color:#38bdf8;">${d.started}</td>
+      <td style="color:#34d399;">${d.completed}</td>
+      <td>${d.certified}</td>
+      <td style="color:#818cf8;">${d.paid}</td>
+      <td>${fmtINR(d.revenue_rupees)}</td>
+      <td>${rateCell}</td>
     </tr>`;
   }).join('');
 }

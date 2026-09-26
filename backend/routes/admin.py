@@ -67,12 +67,13 @@ ANNOUNCEMENTS = {
 async def get_stats(_: str = Depends(require_admin)):
     """Get aggregated stats for the admin dashboard (single round-trip)."""
     row = await db.fetch_one(
-        """SELECT
+        f"""SELECT
              (SELECT COUNT(*) FROM students) AS total_students,
              (SELECT COUNT(*) FROM students WHERE status = 'applied') AS pending_applications,
              (SELECT COUNT(*) FROM students WHERE status = 'shortlisted') AS shortlisted_students,
              (SELECT COUNT(*) FROM students WHERE status = 'enrolled') AS enrolled_students,
-             (SELECT COUNT(DISTINCT student_id) FROM payments WHERE status = 'paid') AS total_alumni,
+             (SELECT COUNT(DISTINCT student_id) FROM payments
+                WHERE status = 'paid' AND {REAL_PAYMENT_SQL}) AS total_alumni,
              (SELECT COUNT(*) FROM submissions WHERE status = 'pending') AS pending_submissions,
              (SELECT COUNT(*) FROM urgent_requests WHERE status = 'pending') AS pending_urgent_requests"""
     ) or {}
@@ -801,124 +802,170 @@ async def send_task_reminders(
 # Analytics
 # ──────────────────────────────────────────────
 
+# Payments that never went through Razorpay checkout (seeded/manual test rows such
+# as pay_test123 / pay_mock_456). Every real paid row passes signature verification
+# in routes/payments.py and carries a genuine pay_… id, so these are excluded from
+# every revenue / paid figure — the dashboard only reports money actually collected.
+REAL_PAYMENT_SQL = (
+    "COALESCE(razorpay_payment_id, '') NOT LIKE 'pay_test%' "
+    "AND COALESCE(razorpay_payment_id, '') NOT LIKE 'pay_mock%'"
+)
+TOTAL_WEEKS = 4
+
+
+def _pct(part: int, whole: int) -> float:
+    return round(part * 100 / whole, 1) if whole else 0.0
+
+
 @router.get("/analytics", summary="Aggregated platform analytics for the admin dashboard")
 async def get_analytics(_: str = Depends(require_admin)):
     """
-    Everything the Analytics tab needs in a handful of aggregated queries (never
-    per-row Python loops): funnel counts, domain-wise breakdown, weekly task
-    completion/dropout, and certificate-payment revenue. Each query is a single
-    GROUP BY / conditional-SUM pass over an indexed column (see the v8 migration
-    in db/database.py — payments.status, payments.created_at, students.domain),
-    so this stays cheap as the tables grow instead of scanning per widget.
+    Built from real activity rather than students.status (which stays 'enrolled'
+    for almost everyone and never records completion):
+      started   = has at least one task submission
+      completed = all 4 weeks approved
+      certified = has a certificate row
+      paid      = at least one verified Razorpay payment (test ids excluded)
+
+    Domains are merged through task_service.normalize_domain_slug — the same resolver
+    tasks, emails and certificates already use — so stored variants like
+    'Data Science' / 'data-science' count as one domain.
+
+    The per-student rollup is ONE query over pre-aggregated joins (no per-row
+    correlated subqueries); the funnel cards and the domain table are both derived
+    from it, so their numbers always agree with each other.
     """
-    # Funnel: where every applicant currently sits in the pipeline.
-    funnel_row = await db.fetch_one(
-        """SELECT
-             COUNT(*) AS total,
-             SUM(CASE WHEN status = 'applied'    THEN 1 ELSE 0 END) AS applied,
-             SUM(CASE WHEN status = 'shortlisted' THEN 1 ELSE 0 END) AS shortlisted,
-             SUM(CASE WHEN status = 'enrolled'    THEN 1 ELSE 0 END) AS enrolled,
-             SUM(CASE WHEN status = 'completed'   THEN 1 ELSE 0 END) AS completed,
-             SUM(CASE WHEN status = 'dropped'     THEN 1 ELSE 0 END) AS dropped
-           FROM students"""
+    from services.task_service import task_service
+    from services.email_service import _domain_label
+
+    students = await db.fetch_all(
+        f"""SELECT s.id, s.domain,
+                   COALESCE(sub.submitted, 0)      AS submitted,
+                   COALESCE(sub.weeks_approved, 0) AS weeks_approved,
+                   CASE WHEN pay.student_id  IS NULL THEN 0 ELSE 1 END AS has_paid,
+                   COALESCE(pay.revenue, 0)        AS revenue_paise,
+                   CASE WHEN cert.student_id IS NULL THEN 0 ELSE 1 END AS has_cert
+            FROM students s
+            LEFT JOIN (SELECT student_id, COUNT(*) AS submitted,
+                              COUNT(DISTINCT CASE WHEN status = 'approved' THEN week END) AS weeks_approved
+                       FROM submissions GROUP BY student_id) sub ON sub.student_id = s.id
+            LEFT JOIN (SELECT student_id, SUM(amount) AS revenue
+                       FROM payments WHERE status = 'paid' AND {REAL_PAYMENT_SQL}
+                       GROUP BY student_id) pay ON pay.student_id = s.id
+            LEFT JOIN (SELECT DISTINCT student_id FROM certificates) cert ON cert.student_id = s.id"""
+    )
+
+    funnel = {"total": 0, "started": 0, "completed": 0, "certified": 0, "paid": 0}
+    domains: dict[str, dict] = {}
+    for s in students:
+        raw = (s["domain"] or "").strip()
+        key = task_service.normalize_domain_slug(raw) if raw else "unspecified"
+        d = domains.setdefault(key, {
+            "domain": key,
+            "label": _domain_label(key) if raw else "Unspecified",
+            "total": 0, "started": 0, "completed": 0, "certified": 0, "paid": 0,
+            "revenue_rupees": 0.0,
+        })
+        started = (s["submitted"] or 0) > 0
+        completed = (s["weeks_approved"] or 0) >= TOTAL_WEEKS
+        for bucket in (funnel, d):
+            bucket["total"] += 1
+            bucket["started"] += started
+            bucket["completed"] += completed
+            bucket["certified"] += bool(s["has_cert"])
+            bucket["paid"] += bool(s["has_paid"])
+        d["revenue_rupees"] += (s["revenue_paise"] or 0) / 100
+
+    domain_list = sorted(domains.values(), key=lambda d: d["total"], reverse=True)
+    for d in domain_list:
+        d["completion_rate"] = _pct(d["completed"], d["started"])
+
+    # Week-by-week review status — approved counts per week form the drop-off curve.
+    weekly = await db.fetch_all(
+        """SELECT week,
+                  SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) AS approved,
+                  SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) AS rejected,
+                  SUM(CASE WHEN status = 'pending'  THEN 1 ELSE 0 END) AS pending
+           FROM submissions GROUP BY week ORDER BY week"""
+    )
+
+    # Revenue by price point: full-price and discount-code orders are reported
+    # separately so a ₹5 order reads as an intended discount, not a data error.
+    tiers = await db.fetch_all(
+        f"""SELECT amount, COUNT(*) AS orders FROM payments
+            WHERE status = 'paid' AND {REAL_PAYMENT_SQL}
+            GROUP BY amount ORDER BY amount DESC"""
+    )
+    full_price = settings.certificate_price_paise
+    tier_list = []
+    for t in tiers:
+        amount = t["amount"] or 0
+        orders = t["orders"] or 0
+        kind = "full" if amount == full_price else ("discounted" if amount < full_price else "legacy")
+        tier_list.append({
+            "kind": kind,
+            "price_rupees": amount / 100,
+            "orders": orders,
+            "revenue_rupees": amount * orders / 100,
+        })
+    total_revenue = sum(t["revenue_rupees"] for t in tier_list)
+    paid_orders = sum(t["orders"] for t in tier_list)
+
+    excluded = await db.fetch_one(
+        f"""SELECT COUNT(*) AS orders, COALESCE(SUM(amount), 0) AS amount FROM payments
+            WHERE status = 'paid' AND NOT ({REAL_PAYMENT_SQL})"""
     ) or {}
 
-    # Domain-wise breakdown: applicants, enrolled, completed and paid-alumni per domain.
-    domain_rows = await db.fetch_all(
-        """SELECT
-             COALESCE(s.domain, 'unspecified') AS domain,
-             COUNT(*) AS total,
-             SUM(CASE WHEN s.status = 'enrolled'  THEN 1 ELSE 0 END) AS enrolled,
-             SUM(CASE WHEN s.status = 'completed' THEN 1 ELSE 0 END) AS completed,
-             SUM(CASE WHEN s.status = 'dropped'   THEN 1 ELSE 0 END) AS dropped,
-             (SELECT COUNT(DISTINCT p.student_id) FROM payments p
-                JOIN students s2 ON s2.id = p.student_id
-                WHERE p.status = 'paid' AND COALESCE(s2.domain, 'unspecified') = COALESCE(s.domain, 'unspecified')
-             ) AS paid_alumni
-           FROM students s
-           GROUP BY COALESCE(s.domain, 'unspecified')
-           ORDER BY total DESC"""
-    )
-
-    # Weekly completion / dropout — approved submissions per week across all enrollments,
-    # against how many enrollments were ever active (rough completion-rate denominator).
-    completion_rows = await db.fetch_all(
-        """SELECT
-             week,
-             COUNT(*) AS total_submitted,
-             SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) AS approved,
-             SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) AS rejected,
-             SUM(CASE WHEN status = 'pending'  THEN 1 ELSE 0 END) AS pending
-           FROM submissions
-           GROUP BY week
-           ORDER BY week"""
-    )
-
-    # Revenue: certificate payments, all-time totals plus a 12-month trend.
-    revenue_row = await db.fetch_one(
-        """SELECT
-             COUNT(*)                                            AS total_orders,
-             SUM(CASE WHEN status = 'paid'   THEN 1 ELSE 0 END)  AS paid_orders,
-             SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END)  AS failed_orders,
-             SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending_orders,
-             COALESCE(SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END), 0) AS total_revenue_paise
-           FROM payments"""
+    # Students who opened checkout but never completed a real payment. An order row is
+    # created on every "Pay" click, so counting rows instead of students overstates this.
+    abandoned = await db.fetch_one(
+        f"""SELECT COUNT(DISTINCT student_id) AS students FROM payments
+            WHERE status = 'pending' AND student_id NOT IN (
+                SELECT student_id FROM payments WHERE status = 'paid' AND {REAL_PAYMENT_SQL})"""
     ) or {}
 
     revenue_trend = await db.fetch_all(
-        """SELECT
-             strftime('%Y-%m', created_at) AS month,
-             COUNT(*) AS orders,
-             COALESCE(SUM(amount), 0) AS revenue_paise
-           FROM payments
-           WHERE status = 'paid' AND created_at >= datetime('now', '-12 months')
-           GROUP BY strftime('%Y-%m', created_at)
-           ORDER BY month"""
+        f"""SELECT strftime('%Y-%m', created_at) AS month,
+                   COUNT(*) AS orders, COALESCE(SUM(amount), 0) AS revenue_paise
+            FROM payments
+            WHERE status = 'paid' AND {REAL_PAYMENT_SQL}
+              AND created_at >= datetime('now', '-12 months')
+            GROUP BY month ORDER BY month"""
     )
 
-    # Applications trend — last 12 months, for a simple growth sparkline.
     applications_trend = await db.fetch_all(
-        """SELECT
-             strftime('%Y-%m', created_at) AS month,
-             COUNT(*) AS count
+        """SELECT strftime('%Y-%m', created_at) AS month, COUNT(*) AS count
            FROM students
            WHERE created_at >= datetime('now', '-12 months')
-           GROUP BY strftime('%Y-%m', created_at)
-           ORDER BY month"""
+           GROUP BY month ORDER BY month"""
     )
 
     return {
-        "funnel": {k: funnel_row.get(k) or 0 for k in
-                   ("total", "applied", "shortlisted", "enrolled", "completed", "dropped")},
-        "domains": [
-            {
-                "domain": r["domain"],
-                "total": r["total"] or 0,
-                "enrolled": r["enrolled"] or 0,
-                "completed": r["completed"] or 0,
-                "dropped": r["dropped"] or 0,
-                "paid_alumni": r["paid_alumni"] or 0,
-            }
-            for r in domain_rows
-        ],
+        "funnel": {
+            **funnel,
+            "never_started": funnel["total"] - funnel["started"],
+            "start_rate": _pct(funnel["started"], funnel["total"]),
+            "completion_rate": _pct(funnel["completed"], funnel["started"]),
+            "paid_rate": _pct(funnel["paid"], funnel["total"]),
+        },
+        "domains": domain_list,
         "weekly_completion": [
-            {
-                "week": r["week"],
-                "total_submitted": r["total_submitted"] or 0,
-                "approved": r["approved"] or 0,
-                "rejected": r["rejected"] or 0,
-                "pending": r["pending"] or 0,
-            }
-            for r in completion_rows
+            {"week": r["week"], "approved": r["approved"] or 0,
+             "rejected": r["rejected"] or 0, "pending": r["pending"] or 0}
+            for r in weekly
         ],
         "revenue": {
-            "total_orders": revenue_row.get("total_orders") or 0,
-            "paid_orders": revenue_row.get("paid_orders") or 0,
-            "failed_orders": revenue_row.get("failed_orders") or 0,
-            "pending_orders": revenue_row.get("pending_orders") or 0,
-            "total_revenue_rupees": (revenue_row.get("total_revenue_paise") or 0) / 100,
+            "total_revenue_rupees": total_revenue,
+            "paid_orders": paid_orders,
+            "paid_students": funnel["paid"],
+            "avg_order_rupees": round(total_revenue / paid_orders, 2) if paid_orders else 0,
+            "tiers": tier_list,
+            "abandoned_checkouts": abandoned.get("students") or 0,
+            "excluded_test_orders": excluded.get("orders") or 0,
+            "excluded_test_rupees": (excluded.get("amount") or 0) / 100,
             "trend": [
-                {"month": r["month"], "orders": r["orders"] or 0, "revenue_rupees": (r["revenue_paise"] or 0) / 100}
+                {"month": r["month"], "orders": r["orders"] or 0,
+                 "revenue_rupees": (r["revenue_paise"] or 0) / 100}
                 for r in revenue_trend
             ],
         },
