@@ -26,10 +26,8 @@ from routes.certificates import router as certificates_router
 from routes.payments import router as payments_router
 from routes.auth import router as auth_router
 from routes.portfolio import router as portfolio_router
-from routes.monitor import router as monitor_router
 from routes.tasks import router as tasks_router
 from routes.webhooks import router as webhooks_router
-from services.monitor_scheduler import register_monitor_jobs
 
 # Rate limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -60,12 +58,21 @@ async def lifespan(app: FastAPI):
     # Start the task scheduler
     scheduler_service.start()
 
-    # Register monitoring jobs on the existing scheduler
-    try:
-        register_monitor_jobs(scheduler_service._scheduler)
-        logger.info("Monitoring jobs registered on scheduler")
-    except Exception as e:
-        logger.warning(f"Failed to register monitoring jobs: {e}")
+    # Daily task inactivity reminders — 10:00 AM IST
+    from apscheduler.triggers.cron import CronTrigger
+
+    async def daily_task_reminders():
+        from services.reminder_service import send_reminders
+        result = await send_reminders()
+        logger.info("Daily task reminders: %s", result)
+
+    scheduler_service._scheduler.add_job(
+        daily_task_reminders,
+        trigger=CronTrigger(hour=10, minute=0, timezone="Asia/Kolkata"),
+        id="daily_task_reminders",
+        replace_existing=True,
+        misfire_grace_time=3600,
+    )
 
     yield
 
@@ -132,7 +139,6 @@ app.include_router(certificates_router)
 app.include_router(payments_router)
 app.include_router(auth_router)
 app.include_router(portfolio_router)
-app.include_router(monitor_router)
 app.include_router(tasks_router)
 app.include_router(webhooks_router)
 
@@ -155,7 +161,6 @@ _PAGES = {
     "privacy":     "privacy.html",
     "terms":       "terms.html",
     "refunds":     "refunds.html",
-    "monitor":     "monitor.html",
 }
 
 for _slug, _filename in _PAGES.items():
