@@ -834,6 +834,12 @@
         Alumni
         <span class="nav-badge" id="alumni-badge" style="display:none;background:rgba(52,211,153,0.2);color:#34d399;">0</span>
       </div>
+      <div class="nav-item" id="nav-analytics" onclick="navigate('analytics')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+        Analytics
+      </div>
       <div class="nav-section-label" style="margin-top:12px;">Actions</div>
       <div class="nav-item" onclick="showApplicationsToReview()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1038,6 +1044,93 @@
       </div>
     </section>
 
+    <!-- ─── ANALYTICS PAGE ─── -->
+    <section class="page" id="page-analytics">
+      <div class="stats-grid" id="analytics-funnel-grid">
+        <div class="loading-overlay"><div class="spinner"></div> Loading analytics...</div>
+      </div>
+
+      <div class="grid-2" style="margin-top:24px;">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">📈 Applications — Last 12 Months</div>
+              <div class="panel-subtitle">New applications received per month</div>
+            </div>
+          </div>
+          <div class="panel-body" style="max-height:none;">
+            <canvas id="chart-applications-trend" height="220"></canvas>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">💰 Revenue — Last 12 Months</div>
+              <div class="panel-subtitle" id="analytics-revenue-subtitle">Certificate purchases (paid orders)</div>
+            </div>
+          </div>
+          <div class="panel-body" style="max-height:none;">
+            <canvas id="chart-revenue-trend" height="220"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:24px;">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">🎯 Domain-wise Breakdown</div>
+              <div class="panel-subtitle">Applicants, enrolled, completed &amp; paid alumni per domain</div>
+            </div>
+          </div>
+          <div class="panel-body" style="max-height:none;">
+            <canvas id="chart-domain-breakdown" height="240"></canvas>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">✅ Weekly Task Completion</div>
+              <div class="panel-subtitle">Approved / rejected / pending submissions, by week</div>
+            </div>
+          </div>
+          <div class="panel-body" style="max-height:none;">
+            <canvas id="chart-weekly-completion" height="240"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:24px;">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">🗂️ Domain Detail</div>
+            <div class="panel-subtitle">Exact counts behind the domain-wise chart above</div>
+          </div>
+          <button class="btn btn-secondary" onclick="loadAnalytics()" style="font-size:0.8rem;padding:6px 14px;">↻ Refresh</button>
+        </div>
+        <div class="panel-body">
+          <div style="overflow-x:auto;">
+            <table class="students-table" id="analytics-domain-table">
+              <thead>
+                <tr>
+                  <th>Domain</th>
+                  <th style="width:100px;">Total</th>
+                  <th style="width:100px;">Enrolled</th>
+                  <th style="width:100px;">Completed</th>
+                  <th style="width:100px;">Dropped</th>
+                  <th style="width:120px;">Paid Alumni</th>
+                  <th style="width:140px;">Completion Rate</th>
+                </tr>
+              </thead>
+              <tbody id="analytics-domain-tbody">
+                <tr><td colspan="7" style="text-align:center;color:var(--text-secondary);padding:32px;">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- ─── EMAIL SETTINGS PAGE ─── -->
     <section class="page" id="page-email">
       <div class="panel" style="margin-bottom:24px;">
@@ -1120,6 +1213,42 @@
               <div style="margin-left:auto;padding:3px 10px;border-radius:12px;font-size:0.72rem;font-weight:600;background:rgba(52,211,153,0.12);color:#34d399;">AUTO</div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- ─── EMAIL DIRECTORY ─── -->
+      <div class="panel" style="margin-top:24px;">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">📇 Email Directory</div>
+            <div class="panel-subtitle">Every student's email address with their send/delivery health at a glance</div>
+          </div>
+          <button class="btn btn-secondary" onclick="loadEmailDirectory()" style="font-size:0.8rem;padding:6px 14px;">↻ Refresh</button>
+        </div>
+        <div class="panel-body">
+          <div class="filter-row" style="margin-bottom:14px;">
+            <input type="text" class="search-input" id="email-directory-search" placeholder="Search by name, email or domain..." oninput="debounceEmailDirectory()" />
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="students-table" id="email-directory-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Domain</th>
+                  <th>Status</th>
+                  <th style="width:110px;">Sent</th>
+                  <th style="width:110px;">Failed</th>
+                  <th style="width:110px;">Bounced</th>
+                  <th>Last Email</th>
+                </tr>
+              </thead>
+              <tbody id="email-directory-tbody">
+                <tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:32px;">Click Refresh to load the directory</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="email-directory-pagination" style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:0.82rem;color:var(--text-secondary);"></div>
         </div>
       </div>
 
@@ -1401,7 +1530,7 @@
 <div id="toast-container"></div>
 
 <script src="config.js"></script>
-<script src="admin.js?v=20260925_184405"></script>
+<script src="admin.js?v=20260926_120000"></script>
 <script>
 // ─── Email Logs ───────────────────────────────────────────────────────────────
 const EMAIL_TYPE_LABELS = {

@@ -1,10 +1,16 @@
 """
-One-time script: retroactively send certificate-ready emails to the 3 students
-whose certificates were issued without a notification email.
+Retroactively send certificate-ready emails for certificates that were issued
+without a notification email going out.
 
-Run once from the backend/ directory:
-    python scripts/send_missed_cert_emails.py
+Looks the recipients up from the DB by certificate ID (or by student email)
+instead of hardcoding student PII in this file — pass the cert IDs (or emails)
+as CLI args.
+
+Run from the backend/ directory:
+    python scripts/send_missed_cert_emails.py --cert-id SM-XXXX-XXXX-XXXX [--cert-id ...]
+    python scripts/send_missed_cert_emails.py --email someone@example.com [--email ...]
 """
+import argparse
 import asyncio
 import sys
 import os
@@ -13,40 +19,65 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from db.database import db
 from services.email_service import email_service
 
-MISSING = [
-    {"cert_id": "SM-5E50-AC46-2A60", "email": "ttg336451@gmail.com",   "first_name": "JONNY",   "last_name": "Ttg",   "issued_at": "02 August 2026"},
-    {"cert_id": "SM-429B-5148-DDFA", "email": "n8n.saksham@gmail.com", "first_name": "SAKSHAM", "last_name": "bisht", "issued_at": "08 August 2026"},
-    {"cert_id": "SM-7636-ED2A-F101", "email": "h4930480@gmail.com",    "first_name": "SAKSHAM", "last_name": "doe",   "issued_at": "13 August 2026"},
-]
+
+async def _send_for_row(row: dict) -> bool:
+    print(f"Sending to {row['email']} ({row['cert_id']}, {row['domain']})...")
+    ok = await email_service.send_certificate_ready(
+        first_name=row["first_name"],
+        last_name=row["last_name"],
+        email=row["email"],
+        domain=row["domain"],
+        cert_id=row["cert_id"],
+        issued_date=row["issued_at"],
+    )
+    print(f"  -> {'OK' if ok else 'FAILED'}")
+    return ok
 
 
 async def main():
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--cert-id", action="append", default=[], help="Certificate ID, e.g. SM-XXXX-XXXX-XXXX (repeatable)")
+    parser.add_argument("--email", action="append", default=[], help="Student email — resends for their most recent certificate (repeatable)")
+    args = parser.parse_args()
+
+    if not args.cert_id and not args.email:
+        parser.error("Provide at least one --cert-id or --email")
+
     await db.connect()
-    for c in MISSING:
+
+    for cert_id in args.cert_id:
         row = await db.fetch_one(
-            """SELECT COALESCE(b.domain, s.domain) AS domain
+            """SELECT cert.cert_id, cert.issued_at, s.first_name, s.last_name, s.email,
+                      COALESCE(b.domain, s.domain) AS domain
                FROM certificates cert
                JOIN students s ON s.id = cert.student_id
                LEFT JOIN batches b ON cert.batch_id = b.id
                WHERE cert.cert_id = ?""",
-            (c["cert_id"],),
+            (cert_id,),
         )
         if not row:
-            print(f"SKIP {c['cert_id']} — certificate not found")
+            print(f"SKIP {cert_id} — certificate not found")
             continue
+        await _send_for_row(row)
 
-        print(f"Sending to {c['email']} ({c['cert_id']}, {row['domain']})...")
-        ok = await email_service.send_certificate_ready(
-            first_name=c["first_name"],
-            last_name=c["last_name"],
-            email=c["email"],
-            domain=row["domain"],
-            cert_id=c["cert_id"],
-            issued_date=c["issued_at"],
+    for email in args.email:
+        row = await db.fetch_one(
+            """SELECT cert.cert_id, cert.issued_at, s.first_name, s.last_name, s.email,
+                      COALESCE(b.domain, s.domain) AS domain
+               FROM certificates cert
+               JOIN students s ON s.id = cert.student_id
+               LEFT JOIN batches b ON cert.batch_id = b.id
+               WHERE LOWER(s.email) = LOWER(?)
+               ORDER BY cert.issued_at DESC LIMIT 1""",
+            (email,),
         )
-        print(f"  -> {'OK' if ok else 'FAILED'}")
+        if not row:
+            print(f"SKIP {email} — no certificate found for this student")
+            continue
+        await _send_for_row(row)
 
     await db.disconnect()
 
 
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())

@@ -596,19 +596,29 @@ async def send_test_email(req: TestEmailRequest, _: str = Depends(require_admin)
     return {"status": "failed", "message": "Email send failed — check SMTP credentials in .env"}
 
 
+EMAIL_LOGS_PAGE_SIZE = 50
+EMAIL_LOGS_MAX_PAGE_SIZE = 200
+
+
 @router.get("/email/logs", summary="Get email send history")
 async def get_email_logs(
     _:           str = Depends(require_admin),
     email_type:  str | None = None,   # filter by type
     recipient:   str | None = None,   # filter by email address (partial match)
     status:      str | None = None,   # sent | failed
-    limit:       int = 50,
+    page:        int | None = None,   # 1-based page number (takes precedence over offset)
+    limit:       int = EMAIL_LOGS_PAGE_SIZE,
     offset:      int = 0,
 ):
     """
     Return a paginated list of all emails sent (or attempted) by SkillMe.
     Useful for auditing delivery, debugging failures, and tracking communication history.
     """
+    limit = max(1, min(limit, EMAIL_LOGS_MAX_PAGE_SIZE))
+    if page is not None:
+        offset = (max(1, page) - 1) * limit
+    offset = max(0, offset)
+
     conditions = []
     params: list = []
 
@@ -639,12 +649,76 @@ async def get_email_logs(
         f"SELECT COUNT(*) as total FROM email_logs el {where}",
         tuple(params),
     )
+    total = int(total_row["total"]) if total_row and total_row["total"] is not None else 0
 
     return {
-        "total": total_row["total"] if total_row else 0,
+        "logs": rows,
+        "count": len(rows),
+        "total": total,
         "limit": limit,
         "offset": offset,
-        "logs": rows,
+        "page": offset // limit + 1,
+        "total_pages": max(1, -(-total // limit)),
+    }
+
+
+@router.get("/email/directory", summary="Per-student email contact directory")
+async def get_email_directory(
+    _:  str = Depends(require_admin),
+    q:  str | None = None,     # search by name, email or domain
+    page: int | None = None,
+    limit: int = STUDENTS_PAGE_SIZE,
+    offset: int = 0,
+):
+    """
+    One row per student showing their email address plus a rollup of their send
+    history (last email sent, last status, counts of delivered/opened/bounced) —
+    the "who have we emailed, and did it land" view, as opposed to /email/logs'
+    raw chronological log of every individual send.
+    """
+    limit = max(1, min(limit, STUDENTS_MAX_PAGE_SIZE))
+    if page is not None:
+        offset = (max(1, page) - 1) * limit
+    offset = max(0, offset)
+
+    conditions: list[str] = []
+    params: list = []
+    if q and q.strip():
+        like = f"%{q.strip().lower()}%"
+        conditions.append(
+            "(LOWER(s.first_name || ' ' || s.last_name) LIKE ? OR LOWER(s.email) LIKE ?"
+            " OR LOWER(COALESCE(s.domain, '')) LIKE ?)"
+        )
+        params.extend([like, like, like])
+    where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+
+    rows = await db.fetch_all(
+        f"""SELECT
+              s.id, s.first_name, s.last_name, s.email, s.domain, s.status,
+              (SELECT COUNT(*) FROM email_logs el WHERE el.student_id = s.id) AS emails_sent,
+              (SELECT COUNT(*) FROM email_logs el WHERE el.student_id = s.id AND el.status = 'failed') AS emails_failed,
+              (SELECT COUNT(*) FROM email_logs el WHERE el.student_id = s.id AND el.bounced_at IS NOT NULL) AS emails_bounced,
+              (SELECT el2.email_type FROM email_logs el2 WHERE el2.student_id = s.id
+                 ORDER BY el2.sent_at DESC LIMIT 1) AS last_email_type,
+              (SELECT el3.sent_at FROM email_logs el3 WHERE el3.student_id = s.id
+                 ORDER BY el3.sent_at DESC LIMIT 1) AS last_email_at
+            FROM students s
+            {where}
+            ORDER BY s.created_at DESC, s.id DESC
+            LIMIT ? OFFSET ?""",
+        (*params, limit, offset),
+    )
+    total_row = await db.fetch_one(f"SELECT COUNT(*) AS count FROM students s {where}", tuple(params))
+    total = int(total_row["count"]) if total_row and total_row["count"] is not None else 0
+
+    return {
+        "students": rows,
+        "count": len(rows),
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "page": offset // limit + 1,
+        "total_pages": max(1, -(-total // limit)),
     }
 
 
@@ -719,5 +793,136 @@ async def send_task_reminders(
         "students": [
             {"student_id": s["student_id"], "name": f"{s['first_name']} {s['last_name']}", "email": s["email"]}
             for s in inactive
+        ],
+    }
+
+
+# ──────────────────────────────────────────────
+# Analytics
+# ──────────────────────────────────────────────
+
+@router.get("/analytics", summary="Aggregated platform analytics for the admin dashboard")
+async def get_analytics(_: str = Depends(require_admin)):
+    """
+    Everything the Analytics tab needs in a handful of aggregated queries (never
+    per-row Python loops): funnel counts, domain-wise breakdown, weekly task
+    completion/dropout, and certificate-payment revenue. Each query is a single
+    GROUP BY / conditional-SUM pass over an indexed column (see the v8 migration
+    in db/database.py — payments.status, payments.created_at, students.domain),
+    so this stays cheap as the tables grow instead of scanning per widget.
+    """
+    # Funnel: where every applicant currently sits in the pipeline.
+    funnel_row = await db.fetch_one(
+        """SELECT
+             COUNT(*) AS total,
+             SUM(CASE WHEN status = 'applied'    THEN 1 ELSE 0 END) AS applied,
+             SUM(CASE WHEN status = 'shortlisted' THEN 1 ELSE 0 END) AS shortlisted,
+             SUM(CASE WHEN status = 'enrolled'    THEN 1 ELSE 0 END) AS enrolled,
+             SUM(CASE WHEN status = 'completed'   THEN 1 ELSE 0 END) AS completed,
+             SUM(CASE WHEN status = 'dropped'     THEN 1 ELSE 0 END) AS dropped
+           FROM students"""
+    ) or {}
+
+    # Domain-wise breakdown: applicants, enrolled, completed and paid-alumni per domain.
+    domain_rows = await db.fetch_all(
+        """SELECT
+             COALESCE(s.domain, 'unspecified') AS domain,
+             COUNT(*) AS total,
+             SUM(CASE WHEN s.status = 'enrolled'  THEN 1 ELSE 0 END) AS enrolled,
+             SUM(CASE WHEN s.status = 'completed' THEN 1 ELSE 0 END) AS completed,
+             SUM(CASE WHEN s.status = 'dropped'   THEN 1 ELSE 0 END) AS dropped,
+             (SELECT COUNT(DISTINCT p.student_id) FROM payments p
+                JOIN students s2 ON s2.id = p.student_id
+                WHERE p.status = 'paid' AND COALESCE(s2.domain, 'unspecified') = COALESCE(s.domain, 'unspecified')
+             ) AS paid_alumni
+           FROM students s
+           GROUP BY COALESCE(s.domain, 'unspecified')
+           ORDER BY total DESC"""
+    )
+
+    # Weekly completion / dropout — approved submissions per week across all enrollments,
+    # against how many enrollments were ever active (rough completion-rate denominator).
+    completion_rows = await db.fetch_all(
+        """SELECT
+             week,
+             COUNT(*) AS total_submitted,
+             SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) AS approved,
+             SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) AS rejected,
+             SUM(CASE WHEN status = 'pending'  THEN 1 ELSE 0 END) AS pending
+           FROM submissions
+           GROUP BY week
+           ORDER BY week"""
+    )
+
+    # Revenue: certificate payments, all-time totals plus a 12-month trend.
+    revenue_row = await db.fetch_one(
+        """SELECT
+             COUNT(*)                                            AS total_orders,
+             SUM(CASE WHEN status = 'paid'   THEN 1 ELSE 0 END)  AS paid_orders,
+             SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END)  AS failed_orders,
+             SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending_orders,
+             COALESCE(SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END), 0) AS total_revenue_paise
+           FROM payments"""
+    ) or {}
+
+    revenue_trend = await db.fetch_all(
+        """SELECT
+             strftime('%Y-%m', created_at) AS month,
+             COUNT(*) AS orders,
+             COALESCE(SUM(amount), 0) AS revenue_paise
+           FROM payments
+           WHERE status = 'paid' AND created_at >= datetime('now', '-12 months')
+           GROUP BY strftime('%Y-%m', created_at)
+           ORDER BY month"""
+    )
+
+    # Applications trend — last 12 months, for a simple growth sparkline.
+    applications_trend = await db.fetch_all(
+        """SELECT
+             strftime('%Y-%m', created_at) AS month,
+             COUNT(*) AS count
+           FROM students
+           WHERE created_at >= datetime('now', '-12 months')
+           GROUP BY strftime('%Y-%m', created_at)
+           ORDER BY month"""
+    )
+
+    return {
+        "funnel": {k: funnel_row.get(k) or 0 for k in
+                   ("total", "applied", "shortlisted", "enrolled", "completed", "dropped")},
+        "domains": [
+            {
+                "domain": r["domain"],
+                "total": r["total"] or 0,
+                "enrolled": r["enrolled"] or 0,
+                "completed": r["completed"] or 0,
+                "dropped": r["dropped"] or 0,
+                "paid_alumni": r["paid_alumni"] or 0,
+            }
+            for r in domain_rows
+        ],
+        "weekly_completion": [
+            {
+                "week": r["week"],
+                "total_submitted": r["total_submitted"] or 0,
+                "approved": r["approved"] or 0,
+                "rejected": r["rejected"] or 0,
+                "pending": r["pending"] or 0,
+            }
+            for r in completion_rows
+        ],
+        "revenue": {
+            "total_orders": revenue_row.get("total_orders") or 0,
+            "paid_orders": revenue_row.get("paid_orders") or 0,
+            "failed_orders": revenue_row.get("failed_orders") or 0,
+            "pending_orders": revenue_row.get("pending_orders") or 0,
+            "total_revenue_rupees": (revenue_row.get("total_revenue_paise") or 0) / 100,
+            "trend": [
+                {"month": r["month"], "orders": r["orders"] or 0, "revenue_rupees": (r["revenue_paise"] or 0) / 100}
+                for r in revenue_trend
+            ],
+        },
+        "applications_trend": [
+            {"month": r["month"], "count": r["count"] or 0} for r in applications_trend
         ],
     }

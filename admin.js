@@ -34,6 +34,7 @@ const PAGE_META = {
   overview:  { title: 'Overview',  subtitle: 'Platform summary and recent activity' },
   students:  { title: 'Students',  subtitle: 'Shortlist and enroll applicants' },
   alumni:    { title: 'Alumni',    subtitle: 'Students who completed their internship' },
+  analytics: { title: 'Analytics', subtitle: 'Domain performance, completion rates and revenue at a glance' },
   email:     { title: 'Email Settings', subtitle: 'Brevo SMTP relay — test and monitor email delivery' },
   submissions: { title: 'Submissions', subtitle: 'Review and approve/reject weekly LinkedIn submissions' },
   'urgent-requests': { title: 'Urgent Requests', subtitle: 'Expedited (24h) certificate/LOR/portfolio processing requests' },
@@ -602,7 +603,8 @@ function navigate(page) {
   if (page === 'overview') loadOverview();
   if (page === 'students') loadStudents();
   if (page === 'alumni') loadAlumni();
-  if (page === 'email') loadEmailStatus();
+  if (page === 'analytics') loadAnalytics();
+  if (page === 'email') { loadEmailStatus(); loadEmailDirectory(); loadEmailLogs(); loadEmailAggStats(); }
   if (page === 'submissions') loadSubmissions();
   if (page === 'urgent-requests') loadUrgentRequests();
   if (page === 'announcements') previewAnnouncement();
@@ -805,8 +807,9 @@ function renderPager(elId, state, loaderName) {
   const el = document.getElementById(elId);
   if (!el) return;
   if (!state.total) { el.innerHTML = ''; return; }
-  const from = (state.page - 1) * STUDENTS_PAGE_SIZE + 1;
-  const to = Math.min(state.total, state.page * STUDENTS_PAGE_SIZE);
+  const pageSize = state.limit || STUDENTS_PAGE_SIZE;
+  const from = (state.page - 1) * pageSize + 1;
+  const to = Math.min(state.total, state.page * pageSize);
   el.innerHTML = `
     <span>Showing ${from}–${to} of ${state.total} · Page ${state.page} of ${state.totalPages}</span>
     <div style="display:flex;gap:8px;">
@@ -1104,6 +1107,170 @@ async function sendTestEmail() {
   } finally {
     btn.textContent = 'Send Test';
     btn.disabled = false;
+  }
+}
+
+// ─── EMAIL DIRECTORY (per-student contact + delivery health) ───
+const emailDirectoryState = { page: 1, q: '', total: 0, totalPages: 1, limit: STUDENTS_PAGE_SIZE };
+let _emailDirReq = 0;
+
+async function loadEmailDirectory(silent = false) {
+  const tbody = document.getElementById('email-directory-tbody');
+  if (!tbody) return;
+  if (!silent) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="loading-overlay"><div class="spinner"></div></div></td></tr>`;
+  }
+  const reqId = ++_emailDirReq;
+  const params = new URLSearchParams({ page: emailDirectoryState.page, limit: emailDirectoryState.limit });
+  if (emailDirectoryState.q) params.set('q', emailDirectoryState.q);
+  try {
+    const data = await api(`/api/admin/email/directory?${params}`);
+    if (reqId !== _emailDirReq) return;
+    emailDirectoryState.total = data.total || 0;
+    emailDirectoryState.totalPages = data.total_pages || 1;
+    if (!data.students.length && emailDirectoryState.page > 1 && emailDirectoryState.total) {
+      emailDirectoryState.page = emailDirectoryState.totalPages;
+      return loadEmailDirectory(silent);
+    }
+    renderEmailDirectory(data.students || []);
+    renderPager('email-directory-pagination', emailDirectoryState, 'goToEmailDirectoryPage');
+  } catch(e) {
+    if (reqId !== _emailDirReq) return;
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-state-text">${esc(e.message)}</div></div></td></tr>`;
+  }
+}
+
+function renderEmailDirectory(students) {
+  const tbody = document.getElementById('email-directory-tbody');
+  if (!tbody) return;
+  if (!students.length) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:32px;">No students found.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = students.map(s => {
+    const bounced = s.emails_bounced > 0
+      ? `<span style="color:#fb7185;font-weight:700;">${s.emails_bounced}</span>`
+      : `<span style="color:var(--text-secondary);">0</span>`;
+    const failed = s.emails_failed > 0
+      ? `<span style="color:#f59e0b;font-weight:700;">${s.emails_failed}</span>`
+      : `<span style="color:var(--text-secondary);">0</span>`;
+    return `
+    <tr>
+      <td style="font-weight:500;">${esc(s.first_name)} ${esc(s.last_name)}</td>
+      <td style="font-size:0.82rem;color:var(--text-secondary);">${esc(s.email)}</td>
+      <td>${esc(s.domain || '—')}</td>
+      <td>${statusBadge(s.status)}</td>
+      <td>${s.emails_sent || 0}</td>
+      <td>${failed}</td>
+      <td>${bounced}</td>
+      <td style="font-size:0.8rem;color:var(--text-secondary);">${s.last_email_type ? esc(s.last_email_type) + ' · ' + fmtDate(s.last_email_at) : '—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function goToEmailDirectoryPage(page) {
+  emailDirectoryState.page = Math.max(1, Math.min(page, emailDirectoryState.totalPages || 1));
+  loadEmailDirectory();
+}
+
+const _debouncedEmailDirSearch = debounce(() => loadEmailDirectory(), 300);
+function debounceEmailDirectory() {
+  emailDirectoryState.q = (document.getElementById('email-directory-search')?.value || '').trim();
+  emailDirectoryState.page = 1;
+  _debouncedEmailDirSearch();
+}
+
+// ─── EMAIL SEND LOG ───
+const emailLogState = { page: 1, total: 0, totalPages: 1, limit: 50 };
+let _emailLogReq = 0;
+
+async function loadEmailLogs(silent = false) {
+  const tbody = document.getElementById('email-log-tbody');
+  if (!tbody) return;
+  if (!silent) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="loading-overlay"><div class="spinner"></div></td></tr>`;
+  }
+  const reqId = ++_emailLogReq;
+  const type = document.getElementById('email-log-type-filter')?.value || '';
+  const recipient = (document.getElementById('email-log-recipient-filter')?.value || '').trim();
+  const status = document.getElementById('email-log-status-filter')?.value || '';
+  const params = new URLSearchParams({ page: emailLogState.page, limit: emailLogState.limit });
+  if (type) params.set('email_type', type);
+  if (recipient) params.set('recipient', recipient);
+  if (status) params.set('status', status);
+  try {
+    const data = await api(`/api/admin/email/logs?${params}`);
+    if (reqId !== _emailLogReq) return;
+    emailLogState.total = data.total || 0;
+    emailLogState.totalPages = data.total_pages || 1;
+    renderEmailLogs(data.logs || []);
+    renderPager('email-log-pagination', emailLogState, 'goToEmailLogPage');
+  } catch(e) {
+    if (reqId !== _emailLogReq) return;
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-state-text">${esc(e.message)}</div></div></td></tr>`;
+  }
+}
+
+function renderEmailLogs(logs) {
+  const tbody = document.getElementById('email-log-tbody');
+  if (!tbody) return;
+  if (!logs.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text-secondary);padding:32px;">No emails match these filters.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = logs.map(l => {
+    const statusChip = l.status === 'sent'
+      ? `<span style="color:#34d399;font-weight:600;">Sent</span>`
+      : `<span style="color:#fb7185;font-weight:600;" title="${esc(l.error_message || '')}">Failed</span>`;
+    const engagement = [];
+    if (l.delivered_at) engagement.push('📬 Delivered');
+    if (l.opened_at) engagement.push(`👁️ Opened${l.opened_count > 1 ? ' x' + l.opened_count : ''}`);
+    if (l.clicked_at) engagement.push(`🖱️ Clicked${l.clicked_count > 1 ? ' x' + l.clicked_count : ''}`);
+    if (l.bounced_at) engagement.push(`⚠️ Bounced${l.bounce_type ? ' (' + esc(l.bounce_type) + ')' : ''}`);
+    if (l.spam_reported_at) engagement.push('🚫 Spam');
+    if (l.unsubscribed_at) engagement.push('✋ Unsubscribed');
+    return `
+    <tr>
+      <td style="font-size:0.78rem;color:var(--text-secondary);">${fmtDate(l.sent_at)}</td>
+      <td style="font-size:0.8rem;">${esc(l.email_type)}</td>
+      <td style="font-size:0.82rem;">${esc(l.recipient_email)}</td>
+      <td style="font-size:0.82rem;color:var(--text-secondary);">${esc(l.subject)}</td>
+      <td style="font-size:0.8rem;color:var(--text-secondary);">${esc(l.student_name || '—')}</td>
+      <td>${statusChip}</td>
+      <td style="font-size:0.72rem;color:var(--text-secondary);">${engagement.join('<br>') || '—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function goToEmailLogPage(page) {
+  emailLogState.page = Math.max(1, Math.min(page, emailLogState.totalPages || 1));
+  loadEmailLogs();
+}
+
+const _debouncedEmailLogSearch = debounce(() => { emailLogState.page = 1; loadEmailLogs(); }, 300);
+function debounceEmailLogs() { _debouncedEmailLogSearch(); }
+
+async function loadEmailAggStats() {
+  const el = document.getElementById('email-agg-stats');
+  if (!el) return;
+  try {
+    const s = await api('/api/admin/email/stats');
+    const chip = (label, value, color) => `
+      <div style="padding:10px 16px;border-radius:8px;background:${color}1a;border:1px solid ${color}4d;font-size:0.8rem;min-width:110px;">
+        <div style="color:var(--text-secondary);font-size:0.68rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">${label}</div>
+        <div style="color:${color};font-weight:700;font-size:1.05rem;">${(value ?? 0).toLocaleString()}</div>
+      </div>`;
+    el.innerHTML = [
+      chip('Total Sent', s.total, '#c99a4e'),
+      chip('Delivered', s.delivered, '#34d399'),
+      chip('Opened', s.opened, '#38bdf8'),
+      chip('Clicked', s.clicked, '#818cf8'),
+      chip('Failed', s.failed, '#fb7185'),
+      chip('Bounced', s.bounced, '#f59e0b'),
+      chip('Spam Reports', s.spam_reported, '#ef4444'),
+    ].join('');
+  } catch(e) {
+    el.innerHTML = `<div class="empty-state-text" style="font-size:0.8rem;">${esc(e.message)}</div>`;
   }
 }
 
@@ -1497,6 +1664,158 @@ async function sendRemindersNow() {
     if (resultEl) resultEl.textContent = `❌ Failed: ${err.message}`;
     if (sendBtn) sendBtn.disabled = false;
   }
+}
+
+// ─── ANALYTICS ───
+// Chart.js instances, kept keyed by canvas id so a refresh destroys the old
+// chart before drawing a new one instead of leaking canvases/listeners.
+const _analyticsCharts = {};
+
+const CHART_PALETTE = ['#c99a4e', '#4fa36b', '#38bdf8', '#818cf8', '#fb7185', '#f59e0b', '#34d399', '#a78bfa'];
+
+function _drawChart(canvasId, config) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas || typeof Chart === 'undefined') return;
+  if (_analyticsCharts[canvasId]) _analyticsCharts[canvasId].destroy();
+  _analyticsCharts[canvasId] = new Chart(canvas.getContext('2d'), config);
+}
+
+const CHART_BASE_OPTIONS = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { labels: { color: 'rgba(244,235,225,0.75)', boxWidth: 12, font: { size: 11 } } } },
+  scales: {
+    x: { ticks: { color: 'rgba(244,235,225,0.55)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+    y: { ticks: { color: 'rgba(244,235,225,0.55)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true },
+  },
+};
+
+async function loadAnalytics() {
+  const grid = document.getElementById('analytics-funnel-grid');
+  if (!grid) return;
+  try {
+    const data = await api('/api/admin/analytics');
+    renderAnalyticsFunnel(data.funnel || {});
+    renderApplicationsTrendChart(data.applications_trend || []);
+    renderRevenueTrendChart(data.revenue || {});
+    renderDomainBreakdownChart(data.domains || []);
+    renderWeeklyCompletionChart(data.weekly_completion || []);
+    renderDomainTable(data.domains || []);
+  } catch (e) {
+    grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-text">${esc(e.message)}</div></div>`;
+  }
+}
+
+function renderAnalyticsFunnel(f) {
+  const grid = document.getElementById('analytics-funnel-grid');
+  if (!grid) return;
+  const completionRate = f.total ? Math.round(((f.completed || 0) / f.total) * 100) : 0;
+  const dropoutRate = f.total ? Math.round(((f.dropped || 0) / f.total) * 100) : 0;
+  grid.innerHTML = `
+    ${statCard('📋', f.total, 'Total Applicants', 'rgba(201,154,78,0.12)', '#c99a4e')}
+    ${statCard('🟢', f.enrolled, 'Currently Enrolled', 'rgba(79,163,107,0.15)', '#4fa36b')}
+    ${statCard('🏁', f.completed, 'Completed', 'rgba(129,140,248,0.15)', '#818cf8')}
+    ${statCard('📉', `${dropoutRate}%`, 'Dropout Rate', 'rgba(251,113,133,0.15)', '#fb7185')}
+    ${statCard('✅', `${completionRate}%`, 'Completion Rate', 'rgba(56,189,248,0.15)', '#38bdf8')}
+  `;
+}
+
+function renderApplicationsTrendChart(trend) {
+  _drawChart('chart-applications-trend', {
+    type: 'line',
+    data: {
+      labels: trend.map(t => t.month),
+      datasets: [{
+        label: 'Applications',
+        data: trend.map(t => t.count),
+        borderColor: '#c99a4e',
+        backgroundColor: 'rgba(201,154,78,0.15)',
+        fill: true,
+        tension: 0.35,
+      }],
+    },
+    options: { ...CHART_BASE_OPTIONS, plugins: { legend: { display: false } } },
+  });
+}
+
+function renderRevenueTrendChart(revenue) {
+  const trend = revenue.trend || [];
+  const subtitle = document.getElementById('analytics-revenue-subtitle');
+  if (subtitle) {
+    subtitle.textContent = `₹${(revenue.total_revenue_rupees || 0).toLocaleString('en-IN')} total · ${revenue.paid_orders || 0} paid orders`;
+  }
+  _drawChart('chart-revenue-trend', {
+    type: 'bar',
+    data: {
+      labels: trend.map(t => t.month),
+      datasets: [{
+        label: 'Revenue (₹)',
+        data: trend.map(t => t.revenue_rupees),
+        backgroundColor: '#4fa36b',
+        borderRadius: 4,
+      }],
+    },
+    options: { ...CHART_BASE_OPTIONS, plugins: { legend: { display: false } } },
+  });
+}
+
+function renderDomainBreakdownChart(domains) {
+  _drawChart('chart-domain-breakdown', {
+    type: 'bar',
+    data: {
+      labels: domains.map(d => d.domain),
+      datasets: [
+        { label: 'Enrolled', data: domains.map(d => d.enrolled), backgroundColor: '#4fa36b', borderRadius: 4 },
+        { label: 'Completed', data: domains.map(d => d.completed), backgroundColor: '#818cf8', borderRadius: 4 },
+        { label: 'Dropped', data: domains.map(d => d.dropped), backgroundColor: '#fb7185', borderRadius: 4 },
+      ],
+    },
+    options: CHART_BASE_OPTIONS,
+  });
+}
+
+function renderWeeklyCompletionChart(weekly) {
+  _drawChart('chart-weekly-completion', {
+    type: 'bar',
+    data: {
+      labels: weekly.map(w => `Week ${w.week}`),
+      datasets: [
+        { label: 'Approved', data: weekly.map(w => w.approved), backgroundColor: '#34d399', borderRadius: 4 },
+        { label: 'Rejected', data: weekly.map(w => w.rejected), backgroundColor: '#fb7185', borderRadius: 4 },
+        { label: 'Pending', data: weekly.map(w => w.pending), backgroundColor: '#f59e0b', borderRadius: 4 },
+      ],
+    },
+    options: { ...CHART_BASE_OPTIONS, scales: { ...CHART_BASE_OPTIONS.scales, x: { ...CHART_BASE_OPTIONS.scales.x, stacked: true }, y: { ...CHART_BASE_OPTIONS.scales.y, stacked: true } } },
+  });
+}
+
+function renderDomainTable(domains) {
+  const tbody = document.getElementById('analytics-domain-tbody');
+  if (!tbody) return;
+  if (!domains.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text-secondary);padding:32px;">No students yet.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = domains.map(d => {
+    const rate = d.total ? Math.round((d.completed / d.total) * 100) : 0;
+    return `
+    <tr>
+      <td style="font-weight:600;">${esc(d.domain)}</td>
+      <td>${d.total}</td>
+      <td style="color:#4fa36b;">${d.enrolled}</td>
+      <td style="color:#818cf8;">${d.completed}</td>
+      <td style="color:#fb7185;">${d.dropped}</td>
+      <td>${d.paid_alumni}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,0.08);overflow:hidden;">
+            <div style="width:${rate}%;height:100%;background:#38bdf8;"></div>
+          </div>
+          <span style="font-size:0.78rem;color:var(--text-secondary);min-width:34px;">${rate}%</span>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
 }
 
 // ─── INIT ───

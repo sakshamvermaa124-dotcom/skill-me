@@ -62,141 +62,32 @@ class Database:
                 return fn(*args, **kwargs)
             raise
 
+    def _uses_http(self) -> bool:
+        return bool(self._auth_token) and getattr(libsql, "__name__", "") != "libsql_experimental"
+
     async def connect(self):
         """Initialize the LibSQL connection and create tables from schema."""
-        # Use a temporary connection to apply the schema
+        schema_sql = SCHEMA_PATH.read_text(encoding="utf-8")
+        statements = [s.strip() for s in schema_sql.split(";") if s.strip()]
+
+        if self._uses_http():
+            # Without the native driver, _make_connection() points at a local file,
+            # so schema/migrations must go over HTTP to actually reach Turso.
+            for stmt in statements + self._migrations():
+                try:
+                    self._run_turso_http(stmt)
+                except Exception as e:
+                    if "duplicate column" not in str(e).lower():
+                        logger.warning(f"Schema statement skipped: {e}")
+            logger.info(f"Database schema verified over HTTP: {self._url}")
+            return
+
         conn = self._make_connection()
         try:
-            # Apply schema (CREATE IF NOT EXISTS — safe to run every start)
-            schema_sql = SCHEMA_PATH.read_text(encoding="utf-8")
-            statements = [s.strip() for s in schema_sql.split(";") if s.strip()]
             for stmt in statements:
                 conn.execute(stmt)
             conn.commit()
-
-            # Run migrations — safe to run on every startup (no-op if already done)
-            migrations = [
-                "ALTER TABLE students ADD COLUMN domain TEXT",
-                # email_logs table — added in v2; safe no-op if schema already ran
-                """CREATE TABLE IF NOT EXISTS email_logs (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    recipient_email TEXT NOT NULL,
-                    recipient_name  TEXT,
-                    email_type      TEXT NOT NULL,
-                    subject         TEXT NOT NULL,
-                    student_id      INTEGER,
-                    batch_id        INTEGER,
-                    status          TEXT NOT NULL DEFAULT 'sent',
-                    error_message   TEXT,
-                    sent_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )""",
-                "CREATE INDEX IF NOT EXISTS idx_email_logs_recipient ON email_logs(recipient_email)",
-                "CREATE INDEX IF NOT EXISTS idx_email_logs_type ON email_logs(email_type)",
-                "CREATE INDEX IF NOT EXISTS idx_email_logs_sent_at ON email_logs(sent_at)",
-                "ALTER TABLE email_logs ADD COLUMN body TEXT", # v3 update
-                # otp_tokens — student OTP login (v3)
-                """CREATE TABLE IF NOT EXISTS otp_tokens (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    email TEXT NOT NULL,
-                    otp_hash TEXT NOT NULL,
-                    expires_at TIMESTAMP NOT NULL,
-                    used INTEGER DEFAULT 0,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )""",
-                "CREATE INDEX IF NOT EXISTS idx_otp_email ON otp_tokens(email)",
-                # referral_codes — one per student (v3)
-                """CREATE TABLE IF NOT EXISTS referral_codes (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    student_id INTEGER NOT NULL UNIQUE,
-                    code TEXT NOT NULL UNIQUE,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )""",
-                "CREATE INDEX IF NOT EXISTS idx_referral_codes_code ON referral_codes(code)",
-                # referral_conversions (v3)
-                """CREATE TABLE IF NOT EXISTS referral_conversions (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    referrer_student_id INTEGER NOT NULL,
-                    referred_student_id INTEGER,
-                    referred_email TEXT NOT NULL,
-                    status TEXT DEFAULT 'clicked',
-                    discount_applied INTEGER DEFAULT 0,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )""",
-                "CREATE INDEX IF NOT EXISTS idx_referral_conv_referrer ON referral_conversions(referrer_student_id)",
-                # ── Monitoring & QA tables (v4) ──
-                """CREATE TABLE IF NOT EXISTS monitor_alerts (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    alert_type TEXT NOT NULL,
-                    severity TEXT NOT NULL,
-                    category TEXT NOT NULL,
-                    workflow TEXT,
-                    failed_step TEXT,
-                    title TEXT NOT NULL,
-                    description TEXT NOT NULL,
-                    expected TEXT,
-                    actual TEXT,
-                    student_id INTEGER,
-                    student_email TEXT,
-                    api_response TEXT,
-                    error_details TEXT,
-                    component TEXT,
-                    is_regression INTEGER DEFAULT 0,
-                    is_resolved INTEGER DEFAULT 0,
-                    resolved_at TIMESTAMP,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )""",
-                "CREATE INDEX IF NOT EXISTS idx_monitor_alerts_severity ON monitor_alerts(severity)",
-                "CREATE INDEX IF NOT EXISTS idx_monitor_alerts_created ON monitor_alerts(created_at)",
-                "CREATE INDEX IF NOT EXISTS idx_monitor_alerts_resolved ON monitor_alerts(is_resolved)",
-                """CREATE TABLE IF NOT EXISTS monitor_checks (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    check_name TEXT NOT NULL,
-                    check_type TEXT NOT NULL,
-                    status TEXT NOT NULL,
-                    response_time_ms INTEGER,
-                    details TEXT,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )""",
-                "CREATE INDEX IF NOT EXISTS idx_monitor_checks_name ON monitor_checks(check_name)",
-                "CREATE INDEX IF NOT EXISTS idx_monitor_checks_created ON monitor_checks(created_at)",
-                """CREATE TABLE IF NOT EXISTS frontend_errors (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    page TEXT NOT NULL,
-                    error_type TEXT NOT NULL,
-                    message TEXT NOT NULL,
-                    stack_trace TEXT,
-                    url TEXT,
-                    user_agent TEXT,
-                    student_email TEXT,
-                    session_id TEXT,
-                    request_url TEXT,
-                    request_status INTEGER,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )""",
-                "CREATE INDEX IF NOT EXISTS idx_frontend_errors_page ON frontend_errors(page)",
-                "CREATE INDEX IF NOT EXISTS idx_frontend_errors_created ON frontend_errors(created_at)",
-                "CREATE INDEX IF NOT EXISTS idx_frontend_errors_email ON frontend_errors(student_email)",
-                # payment_unlocked_at — set on enrollments when an admin fulfills a sub-50% urgent request (v5)
-                "ALTER TABLE enrollments ADD COLUMN payment_unlocked_at TIMESTAMP",
-                # Email delivery/engagement tracking via Brevo webhook events (v6)
-                "ALTER TABLE email_logs ADD COLUMN message_tag TEXT",
-                "ALTER TABLE email_logs ADD COLUMN delivered_at TIMESTAMP",
-                "ALTER TABLE email_logs ADD COLUMN opened_at TIMESTAMP",
-                "ALTER TABLE email_logs ADD COLUMN opened_count INTEGER DEFAULT 0",
-                "ALTER TABLE email_logs ADD COLUMN clicked_at TIMESTAMP",
-                "ALTER TABLE email_logs ADD COLUMN clicked_count INTEGER DEFAULT 0",
-                "ALTER TABLE email_logs ADD COLUMN bounced_at TIMESTAMP",
-                "ALTER TABLE email_logs ADD COLUMN bounce_type TEXT",
-                "ALTER TABLE email_logs ADD COLUMN spam_reported_at TIMESTAMP",
-                "ALTER TABLE email_logs ADD COLUMN unsubscribed_at TIMESTAMP",
-                "ALTER TABLE email_logs ADD COLUMN last_event TEXT",
-                "ALTER TABLE email_logs ADD COLUMN last_event_at TIMESTAMP",
-                "CREATE INDEX IF NOT EXISTS idx_email_logs_tag ON email_logs(message_tag)",
-                # Auto-generated feedback emailed to the student when they submit a week's task (v7)
-                "ALTER TABLE submissions ADD COLUMN feedback TEXT",
-            ]
-            for migration in migrations:
+            for migration in self._migrations():
                 try:
                     conn.execute(migration)
                     conn.commit()
@@ -205,6 +96,137 @@ class Database:
             logger.info(f"Database schema verified: {self._url}")
         finally:
             conn.close()
+
+    @staticmethod
+    def _migrations() -> list[str]:
+        """Idempotent migrations — safe to run on every startup."""
+        migrations = [
+            "ALTER TABLE students ADD COLUMN domain TEXT",
+            # email_logs table — added in v2; safe no-op if schema already ran
+            """CREATE TABLE IF NOT EXISTS email_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                recipient_email TEXT NOT NULL,
+                recipient_name  TEXT,
+                email_type      TEXT NOT NULL,
+                subject         TEXT NOT NULL,
+                student_id      INTEGER,
+                batch_id        INTEGER,
+                status          TEXT NOT NULL DEFAULT 'sent',
+                error_message   TEXT,
+                sent_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )""",
+            "CREATE INDEX IF NOT EXISTS idx_email_logs_recipient ON email_logs(recipient_email)",
+            "CREATE INDEX IF NOT EXISTS idx_email_logs_type ON email_logs(email_type)",
+            "CREATE INDEX IF NOT EXISTS idx_email_logs_sent_at ON email_logs(sent_at)",
+            "ALTER TABLE email_logs ADD COLUMN body TEXT", # v3 update
+            # otp_tokens — student OTP login (v3)
+            """CREATE TABLE IF NOT EXISTS otp_tokens (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                email TEXT NOT NULL,
+                otp_hash TEXT NOT NULL,
+                expires_at TIMESTAMP NOT NULL,
+                used INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )""",
+            "CREATE INDEX IF NOT EXISTS idx_otp_email ON otp_tokens(email)",
+            # referral_codes — one per student (v3)
+            """CREATE TABLE IF NOT EXISTS referral_codes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id INTEGER NOT NULL UNIQUE,
+                code TEXT NOT NULL UNIQUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )""",
+            "CREATE INDEX IF NOT EXISTS idx_referral_codes_code ON referral_codes(code)",
+            # referral_conversions (v3)
+            """CREATE TABLE IF NOT EXISTS referral_conversions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                referrer_student_id INTEGER NOT NULL,
+                referred_student_id INTEGER,
+                referred_email TEXT NOT NULL,
+                status TEXT DEFAULT 'clicked',
+                discount_applied INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )""",
+            "CREATE INDEX IF NOT EXISTS idx_referral_conv_referrer ON referral_conversions(referrer_student_id)",
+            # ── Monitoring & QA tables (v4) ──
+            """CREATE TABLE IF NOT EXISTS monitor_alerts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                alert_type TEXT NOT NULL,
+                severity TEXT NOT NULL,
+                category TEXT NOT NULL,
+                workflow TEXT,
+                failed_step TEXT,
+                title TEXT NOT NULL,
+                description TEXT NOT NULL,
+                expected TEXT,
+                actual TEXT,
+                student_id INTEGER,
+                student_email TEXT,
+                api_response TEXT,
+                error_details TEXT,
+                component TEXT,
+                is_regression INTEGER DEFAULT 0,
+                is_resolved INTEGER DEFAULT 0,
+                resolved_at TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )""",
+            "CREATE INDEX IF NOT EXISTS idx_monitor_alerts_severity ON monitor_alerts(severity)",
+            "CREATE INDEX IF NOT EXISTS idx_monitor_alerts_created ON monitor_alerts(created_at)",
+            "CREATE INDEX IF NOT EXISTS idx_monitor_alerts_resolved ON monitor_alerts(is_resolved)",
+            """CREATE TABLE IF NOT EXISTS monitor_checks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                check_name TEXT NOT NULL,
+                check_type TEXT NOT NULL,
+                status TEXT NOT NULL,
+                response_time_ms INTEGER,
+                details TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )""",
+            "CREATE INDEX IF NOT EXISTS idx_monitor_checks_name ON monitor_checks(check_name)",
+            "CREATE INDEX IF NOT EXISTS idx_monitor_checks_created ON monitor_checks(created_at)",
+            """CREATE TABLE IF NOT EXISTS frontend_errors (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                page TEXT NOT NULL,
+                error_type TEXT NOT NULL,
+                message TEXT NOT NULL,
+                stack_trace TEXT,
+                url TEXT,
+                user_agent TEXT,
+                student_email TEXT,
+                session_id TEXT,
+                request_url TEXT,
+                request_status INTEGER,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )""",
+            "CREATE INDEX IF NOT EXISTS idx_frontend_errors_page ON frontend_errors(page)",
+            "CREATE INDEX IF NOT EXISTS idx_frontend_errors_created ON frontend_errors(created_at)",
+            "CREATE INDEX IF NOT EXISTS idx_frontend_errors_email ON frontend_errors(student_email)",
+            # payment_unlocked_at — set on enrollments when an admin fulfills a sub-50% urgent request (v5)
+            "ALTER TABLE enrollments ADD COLUMN payment_unlocked_at TIMESTAMP",
+            # Email delivery/engagement tracking via Brevo webhook events (v6)
+            "ALTER TABLE email_logs ADD COLUMN message_tag TEXT",
+            "ALTER TABLE email_logs ADD COLUMN delivered_at TIMESTAMP",
+            "ALTER TABLE email_logs ADD COLUMN opened_at TIMESTAMP",
+            "ALTER TABLE email_logs ADD COLUMN opened_count INTEGER DEFAULT 0",
+            "ALTER TABLE email_logs ADD COLUMN clicked_at TIMESTAMP",
+            "ALTER TABLE email_logs ADD COLUMN clicked_count INTEGER DEFAULT 0",
+            "ALTER TABLE email_logs ADD COLUMN bounced_at TIMESTAMP",
+            "ALTER TABLE email_logs ADD COLUMN bounce_type TEXT",
+            "ALTER TABLE email_logs ADD COLUMN spam_reported_at TIMESTAMP",
+            "ALTER TABLE email_logs ADD COLUMN unsubscribed_at TIMESTAMP",
+            "ALTER TABLE email_logs ADD COLUMN last_event TEXT",
+            "ALTER TABLE email_logs ADD COLUMN last_event_at TIMESTAMP",
+            "CREATE INDEX IF NOT EXISTS idx_email_logs_tag ON email_logs(message_tag)",
+            # Auto-generated feedback emailed to the student when they submit a week's task (v7)
+            "ALTER TABLE submissions ADD COLUMN feedback TEXT",
+            # Indexes for the admin analytics dashboard (v8) — without these, revenue/domain
+            # aggregation queries full-scan payments/students as those tables grow.
+            "CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status)",
+            "CREATE INDEX IF NOT EXISTS idx_payments_created ON payments(created_at)",
+            "CREATE INDEX IF NOT EXISTS idx_students_domain ON students(domain)",
+        ]
+        return migrations
 
     async def disconnect(self):
         """No-op since connections are created per-query."""
@@ -274,8 +296,11 @@ class Database:
             res.raise_for_status()
             data = res.json()
             results = data.get("results", [])
-            if not results or "response" not in results[0]:
+            if not results:
                 return [], None
+            if results[0].get("type") == "error" or "response" not in results[0]:
+                msg = (results[0].get("error") or {}).get("message", "unknown error")
+                raise RuntimeError(f"Turso query failed: {msg}")
             result = results[0]["response"].get("result", {})
             cols = [c["name"] for c in result.get("cols", [])]
             rows = []
