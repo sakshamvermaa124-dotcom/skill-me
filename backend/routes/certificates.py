@@ -13,11 +13,20 @@ from fastapi.responses import Response
 from middleware.auth import require_admin
 from services.certificate_service import certificate_service, generate_certificate_pdf
 from services.enrollment_service import enrollment_service
-from services.email_service import email_service
+from services.email_service import email_service, _domain_label
+from services.task_service import task_service
 from db.database import db
 
 logger = logging.getLogger("skillme.certificates")
 router = APIRouter(prefix="/api/certificates", tags=["certificates"])
+
+
+def _domain_fields(raw: str | None) -> dict:
+    """Canonical slug + display label, so pages don't have to parse the raw stored
+    value (which may be a slug like 'web-dev' or a form label like 'Data Science')."""
+    raw = (raw or "").strip()
+    slug = task_service.normalize_domain_slug(raw)
+    return {"domain_slug": slug, "domain_label": _domain_label(raw or slug)}
 
 
 async def _student_certificate(student_id: int, batch_id: int) -> dict | None:
@@ -54,6 +63,7 @@ async def verify_certificate(cert_id: str):
         "cert_id": row["cert_id"],
         "holder": f"{row['first_name']} {row['last_name']}",
         "domain": row["domain"],
+        **_domain_fields(row["domain"]),
         "issued_at": row["issued_at"],
     }
 
@@ -175,14 +185,19 @@ async def get_cert_metadata(student_id: int, batch_id: int):
         (cert["batch_id"], student_id),
     )
 
+    first = (info["first_name"] if info else "") or ""
+    last = (info["last_name"] if info else "") or ""
+    domain = (info["domain"] if info else "") or ""
     return {
         "cert_id": cert["cert_id"],
+        "holder": f"{first} {last}".strip(),
         "student_id": cert["student_id"],
         "batch_id": cert["batch_id"],
         "issued_at": cert["issued_at"],
-        "first_name": info["first_name"] if info else "",
-        "last_name": info["last_name"] if info else "",
-        "domain": (info["domain"] if info else "") or "",
+        "first_name": first,
+        "last_name": last,
+        "domain": domain,
+        **_domain_fields(domain),
     }
 
 
