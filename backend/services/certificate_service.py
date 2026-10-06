@@ -163,7 +163,7 @@ def _draw_company_header(c: rl_canvas.Canvas, w: float, h: float):
 
     c.setFillColor(C_MUTED)
     c.setFont("Helvetica", 6.5)
-    c.drawString(18 * mm, header_y - 5, "India's Open Source Internship Platform")
+    c.drawString(18 * mm, header_y - 5, "Project-Based Internship Platform")
 
     # Right: contact & registration
     c.setFillColor(C_MUTED)
@@ -187,15 +187,15 @@ def _draw_title(c: rl_canvas.Canvas, w: float, h: float):
     # "OFFICIAL DOCUMENT" label
     c.setFillColor(C_GOLD)
     c.setFont("Helvetica-Bold", 7)
-    c.drawCentredString(w / 2, title_y + 8, "OFFICIAL DOCUMENT")
+    c.drawCentredString(w / 2, title_y + 12, "OFFICIAL DOCUMENT")
 
     # Main title
     c.setFillColor(C_TEXT)
     c.setFont("Helvetica-Bold", 20)
-    c.drawCentredString(w / 2, title_y - 8, "Certificate of Internship Completion")
+    c.drawCentredString(w / 2, title_y - 10, "Certificate of Internship Completion")
 
     # Gold divider with diamond
-    div_y = title_y - 16
+    div_y = title_y - 19
     line_w = 60 * mm
     c.setStrokeColor(Color(0.79, 0.66, 0.30, alpha=0.4))
     c.setLineWidth(0.5)
