@@ -220,13 +220,17 @@ def _draw_body(c: rl_canvas.Canvas, w: float, h: float, student: dict, enrollmen
     c.drawCentredString(w / 2, mid_y + 26 * mm, "This is to certify that")
 
     # Student Name
-    name = f"{student.get('first_name', '')} {student.get('last_name', '')}".strip()
+    name = f"{student.get('first_name') or ''} {student.get('last_name') or ''}".strip()
+    name_size = 34
+    max_name_w = w - 70 * mm
+    while name_size > 16 and c.stringWidth(name, "Helvetica-Bold", name_size) > max_name_w:
+        name_size -= 1
     c.setFillColor(C_TEXT)
-    c.setFont("Helvetica-Bold", 34)
+    c.setFont("Helvetica-Bold", name_size)
     c.drawCentredString(w / 2, mid_y + 10 * mm, name)
 
     # Name underline
-    name_w = c.stringWidth(name, "Helvetica-Bold", 34)
+    name_w = c.stringWidth(name, "Helvetica-Bold", name_size)
     c.setStrokeColor(Color(0.79, 0.66, 0.30, alpha=0.5))
     c.setLineWidth(1)
     c.line(w / 2 - name_w / 2 - 10, mid_y + 7 * mm, w / 2 + name_w / 2 + 10, mid_y + 7 * mm)
@@ -237,7 +241,7 @@ def _draw_body(c: rl_canvas.Canvas, w: float, h: float, student: dict, enrollmen
     c.drawCentredString(w / 2, mid_y - 3 * mm, "has successfully completed the")
 
     # Domain name
-    domain = (enrollment.get("domain") or student.get("domain") or "").replace("-", " ").title()
+    track = _track_label(enrollment.get("domain") or student.get("domain"))
     c.setFillColor(C_BLUE)
     c.setFont("Helvetica-Bold", 17)
     c.drawCentredString(w / 2, mid_y - 13 * mm, f"{domain} Developer Internship")
