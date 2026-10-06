@@ -103,13 +103,16 @@ async def download_certificate(student_id: int, batch_id: int):
     # suppress_email=False (default): if this is the student's first download
     # and the payment flow somehow didn't send the email, this will catch it.
     cert_id = None
+    issued_on = None
     try:
-        cert_id = (await certificate_service.issue_certificate(student["id"], enrollment["id"]))["cert_id"]
-    except Exception:
-        pass  # Already issued or non-critical
+        issued = await certificate_service.issue_certificate(student["id"], enrollment["id"])
+        cert_id, issued_on = issued["cert_id"], issued["issued_on"]
+    except Exception as e:
+        # Non-critical: the PDF falls back to the deterministic ID
+        logger.warning(f"Certificate record lookup failed for student {student['id']}: {e}")
 
     try:
-        pdf_bytes, cert_id = generate_certificate_pdf(dict(student), dict(enrollment), cert_id=cert_id)
+        pdf_bytes, cert_id = generate_certificate_pdf(dict(student), dict(enrollment), cert_id=cert_id, issued_on=issued_on)
     except Exception as e:
         logger.error(f"PDF generation failed: {e}")
         raise HTTPException(status_code=500, detail=f"Certificate generation failed: {e}")

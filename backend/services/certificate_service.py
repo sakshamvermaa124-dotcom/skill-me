@@ -244,7 +244,7 @@ def _draw_body(c: rl_canvas.Canvas, w: float, h: float, student: dict, enrollmen
     track = _track_label(enrollment.get("domain") or student.get("domain"))
     c.setFillColor(C_BLUE)
     c.setFont("Helvetica-Bold", 17)
-    c.drawCentredString(w / 2, mid_y - 13 * mm, f"{domain} Developer Internship")
+    c.drawCentredString(w / 2, mid_y - 13 * mm, track)
 
     # Description
     c.setFillColor(C_MUTED)
@@ -333,7 +333,7 @@ def _draw_footer(c: rl_canvas.Canvas, w: float, h: float, cert_id: str, issued_o
     c.setFillColor(C_MUTED)
     c.setFont("Helvetica", 4.5)
     c.drawString(18 * mm, 6, "This is a computer-generated document. Verify at skill-me-intern.in/certificate.html")
-    c.drawRightString(w - 18 * mm, 6, "© 2024–2026 SkillMe Technologies • Govt. of India Udyam Reg. UDYAM-UP-50-0294192")
+    c.drawRightString(w - 18 * mm, 6, f"© 2024–{datetime.utcnow().year} SkillMe Technologies • Govt. of India Udyam Reg. UDYAM-UP-50-0294192")
 
 def _draw_qr(c: rl_canvas.Canvas, w: float, h: float, cert_id: str):
     """Draw a QR code linking to the certificate verification page."""
@@ -370,15 +370,17 @@ def _draw_qr(c: rl_canvas.Canvas, w: float, h: float, cert_id: str):
         logger.warning(f"QR code generation failed: {e}")
 
 
-def generate_certificate_pdf(student: dict, enrollment: dict, cert_id: str | None = None) -> tuple[bytes, str]:
+def generate_certificate_pdf(student: dict, enrollment: dict, cert_id: str | None = None,
+                             issued_on: str | None = None) -> tuple[bytes, str]:
     """
     Generate a PDF certificate for a student.
     `enrollment` is the student's internal enrollment row (needs `id` and `domain`).
-    Pass the stored `cert_id` when one exists so the PDF always matches the registry.
+    Pass the stored `cert_id` and `issued_on` when they exist so the PDF always matches
+    the registry (otherwise every re-download would show that day's date).
     Returns (pdf_bytes, cert_id).
     """
     cert_id = cert_id or _cert_id_from_student(student["id"], enrollment["id"])
-    issued_on = datetime.utcnow().strftime("%d %B %Y")
+    issued_on = issued_on or datetime.utcnow().strftime("%d %B %Y")
 
     buffer = io.BytesIO()
     c = rl_canvas.Canvas(buffer, pagesize=landscape(A4))
@@ -438,7 +440,7 @@ class CertificateService:
 
         # Always prefer the stored ID so a PDF/email never shows an ID that won't verify
         cert_id = existing["cert_id"] if existing else _cert_id_from_student(student_id, batch_id)
-        issued_on = datetime.utcnow().strftime("%d %B %Y")
+        issued_on = _format_issued_on(existing["issued_at"]) if existing else datetime.utcnow().strftime("%d %B %Y")
         is_new = not existing
 
         if is_new:
