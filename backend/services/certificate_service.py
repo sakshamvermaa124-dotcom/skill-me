@@ -59,6 +59,26 @@ C_BORDER     = HexColor("#1f2937")
 C_BORDER_GOLD = Color(0.72, 0.53, 0.04, alpha=0.25)
 
 
+def _track_label(domain: str) -> str:
+    """Human-readable track title for the certificate, e.g. 'web-dev' -> 'Full Stack Engineer Internship'."""
+    from services.email_service import _domain_label  # lazy: email_service is heavy and imported lazily here
+    label = _domain_label((domain or "web-dev").strip())
+    return label if "internship" in label.lower() else f"{label} Internship"
+
+
+def _format_issued_on(value) -> str:
+    """Format a stored `issued_at` (datetime or 'YYYY-MM-DD HH:MM:SS' / ISO string) as '11 October 2026'."""
+    if isinstance(value, datetime):
+        return value.strftime("%d %B %Y")
+    text = str(value or "").strip()
+    if not text:
+        return datetime.utcnow().strftime("%d %B %Y")
+    try:
+        return datetime.fromisoformat(text.replace("Z", "+00:00").replace(" ", "T", 1)).strftime("%d %B %Y")
+    except ValueError:
+        return text
+
+
 def _cert_id_from_student(student_id: int, batch_id: int) -> str:
     """Generate a deterministic, short certificate ID.
 
