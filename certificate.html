@@ -51,6 +51,7 @@
   <!-- Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <script src="config.js"></script>
+  <script src="docs.js?v=1"></script>
 
   <!-- Structured Data Graph (Breadcrumbs & Credential Portal) -->
   <script type="application/ld+json">
@@ -197,12 +198,20 @@
       color: #fff;
     }
 
+    #cert-view-wrapper {
+      width: 100%;
+      max-width: 980px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
     /* ─── Certificate Outer Container ─── */
     .cert-wrap {
       width: 100%;
       max-width: 980px;
       position: relative;
-      perspective: 1000px;
+      overflow: hidden;
     }
 
     .certificate {
@@ -402,7 +411,8 @@
       margin: 0 auto;
     }
 
-    .cert-title-divider {
+    .cert-title-divider,
+    .cert-divider {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -617,6 +627,14 @@
       overflow: hidden;
     }
 
+    .cert-sig-img {
+      height: 100%;
+      width: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      user-select: none;
+    }
+
     .cert-sig-script {
       font-family: 'Dancing Script', cursive;
       font-size: 1.65rem;
@@ -806,6 +824,20 @@
       display: block;
     }
 
+    @media (max-width: 640px) {
+      body { padding: 18px 10px 40px; }
+      .action-bar { gap: 8px; margin-bottom: 16px; width: 100%; }
+      .badge-id { width: 100%; text-align: center; font-size: 0.74rem; padding: 7px 12px; overflow-wrap: anywhere; }
+      .btn-action { padding: 9px 14px; font-size: 0.8rem; flex: 1 1 auto; justify-content: center; }
+      .certificate { border-radius: 4px; }
+      .verify-strip { margin-top: 16px; padding: 14px 16px; align-items: flex-start; gap: 12px; }
+      .verify-strip-text { font-size: 0.8rem; overflow-wrap: anywhere; }
+      .verify-page { margin: 16px auto; }
+      .verify-page h1 { font-size: 1.4rem; }
+      .verify-input-group { flex-direction: column; }
+      .verify-submit { width: 100%; }
+    }
+
     /* ─── Print Styles ─── */
     @media print {
       @page {
@@ -827,14 +859,22 @@
         display: none !important;
       }
 
+      #cert-view-wrapper {
+        max-width: none !important;
+      }
+
       .cert-wrap {
         display: block !important;
+        width: 980px !important;
+        max-width: none !important;
+        height: auto !important;
+        overflow: visible !important;
         margin: 0 auto !important;
         padding: 0 !important;
-        transform: scale(1) !important;
       }
 
       .certificate {
+        transform: none !important;
         box-shadow: none !important;
         border: 2px solid #c99a4e !important;
         border-radius: 6px !important;
@@ -872,13 +912,21 @@
     <!-- Top Action Control Bar -->
     <div class="action-bar" id="action-bar">
       <div class="badge-id" id="cert-id-badge">Loading Credential...</div>
-      <button class="btn-action btn-download" onclick="window.print()">
+      <button class="btn-action btn-download" id="btn-download-pdf" onclick="downloadCertificate(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+        Download PDF
+      </button>
+      <button class="btn-action btn-secondary" onclick="window.print()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
           <polyline points="6 9 6 2 18 2 18 9" />
           <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
           <rect x="6" y="14" width="12" height="8" />
         </svg>
-        Print / Save as PDF
+        Print
       </button>
       <a class="btn-action btn-secondary" href="verify.html" id="verify-another-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
@@ -995,8 +1043,10 @@
             <!-- Right: Signature & Live QR -->
             <div class="cert-col-right">
               <div class="cert-sig-box">
-                <img src="assets/signature-cropped.png" alt="Signature"
-                  style="height: 100%; width: 100%; max-width: none; object-fit: contain; mix-blend-mode: multiply; filter: contrast(1.5) brightness(1.1); pointer-events: none;">
+                <img src="assets/signature-transparent.png" alt="Signature of Saksham Verma" class="cert-sig-img"
+                  width="720" height="427"
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div class="cert-sig-script" style="display:none;">Saksham Verma</div>
               </div>
 
               <div class="cert-qr-holder">
@@ -1053,7 +1103,7 @@
       });
     } else {
       document.getElementById('verify-page').style.display = 'none';
-      document.getElementById('cert-view-wrapper').style.display = 'block';
+      document.getElementById('cert-view-wrapper').style.display = '';
       loadCertificate();
     }
 
@@ -1114,10 +1164,14 @@
         const metaRes = await fetch(`${API}/api/certificates/metadata/${studentId}/${bid}`);
         if (metaRes.ok) {
           const myCert = await metaRes.json();
-          const certHolder = resolvedName || `${myCert.first_name} ${myCert.last_name}`;
+          const certHolder = myCert.holder
+            || `${myCert.first_name || ''} ${myCert.last_name || ''}`.trim()
+            || resolvedName;
           populateCertificate({
             holder: certHolder,
-            domain: myCert.domain || domainParam || 'Web Development',
+            domain: myCert.domain || domainParam,
+            domain_slug: myCert.domain_slug,
+            domain_label: myCert.domain_label,
             issued_at: myCert.issued_at,
             cert_id: myCert.cert_id,
           });
@@ -1143,6 +1197,42 @@
       }
     }
 
+    const DOMAIN_NARRATIVE = {
+      'web-dev': 'building responsive interfaces, implementing REST APIs, and deploying full-stack applications.',
+      'react': 'building component-driven interfaces, managing application state, and shipping responsive front-ends.',
+      'node': 'designing REST APIs, modelling data, and implementing secure server-side logic.',
+      'python': 'developing scalable backend logic, automating data pipelines, and deploying Python applications.',
+      'java': 'implementing object-oriented architectures, building Spring Boot services, and optimizing performance.',
+      'datascience': 'performing exploratory data analysis, building visualizations, and deriving data-driven insights.',
+      'data-science': 'performing exploratory data analysis, building visualizations, and deriving data-driven insights.',
+      'ml': 'developing machine learning models, engineering features, and evaluating model performance.',
+      'genai': 'integrating LLM APIs, engineering prompts, and prototyping retrieval-backed AI applications.',
+      'ai-engineer': 'building LLM-powered applications with retrieval, tool calling, and systematic evaluation.',
+      'ai-pm': 'defining AI product strategy, writing product specifications, and evaluating LLM-driven features.',
+      'flutter': 'designing intuitive mobile UI, integrating APIs, and shipping cross-platform applications.',
+      'android': 'designing intuitive mobile UI/UX, integrating robust APIs, and deploying Android applications.',
+      'uiux': 'conducting user research, designing high-fidelity prototypes, and delivering accessible user experiences.',
+      'devops': 'containerizing applications, automating CI/CD pipelines, and managing cloud deployments.',
+      'cloud': 'architecting cloud infrastructure, building serverless services, and applying IAM best practices.',
+      'cyber': 'conducting vulnerability assessments, applying OWASP practices, and reporting security findings.',
+      'sql': 'designing relational schemas, engineering analytical queries, and optimizing database performance.',
+      'cpp': 'implementing efficient data structures and algorithms in modern C++.',
+      'sde': 'solving algorithmic problems, designing clean architectures, and writing well-tested code.',
+      'fde': 'integrating APIs for client use cases, debugging production issues, and documenting solutions.',
+      'qa': 'designing test plans, automating test suites, and reporting and triaging defects.',
+    };
+
+    let certHolderName = '';
+    function downloadCertificate(btn) {
+      return SkillMeDocs.downloadPDF(document.getElementById('certificate'), {
+        button: btn,
+        filename: `SkillMe-Certificate-${SkillMeDocs.safeFilePart(certHolderName)}.pdf`,
+        orientation: 'landscape',
+        width: 980,
+        singlePage: true,
+      });
+    }
+
     function populateCertificate(data) {
       const rawName = data.holder || data.student_name || 'Saksham Verma';
       const name = rawName
@@ -1153,13 +1243,13 @@
         .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
         .join(' ');
 
-      const rawDomain = (data.domain || 'Web Development').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      const domainLabel = rawDomain.toLowerCase().includes('internship')
-        ? rawDomain
-        : `${rawDomain} Engineering Internship`;
+      const slug = data.domain_slug || SkillMeDocs.toSlug(data.domain);
+      const rawDomain = data.domain_label || SkillMeDocs.domainLabel(data.domain, 'Software Engineering');
+      const domainLabel = /internship/i.test(rawDomain) ? rawDomain : `${rawDomain} Internship`;
 
       const id = data.cert_id || 'SM-2026-WD-1001';
-      const rawDateObj = data.issued_at ? new Date(data.issued_at) : new Date();
+      certHolderName = name;
+      const rawDateObj = SkillMeDocs.parseDate(data.issued_at);
       const date = rawDateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
       const startDateObj = new Date(rawDateObj.getTime() - (28 * 24 * 60 * 60 * 1000));
       const startDateStr = startDateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -1172,34 +1262,11 @@
       // Update description with dynamic domain narrative and dates
       const descEl = document.getElementById('cert-description');
       if (descEl) {
-        let domainSkills = "implementing modular architecture, completing assigned tasks, and adhering to professional engineering standards.";
-        const lowerDomain = rawDomain.toLowerCase();
+        const domainSkills = DOMAIN_NARRATIVE[slug]
+          || "implementing modular architecture, completing assigned tasks, and adhering to professional engineering standards.";
 
-        if (lowerDomain.includes('web')) {
-          domainSkills = "building responsive interfaces, implementing REST APIs, and deploying full-stack applications.";
-        } else if (lowerDomain.includes('python')) {
-          domainSkills = "developing scalable backend logic, automating data pipelines, and deploying Python applications.";
-        } else if (lowerDomain.includes('data')) {
-          domainSkills = "performing advanced data analysis, developing predictive models, and engineering data pipelines.";
-        } else if (lowerDomain.includes('android')) {
-          domainSkills = "designing intuitive mobile UI/UX, integrating robust APIs, and deploying Android applications.";
-        } else if (lowerDomain.includes('ui') || lowerDomain.includes('ux') || lowerDomain.includes('design')) {
-          domainSkills = "conducting user research, designing high-fidelity prototypes, and delivering accessible user experiences.";
-        } else if (lowerDomain.includes('ai') || lowerDomain.includes('machine learning')) {
-          domainSkills = "developing machine learning models, engineering prompt pipelines, and integrating AI-driven solutions.";
-        } else if (lowerDomain.includes('devops') || lowerDomain.includes('cloud')) {
-          domainSkills = "architecting cloud infrastructure, automating CI/CD pipelines, and managing containerized deployments.";
-        } else if (lowerDomain.includes('security') || lowerDomain.includes('cyber')) {
-          domainSkills = "conducting vulnerability assessments, implementing security protocols, and hardening application infrastructure.";
-        } else if (lowerDomain.includes('sql') || lowerDomain.includes('database')) {
-          domainSkills = "designing relational schemas, engineering analytical queries, and optimizing database performance.";
-        } else if (lowerDomain.includes('java') || lowerDomain.includes('cpp') || lowerDomain.includes('c++')) {
-          domainSkills = "implementing object-oriented architectures, developing microservices, and optimizing performance.";
-        } else if (lowerDomain.includes('marketing') || lowerDomain.includes('seo')) {
-          domainSkills = "executing data-driven campaigns, optimizing SEO strategies, and improving audience engagement.";
-        }
-
-        descEl.innerHTML = `Successfully completed a 4-week <strong>${rawDomain}</strong> internship from <strong>${startDateStr}</strong> to <strong>${date}</strong>, demonstrating professional competency by ${domainSkills}`;
+        const esc = SkillMeDocs.esc;
+        descEl.innerHTML = `Successfully completed a 4-week <strong>${esc(rawDomain)}</strong> internship from <strong>${esc(startDateStr)}</strong> to <strong>${esc(date)}</strong>, demonstrating professional competency by ${esc(domainSkills)}`;
       }
 
       // We removed cert-id-badge and cert-doc-ref from the HTML earlier, so don't update them if missing
@@ -1257,7 +1324,7 @@
         const res = await fetch(`${API}/api/certificates/verify/${encodeURIComponent(rawId)}`);
         if (!res.ok) throw new Error('Certificate not found');
         const data = await res.json();
-        const domainLabel = (data.domain || 'web-dev').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        const domainLabel = SkillMeDocs.esc(data.domain_label || SkillMeDocs.domainLabel(data.domain, 'N/A'));
         const certViewUrl = `${window.location.origin}/certificate.html?cert_id=${encodeURIComponent(data.cert_id)}`;
 
         resultEl.className = 'verify-result active';
@@ -1270,9 +1337,9 @@
           </div>
         </div>
         <div style="font-size:0.88rem; line-height:1.7; color:#e2e8f0; margin-bottom:16px;">
-          <strong>Candidate:</strong> ${data.holder || 'N/A'}<br>
+          <strong>Candidate:</strong> ${SkillMeDocs.esc(data.holder || 'N/A')}<br>
           <strong>Domain:</strong> ${domainLabel}<br>
-          <strong>Credential ID:</strong> <span style="font-family:monospace; color:#f0c97a;">${data.cert_id}</span>
+          <strong>Credential ID:</strong> <span style="font-family:monospace; color:#f0c97a;">${SkillMeDocs.esc(data.cert_id)}</span>
         </div>
         <a href="${certViewUrl}" target="_blank" style="display:inline-block; padding:9px 20px; background:#c99a4e; color:#0c0b0b; font-weight:700; border-radius:8px; text-decoration:none; font-size:0.85rem;">View Full Certificate &rarr;</a>
       `;
@@ -1298,7 +1365,7 @@
       const cert = document.querySelector('.certificate');
       const wrap = document.querySelector('.cert-wrap');
       if (!cert || !wrap) return;
-      const wrapWidth = wrap.clientWidth;
+      const wrapWidth = wrap.getBoundingClientRect().width;
       const certWidth = 980;
       const scale = Math.min(1, wrapWidth / certWidth);
       cert.style.transform = `scale(${scale})`;
