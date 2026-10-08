@@ -15,7 +15,14 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="SkillMe">
   <meta property="og:title" content="Letter of Recommendation — SkillMe">
+  <meta property="og:description" content="Official, verifiable Letter of Recommendation issued by SkillMe (Udyam Reg. UDYAM-UP-50-0294192). Open the link to view and verify.">
+  <meta property="og:url" content="https://www.skill-me-intern.in/lor">
   <meta property="og:image" content="https://www.skill-me-intern.in/assets/logo.png">
+  <meta property="og:image:alt" content="SkillMe logo">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Letter of Recommendation — SkillMe">
+  <meta name="twitter:description" content="Official, verifiable Letter of Recommendation issued by SkillMe.">
+  <meta name="twitter:image" content="https://www.skill-me-intern.in/assets/logo.png">
 
   <!-- Favicon & Fonts -->
   <link rel="icon" type="image/webp" href="assets/logo.webp">
@@ -28,6 +35,7 @@
   <!-- QR Code Generator -->
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <script src="config.js"></script>
+  <script src="docs.js?v=1"></script>
 
   <style>
     :root {
@@ -328,6 +336,22 @@
       flex-direction: column;
     }
 
+    /* Signature + seal. The PNG has a real alpha channel (no paper background),
+       so it can't render as a grey box on screen, in print, or on any backdrop. */
+    .sig-img {
+      display: block;
+      height: 104px;
+      width: auto;
+      max-width: 100%;
+      align-self: flex-start; /* .sig-block is a flex column — don't let it stretch the image */
+      object-fit: contain;
+      margin: 0 0 -14px -6px;
+      position: relative;
+      z-index: 1;
+      pointer-events: none;
+      user-select: none;
+    }
+
     .sig-cursive {
       font-family: 'Dancing Script', cursive;
       font-size: 2rem;
@@ -335,6 +359,7 @@
       color: #0f172a;
       line-height: 1;
       margin-bottom: 4px;
+      display: none; /* only shown if the signature image fails to load */
     }
 
     .sig-line {
@@ -445,6 +470,12 @@
       color: #eae6e1;
     }
 
+    .verify-text span strong {
+      display: inline;
+      font-size: inherit;
+      margin: 0;
+    }
+
     .verify-text span {
       font-size: 0.76rem;
       color: #a8a29e;
@@ -484,7 +515,7 @@
         width: 100% !important;
         min-height: 268mm !important;
         border-radius: 0 !important;
-        padding: 50px 60px !important;
+        padding: 34px 52px !important;
         margin: 0 auto !important;
         border: none !important;
         display: flex !important;
@@ -531,8 +562,8 @@
         display: flex !important;
         flex-direction: column !important;
         justify-content: space-between !important;
-        font-size: 0.91rem !important;
-        line-height: 1.72 !important;
+        font-size: 0.87rem !important;
+        line-height: 1.6 !important;
       }
 
       .salutation {
@@ -541,8 +572,8 @@
       }
 
       .para {
-        margin-bottom: 12px !important;
-        line-height: 1.72 !important;
+        margin-bottom: 10px !important;
+        line-height: 1.6 !important;
       }
 
       .section-head {
@@ -575,6 +606,10 @@
         font-size: 1.85rem !important;
       }
 
+      .sig-img {
+        height: 88px !important;
+      }
+
       .doc-footer {
         margin-top: auto !important;
         padding-top: 10px !important;
@@ -584,13 +619,31 @@
     }
 
     @media (max-width: 640px) {
-      .lor-paper { padding: 32px 20px; }
-      .letterhead { flex-direction: column; gap: 14px; align-items: flex-start; }
+      body { padding: 16px 10px 40px; }
+      .actions-bar { gap: 8px; margin-bottom: 16px; }
+      .btn-action { padding: 9px 16px; font-size: 0.82rem; }
+      .lor-paper { padding: 26px 18px; border-radius: 10px; }
+      .watermark { font-size: 4.5rem; }
+      .letterhead { flex-direction: column; gap: 12px; align-items: flex-start; }
+      .brand-title { font-size: 1.4rem; }
       .msme-header-box { align-items: flex-start; }
-      .doc-meta-ribbon { flex-direction: column; gap: 6px; align-items: flex-start; }
+      .doc-meta-ribbon { flex-direction: column; gap: 4px; align-items: flex-start; padding: 8px 12px; }
+      .doc-meta-ribbon > div { overflow-wrap: anywhere; }
+      .doc-title { font-size: 1.4rem; }
+      .body-content { font-size: 0.9rem; line-height: 1.7; }
+      .para { text-align: left; hyphens: manual; -webkit-hyphens: manual; }
+      .brand-sub { overflow-wrap: normal; }
+      .skills-card { padding: 12px 14px; }
       .skills-grid { grid-template-columns: 1fr; }
-      .signature-row { flex-direction: column; gap: 18px; align-items: flex-start; }
+      .signature-row { flex-direction: column; gap: 18px; align-items: stretch; }
+      .sig-img { height: 96px; }
+      .sig-line { width: 100%; max-width: 220px; }
+      .sig-right, .qr-box { width: 100%; }
+      .qr-info { min-width: 0; overflow-wrap: anywhere; }
       .doc-footer { flex-direction: column; gap: 8px; align-items: flex-start; }
+      .doc-footer-legal { max-width: 100%; }
+      .verify-section { align-items: flex-start; }
+      .verify-text span { overflow-wrap: anywhere; }
     }
   </style>
 </head>
@@ -599,9 +652,10 @@
   <!-- Actions Bar -->
   <div class="actions-bar">
     <a href="dashboard.html" class="btn-action">← Return to Dashboard</a>
-    <button class="btn-action btn-primary" id="btn-download-pdf" onclick="window.print()">
-      🖨️ Print / Save as PDF
+    <button class="btn-action btn-primary" id="btn-download-pdf" onclick="downloadLOR(this)">
+      ⬇️ Download PDF
     </button>
+    <button class="btn-action" onclick="window.print()">🖨️ Print</button>
   </div>
 
   <!-- Main Paper Container -->
@@ -615,7 +669,7 @@
         <div style="display:none; width:48px; height:48px; border-radius:50%; background:#0c0b0b; border:2px solid #c99a4e; align-items:center; justify-content:center; color:#2563eb; font-weight:800; font-size:1.2rem;" class="brand-logo-fallback">SM</div>
         <div>
           <div class="brand-title"><span class="brand-skill">Skill</span><span class="brand-me">Me</span></div>
-          <div class="brand-sub">Technical Engineering Internship &bull; skill-me-intern.in</div>
+          <div class="brand-sub">Technical Engineering Internship &bull; <span style="white-space:nowrap;">skill-me-intern.in</span></div>
         </div>
       </div>
       <div class="msme-header-box">
@@ -691,6 +745,9 @@
       <!-- Signature Area -->
       <div class="signature-row">
         <div class="sig-block">
+          <img src="assets/signature-transparent.png" alt="Signature of Saksham Verma" class="sig-img"
+               width="720" height="427"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
           <div class="sig-cursive">Saksham Verma</div>
           <div class="sig-line"></div>
           <div class="sig-name">Saksham Verma</div>
@@ -738,21 +795,60 @@
   const nameParam   = params.get('name');
   const domainParam = params.get('domain');
 
-  const domainSkills = {
-    'web-dev': ['HTML5 & CSS3', 'JavaScript (ES6+)', 'Responsive Design', 'Milestone Project Delivery', 'Professional Task Execution', 'Technical Documentation'],
-    'python': ['Python 3.x', 'Data Structures & Algorithms', 'Unit Testing (pytest)', 'Milestone Project Delivery', 'Professional Task Execution', 'Technical Documentation'],
-    'ml': ['Python & NumPy/Pandas', 'Machine Learning Fundamentals', 'Data Analysis & Visualization', 'Milestone Project Delivery', 'Model Evaluation', 'Technical Documentation'],
-    'react': ['React.js & Hooks', 'Component Architecture', 'State Management', 'Milestone Project Delivery', 'Professional Task Execution', 'Responsive UI Development'],
-    'uiux': ['User Research & Personas', 'Wireframing & Prototyping', 'Design Systems', 'Figma / Design Tools', 'Usability Testing', 'Visual Design Principles'],
-    'android': ['Kotlin / Java', 'Android SDK', 'UI/UX for Mobile', 'Milestone Project Delivery', 'Professional Task Execution', 'API Integration'],
-  };
+  const { DOMAIN_LABELS, toSlug, esc, parseDate } = window.SkillMeDocs;
 
-  function populateLOR(name, rawDomain, id, issuedAt) {
-    const domain = (rawDomain || 'web-dev').replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    const dateStr = issuedAt
-      ? new Date(issuedAt).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' })
-      : new Date().toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' });
+  const COMMON = ['Milestone Project Delivery', 'Technical Documentation'];
+  const domainSkills = {
+    'web-dev': ['HTML5 & CSS3', 'JavaScript (ES6+)', 'Responsive Design', 'REST API Integration', ...COMMON],
+    'python': ['Python 3.x', 'Data Structures & Algorithms', 'Unit Testing (pytest)', 'Automation Scripting', ...COMMON],
+    'ml': ['Python & NumPy/Pandas', 'Machine Learning Fundamentals', 'Data Analysis & Visualization', 'Model Evaluation', ...COMMON],
+    'react': ['React.js & Hooks', 'Component Architecture', 'State Management', 'Responsive UI Development', ...COMMON],
+    'node': ['Node.js & Express', 'REST API Design', 'Databases & Data Modelling', 'Authentication', ...COMMON],
+    'java': ['Java & OOP', 'Spring Boot', 'REST API Design', 'SQL & Persistence', ...COMMON],
+    'datascience': ['Python, Pandas & NumPy', 'Exploratory Data Analysis', 'Data Visualization', 'SQL for Analysis', ...COMMON],
+    'flutter': ['Flutter & Dart', 'Mobile UI Development', 'State Management', 'API Integration', ...COMMON],
+    'devops': ['Docker & Containers', 'CI/CD Pipelines', 'Linux & Bash', 'Cloud Deployment', ...COMMON],
+    'cpp': ['Modern C++ & STL', 'Data Structures', 'Algorithms & Complexity', 'Object-Oriented Design', ...COMMON],
+    'cloud': ['AWS Core Services', 'Serverless Architecture', 'IAM & Security', 'Cost-Aware Design', ...COMMON],
+    'cyber': ['Web Application Security', 'OWASP Top 10', 'Log Analysis', 'Security Reporting', ...COMMON],
+    'uiux': ['User Research & Personas', 'Wireframing & Prototyping', 'Design Systems', 'Figma / Design Tools', 'Usability Testing', 'Visual Design Principles'],
+    'genai': ['LLM APIs', 'Prompt Engineering', 'Embeddings & Retrieval', 'AI App Prototyping', ...COMMON],
+    'sql': ['SQL Querying', 'Database Design', 'Joins & Aggregations', 'Indexing & Performance', ...COMMON],
+    'ai-engineer': ['LLM APIs', 'Retrieval-Augmented Generation', 'Tool Calling & Agents', 'Evaluation (Evals)', ...COMMON],
+    'fde': ['Client-Facing Integration', 'API Integration', 'Debugging in Production', 'Technical Communication', ...COMMON],
+    'sde': ['Data Structures & Algorithms', 'System Design Basics', 'Testing & Code Quality', 'Clean Architecture', ...COMMON],
+    'ai-pm': ['Product Strategy', 'PRDs & Specifications', 'AI/LLM Evaluation', 'User Research', 'Roadmapping & Prioritisation', 'Stakeholder Communication'],
+    'qa': ['Manual Test Design', 'Test Automation', 'Bug Reporting & Triage', 'Test Planning', 'API Testing', 'Technical Documentation'],
+    'android': ['Kotlin / Java', 'Android SDK', 'Mobile UI Development', 'API Integration', ...COMMON],
+  };
+  domainSkills['data-science'] = domainSkills['datascience'];
+  const GENERIC_SKILLS = ['Milestone Project Delivery', 'Admin Review Responses', 'Professional Task Execution',
+                          'Technical Documentation', 'Problem-Solving Aptitude', 'Self-Directed Learning'];
+
+  function fmtDate(iso) {
+    return parseDate(iso).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' });
+  }
+
+  let lorHolder = '';
+  function downloadLOR(btn) {
+    return SkillMeDocs.downloadPDF(document.getElementById('lor-document'), {
+      button: btn,
+      filename: `SkillMe-LOR-${SkillMeDocs.safeFilePart(lorHolder)}.pdf`,
+      orientation: 'portrait',
+      width: 860,
+      singlePage: true,
+    });
+  }
+
+  function populateLOR(name, d) {
+    const slug = d.domain_slug || toSlug(d.domain || domainParam);
+    const domain = d.domain_label || DOMAIN_LABELS[slug]
+      || String(d.domain || domainParam || '').replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+      || 'Technical Internship';
+    const id = d.cert_id;
+    const dateStr = fmtDate(d.issued_at) || fmtDate(null);
     const firstName = name.split(' ')[0];
+    lorHolder = name;
 
     document.getElementById('lh-cert-id').textContent = id || 'Pending';
     document.getElementById('lb-date').textContent = dateStr;
@@ -770,13 +866,13 @@
     if (domainEl) domainEl.textContent = domain;
     document.title = `LOR — ${name} — SkillMe`;
 
-    const skills = domainSkills[(rawDomain || 'web-dev').toLowerCase()] || domainSkills['web-dev'];
+    const skills = domainSkills[slug] || GENERIC_SKILLS;
     const skillsEl = document.getElementById('lb-skills');
     if (skillsEl) {
-      skillsEl.innerHTML = skills.map(s => `<div class="skill-item">${s}</div>`).join('');
+      skillsEl.innerHTML = skills.map(s => `<div class="skill-item">${esc(s)}</div>`).join('');
     }
 
-    const verifyUrl = `${window.location.origin}/certificate.html?cert_id=${id || 'PREVIEW'}`;
+    const verifyUrl = `${window.location.origin}/certificate.html?cert_id=${encodeURIComponent(id || 'PREVIEW')}`;
     try {
       new QRious({
         element: document.getElementById('qr-canvas'),
@@ -791,19 +887,20 @@
   function showVerify(ok, name, certId, issuedAt) {
     const vs = document.getElementById('verify-section');
     if (!vs) return;
+    const on = issuedAt ? fmtDate(issuedAt) : '';
     if (ok) {
       vs.innerHTML = `
         <div class="verify-icon">✓</div>
         <div class="verify-text">
           <strong>Recommendation Verified</strong>
-          <span>This letter is genuine and was issued to <strong>${name}</strong>${issuedAt ? ' on ' + new Date(issuedAt).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}) : ''} by SkillMe Technologies (Udyam Reg. UDYAM-UP-50-0294192). Ref: ${certId || 'N/A'}</span>
+          <span>This letter is genuine and was issued to <strong>${esc(name)}</strong>${on ? ' on ' + esc(on) : ''} by SkillMe Technologies (Udyam Reg. UDYAM-UP-50-0294192). Ref: ${esc(certId || 'N/A')}</span>
         </div>`;
     } else {
       vs.innerHTML = `
         <div class="verify-icon" style="background:rgba(251,191,36,0.15);color:#fbbf24;">!</div>
         <div class="verify-text">
           <strong>Issued</strong>
-          <span>This letter was issued to <strong>${name}</strong>. Verified copy available on completion of internship.</span>
+          <span>This letter was issued to <strong>${esc(name)}</strong>. Verified copy available on completion of internship.</span>
         </div>`;
     }
   }
@@ -839,7 +936,7 @@
         if (res.ok) {
           const d = await res.json();
           const name = d.holder || d.student_name || nameParam || 'Student';
-          populateLOR(name, d.domain || domainParam, d.cert_id, d.issued_at);
+          populateLOR(name, d);
           showVerify(true, name, d.cert_id, d.issued_at);
           return;
         }
@@ -855,8 +952,8 @@
         const res = await fetch(`${API}/api/certificates/metadata/${studentId}/${batchId || 0}`);
         if (res.ok) {
           const d = await res.json();
-          const name = d.holder || nameParam || `${d.first_name||''} ${d.last_name||''}`.trim() || 'Student';
-          populateLOR(name, d.domain || domainParam, d.cert_id, d.issued_at);
+          const name = d.holder || `${d.first_name||''} ${d.last_name||''}`.trim() || nameParam || 'Student';
+          populateLOR(name, d);
           showVerify(true, name, d.cert_id, d.issued_at);
           return;
         }
