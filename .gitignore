@@ -47,3 +47,11 @@ schema.txt
 *.err.log
 backend-server.*.log
 frontend-server.*.log
+
+# Local SQLite copies (production is Turso)
+*.db
+
+# Generated artifacts / screenshots
+brag-output/
+live-test-*.png
+.pytest_cache/
