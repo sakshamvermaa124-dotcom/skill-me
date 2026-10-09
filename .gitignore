@@ -55,3 +55,10 @@ frontend-server.*.log
 brag-output/
 live-test-*.png
 .pytest_cache/
+
+# Separate repos cloned locally (have their own GitHub remotes)
+SkillMe-Intern-Tasks/
+ml-template/
+
+# Third-party agent skill packs (local tooling, not app code)
+.agents/skills/*/
