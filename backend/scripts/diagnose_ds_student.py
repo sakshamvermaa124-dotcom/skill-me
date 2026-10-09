@@ -3,6 +3,7 @@ SkillMe — Standalone Diagnostic (httpx only, no native modules)
 Uses Turso HTTP API + GitHub REST API directly.
 """
 
+import os
 import asyncio
 import httpx
 import json
@@ -14,7 +15,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 
 # ── Config (from .env) ──────────────────────────────────────────────────────
 TURSO_URL   = "libsql://skillme-db-saksahm.aws-ap-south-1.turso.io"
-TURSO_TOKEN = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3ODU1MTg5NjksImlkIjoiMDE5ZmI5MzctYWQwMS03YjM3LTgyZTctZjJmOWIyMzg3NDUzIiwia2lkIjoiSDdIWkFQenRlbTMzNVMwNS1CNzNjYU5XNUUtNmVsb1BXaEtyalhpcF9TNCIsInJpZCI6IjNiNWI5MWE3LWRkMzEtNDBlMi05ZmRmLWVlNjk3MzM0MjNlNiJ9.IkHKCZPMUTZv9jygU0QWGsVrhUIGpudJ9DECxaBH5TEa7uX44LtIXhCfCGbcpxsC7V-eIHvsyC6QyMKj8Lt_Ag"
+TURSO_TOKEN = os.environ["TURSO_AUTH_TOKEN"]
 GITHUB_TOKEN = os.environ.get("SKILLME_GITHUB_TOKEN", "")
 GITHUB_ORG   = "sakshamvermaa124-dotcom"
 TASKS_REPO   = "SkillMe-Intern-Tasks"
