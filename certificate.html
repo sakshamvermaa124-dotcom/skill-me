@@ -1101,13 +1101,17 @@
     }
 
     function populateCertificate(data) {
-      const rawName = data.holder || data.student_name || 'Saksham Verma';
-      const name = rawName
-        .replace(/([a-z])([A-Z])/g, '$1 $2')
-        .replace(/[_-]/g, ' ')
+      const rawName = (data.holder || data.student_name || '').trim() || 'Certificate Holder';
+      // Split "sakshamVerma"-style handles only when the name is a single token,
+      // and keep deliberate mixed case (McDonald, DeSouza) instead of flattening it.
+      const spaced = /\s/.test(rawName) ? rawName : rawName.replace(/([a-z])([A-Z])/g, '$1 $2');
+      const name = spaced
+        .replace(/[_]/g, ' ')
         .replace(/\s+/g, ' ').trim()
         .split(' ')
-        .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .map(w => (w === w.toLowerCase() || w === w.toUpperCase())
+          ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+          : w)
         .join(' ');
 
       const slug = data.domain_slug || SkillMeDocs.toSlug(data.domain);
