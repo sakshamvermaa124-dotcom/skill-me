@@ -9,10 +9,10 @@ Runs in **~5 seconds**, touches **zero production systems**, and catches regress
 
 ```bash
 cd backend
-.\.venv\Scripts\python -m pytest tests/ -v
+python -m pytest tests/ -v
 ```
 
-That is it. All 238 tests should pass with no setup beyond the existing virtual environment.
+That is it. All ~400 tests should pass with no setup beyond the existing virtual environment.
 
 ---
 
@@ -46,52 +46,52 @@ You can run the full suite safely at any time without touching production.
 
 ### Made a small change? Run the full suite (fast enough):
 ```bash
-.\.venv\Scripts\python -m pytest tests/ -v
+python -m pytest tests/ -v
 ```
 
 ### Changed auth logic?
 ```bash
-.\.venv\Scripts\python -m pytest tests/auth/ -v
+python -m pytest tests/auth/ -v
 ```
 
 ### Changed student application / status / progress?
 ```bash
-.\.venv\Scripts\python -m pytest tests/students/ -v
+python -m pytest tests/students/ -v
 ```
 
 ### Changed admin endpoints (enrollment, student management)?
 ```bash
-.\.venv\Scripts\python -m pytest tests/admin/ -v
+python -m pytest tests/admin/ -v
 ```
 
 ### Changed the certificate service or routes?
 ```bash
-.\.venv\Scripts\python -m pytest tests/certificates/ -v
+python -m pytest tests/certificates/ -v
 ```
 
 ### Changed payment / Razorpay logic?
 ```bash
-.\.venv\Scripts\python -m pytest tests/payments/ -v
+python -m pytest tests/payments/ -v
 ```
 
 ### Changed the GitHub webhook handler?
 ```bash
-.\.venv\Scripts\python -m pytest tests/webhooks/ -v
+python -m pytest tests/webhooks/ -v
 ```
 
 ### Changed portfolio endpoint?
 ```bash
-.\.venv\Scripts\python -m pytest tests/portfolio/ -v
+python -m pytest tests/portfolio/ -v
 ```
 
 ### Changed routes in main.py (page routes, middleware)?
 ```bash
-.\.venv\Scripts\python -m pytest tests/smoke/ -v
+python -m pytest tests/smoke/ -v
 ```
 
 ### Want to verify nothing critical is broken (fastest check)?
 ```bash
-.\.venv\Scripts\python -m pytest tests/regression/ -v
+python -m pytest tests/regression/ -v
 ```
 
 ---
@@ -124,13 +124,13 @@ pytest -m edge         # Input validation + boundary + SQL injection
 
 ```bash
 # Step 2 — example: you changed routes/payments.py
-.\.venv\Scripts\python -m pytest tests/payments/ -v
+python -m pytest tests/payments/ -v
 
 # Step 3 — always run regression
-.\.venv\Scripts\python -m pytest tests/regression/ -v
+python -m pytest tests/regression/ -v
 
 # Step 4 — before committing
-.\.venv\Scripts\python -m pytest tests/ -v
+python -m pytest tests/ -v
 ```
 
 ---
