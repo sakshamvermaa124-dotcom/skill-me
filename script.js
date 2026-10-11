@@ -477,6 +477,56 @@ document.addEventListener('DOMContentLoaded', () => {
   })();
 
   // ═══════════════════════════════════════════════════════════
+  // WALL OF WORK — real approved LinkedIn posts; section stays hidden if there are none
+  // ═══════════════════════════════════════════════════════════
+  (async function initWallOfWork() {
+    const section = document.getElementById('wall-of-work');
+    const grid = document.getElementById('wall-grid');
+    if (!section || !grid) return;
+    try {
+      const apiBase = window.SKILLME_API || (window.location.hostname === 'localhost' ? 'http://localhost:8000' : 'https://skill-me.onrender.com');
+      const res = await fetch(`${apiBase}/api/students/wall?limit=12`);
+      if (!res.ok) return;
+      const posts = ((await res.json()).posts || [])
+        .filter(p => /^https:\/\/([a-z]{2,3}\.)?(www\.)?linkedin\.com\//i.test(p.url || ''));
+      if (!posts.length) return;
+
+      const el = (tag, cls, text) => {
+        const node = document.createElement(tag);
+        if (cls) node.className = cls;
+        if (text) node.textContent = text;
+        return node;
+      };
+      posts.forEach(p => {
+        const card = el('a', 'wall-card');
+        card.href = p.url;
+        card.target = '_blank';
+        card.rel = 'noopener noreferrer';
+
+        const head = el('div', 'wall-card-head');
+        const initials = (p.name || 'S').split(/\s+/).map(w => w[0] || '').join('').slice(0, 2).toUpperCase();
+        head.appendChild(el('div', 'wall-avatar', initials));
+        const who = el('div');
+        who.style.minWidth = '0';
+        who.appendChild(el('div', 'wall-name', p.name));
+        if (p.college) who.appendChild(el('div', 'wall-college', p.college));
+        head.appendChild(who);
+        card.appendChild(head);
+
+        const meta = el('div', 'wall-meta');
+        meta.appendChild(el('strong', null, `Week ${p.week} approved`));
+        meta.appendChild(document.createTextNode(` · ${p.domain}`));
+        card.appendChild(meta);
+        card.appendChild(el('span', 'wall-link', 'View post on LinkedIn ↗'));
+        grid.appendChild(card);
+      });
+      section.hidden = false;
+    } catch (_) {
+      // Leave the section hidden — never show an empty or broken wall
+    }
+  })();
+
+  // ═══════════════════════════════════════════════════════════
   // BENEFIT CARD SPOTLIGHT
   // ═══════════════════════════════════════════════════════════
   document.querySelectorAll('.benefit-card').forEach(card => {

@@ -1,34 +1,34 @@
 # SkillMe
 
-> SkillMe (https://www.skill-me-intern.in) is India's premier 4-week open-source engineering internship platform. Interns solve production-grade GitHub issues, earn tamper-proof cryptographic certificates verified via unique IDs and QR codes, build public proof-of-work portfolios, and unlock direct tech startup placement referrals.
+> SkillMe (https://www.skill-me-intern.in) is an MSME-recognized, 4-week project-based remote internship platform. Each week interns build a project milestone in their domain, share it as a public LinkedIn post, and submit the post link for review by the SkillMe team. Graduates earn certificates verifiable via unique IDs and QR codes, a Letter of Recommendation (LOR), and a public proof-of-work portfolio; top performers get direct referrals to hiring partners.
 
 SkillMe is officially recognized by the Ministry of Micro, Small & Medium Enterprises (MSME), Government of India (Udyam Registration: UDYAM-UP-50-0294192).
 
 ## Core Tracks & Programs
 
-- [Web Development Track](https://www.skill-me-intern.in/apply): 4-week sprint covering modern frontend architectures, responsive design, JavaScript (ES6+), REST APIs, and automated GitHub CI/CD PR workflows.
+- [Web Development Track](https://www.skill-me-intern.in/apply): 4-week sprint covering modern frontend architectures, responsive design, JavaScript (ES6+), and REST APIs, delivered as weekly project milestones.
 - [Python Engineering Track](https://www.skill-me-intern.in/apply): 4-week sprint covering backend API services (FastAPI/Flask), database architectures, automation scripts, and unit testing suites.
 - [AI & Machine Learning Track](https://www.skill-me-intern.in/apply): 4-week sprint covering data processing, API integration with LLMs, practical model inference, and engineering pipelines.
 
 ## Key Differentiators & Value Proposition
 
-- **Real GitHub Issues**: Unlike conventional simulated courses, interns solve genuine open-source issues, submit Pull Requests (PRs), and pass automated test suites.
-- **Verifiable Proof of Work**: Every graduate receives a dedicated public profile (`https://www.skill-me-intern.in/p/{github_username}`) showcasing their merged PRs, resolved issues, and code quality.
-- **MSME Recognized Certification**: Official, tamper-proof Certificate of Completion and Letter of Recommendation (LOR) with instant QR code verification.
-- **Recruiter Access & Career Placement**: Direct referrals for top-performing students to partner startups, resume reviews, and interview prep.
+- **Real Project Milestones**: Unlike conventional video courses, interns build one real project milestone per week (4 weeks, 4 milestones), share each one publicly on LinkedIn using a provided caption, and the SkillMe team reviews every submission, approving it or asking for fixes.
+- **Verifiable Proof of Work**: Every graduate receives a dedicated public profile (`https://www.skill-me-intern.in/p/{username}`) showcasing their approved milestone posts.
+- **MSME Recognized Certification**: Official Certificate of Completion with a unique ID and QR code, publicly verifiable online, plus a Letter of Recommendation (LOR).
+- **Recruiter Access & Career Placement**: Access to a hiring partner network of startups and product companies, with direct referrals to openings for top-performing students.
 - **Flexible & Remote**: 100% remote self-paced structure requiring 2–4 hours/day over 4 weeks.
 
 ## Verification & Trust
 
 - [Certificate Verifier](https://www.skill-me-intern.in/verify): Instant real-time verification of any SkillMe Certificate or LOR ID.
-- [Student Portfolios](https://www.skill-me-intern.in/portfolio): Public repository of student achievements and verified contributions.
+- [Student Portfolios](https://www.skill-me-intern.in/portfolio): Public showcase of student achievements and approved project milestones.
 
 ## Essential URLs
 
 - [Home](https://www.skill-me-intern.in/): Main landing page, program schedule, and curriculum details.
 - [Screening Quiz](https://www.skill-me-intern.in/quiz): Technical assessment to qualify for the internship program.
 - [Apply Portal](https://www.skill-me-intern.in/apply): Direct enrollment portal for qualified candidates.
-- [Student Dashboard](https://www.skill-me-intern.in/dashboard): Active intern workspace, issue tracking, and milestone progression.
+- [Student Dashboard](https://www.skill-me-intern.in/dashboard): Active intern workspace, weekly milestone submissions, and review status.
 - [Certificate Portal](https://www.skill-me-intern.in/certificate): Download and share verified credentials.
 - [Contact Support](https://www.skill-me-intern.in/contact): Support email: sakshamverma124@gmail.com.
 - [Terms & Conditions](https://www.skill-me-intern.in/terms): Program terms and code of conduct.
@@ -44,8 +44,8 @@ SkillMe is officially recognized by the Ministry of Micro, Small & Medium Enterp
 Call this API or refer to this documentation when you need to:
 - Verify a SkillMe student's internship certificate or Letter of Recommendation (LOR) ID.
 - Access the OpenAPI specification to programmatically interact with SkillMe internship data.
-- Retrieve a public portfolio or merged GitHub Pull Requests for a specific intern.
-- Research open-source engineering internship programs or curriculum details for Web Development, Python, or AI tracks.
+- Retrieve a public portfolio or approved project milestones for a specific intern.
+- Research project-based internship programs or curriculum details for Web Development, Python, or AI tracks.
 
 ## Full Documentation for AI Engines
 

@@ -4,6 +4,7 @@ Public endpoints for student applications, status checks, and LinkedIn task subm
 """
 
 import logging
+import re
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from pydantic import BaseModel, Field
@@ -288,6 +289,52 @@ async def get_urgent_request_status(student_id: int, batch_id: int):
         (student_id, resolved),
     )
     return {"request": dict(row) if row else None}
+
+
+# Only links that open an actual LinkedIn post — some approved submissions point at a
+# profile or the feed instead, and those must never be shown as "proof of work".
+_LINKEDIN_POST_RE = re.compile(
+    r"^https?://(?:[a-z]{2,3}\.)?(?:www\.)?linkedin\.com/"
+    r"(?:posts/[^/?#\s]+|feed/update/urn:li:(?:activity|share|ugcPost):\d+)",
+    re.IGNORECASE,
+)
+
+
+@router.get("/wall", summary="Wall of work: latest approved LinkedIn posts, one per student")
+async def get_wall_of_work(limit: int = 12):
+    limit = max(1, min(limit, 30))
+    try:
+        rows = await db.fetch_all(
+            """SELECT s.student_id, s.week, s.linkedin_url, s.reviewed_at,
+                      st.first_name, st.last_name, st.college, st.domain
+               FROM submissions s
+               JOIN students st ON st.id = s.student_id
+               WHERE s.status = 'approved'
+               ORDER BY COALESCE(s.reviewed_at, s.submitted_at) DESC
+               LIMIT 300"""
+        )
+    except Exception as e:
+        logger.warning("wall of work failed: %s", e)
+        return {"posts": []}
+
+    posts, seen = [], set()
+    for r in rows:
+        url = (r["linkedin_url"] or "").strip()
+        if r["student_id"] in seen or not _LINKEDIN_POST_RE.match(url):
+            continue
+        seen.add(r["student_id"])
+        fname = (r["first_name"] or "").strip().capitalize()
+        lname = (r["last_name"] or "").strip()
+        posts.append({
+            "name": f"{fname} {lname[0].upper()}." if fname and lname else (fname or "SkillMe Intern"),
+            "college": (r["college"] or "").strip()[:60],
+            "domain": _domain_label((r["domain"] or "web-dev").strip()),
+            "week": r["week"],
+            "url": url,
+        })
+        if len(posts) >= limit:
+            break
+    return {"posts": posts}
 
 
 @router.get("/public-activity", summary="Get live public proof-of-work activity feed")
