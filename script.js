@@ -314,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const domain = pill.getAttribute('data-domain');
       const name = pill.getAttribute('data-name');
-      if (ctaBtnLabel) ctaBtnLabel.textContent = `Start my ${name} application`;
+      if (ctaBtnLabel) ctaBtnLabel.textContent = `Start my ${name} internship`;
       if (ctaApplyBtn) ctaApplyBtn.href = `quiz.html?domain=${domain}`;
     });
   });
