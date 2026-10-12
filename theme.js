@@ -47,18 +47,7 @@
     if (btn) { e.preventDefault(); window.SkillMeTheme.toggle(); }
   });
 
-  // Follow the OS only while the visitor hasn't chosen explicitly
-  if (window.matchMedia) {
-    var mq = window.matchMedia('(prefers-color-scheme: dark)');
-    var onOs = function (ev) {
-      var saved = null;
-      try { saved = localStorage.getItem(KEY); } catch (e) {}
-      if (saved === 'light' || saved === 'dark') return;
-      root.setAttribute('data-theme', ev.matches ? 'dark' : 'light');
-      syncUi();
-    };
-    if (mq.addEventListener) mq.addEventListener('change', onOs); else if (mq.addListener) mq.addListener(onOs);
-  }
+  // Light is the default for every visitor; only an explicit toggle (saved) overrides it.
 
   function init() {
     syncUi();

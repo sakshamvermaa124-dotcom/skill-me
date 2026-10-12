@@ -167,20 +167,6 @@
     window.dashSetTheme(currentTheme() === 'dark' ? 'light' : 'dark');
   });
 
-  // Follow OS theme changes only while the student hasn't picked one explicitly
-  if (window.matchMedia) {
-    var mq = window.matchMedia('(prefers-color-scheme: light)');
-    var onChange = function (ev) {
-      var saved = null;
-      try { saved = localStorage.getItem(THEME_KEY); } catch (e) {}
-      if (saved === 'light' || saved === 'dark') return;
-      document.documentElement.setAttribute('data-theme', ev.matches ? 'light' : 'dark');
-      syncThemeUi(currentTheme());
-    };
-    if (mq.addEventListener) mq.addEventListener('change', onChange);
-    else if (mq.addListener) mq.addListener(onChange);
-  }
-
   // Escape closes whichever modal is open
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape') return;
