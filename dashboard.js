@@ -154,6 +154,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
 
+  // Task view state — declared before checkExistingSession(): preview mode renders synchronously.
+  let lastTasks = null;     // most recent task list from /api/tasks/current
+  let selectedWeek = null;  // week currently open in the Tasks panel
+
   // Check on load
   checkExistingSession().catch(err => {
     console.warn("Session check notice:", err);
@@ -324,6 +328,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (sidebarNameEl) sidebarNameEl.textContent = student.name;
     const mobileHeaderNameEl = document.getElementById('mobile-header-name');
     if (mobileHeaderNameEl) mobileHeaderNameEl.textContent = student.name;
+    const avatarEl = document.getElementById('dash-avatar');
+    if (avatarEl) {
+      const initials = String(student.name || '').trim().split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+      avatarEl.textContent = initials || '·';
+    }
 
     const hodUrl = `offer.html?view=hod&student_id=${student.id || ''}&name=${encodeURIComponent(student.name || '')}&domain=${encodeURIComponent(student.domain || '')}&college=${encodeURIComponent(student.college || '')}`;
     const hodQuickLink = document.getElementById('dash-quick-hod');
@@ -427,7 +436,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const circumference = 2 * Math.PI * r;
       const offset = circumference - (pct / 100) * circumference;
       const urlParams = new URLSearchParams(window.location.search);
-      const isPreview = urlParams.get('preview') === '1';
 
       document.getElementById('progress-ring').style.strokeDashoffset = offset;
       document.getElementById('progress-bar-inner').style.width = `${pct}%`;
@@ -450,46 +458,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1600);
       }
 
-      // Per-card mini progress bars
-      const approvalRate = totalCompleted > 0 ? Math.min(100, Math.round((approvedCount / totalCompleted) * 100)) : 0;
-      const bar1 = document.getElementById('stat-bar-1');
-      const bar2 = document.getElementById('stat-bar-2');
-      const bar3 = document.getElementById('stat-bar-3');
-      const bar4 = document.getElementById('stat-bar-4');
-      if (bar1) bar1.style.width = `${pct}%`;
-      if (bar2) bar2.style.width = `${approvalRate}%`;
-      if (bar3) bar3.style.width = `${pct}%`;
-      if (bar4) bar4.style.width = `${pct}%`;
+      // Journey timeline + unlock meter reflect each week's real review status
+      renderJourney(data, lastTasks);
 
-      // Update Sprint Milestone Step Cards
-      const m1 = document.getElementById('milestone-w1');
-      const m2 = document.getElementById('milestone-w2');
-      const m3 = document.getElementById('milestone-w3');
-      const m4 = document.getElementById('milestone-w4');
-      if (m1 && m2 && m3 && m4) {
-        [m1, m2, m3, m4].forEach(el => el.classList.remove('active', 'completed'));
-        if (pct >= 100) {
-          m1.classList.add('completed');
-          m2.classList.add('completed');
-          m3.classList.add('completed');
-          m4.classList.add('completed');
-        } else if (pct >= 75) {
-          m1.classList.add('completed');
-          m2.classList.add('completed');
-          m3.classList.add('completed');
-          m4.classList.add('active');
-        } else if (pct >= 50) {
-          m1.classList.add('completed');
-          m2.classList.add('completed');
-          m3.classList.add('active');
-        } else if (pct >= 25) {
-          m1.classList.add('completed');
-          m2.classList.add('active');
-        } else {
-          m1.classList.add('active');
-        }
-      }
-      
       // ─── Certificate Banner (Payment Gated) ───
       // Payment is visible directly at >=75% completion (3 of 4 tasks). Below that, a student must
       // file an urgent request (panel-urgent) and have an admin fulfill it — which
@@ -499,7 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (certSection) {
         let isPaid = false;
         if (student.id && data._batch_id) {
-          if (isPreview && urlParams.get('preview') === 'paid') {
+          if (urlParams.get('preview') === 'paid') {
             isPaid = true;
           } else {
             try {
@@ -546,6 +517,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }, 600);
 
+    // "Your next step" card — first pass from submissions; refined once task titles load
+    renderNextStep(data, null);
+
     // Submissions (LinkedIn task review history)
     renderSubmissionsList(submissions || []);
 
@@ -554,6 +528,163 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Removed pdfBtn onclick to rely on standard HTML anchor tag for popup blocker bypass
 
+  }
+
+  function escHtml(s) {
+    return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  // Open a panel and (optionally) scroll to a week's task card.
+  function goToTask(panelId, week) {
+    if (week) selectTaskWeek(week);
+    if (typeof window.dashShowPanel === 'function') window.dashShowPanel(panelId);
+    if (lenis) lenis.scrollTo(0, { immediate: true }); else window.scrollTo(0, 0);
+  }
+
+  // Per-week review status from the student's submissions.
+  function weekStatus(data, week) {
+    const s = ((data && data.submissions) || []).find(x => Number(x.week) === Number(week));
+    return s ? (s.status || 'pending').toLowerCase() : 'not_submitted';
+  }
+
+  // Home "4-week journey" tiles + the credentials unlock meter.
+  function renderJourney(data, tasks) {
+    if (!data) return;
+    const summary = data.summary || {};
+    const total = Number(summary.total_tasks) || 4;
+    const pct = typeof summary.completion_pct === 'number' ? summary.completion_pct : 0;
+    const approvedSubs = (data.submissions || []).filter(s => (s.status || '').toLowerCase() === 'approved').length;
+    const approved = Math.max(Number(summary.completed_tasks) || 0, approvedSubs);
+    const allDone = pct >= 100;
+    const firstOpen = [1, 2, 3, 4].find(w => ['not_submitted', 'rejected'].includes(weekStatus(data, w)));
+
+    const STATE = {
+      approved:      { cls: 'completed', text: 'Approved' },
+      pending:       { cls: 'review',    text: 'In review' },
+      rejected:      { cls: 'rejected',  text: 'Needs changes' },
+      not_submitted: { cls: '',          text: 'Not started' },
+    };
+    [1, 2, 3, 4].forEach(w => {
+      const el = document.querySelector(`#sprint-milestones-row [data-week="${w}"]`);
+      if (!el) return;
+      const status = allDone ? 'approved' : weekStatus(data, w);
+      let { cls, text } = STATE[status] || STATE.not_submitted;
+      if (status === 'not_submitted' && w === firstOpen) { cls = 'active'; text = 'Up next'; }
+      el.classList.remove('active', 'completed', 'review', 'rejected');
+      if (cls) el.classList.add(cls);
+      const stateEl = el.querySelector('.milestone-state');
+      if (stateEl) stateEl.textContent = text;
+      const task = (tasks || []).find(t => Number(t.week_number) === w);
+      const nameEl = el.querySelector('.milestone-name');
+      if (nameEl && task && task.title) nameEl.textContent = task.title;
+      el.setAttribute('aria-label', `Week ${w}${task && task.title ? ': ' + task.title : ''} — ${text}`);
+    });
+
+    // Unlock meter (credentials) + certificate fact (home)
+    const needed = Math.ceil(total * PAYMENT_UNLOCK_PCT / 100);
+    const unlocked = pct >= PAYMENT_UNLOCK_PCT || !!summary.payment_unlocked;
+    const done = Math.min(approved, needed);
+    const fill = document.getElementById('unlock-meter-fill');
+    if (fill) fill.style.width = `${Math.round((done / (needed || 1)) * 100)}%`;
+    const countEl = document.getElementById('unlock-count');
+    if (countEl) countEl.textContent = `${done} of ${needed}`;
+    const remaining = Math.max(0, needed - approved);
+    const factEl = document.getElementById('fact-unlock');
+    if (factEl) factEl.innerHTML = unlocked
+      ? '<span class="fact-ok">Unlocked</span>'
+      : `${remaining}<span class="stat-unit"> more approval${remaining === 1 ? '' : 's'}</span>`;
+    const homeCred = document.getElementById('home-cred-status');
+    if (homeCred) homeCred.textContent = unlocked ? 'Unlocked — ready to claim' : `Unlocks after ${remaining} more approval${remaining === 1 ? '' : 's'}`;
+
+    // Sidebar badge: how many tasks still need action
+    const badge = document.getElementById('nav-work-badge');
+    if (badge) {
+      const open = allDone ? 0 : [1, 2, 3, 4].filter(w => ['not_submitted', 'rejected'].includes(weekStatus(data, w))).length;
+      badge.textContent = open;
+      badge.hidden = open === 0;
+    }
+  }
+
+  // Show one week's task card in the Tasks panel.
+  function selectTaskWeek(week) {
+    selectedWeek = Number(week);
+    document.querySelectorAll('#tasks-list .task-card').forEach(card => {
+      card.hidden = Number(card.dataset.week) !== selectedWeek;
+    });
+    document.querySelectorAll('#task-week-tabs .week-tab').forEach(tab => {
+      const on = Number(tab.dataset.week) === selectedWeek;
+      tab.classList.toggle('is-selected', on);
+      tab.setAttribute('aria-selected', on ? 'true' : 'false');
+      tab.tabIndex = on ? 0 : -1;
+      // Keep the selected week visible when the switcher scrolls sideways (mobile)
+      if (on && tab.parentElement && tab.parentElement.scrollWidth > tab.parentElement.clientWidth) {
+        const strip = tab.parentElement;
+        strip.scrollTo({ left: tab.offsetLeft - strip.offsetLeft - 16, behavior: 'smooth' });
+      }
+    });
+  }
+
+  window.dashOpenWeek = function(week) { goToTask('panel-work', week); };
+
+  // "Your next step" card on the overview — one clear action derived from live status.
+  function renderNextStep(data, tasks) {
+    const el = document.getElementById('dash-next-step');
+    if (!el || !data) return;
+    const summary = data.summary || {};
+    const subs = data.submissions || [];
+    const total = Number(summary.total_tasks) || (tasks && tasks.length) || 4;
+    const weeks = (tasks && tasks.length)
+      ? [...tasks].map((t, i) => Number(t.week_number) || (i + 1)).sort((a, b) => a - b)
+      : Array.from({ length: total }, (_, i) => i + 1);
+    const statusOf = (w) => {
+      const s = subs.find(x => Number(x.week) === Number(w));
+      return s ? (s.status || 'pending').toLowerCase() : 'not_submitted';
+    };
+    const titleOf = (w) => {
+      const t = (tasks || []).find(x => Number(x.week_number) === Number(w));
+      return t && t.title ? t.title : `Week ${w} task`;
+    };
+    const weeksLabel = (ws) => ws.length === 1 ? `Week ${ws[0]}` : `Weeks ${ws.slice(0, -1).join(', ')} & ${ws[ws.length - 1]}`;
+
+    const approved = subs.filter(s => (s.status || '').toLowerCase() === 'approved').length;
+    const pct = typeof summary.completion_pct === 'number' ? summary.completion_pct : Math.round((approved / (total || 4)) * 100);
+    const rejected = weeks.find(w => statusOf(w) === 'rejected');
+    const todo = weeks.find(w => statusOf(w) === 'not_submitted');
+    const pending = weeks.filter(w => statusOf(w) === 'pending');
+
+    const ICONS = {
+      accent: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+      danger: '<path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>',
+      review: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+      ok: '<circle cx="12" cy="8" r="6"/><path d="M15.48 12.89 17 22l-5-3-5 3 1.52-9.11"/>',
+    };
+
+    let s;
+    if (pct >= 100) {
+      s = { tone: 'ok', label: 'All tasks complete', title: "You've finished the internship 🎉", desc: 'Your Certificate, LOR and Portfolio are waiting in the Credentials tab.', cta: 'Open Credentials', panel: 'panel-credentials' };
+    } else if (rejected) {
+      s = { tone: 'danger', label: 'Action needed', title: `Resubmit Week ${rejected}: ${titleOf(rejected)}`, desc: 'Your post was rejected. Read the admin note on the task, fix your post and paste the new link.', cta: 'Fix & resubmit', panel: 'panel-work', week: rejected };
+    } else if (pct >= PAYMENT_UNLOCK_PCT) {
+      s = { tone: 'ok', label: 'Credentials unlocked', title: 'Your certificate is ready to claim', desc: todo ? `You can still finish Week ${todo} to complete all ${total} tasks.` : 'Open the Credentials tab to view or claim them.', cta: 'Open Credentials', panel: 'panel-credentials' };
+    } else if (todo) {
+      s = { tone: 'accent', label: 'Your next step', title: `Week ${todo}: ${titleOf(todo)}`, desc: pending.length ? `${weeksLabel(pending)} is under review. Meanwhile, complete this task and submit your LinkedIn post.` : 'Complete the task, share it on LinkedIn and submit the post link for review.', cta: 'Open task', panel: 'panel-work', week: todo };
+    } else if (pending.length) {
+      s = { tone: 'review', label: 'Under review', title: `${weeksLabel(pending)} ${pending.length > 1 ? 'are' : 'is'} being reviewed`, desc: 'Nothing to do right now — your progress updates automatically once an admin approves it.', cta: 'View submissions', panel: 'panel-work' };
+    } else {
+      s = { tone: 'accent', label: 'Your next step', title: 'Open your weekly tasks', desc: 'Complete each task and submit your LinkedIn post for review.', cta: 'Open tasks', panel: 'panel-work' };
+    }
+
+    el.dataset.tone = s.tone;
+    el.innerHTML = `
+      <div class="next-step-body">
+        <div class="next-step-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${ICONS[s.tone]}</svg>${escHtml(s.label)}</div>
+        <div class="next-step-title">${escHtml(s.title)}</div>
+        <div class="next-step-desc">${escHtml(s.desc)}</div>
+        <button type="button" class="cert-btn ${s.tone === 'review' ? 'cert-btn-secondary' : 'cert-btn-primary'}">${escHtml(s.cta)}
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </button>
+      </div>`;
+    el.querySelector('button').addEventListener('click', () => goToTask(s.panel, s.week));
   }
 
   function renderSubmissionsList(submissions) {
@@ -583,8 +714,8 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="sub-info">
             <div class="sub-title">Week ${sub.week || '?'} LinkedIn Submission</div>
             <div class="sub-meta">
-              <span>${dateStr}</span>
-              ${sub.admin_note ? `<span title="Admin note">📝 ${sub.admin_note}</span>` : ''}
+              ${dateStr ? `<span>Submitted ${dateStr}</span>` : ''}
+              ${sub.admin_note ? `<span title="Admin note">📝 ${escHtml(sub.admin_note)}</span>` : ''}
             </div>
           </div>
           <span class="sub-status ${dotClass}">${status}</span>
@@ -633,89 +764,169 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!tasksList) return;
 
     tasksList.innerHTML = '';
+    lastTasks = tasks && tasks.length ? tasks : null;
+    const weekTabs = document.getElementById('task-week-tabs');
+    if (weekTabs) weekTabs.innerHTML = '';
+
     if (tasks && tasks.length > 0) {
       if (tasksEmpty) tasksEmpty.style.display = 'none';
       if (tasksCount) tasksCount.textContent = `${tasks.length} Task${tasks.length !== 1 ? 's' : ''}`;
 
       const sortedTasks = [...tasks].sort((a, b) => (a.week_number || 0) - (b.week_number || 0));
+      const statusForWeek = (w) => {
+        const s = (submissions || []).find(x => Number(x.week) === Number(w));
+        return s ? (s.status || 'pending').toLowerCase() : 'not_submitted';
+      };
+      const weeks = sortedTasks.map((t, i) => Number(t.week_number) || (i + 1));
+      // The first week that still needs a submission is the "current" one.
+      const activeWeek = weeks.find(w => ['not_submitted', 'rejected'].includes(statusForWeek(w))) || null;
+      if (!weeks.includes(Number(selectedWeek))) selectedWeek = activeWeek || weeks[weeks.length - 1];
+
+      const TAB_STATE = {
+        approved: { cls: 'is-approved', text: 'Approved' },
+        pending: { cls: 'is-pending', text: 'In review' },
+        rejected: { cls: 'is-rejected', text: 'Needs changes' },
+        not_submitted: { cls: '', text: 'Not started' },
+      };
+      const esc = escHtml;
 
       sortedTasks.forEach((task, i) => {
-        const week = task.week_number || (i + 1);
-        const diffColor = { 'Beginner': '#34d399', 'Beginner+': '#a3e635', 'Intermediate': '#fbbf24', 'Intermediate+': '#fb923c' }[task.difficulty] || '#fbbf24';
+        const week = weeks[i];
+        const diffLevel = { 'Beginner': 1, 'Beginner+': 2, 'Intermediate': 3, 'Intermediate+': 4 }[task.difficulty] || 3;
         const sub = (submissions || []).find(s => Number(s.week) === Number(week));
         const subStatus = sub ? (sub.status || 'pending').toLowerCase() : 'not_submitted';
         const caption = (templates && templates[String(week)]) || '';
+        const isActive = Number(week) === Number(activeWeek);
 
-        let badgeClass = 'open', badgeText = 'Not submitted yet';
+        // Week tab
+        if (weekTabs) {
+          const st = TAB_STATE[subStatus] || TAB_STATE.not_submitted;
+          const tab = document.createElement('button');
+          tab.type = 'button';
+          tab.className = `week-tab ${st.cls}${isActive && subStatus === 'not_submitted' ? ' is-next' : ''}`;
+          tab.dataset.week = week;
+          tab.setAttribute('role', 'tab');
+          tab.innerHTML = `
+            <span class="week-tab-top"><span class="week-tab-num">Week ${week}</span><span class="week-tab-dot" aria-hidden="true"></span></span>
+            <span class="week-tab-title">${esc(task.title || `Week ${week} task`)}</span>
+            <span class="week-tab-state">${isActive && subStatus === 'not_submitted' ? 'Up next' : st.text}</span>`;
+          tab.addEventListener('click', () => selectTaskWeek(week));
+          weekTabs.appendChild(tab);
+        }
+
+        let badgeClass = 'idle', badgeText = 'Not submitted';
         if (subStatus === 'pending') { badgeClass = 'open'; badgeText = 'Pending review'; }
         else if (subStatus === 'approved') { badgeClass = 'merged'; badgeText = 'Approved ✓'; }
-        else if (subStatus === 'rejected') { badgeClass = 'failed'; badgeText = 'Rejected — you can resubmit'; }
+        else if (subStatus === 'rejected') { badgeClass = 'failed'; badgeText = 'Needs changes'; }
 
         // Only a rejected (or never-submitted) task accepts a new link — the backend enforces the same rule.
         const isLocked = subStatus === 'approved' || subStatus === 'pending';
         const inputId = `sub-url-input-w${week}`;
         const btnId = `sub-submit-btn-w${week}`;
         const btnLabel = { approved: 'Approved ✓', pending: 'Under Review', rejected: 'Resubmit' }[subStatus] || 'Submit for Review';
-        const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         const guidance = {
-          approved: { color: '#34d399', text: 'This task is approved and counts toward your progress. No further submission is needed.' },
-          pending: { color: '#fbbf24', text: 'Your LinkedIn post is under review. You can submit a new link only if this one is rejected.' },
-          rejected: { color: '#f87171', text: 'This submission was rejected. Check the admin note below, fix your LinkedIn post, and resubmit the new post link.' },
+          approved: { tone: 'ok', text: 'Approved — this task counts toward your progress. Nothing more to do here.' },
+          pending: { tone: 'warn', text: "Your post is being reviewed. You'll be able to submit a new link only if it's rejected." },
+          rejected: { tone: 'danger', text: 'This submission was rejected. Read the admin note, fix your LinkedIn post, then submit the new link below.' },
         }[subStatus];
+        const dateStr = sub && sub.submitted_at ? new Date(sub.submitted_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '';
+        const doneStep = isLocked ? ' is-done' : '';
 
         const card = document.createElement('div');
-        card.className = 'sub-card task-card';
-        card.style.flexDirection = 'column';
-        card.style.alignItems = 'stretch';
-        card.style.transitionDelay = `${i * 0.08}s`;
+        card.className = `sub-card task-card is-${subStatus === 'approved' ? 'approved' : subStatus}${isActive ? ' is-active' : ''}`;
+        card.dataset.week = week;
+        card.setAttribute('role', 'tabpanel');
         card.innerHTML = `
-          <div style="display:flex;align-items:center;gap:16px;width:100%;">
-            <div class="sub-dot ${badgeClass}"></div>
+          <div class="task-head">
+            <div class="task-week"><small>Week</small><strong>${week}</strong></div>
             <div class="sub-info">
-              <div class="sub-title">${task.title || `Week ${week} Task`}</div>
+              <div class="sub-title">${esc(task.title || `Week ${week} Task`)}</div>
               <div class="sub-meta">
-                <span>Week ${week}</span>
-                <span style="color:${diffColor};font-weight:600;">${(task.difficulty || 'medium').toUpperCase()}</span>
-                ${task.est_hours ? `<span>~${task.est_hours} hrs</span>` : ''}
+                <span class="diff diff-${diffLevel}">${esc(task.difficulty || 'Medium')}</span>
+                ${task.est_hours ? `<span>~${esc(task.est_hours)} hrs</span>` : ''}
+                ${dateStr ? `<span>Submitted ${dateStr}</span>` : ''}
               </div>
             </div>
             <span class="sub-status ${badgeClass}">${badgeText}</span>
           </div>
-          ${task.description ? `<div style="margin:14px 0 0 0;font-size:0.85rem;color:var(--text-secondary);line-height:1.5;" class="dash-markdown">${marked.parse(task.description)}</div>` : ''}
-          ${guidance ? `<div style="margin-top:12px;font-size:0.8rem;color:${guidance.color};line-height:1.5;">${guidance.text}</div>` : ''}
-          ${sub && sub.admin_note && subStatus === 'rejected' ? `<div style="margin-top:10px;font-size:0.8rem;color:#f87171;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:8px 12px;">Admin note: ${esc(sub.admin_note)}</div>` : ''}
-          ${sub && sub.feedback ? `
-          <details style="margin-top:12px;">
-            <summary style="cursor:pointer;font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">📝 Feedback for this submission</summary>
-            <pre data-lenis-prevent style="white-space:pre-wrap;font-family:inherit;font-size:0.8rem;color:var(--text-secondary);background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:10px 14px;margin-top:8px;max-height:220px;overflow-y:auto;">${sub.feedback.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
-          </details>` : ''}
-          ${caption ? `
-          <div style="margin-top:14px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <span style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Suggested LinkedIn Caption</span>
-              <button class="guide-code-copy" style="position:static;" data-caption="${caption.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}" onclick="copyCode(this, this.getAttribute('data-caption'))">Copy Caption</button>
-            </div>
-            <pre data-lenis-prevent style="white-space:pre-wrap;font-family:inherit;font-size:0.8rem;color:var(--text-secondary);background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:10px 14px;max-height:140px;overflow-y:auto;">${caption}</pre>
+          ${guidance || (sub && sub.admin_note && subStatus === 'rejected') ? `
+          <div class="task-alerts">
+            ${guidance ? `<div class="task-guidance tone-${guidance.tone}">${guidance.text}</div>` : ''}
+            ${sub && sub.admin_note && subStatus === 'rejected' ? `<div class="task-admin-note"><strong>Admin note:</strong> ${esc(sub.admin_note)}</div>` : ''}
           </div>` : ''}
-          <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
-            <div class="login-input-wrap" style="flex:1;min-width:220px;margin-bottom:0;">
-              <input type="url" id="${inputId}" placeholder="Paste your LinkedIn post URL" value="${sub && sub.linkedin_url ? esc(sub.linkedin_url) : ''}" ${isLocked ? 'disabled' : ''}>
-            </div>
-            <button id="${btnId}" class="cert-btn cert-btn-primary" style="flex-shrink:0;" ${isLocked ? 'disabled' : ''}
-              onclick="window.submitTaskForReview(${ctx ? ctx.studentId : 'null'}, ${ctx ? ctx.batchId : 'null'}, ${week}, this)">
-              ${btnLabel}
-            </button>
-          </div>
-          ${isLocked ? '' : `<div style="margin-top:6px;font-size:0.72rem;color:var(--text-muted);">On your LinkedIn post, click <strong>⋯ → Copy link to post</strong>. Your GitHub, Figma, notebook or live-site links go inside the post, not here.</div>`}
+          <ol class="task-steps">
+            <li class="task-step${doneStep}">
+              <span class="task-step-marker">1</span>
+              <div class="task-step-main">
+                ${task.description ? `
+                <details class="task-step-details"${isLocked ? '' : ' open'}>
+                  <summary><span class="task-step-title">Read the brief &amp; do the work</span><span class="task-step-toggle"></span></summary>
+                  <div class="task-step-content dash-markdown">${marked.parse(task.description)}</div>
+                </details>` : `<div class="task-step-title">Do the work</div><p class="task-step-desc">Follow the task in the PDF guide for this week.</p>`}
+              </div>
+            </li>
+            <li class="task-step${doneStep}">
+              <span class="task-step-marker">2</span>
+              <div class="task-step-main">
+                <div class="task-step-title">Share it on LinkedIn</div>
+                <p class="task-step-desc">Post your work with screenshots or a short demo and tag <strong>@SkillMe</strong>. Put your project link inside the post or its first comment.</p>
+                ${caption && !isLocked ? `
+                <div class="task-caption-box">
+                  <div class="task-caption-head">
+                    <span class="task-caption-label">Suggested caption</span>
+                    <button class="guide-code-copy" data-caption="${esc(caption)}" onclick="copyCode(this, this.getAttribute('data-caption'))">Copy Caption</button>
+                  </div>
+                  <pre data-lenis-prevent class="task-pre">${esc(caption)}</pre>
+                </div>` : ''}
+              </div>
+            </li>
+            <li class="task-step${doneStep}">
+              <span class="task-step-marker">3</span>
+              <div class="task-step-main">
+                <div class="task-step-title">${isLocked ? 'Your submitted post' : 'Submit your post link'}</div>
+                <div class="task-submit">
+                  <div class="login-input-wrap">
+                    <input type="url" id="${inputId}" placeholder="https://www.linkedin.com/posts/…" aria-label="LinkedIn post URL for week ${week}" value="${sub && sub.linkedin_url ? esc(sub.linkedin_url) : ''}" ${isLocked ? 'disabled' : ''}>
+                  </div>
+                  <button id="${btnId}" class="cert-btn cert-btn-primary" ${isLocked ? 'disabled' : ''}
+                    onclick="window.submitTaskForReview(${ctx ? ctx.studentId : 'null'}, ${ctx ? ctx.batchId : 'null'}, ${week}, this)">
+                    ${btnLabel}
+                  </button>
+                </div>
+                ${isLocked
+                  ? (sub && sub.linkedin_url ? `<a class="task-view-post" href="${esc(sub.linkedin_url)}" target="_blank" rel="noopener noreferrer">View post on LinkedIn ↗</a>` : '')
+                  : `<p class="task-hint">On your post, click <strong>⋯ → Copy link to post</strong>. GitHub, Figma, notebook or live-site links go inside the post, not here.</p>`}
+              </div>
+            </li>
+          </ol>
+          ${sub && sub.feedback ? `
+          <details class="task-section">
+            <summary>📝 Feedback for this submission</summary>
+            <div class="task-section-body"><pre data-lenis-prevent class="task-pre">${esc(sub.feedback)}</pre></div>
+          </details>` : ''}
         `;
         tasksList.appendChild(card);
-        // Add visible class immediately for the initial fade-in to prevent invisible cards
-        setTimeout(() => card.classList.add('visible'), 50 * i);
+        card.classList.add('visible');
       });
+
+      // Arrow-key navigation between week tabs
+      if (weekTabs && !weekTabs.dataset.keys) {
+        weekTabs.dataset.keys = '1';
+        weekTabs.addEventListener('keydown', (e) => {
+          if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+          const tabs = [...weekTabs.querySelectorAll('.week-tab')];
+          const idx = tabs.findIndex(t => t.classList.contains('is-selected'));
+          const next = tabs[(idx + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length];
+          if (next) { selectTaskWeek(next.dataset.week); next.focus(); }
+        });
+      }
+      selectTaskWeek(selectedWeek);
     } else {
       if (tasksEmpty) tasksEmpty.style.display = 'block';
       if (tasksCount) tasksCount.textContent = '0 Tasks';
     }
+    renderJourney(window._dashData, lastTasks);
+    renderNextStep(window._dashData, tasks);
   }
 
   // Explain the common wrong-link cases (a Figma/GitHub/live-site link, or a profile link)
@@ -931,22 +1142,22 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="cert-banner-content">
           <div class="cert-banner-icon">✨</div>
           <div class="cert-banner-text">
-            <div class="cert-banner-title">You've Earned Your Credentials — Claim Them</div>
+            <div class="cert-banner-title">Your credentials are unlocked</div>
             <div class="cert-banner-sub">
-              A one-time ₹129 fee covers your verified certificate, personalized LOR, and lifetime hosting for your Proof of Work portfolio — the work behind them (review, generation, hosting) doesn't happen for free.
+              A one-time ₹129 covers your verified certificate, personalized LOR and lifetime hosting for your Proof of Work portfolio.
             </div>
           </div>
-          <div class="cert-banner-actions" style="flex-direction: column; align-items: flex-start; gap: 8px;">
-            <div style="display: flex; gap: 8px; width: 100%;">
-              <input type="text" id="discount-code" placeholder="Have a discount code?" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.5); color: #fff; outline: none; font-size: 14px; width: 180px;">
-              <button id="pay-btn" class="cert-btn cert-btn-primary" onclick="initiatePayment(${student.id}, ${data._batch_id})" style="flex: 1;">
+          <div class="cert-banner-actions" style="width: 100%;">
+            <div class="cert-pay-row">
+              <input type="text" id="discount-code" class="dash-input" placeholder="Have a discount code?">
+              <button id="pay-btn" class="cert-btn cert-btn-primary" onclick="initiatePayment(${student.id}, ${data._batch_id})">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
                   <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
                 </svg>
                 Unlock My Certificate — ₹129
               </button>
             </div>
-            <div style="font-size:11px;color:var(--text-3,#666);margin-top:4px;text-align:center; width: 100%;">
+            <div class="secure-note">
               🔒 Secured by Razorpay · UPI / Card / NetBanking · Every certificate is independently verifiable
             </div>
           </div>
@@ -966,29 +1177,29 @@ document.addEventListener('DOMContentLoaded', () => {
     if (credStrip) {
       credStrip.className = 'cred-strip visible';
       credStrip.innerHTML = `
-        <a href="${certUrl}" target="_blank" class="cred-pill" style="border-color:rgba(212,168,83,0.25);">
-          <div class="cred-pill-icon" style="background:rgba(212,168,83,0.12);color:#d4a853;">🎓</div>
+        <a href="${certUrl}" target="_blank" class="cred-pill">
+          <div class="cred-pill-icon">🎓</div>
           <div class="cred-pill-text">
             <div class="cred-pill-label">Certificate</div>
             <div class="cred-pill-name">View &amp; Download</div>
           </div>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.4;flex-shrink:0;"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          <svg class="cred-pill-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
-        <a href="${lorUrl}" target="_blank" class="cred-pill" style="border-color:rgba(99,102,241,0.2);">
-          <div class="cred-pill-icon" style="background:rgba(99,102,241,0.12);color:#a5b4fc;">📄</div>
+        <a href="${lorUrl}" target="_blank" class="cred-pill">
+          <div class="cred-pill-icon tone-info">📄</div>
           <div class="cred-pill-text">
             <div class="cred-pill-label">Letter of Recommendation</div>
             <div class="cred-pill-name">View LOR</div>
           </div>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.4;flex-shrink:0;"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          <svg class="cred-pill-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
-        <a href="${portfolioUrl}" target="${portfolioUrl !== '#' ? '_blank' : '_self'}" class="cred-pill" style="border-color:rgba(52,211,153,0.2);${portfolioUrl === '#' ? 'opacity:0.5;pointer-events:none;' : ''}">
-          <div class="cred-pill-icon" style="background:rgba(52,211,153,0.12);color:#34d399;">🌐</div>
+        <a href="${portfolioUrl}" target="${portfolioUrl !== '#' ? '_blank' : '_self'}" class="cred-pill${portfolioUrl === '#' ? ' is-disabled' : ''}">
+          <div class="cred-pill-icon tone-ok">🌐</div>
           <div class="cred-pill-text">
             <div class="cred-pill-label">Proof of Work</div>
             <div class="cred-pill-name">Public Portfolio</div>
           </div>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.4;flex-shrink:0;"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          <svg class="cred-pill-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
       `;
     }
@@ -1001,8 +1212,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="cert-banner-content">
           <div class="cert-banner-icon">🏆</div>
           <div class="cert-banner-text">
-            <div class="cert-banner-title">Congratulations! Your credentials are ready.</div>
-            <div class="cert-banner-sub">Payment confirmed · View, download, and verify your credentials!</div>
+            <div class="cert-banner-title">Your credentials are ready</div>
+            <div class="cert-banner-sub">Payment confirmed — view, download and share them anywhere.</div>
           </div>
           <div class="cert-banner-actions">
             <a href="${certUrl}" target="_blank" class="cert-btn cert-btn-primary">
@@ -1012,12 +1223,13 @@ document.addEventListener('DOMContentLoaded', () => {
               </svg>
               View Certificate
             </a>
-            <a href="${lorUrl}" target="_blank" class="cert-btn cert-btn-primary" style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; border: none;">
+            <a href="${lorUrl}" target="_blank" class="cert-btn cert-btn-secondary">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline>
               </svg>
               View LOR
             </a>
+            ${portfolioUrl !== '#' ? `<a href="${portfolioUrl}" target="_blank" class="cert-btn cert-btn-secondary">Portfolio ↗</a>` : ''}
           </div>
         </div>
       </div>`;
@@ -1035,15 +1247,18 @@ document.addEventListener('DOMContentLoaded', () => {
   async function loadUrgentRequestPanel(student, data, pct, paymentUnlocked) {
     const content = document.getElementById('urgent-request-content');
     if (!content) return;
+    const urgentCard = document.getElementById('urgent-card');
 
     if (pct >= PAYMENT_UNLOCK_PCT) {
+      // Credentials are claimable directly — no need to offer priority processing.
+      if (urgentCard) urgentCard.hidden = true;
       content.innerHTML = `
         <div class="empty-state">
-          <div class="empty-icon">
-            <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.2)" stroke-width="1"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <div class="empty-icon tone-ok">
+            <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           </div>
           <h3>Not Needed</h3>
-          <p>You're at ${pct}% completion — payment is already available on the Credentials tab, no request required.</p>
+          <p>You're at ${pct}% completion — you can claim your credentials directly, no request required.</p>
         </div>`;
       return;
     }
@@ -1051,11 +1266,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (paymentUnlocked) {
       content.innerHTML = `
         <div class="empty-state">
-          <div class="empty-icon">
-            <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.2)" stroke-width="1"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <div class="empty-icon tone-ok">
+            <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           </div>
           <h3>Approved ✅</h3>
-          <p>Your urgent request was approved — head to the Credentials tab to complete payment.</p>
+          <p>Your priority request was approved — you can now claim your credentials above.</p>
         </div>`;
       return;
     }
@@ -1078,24 +1293,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const content = document.getElementById('urgent-request-content');
     if (!content) return;
 
+    const urgentCard = document.getElementById('urgent-card');
+    if (urgentCard && request) urgentCard.open = true;
+
     if (!request) {
       content.innerHTML = `
-        <div class="guide-card">
-          <div class="guide-header">
-            <div class="guide-header-icon">⚡</div>
-            <h2>Request Urgent Processing</h2>
-          </div>
-          <p class="guide-subtitle">Need your Certificate, LOR, or Portfolio sooner? Submit a request and our team will process it within 24 hours.</p>
-          <div style="margin-top: 16px;">
-            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;">
-              <label style="font-size: 0.85rem; color: rgba(255,255,255,0.8);"><input type="radio" name="urgent-request-type" value="certificate" checked> Certificate</label>
-              <label style="font-size: 0.85rem; color: rgba(255,255,255,0.8);"><input type="radio" name="urgent-request-type" value="lor"> Letter of Recommendation</label>
-              <label style="font-size: 0.85rem; color: rgba(255,255,255,0.8);"><input type="radio" name="urgent-request-type" value="portfolio"> Portfolio</label>
-              <label style="font-size: 0.85rem; color: rgba(255,255,255,0.8);"><input type="radio" name="urgent-request-type" value="all"> All three</label>
+        <div class="urgent-panel">
+          <p class="urgent-intro">Haven't reached 3 approvals yet but need your Certificate, LOR or Portfolio urgently? Tell us what you need and our team will process it within 24 hours.</p>
+          <div class="urgent-form">
+            <div class="urgent-options" role="radiogroup" aria-label="What do you need processed?">
+              <label class="urgent-option"><input type="radio" name="urgent-request-type" value="certificate" checked> Certificate</label>
+              <label class="urgent-option"><input type="radio" name="urgent-request-type" value="lor"> Letter of Recommendation</label>
+              <label class="urgent-option"><input type="radio" name="urgent-request-type" value="portfolio"> Portfolio</label>
+              <label class="urgent-option"><input type="radio" name="urgent-request-type" value="all"> All three</label>
             </div>
-            <textarea id="urgent-request-note" placeholder="Optional note for the admin team..." rows="3" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: #fff; outline: none; font-size: 14px; resize: vertical; margin-bottom: 14px;"></textarea>
+            <textarea id="urgent-request-note" class="dash-input" placeholder="Optional note for the admin team..." rows="3"></textarea>
             <button id="urgent-request-submit-btn" class="cert-btn cert-btn-primary" onclick="window.submitUrgentRequest()">
-              Request Urgent Processing (24h)
+              Request Priority Processing
             </button>
           </div>
         </div>`;
@@ -1104,27 +1318,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (request.status === 'pending') {
       content.innerHTML = `
-        <div class="guide-card">
+        <div class="urgent-panel">
           <div class="guide-header">
             <div class="guide-header-icon">⏳</div>
-            <h2>Request Submitted</h2>
+            <h2>Request submitted</h2>
           </div>
           <p class="guide-subtitle">Our team will process your <strong>${request.request_type}</strong> request within 24 hours.</p>
-          <p style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">Submitted ${new Date(request.created_at).toLocaleString()}</p>
-          ${request.note ? `<p style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">Your note: ${request.note}</p>` : ''}
+          <p class="urgent-meta">Submitted ${new Date(request.created_at).toLocaleString()}</p>
+          ${request.note ? `<p class="urgent-meta"><strong>Your note:</strong> ${escHtml(request.note)}</p>` : ''}
         </div>`;
       return;
     }
 
     const statusLabel = request.status === 'fulfilled' ? 'Fulfilled ✅' : 'Rejected ❌';
     content.innerHTML = `
-      <div class="guide-card">
+      <div class="urgent-panel">
         <div class="guide-header">
           <div class="guide-header-icon">${request.status === 'fulfilled' ? '✅' : '❌'}</div>
           <h2>${statusLabel}</h2>
         </div>
         <p class="guide-subtitle">Your <strong>${request.request_type}</strong> request was ${request.status} on ${request.resolved_at ? new Date(request.resolved_at).toLocaleString() : ''}.</p>
-        ${request.admin_note ? `<p style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">Admin note: ${request.admin_note}</p>` : ''}
+        ${request.admin_note ? `<p class="urgent-meta"><strong>Admin note:</strong> ${escHtml(request.admin_note)}</p>` : ''}
       </div>`;
   }
 
@@ -1154,7 +1368,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!res.ok) {
         alert(resData.detail || 'Could not submit request. Please try again.');
-        if (btn) { btn.disabled = false; btn.textContent = 'Request Urgent Processing (24h)'; }
+        if (btn) { btn.disabled = false; btn.textContent = 'Request Priority Processing'; }
         return;
       }
 
@@ -1168,7 +1382,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     } catch (e) {
       alert('Network error while submitting. Please try again.');
-      if (btn) { btn.disabled = false; btn.textContent = 'Request Urgent Processing (24h)'; }
+      if (btn) { btn.disabled = false; btn.textContent = 'Request Priority Processing'; }
     }
   };
 
@@ -1231,7 +1445,7 @@ document.addEventListener('DOMContentLoaded', () => {
           email: window._dashData._email || ''
         },
         theme: {
-          color: "#4f46e5"
+          color: "#e5322d"
         },
         modal: {
           ondismiss: function () {
@@ -1342,52 +1556,30 @@ function showCompletionPopup(student, data, pct) {
   // Create overlay
   const overlay = document.createElement('div');
   overlay.id = 'completion-overlay';
-  overlay.style.cssText = `
-    position:fixed;inset:0;z-index:9999;
-    background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);
-    display:flex;align-items:center;justify-content:center;
-    opacity:0;transition:opacity 0.4s;
-  `;
+  overlay.className = 'completion-overlay';
 
   const firstName = (student && student.name) ? student.name.split(' ')[0] : 'Intern';
 
   overlay.innerHTML = `
-    <div style="
-      background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);
-      border:1px solid rgba(201,154,78,0.3);
-      border-radius:24px;padding:44px 36px 36px;max-width:500px;width:92%;
-      text-align:center;position:relative;overflow:hidden;
-      box-shadow:0 0 80px rgba(201,154,78,0.15), 0 24px 64px rgba(0,0,0,0.5);
-    ">
-      <!-- Glow -->
-      <div style="position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:200px;height:200px;background:radial-gradient(circle,rgba(201,154,78,0.18) 0%,transparent 70%);pointer-events:none;"></div>
-
-      <div style="font-size:3.2rem;margin-bottom:12px;position:relative;">🏆</div>
-      <div style="font-family:'Space Grotesk',sans-serif;font-size:1.55rem;font-weight:800;color:#fff;margin-bottom:8px;position:relative;">
-        Congratulations, ${firstName}!
-      </div>
-      <div style="font-size:0.9rem;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:28px;position:relative;">
+    <div class="completion-card" role="dialog" aria-modal="true">
+      <div class="completion-glow"></div>
+      <div class="completion-trophy">🏆</div>
+      <div class="completion-title">Congratulations, ${firstName}!</div>
+      <div class="completion-text">
         ${isFullyComplete
-          ? `You've completed <strong style="color:#c99a4e;">100%</strong> of your internship tasks!`
-          : `You've reached <strong style="color:#c99a4e;">${pct}%</strong> completion — enough to unlock your credentials!`}<br>
+          ? `You've completed <strong>100%</strong> of your internship tasks!`
+          : `You've reached <strong>${pct}%</strong> completion — enough to unlock your credentials!`}<br>
         Your Certificate, LOR, and Portfolio are ready to claim.
       </div>
 
       <!-- Credential buttons — rendered by JS after payment check -->
-      <div id="completion-cred-area" style="margin-bottom:12px;position:relative;">
-        <div style="color:rgba(255,255,255,0.4);font-size:0.8rem;text-align:center;padding:16px;">
-          Checking payment status…
-        </div>
+      <div id="completion-cred-area" class="completion-cred-area">
+        <div class="completion-loading">Checking payment status…</div>
       </div>
 
-      <button onclick="document.getElementById('completion-overlay').remove()" style="
-        background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);
-        border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 28px;
-        font-weight:500;font-size:0.85rem;cursor:pointer;width:100%;
-        position:relative;transition:background 0.2s;
-      " onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.06)'">Dismiss</button>
+      <button onclick="document.getElementById('completion-overlay').remove()" class="completion-dismiss">Dismiss</button>
 
-      <canvas id="confetti-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;border-radius:24px;"></canvas>
+      <canvas id="confetti-canvas" class="completion-canvas"></canvas>
     </div>
   `;
 
@@ -1404,21 +1596,21 @@ function showCompletionPopup(student, data, pct) {
       if (payData.status === 'paid') {
         // Paid — show real credential links
         credArea.innerHTML = `
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
-            <button onclick="window.open('${certUrl}','_blank');document.getElementById('completion-overlay').remove()" style="background:linear-gradient(135deg,#c99a4e,#e8b96e);color:#000;border:none;border-radius:12px;padding:13px 8px;font-weight:700;font-size:0.78rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''"><span style="font-size:1.3rem;">🎓</span>Certificate</button>
-            <button onclick="window.open('${lorUrl}','_blank');document.getElementById('completion-overlay').remove()" style="background:rgba(99,102,241,0.2);color:#a5b4fc;border:1px solid rgba(99,102,241,0.35);border-radius:12px;padding:13px 8px;font-weight:700;font-size:0.78rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''"><span style="font-size:1.3rem;">📄</span>View LOR</button>
-            <button onclick="${portfolioUrl !== '#' ? `window.open('${portfolioUrl}','_blank');` : ''}document.getElementById('completion-overlay').remove()" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.3);border-radius:12px;padding:13px 8px;font-weight:700;font-size:0.78rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:transform 0.2s;${portfolioUrl === '#' ? 'opacity:0.5;cursor:not-allowed;' : ''}" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''"><span style="font-size:1.3rem;">🌐</span>Portfolio</button>
+          <div class="completion-cred-grid">
+            <button class="completion-cred-btn is-primary" onclick="window.open('${certUrl}','_blank');document.getElementById('completion-overlay').remove()"><span>🎓</span>Certificate</button>
+            <button class="completion-cred-btn" onclick="window.open('${lorUrl}','_blank');document.getElementById('completion-overlay').remove()"><span>📄</span>View LOR</button>
+            <button class="completion-cred-btn" ${portfolioUrl === '#' ? 'disabled' : ''} onclick="${portfolioUrl !== '#' ? `window.open('${portfolioUrl}','_blank');` : ''}document.getElementById('completion-overlay').remove()"><span>🌐</span>Portfolio</button>
           </div>`;
       } else {
         // Not paid — show pay CTA
         credArea.innerHTML = `
-          <div style="background:rgba(201,154,78,0.08);border:1px solid rgba(201,154,78,0.2);border-radius:14px;padding:18px;text-align:center;">
-            <div style="font-size:0.85rem;color:rgba(255,255,255,0.6);margin-bottom:12px;">One-time ₹129 unlocks your Certificate, LOR &amp; Portfolio — verified, downloadable, and yours for life</div>
-            <button onclick="document.getElementById('completion-overlay').remove();setTimeout(()=>showPaymentModal(window._dashStudent,window._dashData),200);" style="background:linear-gradient(135deg,#c99a4e,#e8b96e);color:#000;border:none;border-radius:10px;padding:12px 28px;font-weight:700;font-size:0.88rem;cursor:pointer;width:100%;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">Unlock My Certificate — ₹129</button>
+          <div class="completion-pay">
+            <p>One-time ₹129 unlocks your Certificate, LOR &amp; Portfolio — verified, downloadable, and yours for life</p>
+            <button class="cert-btn cert-btn-primary cert-btn-block" onclick="document.getElementById('completion-overlay').remove();setTimeout(()=>showPaymentModal(window._dashStudent,window._dashData),200);">Unlock My Certificate — ₹129</button>
           </div>`;
       }
     } catch(e) {
-      credArea.innerHTML = `<div style="color:rgba(255,255,255,0.4);font-size:0.8rem;text-align:center;padding:16px;">Could not load credentials. <a href="javascript:void(0)" onclick="document.getElementById('completion-overlay').remove()" style="color:#c99a4e;">Close</a> and check the dashboard.</div>`;
+      credArea.innerHTML = `<div class="completion-loading">Could not load credentials. <a href="javascript:void(0)" onclick="document.getElementById('completion-overlay').remove()">Close</a> and check the dashboard.</div>`;
     }
   })();
 
@@ -1433,7 +1625,7 @@ function showCompletionPopup(student, data, pct) {
     y: Math.random() * canvas.height * -1,
     r: Math.random() * 5 + 2,
     d: Math.random() * 30 + 10,
-    color: ['#c99a4e','#e8b96e','#fff','#4f46e5','#34d399'][Math.floor(Math.random()*5)],
+    color: ['#ef3e36','#ff7a2f','#fbbf24','#a1a1aa','#4ade80'][Math.floor(Math.random()*5)],
     tilt: Math.floor(Math.random() * 10) - 10,
     tiltAngle: 0, tiltAngleInc: (Math.random() * 0.07) + 0.05
   }));
@@ -1778,12 +1970,7 @@ Join me on SkillMe to work on real projects and level up your resume:
       if (!offerBtn) {
         offerBtn = document.createElement('button');
         offerBtn.id = 'btn-view-offer';
-        offerBtn.className = 'btn-share-main';
-        offerBtn.style.backgroundColor = 'rgba(99, 102, 241, 0.15)';
-        offerBtn.style.color = '#a5b4fc';
-        offerBtn.style.border = '1px solid rgba(99, 102, 241, 0.3)';
-        offerBtn.style.marginTop = '10px';
-        offerBtn.style.width = '100%';
+        offerBtn.className = 'btn-share-main btn-share-offer';
         offerBtn.innerHTML = 'View Official Offer Letter 📄';
         actionsRow.parentElement.appendChild(offerBtn);
       }
@@ -1889,7 +2076,7 @@ function triggerMilestoneConfetti() {
     y: Math.random() * canvas.height * -0.5,
     r: Math.random() * 4 + 2,
     d: Math.random() * 25 + 10,
-    color: ['#c99a4e', '#e8b96e', '#fff', '#38bdf8', '#34d399'][Math.floor(Math.random() * 5)],
+    color: ['#ef3e36', '#ff7a2f', '#fbbf24', '#a1a1aa', '#4ade80'][Math.floor(Math.random() * 5)],
     tilt: Math.floor(Math.random() * 10) - 10,
     tiltAngle: 0,
     tiltAngleInc: Math.random() * 0.08 + 0.04
