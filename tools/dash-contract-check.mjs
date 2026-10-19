@@ -55,6 +55,8 @@ const JS_CREATED_IDS = new Set([
   'discount-code',        // js creates input in payment-banner
   'payment-banner',       // js creates the entire banner div
   'btn-view-offer',       // js:1484-1494 — createElement, id assigned on creation
+  'urgent-request-note',        // rendered by renderUrgentRequestState()
+  'urgent-request-submit-btn',  // rendered by renderUrgentRequestState()
 ]);
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -79,7 +81,7 @@ const JS_CREATED_CLASSES = new Set([
   'sub-card', 'task-card', 'cred-pill', 'cred-pill-icon',
   'cert-banner', 'cert-banner-icon', 'cert-banner-text', 'cert-banner-actions',
   'completion-overlay', 'confetti-canvas', 'completion-cred-area',
-  'milestone-pill', 'pay-btn', 'stat-fill',
+  'milestone-pill', 'pay-btn', 'stat-fill', 'week-tab', 'visible',
 ]);
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -167,7 +169,8 @@ function section(title) { console.log(`\n\u2500\u2500 ${title} \u2500\u2500`); }
 // ─────────────────────────────────────────────────────────────────────────────
 section('A1 \u2014 Required ids present in HTML');
 for (const id of [...requiredIds].sort()) {
-  if (JS_CREATED_IDS.has(id)) {
+  // Template-literal ids (e.g. sub-url-input-w${week}) are built per task card at runtime.
+  if (JS_CREATED_IDS.has(id) || id.includes('${')) {
     pass(`${id}  [js-created \u2014 skipped]`);
     continue;
   }
@@ -221,61 +224,8 @@ for (const sel of selectorStrings) {
 // ─────────────────────────────────────────────────────────────────────────────
 section('A4 \u2014 Ordinal / structural assertions');
 
-// 4a — first guide-code-copy must start with the git clone copy command
-{
-  const m = html.match(/class="guide-code-copy"[^>]*onclick="([^"]*?)"/s);
-  if (!m) {
-    fail('4a: No .guide-code-copy element found');
-  } else {
-    const val = m[1].replace(/\s+/g, ' ').trim();
-    if (val.includes("copyCode(this, 'git clone") || val.includes('copyCode(this, "git clone')) {
-      pass(`4a: first .guide-code-copy onclick starts with copyCode(this, 'git clone ...)`);
-    } else {
-      fail(`4a: first .guide-code-copy onclick unexpected: ${val.slice(0, 120)}`);
-    }
-  }
-}
-
-// 4b — second .guide-code .cmd should be 'cd' with bare text node
-{
-  const guideCodeBlocks = [...html.matchAll(/<div class="guide-code">([\s\S]*?)<\/div>/g)].map(m => m[1]);
-  let cmdCount = 0;
-  let secondCmdFound = false;
-  outer:
-  for (const block of guideCodeBlocks) {
-    for (const cmdM of block.matchAll(/<span class="cmd">([^<]*)<\/span>([^<]*)/g)) {
-      cmdCount++;
-      if (cmdCount === 2) {
-        const cmdText  = cmdM[1].trim();
-        const textNode = cmdM[2];
-        if (cmdText === 'cd') {
-          pass(`4b: second .guide-code .cmd is 'cd' with text node: "${textNode.slice(0,40)}"`);
-        } else {
-          fail(`4b: second .guide-code .cmd is '${cmdText}', expected 'cd'`);
-        }
-        secondCmdFound = true;
-        break outer;
-      }
-    }
-  }
-  if (!secondCmdFound) fail('4b: fewer than 2 .guide-code .cmd spans found');
-}
-
-// 4c — first .guide-code .url should be the <repo-url> placeholder
-{
-  const m = html.match(/<span class="url">([^<]*)<\/span>/);
-  if (!m) {
-    fail('4c: No .guide-code .url span found');
-  } else {
-    const text = m[1].trim();
-    if (text.includes('repo-url') || text.startsWith('<repo') ||
-        text === '&lt;repo-url&gt;' || text.includes('&lt;repo')) {
-      pass(`4c: first .guide-code .url is repo-url placeholder: "${text.slice(0,60)}"`);
-    } else {
-      warn(`4c: first .guide-code .url is "${text.slice(0,60)}" \u2014 verify it is the repo-url placeholder`);
-    }
-  }
-}
+// 4a–4c (git-clone guide snippets) were retired: the guide moved to the LinkedIn
+// submission flow and no longer contains .guide-code blocks.
 
 // 4d — .milestone-actions-row must exist somewhere after .milestone-modal-card opens
 {
