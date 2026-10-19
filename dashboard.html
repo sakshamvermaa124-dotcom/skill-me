@@ -1,5 +1,5 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,8 +13,20 @@
   <meta name="language" content="English">
   <meta name="geo.region" content="IN">
   <meta name="geo.placename" content="India">
-  <meta name="theme-color" media="(prefers-color-scheme: dark)"  content="#000000">
-  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#e1dcc9">
+  <meta name="theme-color" content="#09090a">
+
+  <!-- Theme bootstrap — runs before first paint so there is no flash of the wrong theme.
+       Same localStorage key as the main site (script.js). Falls back to the OS preference. -->
+  <script>
+    (function () {
+      var t;
+      try { t = localStorage.getItem('skillme-theme'); } catch (e) {}
+      if (t !== 'light' && t !== 'dark') {
+        t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      }
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
 
   <!-- Canonical URL -->
   <link rel="canonical" href="https://www.skill-me-intern.in/dashboard">
@@ -39,130 +51,111 @@
   <link rel="apple-touch-icon" href="assets/logo.png">
   <link rel="manifest" href="site.webmanifest">
 
-
-
   <link rel="stylesheet" href="style.css?v=20260923_020524">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="dashboard.css?v=20260923_020524">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css?v=20261011_ds2">
 
   <script src="config.js?v=20260923_020524" defer></script>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <style>
-    .dash-markdown h3 { font-size: 1rem; color: var(--text-primary); margin-top: 12px; margin-bottom: 6px; }
-    .dash-markdown ul { padding-left: 20px; margin-top: 4px; }
-    .dash-markdown li { margin-bottom: 4px; }
-    .dash-markdown p { margin-bottom: 8px; }
-  </style>
 </head>
 <body>
-  <!-- Navigation (Visible only on Login View) -->
-  <nav class="navbar scrolled" id="navbar">
-    <div class="container">
-    <div class="nav-left">
-      <a href="index.html" class="nav-logo" id="nav-logo">
-        <img src="assets/logo.webp" alt="SkillMe Logo" class="brand-logo-img" width="36" height="36" style="width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important;">
+  <!-- Navigation (visible only on the login / unenrolled views) — matches the public site header -->
+  <header class="login-topbar" id="navbar">
+    <div class="login-topbar-inner">
+      <a href="index.html" class="login-brand" id="nav-logo" aria-label="SkillMe home">
+        <img src="assets/logo.webp" alt="" class="brand-logo-img" width="32" height="32">
         <span>SkillMe</span>
       </a>
+      <nav class="login-links" id="nav-links-center" aria-label="Primary">
+        <a href="index.html#how-it-works">How it works</a>
+        <a href="index.html#domains">Domains</a>
+        <a href="verify.html">Verify</a>
+        <a href="index.html#faq">FAQ</a>
+      </nav>
+      <div class="login-actions">
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle light and dark mode" title="Toggle theme">
+          <svg class="ti-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          <svg class="ti-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <a href="contact.html" class="login-link-ghost">Contact</a>
+        <a href="quiz.html" class="login-cta">Apply now</a>
+      </div>
     </div>
-    <div class="nav-links-center" id="nav-links-center" data-lenis-prevent>
-      <a href="index.html#how-it-works">How It Works</a>
-      <a href="index.html#domains">Domains</a>
-      <a href="index.html#benefits">Benefits</a>
-      <a href="index.html#faq">FAQ</a>
-    </div>
-    <div class="nav-actions-right">
-      <a href="contact.html" class="btn btn-secondary">Contact Us</a>
-    </div>
-    </div>
-  </nav>
-<!-- dash-shell-v1 -->
+  </header>
 
-  <!-- ══ App Sidebar ═══════════════════════════════════════════════════════════
+  <!-- ══ App Sidebar (desktop / tablet) ════════════════════════════════════════
        Sibling of .dash-page. Hidden until dashboard-ui.js sets .dash-app on body.
-       Rule B: #dashboard-view stays a plain div; grid lives on child .dash-shell.
+       Rule B: #dashboard-view stays a plain div; layout lives on child .dash-shell.
        ═════════════════════════════════════════════════════════════════════════ -->
   <aside class="dash-sidebar" id="dash-sidebar" aria-label="Dashboard navigation">
 
     <a href="index.html" class="dash-sidebar-logo" aria-label="SkillMe home">
-      <img src="assets/logo.webp" alt="SkillMe Logo" class="brand-logo-img" width="36" height="36"
-           style="width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important;">
+      <img src="assets/logo.webp" alt="SkillMe Logo" class="brand-logo-img" width="36" height="36">
       <span class="dash-sidebar-logo-text">SkillMe</span>
     </a>
 
     <nav class="dash-sidebar-nav" id="dash-sidebar-nav" aria-label="Dashboard sections" data-lenis-prevent>
-      <button class="dash-nav-item is-active" id="nav-overview" onclick="dashShowPanel('panel-overview')">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/>
-          <rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/>
-        </svg>
-        <span class="dash-nav-label">Overview</span>
+      <button class="dash-nav-item is-active" id="nav-overview" onclick="dashShowPanel('panel-overview')" title="Home">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/></svg>
+        <span class="dash-nav-label">Home</span>
       </button>
-      <button class="dash-nav-item" id="nav-work" onclick="dashShowPanel('panel-work')">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/>
-          <path d="M9 18c-4.51 2-5-2-7-2"/>
-        </svg>
-        <span class="dash-nav-label">Submissions</span>
+      <button class="dash-nav-item" id="nav-work" onclick="dashShowPanel('panel-work')" title="Tasks">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg>
+        <span class="dash-nav-label">Tasks</span>
+        <span class="dash-nav-badge" id="nav-work-badge" hidden></span>
       </button>
-      <button class="dash-nav-item" id="nav-credentials" onclick="dashShowPanel('panel-credentials')">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        </svg>
+      <button class="dash-nav-item" id="nav-credentials" onclick="dashShowPanel('panel-credentials')" title="Credentials">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.48 12.89 17 22l-5-3-5 3 1.52-9.11"/></svg>
         <span class="dash-nav-label">Credentials</span>
       </button>
-      <button class="dash-nav-item" id="nav-guide" onclick="dashShowPanel('panel-guide')">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-        </svg>
-        <span class="dash-nav-label">Guide</span>
-      </button>
-      <button class="dash-nav-item" id="nav-urgent" onclick="dashShowPanel('panel-urgent')">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-        </svg>
-        <span class="dash-nav-label">Priority</span>
+      <button class="dash-nav-item" id="nav-guide" onclick="dashShowPanel('panel-guide')" title="Help">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+        <span class="dash-nav-label">Help</span>
       </button>
     </nav>
 
     <div class="dash-sidebar-footer">
-      <!-- Student identity — dashboard.js writes to #dash-sidebar-name and #dash-domain -->
-      <div class="dash-sidebar-user">
-        <div id="dash-sidebar-name" class="dash-sidebar-name">—</div>
-        <div id="dash-domain" class="dash-sidebar-domain"></div>
-      </div>
-
-      <!-- Sign-out — start display:none; dashboard.js reveals them at lines 75-76, 102-103, 305-306 -->
-      <button onclick="signOut()" class="dash-sidebar-signout" id="signout-btn" style="display: none;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        <span class="dash-nav-label">Sign Out</span>
+      <button type="button" class="dash-theme-toggle" data-theme-toggle aria-label="Toggle light and dark mode" title="Toggle theme">
+        <svg class="ti-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <svg class="ti-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <span class="dash-nav-label theme-toggle-label">Light mode</span>
       </button>
+
+      <!-- Student identity — dashboard.js writes #dash-sidebar-name, #dash-domain and #dash-avatar -->
+      <div class="dash-sidebar-user">
+        <div class="dash-avatar" id="dash-avatar" aria-hidden="true">·</div>
+        <div class="dash-sidebar-user-text">
+          <div id="dash-sidebar-name" class="dash-sidebar-name">—</div>
+          <div id="dash-domain" class="dash-sidebar-domain"></div>
+        </div>
+        <!-- Sign-out — starts hidden; dashboard.js reveals it once a session exists -->
+        <button onclick="signOut()" class="dash-sidebar-signout" id="signout-btn" style="display: none;" title="Sign out" aria-label="Sign out">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
     </div>
   </aside>
 
   <!-- ══ Mobile Bottom Tab Bar ════════════════════════════════════════════════ -->
   <nav class="dash-tab-bar" id="dash-tab-bar" aria-label="Dashboard mobile navigation">
     <button class="dash-tab is-active" id="tab-overview" onclick="dashShowPanel('panel-overview')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
-      Overview
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/></svg>
+      <span>Home</span>
     </button>
     <button class="dash-tab" id="tab-work" onclick="dashShowPanel('panel-work')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/></svg>
-      Work
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg>
+      <span>Tasks</span>
     </button>
     <button class="dash-tab" id="tab-credentials" onclick="dashShowPanel('panel-credentials')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      Creds
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.48 12.89 17 22l-5-3-5 3 1.52-9.11"/></svg>
+      <span>Credentials</span>
     </button>
     <button class="dash-tab" id="tab-guide" onclick="dashShowPanel('panel-guide')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-      Guide
-    </button>
-    <button class="dash-tab" id="tab-urgent" onclick="dashShowPanel('panel-urgent')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-      Priority
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+      <span>Help</span>
     </button>
   </nav>
 
@@ -175,415 +168,438 @@
     <div id="login-view">
       <div class="login-card">
         <div class="login-icon">
-          <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="color: var(--accent);">
+          <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
           </svg>
         </div>
-        <h2>Student Dashboard</h2>
-        <p>Enter the email you used to apply</p>
+        <h2>Welcome to your dashboard</h2>
+        <p>Sign in with the email you applied with. We'll email you a one-time code — no password needed.</p>
         <form id="dash-login-form" autocomplete="off">
+          <label class="login-label" for="login-email">Email address</label>
           <div class="login-input-wrap" id="email-wrap">
-            <input type="email" id="login-email" placeholder="you@example.com" required style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
+            <input type="email" id="login-email" placeholder="you@example.com" required>
           </div>
           <div class="login-input-wrap" id="otp-wrap" style="display: none;">
-            <input type="text" id="login-otp" placeholder="6-digit code" pattern="[0-9]{6}" maxlength="6">
-            <div style="text-align: right; margin-top: 8px;">
-              <button type="button" id="resend-btn" style="background:none; border:none; color: var(--accent); cursor:pointer; font-size:14px; padding:8px 12px; margin-right: -12px; text-decoration:underline;">Resend Code</button>
+            <label class="login-label" for="login-otp">6-digit code</label>
+            <input type="text" id="login-otp" placeholder="••••••" pattern="[0-9]{6}" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+            <div class="login-resend-row">
+              <span>Check your inbox and spam folder.</span>
+              <button type="button" id="resend-btn" class="login-link-btn">Resend code</button>
             </div>
           </div>
           <button type="submit" class="login-btn" id="login-btn">
             Get Login Code
           </button>
-          <div id="login-cancel-wrap" style="display: none; text-align: center; margin-top: 16px;">
-            <button type="button" onclick="signOut()" style="background:none; border:none; color: var(--text-primary); cursor:pointer; font-size:14px; padding: 12px; text-decoration:underline;">Cancel / Sign Out</button>
+          <div id="login-cancel-wrap" style="display: none;">
+            <button type="button" onclick="signOut()" class="login-link-btn login-cancel-btn">Cancel / Sign out</button>
           </div>
           <div id="login-error" class="login-error"></div>
         </form>
+        <div class="login-foot">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Haven't applied yet? <a href="apply.html">Apply for an internship</a>
+        </div>
       </div>
     </div>
 
     <!-- Unenrolled View -->
-    <div id="unenrolled-view" style="display: none; align-items: center; justify-content: center; min-height: 80vh; padding: 20px;">
-      <div class="login-card" style="max-width: 500px; opacity: 1; transform: translateY(0); animation: none;">
-        <div class="login-icon" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border-color: rgba(245, 158, 11, 0.3);">
-          <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <div id="unenrolled-view" style="display: none;">
+      <div class="login-card login-card--static">
+        <div class="login-icon login-icon--warn">
+          <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
         </div>
-        <h2>Application Under Review</h2>
-        <p>We are currently reviewing your application. Please wait for enrollment to access your internship dashboard.</p>
-        <button class="login-btn" onclick="signOut()" style="margin-top: 10px;">Sign Out</button>
+        <h2>Your application is under review</h2>
+        <p>We're reviewing your application. Your dashboard unlocks as soon as you're enrolled — we'll email you when that happens.</p>
+        <button class="login-btn" onclick="signOut()">Sign Out</button>
       </div>
     </div>
 
     <!-- Dashboard View
-         Rule B: #dashboard-view stays plain div (dashboard.js sets display:block at lines 118, 280).
-         Grid lives on child .dash-shell. -->
+         Rule B: #dashboard-view stays a plain div (dashboard.js toggles style.display).
+         Layout lives on child .dash-shell. -->
     <div id="dashboard-view" style="display: none;">
       <!-- Mobile Dashboard Header -->
       <header class="dash-mobile-header" id="dash-mobile-header">
         <a href="index.html" class="dash-mobile-logo" aria-label="SkillMe home">
-          <img src="assets/logo.webp" alt="SkillMe Logo" class="brand-logo-img" width="32" height="32" style="width: 32px !important; height: 32px !important; border-radius: 50% !important;">
+          <img src="assets/logo.webp" alt="SkillMe Logo" class="brand-logo-img" width="32" height="32">
           <span>SkillMe</span>
         </a>
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <span id="mobile-header-name" style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); max-width: 130px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></span>
-          <button onclick="signOut()" class="dash-mobile-signout" aria-label="Sign Out">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <div class="dash-mobile-actions">
+          <span id="mobile-header-name" class="dash-mobile-name"></span>
+          <button type="button" class="dash-icon-btn" data-theme-toggle aria-label="Toggle light and dark mode">
+            <svg class="ti-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+            <svg class="ti-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+          <button onclick="signOut()" class="dash-icon-btn dash-mobile-signout" aria-label="Sign Out">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           </button>
         </div>
       </header>
+
       <div class="dash-shell" id="dash-shell">
 
-        <!-- ── Panel: Overview ──────────────────────────────────────── -->
+        <!-- ═══ Panel: Home ═══════════════════════════════════════════ -->
         <div class="dash-panel" id="panel-overview">
-          <div class="dash-header" id="dash-header-el" style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
-            <div class="dash-header-icon" style="font-size: 2.8rem;">👋</div>
-            <div style="display: flex; flex-direction: column; justify-content: center;">
-              <h1 id="dash-name" class="dash-panel-title" style="margin-bottom: 6px; line-height: 1.1;">Welcome back</h1>
+          <header class="ov-header" id="dash-header-el">
+            <div class="ov-greet">
+              <p class="dash-eyebrow" id="dash-today">Student dashboard</p>
+              <h1 id="dash-name" class="dash-panel-title">Welcome back</h1>
               <div class="mobile-profile-inline">
                 <span id="mobile-dash-domain" class="mobile-dash-domain"></span>
               </div>
             </div>
-          </div>
-
-          <!-- Quick Action Hub -->
-          <div class="dash-quick-actions">
-            <a href="tasks.html" target="_blank" class="dash-action-btn" id="flex-pdf-btn" style="border-color:rgba(216,172,99,0.35);color:#e0b878;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              View Task Guide (PDF)
-            </a>
-            <a href="verify.html" class="dash-action-btn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              Verify Credentials
-            </a>
-            <a href="https://www.linkedin.com/company/skill-me-intern/" target="_blank" rel="noopener noreferrer" class="dash-action-btn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
-              SkillMe Community
-            </a>
-            <a href="https://mail.google.com/mail/?view=cm&fs=1&to=admin@skill-me-intern.in" target="_blank" class="dash-action-btn" style="text-decoration: none;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-              Support Email
-            </a>
-            <button class="dash-action-btn" id="dash-share-milestone-btn" onclick="openMilestoneShareModal()" style="cursor:pointer;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-              Share Milestone 🎉
+            <button class="btn-soft" id="dash-share-milestone-btn" onclick="openMilestoneShareModal()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+              Share progress
             </button>
-          </div>
+          </header>
 
-          <!-- Credential Quick-Access Strip (visible when paid) -->
+          <!-- Credential quick-access strip (filled by dashboard.js once paid) -->
           <div class="cred-strip" id="cred-strip"></div>
 
-          <!-- ── Internship Milestone Hero — top of overview, headline moment ── -->
-          <div class="progress-section" id="progress-section-el">
-            <div class="progress-card milestone-hero">
-              <div class="progress-ring-wrap" onclick="window.dashShowPanel('panel-work')" role="button" tabindex="0" title="View your submissions">
-                <div class="ring-ambient-halo"></div>
-                <svg width="164" height="164" viewBox="0 0 164 164">
-                  <circle cx="82" cy="82" r="70" fill="none" stroke="var(--border)" stroke-width="10"/>
-                  <circle id="progress-ring" cx="82" cy="82" r="70" fill="none" stroke="var(--accent)" stroke-width="10" stroke-linecap="round"
+          <!-- Hero: progress + the one thing to do next -->
+          <div class="hero-card progress-section" id="progress-section-el">
+            <div class="hero-main">
+              <div class="progress-ring-wrap" onclick="window.dashShowPanel('panel-work')" role="button" tabindex="0" title="Open your tasks" aria-label="Open your tasks">
+                <svg width="148" height="148" viewBox="0 0 164 164" aria-hidden="true">
+                  <circle class="ring-track" cx="82" cy="82" r="70" fill="none" stroke-width="12"/>
+                  <circle id="progress-ring" class="ring-fill" cx="82" cy="82" r="70" fill="none" stroke-width="12" stroke-linecap="round"
                     stroke-dasharray="439.8" stroke-dashoffset="439.8"
-                    transform="rotate(-90 82 82)"
-                    style="transition: stroke-dashoffset 1.8s cubic-bezier(0.16, 1, 0.3, 1);"/>
-                  <circle id="progress-ring-head" cx="82" cy="12" r="5.5" fill="var(--accent)" filter="url(#ringGlow)"
-                    style="opacity:0; transition: cx 1.8s cubic-bezier(0.16, 1, 0.3, 1), cy 1.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;"/>
-                  <defs>
-                    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stop-color="var(--bg-raised)"/>
-                      <stop offset="100%" stop-color="var(--accent)"/>
-                    </linearGradient>
-                    <filter id="ringGlow" x="-200%" y="-200%" width="500%" height="500%">
-                      <feGaussianBlur stdDeviation="3.2" result="blur"/>
-                      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                    </filter>
-                  </defs>
+                    transform="rotate(-90 82 82)"/>
+                  <circle id="progress-ring-head" class="ring-head" cx="82" cy="12" r="4"/>
                 </svg>
                 <div class="progress-ring-label">
                   <span class="progress-ring-pct"><span id="progress-pct">0</span><span class="progress-ring-pct-sign">%</span></span>
-                  <span class="progress-ring-sub">Complete</span>
+                  <span class="progress-ring-sub">complete</span>
                 </div>
               </div>
-              <div class="progress-details">
-                <h3>Internship Milestone Progress</h3>
-                <p id="progress-desc">You're just getting started. Submit your first LinkedIn post for a task to see your progress update once it's approved.</p>
-                <div class="progress-bar-track">
-                  <div class="progress-bar-inner" id="progress-bar-inner"></div>
+
+              <!-- Next step — filled by dashboard.js from live task + submission status -->
+              <div class="next-step" id="dash-next-step" aria-live="polite">
+                <div class="next-step-body">
+                  <div class="next-step-label">Your next step</div>
+                  <div class="next-step-title">Loading your progress…</div>
                 </div>
-                <div style="margin-top: 12px; margin-bottom: 14px; text-align: left;">
-                  <div style="display: inline-flex; align-items: flex-start; gap: 10px; font-size: 0.8rem; color: var(--text-primary); background: var(--bg-card);, rgba(201, 154, 78, 0.05)); padding: 10px 14px; border-radius: 12px; border: 1px solid var(--accent); box-shadow: var(--shadow); line-height: 1.5;">
-                    <span style="font-size: 1.1rem; flex-shrink: 0; line-height: 1.2;">💡</span>
-                    <span><strong style="color: #f0c97a;">Eligibility Note:</strong> To be eligible for the internship certificate and credentials, you must complete and submit a minimum of <strong>three tasks (75%)</strong>. Once 3 tasks are approved by an admin, your certificate will unlock!</span>
-                  </div>
-                </div>
-                <!-- 4-Week Milestone Roadmap — click a week for details -->
-                <div class="sprint-milestones-row" id="sprint-milestones-row">
-                  <div class="sprint-milestone-step active" id="milestone-w1" onclick="window.showMilestoneInfo(1,'Project Kickoff',this)" role="button" tabindex="0">
-                    <div class="milestone-top"><span class="milestone-week">WEEK 1</span><span class="milestone-status-dot"></span></div>
-                    <div class="milestone-name">Project Kickoff</div>
-                  </div>
-                  <div class="sprint-milestone-step" id="milestone-w2" onclick="window.showMilestoneInfo(2,'Core Features',this)" role="button" tabindex="0">
-                    <div class="milestone-top"><span class="milestone-week">WEEK 2</span><span class="milestone-status-dot"></span></div>
-                    <div class="milestone-name">Core Features</div>
-                  </div>
-                  <div class="sprint-milestone-step" id="milestone-w3" onclick="window.showMilestoneInfo(3,'CI/CD &amp; Tests',this)" role="button" tabindex="0">
-                    <div class="milestone-top"><span class="milestone-week">WEEK 3</span><span class="milestone-status-dot"></span></div>
-                    <div class="milestone-name">CI/CD &amp; Tests</div>
-                  </div>
-                  <div class="sprint-milestone-step" id="milestone-w4" onclick="window.showMilestoneInfo(4,'Final Polish',this)" role="button" tabindex="0">
-                    <div class="milestone-top"><span class="milestone-week">WEEK 4</span><span class="milestone-status-dot"></span></div>
-                    <div class="milestone-name">Final Polish</div>
-                  </div>
-                </div>
-                <div class="milestone-tooltip" id="milestone-tooltip"></div>
               </div>
+            </div>
+
+            <dl class="hero-facts" id="stats-grid-el">
+              <div class="hero-fact">
+                <dt>Tasks completed</dt>
+                <dd><span id="stat-completed">0</span><span class="stat-unit"> / <span id="stat-assigned">0</span></span></dd>
+              </div>
+              <div class="hero-fact">
+                <dt>Current week</dt>
+                <dd><span id="stat-week">1</span><span class="stat-unit"> of 4</span></dd>
+              </div>
+              <div class="hero-fact">
+                <dt>Score</dt>
+                <dd><span id="stat-score">0</span><span class="stat-unit"> pts</span></dd>
+              </div>
+              <div class="hero-fact">
+                <dt>Certificate</dt>
+                <dd id="fact-unlock">—</dd>
+              </div>
+            </dl>
+
+            <!-- Kept for dashboard.js (copy + approved count); not shown visually -->
+            <div class="sr-only">
+              <p id="progress-desc"></p>
+              <span id="stat-prs">0</span>
+              <div class="progress-bar-track"><div class="progress-bar-inner" id="progress-bar-inner"></div></div>
             </div>
           </div>
 
-          <!-- ── Stats — one unified section, not separate floating cards ── -->
-          <div class="stats-bar" id="stats-grid-el">
-            <div class="stats-bar-item">
-              <div class="stats-bar-item-top">
-                <div class="stat-icon">
-                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#5C5346" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-                </div>
-                <span class="stat-trend">Assigned</span>
-              </div>
-              <div class="stat-label">Tasks Completed</div>
-              <div class="stat-value"><span id="stat-completed">0</span><span class="stat-unit"> / <span id="stat-assigned">0</span></span></div>
-              <div class="stat-mini-bar-track"><div class="stat-mini-bar-inner" id="stat-bar-1"></div></div>
+          <!-- 4-week journey — each week opens its task -->
+          <div class="journey">
+            <div class="block-head">
+              <h2>Your 4-week journey</h2>
+              <button type="button" class="link-btn" onclick="dashShowPanel('panel-work')">All tasks
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </button>
             </div>
-            <div class="stats-bar-divider"></div>
-            <div class="stats-bar-item">
-              <div class="stats-bar-item-top">
-                <div class="stat-icon">
-                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#5C5346" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
-                </div>
-                <span class="stat-trend pulse-badge">Live Sync</span>
+            <div class="sprint-milestones-row" id="sprint-milestones-row">
+              <div class="sprint-milestone-step active" id="milestone-w1" data-week="1" onclick="dashOpenWeek(1)" role="button" tabindex="0">
+                <div class="milestone-top"><span class="milestone-week">Week 1</span><span class="milestone-status-dot"></span></div>
+                <div class="milestone-name">Project Kickoff</div>
+                <div class="milestone-state">Up next</div>
               </div>
-              <div class="stat-label">Submissions Approved</div>
-              <div class="stat-value" id="stat-prs">0</div>
-              <div class="stat-mini-bar-track"><div class="stat-mini-bar-inner" id="stat-bar-2"></div></div>
-            </div>
-            <div class="stats-bar-divider"></div>
-            <div class="stats-bar-item">
-              <div class="stats-bar-item-top">
-                <div class="stat-icon">
-                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#5C5346" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                </div>
-                <span class="stat-trend pulse-badge">Sprint Active</span>
+              <div class="sprint-milestone-step" id="milestone-w2" data-week="2" onclick="dashOpenWeek(2)" role="button" tabindex="0">
+                <div class="milestone-top"><span class="milestone-week">Week 2</span><span class="milestone-status-dot"></span></div>
+                <div class="milestone-name">Core Features</div>
+                <div class="milestone-state">Not started</div>
               </div>
-              <div class="stat-label">Current Week</div>
-              <div class="stat-value"><span id="stat-week">1</span><span class="stat-unit"> / 4</span></div>
-              <div class="stat-mini-bar-track"><div class="stat-mini-bar-inner" id="stat-bar-3"></div></div>
-            </div>
-            <div class="stats-bar-divider"></div>
-            <div class="stats-bar-item">
-              <div class="stats-bar-item-top">
-                <div class="stat-icon">
-                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#5C5346" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                </div>
-                <span class="stat-trend">Top 5%</span>
+              <div class="sprint-milestone-step" id="milestone-w3" data-week="3" onclick="dashOpenWeek(3)" role="button" tabindex="0">
+                <div class="milestone-top"><span class="milestone-week">Week 3</span><span class="milestone-status-dot"></span></div>
+                <div class="milestone-name">Testing &amp; Iteration</div>
+                <div class="milestone-state">Not started</div>
               </div>
-              <div class="stat-label">Score &amp; Proof</div>
-              <div class="stat-value"><span id="stat-score">0</span><span class="stat-unit"> pts</span></div>
-              <div class="stat-mini-bar-track"><div class="stat-mini-bar-inner" id="stat-bar-4"></div></div>
+              <div class="sprint-milestone-step" id="milestone-w4" data-week="4" onclick="dashOpenWeek(4)" role="button" tabindex="0">
+                <div class="milestone-top"><span class="milestone-week">Week 4</span><span class="milestone-status-dot"></span></div>
+                <div class="milestone-name">Final Polish</div>
+                <div class="milestone-state">Not started</div>
+              </div>
             </div>
+            <div class="milestone-tooltip" id="milestone-tooltip"></div>
           </div>
 
+          <!-- Shortcuts -->
+          <div class="shortcut-row">
+            <button type="button" class="shortcut-card" onclick="dashShowPanel('panel-credentials')">
+              <span class="shortcut-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.48 12.89 17 22l-5-3-5 3 1.52-9.11"/></svg></span>
+              <span class="shortcut-text">
+                <span class="shortcut-title">Credentials</span>
+                <span class="shortcut-sub" id="home-cred-status">Certificate, LOR &amp; Portfolio</span>
+              </span>
+              <svg class="shortcut-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+            <button type="button" class="shortcut-card" onclick="dashShowPanel('panel-guide')">
+              <span class="shortcut-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+              <span class="shortcut-text">
+                <span class="shortcut-title">How it works</span>
+                <span class="shortcut-sub">Submitting &amp; getting approved</span>
+              </span>
+              <svg class="shortcut-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+            <a class="shortcut-card" href="https://mail.google.com/mail/?view=cm&fs=1&to=admin@skill-me-intern.in" target="_blank" rel="noopener noreferrer">
+              <span class="shortcut-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
+              <span class="shortcut-text">
+                <span class="shortcut-title">Need help?</span>
+                <span class="shortcut-sub">Email the SkillMe team</span>
+              </span>
+              <svg class="shortcut-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+            </a>
+          </div>
         </div><!-- /panel-overview -->
 
-        <!-- ── Panel: Work ──────────────────────────────────────────── -->
+        <!-- ═══ Panel: Tasks ══════════════════════════════════════════ -->
         <div class="dash-panel" id="panel-work" style="display:none;">
-          <div class="dash-header panel-header-banner">
-            <div class="dash-header-icon" style="font-size: 2.4rem;">📋</div>
+          <header class="panel-header-banner panel-header-row">
             <div>
-              <h1 class="dash-panel-title" style="margin-bottom: 4px;">Submissions</h1>
-              <p class="panel-header-sub">Track your weekly tasks and the review status of every LinkedIn post you've submitted.</p>
+              <h1 class="dash-panel-title">Tasks</h1>
+              <p class="panel-header-sub">One task per week. Complete it, share it on LinkedIn, then submit the post link for review.</p>
             </div>
-          </div>
+            <a href="tasks.html" target="_blank" class="btn-soft" id="flex-pdf-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              All tasks (PDF)
+            </a>
+          </header>
 
-          <!-- Assigned Tasks Section -->
-          <div class="submissions-section" id="tasks-section-el" style="margin-bottom: 32px;">
-            <div class="section-header">
-              <h2>Assigned Tasks</h2>
-              <span class="count-badge" id="tasks-count">0 Tasks</span>
-            </div>
+          <div class="tasks-area" id="tasks-section-el">
+            <span class="sr-only" id="tasks-count">0 Tasks</span>
+            <div class="week-tabs" id="task-week-tabs" role="tablist" aria-label="Choose a week"></div>
             <div class="sub-list" id="tasks-list">
-              <!-- Task cards injected by JS -->
+              <!-- Task cards injected by JS; one is shown at a time -->
             </div>
             <div id="tasks-empty" class="empty-state" style="display: none;">
               <div class="empty-icon">
-                <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="rgba(28,24,18,0.2)" stroke-width="1"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
               </div>
-              <h3>No assigned tasks yet</h3>
-              <p>Tasks will appear here as soon as your weekly project is released.</p>
+              <h3>Your tasks are on the way</h3>
+              <p>Your weekly tasks will appear here as soon as your project is released.</p>
             </div>
           </div>
 
-          <!-- Submissions Section -->
-          <div class="submissions-section" id="submissions-section-el">
-            <div class="section-header">
-              <h2>Submissions</h2>
+          <!-- Submission history — collapsed by default -->
+          <details class="fold-card submissions-section" id="submissions-section-el">
+            <summary>
+              <span class="fold-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v5h5"/><path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/><path d="M12 7v5l4 2"/></svg>
+                Submission history
+              </span>
               <span class="count-badge" id="sub-count">0 Submitted</span>
-            </div>
-            <div class="sub-list" id="sub-list">
-              <!-- Cards injected by JS -->
-            </div>
-            <div id="sub-empty" class="empty-state" style="display: none;">
-              <div class="empty-icon">
-                <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="rgba(28,24,18,0.2)" stroke-width="1"><path d="M9 5H2v7l6.29 6.29c.94.94 2.48.94 3.42 0l3.58-3.58c.94-.94.94-2.48 0-3.42L9 5Z"/><path d="M6 9.01V9"/><path d="m15 5 6.3 6.3a2.4 2.4 0 0 1 0 3.4L17 19"/></svg>
+            </summary>
+            <div class="fold-body">
+              <div class="sub-list sub-list--history" id="sub-list">
+                <!-- Rows injected by JS -->
               </div>
-              <h3>No submissions yet</h3>
-              <p>Once you submit a LinkedIn post for a task, it will appear here with real-time review status.</p>
+              <div id="sub-empty" class="empty-state" style="display: none;">
+                <h3>No submissions yet</h3>
+                <p>Once you submit a LinkedIn post for a task, it will appear here with its review status.</p>
+              </div>
             </div>
-          </div>
+          </details>
         </div><!-- /panel-work -->
 
-        <!-- ── Panel: Credentials ───────────────────────────────────── -->
+        <!-- ═══ Panel: Credentials ════════════════════════════════════ -->
         <div class="dash-panel" id="panel-credentials" style="display:none;">
-          <div class="dash-header panel-header-banner">
-            <div class="dash-header-icon" style="font-size: 2.4rem;">🎓</div>
-            <div>
-              <h1 class="dash-panel-title" style="margin-bottom: 4px;">Credentials</h1>
-              <p class="panel-header-sub">Your certificate, letter of recommendation, and public portfolio — unlocked once 3 of your 4 tasks are approved.</p>
+          <header class="panel-header-banner">
+            <h1 class="dash-panel-title">Credentials</h1>
+            <p class="panel-header-sub">Your verified certificate, letter of recommendation and public portfolio.</p>
+          </header>
+
+          <!-- Unlock progress — dashboard.js updates the <strong> text and hides it once unlocked -->
+          <div id="cred-nudge-banner" class="unlock-card">
+            <div class="unlock-top">
+              <span class="unlock-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </span>
+              <div>
+                <div class="unlock-title"><strong>3 more tasks</strong> to unlock your credentials</div>
+                <div class="unlock-sub">Credentials unlock once 3 of your 4 tasks are approved by an admin.</div>
+              </div>
             </div>
+            <div class="unlock-meter" aria-hidden="true"><div class="unlock-meter-fill" id="unlock-meter-fill"></div></div>
+            <div class="unlock-foot"><span id="unlock-count">0 of 3</span> approved</div>
           </div>
 
-          <!-- Progress-nudge banner — advertises the 3-of-4 unlock -->
-          <div id="cred-nudge-banner" style="display: inline-flex; align-items: flex-start; gap: 10px; font-size: 0.85rem; color: var(--text-primary); background: var(--bg-card);, rgba(201, 154, 78, 0.05)); padding: 12px 16px; border-radius: 12px; border: 1px solid var(--accent); box-shadow: var(--shadow); line-height: 1.5; margin-bottom: 16px;">
-            <span style="font-size: 1.1rem; flex-shrink: 0; line-height: 1.2;">🔓</span>
-            <span><strong style="color: #f0c97a;">3 more tasks</strong> and your Certificate, LOR &amp; Portfolio unlock.</span>
-          </div>
+          <!-- Payment / certificate-ready banner — dashboard.js reveals it -->
+          <div id="cert-section" style="display:none;"></div>
 
-          <!-- Locked-state preview — shown until the certificate/LOR/portfolio unlock -->
+          <!-- What you'll unlock — hidden by dashboard.js once unlocked -->
           <div class="cred-locked-strip" id="cred-locked-strip">
+            <h2 class="strip-title">What you'll unlock</h2>
             <div class="cred-locked-pill">
               <div class="cred-locked-icon">
-                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.48 12.89 17 22l-5-3-5 3 1.52-9.11"/></svg>
               </div>
               <div class="cred-locked-text">
                 <div class="cred-locked-label">Certificate</div>
-                <div class="cred-locked-name">Verified, with a unique ID</div>
+                <div class="cred-locked-name">Verified, with a unique ID anyone can check</div>
               </div>
             </div>
             <div class="cred-locked-pill">
               <div class="cred-locked-icon">
-                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
               </div>
               <div class="cred-locked-text">
                 <div class="cred-locked-label">Letter of Recommendation</div>
-                <div class="cred-locked-name">Personalized to your work</div>
+                <div class="cred-locked-name">Personalized to the work you did</div>
               </div>
             </div>
             <div class="cred-locked-pill">
               <div class="cred-locked-icon">
-                <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
               </div>
               <div class="cred-locked-text">
-                <div class="cred-locked-label">Proof of Work</div>
-                <div class="cred-locked-name">Public link, hosted for life</div>
+                <div class="cred-locked-label">Proof of Work portfolio</div>
+                <div class="cred-locked-name">A public link to your projects, hosted for life</div>
               </div>
             </div>
           </div>
 
-          <!-- Certificate Section — dashboard.js reveals with style.display = 'block' when paid -->
-          <div id="cert-section" style="display:none;"></div>
+          <!-- Priority processing (24h) — folded away; dashboard.js fills and may hide it -->
+          <details class="fold-card urgent-card" id="urgent-card">
+            <summary>
+              <span class="fold-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <span>
+                  Need your credentials within 24 hours?
+                  <span class="fold-sub">Request priority processing</span>
+                </span>
+              </span>
+            </summary>
+            <div class="fold-body" id="urgent-request-content">
+              <div class="empty-state"><p>Loading…</p></div>
+            </div>
+          </details>
 
-          <!-- HOD Banner -->
+          <!-- College verification -->
           <div class="dash-hod-banner" id="dash-hod-banner-el">
             <div class="dash-hod-banner-content">
-              <div class="dash-hod-icon">🏛️</div>
+              <div class="dash-hod-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/></svg>
+              </div>
               <div class="dash-hod-text">
-                <div class="dash-hod-title">Need College NOC or HOD Department Verification?</div>
-                <div class="dash-hod-sub">Download your official institutional compliance pack with official acceptance letter, 4-week structured syllabus, grading rubric, and live QR code.</div>
+                <div class="dash-hod-title">College NOC or HOD verification</div>
+                <div class="dash-hod-sub">Acceptance letter, 4-week syllabus, grading rubric and a live QR code — in one pack.</div>
               </div>
             </div>
             <a href="offer.html?view=hod" id="dash-banner-hod-btn" target="_blank" class="dash-hod-btn">
-              Download HOD Pack ↗
-            </a>
-          </div>
-
-          <div class="dash-quick-actions" style="margin-top:16px;">
-            <a href="offer.html?view=hod" id="dash-quick-hod" target="_blank" rel="noopener noreferrer" class="dash-action-btn" style="border-color: var(--accent);color: var(--accent);">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-              HOD Verification Pack 🏛️
+              Download pack
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
             </a>
           </div>
         </div><!-- /panel-credentials -->
 
-        <!-- ── Panel: Urgent Request (24h expedited processing) ──────── -->
-        <div class="dash-panel" id="panel-urgent" style="display:none;">
-          <div class="dash-header panel-header-banner">
-            <div class="dash-header-icon" style="font-size: 2.4rem;">⚡</div>
-            <div>
-              <h1 class="dash-panel-title" style="margin-bottom: 4px;">Priority Processing</h1>
-              <p class="panel-header-sub">Need your Certificate, LOR, or Portfolio processed urgently? Request expedited (24h) handling here.</p>
-            </div>
-          </div>
-
-          <div id="urgent-request-content">
-            <div class="empty-state">
-              <p>Loading…</p>
-            </div>
-          </div>
-        </div><!-- /panel-urgent -->
-
-        <!-- ── Panel: Guide (beginner → advanced → helper — R3 order locked) ── -->
+        <!-- ═══ Panel: Help ═══════════════════════════════════════════ -->
         <div class="dash-panel" id="panel-guide" style="display:none;">
-          <div class="dash-header panel-header-banner">
-            <div class="dash-header-icon" style="font-size: 2.4rem;">📘</div>
-            <div>
-              <h1 class="dash-panel-title" style="margin-bottom: 4px;">Guide</h1>
-              <p class="panel-header-sub">Step-by-step instructions for completing your weekly tasks and getting them approved.</p>
-            </div>
-          </div>
+          <header class="panel-header-banner">
+            <h1 class="dash-panel-title">Help</h1>
+            <p class="panel-header-sub">How weekly tasks work, tips for getting approved, and useful links.</p>
+          </header>
 
           <div class="guide-section" id="guide-section-el">
             <div class="guide-card">
               <div class="guide-header">
-                <div class="guide-header-icon">🚀</div>
-                <h2>How to Complete Your Tasks &amp; Submit for Review</h2>
+                <h2>How to complete a task</h2>
+                <button class="guide-toggle expanded" id="guide-toggle-btn" onclick="toggleGuide()">
+                  <span id="guide-toggle-text">Hide Guide</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+                </button>
               </div>
-              <p class="guide-subtitle">Follow these simple steps every week to complete your assigned task, share your work on LinkedIn, and get it approved by an admin.</p>
-
-              <button class="guide-toggle expanded" id="guide-toggle-btn" onclick="toggleGuide()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
-                <span id="guide-toggle-text">Hide Guide</span>
-              </button>
 
               <div class="guide-body" id="guide-body">
-                <div class="guide-steps" style="margin-top:20px;">
+                <div class="guide-steps">
                   <div class="guide-step">
                     <div class="guide-step-num">1</div>
                     <div class="guide-step-content">
-                      <div class="guide-step-title">Open Your Assigned Task</div>
-                      <div class="guide-step-desc">Go to the <strong>Submissions</strong> tab and open the task assigned for the current week. Read the description and deliverables carefully before you begin.</div>
+                      <div class="guide-step-title">Open this week's task</div>
+                      <div class="guide-step-desc">Go to <strong>Tasks</strong> and pick the current week. Read the brief and deliverables before you start.</div>
                     </div>
                   </div>
                   <div class="guide-step">
                     <div class="guide-step-num">2</div>
                     <div class="guide-step-content">
-                      <div class="guide-step-title">Complete the Task</div>
-                      <div class="guide-step-desc">Work through the task as described — whether that's code, a notebook, a Figma design or a cloud setup. Take screenshots or a short screen recording as you go so you have something to show in your post.</div>
+                      <div class="guide-step-title">Do the work</div>
+                      <div class="guide-step-desc">Code, notebook, Figma design or cloud setup — whatever the task asks for. Grab screenshots or a short screen recording as you go.</div>
                     </div>
                   </div>
                   <div class="guide-step">
                     <div class="guide-step-num">3</div>
                     <div class="guide-step-content">
-                      <div class="guide-step-title">Post About It on LinkedIn</div>
-                      <div class="guide-step-desc">Use the suggested caption on each task card (copy it with one click), add your screenshots or demo video, and tag <strong>@SkillMe</strong>. Put your GitHub, Figma, notebook or live-site link in the post or its first comment.</div>
+                      <div class="guide-step-title">Post it on LinkedIn</div>
+                      <div class="guide-step-desc">Copy the suggested caption from the task, add your screenshots or demo, and tag <strong>@SkillMe</strong>. Put your GitHub, Figma, notebook or live-site link in the post or its first comment.</div>
                     </div>
                   </div>
                   <div class="guide-step">
                     <div class="guide-step-num">4</div>
                     <div class="guide-step-content">
-                      <div class="guide-step-title">Submit Your Post URL for Review</div>
-                      <div class="guide-step-desc">On your published post, click <strong>⋯ → Copy link to post</strong>, paste it into the task card and click <strong>"Submit for Review"</strong>. An admin will review it and approve it — your progress updates automatically once approved.</div>
+                      <div class="guide-step-title">Submit the post link</div>
+                      <div class="guide-step-desc">On your post, click <strong>⋯ → Copy link to post</strong>, paste it into the task and press <strong>Submit for Review</strong>. Your progress updates automatically once an admin approves it.</div>
                     </div>
                   </div>
                 </div>
               </div><!-- /guide-body -->
             </div><!-- /guide-card -->
+
+            <h2 class="block-title">Tips for getting approved</h2>
+            <div class="guide-tips">
+              <div class="guide-tip">
+                <div class="guide-tip-title">Paste the post link, not your profile</div>
+                <p>Links ending in <code>/in/your-name</code> are profile links. Use <strong>⋯ → Copy link to post</strong> on the post itself.</p>
+              </div>
+              <div class="guide-tip">
+                <div class="guide-tip-title">Rejected? Just resubmit</div>
+                <p>Read the admin note on the task, fix your post and paste the new link. Only rejected tasks accept a new link.</p>
+              </div>
+              <div class="guide-tip">
+                <div class="guide-tip-title">3 approvals unlock credentials</div>
+                <p>Once 3 of your 4 tasks are approved, your Certificate, LOR and Portfolio unlock under <strong>Credentials</strong>.</p>
+              </div>
+            </div>
+
+            <h2 class="block-title">Useful links</h2>
+            <div class="dash-quick-actions">
+              <a href="offer.html?view=hod" id="dash-quick-hod" target="_blank" rel="noopener noreferrer" class="dash-action-btn">
+                <span class="dash-action-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/></svg></span>
+                <span class="dash-action-text"><span class="dash-action-title">HOD / NOC pack</span><span class="dash-action-sub">For college verification</span></span>
+              </a>
+              <a href="verify.html" class="dash-action-btn">
+                <span class="dash-action-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
+                <span class="dash-action-text"><span class="dash-action-title">Verify a certificate</span><span class="dash-action-sub">Check any certificate ID</span></span>
+              </a>
+              <a href="https://www.linkedin.com/company/skill-me-intern/" target="_blank" rel="noopener noreferrer" class="dash-action-btn">
+                <span class="dash-action-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></span>
+                <span class="dash-action-text"><span class="dash-action-title">SkillMe on LinkedIn</span><span class="dash-action-sub">Follow &amp; tag @SkillMe</span></span>
+              </a>
+              <a href="https://mail.google.com/mail/?view=cm&fs=1&to=admin@skill-me-intern.in" target="_blank" rel="noopener noreferrer" class="dash-action-btn">
+                <span class="dash-action-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
+                <span class="dash-action-text"><span class="dash-action-title">Email support</span><span class="dash-action-sub">admin@skill-me-intern.in</span></span>
+              </a>
+            </div>
           </div><!-- /guide-section -->
         </div><!-- /panel-guide -->
 
@@ -594,17 +610,17 @@
 
   <!-- Lenis smooth scroll -->
   <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js" defer></script>
-  <script src="dashboard.js?v=20260925_184405" defer></script>
-  <script src="dashboard-ui.js?v=20260923_020524" defer></script>
+  <script src="dashboard.js?v=20261011_ds2" defer></script>
+  <script src="dashboard-ui.js?v=20261011_ds1" defer></script>
 
-  <!-- ══ Modals — siblings of .dash-page, outside panel system ════════════════
+  <!-- ══ Modals — siblings of .dash-page, outside the panel system ════════════
        Must NOT be inside #dashboard-view (it starts display:none).
        dashboard.js opens/closes these with inline style.display + .active class. -->
 
   <!-- Milestone Celebration & Share Modal -->
   <div class="milestone-modal-overlay" id="milestone-modal">
-    <div class="milestone-modal-card">
-      <div class="milestone-modal-close" onclick="closeMilestoneModal()">
+    <div class="milestone-modal-card" role="dialog" aria-modal="true" aria-labelledby="milestone-title">
+      <div class="milestone-modal-close" onclick="closeMilestoneModal()" role="button" tabindex="0" aria-label="Close">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </div>
       <div class="milestone-modal-badge" id="milestone-badge">🎉 SPRINT MILESTONE UNLOCKED</div>
@@ -617,21 +633,21 @@
         </div>
         <div class="milestone-stat-item">
           <div class="milestone-stat-val" id="modal-stat-score">0</div>
-          <div class="milestone-stat-lbl">Score Pts</div>
+          <div class="milestone-stat-lbl">Score</div>
         </div>
         <div class="milestone-stat-item">
           <div class="milestone-stat-val" id="modal-stat-week">W1</div>
-          <div class="milestone-stat-lbl">Sprint Week</div>
+          <div class="milestone-stat-lbl">Sprint week</div>
         </div>
       </div>
       <div class="milestone-share-tabs">
         <button class="milestone-share-tab active" id="tab-btn-linkedin" onclick="switchShareTab('linkedin')">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
-          LinkedIn Post
+          LinkedIn post
         </button>
         <button class="milestone-share-tab" id="tab-btn-whatsapp" onclick="switchShareTab('whatsapp')">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-          WhatsApp Squad Invite
+          WhatsApp invite
         </button>
       </div>
       <div class="milestone-preview-box" id="milestone-post-preview" data-lenis-prevent></div>
@@ -643,23 +659,23 @@
           Copy Text 📋
         </button>
       </div>
-      <p style="font-size: 0.75rem; color: var(--text-primary); text-align: center; margin-top: 12px; font-style: italic; line-height: 1.4;">
-        Note: When posting to LinkedIn, make sure to manually select <strong>@SkillMe</strong> from the dropdown menu to officially tag us!
+      <p class="milestone-modal-note">
+        When posting to LinkedIn, select <strong>@SkillMe</strong> from the mention dropdown to officially tag us.
       </p>
-      <canvas id="milestone-confetti-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"></canvas>
+      <canvas id="milestone-confetti-canvas" class="milestone-confetti-canvas"></canvas>
     </div>
   </div>
 
   <!-- Payment Modal -->
   <div class="payment-modal-overlay" id="payment-modal">
-    <div class="payment-modal-card">
-      <div class="payment-modal-close" onclick="closePaymentModal()">
+    <div class="payment-modal-card" role="dialog" aria-modal="true">
+      <div class="payment-modal-close" onclick="closePaymentModal()" role="button" tabindex="0" aria-label="Close">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </div>
       <div class="payment-modal-glow"></div>
       <div class="payment-modal-content">
         <div class="payment-modal-icon">🏆</div>
-        <div class="payment-modal-title">You Did It — Now Claim It</div>
+        <div class="payment-modal-title">You did it — now claim it</div>
         <div class="payment-modal-desc">Your approved work has unlocked your credentials. Here's what you get the moment you activate your profile:</div>
         <ul class="payment-modal-list">
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span><strong>Verified Certificate</strong> with unique ID</span></li>
@@ -667,21 +683,17 @@
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span><strong>Letter of Recommendation</strong> for your domain</span></li>
         </ul>
         <div class="payment-modal-price">₹129 <span>one-time, covers verification &amp; lifetime hosting</span></div>
-        <div style="margin-bottom: 12px; display: flex; justify-content: center;">
-          <input type="text" id="discount-code-milestone" placeholder="Have a discount code?" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-primary); outline: none; font-size: 14px; width: 100%; text-align: center;">
-        </div>
-        <button id="modal-pay-btn" class="cert-btn cert-btn-primary" style="width: 100%; justify-content: center; font-size: 1.05rem;">
+        <input type="text" id="discount-code-milestone" class="dash-input dash-input--center" placeholder="Have a discount code?">
+        <button id="modal-pay-btn" class="cert-btn cert-btn-primary cert-btn-block">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
           Unlock My Certificate — ₹129
         </button>
-        <div style="font-size:11px;color:var(--text-3,#666);margin-top:12px;text-align:center;">
-          🔒 Secured by Razorpay • UPI / Card / NetBanking · Every certificate is independently verifiable
+        <div class="secure-note">
+          🔒 Secured by Razorpay · UPI / Card / NetBanking · Every certificate is independently verifiable
         </div>
       </div>
     </div>
   </div>
 
-
 </body>
 </html>
-
