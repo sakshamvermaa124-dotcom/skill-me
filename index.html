@@ -290,6 +290,62 @@
         </div>
 
         <div class="hero-visual">
+          <div class="hero-stage" role="img" aria-label="Example of a SkillMe internship in progress: two of four weekly milestones approved, the third in review">
+            <!-- Floating: offer letter -->
+            <div class="float-card float-offer" aria-hidden="true">
+              <span class="float-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg></span>
+              <span class="float-text"><strong>Offer letter issued</strong><small>Full Stack Engineer</small></span>
+            </div>
+
+            <!-- Milestone tracker -->
+            <div class="tracker card" aria-hidden="true">
+              <div class="tracker-head">
+                <div>
+                  <span class="tracker-kicker mono">Your internship</span>
+                  <span class="tracker-title">4 weekly milestones</span>
+                </div>
+                <span class="badge mono">Example</span>
+              </div>
+              <ol class="tracker-list" role="list">
+                <li class="tracker-row is-done">
+                  <span class="tracker-week mono">W1</span>
+                  <span class="tracker-name">Setup &amp; first task</span>
+                  <span class="badge badge-ok">Approved</span>
+                </li>
+                <li class="tracker-row is-done">
+                  <span class="tracker-week mono">W2</span>
+                  <span class="tracker-name">Core feature</span>
+                  <span class="badge badge-ok">Approved</span>
+                </li>
+                <li class="tracker-row is-active">
+                  <span class="tracker-week mono">W3</span>
+                  <span class="tracker-name">Integration &amp; polish</span>
+                  <span class="badge badge-accent">In review</span>
+                </li>
+                <li class="tracker-row">
+                  <span class="tracker-week mono">W4</span>
+                  <span class="tracker-name">Final review</span>
+                  <span class="badge">Up next</span>
+                </li>
+              </ol>
+              <div class="tracker-progress">
+                <div class="tracker-progress-top">
+                  <span>Milestones approved</span>
+                  <span class="mono">2 / 4</span>
+                </div>
+                <div class="progress"><span style="width: 50%"></span></div>
+                <p class="tracker-foot">One more approval unlocks the certificate + LOR.</p>
+              </div>
+            </div>
+
+            <!-- Floating: certificate -->
+            <div class="float-card float-cert" aria-hidden="true">
+              <span class="float-qr"><span></span><span></span><span></span><span></span></span>
+              <span class="float-text"><strong>Certificate verified</strong><small class="mono">SKM-XXXX-XXXX</small></span>
+              <span class="float-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+            </div>
+          </div>
+
           <!-- Live activity: real approved submissions only; stays hidden until the API returns some -->
           <div class="live-ribbon" id="live-activity-ribbon" role="region" aria-label="Live activity" style="display: none;">
             <span class="live-beacon mono"><span class="live-dot" aria-hidden="true"></span>Live</span>
@@ -306,47 +362,6 @@
             </div>
             <div class="live-stat" id="live-ticker-stat">
               <strong class="mono" id="ticker-pr-count"></strong> milestones approved across <strong class="mono" id="ticker-college-count"></strong> colleges
-            </div>
-          </div>
-
-          <!-- Illustration of the 4-week milestone flow -->
-          <div class="tracker card" aria-label="Example of the 4-week milestone tracker">
-            <div class="tracker-head">
-              <div>
-                <span class="tracker-kicker mono">Your internship</span>
-                <h2 class="tracker-title">4 weekly milestones</h2>
-              </div>
-              <span class="badge mono">Example</span>
-            </div>
-            <ol class="tracker-list" role="list">
-              <li class="tracker-row is-done">
-                <span class="tracker-week mono">W1</span>
-                <span class="tracker-name">Setup &amp; first task</span>
-                <span class="badge badge-ok">Approved</span>
-              </li>
-              <li class="tracker-row is-done">
-                <span class="tracker-week mono">W2</span>
-                <span class="tracker-name">Core feature</span>
-                <span class="badge badge-ok">Approved</span>
-              </li>
-              <li class="tracker-row is-active">
-                <span class="tracker-week mono">W3</span>
-                <span class="tracker-name">Integration &amp; polish</span>
-                <span class="badge badge-accent">In review</span>
-              </li>
-              <li class="tracker-row">
-                <span class="tracker-week mono">W4</span>
-                <span class="tracker-name">Final review</span>
-                <span class="badge">Up next</span>
-              </li>
-            </ol>
-            <div class="tracker-progress">
-              <div class="tracker-progress-top">
-                <span>Milestones approved</span>
-                <span class="mono">2 / 4</span>
-              </div>
-              <div class="progress" aria-hidden="true"><span style="width: 50%"></span></div>
-              <p class="tracker-foot">Certificate + LOR unlock once 3 of 4 milestones are approved.</p>
             </div>
           </div>
         </div>
