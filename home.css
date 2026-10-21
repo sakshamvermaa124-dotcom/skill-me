@@ -163,8 +163,46 @@
 }
 .facts li { display: flex; flex-direction: column; gap: 2px; padding: 20px 24px; }
 .facts li + li { border-left: 1px solid var(--line); }
-.fact-value { font-size: 1.35rem; font-weight: 600; letter-spacing: -0.02em; color: var(--text); }
-.fact-label { font-size: 0.84rem; color: var(--text-2); }
+.fact-value { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.03em; color: var(--text); }
+.facts li:first-child .fact-value { color: var(--primary); }
+.fact-label { font-size: 0.85rem; color: var(--text-2); }
+
+/* ── Why: contrast ───────────────────────────────────────────── */
+#why { padding-top: clamp(48px, 7vw, 88px); }
+.compare {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  max-width: 980px; margin: 0 auto;
+}
+.compare-col { padding: clamp(24px, 3vw, 36px); border-radius: var(--r-xl); }
+.compare-old { background: var(--surface-2); border: 1px solid var(--line); }
+.compare-new {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--accent-line);
+  box-shadow: 0 0 0 4px var(--accent-wash), var(--shadow-md);
+}
+.compare-label { display: block; margin-bottom: 18px; font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
+.compare-new .compare-label { color: var(--accent-text); }
+.compare ul { display: flex; flex-direction: column; gap: 14px; }
+.compare li { display: flex; align-items: flex-start; gap: 12px; font-size: 0.98rem; line-height: 1.45; }
+.compare-old li { color: var(--text-3); }
+.compare-new li { color: var(--text); font-weight: 500; }
+.compare-vs {
+  align-self: center;
+  width: 44px; height: 44px; margin: 0 -10px; z-index: 1;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  font-size: 0.78rem; color: var(--text-3);
+}
+.cx, .ck { position: relative; width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px; border-radius: 50%; }
+.cx { background: var(--surface-3); }
+.cx::before, .cx::after { content: ''; position: absolute; left: 6px; top: 9.25px; width: 8px; height: 1.5px; background: var(--text-3); transform: rotate(45deg); }
+.cx::after { transform: rotate(-45deg); }
+.ck { background: var(--ok-wash); }
+.ck::after { content: ''; position: absolute; left: 7px; top: 4px; width: 5px; height: 9px; border: solid var(--ok); border-width: 0 2px 2px 0; transform: rotate(45deg); }
 
 /* ── How it works ────────────────────────────────────────────── */
 .steps { list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; counter-reset: none; }
