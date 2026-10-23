@@ -1,27 +1,63 @@
+"""
+Stamp every local .js/.css reference in the HTML pages with a hash of the file's content:
+
+    <script src="theme.js?v=3f9c2a1b">   <link href="/home.css?v=8d0e4c77">
+
+Run from the repo root after editing any JS/CSS (and before deploying):
+
+    python bump_versions.py          # rewrite the HTML
+    python bump_versions.py --check  # exit 1 if any page is out of date (used by the pre-commit hook)
+
+Unchanged files keep the same version, so browsers keep them cached; vercel.json can then
+cache JS/CSS for a year (immutable). config.js is versioned too but is still served
+no-cache, because it is the one file that must change without an HTML edit.
+"""
+import hashlib
 import os
 import re
-from datetime import datetime
+import sys
 
-html_files = [f for f in os.listdir('.') if f.endswith('.html')]
+ROOT = os.path.dirname(os.path.abspath(__file__))
+REF = re.compile(r'((?:src|href)=")(/?)([A-Za-z0-9_-]+\.(?:js|css))(?:\?v=[^"]*)?(")')
 
-# We'll use today's date and time for versioning: YYYYMMDD_HHMMSS
-today = datetime.now().strftime("%Y%m%d_%H%M%S")
-new_version = f"{today}"
 
-script_pattern = re.compile(r'(\.js\?v=)[a-zA-Z0-9_]+')
-css_pattern = re.compile(r'(\.css\?v=)[a-zA-Z0-9_]+')
+def file_hash(name, cache={}):
+    if name not in cache:
+        path = os.path.join(ROOT, name)
+        if not os.path.isfile(path):
+            cache[name] = None
+        else:
+            with open(path, 'rb') as f:
+                cache[name] = hashlib.sha256(f.read()).hexdigest()[:10]
+    return cache[name]
 
-for file in html_files:
-    try:
-        with open(file, 'r', encoding='utf-8') as f:
+
+def stamp(match):
+    prefix, slash, name, quote = match.groups()
+    h = file_hash(name)
+    if h is None:  # not a local file (or missing): leave the reference alone
+        return match.group(0)
+    return f'{prefix}{slash}{name}?v={h}{quote}'
+
+
+def main():
+    check = '--check' in sys.argv
+    stale = []
+    for page in sorted(f for f in os.listdir(ROOT) if f.endswith('.html')):
+        path = os.path.join(ROOT, page)
+        with open(path, encoding='utf-8', newline='') as f:
             content = f.read()
-        
-        updated = script_pattern.sub(r'\g<1>' + new_version, content)
-        updated = css_pattern.sub(r'\g<1>' + new_version, updated)
-        
+        updated = REF.sub(stamp, content)
         if updated != content:
-            with open(file, 'w', encoding='utf-8') as f:
-                f.write(updated)
-            print(f"Updated {file}")
-    except UnicodeDecodeError:
-        print(f"Skipping {file} due to encoding issue")
+            stale.append(page)
+            if not check:
+                with open(path, 'w', encoding='utf-8', newline='') as f:
+                    f.write(updated)
+                print(f'Updated {page}')
+    if check and stale:
+        print('Asset versions are out of date in: ' + ', '.join(stale))
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()

@@ -47,6 +47,9 @@ const PAGE_META = {
 // ═══════════════════════════════════════════════════════════
 let bgScene, bgCamera, bgRenderer, bgMesh, bgParticles;
 
+// Reduced motion: draw the 3D scenes once, never animate them or play the unzip transition.
+const ADMIN_REDUCED_MOTION = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
 function initAdminBgLattice() {
   const canvas = document.getElementById('admin-bg-canvas');
   if (!canvas || typeof THREE === 'undefined') return;
@@ -121,7 +124,7 @@ function initAdminBgLattice() {
 
   const clock = new THREE.Clock();
   function animateBg() {
-    requestAnimationFrame(animateBg);
+    if (!ADMIN_REDUCED_MOTION) requestAnimationFrame(animateBg);
     const t = clock.getElapsedTime();
 
     bgMesh.rotation.y = t * 0.2;
@@ -161,7 +164,7 @@ function playUnzipTransition(callback) {
   const leftPanel = document.querySelector('.split-left');
   const rightPanel = document.querySelector('.split-right');
 
-  if (!canvas || typeof THREE === 'undefined' || typeof gsap === 'undefined') {
+  if (ADMIN_REDUCED_MOTION || !canvas || typeof THREE === 'undefined' || typeof gsap === 'undefined') {
     isUnzipping = false;
     if (callback) callback();
     return;
@@ -356,7 +359,7 @@ function initInteriorLavaRock() {
   const clock = new THREE.Clock();
   function animateInteriorLava() {
     if (!canvas.parentElement || canvas.offsetParent === null) return;
-    requestAnimationFrame(animateInteriorLava);
+    if (!ADMIN_REDUCED_MOTION) requestAnimationFrame(animateInteriorLava);
     const t = clock.getElapsedTime();
 
     intLavaMesh.rotation.y = t * 0.22;
@@ -417,7 +420,7 @@ function initAdmin3DCrystalEngine() {
 
   // Load Texture for Real-time 3D Lava Rock
   const textureLoader = new THREE.TextureLoader();
-  const lavaTexture = textureLoader.load('lava_rock_texture.jpg', (tex) => {
+  const lavaTexture = textureLoader.load('lava_rock_texture.webp', (tex) => {
     tex.wrapS = THREE.RepeatWrapping;
     tex.wrapT = THREE.RepeatWrapping;
     tex.minFilter = THREE.LinearFilter;
@@ -485,7 +488,7 @@ function initAdmin3DCrystalEngine() {
 
   const clock = new THREE.Clock();
   function render3DCrystalLoop() {
-    requestAnimationFrame(render3DCrystalLoop);
+    if (!ADMIN_REDUCED_MOTION) requestAnimationFrame(render3DCrystalLoop);
     const t = clock.getElapsedTime();
 
     admin3DMesh.rotation.y = t * 0.22;

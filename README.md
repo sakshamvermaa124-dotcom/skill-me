@@ -101,6 +101,7 @@ python backend/scripts/debug_db.py
 ## Deployment
 
 - **Frontend** → Vercel. Connect the repo with the root directory as `/`.
+- JS/CSS are cached for a year, so after editing any `.js`/`.css` file run `python bump_versions.py` to stamp new content-hash `?v=` versions into the HTML (the pre-commit hook from `sh setup.sh` blocks commits that forget). `.vercelignore` keeps `backend/`, `archive/`, `tools/` and other non-site files out of the deploy.
 - **Backend** → Google Cloud Run, built from `backend/Dockerfile`. Set the environment variables above on the service.
 - After deploying the backend, make sure `PROD_API_URL` in [config.js](config.js) matches the Cloud Run URL, then redeploy the frontend.
 - Health check: `GET /api/health`.

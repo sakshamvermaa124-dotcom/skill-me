@@ -1,103 +1,74 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
-        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<!-- Public, indexable pages only. Dashboard, offer, certificate, LOR and tasks are per-student and noindex. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Homepage -->
   <url>
     <loc>https://www.skill-me-intern.in/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-10-23</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
-  
-  <!-- Screening Quiz -->
+  <!-- Screening quiz -->
   <url>
     <loc>https://www.skill-me-intern.in/quiz</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-10-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
-
-  <!-- Apply Page -->
+  <!-- Apply -->
   <url>
     <loc>https://www.skill-me-intern.in/apply</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-10-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.90</priority>
   </url>
-
-  <!-- Verification Page -->
+  <!-- Certificate verification -->
   <url>
     <loc>https://www.skill-me-intern.in/verify</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-10-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
-
-  <!-- Student Dashboard -->
-  <url>
-    <loc>https://www.skill-me-intern.in/dashboard</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.80</priority>
-  </url>
-
-  <!-- Certificate Portal -->
-  <url>
-    <loc>https://www.skill-me-intern.in/certificate</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
-  </url>
-
-  <!-- Portfolio Portal -->
-  <url>
-    <loc>https://www.skill-me-intern.in/portfolio</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
-  </url>
-
-  <!-- LLM & AI Specifications -->
-  <url>
-    <loc>https://www.skill-me-intern.in/llms.txt</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.70</priority>
-  </url>
-  <url>
-    <loc>https://www.skill-me-intern.in/llms-full.txt</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.65</priority>
-  </url>
-
-  <!-- Contact Us -->
+  <!-- Contact -->
   <url>
     <loc>https://www.skill-me-intern.in/contact</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-10-23</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.70</priority>
+    <priority>0.60</priority>
   </url>
-
-  <!-- Legal & Policies -->
+  <!-- Terms -->
   <url>
     <loc>https://www.skill-me-intern.in/terms</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.50</priority>
+    <lastmod>2026-10-23</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.30</priority>
   </url>
+  <!-- Privacy -->
   <url>
     <loc>https://www.skill-me-intern.in/privacy</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.50</priority>
+    <lastmod>2026-10-23</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.30</priority>
   </url>
+  <!-- Refunds -->
   <url>
     <loc>https://www.skill-me-intern.in/refunds</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
+    <lastmod>2026-10-23</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.30</priority>
+  </url>
+  <!-- LLM summary -->
+  <url>
+    <loc>https://www.skill-me-intern.in/llms.txt</loc>
+    <lastmod>2026-10-23</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.50</priority>
+  </url>
+  <!-- LLM full docs -->
+  <url>
+    <loc>https://www.skill-me-intern.in/llms-full.txt</loc>
+    <lastmod>2026-10-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.40</priority>
   </url>
 </urlset>

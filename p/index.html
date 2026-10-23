@@ -1,20 +1,19 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Student portfolio — SkillMe</title>
   <script>
-    // Extract username from referrer or redirect to portfolio.html with github param
-    // This file is served when /p/ is accessed without a username
-    // The real routing for /p/:username is handled by vercel.json routes
-    const path = window.location.pathname; // /p/username
-    const parts = path.split('/').filter(Boolean); // ['p', 'username']
+    // Served when /p/ is opened without a username. /p/:username itself is rewritten
+    // to portfolio.html by vercel.json; this only catches the bare folder.
+    const parts = window.location.pathname.split('/').filter(Boolean); // ['p', 'username']
     const username = parts[1];
-    if (username) {
-      window.location.replace('/portfolio.html?gh=' + encodeURIComponent(username));
-    } else {
-      window.location.replace('/');
-    }
+    window.location.replace(username ? '/portfolio?gh=' + encodeURIComponent(username) : '/');
   </script>
 </head>
-<body></body>
+<body>
+  <p><a href="/">Go to SkillMe</a></p>
+</body>
 </html>

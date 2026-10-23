@@ -426,8 +426,8 @@
             <p class="cta-sub">Do real weekly projects in a SkillMe internship, get each one reviewed, and earn a public Proof of Work page of your own.</p>
           </div>
           <div class="cta-actions">
-            <a href="apply.html" class="btn btn-primary">Apply to SkillMe ${ICONS.arrow}</a>
-            <a href="index.html#how-it-works" class="btn btn-ghost">How it works</a>
+            <a href="/apply" class="btn btn-primary">Apply to SkillMe ${ICONS.arrow}</a>
+            <a href="/#how-it-works" class="btn btn-ghost">How it works</a>
           </div>
         </section>`;
 
@@ -463,7 +463,7 @@
           <div class="cred-stage">
             <div class="cred-card" id="cred-card" aria-label="${shownApproved} of ${totalMilestones} milestones verified by SkillMe">
               <div class="cred-top">
-                <div class="cred-brand"><img src="assets/logo.webp" alt="" onerror="this.src='assets/logo.png'"> SkillMe</div>
+                <div class="cred-brand"><img src="/assets/logo-96.webp" alt="" width="28" height="28"> SkillMe</div>
                 <div class="cred-type">Proof of Work</div>
               </div>
               <div class="cred-main">
@@ -520,7 +520,7 @@
                 <li><span class="trust-ico">${ICONS.link}</span><div><strong>Linked to the original</strong><span>Each milestone points to the student's public LinkedIn post.</span></div></li>
                 <li><span class="trust-ico">${ICONS.shield.replace('width="19" height="19"', 'width="16" height="16"')}</span><div><strong>Can't be edited by the student</strong><span>This page is generated from SkillMe's records.</span></div></li>
               </ul>
-              <div class="trust-actions"><a href="verify.html" class="btn btn-ghost btn-sm">Verify a certificate ${ICONS.arrow}</a></div>
+              <div class="trust-actions"><a href="/verify" class="btn btn-ghost btn-sm">Verify a certificate ${ICONS.arrow}</a></div>
             </div>
           </div>
         </section>
@@ -581,6 +581,11 @@ Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
     });
 
     document.title = `${name} — Proof of Work Portfolio — SkillMe`;
+    // Each student's portfolio is its own page for search engines, not the empty /portfolio shell
+    const canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) canonical.setAttribute('href', shareUrl);
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    if (ogUrl) ogUrl.setAttribute('content', shareUrl);
     const desc = `${name}'s verified SkillMe Proof of Work: ${approved} approved milestone${approved === 1 ? '' : 's'}${domains.length ? ' in ' + domains.map(domainLabel).join(', ') : ''}.`;
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) metaDesc.setAttribute('content', desc);
@@ -615,7 +620,7 @@ Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
         ICONS.search,
         'Invalid profile link',
         'This link is missing a student reference. Portfolio links look like <code>/portfolio.html?student_id=123</code> — you can copy yours from the Student Dashboard.',
-        '<a href="dashboard.html" class="btn btn-primary">Go to Student Dashboard &rarr;</a>'
+        '<a href="/dashboard" class="btn btn-primary">Go to Student Dashboard &rarr;</a>'
       );
       return;
     }
@@ -633,7 +638,7 @@ Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
           ICONS.lock,
           'Portfolio not yet public',
           'This Proof of Work portfolio hasn\'t been activated yet.<br><br>If it\'s yours, complete your milestones and activate your credentials from the Student Dashboard to unlock your public link.',
-          '<a href="dashboard.html" class="btn btn-primary">Log in to Dashboard &rarr;</a>'
+          '<a href="/dashboard" class="btn btn-primary">Log in to Dashboard &rarr;</a>'
         );
         return;
       }
@@ -643,7 +648,7 @@ Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
           ICONS.search,
           'Profile not found',
           `We couldn't find a SkillMe portfolio for <strong>${esc(target.value)}</strong>. Double-check the link and try again.`,
-          '<a href="index.html" class="btn btn-ghost">Back to Home &rarr;</a>'
+          '<a href="/" class="btn btn-ghost">Back to Home &rarr;</a>'
         );
         return;
       }

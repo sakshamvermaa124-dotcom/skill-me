@@ -30,9 +30,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // this track, otherwise the quiz (pre-selected to the clicked track, if any).
   function applyTarget(domainId) {
     const done = quizDomain();
-    if (!domainId) return done ? 'apply.html' : 'quiz.html';
-    if (done && normDomain(domainId) === done) return 'apply.html';
-    return `quiz.html?domain=${encodeURIComponent(domainId)}`;
+    if (!domainId) return done ? '/apply' : '/quiz';
+    if (done && normDomain(domainId) === done) return '/apply';
+    return `/quiz?domain=${encodeURIComponent(domainId)}`;
   }
 
   // ── Apply links: once the quiz is done for that track, go straight to the application ──
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ── Same-page anchors (#id, /#id and index.html#id) ──
-  document.querySelectorAll('a[href^="#"], a[href^="index.html#"], a[href^="/#"]').forEach(anchor => {
+  document.querySelectorAll('a[href^="#"], a[href^="/#"], a[href^="/#"]').forEach(anchor => {
     anchor.addEventListener('click', (e) => {
       const hash = anchor.getAttribute('href').replace(/^(index\.html|\/)(?=#)/, '');
       if (!hash || hash === '#') return;
@@ -358,7 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (faqSearchInput) faqSearchInput.focus();
         });
         const contact = document.createElement('a');
-        contact.href = 'contact.html';
+        contact.href = '/contact';
         contact.className = 'btn-link';
         contact.textContent = 'contact us';
         faqEmpty.append(' or ', contact, '.');
@@ -397,7 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const domain = pill.getAttribute('data-domain');
       const name = pill.getAttribute('data-name');
       if (ctaBtnLabel) ctaBtnLabel.textContent = `Start my ${name} internship`;
-      if (ctaApplyBtn) ctaApplyBtn.href = `quiz.html?domain=${domain}`;
+      if (ctaApplyBtn) ctaApplyBtn.href = `/quiz?domain=${domain}`;
     });
     // Arrow keys move between the options, like native radios
     pill.addEventListener('keydown', (e) => {
@@ -448,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Nav scroll-spy: highlight the section in view ──
   (function initScrollSpy() {
     if (!('IntersectionObserver' in window)) return;
-    const links = Array.from(document.querySelectorAll('.nav-links a[href^="index.html#"], .nav-links a[href^="/#"]'));
+    const links = Array.from(document.querySelectorAll('.nav-links a[href^="/#"], .nav-links a[href^="/#"]'));
     const byId = new Map();
     links.forEach(a => {
       const section = document.getElementById(a.getAttribute('href').split('#')[1]);

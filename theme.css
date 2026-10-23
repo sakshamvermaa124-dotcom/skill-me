@@ -23,13 +23,13 @@
 
   --text:   #0a0a0a;
   --text-2: #52525b;        /* body secondary */
-  --text-3: #8b8b94;        /* captions, meta */
+  --text-3: #6b6b74;        /* captions, meta — 5.3:1 on white */
   --invert:    #0a0a0a;     /* black blocks in light mode */
   --invert-fg: #ffffff;
 
   /* Red = actions (buttons, primary links) */
-  --primary:        #e5322d;
-  --primary-hover:  #c92420;
+  --primary:        #d42a25;  /* white text 5.05:1 */
+  --primary-hover:  #bd221e;
   --primary-press:  #b01e1a;
   --primary-fg:     #ffffff;
   --primary-wash:   rgba(229, 50, 45, 0.08);
@@ -50,7 +50,7 @@
   --shadow-sm: 0 1px 2px rgba(10, 10, 10, 0.04), 0 2px 8px -2px rgba(10, 10, 10, 0.06);
   --shadow-md: 0 1px 2px rgba(10, 10, 10, 0.04), 0 12px 32px -12px rgba(10, 10, 10, 0.16);
   --shadow-lg: 0 30px 70px -24px rgba(10, 10, 10, 0.28);
-  --ring: 0 0 0 4px var(--primary-wash);
+  --ring: 0 0 0 4px rgba(212, 42, 37, 0.28);
 
   --nav-bg: rgba(255, 255, 255, 0.82);
   --overlay: rgba(10, 10, 10, 0.45);
@@ -71,7 +71,7 @@
 
   --text:   #fafafa;
   --text-2: #a1a1aa;
-  --text-3: #71717a;
+  --text-3: #8a8a93;  /* 5.8:1 on the dark background */
   --invert:    #fafafa;
   --invert-fg: #0a0a0a;
 

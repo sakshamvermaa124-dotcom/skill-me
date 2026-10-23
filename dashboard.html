@@ -1,22 +1,17 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- Primary SEO Meta Tags -->
   <title>Student Portal &amp; Task Dashboard — SkillMe</title>
-  <meta name="title" content="Student Portal &amp; Task Dashboard — SkillMe">
   <meta name="description" content="SkillMe student portal: Track weekly project milestones, LinkedIn submission approvals, performance scores, and certificates.">
-  <meta name="keywords" content="SkillMe dashboard, student login, intern portal, milestone tasks, task submission">
   <meta name="robots" content="noindex, follow">
-  <meta name="language" content="English">
-  <meta name="geo.region" content="IN">
-  <meta name="geo.placename" content="India">
-  <meta name="theme-color" content="#09090a">
+  <meta name="theme-color" content="#ffffff">
 
   <!-- Theme bootstrap — runs before first paint so there is no flash of the wrong theme.
-       Same localStorage key as the main site (script.js). Falls back to the OS preference. -->
+       Same localStorage key as the main site (script.js). Defaults to light, like the rest of the site. -->
   <script>
     (function () {
       var t;
@@ -37,52 +32,54 @@
   <meta property="og:url" content="https://www.skill-me-intern.in/dashboard">
   <meta property="og:title" content="Student Portal &amp; Task Dashboard — SkillMe">
   <meta property="og:description" content="Track your SkillMe internship progress, submissions, and achievements.">
-  <meta property="og:image" content="https://www.skill-me-intern.in/assets/logo.png">
+  <meta property="og:image" content="https://www.skill-me-intern.in/assets/og-image.png">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:domain" content="skill-me-intern.in">
   <meta name="twitter:title" content="Student Portal &amp; Task Dashboard — SkillMe">
   <meta name="twitter:description" content="SkillMe student progress, weekly tasks, and verified credentials.">
-  <meta name="twitter:image" content="https://www.skill-me-intern.in/assets/logo.png">
+  <meta name="twitter:image" content="https://www.skill-me-intern.in/assets/og-image.png">
 
   <!-- Favicon & App Icons -->
-  <link rel="icon" href="assets/logo.webp" type="image/webp">
-  <link rel="apple-touch-icon" href="assets/logo.png">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/assets/favicon-48.png" type="image/png" sizes="48x48">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
 
-  <link rel="stylesheet" href="style.css?v=20260923_020524">
+  <link rel="stylesheet" href="style.css?v=f405dfefe7">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="dashboard.css?v=20261023_fun1">
+  <link rel="stylesheet" href="dashboard.css?v=ca2098d813">
 
-  <script src="config.js?v=20260923_020524" defer></script>
+  <script src="config.js?v=b82b38a780" defer></script>
 
   <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js" integrity="sha384-/TQbtLCAerC3jgaim+N78RZSDYV7ryeoBCVqTuzRrFec2akfBkHS7ACQ3PQhvMVi" crossorigin="anonymous" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js" integrity="sha384-+VfUPEb0PdtChMwmBcBmykRMDd+v6D/oFmB3rZM/puCMDYcIvF968OimRh4KQY9a" crossorigin="anonymous" defer></script>
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
   <!-- Navigation (visible only on the login / unenrolled views) — matches the public site header -->
   <header class="login-topbar" id="navbar">
     <div class="login-topbar-inner">
-      <a href="index.html" class="login-brand" id="nav-logo" aria-label="SkillMe home">
-        <img src="assets/logo.webp" alt="" class="brand-logo-img" width="32" height="32">
+      <a href="/" class="login-brand" id="nav-logo" aria-label="SkillMe home">
+        <img src="assets/logo-96.webp" alt="" class="brand-logo-img" width="32" height="32">
         <span>SkillMe</span>
       </a>
       <nav class="login-links" id="nav-links-center" aria-label="Primary">
-        <a href="index.html#how-it-works">How it works</a>
-        <a href="index.html#domains">Tracks</a>
-        <a href="verify.html">Verify</a>
-        <a href="index.html#faq">FAQ</a>
+        <a href="/#how-it-works">How it works</a>
+        <a href="/#domains">Tracks</a>
+        <a href="/verify">Verify</a>
+        <a href="/#faq">FAQ</a>
       </nav>
       <div class="login-actions">
         <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle light and dark mode" title="Toggle theme">
           <svg class="ti-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
           <svg class="ti-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
-        <a href="contact.html" class="login-link-ghost">Contact</a>
-        <a href="quiz.html" class="login-cta">Apply now</a>
+        <a href="/contact" class="login-link-ghost">Contact</a>
+        <a href="/quiz" class="login-cta">Apply now</a>
       </div>
     </div>
   </header>
@@ -93,8 +90,8 @@
        ═════════════════════════════════════════════════════════════════════════ -->
   <aside class="dash-sidebar" id="dash-sidebar" aria-label="Dashboard navigation">
 
-    <a href="index.html" class="dash-sidebar-logo" aria-label="SkillMe home">
-      <img src="assets/logo.webp" alt="SkillMe Logo" class="brand-logo-img" width="36" height="36">
+    <a href="/" class="dash-sidebar-logo" aria-label="SkillMe home">
+      <img src="assets/logo-96.webp" alt="SkillMe Logo" class="brand-logo-img" width="36" height="36">
       <span class="dash-sidebar-logo-text">SkillMe</span>
     </a>
 
@@ -163,7 +160,7 @@
   <!-- ══ Main Page Area ═════════════════════════════════════════════════════════
        Three view containers toggled by dashboard.js (login/unenrolled/dashboard).
        ═════════════════════════════════════════════════════════════════════════ -->
-  <div class="dash-page">
+  <main class="dash-page" id="main" tabindex="-1">
 
     <!-- Login View -->
     <div id="login-view">
@@ -200,7 +197,7 @@
         </form>
         <div class="login-foot">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Haven't applied yet? <a href="apply.html">Apply for an internship</a>
+          Haven't applied yet? <a href="/apply">Apply for an internship</a>
         </div>
       </div>
     </div>
@@ -225,8 +222,8 @@
     <div id="dashboard-view" style="display: none;">
       <!-- Mobile Dashboard Header -->
       <header class="dash-mobile-header" id="dash-mobile-header">
-        <a href="index.html" class="dash-mobile-logo" aria-label="SkillMe home">
-          <img src="assets/logo.webp" alt="SkillMe Logo" class="brand-logo-img" width="32" height="32">
+        <a href="/" class="dash-mobile-logo" aria-label="SkillMe home">
+          <img src="assets/logo-96.webp" alt="SkillMe Logo" class="brand-logo-img" width="32" height="32">
           <span>SkillMe</span>
         </a>
         <div class="dash-mobile-actions">
@@ -381,10 +378,10 @@
         <div class="dash-panel" id="panel-work" style="display:none;">
           <header class="panel-header-banner panel-header-row">
             <div>
-              <h1 class="dash-panel-title">Tasks</h1>
+              <h2 class="dash-panel-title">Tasks</h2>
               <p class="panel-header-sub">One task per week. Complete it, share it on LinkedIn, then submit the post link for review.</p>
             </div>
-            <a href="tasks.html" target="_blank" class="btn-soft" id="flex-pdf-btn">
+            <a href="/tasks" target="_blank" class="btn-soft" id="flex-pdf-btn">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               All tasks (PDF)
             </a>
@@ -429,7 +426,7 @@
         <!-- ═══ Panel: Credentials ════════════════════════════════════ -->
         <div class="dash-panel" id="panel-credentials" style="display:none;">
           <header class="panel-header-banner">
-            <h1 class="dash-panel-title">Credentials</h1>
+            <h2 class="dash-panel-title">Credentials</h2>
             <p class="panel-header-sub">Your verified certificate, letter of recommendation and public portfolio.</p>
           </header>
 
@@ -510,7 +507,7 @@
                 <div class="dash-hod-sub">Acceptance letter, 4-week syllabus, grading rubric and a live QR code — in one pack.</div>
               </div>
             </div>
-            <a href="offer.html?view=hod" id="dash-banner-hod-btn" target="_blank" class="dash-hod-btn">
+            <a href="/offer?view=hod" id="dash-banner-hod-btn" target="_blank" class="dash-hod-btn">
               Download pack
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
             </a>
@@ -520,7 +517,7 @@
         <!-- ═══ Panel: Help ═══════════════════════════════════════════ -->
         <div class="dash-panel" id="panel-guide" style="display:none;">
           <header class="panel-header-banner">
-            <h1 class="dash-panel-title">Help</h1>
+            <h2 class="dash-panel-title">Help</h2>
             <p class="panel-header-sub">How weekly tasks work, tips for getting approved, and useful links.</p>
           </header>
 
@@ -586,11 +583,11 @@
 
             <h2 class="block-title">Useful links</h2>
             <div class="dash-quick-actions">
-              <a href="offer.html?view=hod" id="dash-quick-hod" target="_blank" rel="noopener noreferrer" class="dash-action-btn">
+              <a href="/offer?view=hod" id="dash-quick-hod" target="_blank" rel="noopener noreferrer" class="dash-action-btn">
                 <span class="dash-action-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/></svg></span>
                 <span class="dash-action-text"><span class="dash-action-title">HOD / NOC pack</span><span class="dash-action-sub">For college verification</span></span>
               </a>
-              <a href="verify.html" class="dash-action-btn">
+              <a href="/verify" class="dash-action-btn">
                 <span class="dash-action-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
                 <span class="dash-action-text"><span class="dash-action-title">Verify a certificate</span><span class="dash-action-sub">Check any certificate ID</span></span>
               </a>
@@ -609,13 +606,13 @@
       </div><!-- /dash-shell -->
     </div><!-- /#dashboard-view -->
 
-  </div><!-- /.dash-page -->
+  </main><!-- /.dash-page -->
 
   <!-- Lenis smooth scroll -->
   <div id="dash-toast" class="dash-toast" role="status" aria-live="polite"></div>
   <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js" integrity="sha384-tKsJDT6PlUI0pSBt9/sBKJluKgA19/a6mBrDsZaXotLB4ZYfMGM6xt6/WgGpYhTm" crossorigin="anonymous" defer></script>
-  <script src="dashboard.js?v=20261023_fun1" defer></script>
-  <script src="dashboard-ui.js?v=20261023_fun1" defer></script>
+  <script src="dashboard.js?v=7205f0e821" defer></script>
+  <script src="dashboard-ui.js?v=e74a8796a3" defer></script>
 
   <!-- ══ Modals — siblings of .dash-page, outside the panel system ════════════
        Must NOT be inside #dashboard-view (it starts display:none).
@@ -687,7 +684,7 @@
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span><strong>Letter of Recommendation</strong> for your domain</span></li>
         </ul>
         <div class="payment-modal-price">₹129 <span>one-time, covers verification &amp; lifetime hosting</span></div>
-        <input type="text" id="discount-code-milestone" class="dash-input dash-input--center" placeholder="Have a discount code?">
+        <input type="text" id="discount-code-milestone" aria-label="Discount code" class="dash-input dash-input--center" placeholder="Have a discount code?">
         <button id="modal-pay-btn" class="cert-btn cert-btn-primary cert-btn-block">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
           Unlock My Certificate — ₹129

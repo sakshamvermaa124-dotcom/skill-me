@@ -10,6 +10,17 @@ NC='\033[0m' # No Color
 
 echo "${YELLOW}🔍 Pre-commit: Checking JavaScript syntax...${NC}"
 
+# JS/CSS are cached for a year (immutable), so every edited asset needs a new ?v= hash
+# in the HTML. bump_versions.py --check fails if any page still points at an old version.
+ASSETS=$(git diff --cached --name-only --diff-filter=ACMR -- '*.js' '*.css' '*.html' | grep -v '/' )
+if [ -n "$ASSETS" ]; then
+  PY=$(command -v python3 || command -v python)
+  if [ -n "$PY" ] && ! "$PY" bump_versions.py --check; then
+    echo "${RED}✗ COMMIT BLOCKED — run: python bump_versions.py  (then stage the updated .html files)${NC}"
+    exit 1
+  fi
+fi
+
 # Find all staged .js files (Added, Copied, Modified, Renamed)
 JS_FILES=$(git diff --cached --name-only --diff-filter=ACMR -- '*.js')
 

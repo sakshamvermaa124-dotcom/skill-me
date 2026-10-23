@@ -67,7 +67,9 @@ function authHeaders(extra) {
 
 // --- Lenis Smooth Scrolling (from darkroomengineering/lenis) ---
 let lenis;
-if (typeof Lenis !== 'undefined') {
+// Smooth scrolling is motion: skip it for people who ask for less.
+const prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+if (typeof Lenis !== 'undefined' && !prefersReducedMotion) {
   lenis = new Lenis({
     duration: 1.2,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -437,7 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
       avatarEl.textContent = initials || '·';
     }
 
-    const hodUrl = `offer.html?view=hod&student_id=${student.id || ''}&ref=${encodeURIComponent(student.offer_ref || '')}&name=${encodeURIComponent(student.name || '')}&domain=${encodeURIComponent(student.domain || '')}&college=${encodeURIComponent(student.college || '')}`;
+    const hodUrl = `/offer?view=hod&student_id=${student.id || ''}&ref=${encodeURIComponent(student.offer_ref || '')}&name=${encodeURIComponent(student.name || '')}&domain=${encodeURIComponent(student.domain || '')}&college=${encodeURIComponent(student.college || '')}`;
     const hodQuickLink = document.getElementById('dash-quick-hod');
     if (hodQuickLink) hodQuickLink.href = hodUrl;
 
@@ -483,7 +485,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const flexPdfBtn = document.getElementById('flex-pdf-btn');
     if (flexPdfBtn && student && data._batch_id) {
-        flexPdfBtn.href = `tasks.html?student_id=${student.id}&batch_id=${data._batch_id}`;
+        flexPdfBtn.href = `/tasks?student_id=${student.id}&batch_id=${data._batch_id}`;
     }
 
     document.getElementById('stat-completed').textContent = totalCompleted;
@@ -1726,7 +1728,7 @@ function showCompletionPopup(student, data, pct) {
 
   const flexPdfBtn = document.getElementById('flex-pdf-btn');
   if (flexPdfBtn && student) {
-      flexPdfBtn.href = `tasks.html?student_id=${student.id}&batch_id=${batchId}`;
+      flexPdfBtn.href = `/tasks?student_id=${student.id}&batch_id=${batchId}`;
   }
 
   // Create overlay

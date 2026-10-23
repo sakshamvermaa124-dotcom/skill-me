@@ -25,7 +25,7 @@
   --text-strong:    #fafafa;
   --text-default:   #d4d4d8;
   --text-muted:     #a1a1aa;
-  --text-faint:     #71717a;
+  --text-faint:     #8a8a93;
 
   /* Orange = highlights, progress, labels */
   --accent:         #ff7a2f;
@@ -78,7 +78,7 @@
   --text-strong:    #0a0a0a;
   --text-default:   #27272a;
   --text-muted:     #52525b;
-  --text-faint:     #8b8b94;
+  --text-faint:     #6b6b74;
 
   --accent:         #f26a1b;
   --accent-hover:   #e05d12;
@@ -87,8 +87,8 @@
   --accent-wash:    rgba(242,106,27,0.09);
   --accent-border:  rgba(242,106,27,0.32);
 
-  --cta:            #e5322d;
-  --cta-hover:      #c92420;
+  --cta:            #d42a25;
+  --cta-hover:      #bd221e;
   --cta-ink:        #ffffff;
   --cta-shadow:     0 1px 0 rgba(255,255,255,0.18) inset, 0 1px 2px rgba(0,0,0,0.1), 0 8px 20px -10px rgba(229,50,45,0.7);
 
@@ -1874,3 +1874,13 @@ html.lenis, html.lenis body { height: auto; }
 .dash-toast[data-tone="error"] { background: var(--danger); color: #fff; }
 .dash-toast.is-visible { transform: translate(-50%, 0); opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .dash-toast { transition: opacity 0.2s; transform: translate(-50%, 0); } }
+
+/* Skip link (keyboard users jump past the navbar) */
+.skip-link {
+  position: absolute; left: 12px; top: -48px; z-index: 1001;
+  padding: 10px 14px; border-radius: 8px;
+  background: var(--text-strong); color: var(--surface-1);
+  font-weight: 600; text-decoration: none;
+}
+.skip-link:focus { top: 12px; }
+main.dash-page:focus { outline: none; }

@@ -6,14 +6,13 @@
   <title>Admin Console — SkillMe</title>
   <meta name="robots" content="noindex, nofollow" />
   <meta name="description" content="SkillMe Admin Console — Shortlist and enroll students, review task submissions." />
-  <link rel="icon" href="assets/logo.webp" type="image/png">
+  <link rel="icon" href="/favicon.ico" sizes="48x48">
+  <link rel="icon" href="/assets/favicon-48.png" type="image/png" sizes="48x48">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g" crossorigin="anonymous"></script>
   <!-- Three.js + GSAP for EMBER WebGL 3D Lava Core & Smooth Unzip Reveal -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" integrity="sha384-g4NTh/Iv5PPU4xPyhEWqPcwtNXOvdaDI8LLnyYfyNZOjKJeYQyjzQ9X5275eBjpt" crossorigin="anonymous"></script>
 
   <style>
     /* ─── IMPECCABLE DESIGN SYSTEM: OKLCH TINTED NEUTRALS & EMBER PALETTE ─── */
@@ -694,8 +693,8 @@
       .laser-seam { display: none; }
       .display-headline { font-size: 2.2rem; }
     }
+      select.filter-select:focus-visible, .search-input:focus-visible { outline: 2px solid #ff2a4b; outline-offset: 2px; }
   </style>
-  <script src="config.js"></script>
   <style>.brand-logo-img, .logo img, .nav-logo img, .cert-company-logo, .lh-logo { width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important; flex-shrink: 0 !important; }</style>
 </head>
 <body>
@@ -720,7 +719,7 @@
 
     <form id="login-form" onsubmit="handleLogin(event)">
       <div class="input-field-wrap">
-        <input type="password" class="pass-input" id="admin-key-input" placeholder="••••••••••••••••" autofocus required />
+        <input type="password" class="pass-input" id="admin-key-input" aria-label="Admin key" autocomplete="current-password" placeholder="••••••••••••••••" autofocus required />
       </div>
       <button type="submit" class="access-btn" id="admin-login-btn">
         ACCESS CONSOLE &rarr;
@@ -733,11 +732,11 @@
   <!-- Left Pitch Obsidian Panel -->
   <div class="split-left">
     <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
-      <a href="index.html" class="brand-mark" style="text-decoration:none; color: #ffffff !important;" title="Go to Main Website">
-        <img width="36" height="36" src="assets/logo.webp" alt="SkillMe Logo" style="width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important;">
+      <a href="/" class="brand-mark" style="text-decoration:none; color: #ffffff !important;" title="Go to Main Website">
+        <img width="36" height="36" src="assets/logo-96.webp" alt="SkillMe Logo" style="width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important;">
         <span style="color: #ffffff !important; -webkit-text-fill-color: #ffffff !important;">SkillMe</span>
       </a>
-      <a href="dashboard.html" style="color:rgba(255,255,255,0.6); text-decoration:none; font-size:0.75rem; font-weight:600; padding:5px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.12); transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.4)';this.style.color='#fff'" onmouseout="this.style.borderColor='rgba(255,255,255,0.12)';this.style.color='rgba(255,255,255,0.6)'">
+      <a href="/dashboard" style="color:rgba(255,255,255,0.6); text-decoration:none; font-size:0.75rem; font-weight:600; padding:5px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.12); transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.4)';this.style.color='#fff'" onmouseout="this.style.borderColor='rgba(255,255,255,0.12)';this.style.color='rgba(255,255,255,0.6)'">
         Student Portal →
       </a>
     </div>
@@ -791,8 +790,8 @@
 
   <!-- Sidebar -->
   <aside class="sidebar">
-    <a href="index.html" class="sidebar-brand" style="cursor: pointer; text-decoration: none;" title="Go to Home Page">
-      <div class="sidebar-brand-icon"><img src="assets/logo.webp" alt="SkillMe Logo" width="34" height="34" style="width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important;"></div>
+    <a href="/" class="sidebar-brand" style="cursor: pointer; text-decoration: none;" title="Go to Home Page">
+      <div class="sidebar-brand-icon"><img src="assets/logo-96.webp" alt="SkillMe Logo" width="34" height="34" style="width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important;"></div>
       <div class="sidebar-brand-text" style="color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; background: none !important;">SkillMe</div>
       <div class="sidebar-brand-badge">ADMIN</div>
     </a>
@@ -878,9 +877,9 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" class="chevron" style="opacity: 0.5;"><polyline points="6 9 12 15 18 9"/></svg>
         </summary>
         <div style="padding: 0 12px 12px 12px; display: flex; flex-direction: column; gap: 6px;">
-          <a href="dashboard.html?preview=1" target="_blank" style="background: rgba(255,255,255,0.05); color: var(--text-primary); text-decoration: none; padding: 8px 12px; border-radius: 6px; font-size: 0.75rem; text-align: center; border: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">Unpaid UI</a>
-          <a href="dashboard.html?preview=paid" target="_blank" style="background: rgba(99, 102, 241, 0.15); color: var(--accent-indigo); text-decoration: none; padding: 8px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; text-align: center; transition: background 0.2s;" onmouseover="this.style.background='rgba(99, 102, 241, 0.25)'" onmouseout="this.style.background='rgba(99, 102, 241, 0.15)'">Paid UI</a>
-          <a href="portfolio.html?preview=1" target="_blank" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); text-decoration: none; padding: 8px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; text-align: center; transition: background 0.2s;" onmouseover="this.style.background='rgba(16, 185, 129, 0.25)'" onmouseout="this.style.background='rgba(16, 185, 129, 0.15)'">Portfolio UI</a>
+          <a href="/dashboard?preview=1" target="_blank" style="background: rgba(255,255,255,0.05); color: var(--text-primary); text-decoration: none; padding: 8px 12px; border-radius: 6px; font-size: 0.75rem; text-align: center; border: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">Unpaid UI</a>
+          <a href="/dashboard?preview=paid" target="_blank" style="background: rgba(99, 102, 241, 0.15); color: var(--accent-indigo); text-decoration: none; padding: 8px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; text-align: center; transition: background 0.2s;" onmouseover="this.style.background='rgba(99, 102, 241, 0.25)'" onmouseout="this.style.background='rgba(99, 102, 241, 0.15)'">Paid UI</a>
+          <a href="/portfolio?preview=1" target="_blank" style="background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); text-decoration: none; padding: 8px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; text-align: center; transition: background 0.2s;" onmouseover="this.style.background='rgba(16, 185, 129, 0.25)'" onmouseout="this.style.background='rgba(16, 185, 129, 0.15)'">Portfolio UI</a>
         </div>
       </details>
     </div>
@@ -957,8 +956,8 @@
     <!-- ─── STUDENTS PAGE ─── -->
     <section class="page" id="page-students">
       <div class="filter-row">
-        <input type="text" class="search-input" id="student-search" placeholder="Search by name, email, college or domain..." oninput="filterStudents()" />
-        <select class="filter-select" id="status-filter" onchange="filterStudents()">
+        <input type="text" class="search-input" id="student-search" aria-label="Search students" placeholder="Search by name, email, college or domain..." oninput="filterStudents()" />
+        <select class="filter-select" id="status-filter" aria-label="Filter by status" onchange="filterStudents()">
           <option value="">All Statuses</option>
           <option value="applied">Applied</option>
           <option value="shortlisted">Shortlisted</option>
@@ -966,7 +965,7 @@
           <option value="completed">Completed</option>
           <option value="dropped">Dropped</option>
         </select>
-        <button class="btn btn-ghost btn-sm" onclick="loadStudents()">
+        <button class="btn btn-ghost btn-sm" onclick="loadStudents()" aria-label="Refresh students">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
             <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
           </svg>
@@ -997,8 +996,8 @@
     <!-- ─── ALUMNI PAGE ─── -->
     <section class="page" id="page-alumni">
       <div class="filter-row">
-        <input type="text" class="search-input" id="alumni-search" placeholder="Search alumni by name, email or domain..." oninput="filterAlumni()" />
-        <button class="btn btn-ghost btn-sm" onclick="loadAlumni()">
+        <input type="text" class="search-input" id="alumni-search" aria-label="Search alumni" placeholder="Search alumni by name, email or domain..." oninput="filterAlumni()" />
+        <button class="btn btn-ghost btn-sm" onclick="loadAlumni()" aria-label="Refresh alumni">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
             <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
           </svg>
@@ -1159,7 +1158,7 @@
             <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
               <div style="flex:1;min-width:220px;">
                 <label class="form-label" style="font-size:0.78rem;">Recipient email</label>
-                <input type="email" class="form-input" id="test-email-input" placeholder="you@example.com" />
+                <input type="email" class="form-input" id="test-email-input" aria-label="Test email recipient" placeholder="you@example.com" />
               </div>
               <button class="btn btn-primary" onclick="sendTestEmail()" id="test-email-btn" style="flex-shrink:0;">Send Test</button>
             </div>
@@ -1224,7 +1223,7 @@
         </div>
         <div class="panel-body">
           <div class="filter-row" style="margin-bottom:14px;">
-            <input type="text" class="search-input" id="email-directory-search" placeholder="Search by name, email or domain..." oninput="debounceEmailDirectory()" />
+            <input type="text" class="search-input" id="email-directory-search" aria-label="Search email directory" placeholder="Search by name, email or domain..." oninput="debounceEmailDirectory()" />
           </div>
           <div style="overflow-x:auto;">
             <table class="students-table" id="email-directory-table">
@@ -1262,7 +1261,7 @@
           <div style="font-size:0.72rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Deliverability &amp; Engagement (all-time, via Brevo webhook)</div>
           <div id="email-agg-stats" style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;"></div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;">
-            <select id="email-log-type-filter" class="filter-select" onchange="loadEmailLogs()" style="min-width:180px;">
+            <select id="email-log-type-filter" aria-label="Filter by email type" class="filter-select" onchange="loadEmailLogs()" style="min-width:180px;">
               <option value="">All Types</option>
               <option value="application_confirmation">Application Received</option>
               <option value="shortlisted">Shortlisted</option>
@@ -1272,10 +1271,10 @@
               <option value="github_invite_reminder">Invite Reminder</option>
               <option value="test">Test Email</option>
             </select>
-            <input type="text" id="email-log-recipient-filter" class="search-input"
+            <input type="text" id="email-log-recipient-filter" aria-label="Filter by recipient" class="search-input"
               placeholder="Filter by email address..." oninput="debounceEmailLogs()"
               style="flex:1;min-width:200px;max-width:320px;" />
-            <select id="email-log-status-filter" class="filter-select" onchange="loadEmailLogs()" style="min-width:120px;">
+            <select id="email-log-status-filter" aria-label="Filter by delivery status" class="filter-select" onchange="loadEmailLogs()" style="min-width:120px;">
               <option value="">All Status</option>
               <option value="sent">Sent ✅</option>
               <option value="failed">Failed ❌</option>
@@ -1308,13 +1307,13 @@
     <!-- ─── SUBMISSIONS PAGE ─── -->
     <section class="page" id="page-submissions">
       <div class="filter-row">
-        <select class="filter-select" id="submission-status-filter" onchange="loadSubmissions()">
+        <select class="filter-select" id="submission-status-filter" aria-label="Filter submissions by status" onchange="loadSubmissions()">
           <option value="pending">Pending</option>
           <option value="approved">Approved</option>
           <option value="rejected">Rejected</option>
           <option value="">All</option>
         </select>
-        <button class="btn btn-ghost btn-sm" onclick="loadSubmissions()">
+        <button class="btn btn-ghost btn-sm" onclick="loadSubmissions()" aria-label="Refresh submissions">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
             <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
           </svg>
@@ -1334,7 +1333,7 @@
           <table id="submissions-table">
             <thead>
               <tr>
-                <th style="width:36px;"><input type="checkbox" id="submissions-select-all" onchange="toggleSelectAllSubmissions(this.checked)" /></th>
+                <th style="width:36px;"><input type="checkbox" id="submissions-select-all" aria-label="Select all submissions" onchange="toggleSelectAllSubmissions(this.checked)" /></th>
                 <th>Student</th>
                 <th>Email</th>
                 <th>Week</th>
@@ -1355,13 +1354,13 @@
     <!-- ─── URGENT REQUESTS PAGE ─── -->
     <section class="page" id="page-urgent-requests">
       <div class="filter-row">
-        <select class="filter-select" id="urgent-request-status-filter" onchange="loadUrgentRequests()">
+        <select class="filter-select" id="urgent-request-status-filter" aria-label="Filter urgent requests by status" onchange="loadUrgentRequests()">
           <option value="pending">Pending</option>
           <option value="fulfilled">Fulfilled</option>
           <option value="rejected">Rejected</option>
           <option value="">All</option>
         </select>
-        <button class="btn btn-ghost btn-sm" onclick="loadUrgentRequests()">
+        <button class="btn btn-ghost btn-sm" onclick="loadUrgentRequests()" aria-label="Refresh urgent requests">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
             <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
           </svg>
@@ -1404,7 +1403,7 @@
         <div class="panel-body">
           <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px;">
             <label style="font-size:0.82rem;color:var(--text-secondary);">Send to students with status:</label>
-            <select class="filter-select" id="announcement-status-filter" onchange="previewAnnouncement()">
+            <select class="filter-select" id="announcement-status-filter" aria-label="Announcement audience" onchange="previewAnnouncement()">
               <option value="enrolled" selected>Enrolled</option>
               <option value="shortlisted">Shortlisted</option>
               <option value="applied">Applied</option>
@@ -1526,8 +1525,11 @@
 <!-- ─── TOAST CONTAINER ─── -->
 <div id="toast-container"></div>
 
-<script src="config.js"></script>
-<script src="admin.js?v=20261023_fun1"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" integrity="sha384-g4NTh/Iv5PPU4xPyhEWqPcwtNXOvdaDI8LLnyYfyNZOjKJeYQyjzQ9X5275eBjpt" crossorigin="anonymous"></script>
+<script src="config.js?v=b82b38a780"></script>
+<script src="admin.js?v=021032ea24"></script>
 <script>
 // ─── Email Logs ───────────────────────────────────────────────────────────────
 const EMAIL_TYPE_LABELS = {
