@@ -1,61 +1,31 @@
 # SkillMe (skill-me-intern.in) - Robots Exclusion Protocol
+#
+# One shared group: a crawler obeys only the most specific group that names it, so
+# search engines and AI answer engines are listed here together with the same rules.
+
 User-agent: *
-Allow: /
-Disallow: /admin
-Disallow: /admin.html
-Disallow: /api/
-Disallow: /preview_emails/
-
-# Search Engine Crawlers
 User-agent: Googlebot
-Allow: /
-
 User-agent: Googlebot-Image
-Allow: /assets/
-
 User-agent: Bingbot
-Allow: /
-
 User-agent: DuckDuckBot
-Allow: /
-
-# AI Answer Engines & LLM Search Bots (AEO / GEO)
 User-agent: GPTBot
-Allow: /
-
 User-agent: OAI-SearchBot
-Allow: /
-
 User-agent: ChatGPT-User
-Allow: /
-
 User-agent: PerplexityBot
-Allow: /
-
 User-agent: ClaudeBot
-Allow: /
-
 User-agent: anthropic-ai
-Allow: /
-
 User-agent: Google-Extended
-Allow: /
-
 User-agent: Applebot-Extended
-Allow: /
-
 User-agent: cohere-ai
-Allow: /
-
 User-agent: CCBot
-Allow: /
-
 User-agent: Diffbot
-Allow: /
-
 User-agent: FacebookBot
 Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /offer
+Disallow: /lor
+Disallow: /tasks
+Disallow: /api/
 
-# Host, Sitemap & LLM Specs
-Host: https://www.skill-me-intern.in
 Sitemap: https://www.skill-me-intern.in/sitemap.xml

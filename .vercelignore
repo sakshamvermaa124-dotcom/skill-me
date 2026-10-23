@@ -1,0 +1,30 @@
+# Only the static site ships to Vercel. Everything below stays in the repo but is never deployed.
+
+# Backend, tooling and internal docs
+backend/
+archive/
+tools/
+preview_emails/
+brag-output/
+SkillMe-Intern-Tasks/
+ml-template/
+dashboard-app/
+node_modules/
+.venv/
+.pytest_cache/
+
+# Repo/agent config
+.agents/
+.claude/
+.github/
+.githooks/
+.python-version
+
+# Scripts and dev files
+*.py
+*.mjs
+setup.sh
+README.md
+package.json
+package-lock.json
+live-test-*.png
