@@ -630,7 +630,7 @@
     <div class="doc-meta-ribbon">
       <div><strong>Ref:</strong> <span id="lh-cert-id" style="font-family:'JetBrains Mono',monospace; color:#1c1917; font-weight:700;">Loading...</span></div>
       <div><strong>Date:</strong> <span id="lb-date" style="color:#1c1917; font-weight:600;">Loading...</span></div>
-      <div><strong>Verification:</strong> <span style="color:#047857; font-weight:700;">● Cryptographically Verified</span></div>
+      <div><strong>Verification:</strong> <span style="color:#047857; font-weight:700;">● Verified on record</span></div>
     </div>
 
     <!-- Title Section -->
@@ -881,7 +881,7 @@
       icon: isPayment ? 'lock' : 'search',
       title: isPayment ? 'Letter of Recommendation Not Yet Unlocked' : 'Letter of Recommendation Not Found',
       text: isPayment
-        ? 'Complete payment on your Student Dashboard — or, if you’re below 50% completion, get your urgent processing request approved — to unlock this letter.'
+        ? 'Complete payment on your Student Dashboard — or, if you have fewer than 3 approved tasks, get your urgent processing request approved — to unlock this letter.'
         : 'This link is invalid or the letter has not been issued yet.',
       actions: [
         { href: 'dashboard.html', label: 'Return to Dashboard', primary: isPayment, back: true },

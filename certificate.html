@@ -911,7 +911,7 @@
 
           <!-- 6. Bottom Fine Print -->
           <div class="cert-bottom-fineprint">
-            <span>Cryptographically validated credential &bull; Authenticate at skill-me-intern.in/verify</span>
+            <span>Verified against SkillMe records &bull; Check at skill-me-intern.in/verify</span>
             <span>&copy; 2026 SkillMe &bull; Govt. of India Udyam Reg. UDYAM-UP-50-0294192</span>
           </div>
 
@@ -984,7 +984,7 @@
         icon: isPayment ? 'lock' : 'search',
         title: isPayment ? 'Certificate Not Yet Unlocked' : 'Certificate Not Found',
         text: isPayment
-          ? 'Complete payment on your Student Dashboard — or, if you’re below 50% completion, get your urgent processing request approved — to unlock this certificate.'
+          ? 'Complete payment on your Student Dashboard — or, if you have fewer than 3 approved tasks, get your urgent processing request approved — to unlock this certificate.'
           : 'This link is invalid or the certificate has not been issued yet.',
         actions: [
           { href: 'dashboard.html', label: 'Return to Dashboard', primary: isPayment, back: true },
@@ -1162,7 +1162,7 @@
       const holderTitle = document.getElementById('dc-holder');
       if (holderTitle) holderTitle.textContent = name;
       SkillMeDocs.setStatus(document.getElementById('verify-section'), 'ok', 'Credential Authenticity Confirmed',
-        `This certificate is officially registered in SkillMe's cryptographic verification registry for <strong id="verify-holder-name">${SkillMeDocs.esc(name)}</strong>.`);
+        `This certificate is on record in SkillMe's verification registry for <strong id="verify-holder-name">${SkillMeDocs.esc(name)}</strong>.`);
       const viewWrapper = document.getElementById('cert-view-wrapper');
       if (viewWrapper) viewWrapper.dataset.state = 'ready';
 

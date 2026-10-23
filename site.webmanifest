@@ -1,11 +1,11 @@
 {
-  "name": "SkillMe — Open Source Internship Platform",
+  "name": "SkillMe — Project-Based Internships",
   "short_name": "SkillMe",
-  "description": "Work on real open-source GitHub projects, build a verified portfolio, and get placed at top tech startups.",
+  "description": "A 4-week, project-based remote internship. Build one milestone a week, get it reviewed by the SkillMe team, and earn a QR-verified certificate.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0c0b0b",
-  "theme_color": "#0c0b0b",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
   "orientation": "portrait",
   "icons": [
     {
