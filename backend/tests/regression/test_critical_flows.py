@@ -8,7 +8,7 @@ import hmac
 import json
 import pytest
 from unittest.mock import patch, MagicMock
-from tests.conftest import test_db, seed_otp
+from tests.conftest import test_db, seed_otp, auth_headers
 
 
 @pytest.mark.regression
@@ -81,7 +81,7 @@ class TestStudentApplicationLifecycle:
         assert r.status_code == 200
 
         # 4. Check progress
-        r = await client.get("/api/students/progress/fullflow@example.com")
+        r = await client.get("/api/students/progress/fullflow@example.com", headers=auth_headers(student_id))
         assert r.status_code == 200
         data = r.json()
         assert data["student"]["email"] == "fullflow@example.com"

@@ -3,7 +3,7 @@ Admin Tests — LinkedIn Submission Review Queue
 Tests the submit → list → approve/reject → bulk-approve/bulk-reject flow.
 """
 import pytest
-from tests.conftest import test_db, seed_batch, seed_enrollment
+from tests.conftest import test_db, seed_batch, seed_enrollment, auth_headers
 
 
 @pytest.mark.admin
@@ -11,6 +11,7 @@ class TestSubmitTask:
     async def test_submit_task_pending(self, client, enrolled_student):
         r = await client.post(
             "/api/students/submit-task",
+            headers=auth_headers(enrolled_student["id"]),
             json={
                 "student_id": enrolled_student["id"],
                 "batch_id": enrolled_student["batch_id"],
@@ -28,6 +29,7 @@ class TestSubmitTask:
         from services.project_curriculum import get_project_track_for_student
         r = await client.post(
             "/api/students/submit-task",
+            headers=auth_headers(enrolled_student["id"]),
             json={
                 "student_id": enrolled_student["id"],
                 "batch_id": enrolled_student["batch_id"],
@@ -50,12 +52,13 @@ class TestSubmitTask:
         assert send.call_args.kwargs["week"] == 2
         assert send.call_args.kwargs["email"] == enrolled_student["email"]
 
-        progress = (await client.get(f"/api/students/progress/{enrolled_student['email']}")).json()
+        progress = (await client.get(f"/api/students/progress/{enrolled_student['email']}", headers=auth_headers(enrolled_student["id"]))).json()
         assert progress["submissions"][0]["feedback"] == row["feedback"]
 
     async def test_submit_task_rejects_non_linkedin_url(self, client, enrolled_student):
         r = await client.post(
             "/api/students/submit-task",
+            headers=auth_headers(enrolled_student["id"]),
             json={
                 "student_id": enrolled_student["id"],
                 "batch_id": enrolled_student["batch_id"],
@@ -68,6 +71,7 @@ class TestSubmitTask:
     async def test_submit_task_not_enrolled(self, client, test_student, test_batch):
         r = await client.post(
             "/api/students/submit-task",
+            headers=auth_headers(test_student["id"]),
             json={
                 "student_id": test_student["id"],
                 "batch_id": test_batch["id"],
@@ -77,6 +81,19 @@ class TestSubmitTask:
         )
         assert r.status_code == 400
 
+    async def test_submit_task_needs_own_session(self, client, enrolled_student):
+        from tests.conftest import seed_student
+        payload = {
+            "student_id": enrolled_student["id"],
+            "batch_id": enrolled_student["batch_id"],
+            "week": 1,
+            "linkedin_url": "https://www.linkedin.com/posts/test-post",
+        }
+        assert (await client.post("/api/students/submit-task", json=payload)).status_code == 401
+        other = await seed_student(test_db, email="intruder@example.com")
+        r = await client.post("/api/students/submit-task", json=payload, headers=auth_headers(other))
+        assert r.status_code == 403
+
     async def test_duplicate_pending_submission_rejected(self, client, enrolled_student):
         payload = {
             "student_id": enrolled_student["id"],
@@ -84,8 +101,8 @@ class TestSubmitTask:
             "week": 1,
             "linkedin_url": "https://www.linkedin.com/posts/test-post",
         }
-        await client.post("/api/students/submit-task", json=payload)
-        r2 = await client.post("/api/students/submit-task", json=payload)
+        await client.post("/api/students/submit-task", json=payload, headers=auth_headers(enrolled_student["id"]))
+        r2 = await client.post("/api/students/submit-task", json=payload, headers=auth_headers(enrolled_student["id"]))
         assert r2.status_code == 400
 
 
@@ -94,6 +111,7 @@ class TestSubmissionReviewQueue:
     async def test_list_pending_submissions(self, client, admin_headers, enrolled_student):
         await client.post(
             "/api/students/submit-task",
+            headers=auth_headers(enrolled_student["id"]),
             json={
                 "student_id": enrolled_student["id"],
                 "batch_id": enrolled_student["batch_id"],
@@ -109,6 +127,7 @@ class TestSubmissionReviewQueue:
     async def test_approve_submission_increments_progress(self, client, admin_headers, enrolled_student):
         sub = await client.post(
             "/api/students/submit-task",
+            headers=auth_headers(enrolled_student["id"]),
             json={
                 "student_id": enrolled_student["id"],
                 "batch_id": enrolled_student["batch_id"],
@@ -140,7 +159,7 @@ class TestSubmissionReviewQueue:
             "week": 1,
             "linkedin_url": "https://www.linkedin.com/posts/test-post",
         }
-        sub = await client.post("/api/students/submit-task", json=payload)
+        sub = await client.post("/api/students/submit-task", json=payload, headers=auth_headers(enrolled_student["id"]))
         submission_id = sub.json()["submission_id"]
 
         r = await client.post(
@@ -152,7 +171,7 @@ class TestSubmissionReviewQueue:
         assert r.json()["status"] == "rejected"
 
         # Resubmission should now succeed
-        r2 = await client.post("/api/students/submit-task", json=payload)
+        r2 = await client.post("/api/students/submit-task", json=payload, headers=auth_headers(enrolled_student["id"]))
         assert r2.status_code == 200
         assert r2.json()["status"] == "pending"
 
@@ -163,19 +182,20 @@ class TestSubmissionReviewQueue:
             "week": 1,
             "linkedin_url": "https://www.linkedin.com/posts/test-post",
         }
-        submission_id = (await client.post("/api/students/submit-task", json=payload)).json()["submission_id"]
+        submission_id = (await client.post("/api/students/submit-task", json=payload, headers=auth_headers(enrolled_student["id"]))).json()["submission_id"]
         await client.post(f"/api/admin/submissions/{submission_id}/approve", json={}, headers=admin_headers)
 
-        r = await client.post("/api/students/submit-task", json=payload)
+        r = await client.post("/api/students/submit-task", json=payload, headers=auth_headers(enrolled_student["id"]))
         assert r.status_code == 400
 
-        dash = (await client.get(f"/api/students/progress/id/{enrolled_student['id']}")).json()
+        dash = (await client.get(f"/api/students/progress/id/{enrolled_student['id']}", headers=auth_headers(enrolled_student["id"]))).json()
         assert dash["summary"]["completed_tasks"] == 1
         assert [(s["week"], s["status"]) for s in dash["submissions"]] == [(1, "approved")]
 
     async def test_reject_after_approve_rolls_back_progress(self, client, admin_headers, enrolled_student):
         sub = await client.post(
             "/api/students/submit-task",
+            headers=auth_headers(enrolled_student["id"]),
             json={
                 "student_id": enrolled_student["id"],
                 "batch_id": enrolled_student["batch_id"],
@@ -206,6 +226,7 @@ class TestSubmissionReviewQueue:
         for sid in student_ids:
             r = await client.post(
                 "/api/students/submit-task",
+                headers=auth_headers(sid),
                 json={
                     "student_id": sid,
                     "batch_id": test_batch["id"],
@@ -236,6 +257,7 @@ class TestSubmissionReviewQueue:
         for sid in student_ids:
             r = await client.post(
                 "/api/students/submit-task",
+                headers=auth_headers(sid),
                 json={
                     "student_id": sid,
                     "batch_id": test_batch["id"],

@@ -6,9 +6,10 @@ Public endpoints for student applications, status checks, and LinkedIn task subm
 import logging
 import re
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from pydantic import BaseModel, Field
 from db.database import db
+from middleware.student_auth import require_student
 from services.email_service import email_service, _domain_label
 from services.submission_service import submission_service
 from services.urgent_request_service import urgent_request_service
@@ -50,6 +51,19 @@ class UrgentRequestRequest(BaseModel):
 
 
 # ──────────────────────────────────────────────
+# Ownership
+# ──────────────────────────────────────────────
+
+async def _assert_owns(me: dict, student_id: int) -> None:
+    """403 unless `student_id` is one of the signed-in person's own application rows."""
+    if int(student_id) == int(me["id"]):
+        return
+    row = await db.fetch_one("SELECT email FROM students WHERE id = ?", (student_id,))
+    if not row or (row["email"] or "").lower() != (me["email"] or "").lower():
+        raise HTTPException(status_code=403, detail="You can only access your own internship.")
+
+
+# ──────────────────────────────────────────────
 # Endpoints
 # ──────────────────────────────────────────────
 
@@ -59,7 +73,6 @@ async def apply(req: ApplicationRequest, background_tasks: BackgroundTasks):
     Submit a new student application.
     This is called by the apply.html form.
     """
-    import traceback
     try:
         # Check for duplicate email
         req.email = req.email.strip()
@@ -108,15 +121,18 @@ async def apply(req: ApplicationRequest, background_tasks: BackgroundTasks):
             "message": "Application submitted successfully! You'll hear from us within 48 hours.",
             "student_id": student_id,
         }
-    except Exception as e:
-        return {"error": str(e), "traceback": traceback.format_exc()}
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Application submit failed for %s", req.email)
+        raise HTTPException(status_code=500, detail="Something went wrong on our side. Please try again in a minute.")
 
 
 @router.get("/status/{email}", summary="Check application status")
 async def check_status(email: str):
     """Check the status of a student's application by email."""
     student = await db.fetch_one(
-        "SELECT id, first_name, last_name, email, status, created_at FROM students WHERE lower(email) = lower(?)",
+        "SELECT id, first_name, status, created_at FROM students WHERE lower(email) = lower(?)",
         (email.strip(),),
     )
     if not student:
@@ -128,15 +144,26 @@ async def check_status(email: str):
         if enrollment else []
     )
 
+    # Public endpoint: only what the apply page's status view needs, nothing personal.
     return {
-        "student": student,
+        "student": {
+            "first_name": student["first_name"],
+            "status": student["status"],
+            "created_at": student["created_at"],
+        },
         "enrollments": enrollments,
     }
 
 
 @router.get("/progress/{email}", summary="Get student progress")
-async def get_progress(email: str):
-    """Get a student's internship progress by email."""
+async def get_progress(email: str, me: dict = Depends(require_student)):
+    """Get the signed-in student's internship progress by email."""
+    if email.strip().lower() != (me["email"] or "").lower():
+        raise HTTPException(status_code=403, detail="You can only access your own internship.")
+    return await _progress_for_email(email)
+
+
+async def _progress_for_email(email: str) -> dict:
     student = await db.fetch_one(
         "SELECT * FROM students WHERE lower(email) = lower(?)", (email.strip(),)
     )
@@ -203,24 +230,28 @@ async def get_progress(email: str):
 
 
 @router.get("/progress/id/{student_id}", summary="Get student progress by ID")
-async def get_progress_by_id(student_id: int):
-    """Get a student's internship progress by student ID (used by auth'd dashboard)."""
+async def get_progress_by_id(student_id: int, me: dict = Depends(require_student)):
+    """Get the signed-in student's internship progress by student ID."""
+    await _assert_owns(me, student_id)
     student = await db.fetch_one(
         "SELECT * FROM students WHERE id = ?", (student_id,)
     )
     if not student:
         raise HTTPException(status_code=404, detail="Student not found.")
 
-    return await get_progress(student["email"])
+    return await _progress_for_email(student["email"])
 
 
 @router.post("/submit-task", summary="Submit a LinkedIn post URL for a week's task")
-async def submit_task(req: SubmitTaskRequest, background_tasks: BackgroundTasks):
+async def submit_task(
+    req: SubmitTaskRequest, background_tasks: BackgroundTasks, me: dict = Depends(require_student)
+):
     """
     Student submits a LinkedIn post URL for a given week's task.
     The submission is queued as 'pending' until an admin reviews it, and the student is
     emailed automatic feedback for that task.
     """
+    await _assert_owns(me, req.student_id)
     batch_id = await enrollment_service.resolve_batch_id(req.student_id, req.batch_id)
     if not batch_id:
         raise HTTPException(status_code=400, detail="You are not enrolled in an internship yet.")
@@ -256,12 +287,13 @@ async def submit_task(req: SubmitTaskRequest, background_tasks: BackgroundTasks)
 
 
 @router.post("/urgent-request", summary="Request 24h expedited certificate/LOR/portfolio processing")
-async def create_urgent_request(req: UrgentRequestRequest):
+async def create_urgent_request(req: UrgentRequestRequest, me: dict = Depends(require_student)):
     """
     Student requests urgent (24h) processing of their certificate, LOR, or portfolio.
     Open to students below the payment threshold (3 of 4 tasks approved), who don't otherwise have direct
     payment access — an admin reviews and, if fulfilled, unlocks payment for them.
     """
+    await _assert_owns(me, req.student_id)
     batch_id = await enrollment_service.resolve_batch_id(req.student_id, req.batch_id)
     if not batch_id:
         raise HTTPException(status_code=400, detail="You are not enrolled in an internship yet.")
@@ -277,8 +309,9 @@ async def create_urgent_request(req: UrgentRequestRequest):
 
 
 @router.get("/urgent-request/status/{student_id}/{batch_id}", summary="Get latest urgent request status")
-async def get_urgent_request_status(student_id: int, batch_id: int):
+async def get_urgent_request_status(student_id: int, batch_id: int, me: dict = Depends(require_student)):
     """Returns the student's most recent urgent request, or null if none exists."""
+    await _assert_owns(me, student_id)
     resolved = await enrollment_service.resolve_batch_id(student_id, batch_id)
     if not resolved:
         return {"request": None}

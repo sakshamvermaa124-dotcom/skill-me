@@ -217,6 +217,11 @@ def make_jwt(student_id: int, email: str) -> str:
     return _create_jwt(student_id, email)
 
 
+def auth_headers(student_id: int, email: str = "test@example.com") -> dict:
+    """Bearer header for a seeded student (the session resolves the student from `sub`)."""
+    return {"Authorization": f"Bearer {make_jwt(student_id, email)}"}
+
+
 # ── Mock External Services ────────────────────────────────────────────────────
 
 def mock_email_service():

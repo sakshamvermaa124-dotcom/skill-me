@@ -5,7 +5,7 @@ of business logic, only external services (email/payments) per conftest.
 """
 import asyncio
 import pytest
-from tests.conftest import test_db, seed_student, seed_batch, seed_enrollment, seed_payment
+from tests.conftest import test_db, seed_student, seed_batch, seed_enrollment, seed_payment, auth_headers
 
 
 async def _setup_paid(domain="web-dev"):
@@ -38,6 +38,7 @@ class TestRejectResubmitApprove:
         # Student resubmits the SAME week (real submission flow enforces resubmission semantics).
         resub = await client.post(
             "/api/students/submit-task",
+            headers=auth_headers(sid),
             json={"student_id": sid, "batch_id": bid, "week": 1,
                   "linkedin_url": "https://www.linkedin.com/feed/update/urn:li:activity:good"},
         )

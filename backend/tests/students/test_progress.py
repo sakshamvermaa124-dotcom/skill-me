@@ -3,7 +3,7 @@ Student Tests — Status Checks
 Tests GET /api/students/status/{email}.
 """
 import pytest
-from tests.conftest import test_db, seed_student, seed_batch, seed_enrollment
+from tests.conftest import test_db, seed_student, seed_batch, seed_enrollment, auth_headers
 
 
 @pytest.mark.students
@@ -13,8 +13,9 @@ class TestStudentStatus:
         assert r.status_code == 200
         data = r.json()
         assert "student" in data
-        assert data["student"]["email"] == test_student["email"]
         assert data["student"]["status"] == "applied"
+        # Public lookup: nothing personal beyond the first name.
+        assert set(data["student"]) == {"first_name", "status", "created_at"}
 
     async def test_check_status_unknown_email(self, client):
         r = await client.get("/api/students/status/nobody@nowhere.com")
@@ -49,7 +50,7 @@ class TestStudentStatus:
 @pytest.mark.students
 class TestStudentProgress:
     async def test_progress_enrolled_student(self, client, enrolled_student):
-        r = await client.get(f"/api/students/progress/{enrolled_student['email']}")
+        r = await client.get(f"/api/students/progress/{enrolled_student['email']}", headers=auth_headers(enrolled_student["id"]))
         assert r.status_code == 200
         data = r.json()
         assert "student" in data
@@ -57,12 +58,21 @@ class TestStudentProgress:
         assert "submissions" in data
         assert "summary" in data
 
-    async def test_progress_student_not_found(self, client):
-        r = await client.get("/api/students/progress/ghost@nowhere.com")
-        assert r.status_code == 404
+    async def test_progress_requires_login(self, client, enrolled_student):
+        r = await client.get(f"/api/students/progress/{enrolled_student['email']}")
+        assert r.status_code == 401
+        r = await client.get(f"/api/students/progress/id/{enrolled_student['id']}")
+        assert r.status_code == 401
+
+    async def test_progress_of_someone_else_is_forbidden(self, client, enrolled_student):
+        other = await seed_student(test_db, email="other@example.com")
+        r = await client.get(f"/api/students/progress/{enrolled_student['email']}", headers=auth_headers(other))
+        assert r.status_code == 403
+        r = await client.get(f"/api/students/progress/id/{enrolled_student['id']}", headers=auth_headers(other))
+        assert r.status_code == 403
 
     async def test_progress_summary_has_required_fields(self, client, enrolled_student):
-        r = await client.get(f"/api/students/progress/{enrolled_student['email']}")
+        r = await client.get(f"/api/students/progress/{enrolled_student['email']}", headers=auth_headers(enrolled_student["id"]))
         summary = r.json()["summary"]
         assert "total_tasks" in summary
         assert "completed_tasks" in summary
@@ -70,17 +80,17 @@ class TestStudentProgress:
 
     async def test_progress_completion_pct_is_bounded(self, client, enrolled_student):
         """Completion percentage should be between 0 and 100."""
-        r = await client.get(f"/api/students/progress/{enrolled_student['email']}")
+        r = await client.get(f"/api/students/progress/{enrolled_student['email']}", headers=auth_headers(enrolled_student["id"]))
         pct = r.json()["summary"]["completion_pct"]
         assert 0 <= pct <= 100
 
     async def test_progress_by_id(self, client, enrolled_student):
-        r = await client.get(f"/api/students/progress/id/{enrolled_student['id']}")
+        r = await client.get(f"/api/students/progress/id/{enrolled_student['id']}", headers=auth_headers(enrolled_student["id"]))
         assert r.status_code == 200
 
-    async def test_progress_by_invalid_id(self, client):
-        r = await client.get("/api/students/progress/id/999999")
-        assert r.status_code == 404
+    async def test_progress_by_invalid_id(self, client, enrolled_student):
+        r = await client.get("/api/students/progress/id/999999", headers=auth_headers(enrolled_student["id"]))
+        assert r.status_code == 403
 
     async def test_completing_all_4_weeks_reaches_100_percent(self, client, admin_headers, enrolled_student):
         """
@@ -94,6 +104,7 @@ class TestStudentProgress:
         for week in [1, 2, 3, 4]:
             sub = await client.post(
                 "/api/students/submit-task",
+                headers=auth_headers(enrolled_student["id"]),
                 json={
                     "student_id": enrolled_student["id"],
                     "batch_id": enrolled_student["batch_id"],
@@ -109,7 +120,7 @@ class TestStudentProgress:
             )
             assert r.status_code == 200
 
-        r = await client.get(f"/api/students/progress/{enrolled_student['email']}")
+        r = await client.get(f"/api/students/progress/{enrolled_student['email']}", headers=auth_headers(enrolled_student["id"]))
         summary = r.json()["summary"]
         assert summary["completed_tasks"] == 4
         assert summary["completion_pct"] == 100
@@ -129,14 +140,14 @@ class TestProgressSingleEnrollment:
         )
         await seed_enrollment(test_db, test_student["id"], new)
 
-        data = (await client.get(f"/api/students/progress/{test_student['email']}")).json()
+        data = (await client.get(f"/api/students/progress/{test_student['email']}", headers=auth_headers(test_student["id"]))).json()
         assert {p["batch_id"] for p in data["progress"]} == {new}
         assert data["summary"]["completed_tasks"] == 0
         assert not any("batch_number" in p for p in data["progress"])
 
     async def test_dropped_student_without_progress_has_no_enrollment(self, client, enrolled_student):
         await test_db.execute("UPDATE enrollments SET status = 'dropped' WHERE student_id = ?", (enrolled_student["id"],))
-        data = (await client.get(f"/api/students/progress/{enrolled_student['email']}")).json()
+        data = (await client.get(f"/api/students/progress/{enrolled_student['email']}", headers=auth_headers(enrolled_student["id"]))).json()
         assert data["progress"] == []
 
     async def test_tasks_with_wrong_batch_id_use_own_enrollment(self, client, enrolled_student):

@@ -40,7 +40,6 @@ class TestApplicationHappyPath:
         r2 = await client.get("/api/students/status/alice@example.com")
         assert r2.status_code == 200
         data = r2.json()
-        assert data["student"]["email"] == "alice@example.com"
         assert data["student"]["status"] == "applied"
 
     async def test_apply_with_github_url_extracts_username(self, client):
