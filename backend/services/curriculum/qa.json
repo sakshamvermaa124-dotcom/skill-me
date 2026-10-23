@@ -8,7 +8,7 @@
         "1": {
           "title": "Test Planning and Manual Test Execution",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Pick a real public web app (a to-do list app, a demo e-commerce site, or similar), write a proper test plan for its core flow, and manually execute it to find real bugs. Good automation later depends on a clear, well-scoped test plan now.",
           "learn": [
             "Writing a test plan: scope, test cases, priorities, and pass/fail criteria",
@@ -53,7 +53,7 @@
         "2": {
           "title": "Bug Reports and Regression Tracking",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Turn last week's found issues into proper bug reports that a real engineering team could act on without back-and-forth, and build a lightweight regression checklist to re-test after fixes. Writing a bug report that gets fixed on the first read is its own skill.",
           "learn": [
             "Writing a bug report with clear repro steps, expected vs actual, and severity",
@@ -98,7 +98,7 @@
         "3": {
           "title": "Automated UI Test Suite",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Automate the core flow from your test plan using Playwright (or Selenium), turning your manual test cases into a repeatable suite that catches regressions automatically. This is where QA work becomes engineering.",
           "learn": [
             "Setting up Playwright (or Selenium) with Python for browser automation",
@@ -143,7 +143,7 @@
         "4": {
           "title": "API Test Suite, Coverage Report and CI",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Add an API-level automated test suite (faster and more precise than UI tests for many checks), wire both suites into CI, and produce a coverage report tying test cases back to your original test plan. This is the deliverable that shows a complete, professional QA process.",
           "learn": [
             "Writing automated API tests with `requests` or Postman/Newman",

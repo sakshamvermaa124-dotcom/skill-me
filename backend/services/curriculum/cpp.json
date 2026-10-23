@@ -8,7 +8,7 @@
         "1": {
           "title": "Structs, Functions and a Console Menu",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Write a C++ program that stores a list of student records in memory and lets you add and print them from a text menu. This gets your toolchain working and practises the basics every later week builds on.",
           "learn": [
             "Compiling and running a C++ program from the terminal (`g++`)",
@@ -54,7 +54,7 @@
         "2": {
           "title": "Classes, File Saving and Sorting",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Turn your struct into a proper class with encapsulated data, save and load records to a file so nothing is lost between runs, and add search and sort features using the STL.",
           "learn": [
             "Classes with private members, constructors and getter methods",
@@ -100,7 +100,7 @@
         "3": {
           "title": "A Hand-Built Data Structure and Recursion",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Add a feature that needs a data structure or algorithm you implement yourself, not just an STL call, so you understand what's happening underneath. You'll add a simple linked-list based history log and a recursive search or sort.",
           "learn": [
             "Implementing a singly linked list from scratch (nodes and pointers)",
@@ -146,7 +146,7 @@
         "4": {
           "title": "Polish, Bulk Import and a Final Report",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Finish the project with a feature that ties everything together: importing many records at once from a CSV file, generating a summary report, and cleaning up the codebase for a strong final demo.",
           "learn": [
             "Reading and parsing a CSV file with `std::stringstream`",
@@ -197,7 +197,7 @@
         "1": {
           "title": "A Moving Character on a Grid",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Draw a simple grid in the terminal and make a character move on it using keyboard input. This is the smallest playable slice of the game and sets up the structure every later week extends.",
           "learn": [
             "Representing a 2D grid with a `std::vector<std::vector<char>>`",
@@ -242,7 +242,7 @@
         "2": {
           "title": "Obstacles, Collisions and Classes",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Add obstacles the player must avoid, detect collisions, and refactor the game into classes so the code stays organised as features grow.",
           "learn": [
             "Designing a `Player` class and an `Entity`/`Obstacle` class",
@@ -287,7 +287,7 @@
         "3": {
           "title": "Simple Physics: Gravity and Velocity",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Add basic physics so the player has velocity and gravity instead of just teleporting one grid cell per key press — the first real step from 'grid puzzle' toward 'game engine' thinking.",
           "learn": [
             "Representing velocity as a change applied each tick instead of an instant jump",
@@ -332,7 +332,7 @@
         "4": {
           "title": "Levels, Scoring and a Polished Demo",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Turn your prototype into a small finished game: add a second level, a scoring system, and polish that makes it demo-ready.",
           "learn": [
             "Loading level layouts from a simple text file instead of hardcoding them",
@@ -383,7 +383,7 @@
         "1": {
           "title": "Records, Tables and Basic Commands",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Build the core of a tiny database: a table that stores key-value style records in memory and a command interface to insert and view them.",
           "learn": [
             "Modelling a database 'table' with `std::vector<std::map<std::string, std::string>>`",
@@ -428,7 +428,7 @@
         "2": {
           "title": "Filtering, Updating and Deleting",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Add the rest of basic CRUD: filter records with a WHERE-style condition, update matching records, and delete them, plus persist the table to disk.",
           "learn": [
             "Filtering a vector of records with a simple condition (`std::copy_if` or a manual loop)",
@@ -473,7 +473,7 @@
         "3": {
           "title": "Indexing for Fast Lookup",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Add an index so lookups by a chosen field are fast instead of scanning every record, and measure the speed difference — the core idea behind how real databases work.",
           "learn": [
             "Why linear scans get slow as data grows, and what an index trades off (memory for speed)",
@@ -518,7 +518,7 @@
         "4": {
           "title": "Multiple Tables, Tests and a Final Demo",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Extend your engine to support more than one table, add automated tests for your core logic, and polish the project into a demo-ready mini database.",
           "learn": [
             "Managing multiple named tables in one engine (`std::map<std::string, Table>`)",

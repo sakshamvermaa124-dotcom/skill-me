@@ -8,7 +8,7 @@
         "1": {
           "title": "Password Strength Rules in Python",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Write a command-line Python program that scores a password and explains how to make it stronger. This teaches the basics of what makes passwords weak and gets your project set up for the coming weeks.",
           "learn": [
             "Ethics and law: only test systems you own or have written permission to test",
@@ -52,7 +52,7 @@
         "2": {
           "title": "Entropy and Common Password Detection",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Make your checker smarter by estimating password entropy and detecting common patterns like dictionary words and keyboard sequences. You will also add automated tests so you can change code with confidence.",
           "learn": [
             "Password entropy as a simple measure of guessing difficulty",
@@ -93,7 +93,7 @@
         "3": {
           "title": "Safe Breach Check with k-Anonymity",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Check whether a password has appeared in known breaches using the Have I Been Pwned range API, without ever sending the password itself. You will learn how hashing and k-anonymity protect privacy, and how to handle network errors.",
           "learn": [
             "Hashing with SHA-1 using Python's `hashlib`",
@@ -136,7 +136,7 @@
         "4": {
           "title": "Passphrase Generator and Web UI",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Add a secure passphrase generator and wrap everything in a simple web interface. Finish with a clear README and a demo that explains how the tool protects user privacy.",
           "learn": [
             "Generating secure random values with Python's `secrets` module",
@@ -185,7 +185,7 @@
         "1": {
           "title": "Reading and Parsing Log Files",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Create a sample login log and write a Python script that reads it line by line and extracts the time, username, IP address and result. Parsing logs is the first skill of any security analyst.",
           "learn": [
             "Ethics and law: only analyse logs from systems you own or have written permission to use",
@@ -228,7 +228,7 @@
         "2": {
           "title": "Detecting Repeated Failed Logins",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Count failed logins per IP and per user within a time window and flag anything above a threshold. This is the core logic behind many real brute-force detection rules.",
           "learn": [
             "Counting with dictionaries and `collections.Counter`",
@@ -269,7 +269,7 @@
         "3": {
           "title": "Real Log Formats and Alert Reports",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Support a realistic log format such as Linux `auth.log` style lines from your own machine or VM, and export findings to CSV and a readable report. You will also handle messy input safely.",
           "learn": [
             "Common real-world log formats",
@@ -310,7 +310,7 @@
         "4": {
           "title": "Dashboard and Incident Summary",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Build a small dashboard that visualises login activity and alerts, and write a short incident summary based on your sample data. This shows you can turn raw logs into decisions.",
           "learn": [
             "Visualising security data with charts",
@@ -358,7 +358,7 @@
         "1": {
           "title": "Hashing Files in Python",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Write a script that calculates SHA-256 hashes for files and shows how even a tiny change produces a completely different hash. Hashing is the foundation of file integrity checking.",
           "learn": [
             "Ethics and law: only monitor systems and folders you own or have written permission to use",
@@ -400,7 +400,7 @@
         "2": {
           "title": "Baseline and Change Detection",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Save a baseline of file hashes and compare the folder against it to detect added, modified and deleted files. This is exactly how file integrity monitors work.",
           "learn": [
             "Walking folders with `os.walk` or `pathlib`",
@@ -441,7 +441,7 @@
         "3": {
           "title": "Continuous Monitoring and Alerts",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Turn your checker into a monitor that runs continuously, logs changes and alerts you when something changes. You will also handle real-world problems such as locked files and ignored paths.",
           "learn": [
             "Running checks on a loop or with the `watchdog` library",
@@ -483,7 +483,7 @@
         "4": {
           "title": "Integrity Report and Dashboard",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Add a report view that shows change history and a simple dashboard, then document the project as a small security tool. You will explain where file integrity monitoring fits in real defence.",
           "learn": [
             "Summarising security events into reports",

@@ -8,7 +8,7 @@
         "1": {
           "title": "Wrapping a Third-Party API",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Pick a real public API (weather, currency exchange, GitHub, or similar) and build a clean Python wrapper around it, as if you were the engineer a client hired to 'just make this API work for us'. This is the core skill of forward-deployed work: making someone else's API usable and reliable.",
           "learn": [
             "Reading third-party API docs and identifying auth requirements and rate limits",
@@ -53,7 +53,7 @@
         "2": {
           "title": "Config-Driven Dashboard for a 'Client'",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Turn last week's API wrapper into a small internal dashboard for an imagined client, where what's shown is driven by a config file rather than hardcoded — because real clients always want to add or change tracked items without you editing code every time.",
           "learn": [
             "Designing a simple config file format (JSON or YAML) to drive an app's behaviour",
@@ -98,7 +98,7 @@
         "3": {
           "title": "Edge Cases, Support Scenarios and Logging",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Simulate the messy reality of supporting a live integration: rate limits, partial outages, malformed client configs, and a support ticket asking 'why is this wrong?'. This week is about building the resilience and observability that separates a demo from something a client can actually depend on.",
           "learn": [
             "Simulating and handling rate-limit and outage scenarios",
@@ -144,7 +144,7 @@
         "4": {
           "title": "Setup Docs, Runbook and Client Handoff",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Package the whole integration the way you'd actually hand it to a client team: clear setup docs, a runbook for common issues, and a short demo. This week is entirely about the documentation and polish that make forward-deployed work usable by people who didn't build it.",
           "learn": [
             "Writing setup documentation for a non-engineer or junior engineer audience",

@@ -8,7 +8,7 @@
         "1": {
           "title": "Problem Framing and Competitive Analysis",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Pick a real AI feature idea (an AI meeting-notes summarizer for a team collaboration tool), talk to potential users about the problem, and study how existing products solve it. Good PM work starts with a sharp problem statement, not a feature list.",
           "learn": [
             "Framing an AI feature around a user problem, not a technology",
@@ -52,7 +52,7 @@
         "2": {
           "title": "PRD and Prompt/Eval Spec",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Turn last week's research into a full PRD for the AI meeting-notes feature, plus a lightweight prompt and eval spec — the artifact that tells engineers not just what to build, but how to judge whether the AI part is actually working. This is the core skill that separates AI PM work from general PM work.",
           "learn": [
             "Structuring a PRD for a feature with a probabilistic (AI-generated) component",
@@ -97,7 +97,7 @@
         "3": {
           "title": "Clickable Spec and Stakeholder Narrative",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Turn the PRD into something people can actually react to: a clickable spec or lightweight prototype showing the feature in context, plus a stakeholder narrative explaining trade-offs. PMs ship decisions and clarity, not just documents — this week is about making the feature tangible before any engineer writes code.",
           "learn": [
             "Building a clickable spec or lightweight prototype without code (Figma, or a slide-based clickthrough)",
@@ -142,7 +142,7 @@
         "4": {
           "title": "Launch Plan, Metrics Dashboard Spec and Case Study",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Close the loop from idea to launch: write a lightweight launch plan and a metrics dashboard spec for measuring the feature post-launch, then publish a full case study telling the whole story from research to spec. This is the deliverable a hiring manager or team would actually read to judge your PM thinking end to end.",
           "learn": [
             "Writing a lightweight launch plan (phasing, rollout, guardrails)",

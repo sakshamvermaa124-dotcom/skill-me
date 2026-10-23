@@ -8,7 +8,7 @@
         "1": {
           "title": "Read a CSV and Summarise It",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Write a small Python program that reads a CSV file of expenses and prints useful totals in the terminal. This is the foundation of the whole project, and it practises the everyday Python skills (functions, loops, files and dictionaries) that every later week depends on.",
           "learn": [
             "Reading files safely with `with open(...)` and the built-in `csv` module",
@@ -53,7 +53,7 @@
         "2": {
           "title": "Classes, Modules and Clean Data",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Reorganise your code into classes and modules, and make it handle messy real-world data. You will also let users add new expenses and export a report, so the tool starts to feel like a real app.",
           "learn": [
             "Writing classes with `__init__` and methods (an `Expense` and an `ExpenseTracker`)",
@@ -99,7 +99,7 @@
         "3": {
           "title": "Save to SQLite and Handle Errors",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Replace the CSV file with a real SQLite database using Python's built-in `sqlite3` module, and add proper command-line arguments. This teaches you how most apps store data and how to make a program fail gracefully.",
           "learn": [
             "Creating tables and running `INSERT` and `SELECT` queries with `sqlite3`",
@@ -145,7 +145,7 @@
         "4": {
           "title": "Web Dashboard, Tests and Demo",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Put a small web dashboard on top of your database using Flask, and protect your core logic with a few automated tests. You finish with a complete, documented project that you can demo in under a minute.",
           "learn": [
             "Creating routes and HTML templates with Flask",
@@ -196,7 +196,7 @@
         "1": {
           "title": "System Health Snapshot",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Write a Python script that prints a quick health report of your computer (disk space, folder sizes and the largest files) and saves a summary to a log file. You will practise core Python using only the standard library, so there is nothing to install.",
           "learn": [
             "Using the `os`, `shutil` and `datetime` standard-library modules",
@@ -241,7 +241,7 @@
         "2": {
           "title": "Configurable Checks with Classes",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Turn your script into a small monitoring tool where each check is a class that returns a clear OK, WARN or FAIL result. Settings move into a JSON config file, so users can change thresholds without touching the code.",
           "learn": [
             "Writing a simple base class and subclasses that share a method name",
@@ -286,7 +286,7 @@
         "3": {
           "title": "Website Uptime Checks with requests",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Add website monitoring with the `requests` library: check whether sites respond, how fast they are, and what went wrong when they fail. Real networks are unreliable, so this week is all about handling errors properly.",
           "learn": [
             "Making HTTP GET requests with the `requests` library",
@@ -331,7 +331,7 @@
         "4": {
           "title": "Scheduled Monitoring, Alerts and Tests",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Make PySentinel run on its own every minute or so, raise an alert when something stays broken, and publish a simple HTML status page. Add a few pytest tests and a good README so the project is ready to show.",
           "learn": [
             "Running tasks on a timer with a loop and `time.sleep`",
@@ -383,7 +383,7 @@
         "1": {
           "title": "Terminal Quiz from a Text File",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Build a quiz game that reads questions from a file, asks them one by one, and shows your score at the end. It is small, fun to demo, and practises loops, conditions, functions and file reading.",
           "learn": [
             "Reading and parsing a text file line by line",
@@ -427,7 +427,7 @@
         "2": {
           "title": "Decks, Classes and Saved Progress",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Organise questions into decks (like DSA, DBMS or Python) using classes, and add multiple-choice questions. Save each player's progress to a JSON file so the app remembers how they did last time.",
           "learn": [
             "Designing classes (`Question`, `Deck`, `QuizSession`)",
@@ -471,7 +471,7 @@
         "3": {
           "title": "Import Questions from a Free API",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Connect QuizCraft to the free Open Trivia Database API so players can pull fresh questions on many topics. You will learn how to call a web API, read its JSON response and cope when things go wrong.",
           "learn": [
             "Calling a REST API with the `requests` library",
@@ -516,7 +516,7 @@
         "4": {
           "title": "Web Quiz with Flask and Tests",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Give QuizCraft a simple web interface with Flask so anyone can play in a browser, and add pytest tests for your core classes. You finish with a polished, documented app and a short demo video.",
           "learn": [
             "Building pages with Flask routes and Jinja templates",

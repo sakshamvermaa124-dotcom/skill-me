@@ -8,7 +8,7 @@
         "1": {
           "title": "Accounts and Transactions in the Console",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Write a Java console program that can create bank accounts and record deposits and withdrawals in memory. This week is about getting comfortable with classes, objects and basic control flow before anything gets complicated.",
           "learn": [
             "Classes and objects with fields, constructors and methods",
@@ -52,7 +52,7 @@
         "2": {
           "title": "Transaction History and File Storage",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Add a transaction history to every account and save all data to a file so it survives between runs. This introduces you to composition between classes and basic file I/O, two skills every backend developer needs.",
           "learn": [
             "Composition: an `Account` holding a list of `Transaction` objects",
@@ -97,7 +97,7 @@
         "3": {
           "title": "Spring Boot REST API with H2",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Turn BankPulse into a real web service using Spring Boot, storing accounts in an in-memory H2 database with Spring Data JPA. This is your first REST API and your first taste of how most backend jobs actually work.",
           "learn": [
             "Setting up a Spring Boot project with Spring Web, Spring Data JPA and H2",
@@ -143,7 +143,7 @@
         "4": {
           "title": "Validation, Tests and API Docs",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Harden your API with proper input validation, a global error handler, and automated tests, then document it with Swagger so anyone can explore it. This is the polish that turns a working demo into a project you can confidently show off.",
           "learn": [
             "Request validation with `@Valid` and Bean Validation annotations",
@@ -195,7 +195,7 @@
         "1": {
           "title": "Products and Stock in the Console",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Write a Java console program that manages a product catalog and tracks stock levels in memory. This week builds the object-oriented foundation the whole project will grow from.",
           "learn": [
             "Classes and objects with fields, constructors and methods",
@@ -239,7 +239,7 @@
         "2": {
           "title": "Orders and File Storage",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Add customer orders that reduce stock automatically, and save your catalog and orders to files so data survives between runs. This introduces composition between classes and basic file I/O.",
           "learn": [
             "Composition: an `Order` holding a list of `OrderItem` objects",
@@ -284,7 +284,7 @@
         "3": {
           "title": "Spring Boot REST API with H2",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Turn ShopSphere into a real web service using Spring Boot, storing products and orders in an in-memory H2 database with Spring Data JPA. This is your first REST API for a shop-style application.",
           "learn": [
             "Setting up a Spring Boot project with Spring Web, Spring Data JPA and H2",
@@ -330,7 +330,7 @@
         "4": {
           "title": "Validation, Tests and API Docs",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Harden your API with proper input validation, a global error handler, and automated tests, then document it with Swagger. This is the polish that turns ShopSphere into a project you can confidently demo.",
           "learn": [
             "Request validation with `@Valid` and Bean Validation annotations",
@@ -382,7 +382,7 @@
         "1": {
           "title": "Tasks in the Console",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Write a Java console program that lets you add, list and complete tasks in memory. This week is about getting comfortable with classes, objects and everyday control flow before anything gets more advanced.",
           "learn": [
             "Classes and objects with fields, constructors and methods",
@@ -426,7 +426,7 @@
         "2": {
           "title": "Categories, Streaks and File Storage",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Add categories and simple habit streaks to your tracker, and save everything to a file so it survives between runs. This introduces composition between classes and basic file I/O.",
           "learn": [
             "Composition: a `Task` holding a `Category`",
@@ -471,7 +471,7 @@
         "3": {
           "title": "Spring Boot REST API with H2",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Turn TaskForge into a real web service using Spring Boot, storing tasks and habits in an in-memory H2 database with Spring Data JPA. This is your first REST API for a personal productivity app.",
           "learn": [
             "Setting up a Spring Boot project with Spring Web, Spring Data JPA and H2",
@@ -517,7 +517,7 @@
         "4": {
           "title": "Validation, Tests and API Docs",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Harden your API with proper input validation, a global error handler, and automated tests, then document it with Swagger. This is the polish that turns TaskForge into a project you can confidently demo.",
           "learn": [
             "Request validation with `@Valid` and Bean Validation annotations",

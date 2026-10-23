@@ -8,7 +8,7 @@
         "1": {
           "title": "Core Domain Model and In-Memory Service",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Design the core data model for a library lending service and implement it as clean, layered Python code with an in-memory store, before touching a database or API. Getting the domain logic right first makes everything later easier to test and extend.",
           "learn": [
             "Separating domain models from storage and application logic",
@@ -53,7 +53,7 @@
         "2": {
           "title": "Search, Ranking and a REST API",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Expose last week's service as a real HTTP API, and add a search feature with relevance ranking — an applied use of sorting and string-matching data structures inside a real feature, not an isolated algorithm exercise.",
           "learn": [
             "Building a REST API with FastAPI (or Flask) over an existing service layer",
@@ -98,7 +98,7 @@
         "3": {
           "title": "Persistence, Caching and Concurrency Safety",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Swap the in-memory store for a real SQLite database, and add a small LRU-style in-memory cache for repeated lookups — applying a hash-map-backed cache data structure inside a real performance feature, plus handling concurrent checkout attempts safely.",
           "learn": [
             "Persisting a domain model to SQLite with `sqlite3` or a lightweight ORM",
@@ -143,7 +143,7 @@
         "4": {
           "title": "CI, Load Handling and Deployment Readiness",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Add automated CI, handle a batch-import feature efficiently using an appropriate data structure for deduplication, and get the service into a state you could actually hand off or deploy. This week is the engineering polish that makes the project real, not just working on your machine.",
           "learn": [
             "Setting up continuous integration to run the full test suite automatically",

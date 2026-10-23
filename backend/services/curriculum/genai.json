@@ -8,7 +8,7 @@
         "1": {
           "title": "Your First LLM API Call",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Get a free LLM API key, make your first working API call from Python, and build a simple terminal chatbot that answers one question at a time. This week is about the basic mechanics of talking to an LLM safely, before anything fancier.",
           "learn": [
             "Getting and using a free-tier LLM API key (Google Gemini API or Groq)",
@@ -53,7 +53,7 @@
         "2": {
           "title": "Prompt Templates and Conversation Memory",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Make StudyBuddy actually remember the conversation and respond consistently by introducing prompt templates, a proper system prompt, and a message history list. This is the difference between a one-shot Q&A script and something that feels like a real assistant.",
           "learn": [
             "Writing a clear, reusable system prompt that sets the assistant's behaviour",
@@ -98,7 +98,7 @@
         "3": {
           "title": "Answer Questions from Your Own Notes",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Give StudyBuddy the ability to answer questions using your own study notes instead of only general knowledge, by building a simple retrieval system: chunk your notes, embed them, and find the most relevant pieces for each question. This is a hands-on, simplified introduction to how RAG (retrieval-augmented generation) works.",
           "learn": [
             "Splitting long text into overlapping chunks",
@@ -143,7 +143,7 @@
         "4": {
           "title": "Streamlit UI, Evaluation and Guardrails",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Give StudyBuddy a proper chat UI with Streamlit, add basic guardrails so it stays on-topic and safe, and write a small evaluation set to check its answer quality. This is the polish that turns a script into a demoable product.",
           "learn": [
             "Building a chat interface with Streamlit's chat elements and session state",
@@ -194,7 +194,7 @@
         "1": {
           "title": "Your First LLM API Call",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Get a free LLM API key, make your first working API call, and build a terminal tool that summarises a piece of text you paste in. This week is about the basic mechanics of calling an LLM safely, which every later feature depends on.",
           "learn": [
             "Getting and using a free-tier LLM API key (Google Gemini API or Groq)",
@@ -239,7 +239,7 @@
         "2": {
           "title": "Prompt Templates and Structured Summaries",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Add prompt templates for different document tasks and start extracting information from documents that arrive one page or section at a time. This introduces the idea of processing a document in pieces, which next week's retrieval system depends on.",
           "learn": [
             "Writing prompt templates for different tasks (summarise, extract key points, generate questions)",
@@ -284,7 +284,7 @@
         "3": {
           "title": "Retrieval Over Your Own PDFs",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Extend DocuMind to answer specific questions about your own PDF or text files by building a simple retrieval pipeline: extract text, chunk it, embed it, and find the most relevant pieces per question. This is a hands-on, simplified introduction to RAG (retrieval-augmented generation).",
           "learn": [
             "Extracting text from PDF files with a library like `pypdf`",
@@ -329,7 +329,7 @@
         "4": {
           "title": "Streamlit UI, Evaluation and Guardrails",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Give DocuMind a proper drag-and-drop UI with Streamlit, add guardrails so it does not make up answers outside the documents, and write a small evaluation set to check answer quality. This is the polish that turns a script into a demoable product.",
           "learn": [
             "Building a file-upload UI with Streamlit and handling uploaded PDFs",
@@ -380,7 +380,7 @@
         "1": {
           "title": "Your First LLM API Call",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Get a free LLM API key, make your first working API call, and build a terminal tool that generates a short social media caption from a topic you type in. This week is about the basic mechanics of talking to an LLM safely.",
           "learn": [
             "Getting and using a free-tier LLM API key (Google Gemini API or Groq)",
@@ -425,7 +425,7 @@
         "2": {
           "title": "Prompt Templates for Multiple Content Types",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Expand ContentForge to generate several content types (captions, tweets, blog outlines) from consistent, reusable prompt templates, and remember the last few topics you worked on. This week is about designing good prompts, not just calling an API.",
           "learn": [
             "Writing a clear system prompt that fixes ContentForge's voice and rules",
@@ -470,7 +470,7 @@
         "3": {
           "title": "Structured JSON Output for a Content Calendar",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Make ContentForge return structured JSON instead of free text, so you can build a real content calendar: a week's worth of posts generated and organised automatically. This teaches you how to get reliable, parseable output from an LLM, a core skill for any real GenAI integration.",
           "learn": [
             "Asking an LLM to return valid JSON and parsing it reliably",
@@ -515,7 +515,7 @@
         "4": {
           "title": "Streamlit UI, Evaluation and Guardrails",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Give ContentForge a proper Streamlit UI for planning and editing a content calendar, add guardrails against off-brand or inappropriate output, and write a small evaluation set to check output quality. This is the polish that turns a script into a demoable product.",
           "learn": [
             "Building a form-based planning UI with Streamlit widgets",

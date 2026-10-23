@@ -8,7 +8,7 @@
         "1": {
           "title": "Home Screen & Workout List with Widgets",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Set up Flutter and build the first two static screens of FitPulse: a home dashboard and a list of workouts. Everything uses hardcoded data this week, so you can focus completely on how widgets and layouts fit together.",
           "learn": [
             "How a Flutter app is structured: `main()`, `MaterialApp`, `Scaffold` and the widget tree",
@@ -55,7 +55,7 @@
         "2": {
           "title": "Add Workouts with Forms & Navigation",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Make FitPulse interactive: users can add new workouts through a form, open a workout's detail screen, and mark it as done. This week teaches you how Flutter apps change what is on screen when data changes.",
           "learn": [
             "The difference between `StatelessWidget` and `StatefulWidget`, and when to call `setState`",
@@ -102,7 +102,7 @@
         "3": {
           "title": "Save Data Locally & Workout History",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Right now all workouts disappear when the app restarts. This week you save them on the device and add a history of completed workouts, handling loading and errors properly so the app never shows a blank or broken screen.",
           "learn": [
             "Local storage on the device with `shared_preferences` or Hive",
@@ -148,7 +148,7 @@
         "4": {
           "title": "Provider, Weekly Chart & Release Build",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Finish FitPulse as a portfolio-ready app. You will move your data into a simple Provider so any screen can use it, add a weekly progress chart, polish the design, and produce an installable build with a demo video.",
           "learn": [
             "Simple app-wide state management with `provider` and `ChangeNotifier`",
@@ -200,7 +200,7 @@
         "1": {
           "title": "Balance Dashboard & Transaction List",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Set up Flutter and build the main screen of WalletWave: a balance card at the top and a list of recent transactions below it. You will use hardcoded sample data so you can focus on widgets and layout.",
           "learn": [
             "How a Flutter app is structured: `main()`, `MaterialApp`, `Scaffold` and the widget tree",
@@ -246,7 +246,7 @@
         "2": {
           "title": "Add, Edit & Delete Transactions",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Make WalletWave interactive so users can add, edit and delete transactions through a form. You will learn how state changes update the screen and how to move between screens.",
           "learn": [
             "`StatefulWidget` and `setState` for data that changes",
@@ -291,7 +291,7 @@
         "3": {
           "title": "Local Database & Monthly View",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Save transactions on the device so they survive restarts, and add a month selector so users can see one month at a time. You will also handle loading and error cases so the app always shows something sensible.",
           "learn": [
             "Storing data on the device with Hive or `sqflite`",
@@ -337,7 +337,7 @@
         "4": {
           "title": "Budgets, Pie Chart & Release Build",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Turn WalletWave into a finished portfolio app. You will move data into a Provider, add a category pie chart and a monthly budget warning, polish the design, and ship an installable build with a demo.",
           "learn": [
             "App-wide state management with `provider` and `ChangeNotifier`",
@@ -389,7 +389,7 @@
         "1": {
           "title": "Recipe Screens with Sample Data",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Set up Flutter and build the two main screens of RecipeRadar, a recipe grid and a recipe detail page, using a few hardcoded recipes. You will learn layouts and images so the app looks good before any internet code is added.",
           "learn": [
             "How a Flutter app is structured: `MaterialApp`, `Scaffold` and the widget tree",
@@ -434,7 +434,7 @@
         "2": {
           "title": "Navigation, Search & Favourites",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Connect the screens and make the app interactive: tapping a card opens its details, a search box filters recipes, and users can mark favourites. This week is about state and navigation, still with sample data.",
           "learn": [
             "`StatefulWidget` and `setState` for changing data",
@@ -478,7 +478,7 @@
         "3": {
           "title": "Real Recipes from a Public API",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Replace the sample data with real recipes from TheMealDB, a free recipe API that needs no sign-up for testing. You will make HTTP requests, parse JSON, and handle loading and error states the way real apps do.",
           "learn": [
             "Making HTTP GET requests with the `http` package",
@@ -524,7 +524,7 @@
         "4": {
           "title": "Provider, Saved Favourites & Release",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Finish RecipeRadar as a portfolio-ready app. Favourites will move into a Provider and be saved on the device, then you will polish the app and ship an installable build with a demo video.",
           "learn": [
             "App-wide state management with `provider` and `ChangeNotifier`",

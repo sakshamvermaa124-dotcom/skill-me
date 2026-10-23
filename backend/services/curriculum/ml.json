@@ -8,7 +8,7 @@
         "1": {
           "title": "Your First Image Classifier with scikit-learn",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "You will load a small dataset of handwritten digit images, look at them, and train your first classifier with scikit-learn. This teaches the core machine learning loop you will reuse all month: load data, split it, train, and measure on data the model has never seen.",
           "learn": [
             "How images are stored as grids of pixel numbers",
@@ -53,7 +53,7 @@
         "2": {
           "title": "Compare Models and Learn from Mistakes",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "You will compare several classifiers fairly, find out which digits your model confuses, and move up to the full-size MNIST dataset. Knowing how to evaluate a model honestly matters more than any single algorithm.",
           "learn": [
             "Comparing models fairly with cross-validation",
@@ -100,7 +100,7 @@
         "3": {
           "title": "Draw-a-Digit Web App with Gradio",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "You will wrap your saved MNIST model in a Gradio web app where anyone can draw or upload a digit and see the prediction. Real users send messy input, so this week is about preparing images correctly and handling errors gracefully.",
           "learn": [
             "Turning a real image into the exact format the model was trained on",
@@ -146,7 +146,7 @@
         "4": {
           "title": "Capstone: Add a Neural Network and Ship It",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "You will train a small convolutional neural network (CNN) with Keras, compare it with your scikit-learn model, and let users pick either model in your app. You finish with a polished README and a demo video that tells the story of your project.",
           "learn": [
             "What layers, epochs and loss mean in a neural network",
@@ -198,7 +198,7 @@
         "1": {
           "title": "Your First Sentiment Classifier",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "You will load 50,000 IMDB movie reviews, turn the text into numbers, and train a scikit-learn model that predicts positive or negative sentiment. This is the foundation of every text classification project.",
           "learn": [
             "Loading and exploring a text dataset with pandas",
@@ -243,7 +243,7 @@
         "2": {
           "title": "Better Features and Honest Evaluation",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "You will improve your classifier with TF-IDF and word pairs, measure it with more than accuracy, and look inside the model to see which words drive its decisions. You end the week with one saved pipeline that you can load in an app.",
           "learn": [
             "TF-IDF and n-grams as better text features",
@@ -288,7 +288,7 @@
         "3": {
           "title": "Sentiment Analyzer Web App with Streamlit",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "You will turn your saved pipeline into a Streamlit web app that analyses a single review or a whole CSV file of reviews. You will also validate input and handle errors so the app never crashes in front of a user.",
           "learn": [
             "Building an interactive web app with Streamlit",
@@ -334,7 +334,7 @@
         "4": {
           "title": "Capstone: Compare with a Pre-trained Transformer",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "You will add a pre-trained transformer model from Hugging Face to your app and compare it fairly with the model you trained yourself. You finish with a polished README and a demo video that explains what you built and learned.",
           "learn": [
             "What a pre-trained transformer model is and when to use one",
@@ -387,7 +387,7 @@
         "1": {
           "title": "Explore the Data and Build a First Price Model",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "You will explore the California Housing dataset, plot how features relate to price, and train your first regression model. You will also learn to judge a model by checking that it beats a simple baseline.",
           "learn": [
             "Regression: predicting a number instead of a category",
@@ -432,7 +432,7 @@
         "2": {
           "title": "Better Models and Avoiding Overfitting",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "You will try tree-based models, compare them with cross-validation, and learn to spot overfitting by comparing training and test error. You end the week with a saved best model and a chart showing which features matter most.",
           "learn": [
             "Decision trees and random forests for regression",
@@ -477,7 +477,7 @@
         "3": {
           "title": "House Price Web App with Streamlit",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "You will build a Streamlit app where a user sets house features with sliders and instantly sees a predicted price. You will also make the app robust by validating input and handling missing files cleanly.",
           "learn": [
             "Building an interactive form with Streamlit widgets",
@@ -522,7 +522,7 @@
         "4": {
           "title": "Capstone: What-If Explorer and Final Polish",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "You will add a what-if explorer that shows how the predicted price changes as one feature changes, plus a map of the houses. You finish with a polished README and a demo video that walks through your project.",
           "learn": [
             "Using a model to answer 'what if' questions",

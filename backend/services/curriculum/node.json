@@ -8,7 +8,7 @@
         "1": {
           "title": "Your First Express API",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Set up a Node.js project with Express and build your first API endpoints that return vault items (notes and links) from an in-memory array. You will learn how a server receives a request and sends back JSON.",
           "learn": [
             "Setting up a Node project with `npm init` and installing packages",
@@ -54,7 +54,7 @@
         "2": {
           "title": "Full CRUD, Validation & Middleware",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Turn your read-only API into a full CRUD API so items can be created, updated and deleted, with input validation and correct status codes. You will also write your first custom middleware.",
           "learn": [
             "The four CRUD operations mapped to POST, GET, PUT/PATCH and DELETE",
@@ -100,7 +100,7 @@
         "3": {
           "title": "Saving Data with SQLite & Error Handling",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Replace the in-memory array with a SQLite database so your data survives a server restart. You will also add search, simple pagination and a central error handler so the API behaves well when things go wrong.",
           "learn": [
             "Storing data in a SQLite database with basic SQL (CREATE, INSERT, SELECT, UPDATE, DELETE)",
@@ -146,7 +146,7 @@
         "4": {
           "title": "User Login with JWT & API Docs",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Add user accounts so each person can register, log in and see only their own vault items. Finish by writing clear API documentation in your README and recording a full demo.",
           "learn": [
             "Hashing passwords with `bcryptjs` instead of storing them in plain text",
@@ -198,7 +198,7 @@
         "1": {
           "title": "A Simple Message Board with Express",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Build an Express server that stores messages in memory and serves a basic web page where people can post and read messages. This gives you a working chat without real-time features, so you understand the request-response model before moving to WebSockets.",
           "learn": [
             "Setting up a Node project and an Express server",
@@ -244,7 +244,7 @@
         "2": {
           "title": "Going Real-Time with Socket.IO",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Replace the refresh-to-see-messages approach with Socket.IO so messages appear instantly in every open browser. You will learn how real-time events work and how the server broadcasts to all connected users.",
           "learn": [
             "What WebSockets are and how they differ from normal HTTP requests",
@@ -290,7 +290,7 @@
         "3": {
           "title": "Chat Rooms & Saved Message History",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Add chat rooms so users can join different channels, and save messages to a SQLite database so history survives a server restart. You will also validate incoming events so bad data cannot break the server.",
           "learn": [
             "Socket.IO rooms with `socket.join` and `io.to(room).emit`",
@@ -336,7 +336,7 @@
         "4": {
           "title": "Typing Indicators, Online Users & Docs",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Add the features that make chat feel alive: a live list of online users in each room and a 'someone is typing' indicator. Then polish the UI and write a README that documents your socket events so others can run and extend your server.",
           "learn": [
             "Tracking connected users on the server with a `Map`",
@@ -388,7 +388,7 @@
         "1": {
           "title": "Short Codes & Redirects with Express",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Set up an Express server that can create short codes for long URLs and redirect visitors, using an in-memory array. You will learn how routes, request bodies and redirects work in a real, useful app.",
           "learn": [
             "Setting up a Node project and an Express server",
@@ -433,7 +433,7 @@
         "2": {
           "title": "Full CRUD, Custom Aliases & Validation",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Complete the API so links can be viewed, edited and deleted, and let users choose their own custom alias. You will add proper validation and status codes so the API gives helpful errors instead of silently accepting bad data.",
           "learn": [
             "Mapping CRUD actions to GET, POST, PUT and DELETE",
@@ -479,7 +479,7 @@
         "3": {
           "title": "Saving Links in SQLite & Click Tracking",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Store links in a SQLite database so they survive restarts, and count every click so users can see how popular each link is. You will also add a central error handler so the API fails gracefully.",
           "learn": [
             "Creating tables and running queries with SQLite",
@@ -525,7 +525,7 @@
         "4": {
           "title": "Web Dashboard, API Key & Docs",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Build a simple web page served by your Express app where anyone can shorten a link and see its stats, and protect edit and delete routes with an API key. Finish with a README that documents every endpoint.",
           "learn": [
             "Serving a front-end from Express with `express.static`",

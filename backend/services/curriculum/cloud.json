@@ -8,7 +8,7 @@
         "1": {
           "title": "Safe AWS Setup & Static Website on S3",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Set up a cloud account the safe way, with a budget alert and a separate admin user, then host a simple portfolio website on Amazon S3. By the end of the week you will have a live website URL you built and deployed yourself.",
           "learn": [
             "What regions, services and the AWS Management Console are",
@@ -53,7 +53,7 @@
         "2": {
           "title": "Contact Form API with Lambda & API Gateway",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Make the contact form work using serverless: a small Lambda function receives the form data through an API Gateway URL. You will learn how code can run in the cloud without managing any server.",
           "learn": [
             "What serverless means and how an AWS Lambda function is triggered",
@@ -98,7 +98,7 @@
         "3": {
           "title": "Save Messages in DynamoDB with Least-Privilege Access",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Store every contact message in a DynamoDB table and give your Lambda function only the permission it needs. You will also validate input and return clear errors, so the form behaves well when something goes wrong.",
           "learn": [
             "NoSQL basics with DynamoDB: tables, items and partition keys",
@@ -144,7 +144,7 @@
         "4": {
           "title": "HTTPS with CloudFront, Auto-Deploy & Architecture Diagram",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Finish CloudFolio as a professional project: serve it over HTTPS through CloudFront, deploy site changes automatically from GitHub Actions, and document the architecture. You will also clean up properly so nothing keeps costing money.",
           "learn": [
             "What a CDN is and how CloudFront gives your site HTTPS and faster loading",
@@ -196,7 +196,7 @@
         "1": {
           "title": "Safe AWS Setup & Photo Gallery on S3",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Set up your cloud account safely, learn how object storage works, and publish a simple photo gallery website from an S3 bucket. You will also start using the AWS CLI, which you will rely on for the rest of the project.",
           "learn": [
             "Regions, the AWS console, and why you avoid the root account",
@@ -241,7 +241,7 @@
         "2": {
           "title": "Direct Uploads with Presigned URLs & Lambda",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Let visitors upload photos from the web page into a private bucket. A small Lambda function hands out temporary presigned upload links, so the bucket never has to be public and your AWS keys never reach the browser.",
           "learn": [
             "What serverless is and how a Lambda function is invoked through API Gateway",
@@ -287,7 +287,7 @@
         "3": {
           "title": "Photo Records in DynamoDB with S3 Event Triggers",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Make the gallery show uploaded photos automatically. When a photo lands in S3, an event triggers a Lambda that records it in DynamoDB, and a list API returns the gallery with temporary view links. You will also validate uploads and handle errors.",
           "learn": [
             "Event-driven design: running code automatically when a file is uploaded",
@@ -333,7 +333,7 @@
         "4": {
           "title": "Infrastructure as Code with AWS SAM",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Rebuild your backend from a single AWS SAM template so the whole app can be created or deleted with one command. You will add an automatic cleanup rule, draw an architecture diagram, and finish with a polished demo.",
           "learn": [
             "What Infrastructure as Code is and why it beats clicking in the console",
@@ -385,7 +385,7 @@
         "1": {
           "title": "Safe AWS Setup & Landing Page on S3",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Set up your cloud account safely and publish the LinkSnip landing page on Amazon S3. The page will have the shortening form ready for the backend you build next week.",
           "learn": [
             "Regions, the AWS console, and why you never use the root account",
@@ -430,7 +430,7 @@
         "2": {
           "title": "Shorten & Redirect with Lambda and API Gateway",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Build the first working backend: one API route creates a short code and another redirects a short code to its long URL. You will learn how serverless functions handle requests and responses, including HTTP redirects.",
           "learn": [
             "What serverless is and how a Lambda function handles an API request",
@@ -476,7 +476,7 @@
         "3": {
           "title": "Store Links in DynamoDB & Handle Bad Input",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Save links in DynamoDB so any short code you create works for anyone, anywhere. You will lock down permissions and handle bad input and edge cases so the service is reliable.",
           "learn": [
             "DynamoDB basics: tables, items and partition keys",
@@ -522,7 +522,7 @@
         "4": {
           "title": "Click Analytics, Custom Aliases & Final Polish",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Finish LinkSnip with the feature that makes shorteners useful: click counting with a stats page. You will also let users choose custom short names, document the architecture, and clean up your resources safely.",
           "learn": [
             "Atomic counters in DynamoDB with `update_item` and `ADD`",

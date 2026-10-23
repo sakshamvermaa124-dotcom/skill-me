@@ -8,7 +8,7 @@
         "1": {
           "title": "Your First Tool-Calling LLM Call",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Get a free LLM API key and make your first tool-calling request: instead of just replying with text, the model decides to call a Python function you defined. This is the core mechanic every agent in this track builds on.",
           "learn": [
             "Getting and using a free-tier LLM API key with tool/function-calling support (Google Gemini API or Groq)",
@@ -53,7 +53,7 @@
         "2": {
           "title": "Multi-Tool Triage Agent",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Turn last week's single tool call into a real triage agent that reads a support ticket, classifies it, and calls the right combination of tools to gather context before drafting a reply. This is where 'an LLM that can call one function' becomes 'an agent that reasons about which tools to use.'",
           "learn": [
             "Designing a small toolset for one workflow (lookup, classify, escalate)",
@@ -98,7 +98,7 @@
         "3": {
           "title": "RAG for Policy-Grounded Replies",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Give the triage agent a company policy knowledge base so its drafted replies are grounded in real refund/shipping rules instead of the model's guesses. This combines retrieval-augmented generation with the tool-calling loop from Week 2 into one working agent.",
           "learn": [
             "Chunking and embedding a small internal knowledge base",
@@ -143,7 +143,7 @@
         "4": {
           "title": "API, Evals and Guardrails",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Wrap the triage agent in a small API, write an evaluation set to measure how often it triages correctly, and add guardrails so it fails safely. This is the engineering polish that turns a working prototype into something you could hand to another team.",
           "learn": [
             "Exposing an agent as an HTTP endpoint with a lightweight framework (FastAPI or Flask)",

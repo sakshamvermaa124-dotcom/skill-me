@@ -118,7 +118,7 @@ async def apply(req: ApplicationRequest, background_tasks: BackgroundTasks):
 
         return {
             "status": "applied",
-            "message": "Application submitted successfully! You'll hear from us within 48 hours.",
+            "message": "Application submitted! If you're shortlisted, you'll hear from us within 48 hours.",
             "student_id": student_id,
         }
     except HTTPException:

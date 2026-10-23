@@ -8,7 +8,7 @@
         "1": {
           "title": "User Research and Problem Statement",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Talk to real students about canteen queues, turn what you hear into a persona and a clear problem statement, and map the ordering flow. Good design starts with understanding people, not with screens.",
           "learn": [
             "Planning and running short user interviews",
@@ -52,7 +52,7 @@
         "2": {
           "title": "Low-fidelity Wireframes",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Turn your user flow into grayscale wireframes for the main screens. Wireframes let you test layout and flow quickly before spending time on colours and details.",
           "learn": [
             "Information hierarchy and layout",
@@ -94,7 +94,7 @@
         "3": {
           "title": "High-fidelity UI and Mini Design System",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Create a small design system with colours, a type scale and reusable components, then use it to turn your wireframes into polished screens. You will also check basic accessibility.",
           "learn": [
             "Colour styles and text styles",
@@ -138,7 +138,7 @@
         "4": {
           "title": "Prototype, Usability Test and Case Study",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Link your screens into a clickable prototype, test it with 3 people, fix the biggest issues and write a case study. This shows your full process from research to tested design.",
           "learn": [
             "Prototyping with interactions in Figma",
@@ -187,7 +187,7 @@
         "1": {
           "title": "Understanding Habit Struggles",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Research why students start and abandon habits, then create a persona, problem statement and user flow. This keeps your design focused on real needs instead of adding every feature you can think of.",
           "learn": [
             "Writing unbiased research questions",
@@ -230,7 +230,7 @@
         "2": {
           "title": "Wireframing the Core Screens",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Create grayscale wireframes for the main screens of your habit tracker. Focus on making adding and checking off a habit fast and obvious.",
           "learn": [
             "Visual hierarchy",
@@ -272,7 +272,7 @@
         "3": {
           "title": "Visual Design and Components",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Define a small design system and apply it to create high-fidelity screens. You will learn how components and styles keep a design consistent and easy to update.",
           "learn": [
             "Colour and text styles",
@@ -315,7 +315,7 @@
         "4": {
           "title": "Prototype, Testing and Case Study",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Build a clickable prototype, run usability tests with 3 people, iterate on the design and publish a case study. This completes your first end-to-end UX project.",
           "learn": [
             "Prototyping interactions",
@@ -364,7 +364,7 @@
         "1": {
           "title": "Audit and Research",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Pick a local business with an outdated website, audit what is not working and talk to people who might use it. A redesign is only useful if you know which problems to fix.",
           "learn": [
             "Running a heuristic review of an existing site",
@@ -407,7 +407,7 @@
         "2": {
           "title": "Information Architecture and Wireframes",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Reorganise the site's content into a clear structure and create grayscale wireframes for desktop and mobile. Good structure is the biggest improvement in most redesigns.",
           "learn": [
             "Information architecture and sitemaps",
@@ -449,7 +449,7 @@
         "3": {
           "title": "High-fidelity Design System and Pages",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Build a small design system and use it to create polished desktop and mobile pages. You will learn how consistent components make responsive design easier.",
           "learn": [
             "Colour and text styles",
@@ -492,7 +492,7 @@
         "4": {
           "title": "Prototype, Testing and Case Study",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Prototype the main task, test old versus new with 3 people and write a case study comparing the two. Showing measurable improvement makes your redesign convincing.",
           "learn": [
             "Prototyping flows in Figma",

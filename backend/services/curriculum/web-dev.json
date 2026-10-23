@@ -8,7 +8,7 @@
         "1": {
           "title": "Your First Portfolio Page with HTML & CSS",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Build a single-page portfolio with a header, an About section, a Projects section and a Contact section using only HTML and CSS. This is the base you will keep improving every week, so focus on clean structure and simple, readable styling.",
           "learn": [
             "Semantic HTML tags like `header`, `nav`, `main`, `section` and `footer`",
@@ -54,7 +54,7 @@
         "2": {
           "title": "Responsive Layout & Project Cards with JavaScript",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Make your portfolio look good on phones and start using JavaScript to control the page. You will add a mobile menu and generate your project cards from a JavaScript array, so adding a new project means editing data instead of copying HTML.",
           "learn": [
             "Media queries and a mobile-first approach to responsive design",
@@ -100,7 +100,7 @@
         "3": {
           "title": "Live GitHub Repos & Dark Mode",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Connect your portfolio to real data by fetching your public repositories from the GitHub API and showing them on the page. You will also add a dark mode toggle that remembers the visitor's choice using localStorage.",
           "learn": [
             "Fetching data from a public API with `fetch` and `async`/`await`",
@@ -146,7 +146,7 @@
         "4": {
           "title": "Contact Form, Accessibility & Going Live",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Finish your portfolio with a validated contact form, fix accessibility issues, and deploy it for free so anyone can visit it. By the end you will have a real link to put on your resume and LinkedIn profile.",
           "learn": [
             "Client-side form validation with JavaScript and helpful error messages",
@@ -198,7 +198,7 @@
         "1": {
           "title": "Kanban Board Layout with HTML & CSS",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Build the static layout of a Kanban board with three columns and a few sample task cards using HTML and CSS. Getting the structure and look right now makes adding JavaScript next week much easier.",
           "learn": [
             "Structuring a page with semantic HTML and sensible class names",
@@ -243,7 +243,7 @@
         "2": {
           "title": "Add, Move & Delete Tasks with JavaScript",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Bring the board to life with JavaScript so users can add tasks, move them between columns and delete them. You will learn the key idea of keeping your data in an array and redrawing the page from it.",
           "learn": [
             "Keeping app data in an array of objects as the single source of truth",
@@ -289,7 +289,7 @@
         "3": {
           "title": "Saving Tasks & Importing Starter Data",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Make your board remember tasks after a refresh with localStorage, and let first-time users import sample tasks from a public API. You will also add search so larger boards stay easy to use.",
           "learn": [
             "Saving and loading data with `localStorage`, `JSON.stringify` and `JSON.parse`",
@@ -335,7 +335,7 @@
         "4": {
           "title": "Drag-and-Drop, Polish & Deploy",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Add drag-and-drop so tasks can be moved with the mouse, make the board responsive and accessible, and deploy it for free. This is the capstone that turns your board into a portfolio-ready app.",
           "learn": [
             "The HTML Drag and Drop API (`draggable`, `dragstart`, `dragover`, `drop`)",
@@ -387,7 +387,7 @@
         "1": {
           "title": "Weather Dashboard Layout with HTML & CSS",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Design and build the static layout of your weather app: a search bar, a large current-weather card and a row of forecast cards, filled with sample data. A clean layout now makes it easy to plug in real data later.",
           "learn": [
             "Planning a UI with a quick sketch before coding",
@@ -432,7 +432,7 @@
         "2": {
           "title": "Rendering Weather Data with JavaScript",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Replace the hard-coded HTML with JavaScript that renders the dashboard from data objects, and add a Celsius/Fahrenheit toggle. This teaches you to separate data from display, which is exactly what you need before using a real API.",
           "learn": [
             "Representing app data as JavaScript objects and arrays",
@@ -477,7 +477,7 @@
         "3": {
           "title": "Live Weather from the Open-Meteo API",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Connect the dashboard to real weather data using the free Open-Meteo API, which needs no API key. Users can search any city and see its current weather and 7-day forecast, with proper loading and error messages.",
           "learn": [
             "Calling a public REST API with `fetch` and `async`/`await`",
@@ -523,7 +523,7 @@
         "4": {
           "title": "Saved Cities, Responsive Polish & Deploy",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Let users save favourite cities that load with one click and are remembered with localStorage, then polish the app for mobile and accessibility and deploy it. You will finish with a live, useful app you can share.",
           "learn": [
             "Persisting a list of favourites with `localStorage`",

@@ -8,7 +8,7 @@
         "1": {
           "title": "Git Basics & Your First Dockerfile",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Write a tiny notes web app, put it on GitHub, and package it into a Docker container that runs the same way on any machine. This is the foundation every later week builds on.",
           "learn": [
             "A basic Git workflow: `init`, `add`, `commit`, `push` and meaningful commit messages",
@@ -52,7 +52,7 @@
         "2": {
           "title": "App + Database with Docker Compose",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Real apps need a database. This week you add PostgreSQL and run both the app and database together with one Docker Compose command, so notes are saved permanently instead of disappearing on restart.",
           "learn": [
             "Defining multiple services in a `docker-compose.yml` file",
@@ -98,7 +98,7 @@
         "3": {
           "title": "Automated Tests & CI with GitHub Actions",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Set up a pipeline that automatically checks every push: it lints your code, runs tests, and builds the Docker image. You will also switch to a multi-stage Dockerfile so the final image is smaller and cleaner.",
           "learn": [
             "What Continuous Integration (CI) is and why it catches problems early",
@@ -143,7 +143,7 @@
         "4": {
           "title": "Auto-Deploy to the Cloud & Health Checks",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Complete the pipeline: every push to `main` that passes CI is deployed to a free host and becomes live on a public URL. You will add health checks and useful logs, then document the whole flow.",
           "learn": [
             "Continuous Deployment (CD): shipping automatically after tests pass",
@@ -194,7 +194,7 @@
         "1": {
           "title": "Two Small Services in Containers",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Build two tiny services: a `quotes-api` that returns a random quote as JSON, and a `web` service that calls it and shows the quote on a page. You will containerise both and connect them on a Docker network, which is the core idea behind microservices.",
           "learn": [
             "What a microservice is, and why you might split an app into services",
@@ -237,7 +237,7 @@
         "2": {
           "title": "Orchestrate Everything with Docker Compose",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Replace the long list of `docker run` commands with one `docker-compose.yml` file, and give the quotes API a database so users can add their own quotes. After this week the whole system starts with a single command.",
           "learn": [
             "Describing multiple services, networks and volumes in `docker-compose.yml`",
@@ -282,7 +282,7 @@
         "3": {
           "title": "Nginx Gateway & Handling Failures",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Put an Nginx gateway in front of your services so users reach everything through one address, and make the system behave sensibly when a service goes down. This is how real microservice setups stay usable when parts fail.",
           "learn": [
             "What a reverse proxy does and why systems use a single entry point",
@@ -327,7 +327,7 @@
         "4": {
           "title": "Infrastructure as Code with Terraform (Local)",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Describe your infrastructure as code with a small Terraform project that creates your Docker network and containers on your own machine, with no cloud account or bill. Then polish the project with a clear README, a diagram and a demo.",
           "learn": [
             "What Infrastructure as Code (IaC) is and why teams use it",
@@ -379,7 +379,7 @@
         "1": {
           "title": "Uptime Checker Script & Git",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Write a small Python script that reads a list of websites, checks each one, and prints whether it is up along with its response time. You will manage the project with Git from day one.",
           "learn": [
             "A basic Git workflow: `init`, `add`, `commit`, `push`, and writing a `.gitignore`",
@@ -424,7 +424,7 @@
         "2": {
           "title": "Containerise the Checker & Save Results",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Package your checker in a Docker container so it runs the same everywhere, and make it save every check to a results file so you can see history over time.",
           "learn": [
             "Writing a `Dockerfile` for a Python script",
@@ -469,7 +469,7 @@
         "3": {
           "title": "Scheduled Checks & Tests with GitHub Actions",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Let GitHub run your checker automatically every 30 minutes and save the results back to the repo, so it works even when your laptop is off. You will also add tests that run on every push.",
           "learn": [
             "GitHub Actions workflows: triggers, jobs and steps",
@@ -515,7 +515,7 @@
         "4": {
           "title": "Public Status Page & Downtime Alerts",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Turn your results into a public status page hosted free on GitHub Pages, updated automatically after every check, and get an alert when a site goes down. Then polish the project into a complete portfolio piece.",
           "learn": [
             "Generating a static HTML page from data",

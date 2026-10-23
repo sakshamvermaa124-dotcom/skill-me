@@ -8,7 +8,7 @@
         "1": {
           "title": "Product Grid with Components & Props",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Set up a React project with Vite and build the store's home page from small, reusable components: a header, a product card and a product grid. You will learn how React breaks a page into pieces and passes data between them.",
           "learn": [
             "Creating and running a React project with Vite",
@@ -54,7 +54,7 @@
         "2": {
           "title": "Shopping Cart & Search with State",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Make the store interactive by adding a working cart and a search box using React state. You will learn how state makes the UI update automatically and how to share state between components.",
           "learn": [
             "Storing changing data with the `useState` hook",
@@ -100,7 +100,7 @@
         "3": {
           "title": "Real Products, Detail Pages & Routing",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Replace your local data with real products from the free DummyJSON API and add a separate page for each product using React Router. You will learn how React apps load data and move between pages without reloading.",
           "learn": [
             "Fetching data inside `useEffect` and storing it in state",
@@ -146,7 +146,7 @@
         "4": {
           "title": "Global Cart with Context & Checkout",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Move the cart into React Context so any page can use it, save it in localStorage, and build a practice checkout form with validation. You will finish with a complete, deployed mini store and a clear README.",
           "learn": [
             "Sharing state across pages with `createContext` and `useContext`",
@@ -198,7 +198,7 @@
         "1": {
           "title": "Show Catalogue with Components & Props",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Set up a React project with Vite and build the StreamVibe home page: a navbar, a hero section with a video, and rows of show cards. You will learn how to split a page into reusable components and pass data with props.",
           "learn": [
             "Creating and running a React project with Vite",
@@ -244,7 +244,7 @@
         "2": {
           "title": "Genre Filters, Details & Watchlist with State",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Make StreamVibe interactive with React state: filter shows by genre, open a details modal, and add shows to a watchlist. You will learn how state and events drive what the user sees.",
           "learn": [
             "Storing changing data with `useState`",
@@ -289,7 +289,7 @@
         "3": {
           "title": "Live Shows from the TVMaze API & Routing",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Replace your local data with real TV shows from the free TVMaze API, add live search, and give every show its own page with React Router. You will learn how to load data in React and build a multi-page app.",
           "learn": [
             "Fetching data with `fetch` inside `useEffect`",
@@ -335,7 +335,7 @@
         "4": {
           "title": "Watchlist with Context, Ratings & Deploy",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Move the watchlist into React Context so it works on every page, save it with localStorage, and let users give their own star ratings. Then polish the layout for mobile and deploy StreamVibe for free.",
           "learn": [
             "Sharing state across pages with `createContext` and `useContext`",
@@ -387,7 +387,7 @@
         "1": {
           "title": "Recipe Cards with Components & Props",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Set up a React project with Vite and build a page of recipe cards from a local data file. You will learn how to build a UI out of small components that receive data through props.",
           "learn": [
             "Creating and running a React project with Vite",
@@ -433,7 +433,7 @@
         "2": {
           "title": "Search, Filters & Favourites with State",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Add interactivity with React state so users can search recipes, filter by category and mark favourites. You will learn how state changes make React update the page for you.",
           "learn": [
             "Storing changing values with `useState`",
@@ -478,7 +478,7 @@
         "3": {
           "title": "Real Recipes from TheMealDB & Routing",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Connect RecipeBox to TheMealDB, a free recipe API, so users can search thousands of real dishes and open a detail page for each. You will learn to fetch data in React and build a multi-page app with React Router.",
           "learn": [
             "Fetching data with `fetch` inside `useEffect` or an event handler",
@@ -524,7 +524,7 @@
         "4": {
           "title": "Meal Planner with Context & Deploy",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Build a weekly meal planner where users add recipes to days of the week, backed by React Context and localStorage. Finish by generating a shopping list, polishing for mobile, and deploying RecipeBox.",
           "learn": [
             "Sharing state across pages with `createContext` and `useContext`",

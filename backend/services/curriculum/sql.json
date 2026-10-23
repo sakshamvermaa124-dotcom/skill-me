@@ -8,7 +8,7 @@
         "1": {
           "title": "Tables, Data and Your First Queries",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Create a small library database with books, members and loans tables, fill it with sample data and answer simple questions with SELECT. This is the foundation every later week builds on, so getting clean tables now saves time later.",
           "learn": [
             "What tables, rows, columns and data types are",
@@ -52,7 +52,7 @@
         "2": {
           "title": "Relationships, JOINs and Grouping",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Connect your tables with foreign keys and use JOINs and GROUP BY to answer questions that span several tables. You will also tidy the design so data is not repeated.",
           "learn": [
             "Foreign keys and constraints such as NOT NULL, UNIQUE and CHECK",
@@ -97,7 +97,7 @@
         "3": {
           "title": "Subqueries, Views and Indexes",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Answer harder questions with subqueries and CTEs, save useful queries as views, and make lookups faster with indexes. You will also learn to read a simple query plan.",
           "learn": [
             "Subqueries and Common Table Expressions (WITH)",
@@ -141,7 +141,7 @@
         "4": {
           "title": "Library Insights Report",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Turn your database into a short analytics report that answers 8-10 real questions a librarian would ask. Finish with an ER diagram, a clean README and a demo.",
           "learn": [
             "Framing business questions and answering them with SQL",
@@ -191,7 +191,7 @@
         "1": {
           "title": "Store Schema and Basic Queries",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Create tables for customers, products and orders in SQLite or PostgreSQL, add sample data and write your first queries. You will learn the core SQL that every analyst uses daily.",
           "learn": [
             "Tables, columns, data types and primary keys",
@@ -234,7 +234,7 @@
         "2": {
           "title": "Order Items, JOINs and Revenue by Category",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Split orders into orders and order items so one order can hold many products, then use JOINs and GROUP BY to calculate revenue. This is how real shop databases are structured.",
           "learn": [
             "One-to-many relationships and foreign keys",
@@ -278,7 +278,7 @@
         "3": {
           "title": "Customer Insights with CTEs, Views and Indexes",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Load a larger free dataset or generate more rows, then use subqueries, CTEs and views to answer deeper questions about customers. You will add indexes and check their effect with EXPLAIN.",
           "learn": [
             "Subqueries and CTEs for multi-step logic",
@@ -323,7 +323,7 @@
         "4": {
           "title": "Sales Analytics Report and Dashboard",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Answer 8-10 business questions a store owner would ask and present them in a clear report with an ER diagram. Optionally show the results in a small Streamlit or Metabase dashboard.",
           "learn": [
             "Turning business questions into SQL",
@@ -373,7 +373,7 @@
         "1": {
           "title": "Teams, Players and Simple Stats",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Build a small cricket database with teams, players and matches, and write simple queries to explore it. Starting with a small hand-made dataset helps you understand the structure before loading real data.",
           "learn": [
             "Tables, primary keys and data types",
@@ -415,7 +415,7 @@
         "2": {
           "title": "Loading Real Data with JOINs and GROUP BY",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Import a free cricket dataset, link tables with foreign keys and use JOINs and GROUP BY to compute batting and team stats. Working with real data teaches you to handle messy values.",
           "learn": [
             "Importing CSV files into tables",
@@ -459,7 +459,7 @@
         "3": {
           "title": "Advanced Stats with CTEs, Views and Indexes",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Compute stats like strike rate and economy using CTEs and subqueries, save them as views and speed up common queries with indexes. Ball-by-ball data is large, so indexes make a visible difference.",
           "learn": [
             "Subqueries and CTEs",
@@ -502,7 +502,7 @@
         "4": {
           "title": "Cricket Analytics Report",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Answer 8-10 interesting cricket questions with SQL and present them in a report with an ER diagram. Optionally build a small Streamlit page where users pick a player and see their stats.",
           "learn": [
             "Framing analysis questions",

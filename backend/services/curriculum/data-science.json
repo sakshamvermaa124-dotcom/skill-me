@@ -8,7 +8,7 @@
         "1": {
           "title": "Explore a Dataset with Pandas",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Load the classic Titanic dataset into pandas and explore it: what columns exist, what is missing, and what basic patterns show up. This is the foundation every data science project starts from, and it builds comfort with pandas and simple charts.",
           "learn": [
             "Loading data with `pandas.read_csv` and inspecting it with `.head()`, `.info()`, `.describe()`",
@@ -52,7 +52,7 @@
         "2": {
           "title": "Clean Data and Engineer Features",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Clean the missing and messy values you found last week and create a few new columns that make the data more useful for analysis or modeling. This is the unglamorous but essential skill of turning raw data into something usable.",
           "learn": [
             "Handling missing values with `.fillna()` and `.dropna()`",
@@ -96,7 +96,7 @@
         "3": {
           "title": "Train a Prediction Model with scikit-learn",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Use your cleaned dataset to train a simple machine learning model that predicts survival, and evaluate how good it really is. This is your first hands-on experience with the standard scikit-learn workflow used across most ML projects.",
           "learn": [
             "Splitting data into train and test sets with `train_test_split`",
@@ -141,7 +141,7 @@
         "4": {
           "title": "Streamlit Dashboard and Write-Up",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Turn your analysis and model into an interactive Streamlit dashboard that anyone can explore in a browser, and write a clear README that tells the story of your project. This is where your work becomes something you can actually show people.",
           "learn": [
             "Building an interactive app with Streamlit widgets and layout",
@@ -192,7 +192,7 @@
         "1": {
           "title": "Pull Stock Data and Explore Trends",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Download real historical stock price data with yfinance and explore its basic trends and volatility. This introduces you to time-series data, which behaves differently from the flat tables you may have seen before.",
           "learn": [
             "Downloading historical price data with the `yfinance` library",
@@ -236,7 +236,7 @@
         "2": {
           "title": "Clean Data and Engineer Trading Features",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Clean gaps in the price data and engineer features that describe price momentum and trend, the building blocks any forecasting model needs. This week is about turning raw prices into meaningful signals.",
           "learn": [
             "Handling missing dates and forward-filling time-series gaps",
@@ -280,7 +280,7 @@
         "3": {
           "title": "Forecast Prices with Linear Regression",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Train a simple linear regression model to forecast next-day closing price using your engineered features, and honestly evaluate how well it actually performs. This teaches you the standard regression workflow and, just as importantly, healthy skepticism about forecasting stock prices.",
           "learn": [
             "Framing a forecasting problem as supervised regression with a shifted target",
@@ -325,7 +325,7 @@
         "4": {
           "title": "Streamlit Dashboard and Write-Up",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Package your analysis and forecasting model into an interactive Streamlit dashboard where a user can pick a ticker and see trends and forecasts, and write a clear README. This turns your analysis into something demoable and honest about its limits.",
           "learn": [
             "Building a multi-section Streamlit app with charts and user input",
@@ -376,7 +376,7 @@
         "1": {
           "title": "Explore a Survey Dataset",
           "difficulty": "Beginner",
-          "est_hours": "6-8",
+          "est_hours": "2-3",
           "goal": "Load a free public survey dataset (for example the Stack Overflow Developer Survey or a UCI dataset) into pandas and explore its structure, respondents and basic patterns. This builds the everyday pandas skills every later week depends on.",
           "learn": [
             "Loading data with `pandas.read_csv` and inspecting it with `.head()`, `.info()`, `.describe()`",
@@ -420,7 +420,7 @@
         "2": {
           "title": "Clean Responses and Engineer Features",
           "difficulty": "Beginner+",
-          "est_hours": "8-10",
+          "est_hours": "2-3",
           "goal": "Clean messy survey responses (free text, inconsistent categories, missing answers) and engineer a few new columns that make group comparisons easier. Real survey data is messy, and cleaning it well is most of the actual work in data science.",
           "learn": [
             "Standardising inconsistent text categories with `.str` methods",
@@ -464,7 +464,7 @@
         "3": {
           "title": "Analyse Patterns with Grouped Stats and a Simple Model",
           "difficulty": "Intermediate",
-          "est_hours": "10-12",
+          "est_hours": "2-3",
           "goal": "Dig deeper into your cleaned survey with grouped statistical comparisons, then train a simple classifier to predict one categorical outcome from the others. This connects exploratory analysis to a real, evaluated machine learning model.",
           "learn": [
             "Comparing groups with grouped means, medians and simple significance checks",
@@ -508,7 +508,7 @@
         "4": {
           "title": "Streamlit Dashboard and Write-Up",
           "difficulty": "Intermediate+",
-          "est_hours": "10-14",
+          "est_hours": "2-3",
           "goal": "Turn your survey analysis into an interactive Streamlit dashboard so anyone can filter and explore the results themselves, and write a README that tells the full story. This is where your analysis becomes a shareable, demoable project.",
           "learn": [
             "Building a filterable dashboard with Streamlit widgets",
