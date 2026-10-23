@@ -396,6 +396,71 @@
       verifyCertificate();
     }
 
+    // Offer letter / HOD pack QR: ?offer=<student id>&ref=<signed reference>
+    const offerParam = (params.get('offer') || '').trim();
+    const offerRefParam = (params.get('ref') || '').trim();
+    if (offerParam && offerRefParam) verifyOffer(offerParam, offerRefParam);
+
+    async function verifyOffer(studentId, ref) {
+      const area = document.getElementById('result-area');
+      area.innerHTML = `
+        <div class="card vf-loading vf-anim" role="status">
+          <div class="vf-spinner" aria-hidden="true"></div>
+          <span>Checking this offer letter against SkillMe's records…</span>
+        </div>`;
+      let res;
+      try {
+        res = await fetch(`${API}/api/students/offer/${encodeURIComponent(studentId)}/${encodeURIComponent(ref)}`);
+      } catch (e) {
+        showError('offer letter', 'Unable to connect to the verification server. Please try again.', 'network');
+        return;
+      }
+      if (!res.ok) {
+        area.innerHTML = `
+          <article class="card vf-result is-bad vf-anim" aria-labelledby="vf-result-title">
+            <div class="vf-result-head">
+              <div class="vf-status-icon">${ICON.bad}</div>
+              <div>
+                <h2 class="vf-status-title" id="vf-result-title">${res.status >= 500 ? 'Verification is temporarily unavailable' : 'Offer letter not verified'}</h2>
+                <p class="vf-status-sub">${res.status >= 500 ? 'Please try again in a minute.' : 'This QR code or link does not match an offer issued by SkillMe.'}</p>
+              </div>
+            </div>
+            <div class="vf-err-body">
+              <p>If you believe this is an error, contact <a href="mailto:admin@skill-me-intern.in">admin@skill-me-intern.in</a>.</p>
+            </div>
+          </article>`;
+        return;
+      }
+      const d = await res.json();
+      const status = { active: 'Active intern', completed: 'Completed', dropped: 'No longer active' }[d.enrollment_status] || 'Enrolled';
+      const ok = d.enrollment_status !== 'dropped';
+      area.innerHTML = `
+        <article class="card vf-result ${ok ? 'is-ok' : 'is-warn'} vf-anim" aria-labelledby="vf-result-title">
+          <div class="vf-result-head">
+            <div class="vf-status-icon">${ok ? ICON.ok : ICON.warn}</div>
+            <div>
+              <h2 class="vf-status-title" id="vf-result-title">Offer letter verified</h2>
+              <p class="vf-status-sub">This offer was issued by SkillMe.</p>
+            </div>
+            <span class="badge ${ok ? 'badge-ok' : 'badge-warn'}"><span class="dot"></span>${escapeHtml(status)}</span>
+          </div>
+          <div class="vf-body">
+            <div class="vf-holder-label">Issued to</div>
+            <div class="vf-holder">${escapeHtml(d.name || '—')}</div>
+            <div class="vf-holder-domain">${escapeHtml(d.domain_label || titleCase(d.domain || 'Internship'))} Internship</div>
+            <dl class="vf-details">
+              ${d.college ? `<div class="vf-detail full"><dt>College</dt><dd>${escapeHtml(d.college)}</dd></div>` : ''}
+              <div class="vf-detail"><dt>Start date</dt><dd>${escapeHtml(formatDate(d.start_date))}</dd></div>
+              <div class="vf-detail"><dt>Duration</dt><dd>4 Weeks · Remote</dd></div>
+            </dl>
+          </div>
+          <div class="vf-foot">
+            ${ICON.clock}
+            <span>Checked against SkillMe's records on ${escapeHtml(new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }))}. SkillMe Technologies, Govt. of India Udyam Reg. UDYAM-UP-50-0294192.</span>
+          </div>
+        </article>`;
+    }
+
     // Enter key support
     certInput.addEventListener('keydown', e => {
       if (e.key === 'Enter') { e.preventDefault(); verifyCertificate(); }
@@ -471,7 +536,7 @@
 
       } catch (e) {
         if (seq !== verifySeq) return;
-        showError(certId, `Unable to connect to the verification server. Please try again. (${e.message})`, 'network');
+        showError(certId, 'Unable to connect to the verification server. Please try again.', 'network');
       } finally {
         if (seq === verifySeq) setBusy(false);
       }
@@ -537,7 +602,7 @@
 
           <div class="vf-foot">
             ${ICON.clock}
-            <span>Verified against SkillMe's internal certificate registry on ${escapeHtml(today)}. Issued by <strong>Saksham Verma</strong>, Founder &amp; CEO, SkillMe Technologies (Govt. of India Udyam Reg. UDYAM-UP-50-0294192).</span>
+            <span>Verified against SkillMe's internal certificate registry on ${escapeHtml(today)}. Issued by <strong>SkillMe</strong> (SkillMe Technologies, Govt. of India Udyam Reg. UDYAM-UP-50-0294192).</span>
           </div>
         </article>`;
 

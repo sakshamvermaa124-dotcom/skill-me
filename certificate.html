@@ -776,6 +776,11 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
               Print
             </button>
+            <a class="btn btn-secondary" id="btn-add-linkedin" href="#" target="_blank" rel="noopener noreferrer" hidden>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
+              Add to LinkedIn
+              <span class="sr-only">(opens in a new tab)</span>
+            </a>
             <button type="button" class="btn btn-secondary" id="btn-copy-link" onclick="SkillMeDocs.copyLink()">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
               Copy link
@@ -980,6 +985,19 @@
       if (!wrapper) return;
       const isPayment = reason === 'payment_required';
       wrapper.dataset.state = 'locked';
+      if (reason === 'unavailable') {
+        // Network or server trouble is not "your link is wrong".
+        wrapper.innerHTML = SkillMeDocs.stateCard({
+          icon: 'warn',
+          title: "We couldn't load this certificate",
+          text: 'Our verification service is not responding right now. Your certificate is safe — please try again in a minute.',
+          actions: [
+            { href: window.location.href, label: 'Try again', primary: true },
+            { href: 'verify.html', label: 'Verify a certificate' },
+          ],
+        });
+        return;
+      }
       wrapper.innerHTML = SkillMeDocs.stateCard({
         icon: isPayment ? 'lock' : 'search',
         title: isPayment ? 'Certificate Not Yet Unlocked' : 'Certificate Not Found',
@@ -1047,6 +1065,7 @@
             domain_slug: myCert.domain_slug,
             domain_label: myCert.domain_label,
             issued_at: myCert.issued_at,
+            start_date: myCert.start_date,
             cert_id: myCert.cert_id,
           });
           return;
@@ -1055,7 +1074,14 @@
           showLocked('payment_required');
           return;
         }
-      } catch (e) { }
+        if (metaRes.status >= 500) {
+          showLocked('unavailable');
+          return;
+        }
+      } catch (e) {
+        showLocked('unavailable');
+        return;
+      }
 
       showLocked('not_found');
     }
@@ -1063,10 +1089,12 @@
     async function verifyCert(id) {
       try {
         const res = await fetch(`${API}/api/certificates/verify/${encodeURIComponent(id)}`);
+        if (res.status >= 500) return showLocked('unavailable');
         if (!res.ok) throw new Error('Not found');
         const data = await res.json();
         populateCertificate(data);
       } catch (e) {
+        if (e instanceof TypeError) return showLocked('unavailable');
         showError('Certificate not found. The ID may be invalid or expired.');
       }
     }
@@ -1131,10 +1159,25 @@
       // public cert_id link — never the dashboard handoff with student details in it.
       if (data.cert_id && !/^PREVIEW/.test(data.cert_id)) {
         history.replaceState(null, '', `certificate.html?cert_id=${encodeURIComponent(data.cert_id)}`);
+        // LinkedIn "Add licence or certification" form, pre-filled
+        const issued = SkillMeDocs.parseDate(data.issued_at);
+        const li = new URL('https://www.linkedin.com/profile/add');
+        li.search = new URLSearchParams({
+          startTask: 'CERTIFICATION_NAME',
+          name: `${data.domain_label || SkillMeDocs.domainLabel(data.domain, 'Software Engineering')} Internship`,
+          organizationName: 'SkillMe',
+          issueYear: String(issued.getFullYear()),
+          issueMonth: String(issued.getMonth() + 1),
+          certId: data.cert_id,
+          certUrl: `${window.location.origin}/certificate.html?cert_id=${encodeURIComponent(data.cert_id)}`,
+        }).toString();
+        const liBtn = document.getElementById('btn-add-linkedin');
+        if (liBtn) { liBtn.href = li.toString(); liBtn.hidden = false; }
       }
       const rawDateObj = SkillMeDocs.parseDate(data.issued_at);
       const date = rawDateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
-      const startDateObj = new Date(rawDateObj.getTime() - (28 * 24 * 60 * 60 * 1000));
+      // Real enrollment start when the API has it; otherwise the 4-week window before issue.
+      const startDateObj = data.start_date ? SkillMeDocs.parseDate(data.start_date) : new Date(rawDateObj.getTime() - (28 * 24 * 60 * 60 * 1000));
       const startDateStr = startDateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
 
       document.getElementById('cert-name').textContent = name;
@@ -1209,6 +1252,7 @@
 
       try {
         const res = await fetch(`${API}/api/certificates/verify/${encodeURIComponent(rawId)}`);
+        if (res.status >= 500) throw new TypeError('unavailable');
         if (!res.ok) throw new Error('Certificate not found');
         const data = await res.json();
         const domainLabel = SkillMeDocs.esc(data.domain_label || SkillMeDocs.domainLabel(data.domain, 'N/A'));
@@ -1220,7 +1264,7 @@
           <div class="dc-status-icon">${SkillMeDocs.icon('ok')}</div>
           <div>
             <div class="dc-verify-result-title">Certificate Verified &amp; Authentic</div>
-            <div class="help">Issued by SkillMe Open Source Program</div>
+            <div class="help">Issued by SkillMe</div>
           </div>
         </div>
         <dl class="dc-verify-dl">
@@ -1231,13 +1275,14 @@
         <a href="${certViewUrl}" target="_blank" rel="noopener" class="btn btn-primary btn-sm">View Full Certificate &rarr;</a>
       `;
       } catch (e) {
+        const down = e instanceof TypeError;
         resultEl.className = 'verify-result dc-verify-result is-danger active';
         resultEl.innerHTML = `
         <div class="dc-verify-result-head">
           <div class="dc-status-icon">${SkillMeDocs.icon('danger')}</div>
           <div>
-            <div class="dc-verify-result-title">Certificate Not Found</div>
-            <div class="help">Please verify the certificate ID and try again.</div>
+            <div class="dc-verify-result-title">${down ? "Couldn't check right now" : 'Certificate Not Found'}</div>
+            <div class="help">${down ? 'Our verification service is not responding. Please try again in a minute.' : 'Please verify the certificate ID and try again.'}</div>
           </div>
         </div>
       `;

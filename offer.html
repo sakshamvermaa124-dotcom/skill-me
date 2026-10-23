@@ -76,6 +76,10 @@
       margin-bottom: 24px;
     }
 
+    /* Letters without a verified reference are marked as previews */
+    .offer-paper.is-preview .watermark { color: rgba(200, 30, 30, 0.07); }
+    .offer-paper.is-preview .watermark::after { content: ' · PREVIEW'; }
+
     /* Watermark background */
     .watermark {
       position: absolute;
@@ -593,7 +597,7 @@
     <div class="doc-meta-ribbon">
       <div><strong>Doc Ref:</strong> <span id="doc-ref-id" style="font-family:'JetBrains Mono',monospace; color:#1c1917; font-weight:700;">SKM-OFFER-2026-0812</span></div>
       <div><strong>Issued Date:</strong> <span id="doc-date-val" style="color:#1c1917; font-weight:600;">August 16, 2026</span></div>
-      <div><strong>Verification:</strong> <span style="color:#047857; font-weight:700;">● Cryptographically Verified</span></div>
+      <div><strong>Verification:</strong> <span id="doc-verify-state" style="color:#b45309; font-weight:700;">● Preview, not verified</span></div>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════
@@ -835,12 +839,15 @@
     const urlParams = new URLSearchParams(window.location.search);
     let studentName = urlParams.get('name') || localStorage.getItem('student_name') || "";
     let domainName  = urlParams.get('domain') || localStorage.getItem('student_domain') || "";
-    let studentId   = urlParams.get('student_id') || urlParams.get('id') || "1001";
+    let studentId   = urlParams.get('student_id') || urlParams.get('id') || "";
+    let offerRef    = urlParams.get('ref') || "";
     let collegeName = urlParams.get('college') || localStorage.getItem('student_college') || "";
+    let joiningDate = null;      // enrollment start date from the backend, once known
+    let verified = false;        // true once the backend confirms this letter
     const initialView = urlParams.get('view') === 'hod' ? 'hod' : 'offer';
     let currentView = initialView;
 
-    const formattedDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const fmtDate = (d) => d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
     let qrOfferInstance = null;
     let qrHodInstance = null;
 
@@ -848,15 +855,18 @@
       const displayName = studentName || "Intern Candidate";
       const displayDomain = SkillMeDocs.domainLabel(domainName, "Software Engineering");
       const displayCollege = collegeName || "Department of Computer Science & Engineering";
-      const docRef = `SKM-${currentView === 'hod' ? 'NOC' : 'OFFER'}-2026-${String(studentId).padStart(4, '0')}`;
+      const refNum = String(studentId || '0000').padStart(4, '0');
+      const docRef = `SKM-${currentView === 'hod' ? 'NOC' : 'OFFER'}-2026-${refNum}`;
+      // The joining date is the real enrollment start, so the letter reads the same every day.
+      const dateText = joiningDate ? fmtDate(SkillMeDocs.parseDate(joiningDate)) : fmtDate(new Date());
 
       // Populate DOM
       document.querySelectorAll('.student-name-text').forEach(el => el.textContent = displayName);
       document.querySelectorAll('.domain-name-text').forEach(el => el.textContent = displayDomain);
-      document.querySelectorAll('.doc-joining-text').forEach(el => el.textContent = formattedDate);
-      
+      document.querySelectorAll('.doc-joining-text').forEach(el => el.textContent = dateText);
+
       const docDateVal = document.getElementById('doc-date-val');
-      if (docDateVal) docDateVal.textContent = formattedDate;
+      if (docDateVal) docDateVal.textContent = dateText;
 
       const docRefId = document.getElementById('doc-ref-id');
       if (docRefId) docRefId.textContent = docRef;
@@ -864,14 +874,26 @@
       const collegeEl = document.getElementById('hod-college-name');
       if (collegeEl) collegeEl.textContent = displayCollege;
 
+      // Unverified letters (no signed reference) are marked as previews and their QR only
+      // points at the general verification page.
+      const doc = document.getElementById('offer-document');
+      if (doc) doc.classList.toggle('is-preview', !verified);
+      const verifyState = document.getElementById('doc-verify-state');
+      if (verifyState) {
+        verifyState.textContent = verified ? '● Verified on record (scan QR)' : '● Preview, not verified';
+        verifyState.style.color = verified ? '#047857' : '#b45309';
+      }
+
       // QR Code Verification URLs
-      const verifyUrl = `${window.location.origin}/verify.html?id=${encodeURIComponent(studentId)}&name=${encodeURIComponent(displayName)}`;
+      const verifyUrl = verified
+        ? `${window.location.origin}/verify.html?offer=${encodeURIComponent(studentId)}&ref=${encodeURIComponent(offerRef)}`
+        : `${window.location.origin}/verify.html`;
 
       const qrRefOffer = document.getElementById('qr-ref-offer');
-      if (qrRefOffer) qrRefOffer.textContent = `Ref: SKM-OFFER-${String(studentId).padStart(4, '0')}`;
+      if (qrRefOffer) qrRefOffer.textContent = verified ? `Ref: SKM-OFFER-${refNum}` : 'Preview · not verified';
 
       const qrRefHod = document.getElementById('qr-ref-hod');
-      if (qrRefHod) qrRefHod.textContent = `Ref: SKM-NOC-${String(studentId).padStart(4, '0')}`;
+      if (qrRefHod) qrRefHod.textContent = verified ? `Ref: SKM-NOC-${refNum}` : 'Preview · not verified';
 
       if (qrOfferInstance) {
         qrOfferInstance.value = verifyUrl;
@@ -915,24 +937,40 @@
       });
     });
 
-    // Hydrate from the backend whenever we know the student — DB values win over the URL.
-    if (studentId && studentId !== '1001') {
+    // Hydrate from the backend — DB values win over the URL.
+    (async function hydrate() {
+      if (!studentId) return;
       const API = window.SKILLME_API || '';
-      const token = localStorage.getItem('token');
-      fetch(`${API}/api/students/progress/id/${encodeURIComponent(studentId)}`, {
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-      })
-        .then(res => res.ok ? res.json() : null)
-        .then(data => {
-          if (data && data.student) {
-            studentName = data.student.name || studentName;
-            domainName = data.student.domain || domainName;
-            collegeName = data.student.college || collegeName;
-            renderDocumentData();
-          }
-        })
-        .catch(() => {});
-    }
+      // The signed-in student's own letter: pick up the signed reference from their session.
+      if (!offerRef) {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        try {
+          const res = await fetch(`${API}/api/students/progress/id/${encodeURIComponent(studentId)}`, {
+            headers: { 'Authorization': `Bearer ${token}` },
+          });
+          if (!res.ok) return;
+          const data = await res.json();
+          if (!data.student) return;
+          studentName = data.student.name || studentName;
+          domainName = data.student.domain || domainName;
+          collegeName = data.student.college || collegeName;
+          offerRef = data.student.offer_ref || '';
+        } catch (e) { return; }
+      }
+      // Public check of the signed reference (works for anyone holding the letter).
+      try {
+        const res = await fetch(`${API}/api/students/offer/${encodeURIComponent(studentId)}/${encodeURIComponent(offerRef)}`);
+        if (!res.ok) return renderDocumentData();
+        const d = await res.json();
+        studentName = d.name || studentName;
+        domainName = d.domain || domainName;
+        collegeName = d.college || collegeName;
+        joiningDate = d.start_date || null;
+        verified = true;
+      } catch (e) { /* offline: keep the URL values, unverified */ }
+      renderDocumentData();
+    })();
 
     // Document Switcher
     function switchDocument(view) {

@@ -877,6 +877,16 @@
     if (!view) return;
     const isPayment = reason === 'payment_required';
     view.dataset.state = 'locked';
+    if (reason === 'unavailable') {
+      // Network or server trouble is not "your link is wrong".
+      view.innerHTML = SkillMeDocs.stateCard({
+        icon: 'warn',
+        title: "We couldn't load this letter",
+        text: 'Our verification service is not responding right now. Please try again in a minute.',
+        actions: [{ href: window.location.href, label: 'Try again', primary: true }],
+      });
+      return;
+    }
     view.innerHTML = SkillMeDocs.stateCard({
       icon: isPayment ? 'lock' : 'search',
       title: isPayment ? 'Letter of Recommendation Not Yet Unlocked' : 'Letter of Recommendation Not Found',
@@ -896,7 +906,7 @@
     // this is the intentionally-public "verify this credential" path for third parties.
     if (certId) {
       try {
-        const res = await fetch(`${API}/api/certificates/verify/${certId}`);
+        const res = await fetch(`${API}/api/certificates/verify/${encodeURIComponent(certId)}`);
         if (res.ok) {
           const d = await res.json();
           const name = d.holder || d.student_name || nameParam || 'Student';
@@ -904,7 +914,10 @@
           showVerify(true, name, d.cert_id, d.issued_at);
           return;
         }
-      } catch(e) {}
+        if (res.status >= 500) return showLocked('unavailable');
+      } catch(e) {
+        return showLocked('unavailable');
+      }
       showLocked('not_found');
       return;
     }
@@ -925,7 +938,10 @@
           showLocked('payment_required');
           return;
         }
-      } catch(e) {}
+        if (res.status >= 500) return showLocked('unavailable');
+      } catch(e) {
+        return showLocked('unavailable');
+      }
       showLocked('not_found');
       return;
     }
