@@ -503,6 +503,16 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
 }
 .cert-btn-primary:hover { background: var(--cta-hover); }
 .cert-btn-primary:active { transform: scale(0.98); }
+.cert-status-error {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  border: 1px solid var(--danger-border);
+  background: var(--danger-wash);
+  font-size: 0.88rem;
+  color: var(--text-default);
+}
+.cert-status-error p { margin: 0; flex: 1 1 260px; }
 .cert-btn-secondary {
   background: var(--surface-1);
   color: var(--text-strong);
@@ -587,6 +597,9 @@ textarea.dash-input { resize: vertical; min-height: 84px; }
 .login-input-wrap { margin-bottom: 14px; }
 #otp-wrap .login-label { margin-top: 2px; }
 #login-otp { letter-spacing: 0.4em; font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; }
+.login-sent { margin: 0 0 10px; font-size: 0.8rem; color: var(--text-muted); overflow-wrap: anywhere; }
+.login-sent strong { color: var(--text-default); }
+.login-sent .login-link-btn { padding: 0; font-size: 0.8rem; }
 .login-resend-row {
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
   margin-top: 8px;
@@ -629,6 +642,20 @@ textarea.dash-input { resize: vertical; min-height: 84px; }
   color: var(--danger);
   font-size: 0.84rem;
 }
+.login-restoring { display: none; }
+#login-view.is-restoring .login-restoring {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 28px 0; font-size: 0.92rem; color: var(--text-muted);
+}
+#login-view.is-restoring .login-card > :not(.login-restoring):not(#dash-login-form),
+#login-view.is-restoring #dash-login-form > :not(#login-cancel-wrap) { display: none; }
+.login-spinner {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid var(--border-strong); border-top-color: var(--accent-text);
+  animation: loginSpin 0.8s linear infinite;
+}
+@keyframes loginSpin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .login-spinner { animation-duration: 2.4s; } }
 .login-retry-link {
   padding: 0;
   border: 0;
@@ -1820,3 +1847,30 @@ html.lenis, html.lenis body { height: auto; }
 
 /* Units next to mono numbers stay in the UI font */
 .hero-fact dd .stat-unit, .stat-value .stat-unit, .progress-ring-pct-sign { font-family: var(--font-ui); letter-spacing: 0; }
+
+/* Inline error under a task's post-link field */
+.task-submit-error {
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  color: var(--danger);
+}
+.task-submit input[aria-invalid="true"] { border-color: var(--danger); }
+
+/* Non-blocking notices (replaces alert()) */
+.dash-toast {
+  position: fixed; left: 50%; bottom: 24px; z-index: 1000;
+  max-width: min(92vw, 440px);
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--text-strong);
+  color: var(--surface-1);
+  font: 500 0.88rem/1.4 var(--font-ui);
+  box-shadow: var(--shadow-lg, 0 10px 30px rgba(0,0,0,0.25));
+  transform: translate(-50%, 16px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+.dash-toast[data-tone="error"] { background: var(--danger); color: #fff; }
+.dash-toast.is-visible { transform: translate(-50%, 0); opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .dash-toast { transition: opacity 0.2s; transform: translate(-50%, 0); } }

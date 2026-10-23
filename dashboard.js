@@ -19,6 +19,46 @@ function renderMarkdown(md) {
   return div.innerHTML.split(/\n{2,}/).map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
 }
 
+// Short, non-blocking notice (replaces alert()). tone: 'ok' | 'error'
+let dashToastTimer = null;
+function dashToast(msg, tone) {
+  const el = document.getElementById('dash-toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.dataset.tone = tone || 'ok';
+  requestAnimationFrame(() => el.classList.add('is-visible'));
+  clearTimeout(dashToastTimer);
+  dashToastTimer = setTimeout(() => el.classList.remove('is-visible'), tone === 'error' ? 6000 : 3000);
+}
+
+// Dialogs: focus moves into the dialog on open and returns to the trigger on close.
+let modalReturnFocus = null;
+function modalOpened(modal) {
+  modalReturnFocus = document.activeElement;
+  const first = modal.querySelector('.payment-modal-close, .milestone-modal-close') || modal.querySelector('button, [href], input');
+  if (first) first.focus({ preventScroll: true });
+}
+function modalClosed() {
+  if (modalReturnFocus && document.contains(modalReturnFocus)) modalReturnFocus.focus({ preventScroll: true });
+  modalReturnFocus = null;
+}
+
+// Signed in but no active internship: under review, or dropped.
+function showUnenrolled(data) {
+  const summary = (data && data.summary) || {};
+  const dropped = summary.enrollment_status === 'dropped' || summary.application_status === 'dropped';
+  if (dropped) {
+    document.getElementById('unenrolled-title').textContent = 'Your internship is no longer active';
+    const p = document.getElementById('unenrolled-text');
+    p.textContent = 'Your enrollment was closed. If you think this is a mistake or want to be reconsidered, write to ';
+    const a = document.createElement('a');
+    a.href = 'mailto:admin@skill-me-intern.in';
+    a.textContent = 'admin@skill-me-intern.in';
+    p.append(a, '.');
+  }
+  document.getElementById('unenrolled-view').style.display = 'flex';
+}
+
 // Student API calls carry the session token from the OTP login.
 function authHeaders(extra) {
   const token = localStorage.getItem('token');
@@ -87,8 +127,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const signoutBtn = document.getElementById('signout-btn');
     const cancelWrap = document.getElementById('login-cancel-wrap');
     const resetLoginButton = () => {
+      loginView.classList.remove('is-restoring');
       loginBtn.disabled = false;
-      loginBtn.textContent = 'Get Login Code';
+      loginBtn.textContent = 'Get login code';
       if (signoutBtn) signoutBtn.style.display = 'none';
       if (cancelWrap) cancelWrap.style.display = 'none';
     };
@@ -111,8 +152,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    // Returning student: show "Opening your dashboard…" instead of a disabled login form.
+    loginView.classList.add('is-restoring');
     loginBtn.disabled = true;
-    loginBtn.textContent = 'Restoring Session...';
+    loginBtn.textContent = 'Opening your dashboard...';
     // Show Sign Out button so user can abort if stuck
     if (signoutBtn) signoutBtn.style.display = 'inline-flex';
     if (cancelWrap) cancelWrap.style.display = 'block';
@@ -141,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       loginView.style.display = 'none';
       if (data.progress && data.progress.length === 0) {
-        document.getElementById('unenrolled-view').style.display = 'flex';
+        showUnenrolled(data);
       } else {
         dashView.style.display = 'block';
         dashView.style.opacity = '1';
@@ -190,147 +233,180 @@ document.addEventListener('DOMContentLoaded', () => {
     console.warn("Session check notice:", err);
   });
 
+  // --- OTP login ---
+  const emailInput = document.getElementById('login-email');
+  const otpInput = document.getElementById('login-otp');
+  const otpWrap = document.getElementById('otp-wrap');
+  const otpSentTo = document.getElementById('otp-sent-to');
   const resendBtn = document.getElementById('resend-btn');
-  if (resendBtn) {
-    resendBtn.addEventListener('click', () => {
-      const emailInput = document.getElementById('login-email');
-      const email = emailInput.value.trim();
-      if (!email) return;
-      
-      resendBtn.disabled = true;
-      resendBtn.textContent = 'Sending...';
-      errorEl.style.display = 'none';
-      
-      fetch(`${API}/api/auth/request-otp`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
-      }).then(async (res) => {
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({ detail: 'Failed to resend OTP email' }));
-          errorEl.textContent = errData.detail || 'Failed to resend OTP.';
-          errorEl.style.display = 'block';
-          resendBtn.textContent = 'Resend Code';
-          resendBtn.disabled = false;
-        } else {
-          resendBtn.textContent = 'Code Sent!';
-          setTimeout(() => {
-            resendBtn.textContent = 'Resend Code';
-            resendBtn.disabled = false;
-          }, 30000); // 30 seconds cooldown
-        }
-      }).catch((err) => {
-        errorEl.textContent = 'Network error while resending code.';
-        errorEl.style.display = 'block';
-        resendBtn.textContent = 'Resend Code';
-        resendBtn.disabled = false;
-      });
-    });
+  const changeEmailBtn = document.getElementById('change-email-btn');
+  const LABEL_EMAIL = 'Get login code';
+  const LABEL_OTP = 'Sign in';
+  const RESEND_SECONDS = 30;
+  let resendTimer = null;
+
+  function showLoginError(msg) {
+    errorEl.textContent = msg;
+    errorEl.style.display = 'block';
   }
+
+  function setLoginBusy(busy, label) {
+    loginBtn.disabled = busy;
+    loginBtn.style.opacity = busy ? '0.7' : '1';
+    loginBtn.textContent = label;
+  }
+
+  // "Resend in 29s" countdown, then the button comes back.
+  function startResendCountdown() {
+    clearInterval(resendTimer);
+    let left = RESEND_SECONDS;
+    resendBtn.disabled = true;
+    resendBtn.textContent = `Resend in ${left}s`;
+    resendTimer = setInterval(() => {
+      left -= 1;
+      if (left <= 0) {
+        clearInterval(resendTimer);
+        resendBtn.disabled = false;
+        resendBtn.textContent = 'Resend code';
+      } else {
+        resendBtn.textContent = `Resend in ${left}s`;
+      }
+    }, 1000);
+  }
+
+  function showEmailStep() {
+    clearInterval(resendTimer);
+    loginState = 'email';
+    otpWrap.style.display = 'none';
+    otpInput.value = '';
+    emailInput.readOnly = false;
+    setLoginBusy(false, LABEL_EMAIL);
+    emailInput.focus();
+  }
+
+  function showOtpStep(email) {
+    loginState = 'otp';
+    otpWrap.style.display = 'block';
+    emailInput.readOnly = true;
+    if (otpSentTo) otpSentTo.textContent = email;
+    setLoginBusy(false, LABEL_OTP);
+    otpInput.focus();
+    startResendCountdown();
+  }
+
+  async function requestCode(email) {
+    const res = await fetch(`${API}/api/auth/request-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.detail || "We couldn't send a code to that email. Check it and try again.");
+    }
+  }
+
+  resendBtn.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    if (!email) return;
+    errorEl.style.display = 'none';
+    resendBtn.disabled = true;
+    resendBtn.textContent = 'Sending...';
+    try {
+      await requestCode(email);
+      startResendCountdown();
+    } catch (err) {
+      showLoginError(err instanceof TypeError ? "We couldn't reach SkillMe. Check your connection and try again." : err.message);
+      resendBtn.disabled = false;
+      resendBtn.textContent = 'Resend code';
+    }
+  });
+
+  changeEmailBtn.addEventListener('click', () => {
+    errorEl.style.display = 'none';
+    showEmailStep();
+  });
+
+  // Codes arrive as "123456" or "123 456": keep digits only, and sign in once all 6 are there.
+  otpInput.addEventListener('input', () => {
+    const digits = otpInput.value.replace(/\D/g, '').slice(0, 6);
+    if (otpInput.value !== digits) otpInput.value = digits;
+    if (digits.length === 6 && loginState === 'otp' && !loginBtn.disabled) loginForm.requestSubmit();
+  });
 
   // Login handler
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const emailInput = document.getElementById('login-email');
-    const otpInput = document.getElementById('login-otp');
     const email = emailInput.value.trim();
     const otp = otpInput.value.trim();
 
     errorEl.style.display = 'none';
 
-    try {
-      if (loginState === 'email') {
-        if (!email) throw new Error('Please enter a valid email address');
-        
-        // INSTANT OPTIMISTIC UI: Reveal OTP field immediately on click
-        document.getElementById('otp-wrap').style.display = 'block';
-        emailInput.readOnly = true;
-        loginState = 'otp';
-        loginBtn.textContent = 'Verify OTP & Enter →';
-        loginBtn.disabled = false;
-        loginBtn.style.opacity = '1';
-        otpInput.focus();
+    if (loginState === 'email') {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showLoginError('Please enter the email address you applied with.');
 
-        // Dispatch background request for OTP code
-        fetch(`${API}/api/auth/request-otp`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email })
-        }).then(async (res) => {
-          if (!res.ok) {
-            const errData = await res.json().catch(() => ({ detail: 'Failed to send OTP email' }));
-            errorEl.textContent = errData.detail || 'Failed to send OTP. Please try again.';
-            errorEl.style.display = 'block';
-          }
-        }).catch((err) => {
-          console.warn("Background OTP request notice:", err);
-        });
-
-      } else if (loginState === 'otp') {
-        if (!otp) throw new Error('Please enter the 6-digit OTP code sent to your email');
-        
-        loginBtn.disabled = true;
-        loginBtn.style.opacity = '0.7';
-        loginBtn.textContent = 'Verifying Code...';
-
-        const authRes = await fetch(`${API}/api/auth/verify-otp`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, otp })
-        });
-        
-        if (!authRes.ok) {
-          loginBtn.disabled = false;
-          loginBtn.style.opacity = '1';
-          loginBtn.textContent = 'Verify OTP & Enter →';
-          const errData = await authRes.json().catch(() => ({ detail: 'Invalid OTP' }));
-          throw new Error(errData.detail || 'Invalid or expired OTP');
-        }
-
-        const authData = await authRes.json();
-        if (authData.token) {
-          localStorage.setItem('token', authData.token);
-        }
-        localStorage.setItem('skillme_email', email);
-
-        // Successfully verified. Now load student dashboard data.
-        const res = await fetch(`${API}/api/students/progress/${encodeURIComponent(email)}`, {
-          headers: { 'Authorization': `Bearer ${authData.token}` }
-        });
-        
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({ detail: 'Something went wrong loading dashboard' }));
-          throw new Error(errData.detail || 'Failed to load dashboard data');
-        }
-
-        const data = await res.json();
-        data._email = email;
-        renderDashboard(data);
-
-        // Transition to dashboard view
-        loginView.style.opacity = '0';
-        loginView.style.transform = 'translateY(-20px)';
-        loginView.style.transition = 'all 0.4s ease';
-
-        setTimeout(() => {
-          if (data.progress && data.progress.length === 0) {
-            loginView.style.display = 'none';
-            document.getElementById('unenrolled-view').style.display = 'flex';
-          } else {
-            loginView.style.display = 'none';
-            dashView.style.display = 'block';
-            dashView.style.opacity = '1';
-            dashView.style.transform = 'translateY(0)';
-          }
-          if (lenis) lenis.resize();
-        }, 400);
+      // Optimistic: show the code field right away (cold starts can be slow), and step
+      // back to the email field if the code can't be sent.
+      showOtpStep(email);
+      try {
+        await requestCode(email);
+      } catch (err) {
+        showEmailStep();
+        showLoginError(err instanceof TypeError ? "We couldn't reach SkillMe. Check your connection and try again." : err.message);
       }
+      return;
+    }
+
+    if (otp.length !== 6) return showLoginError('Enter the 6-digit code from your email.');
+
+    setLoginBusy(true, 'Signing in...');
+    try {
+      const authRes = await fetch(`${API}/api/auth/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp })
+      });
+      if (!authRes.ok) {
+        const errData = await authRes.json().catch(() => ({}));
+        throw new Error(errData.detail || 'That code is wrong or has expired. Try again or resend it.');
+      }
+
+      const authData = await authRes.json();
+      if (authData.token) localStorage.setItem('token', authData.token);
+      localStorage.setItem('skillme_email', email);
+
+      // Successfully verified. Now load student dashboard data.
+      const res = await fetch(`${API}/api/students/progress/${encodeURIComponent(email)}`, { headers: authHeaders() });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.detail || "Signed in, but we couldn't load your dashboard. Please refresh.");
+      }
+
+      const data = await res.json();
+      data._email = email;
+      clearInterval(resendTimer);
+      renderDashboard(data);
+
+      // Transition to dashboard view
+      loginView.style.opacity = '0';
+      loginView.style.transform = 'translateY(-20px)';
+      loginView.style.transition = 'all 0.4s ease';
+
+      setTimeout(() => {
+        loginView.style.display = 'none';
+        if (data.progress && data.progress.length === 0) {
+          showUnenrolled(data);
+        } else {
+          dashView.style.display = 'block';
+          dashView.style.opacity = '1';
+          dashView.style.transform = 'translateY(0)';
+        }
+        if (lenis) lenis.resize();
+      }, 400);
     } catch (err) {
-      errorEl.textContent = err.message || 'An error occurred';
-      errorEl.style.display = 'block';
-      loginBtn.disabled = false;
-      loginBtn.style.opacity = '1';
-      loginBtn.textContent = loginState === 'otp' ? 'Verify OTP & Enter →' : 'Get Login Code';
+      setLoginBusy(false, LABEL_OTP);
+      showLoginError(err instanceof TypeError ? "We couldn't reach SkillMe. Check your connection and try again." : (err.message || 'Something went wrong. Please try again.'));
+      otpInput.select();
     }
   });
 
@@ -361,7 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
       avatarEl.textContent = initials || '·';
     }
 
-    const hodUrl = `offer.html?view=hod&student_id=${student.id || ''}&name=${encodeURIComponent(student.name || '')}&domain=${encodeURIComponent(student.domain || '')}&college=${encodeURIComponent(student.college || '')}`;
+    const hodUrl = `offer.html?view=hod&student_id=${student.id || ''}&ref=${encodeURIComponent(student.offer_ref || '')}&name=${encodeURIComponent(student.name || '')}&domain=${encodeURIComponent(student.domain || '')}&college=${encodeURIComponent(student.college || '')}`;
     const hodQuickLink = document.getElementById('dash-quick-hod');
     if (hodQuickLink) hodQuickLink.href = hodUrl;
 
@@ -494,36 +570,50 @@ document.addEventListener('DOMContentLoaded', () => {
       // sets summary.payment_unlocked — before the payment banner appears.
       const paymentUnlocked = !!(data.summary && data.summary.payment_unlocked);
       const certSection = document.getElementById('cert-section');
-      if (certSection) {
-        let isPaid = false;
-        if (student.id && data._batch_id) {
-          if (urlParams.get('preview') === 'paid') {
-            isPaid = true;
-          } else {
-            try {
-              const payStatus = await fetch(`${API}/api/payments/status/${student.id}/${data._batch_id}`);
-              const payData = await payStatus.json();
-              if (payData.status === 'paid') isPaid = true;
-            } catch(e) {}
-          }
+      const credLockedStrip = document.getElementById('cred-locked-strip');
+      const credNudgeBanner = document.getElementById('cred-nudge-banner');
+      const hideCredHints = () => {
+        if (credLockedStrip) credLockedStrip.style.display = 'none';
+        if (credNudgeBanner) credNudgeBanner.style.display = 'none';
+      };
+      // 'paid' | 'unpaid' | 'unknown'. 'unknown' (the check failed) must never show the
+      // pay banner — a student who already paid could be charged twice.
+      async function fetchPayState() {
+        if (!student.id || !data._batch_id) return 'unpaid';
+        if (urlParams.get('preview') === 'paid') return 'paid';
+        try {
+          const payStatus = await fetch(`${API}/api/payments/status/${student.id}/${data._batch_id}`);
+          if (!payStatus.ok) return 'unknown';
+          const payData = await payStatus.json();
+          return payData.status === 'paid' ? 'paid' : 'unpaid';
+        } catch (e) {
+          return 'unknown';
         }
-
-        const credLockedStrip = document.getElementById('cred-locked-strip');
-        const credNudgeBanner = document.getElementById('cred-nudge-banner');
-        if (isPaid) {
+      }
+      async function renderCredentials() {
+        const eligible = pct >= PAYMENT_UNLOCK_PCT || paymentUnlocked;
+        const payState = await fetchPayState();
+        if (payState === 'paid') {
           renderCertReady(certSection, student, data);
-          if (credLockedStrip) credLockedStrip.style.display = 'none';
-          if (credNudgeBanner) credNudgeBanner.style.display = 'none';
-        } else if (pct >= PAYMENT_UNLOCK_PCT || paymentUnlocked) {
+          hideCredHints();
+        } else if (eligible && payState === 'unknown') {
+          certSection.style.display = 'block';
+          certSection.innerHTML = `<div class="cert-status-error" role="alert">
+              <p><strong>We couldn't confirm your certificate payment.</strong> Please check again before paying, so you're never charged twice.</p>
+              <button type="button" class="cert-btn cert-btn-primary pay-status-retry">Check again</button>
+            </div>`;
+          certSection.querySelector('.pay-status-retry').addEventListener('click', renderCredentials);
+          hideCredHints();
+        } else if (eligible) {
           renderPaymentBanner(certSection, student, data);
-          if (credLockedStrip) credLockedStrip.style.display = 'none';
-          if (credNudgeBanner) credNudgeBanner.style.display = 'none';
+          hideCredHints();
         } else {
           certSection.style.display = 'none';
           certSection.innerHTML = '';
           if (credLockedStrip) credLockedStrip.style.display = 'grid';
         }
       }
+      if (certSection) await renderCredentials();
 
       // ─── Urgent (24h) Processing Request Panel ───
       loadUrgentRequestPanel(student, data, pct, paymentUnlocked);
@@ -771,17 +861,43 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    setTasksError(false);
     try {
       const res = await fetch(`${API}/api/tasks/current/${student.id}/${batchId}`);
-      if (!res.ok) {
-        renderTasks([], {}, submissions, { studentId: student.id, batchId });
-        return;
-      }
+      if (!res.ok) throw new Error('tasks ' + res.status);
       const taskData = await res.json();
       renderTasks(taskData.tasks || [], taskData.linkedin_templates || {}, submissions, { studentId: student.id, batchId });
     } catch (e) {
+      // A failed load is not "no tasks yet": say so, and offer a retry.
       renderTasks([], {}, submissions, { studentId: student.id, batchId });
+      setTasksError(true, () => loadAndRenderTasks(data));
     }
+  }
+
+  function setTasksError(on, retry) {
+    const box = document.getElementById('tasks-empty');
+    if (!box) return;
+    const h3 = box.querySelector('h3');
+    const p = box.querySelector('p');
+    if (!box.dataset.defaultTitle) {
+      box.dataset.defaultTitle = h3.textContent;
+      box.dataset.defaultText = p.textContent;
+    }
+    const oldBtn = box.querySelector('.tasks-retry');
+    if (oldBtn) oldBtn.remove();
+    if (!on) {
+      h3.textContent = box.dataset.defaultTitle;
+      p.textContent = box.dataset.defaultText;
+      return;
+    }
+    h3.textContent = "We couldn't load your tasks";
+    p.textContent = 'This is usually a connection hiccup. Your progress is safe.';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'cert-btn cert-btn-secondary tasks-retry';
+    btn.textContent = 'Try again';
+    btn.addEventListener('click', () => { btn.disabled = true; btn.textContent = 'Loading...'; retry(); });
+    box.append(btn);
   }
 
   function renderTasks(tasks, templates, submissions, ctx) {
@@ -913,13 +1029,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="task-step-title">${isLocked ? 'Your submitted post' : 'Submit your post link'}</div>
                 <div class="task-submit">
                   <div class="login-input-wrap">
-                    <input type="url" id="${inputId}" placeholder="https://www.linkedin.com/posts/…" aria-label="LinkedIn post URL for week ${week}" value="${sub && sub.linkedin_url ? esc(sub.linkedin_url) : ''}" ${isLocked ? 'disabled' : ''}>
+                    <input type="url" id="${inputId}" placeholder="https://www.linkedin.com/posts/…" aria-label="LinkedIn post URL for week ${week}" aria-describedby="${inputId}-error" value="${sub && sub.linkedin_url ? esc(sub.linkedin_url) : ''}" ${isLocked ? 'disabled' : ''}>
                   </div>
                   <button id="${btnId}" class="cert-btn cert-btn-primary" ${isLocked ? 'disabled' : ''}
                     onclick="window.submitTaskForReview(${ctx ? ctx.studentId : 'null'}, ${ctx ? ctx.batchId : 'null'}, ${week}, this)">
                     ${btnLabel}
                   </button>
                 </div>
+                <p class="task-submit-error" id="${inputId}-error" role="alert" hidden></p>
                 ${isLocked
                   ? (sub && sub.linkedin_url ? `<a class="task-view-post" href="${esc(sub.linkedin_url)}" target="_blank" rel="noopener noreferrer">View post on LinkedIn ↗</a>` : '')
                   : `<p class="task-hint">On your post, click <strong>⋯ → Copy link to post</strong>. GitHub, Figma, notebook or live-site links go inside the post, not here.</p>`}
@@ -977,21 +1094,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Submit a week's LinkedIn post URL for admin review ---
   window.submitTaskForReview = async function(studentId, batchId, week, btn) {
+    const input = document.getElementById(`sub-url-input-w${week}`);
+    const errEl = document.getElementById(`sub-url-input-w${week}-error`);
+    // Problems with the link show right under the field, not in a pop-up.
+    const showFieldError = (msg) => {
+      if (errEl) { errEl.textContent = msg; errEl.hidden = !msg; }
+      if (input) {
+        if (msg) input.setAttribute('aria-invalid', 'true'); else input.removeAttribute('aria-invalid');
+        if (msg) input.focus();
+      }
+    };
+    if (input && !input.dataset.errWired) {
+      input.dataset.errWired = '1';
+      input.addEventListener('input', () => showFieldError(''));
+    }
     if (!studentId || !batchId) {
-      alert('Missing enrollment info. Please refresh the page and try again.');
+      showFieldError("We couldn't find your enrollment. Please refresh the page and try again.");
       return;
     }
-    const input = document.getElementById(`sub-url-input-w${week}`);
     const url = input ? input.value.trim() : '';
     if (!url) {
-      alert('Please paste your LinkedIn post URL first.');
+      showFieldError('Paste your LinkedIn post link first.');
       return;
     }
     const urlProblem = linkedinPostUrlProblem(url);
     if (urlProblem) {
-      alert(urlProblem);
+      showFieldError(urlProblem);
       return;
     }
+    showFieldError('');
 
     const originalText = btn.textContent;
     btn.disabled = true;
@@ -1006,11 +1137,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const resData = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        alert(resData.detail || 'Could not submit for review. Please try again.');
+        if (res.status === 401) return sessionExpired();
+        showFieldError(resData.detail || 'Could not submit for review. Please try again.');
         btn.disabled = false;
         btn.textContent = originalText;
         return;
       }
+      dashToast(`Week ${week} submitted. We'll review it and email you.`);
 
       // Update local cache and re-render both the task card and the submissions history
       if (window._dashData) {
@@ -1033,18 +1166,19 @@ document.addEventListener('DOMContentLoaded', () => {
         loadAndRenderTasks(window._dashData);
       }
     } catch (e) {
-      alert('Network error while submitting. Please try again.');
+      showFieldError("We couldn't reach SkillMe. Check your connection and try again.");
       btn.disabled = false;
       btn.textContent = originalText;
     }
   };
 
-  function signOut() {
+  // A 401 mid-session: the token expired. Send the student back to sign in.
+  function sessionExpired() {
     localStorage.removeItem('token');
-    fetch(`${API}/api/auth/logout`, { method: 'POST' }).catch(() => {});
-    window.location.reload();
+    localStorage.removeItem('skillme_email');
+    dashToast('Your session has expired. Please sign in again.', 'error');
+    setTimeout(() => window.location.reload(), 1800);
   }
-  window.signOut = signOut;
 
   // --- Staggered Entrance Animations ---
   function animateDashboardEntrance() {
@@ -1137,9 +1271,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // 🏆🏆🏆 Payment Modal Helpers 🏆🏆🏆
     window.closePaymentModal = function() {
       const modal = document.getElementById('payment-modal');
-      if (modal) {
+      if (modal && modal.classList.contains('active')) {
         modal.classList.remove('active');
         setTimeout(() => modal.style.display = 'none', 400); // match transition duration
+        modalClosed();
       }
     };
     
@@ -1155,6 +1290,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Force reflow
         void modal.offsetWidth;
         modal.classList.add('active');
+        modalOpened(modal);
       }
     };
 
@@ -1373,7 +1509,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const student = window._dashStudent;
     const data = window._dashData;
     if (!student || !data || !student.id || !data._batch_id) {
-      alert('Student data not loaded yet. Please refresh the page.');
+      dashToast('Your dashboard is still loading. Please refresh the page.', 'error');
       return;
     }
 
@@ -1393,10 +1529,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const resData = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        alert(resData.detail || 'Could not submit request. Please try again.');
+        if (res.status === 401) return sessionExpired();
+        dashToast(resData.detail || 'Could not submit request. Please try again.', 'error');
         if (btn) { btn.disabled = false; btn.textContent = 'Request Priority Processing'; }
         return;
       }
+      dashToast('Request sent. We\'ll review it within 24 hours.');
 
       renderUrgentRequestState(student, data, {
         request_type: requestType,
@@ -1407,7 +1545,7 @@ document.addEventListener('DOMContentLoaded', () => {
         resolved_at: null
       });
     } catch (e) {
-      alert('Network error while submitting. Please try again.');
+      dashToast("We couldn't reach SkillMe. Check your connection and try again.", 'error');
       if (btn) { btn.disabled = false; btn.textContent = 'Request Priority Processing'; }
     }
   };
@@ -1420,8 +1558,26 @@ document.addEventListener('DOMContentLoaded', () => {
       const discountInputMilestone = document.getElementById('discount-code-milestone');
       const discountCode = (discountInputBanner && discountInputBanner.value.trim()) || (discountInputMilestone && discountInputMilestone.value.trim()) || null;
       
+      const PAY_LABEL = 'Unlock My Certificate — ₹129';
+      const resetPayButtons = () => {
+        if (btn) { btn.disabled = false; btn.textContent = PAY_LABEL; }
+        if (modalBtn) { modalBtn.disabled = false; modalBtn.textContent = PAY_LABEL; }
+      };
+      // Charged but not confirmed: keep this on screen (not a pop-up) with what support needs.
+      const showPaymentProblem = (title, paymentId) => {
+        window.closePaymentModal();
+        const certSection = document.getElementById('cert-section');
+        if (!certSection) return dashToast(title, 'error');
+        certSection.style.display = 'block';
+        certSection.innerHTML = `<div class="cert-status-error" role="alert">
+            <p><strong>${escHtml(title)}</strong> If money left your account, it is safe: write to
+            <a href="mailto:admin@skill-me-intern.in?subject=${encodeURIComponent('Payment check ' + (paymentId || ''))}">admin@skill-me-intern.in</a>${paymentId ? ` with payment ID <code>${escHtml(paymentId)}</code>` : ''} and we'll sort it out.</p>
+            <button type="button" class="cert-btn cert-btn-secondary" onclick="window.location.reload()">Refresh status</button>
+          </div>`;
+      };
+
       if (btn) { btn.disabled = true; btn.textContent = 'Creating order...'; }
-    if (modalBtn) { modalBtn.disabled = true; modalBtn.textContent = 'Creating order...'; }
+      if (modalBtn) { modalBtn.disabled = true; modalBtn.textContent = 'Creating order...'; }
 
     try {
       // 1. Create Razorpay order on backend
@@ -1430,12 +1586,11 @@ document.addEventListener('DOMContentLoaded', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ student_id: studentId, batch_id: batchId, discount_code: discountCode })
       });
-      const orderData = await orderRes.json();
+      const orderData = await orderRes.json().catch(() => ({}));
 
       if (!orderRes.ok) {
-        alert(orderData.detail || 'Could not create payment order. Try again.');
-        if (btn) { btn.disabled = false; btn.innerHTML = 'Unlock My Certificate — ₹129'; }
-        if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = 'Unlock My Certificate — ₹129'; }
+        dashToast(orderData.detail || 'Could not start the payment. Please try again.', 'error');
+        resetPayButtons();
         return;
       }
 
@@ -1476,8 +1631,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modal: {
           ondismiss: function () {
             // User closed Razorpay popup without completing payment
-            if (btn) { btn.disabled = false; btn.innerHTML = 'Unlock My Certificate — ₹129'; }
-            if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = 'Unlock My Certificate — ₹129'; }
+            resetPayButtons();
           }
         },
         handler: async function (response) {
@@ -1496,21 +1650,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 razorpay_signature: response.razorpay_signature
               })
             });
-            const verifyData = await verifyRes.json();
+            const verifyData = await verifyRes.json().catch(() => ({}));
             if (verifyRes.ok && verifyData.status === 'success') {
               // 5. Show download banner!
               const certSection = document.getElementById('cert-section');
               renderCertReady(certSection, window._dashStudent, window._dashData);
               window.closePaymentModal();
+              dashToast('Payment confirmed. Your certificate is ready.');
             } else {
-              alert('Payment verification failed: ' + (verifyData.detail || 'Please contact support.'));
-              if (btn) { btn.disabled = false; btn.innerHTML = 'Unlock My Certificate — ₹129'; }
-              if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = 'Unlock My Certificate — ₹129'; }
+              showPaymentProblem("We couldn't confirm your payment yet.", response.razorpay_payment_id);
             }
           } catch(err) {
-            alert('Network error during verification. Your payment may have been processed — please refresh.');
-            if (btn) { btn.disabled = false; btn.innerHTML = 'Unlock My Certificate — ₹129'; }
-            if (modalBtn) { modalBtn.disabled = false; modalBtn.innerHTML = 'Unlock My Certificate — ₹129'; }
+            showPaymentProblem('Your payment may have gone through, but we lost connection while confirming it.', response.razorpay_payment_id);
           }
         }
       };
@@ -1519,8 +1670,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     } catch(err) {
       console.error('Payment error:', err);
-      alert('Payment service unavailable. Please try again.');
-      if (btn) { btn.disabled = false; btn.innerHTML = '💳 Pay ₹129 &amp; Get Certificate'; }
+      dashToast('The payment service is unavailable right now. Please try again in a minute.', 'error');
+      resetPayButtons();
     }
   };
 
@@ -1791,7 +1942,7 @@ function resolveMilestoneContext(data) {
   // Portfolio pages are keyed off the student's ID.
   // The LinkedIn-based submission flow handles verification natively.
   const portfolioUrl = student.id ? `${PROD_BASE}/portfolio.html?student_id=${student.id}` : '#';
-  const offerUrl = `${PROD_BASE}/offer.html?name=${encodeURIComponent(student.name || '')}&domain=${encodeURIComponent(domain)}&student_id=${student.id || ''}&college=${encodeURIComponent(student.college || '')}`;
+  const offerUrl = `${PROD_BASE}/offer.html?name=${encodeURIComponent(student.name || '')}&domain=${encodeURIComponent(domain)}&student_id=${student.id || ''}&ref=${encodeURIComponent(student.offer_ref || '')}&college=${encodeURIComponent(student.college || '')}`;
   const certUrl = `${PROD_BASE}/certificate.html?student_id=${student.id || ''}&domain=${encodeURIComponent(domain)}`;
 
   // Identify the latest approved LinkedIn submission (the "latest milestone")
@@ -2009,6 +2160,7 @@ Join me on SkillMe to work on real projects and level up your resume:
   modal.style.display = 'flex';
   void modal.offsetWidth;
   modal.classList.add('active');
+  modalOpened(modal);
 
   // Trigger Confetti
   triggerMilestoneConfetti();
@@ -2016,9 +2168,10 @@ Join me on SkillMe to work on real projects and level up your resume:
 
 window.closeMilestoneModal = function() {
   const modal = document.getElementById('milestone-modal');
-  if (modal) {
+  if (modal && modal.classList.contains('active')) {
     modal.classList.remove('active');
     setTimeout(() => { modal.style.display = 'none'; }, 350);
+    modalClosed();
   }
 };
 

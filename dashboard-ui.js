@@ -167,6 +167,21 @@
     window.dashSetTheme(currentTheme() === 'dark' ? 'light' : 'dark');
   });
 
+  // Tab stays inside an open dialog
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Tab') return;
+    var card = document.querySelector('.payment-modal-overlay.active [role="dialog"], .milestone-modal-overlay.active [role="dialog"]');
+    if (!card) return;
+    var items = Array.prototype.filter.call(
+      card.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'),
+      function (el) { return !el.disabled && el.offsetParent !== null; }
+    );
+    if (!items.length) return;
+    var first = items[0], last = items[items.length - 1];
+    if (e.shiftKey && (document.activeElement === first || !card.contains(document.activeElement))) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && (document.activeElement === last || !card.contains(document.activeElement))) { e.preventDefault(); first.focus(); }
+  });
+
   // Escape closes whichever modal is open
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape') return;
