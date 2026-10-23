@@ -71,7 +71,7 @@ async def request_otp(email: str) -> dict:
     """
     # Check student exists
     student = await db.fetch_one(
-        "SELECT id, first_name, last_name, status FROM students WHERE email = ?",
+        "SELECT id, first_name, last_name, status FROM students WHERE lower(email) = ? ORDER BY id DESC",
         (email.lower().strip(),)
     )
     if not student:
@@ -115,9 +115,9 @@ async def verify_otp(email: str, otp: str) -> Optional[str]:
     row = await db.fetch_one(
         """SELECT o.id, o.expires_at, s.id as student_id, s.email as student_email 
            FROM otp_tokens o
-           JOIN students s ON s.email = o.email
+           JOIN students s ON lower(s.email) = o.email
            WHERE o.email = ? AND o.otp_hash = ? AND o.used = 0
-           ORDER BY o.created_at DESC LIMIT 1""",
+           ORDER BY o.created_at DESC, s.id DESC LIMIT 1""",
         (email, otp_hash),
     )
 

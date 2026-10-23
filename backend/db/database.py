@@ -175,6 +175,9 @@ class Database:
             # Screening quiz score submitted with the application (v9)
             "ALTER TABLE students ADD COLUMN quiz_score INTEGER",
             "ALTER TABLE students ADD COLUMN quiz_total INTEGER",
+            # One application per (email, track) (v10). Databases created before v10 also need
+            # scripts/migrate_multi_domain.py to drop the old UNIQUE(email) column constraint.
+            "CREATE UNIQUE INDEX IF NOT EXISTS ux_students_email_domain ON students(lower(email), domain)",
         ]
         return migrations
 

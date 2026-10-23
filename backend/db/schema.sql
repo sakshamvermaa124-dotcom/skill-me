@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS students (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
-    email TEXT NOT NULL UNIQUE,
+    email TEXT NOT NULL,                  -- one row per (email, domain): a student can apply to several tracks
     phone TEXT,
     github_username TEXT,
     linkedin_url TEXT,
@@ -87,6 +87,7 @@ CREATE TABLE IF NOT EXISTS progress (
 
 -- Index for common queries
 CREATE INDEX IF NOT EXISTS idx_students_email ON students(email);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_students_email_domain ON students(lower(email), domain);
 CREATE INDEX IF NOT EXISTS idx_students_github ON students(github_username);
 -- Admin student list: newest-first pages, optionally filtered by status
 CREATE INDEX IF NOT EXISTS idx_students_created ON students(created_at);

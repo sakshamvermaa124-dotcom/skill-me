@@ -188,6 +188,8 @@ async def list_students(
         f"""SELECT s.id, s.first_name, s.last_name, s.email, s.phone, s.github_username,
                    s.linkedin_url, s.college, s.year_of_study, s.domain, s.status,
                    s.quiz_score, s.quiz_total, s.created_at, s.updated_at,
+                   (SELECT group_concat(o.domain, ', ') FROM students o
+                     WHERE lower(o.email) = lower(s.email) AND o.id != s.id) AS other_domains,
                    {_CURRENT_BATCH_ID_SUBQUERY} AS batch_id,
                    CASE WHEN {paid_exists} THEN 1 ELSE 0 END AS has_paid,
                    (SELECT p.updated_at FROM payments p

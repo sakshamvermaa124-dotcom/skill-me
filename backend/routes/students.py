@@ -54,6 +54,42 @@ class UrgentRequestRequest(BaseModel):
 
 
 # ──────────────────────────────────────────────
+# Applications (one student row per email + track)
+# ──────────────────────────────────────────────
+
+async def _applications_for_email(email: str) -> list[dict]:
+    """Every application made with this email, newest first, with its enrollment state."""
+    rows = await db.fetch_all(
+        """SELECT id, first_name, domain, status, created_at
+           FROM students WHERE lower(email) = lower(?)
+           ORDER BY created_at DESC, id DESC""",
+        (email.strip(),),
+    )
+    apps = []
+    for row in rows:
+        enrollment = await enrollment_service.get_current_enrollment(row["id"])
+        domain = (enrollment["domain"] if enrollment else None) or row["domain"]
+        apps.append({
+            "student_id": row["id"],
+            "first_name": row["first_name"],
+            "domain": domain,
+            "domain_label": _domain_label(domain or ""),
+            "status": row["status"],
+            "enrollment_status": enrollment["status"] if enrollment else None,
+            "created_at": row["created_at"],
+        })
+    return apps
+
+
+def _pick_primary(apps: list[dict]) -> dict | None:
+    """The application shown by default: an active internship, else the newest one."""
+    for app in apps:
+        if app["enrollment_status"] and app["enrollment_status"] != "dropped":
+            return app
+    return apps[0] if apps else None
+
+
+# ──────────────────────────────────────────────
 # Ownership
 # ──────────────────────────────────────────────
 
@@ -74,44 +110,55 @@ async def _assert_owns(me: dict, student_id: int) -> None:
 async def apply(req: ApplicationRequest, background_tasks: BackgroundTasks):
     """
     Submit a new student application.
-    This is called by the apply.html form.
+    This is called by the apply.html form. One application per (email, track): the same
+    email can apply to several tracks.
     """
     try:
-        # Check for duplicate email
         req.email = req.email.strip()
         existing = await db.fetch_one(
-            "SELECT id, status FROM students WHERE lower(email) = lower(?)", (req.email,)
+            "SELECT id, status FROM students WHERE lower(email) = lower(?) AND domain = ?",
+            (req.email, req.domain),
         )
         if existing:
             return {
                 "status": "already_applied",
-                "message": "An application with this email already exists.",
+                "message": "You've already applied for this track with this email.",
                 "student_id": existing["id"],
                 "current_status": existing["status"],
             }
 
-        # Insert student record
-        student_id = await db.insert(
-            """INSERT INTO students
-               (first_name, last_name, email, phone, linkedin_url,
-                college, year_of_study, domain, motivation, referral_source,
-                quiz_score, quiz_total, status)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'applied')""",
-            (
-                req.first_name,
-                req.last_name,
-                req.email,
-                req.phone,
-                req.linkedin_url,
-                req.college,
-                req.year_of_study,
-                req.domain,
-                req.motivation,
-                req.referral_source,
-                req.quiz_score,
-                req.quiz_total,
-            ),
-        )
+        try:
+            student_id = await db.insert(
+                """INSERT INTO students
+                   (first_name, last_name, email, phone, linkedin_url,
+                    college, year_of_study, domain, motivation, referral_source,
+                    quiz_score, quiz_total, status)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'applied')""",
+                (
+                    req.first_name,
+                    req.last_name,
+                    req.email,
+                    req.phone,
+                    req.linkedin_url,
+                    req.college,
+                    req.year_of_study,
+                    req.domain,
+                    req.motivation,
+                    req.referral_source,
+                    req.quiz_score,
+                    req.quiz_total,
+                ),
+            )
+        except Exception as e:
+            # A database not yet migrated (scripts/migrate_multi_domain.py) still has
+            # UNIQUE(email), so a second track can't be stored there.
+            if "unique" in str(e).lower():
+                raise HTTPException(
+                    status_code=409,
+                    detail="You already have an application with this email. Applying for a second track "
+                           "isn't available yet; please write to admin@skill-me-intern.in.",
+                )
+            raise
 
         # Fire confirmation email in the background (non-blocking)
         background_tasks.add_task(
@@ -136,46 +183,52 @@ async def apply(req: ApplicationRequest, background_tasks: BackgroundTasks):
 
 @router.get("/status/{email}", summary="Check application status")
 async def check_status(email: str):
-    """Check the status of a student's application by email."""
-    student = await db.fetch_one(
-        "SELECT id, first_name, status, created_at FROM students WHERE lower(email) = lower(?)",
-        (email.strip(),),
-    )
-    if not student:
+    """Public status lookup for the apply page: every track applied for with this email."""
+    apps = await _applications_for_email(email)
+    if not apps:
         raise HTTPException(status_code=404, detail="No application found with this email")
-
-    enrollment = await enrollment_service.get_current_enrollment(student["id"])
-    enrollments = (
-        [{"domain": enrollment["domain"], "enrollment_status": enrollment["status"]}]
-        if enrollment else []
-    )
+    primary = _pick_primary(apps)
 
     # Public endpoint: only what the apply page's status view needs, nothing personal.
     return {
+        "applications": [
+            {k: a[k] for k in ("domain", "domain_label", "status", "enrollment_status", "created_at")}
+            for a in apps
+        ],
+        # Single-application shape kept for older pages
         "student": {
-            "first_name": student["first_name"],
-            "status": student["status"],
-            "created_at": student["created_at"],
+            "first_name": primary["first_name"],
+            "status": primary["status"],
+            "created_at": primary["created_at"],
         },
-        "enrollments": enrollments,
+        "enrollments": (
+            [{"domain": primary["domain"], "enrollment_status": primary["enrollment_status"]}]
+            if primary["enrollment_status"] else []
+        ),
     }
+
+
+@router.get("/applications", summary="The signed-in student's applications")
+async def my_applications(me: dict = Depends(require_student)):
+    """Every track this email has applied for, plus the one the dashboard should open."""
+    apps = await _applications_for_email(me["email"])
+    primary = _pick_primary(apps)
+    return {"applications": apps, "default_student_id": primary["student_id"] if primary else None}
 
 
 @router.get("/progress/{email}", summary="Get student progress")
 async def get_progress(email: str, me: dict = Depends(require_student)):
-    """Get the signed-in student's internship progress by email."""
+    """The signed-in student's progress for their main application (see /applications)."""
     if email.strip().lower() != (me["email"] or "").lower():
         raise HTTPException(status_code=403, detail="You can only access your own internship.")
-    return await _progress_for_email(email)
-
-
-async def _progress_for_email(email: str) -> dict:
-    student = await db.fetch_one(
-        "SELECT * FROM students WHERE lower(email) = lower(?)", (email.strip(),)
-    )
-    if not student:
+    primary = _pick_primary(await _applications_for_email(email))
+    if not primary:
         raise HTTPException(status_code=404, detail="Student not found with this email.")
+    student = await db.fetch_one("SELECT * FROM students WHERE id = ?", (primary["student_id"],))
+    return await _progress_for_student(student)
 
+
+async def _progress_for_student(student: dict) -> dict:
     # Everything on the dashboard is scoped to the student's single current enrollment,
     # so stale rows from an old/dropped enrollment can never leak in.
     enrollment = await enrollment_service.get_current_enrollment(student["id"])
@@ -242,7 +295,7 @@ async def _progress_for_email(email: str) -> dict:
 
 @router.get("/progress/id/{student_id}", summary="Get student progress by ID")
 async def get_progress_by_id(student_id: int, me: dict = Depends(require_student)):
-    """Get the signed-in student's internship progress by student ID."""
+    """Progress for one of the signed-in student's applications."""
     await _assert_owns(me, student_id)
     student = await db.fetch_one(
         "SELECT * FROM students WHERE id = ?", (student_id,)
@@ -250,7 +303,7 @@ async def get_progress_by_id(student_id: int, me: dict = Depends(require_student
     if not student:
         raise HTTPException(status_code=404, detail="Student not found.")
 
-    return await _progress_for_email(student["email"])
+    return await _progress_for_student(student)
 
 
 @router.get("/offer/{student_id}/{ref}", summary="Verify an offer letter (public, signed reference)")
