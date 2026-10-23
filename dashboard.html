@@ -611,7 +611,7 @@
   <!-- Lenis smooth scroll -->
   <div id="dash-toast" class="dash-toast" role="status" aria-live="polite"></div>
   <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js" integrity="sha384-tKsJDT6PlUI0pSBt9/sBKJluKgA19/a6mBrDsZaXotLB4ZYfMGM6xt6/WgGpYhTm" crossorigin="anonymous" defer></script>
-  <script src="dashboard.js?v=61f4058d7a" defer></script>
+  <script src="dashboard.js?v=49c961c206" defer></script>
   <script src="dashboard-ui.js?v=e74a8796a3" defer></script>
 
   <!-- ══ Modals — siblings of .dash-page, outside the panel system ════════════
@@ -683,11 +683,11 @@
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span><strong>Public Proof of Work Portfolio</strong> (lifetime hosting)</span></li>
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span><strong>Letter of Recommendation</strong> for your domain</span></li>
         </ul>
-        <div class="payment-modal-price">₹129 <span>one-time, covers verification &amp; lifetime hosting</span></div>
+        <div class="payment-modal-price"><span class="js-cert-price"></span> <span>one-time, covers verification &amp; lifetime hosting</span></div>
         <input type="text" id="discount-code-milestone" aria-label="Discount code" class="dash-input dash-input--center" placeholder="Have a discount code?">
         <button id="modal-pay-btn" class="cert-btn cert-btn-primary cert-btn-block">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-          Unlock My Certificate — ₹129
+          Unlock My Certificate — <span class="js-cert-price"></span>
         </button>
         <div class="secure-note">
           🔒 Secured by Razorpay · UPI / Card / NetBanking · Every certificate is independently verifiable

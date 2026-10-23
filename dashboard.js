@@ -7,6 +7,8 @@
 const API = window.SKILLME_API || '${API}';
 // Certificate payment is asked for at the end — 3 of 4 approved tasks (see backend PAYMENT_UNLOCK_TASKS)
 const PAYMENT_UNLOCK_PCT = 75;
+// The certificate price is only ever shown here, to students who have reached PAYMENT_UNLOCK_PCT.
+const CERT_PRICE = '₹129';
 const FRONTEND = window.SKILLME_FRONTEND || '${FRONTEND}';
 
 // Task guides are markdown from the curriculum; render them sanitized, or as plain text
@@ -1331,7 +1333,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     window.showPaymentModal = function(student, data) {
       const modal = document.getElementById('payment-modal');
+      // Only students who have unlocked their credentials ever see the payment step (and price).
+      const summary = (data && data.summary) || {};
+      const eligible = (summary.completion_pct || 0) >= PAYMENT_UNLOCK_PCT || summary.payment_unlocked || urlParams.get('preview');
+      if (!eligible) return;
       if (modal) {
+        modal.querySelectorAll('.js-cert-price').forEach(el => { el.textContent = CERT_PRICE; });
         // Wire up the pay button dynamically
         const payBtn = document.getElementById('modal-pay-btn');
         if (payBtn) {
@@ -1358,7 +1365,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="cert-banner-text">
             <div class="cert-banner-title">Your credentials are unlocked</div>
             <div class="cert-banner-sub">
-              A one-time ₹129 covers your verified certificate, personalized LOR and lifetime hosting for your Proof of Work portfolio.
+              A one-time ${CERT_PRICE} covers your verified certificate, personalized LOR and lifetime hosting for your Proof of Work portfolio.
             </div>
           </div>
           <div class="cert-banner-actions" style="width: 100%;">
@@ -1368,7 +1375,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
                   <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
                 </svg>
-                Unlock My Certificate — ₹129
+                Unlock My Certificate — ${CERT_PRICE}
               </button>
             </div>
             <div class="secure-note">
@@ -1609,7 +1616,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const discountInputMilestone = document.getElementById('discount-code-milestone');
       const discountCode = (discountInputBanner && discountInputBanner.value.trim()) || (discountInputMilestone && discountInputMilestone.value.trim()) || null;
       
-      const PAY_LABEL = 'Unlock My Certificate — ₹129';
+      const PAY_LABEL = `Unlock My Certificate — ${CERT_PRICE}`;
       const resetPayButtons = () => {
         if (btn) { btn.disabled = false; btn.textContent = PAY_LABEL; }
         if (modalBtn) { modalBtn.disabled = false; modalBtn.textContent = PAY_LABEL; }
@@ -1833,8 +1840,8 @@ function showCompletionPopup(student, data, pct) {
         // Not paid — show pay CTA
         credArea.innerHTML = `
           <div class="completion-pay">
-            <p>One-time ₹129 unlocks your Certificate, LOR &amp; Portfolio — verified, downloadable, and yours for life</p>
-            <button class="cert-btn cert-btn-primary cert-btn-block" onclick="document.getElementById('completion-overlay').remove();setTimeout(()=>showPaymentModal(window._dashStudent,window._dashData),200);">Unlock My Certificate — ₹129</button>
+            <p>One-time ${CERT_PRICE} unlocks your Certificate, LOR &amp; Portfolio — verified, downloadable, and yours for life</p>
+            <button class="cert-btn cert-btn-primary cert-btn-block" onclick="document.getElementById('completion-overlay').remove();setTimeout(()=>showPaymentModal(window._dashStudent,window._dashData),200);">Unlock My Certificate — ${CERT_PRICE}</button>
           </div>`;
       }
     } catch(e) {
