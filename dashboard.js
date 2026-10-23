@@ -48,8 +48,16 @@ function modalClosed() {
 // One email can hold several applications (one per track). The dashboard opens the one
 // picked last time on this device, else the backend's default (an active internship).
 const APP_KEY = 'skillme_student_id';
-async function loadDashboardData() {
+async function loadDashboardData(email) {
   const appsRes = await fetch(`${API}/api/students/applications`, { headers: authHeaders() });
+  if (appsRes.status === 404 && email) {
+    // Backend without the multi-track endpoint yet: load the single application by email.
+    const res = await fetch(`${API}/api/students/progress/${encodeURIComponent(email)}`, { headers: authHeaders() });
+    if (!res.ok) throw Object.assign(new Error('progress'), { status: res.status });
+    const data = await res.json();
+    data._applications = [];
+    return data;
+  }
   if (!appsRes.ok) throw Object.assign(new Error('applications'), { status: appsRes.status });
   const { applications = [], default_student_id } = await appsRes.json();
   if (!applications.length) throw Object.assign(new Error('no applications'), { status: 404 });
@@ -222,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (!resolvedEmail) throw Object.assign(new Error('expired'), { status: 401 });
 
-      const data = await loadDashboardData();
+      const data = await loadDashboardData(resolvedEmail);
 
       // If user clicked sign out while fetch was pending, abort the restore process
       if (!localStorage.getItem('skillme_email') && !localStorage.getItem('token')) {
@@ -430,7 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Successfully verified. Now load student dashboard data.
       let data;
       try {
-        data = await loadDashboardData();
+        data = await loadDashboardData(email);
       } catch (e) {
         if (e instanceof TypeError) throw e;
         throw new Error("Signed in, but we couldn't load your dashboard. Please refresh.");
