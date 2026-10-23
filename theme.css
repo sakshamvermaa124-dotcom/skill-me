@@ -491,6 +491,17 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
 .center { text-align: center; }
 .nowrap { white-space: nowrap; }
 
+/* Sections focused by in-page links (tabindex="-1") don't need a ring */
+[tabindex="-1"]:focus:not(:focus-visible), section[tabindex="-1"]:focus { outline: none; }
+
+/* Touch screens: 44px targets, and 16px inputs so iOS Safari doesn't zoom on focus */
+@media (max-width: 640px) {
+  .input, .select, .textarea { font-size: 16px; }
+  .btn-sm, .chip { min-height: 44px; }
+  .icon-btn, .theme-toggle, .nav-menu-btn { width: 44px; height: 44px; }
+  .footer-col a { padding: 10px 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }

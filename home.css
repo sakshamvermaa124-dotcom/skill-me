@@ -33,8 +33,8 @@
   align-items: center;
 }
 .hero-badge {
-  display: inline-flex; align-items: center; gap: 10px;
-  height: 32px; padding: 0 14px 0 12px;
+  display: inline-flex; align-items: center; flex-wrap: wrap; gap: 4px 10px;
+  min-height: 32px; padding: 5px 14px 5px 12px;
   border: 1px solid var(--line);
   border-radius: var(--r-full);
   background: var(--surface);
@@ -438,7 +438,6 @@
   box-shadow: var(--shadow-xs);
   transition: border-color 0.2s, box-shadow 0.25s var(--ease), transform 0.25s var(--ease);
 }
-.audience-card:hover { border-color: var(--line-strong); box-shadow: var(--shadow-md); transform: translateY(-2px); }
 .audience-card p { font-size: 0.93rem; color: var(--text-2); }
 .audience-tag {
   align-self: flex-start; margin-bottom: 6px;
@@ -561,7 +560,7 @@
   background: var(--surface);
   border: 1px solid var(--line);
 }
-[data-theme="dark"] .cta-track-pill.active, [data-theme="dark"] .cta-track-pill[aria-pressed="true"] { color: var(--bg); }
+[data-theme="dark"] .cta-track-pill[aria-checked="true"] { color: var(--bg); }
 .cta-badge {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 5px 12px; border-radius: var(--r-full);
@@ -584,7 +583,7 @@
   transition: color 0.15s, border-color 0.15s, background-color 0.15s;
 }
 .cta-track-pill:hover { color: var(--cta-fg); border-color: var(--cta-fg-2); }
-.cta-track-pill.active, .cta-track-pill[aria-pressed="true"] { background: var(--cta-fg); border-color: var(--cta-fg); color: var(--invert); }
+.cta-track-pill[aria-checked="true"] { background: var(--cta-fg); border-color: var(--cta-fg); color: var(--invert); }
 .cta-track-pill:focus-visible { outline-color: var(--accent); }
 .cta-track-more { padding: 0 8px; font-size: 0.86rem; font-weight: 600; color: var(--accent); }
 .cta-track-more:hover { text-decoration: underline; text-underline-offset: 3px; }
@@ -602,9 +601,9 @@
 .cta-points strong { font-size: 0.92rem; font-weight: 600; color: var(--cta-fg); }
 .cta-points span { font-size: 0.82rem; color: var(--cta-fg-2); }
 
-/* ── Mobile sticky CTA ───────────────────────────────────────── */
+/* ── Mobile sticky CTA (phones + tablets, where the nav's Apply button is hidden) ── */
 .sticky-cta { display: none; }
-@media (max-width: 640px) {
+@media (max-width: 880px) {
   .sticky-cta {
     position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 90;
     display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -661,13 +660,14 @@
   .bento-wide { grid-template-columns: 1fr; }
   .cert-real img { transform: none; }
   .weeks-tabs { width: 100%; }
-  .weeks-tab { flex: 1; justify-content: center; padding: 0 6px; }
+  .weeks-tab { flex: 1; justify-content: center; padding: 0 6px; min-height: 44px; }
   .week-panel { grid-template-columns: 1fr; }
   .domain-search { max-width: none; }
   .not-for .btn { width: 100%; }
 }
 @media (max-width: 640px) {
   .hero-badge { font-size: 0.76rem; }
+  .hero-badge-sep, .hero-badge-note { display: none; }
   .hero-actions .btn { flex: 1 1 100%; }
   .hero-stage { padding: 46px 0 40px; }
   .float-offer { left: -4px; }
@@ -687,7 +687,12 @@
   .tracker { padding: 16px; }
   .tracker-row { grid-template-columns: 36px minmax(0, 1fr) auto; padding: 10px; gap: 10px; }
   .tracker-week { width: 36px; }
+  /* Small phones: tabs scroll sideways instead of squeezing "Integrate" */
+  .weeks-tabs { overflow-x: auto; scrollbar-width: none; }
+  .weeks-tabs::-webkit-scrollbar { display: none; }
+  .weeks-tab { flex: 1 0 auto; padding: 0 12px; }
   .weeks-tab .mono { display: none; }
+  .cta-track-pill { min-height: 44px; }
   .faq-answer { padding-left: 2px !important; }
   .cta-actions .btn { flex: 1 1 100%; white-space: normal; height: auto; min-height: 52px; padding-top: 12px; padding-bottom: 12px; }
   .cta-points { grid-template-columns: 1fr; }

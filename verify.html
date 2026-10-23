@@ -22,6 +22,10 @@
         t = 'light';
       }
       document.documentElement.setAttribute('data-theme', t);
+      // JS is on: drop the no-js fallback now (before paint) so reveal content doesn't flash.
+      document.documentElement.classList.remove('no-js');
+      var tc = document.querySelector('meta[name="theme-color"]');
+      if (tc) tc.setAttribute('content', t === 'dark' ? '#09090a' : '#ffffff');
     })();
   </script>
 
@@ -52,8 +56,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="theme.css?v=20261011_ds1">
-  <script src="theme.js?v=20261011_ds1" defer></script>
+  <link rel="stylesheet" href="theme.css?v=20261023_ux1">
+  <script src="theme.js?v=20261023_ux1" defer></script>
   <script src="config.js"></script>
 
   <!-- Structured Data Graph (Breadcrumbs & Verification Web Application) -->

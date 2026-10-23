@@ -45,15 +45,15 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('#nav-apply-btn, #hero-apply-btn, #cta-apply-btn, [data-apply]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       // Let modified clicks (new tab, etc.) behave like a normal link
-      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button === 1) return;
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       window.handleApplyClick(e);
     });
   });
 
-  // ── Same-page anchors (#id and index.html#id) ──
-  document.querySelectorAll('a[href^="#"], a[href^="index.html#"]').forEach(anchor => {
+  // ── Same-page anchors (#id, /#id and index.html#id) ──
+  document.querySelectorAll('a[href^="#"], a[href^="index.html#"], a[href^="/#"]').forEach(anchor => {
     anchor.addEventListener('click', (e) => {
-      const hash = anchor.getAttribute('href').replace(/^index\.html/, '');
+      const hash = anchor.getAttribute('href').replace(/^(index\.html|\/)(?=#)/, '');
       if (!hash || hash === '#') return;
       const target = document.getElementById(decodeURIComponent(hash.slice(1)));
       if (!target || target.hidden) return;
@@ -107,8 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
     ribbon.addEventListener('mouseleave', () => { isPaused = false; });
     ribbon.addEventListener('focusin', () => { isPaused = true; });
     ribbon.addEventListener('focusout', () => { isPaused = false; });
-    ribbon.addEventListener('touchstart', () => { isPaused = true; }, { passive: true });
-    ribbon.addEventListener('touchend', () => { isPaused = false; }, { passive: true });
 
     async function fetchLiveFeed() {
       try {
@@ -138,8 +136,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     fetchLiveFeed();
-    setInterval(fetchLiveFeed, 60000);
-    setInterval(nextActivity, 4500);
+    setInterval(() => { if (!document.hidden) fetchLiveFeed(); }, 60000);
+    if (!reduceMotion) setInterval(() => { if (!document.hidden) nextActivity(); }, 4500);
   })();
 
   // ── Wall of work: real approved LinkedIn posts; section stays hidden if there are none ──
@@ -209,26 +207,85 @@ document.addEventListener('DOMContentLoaded', () => {
     tab.appendChild(badge);
   });
 
+  // Extra words people search for that aren't printed on the card
+  const TRACK_KEYWORDS = {
+    webdev: 'web website full stack frontend backend html css javascript js',
+    react: 'web frontend front end ui react next typescript js',
+    node: 'web backend back end server api express javascript js',
+    uiux: 'ui ux design designer figma web product',
+    python: 'python backend automation scripting',
+    'ai-engineer': 'ai llm gpt agents rag machine learning',
+    genai: 'ai llm gpt chatgpt prompt generative',
+    ml: 'ai machine learning data model deep learning',
+    datascience: 'data analytics analysis sql python ai',
+    'ai-pm': 'ai product manager management pm',
+    sde: 'software engineer swe dsa algorithms coding interview',
+    java: 'java spring backend',
+    cpp: 'c c++ cpp dsa algorithms competitive',
+    devops: 'devops ci cd docker kubernetes cloud',
+    cloud: 'cloud aws azure gcp devops',
+    flutter: 'mobile app android ios flutter dart',
+    cyber: 'security cyber hacking ethical web security',
+    sql: 'sql database data postgres mysql',
+    fde: 'forward deployed engineer customer solutions',
+    qa: 'testing qa quality automation selenium',
+  };
+  const categoryLabel = (cat) => {
+    const chip = Array.from(filterTabs).find(t => t.getAttribute('data-category') === cat);
+    return chip ? chip.textContent.replace(/\d+/g, '').trim() : '';
+  };
+  const searchText = new Map();
+  domainCards.forEach(card => {
+    const id = card.id.replace('domain-', '');
+    const title = card.querySelector('h3') ? card.querySelector('h3').textContent : '';
+    const tech = card.querySelector('.domain-tech') ? card.querySelector('.domain-tech').textContent : '';
+    searchText.set(card, `${title} ${tech} ${categoryLabel(card.getAttribute('data-category'))} ${TRACK_KEYWORDS[id] || ''}`.toLowerCase());
+  });
+
+  // Empty results: say what's filtering them out, and offer one click to reset.
+  function renderEmpty(el, what, query, category, reset) {
+    el.replaceChildren();
+    const filter = category !== 'all' ? ` in “${category}”` : '';
+    el.append(query ? `No ${what} match “${query}”${filter}. ` : `No ${what}${filter}. `);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-link';
+    btn.textContent = 'Clear filters';
+    btn.addEventListener('click', reset);
+    el.append(btn);
+  }
+
   function updateDomainVisibility() {
     let shown = 0;
     domainCards.forEach(card => {
       const matchesCat = activeDomainCategory === 'all' || card.getAttribute('data-category') === activeDomainCategory;
-      const matchesSearch = !domainQuery || card.textContent.toLowerCase().includes(domainQuery);
+      const matchesSearch = !domainQuery || searchText.get(card).includes(domainQuery);
       const visible = matchesCat && matchesSearch;
       card.hidden = !visible;
       if (visible) shown++;
     });
-    if (domainEmpty) domainEmpty.hidden = shown > 0;
+    if (domainEmpty) {
+      domainEmpty.hidden = shown > 0;
+      if (!shown) renderEmpty(domainEmpty, 'tracks', domainQuery, categoryLabel(activeDomainCategory) && activeDomainCategory !== 'all' ? categoryLabel(activeDomainCategory) : 'all', resetDomainFilters);
+    }
     if (domainCount) domainCount.textContent = `Showing ${shown} track${shown === 1 ? '' : 's'}`;
   }
 
+  function resetDomainFilters() {
+    domainQuery = '';
+    if (domainSearch) domainSearch.value = '';
+    const all = Array.from(filterTabs).find(t => t.getAttribute('data-category') === 'all');
+    if (all) all.click(); else updateDomainVisibility();
+    if (domainSearch) domainSearch.focus();
+  }
+
+  // "All tracks" count comes from the page, not a hand-typed number
+  const domainAllCount = document.querySelector('.filter-tab[data-category="all"] .chip-count');
+  if (domainAllCount) domainAllCount.textContent = domainCards.length;
+
   filterTabs.forEach(tab => {
     tab.addEventListener('click', () => {
-      filterTabs.forEach(t => {
-        t.classList.remove('active');
-        t.setAttribute('aria-pressed', 'false');
-      });
-      tab.classList.add('active');
+      filterTabs.forEach(t => t.setAttribute('aria-pressed', 'false'));
       tab.setAttribute('aria-pressed', 'true');
       activeDomainCategory = tab.getAttribute('data-category');
       updateDomainVisibility();
@@ -245,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Domain cards: quiz first, or straight to the application once the quiz is done
   domainCards.forEach(card => {
     card.addEventListener('click', (e) => {
-      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button === 1) return;
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       e.preventDefault();
       window.location.href = applyTarget(card.id.replace('domain-', ''));
     });
@@ -265,11 +322,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   faqItems.forEach(item => {
     item.addEventListener('toggle', () => {
-      item.classList.toggle('active', item.open);
       if (!item.open) return;
       faqItems.forEach(other => { if (other !== item && other.open) other.open = false; });
     });
-    item.classList.toggle('active', item.open);
   });
 
   function updateFaqVisibility() {
@@ -279,20 +334,42 @@ document.addEventListener('DOMContentLoaded', () => {
       const matchesSearch = !faqSearchQuery || item.textContent.toLowerCase().includes(faqSearchQuery);
       const visible = matchesCat && matchesSearch;
       item.hidden = !visible;
-      item.classList.toggle('hidden', !visible);
-      if (visible) shown++;
+      if (visible) {
+        shown++;
+        const num = item.querySelector('.faq-num');
+        if (num) num.textContent = String(shown).padStart(2, '0');
+      }
     });
-    if (faqEmpty) faqEmpty.hidden = shown > 0;
+    // Searching: open the first hit so the matching answer is visible
+    if (faqSearchQuery) {
+      const first = Array.from(faqItems).find(i => !i.hidden);
+      if (first && !first.open) first.open = true;
+    }
+    if (faqEmpty) {
+      faqEmpty.hidden = shown > 0;
+      if (!shown) {
+        const pill = Array.from(faqFilterPills).find(p => p.getAttribute('data-category') === activeFaqCategory);
+        const label = activeFaqCategory === 'all' || !pill ? 'all' : pill.textContent.replace(/\d+/g, '').trim();
+        renderEmpty(faqEmpty, 'questions', faqSearchQuery, label, () => {
+          faqSearchQuery = '';
+          if (faqSearchInput) faqSearchInput.value = '';
+          const all = Array.from(faqFilterPills).find(p => p.getAttribute('data-category') === 'all');
+          if (all) all.click(); else updateFaqVisibility();
+          if (faqSearchInput) faqSearchInput.focus();
+        });
+        const contact = document.createElement('a');
+        contact.href = 'contact.html';
+        contact.className = 'btn-link';
+        contact.textContent = 'contact us';
+        faqEmpty.append(' or ', contact, '.');
+      }
+    }
     if (faqCount) faqCount.textContent = `${shown} question${shown === 1 ? '' : 's'} shown`;
   }
 
   faqFilterPills.forEach(pill => {
     pill.addEventListener('click', () => {
-      faqFilterPills.forEach(p => {
-        p.classList.remove('active');
-        p.setAttribute('aria-pressed', 'false');
-      });
-      pill.classList.add('active');
+      faqFilterPills.forEach(p => p.setAttribute('aria-pressed', 'false'));
       pill.setAttribute('aria-pressed', 'true');
       activeFaqCategory = pill.getAttribute('data-category');
       updateFaqVisibility();
@@ -313,17 +390,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   ctaTrackPills.forEach(pill => {
     pill.addEventListener('click', () => {
-      ctaTrackPills.forEach(p => {
-        p.classList.remove('active');
-        p.setAttribute('aria-pressed', 'false');
-      });
-      pill.classList.add('active');
-      pill.setAttribute('aria-pressed', 'true');
+      ctaTrackPills.forEach(p => { p.setAttribute('aria-checked', 'false'); p.tabIndex = -1; });
+      pill.setAttribute('aria-checked', 'true');
+      pill.tabIndex = 0;
 
       const domain = pill.getAttribute('data-domain');
       const name = pill.getAttribute('data-name');
       if (ctaBtnLabel) ctaBtnLabel.textContent = `Start my ${name} internship`;
       if (ctaApplyBtn) ctaApplyBtn.href = `quiz.html?domain=${domain}`;
+    });
+    // Arrow keys move between the options, like native radios
+    pill.addEventListener('keydown', (e) => {
+      const list = Array.from(ctaTrackPills);
+      const i = list.indexOf(pill);
+      const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+      if (!step) return;
+      e.preventDefault();
+      const next = list[(i + step + list.length) % list.length];
+      next.click();
+      next.focus();
     });
   });
 
@@ -363,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Nav scroll-spy: highlight the section in view ──
   (function initScrollSpy() {
     if (!('IntersectionObserver' in window)) return;
-    const links = Array.from(document.querySelectorAll('.nav-links a[href^="index.html#"]'));
+    const links = Array.from(document.querySelectorAll('.nav-links a[href^="index.html#"], .nav-links a[href^="/#"]'));
     const byId = new Map();
     links.forEach(a => {
       const section = document.getElementById(a.getAttribute('href').split('#')[1]);
@@ -375,10 +460,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const link = byId.get(entry.target.id);
         if (!link) return;
         if (entry.isIntersecting) {
-          links.forEach(l => l.classList.remove('is-active'));
+          links.forEach(l => { l.classList.remove('is-active'); l.removeAttribute('aria-current'); });
           link.classList.add('is-active');
+          link.setAttribute('aria-current', 'location');
         } else {
           link.classList.remove('is-active');
+          link.removeAttribute('aria-current');
         }
       });
     }, { rootMargin: '-45% 0px -50% 0px' });
@@ -394,8 +481,9 @@ document.addEventListener('DOMContentLoaded', () => {
     bar.hidden = false;
     let pastHero = false;
     let atFinal = false;
+    let typing = false;
     const update = () => {
-      const show = pastHero && !atFinal;
+      const show = pastHero && !atFinal && !typing;
       bar.classList.toggle('is-visible', show);
       bar.setAttribute('aria-hidden', String(!show));
       bar.querySelectorAll('a').forEach(a => { a.tabIndex = show ? 0 : -1; });
@@ -405,8 +493,15 @@ document.addEventListener('DOMContentLoaded', () => {
       update();
     }).observe(hero);
     if (finalCta) {
-      new IntersectionObserver(([entry]) => { atFinal = entry.isIntersecting; update(); }).observe(finalCta);
+      // "At or past" the final CTA: the bar must not come back over the footer
+      new IntersectionObserver(([entry]) => {
+        atFinal = entry.isIntersecting || entry.boundingClientRect.top < 0;
+        update();
+      }).observe(finalCta);
     }
+    // On phones the bar would ride above the keyboard and cover search results
+    document.addEventListener('focusin', (e) => { if (e.target.matches('main input, main textarea')) { typing = true; update(); } });
+    document.addEventListener('focusout', (e) => { if (e.target.matches('main input, main textarea')) { typing = false; update(); } });
     update();
   })();
 });

@@ -2,7 +2,7 @@
 <html lang="en" data-theme="light" class="no-js">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
   <!-- Primary SEO Meta Tags -->
   <title>SkillMe — Project-Based Internship Platform | Real Projects &amp; Verified Certificates</title>
@@ -56,6 +56,10 @@
         t = 'light';
       }
       document.documentElement.setAttribute('data-theme', t);
+      // JS is on: drop the no-js fallback now (before paint) so reveal content doesn't flash.
+      document.documentElement.classList.remove('no-js');
+      var tc = document.querySelector('meta[name="theme-color"]');
+      if (tc) tc.setAttribute('content', t === 'dark' ? '#09090a' : '#ffffff');
     })();
   </script>
 
@@ -63,9 +67,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="theme.css?v=20261011_ds1">
-  <link rel="stylesheet" href="home.css?v=20261023_copy1">
-  <script src="theme.js?v=20261011_ds1" defer></script>
+  <link rel="stylesheet" href="theme.css?v=20261023_ux1">
+  <link rel="stylesheet" href="home.css?v=20261023_ux1">
+  <script src="theme.js?v=20261023_ux1" defer></script>
   <script src="config.js?v=20260923_020524" defer></script>
 
   <!-- JSON-LD Structured Data Graph (Brand Entity, Website, Internship Program, FAQ Rich Snippet) -->
@@ -279,7 +283,7 @@
       <div class="hero-bg" aria-hidden="true"></div>
       <div class="container hero-grid">
         <div class="hero-copy">
-          <span class="hero-badge"><span class="live-dot" aria-hidden="true"></span>Internships open<span class="hero-badge-sep" aria-hidden="true"></span>Every internship request read by a person</span>
+          <span class="hero-badge"><span class="live-dot" aria-hidden="true"></span>Internships open<span class="hero-badge-sep" aria-hidden="true"></span><span class="hero-badge-note">Every internship request read by a person</span></span>
           <h1 class="display hero-title" id="hero-title">Bridge the gap between<br><span class="hero-hl">your degree &amp; a real career.</span></h1>
           <p class="lead hero-lead">Do a real 4-week internship, one milestone at a time. Real people review every submission, and you finish with work recruiters can see, a QR-verified certificate and a shot at hiring-partner referrals.</p>
 
@@ -358,7 +362,7 @@
           <!-- Live activity: real approved submissions only; stays hidden until the API returns some -->
           <div class="live-ribbon" id="live-activity-ribbon" role="region" aria-label="Live activity" style="display: none;">
             <span class="live-beacon mono"><span class="live-dot" aria-hidden="true"></span>Live</span>
-            <div class="live-ticker" id="live-ticker-track" aria-live="polite">
+            <div class="live-ticker" id="live-ticker-track">
               <div class="live-ticker-item" id="live-ticker-item">
                 <span class="live-avatar mono" id="ticker-avatar" aria-hidden="true"></span>
                 <span class="live-text">
@@ -431,7 +435,7 @@
         <ol class="steps" role="list">
           <li class="step reveal">
             <span class="step-num mono">01</span>
-            <h3 class="h3">Apply now</h3>
+            <h3 class="h3">Take the 5-min quiz</h3>
             <p>8 questions, about 5 minutes. It checks the basics so you start at the right level.</p>
             <span class="step-meta mono">~5 min</span>
           </li>
@@ -800,13 +804,13 @@
           <h2 class="h1 cta-title" id="cta-title">Four weeks from now, you could be showing a recruiter real work.</h2>
           <p class="cta-lead">Or you could still be planning to start. We read every internship request and shortlist the ones we believe in. Give us a reason to pick yours.</p>
 
-          <div class="cta-tracks" role="group" aria-label="Choose a track">
+          <div class="cta-tracks" role="radiogroup" aria-label="Choose a track">
             <span class="cta-tracks-label mono">Pick a track to start</span>
-            <button type="button" class="cta-track-pill active" data-domain="webdev" data-name="Full Stack" aria-pressed="true">Full Stack</button>
-            <button type="button" class="cta-track-pill" data-domain="ai-engineer" data-name="AI Engineer" aria-pressed="false">AI Engineer</button>
-            <button type="button" class="cta-track-pill" data-domain="python" data-name="Python" aria-pressed="false">Python</button>
-            <button type="button" class="cta-track-pill" data-domain="datascience" data-name="Data Science" aria-pressed="false">Data Science</button>
-            <button type="button" class="cta-track-pill" data-domain="devops" data-name="DevOps" aria-pressed="false">DevOps</button>
+            <button type="button" class="cta-track-pill" role="radio" data-domain="webdev" data-name="Full Stack" aria-checked="true" tabindex="0">Full Stack</button>
+            <button type="button" class="cta-track-pill" role="radio" data-domain="ai-engineer" data-name="AI Engineer" aria-checked="false" tabindex="-1">AI Engineer</button>
+            <button type="button" class="cta-track-pill" role="radio" data-domain="python" data-name="Python" aria-checked="false" tabindex="-1">Python</button>
+            <button type="button" class="cta-track-pill" role="radio" data-domain="datascience" data-name="Data Science" aria-checked="false" tabindex="-1">Data Science</button>
+            <button type="button" class="cta-track-pill" role="radio" data-domain="devops" data-name="DevOps" aria-checked="false" tabindex="-1">DevOps</button>
             <a href="#domains" class="cta-track-more">All 20 tracks &rarr;</a>
           </div>
 
@@ -830,7 +834,7 @@
 
   <!-- Mobile sticky CTA: script.js shows it between the hero and the final CTA -->
   <div class="sticky-cta" id="sticky-cta" hidden>
-    <div class="sticky-cta-text"><strong>Internships reviewed by hand</strong><span>Internship spots open</span></div>
+    <div class="sticky-cta-text"><strong>4-week remote internship</strong><span>2–3 hrs a week · free to join</span></div>
     <a href="quiz.html" class="btn btn-primary btn-sm" data-apply>Apply now</a>
   </div>
 
@@ -871,6 +875,6 @@
     </div>
   </footer>
 
-  <script src="script.js?v=20261023_fun1" defer></script>
+  <script src="script.js?v=20261023_ux1" defer></script>
 </body>
 </html>

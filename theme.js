@@ -62,27 +62,30 @@
 
     // Mobile drawer
     var drawer = document.getElementById('nav-drawer');
-    document.querySelectorAll('[data-nav-toggle]').forEach(function (btn) {
+    var toggles = document.querySelectorAll('[data-nav-toggle]');
+    function setDrawer(open) {
+      drawer.classList.toggle('is-open', open);
+      toggles.forEach(function (b) {
+        b.setAttribute('aria-expanded', String(open));
+        b.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      });
+    }
+    toggles.forEach(function (btn) {
       btn.setAttribute('aria-controls', 'nav-drawer');
       btn.setAttribute('aria-expanded', 'false');
       btn.addEventListener('click', function () {
         if (!drawer) return;
-        var open = !drawer.classList.contains('is-open');
-        drawer.classList.toggle('is-open', open);
-        btn.setAttribute('aria-expanded', String(open));
-        btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+        setDrawer(!drawer.classList.contains('is-open'));
       });
     });
     if (drawer) {
       drawer.addEventListener('click', function (e) {
-        if (!e.target.closest('a')) return;
-        drawer.classList.remove('is-open');
-        document.querySelectorAll('[data-nav-toggle]').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
+        if (e.target.closest('a')) setDrawer(false);
       });
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && drawer.classList.contains('is-open')) {
-          drawer.classList.remove('is-open');
-          document.querySelectorAll('[data-nav-toggle]').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
+          setDrawer(false);
+          if (toggles[0]) toggles[0].focus();
         }
       });
     }
