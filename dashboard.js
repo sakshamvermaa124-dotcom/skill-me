@@ -9,6 +9,22 @@ const API = window.SKILLME_API || '${API}';
 const PAYMENT_UNLOCK_PCT = 75;
 const FRONTEND = window.SKILLME_FRONTEND || '${FRONTEND}';
 
+// Task guides are markdown from the curriculum; render them sanitized, or as plain text
+// if the CDN libraries didn't load.
+function renderMarkdown(md) {
+  const src = md || '';
+  if (window.marked && window.DOMPurify) return DOMPurify.sanitize(marked.parse(src));
+  const div = document.createElement('div');
+  div.textContent = src;
+  return div.innerHTML.split(/\n{2,}/).map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+}
+
+// Student API calls carry the session token from the OTP login.
+function authHeaders(extra) {
+  const token = localStorage.getItem('token');
+  return Object.assign({}, extra || {}, token ? { 'Authorization': `Bearer ${token}` } : {});
+}
+
 // --- Lenis Smooth Scrolling (from darkroomengineering/lenis) ---
 let lenis;
 if (typeof Lenis !== 'undefined') {
@@ -68,75 +84,86 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    try {
-      const token = localStorage.getItem('token');
-      const savedEmail = localStorage.getItem('skillme_email');
-      const signoutBtn = document.getElementById('signout-btn');
-    
-      
-      // If we have a saved email in localStorage, restore progress directly
-      const emailToUse = savedEmail || (async () => {
-        if (!token) return null;
-        const meRes = await fetch(`${API}/api/auth/me`, { headers: { 'Authorization': `Bearer ${token}` } });
-        if (meRes.ok) { const me = await meRes.json(); return me.email; }
-        return null;
-      })();
+    const signoutBtn = document.getElementById('signout-btn');
+    const cancelWrap = document.getElementById('login-cancel-wrap');
+    const resetLoginButton = () => {
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'Get Login Code';
+      if (signoutBtn) signoutBtn.style.display = 'none';
+      if (cancelWrap) cancelWrap.style.display = 'none';
+    };
+    const showLoginNotice = (msg) => {
+      errorEl.textContent = msg;
+      errorEl.style.display = 'block';
+    };
 
-      const resolvedEmail = await Promise.resolve(emailToUse);
-      if (resolvedEmail) {
-        loginBtn.disabled = true;
-        loginBtn.textContent = 'Restoring Session...';
-        
-        // Show Sign Out button so user can abort if stuck
-        if (signoutBtn) signoutBtn.style.display = 'inline-flex';
-        const cancelWrap = document.getElementById('login-cancel-wrap');
-        if (cancelWrap) cancelWrap.style.display = 'block';
-        
-        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-        const progressRes = await fetch(`${API}/api/students/progress/${encodeURIComponent(resolvedEmail)}`, { headers });
-        
-        // If user clicked sign out while fetch was pending, abort the restore process
-        if (!localStorage.getItem('skillme_email') && !localStorage.getItem('token')) {
-          if (signoutBtn) signoutBtn.style.display = 'none';
-          if (document.getElementById('login-cancel-wrap')) document.getElementById('login-cancel-wrap').style.display = 'none';
-          return;
-        }
-        
-        if (progressRes.ok) {
-          const data = await progressRes.json();
-          data._email = resolvedEmail;
-          renderDashboard(data);
-          
-          if (data.progress && data.progress.length === 0) {
-            loginView.style.display = 'none';
-            document.getElementById('unenrolled-view').style.display = 'flex';
-          } else {
-            loginView.style.display = 'none';
-            dashView.style.display = 'block';
-            dashView.style.opacity = '1';
-            dashView.style.transform = 'translateY(0)';
-          }
-          if (lenis) lenis.resize();
-          return;
-        } else {
-          // If session email fails to load, clear saved session so user can re-login
-          localStorage.removeItem('skillme_email');
-          if (signoutBtn) signoutBtn.style.display = 'none';
-          if (document.getElementById('login-cancel-wrap')) document.getElementById('login-cancel-wrap').style.display = 'none';
-        }
+    const token = localStorage.getItem('token');
+    const savedEmail = localStorage.getItem('skillme_email');
+    if (!token) {
+      // Sessions from before sign-in tokens were required can't load data any more.
+      if (savedEmail) {
+        localStorage.removeItem('skillme_email');
+        const emailInput = document.getElementById('login-email');
+        if (emailInput) emailInput.value = savedEmail;
+        showLoginNotice('Please sign in again to open your dashboard.');
       }
-      loginBtn.disabled = false;
-      loginBtn.textContent = 'Get Login Code';
-      if (document.getElementById('signout-btn')) document.getElementById('signout-btn').style.display = 'none';
-      
-      if (document.getElementById('login-cancel-wrap')) document.getElementById('login-cancel-wrap').style.display = 'none';
+      resetLoginButton();
+      return;
+    }
+
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'Restoring Session...';
+    // Show Sign Out button so user can abort if stuck
+    if (signoutBtn) signoutBtn.style.display = 'inline-flex';
+    if (cancelWrap) cancelWrap.style.display = 'block';
+
+    try {
+      let resolvedEmail = savedEmail;
+      if (!resolvedEmail) {
+        const meRes = await fetch(`${API}/api/auth/me`, { headers: authHeaders() });
+        if (meRes.ok) resolvedEmail = (await meRes.json()).email;
+      }
+      if (!resolvedEmail) throw Object.assign(new Error('expired'), { status: 401 });
+
+      const progressRes = await fetch(`${API}/api/students/progress/${encodeURIComponent(resolvedEmail)}`, { headers: authHeaders() });
+
+      // If user clicked sign out while fetch was pending, abort the restore process
+      if (!localStorage.getItem('skillme_email') && !localStorage.getItem('token')) {
+        resetLoginButton();
+        return;
+      }
+
+      if (!progressRes.ok) throw Object.assign(new Error('progress'), { status: progressRes.status });
+
+      const data = await progressRes.json();
+      data._email = resolvedEmail;
+      renderDashboard(data);
+
+      loginView.style.display = 'none';
+      if (data.progress && data.progress.length === 0) {
+        document.getElementById('unenrolled-view').style.display = 'flex';
+      } else {
+        dashView.style.display = 'block';
+        dashView.style.opacity = '1';
+        dashView.style.transform = 'translateY(0)';
+      }
+      if (lenis) lenis.resize();
     } catch (e) {
-      console.log("No active session found.");
-      loginBtn.disabled = false;
-      loginBtn.textContent = 'Get Login Code';
-      if (document.getElementById('signout-btn')) document.getElementById('signout-btn').style.display = 'none';
-      
-      if (document.getElementById('login-cancel-wrap')) document.getElementById('login-cancel-wrap').style.display = 'none';
+      resetLoginButton();
+      if (e && (e.status === 401 || e.status === 403 || e.status === 404)) {
+        // Only a rejected session signs the student out — a server hiccup keeps it.
+        localStorage.removeItem('token');
+        localStorage.removeItem('skillme_email');
+        showLoginNotice('Your session has expired. Please sign in again.');
+      } else {
+        showLoginNotice("We couldn't reach SkillMe right now. Check your connection and ");
+        const retry = document.createElement('button');
+        retry.type = 'button';
+        retry.className = 'login-retry-link';
+        retry.textContent = 'try again';
+        retry.addEventListener('click', () => { errorEl.style.display = 'none'; checkExistingSession(); });
+        errorEl.append(retry, '.');
+      }
     }
   }
 
@@ -719,7 +746,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </div>
           <span class="sub-status ${dotClass}">${status}</span>
-          ${sub.linkedin_url ? `<a href="${sub.linkedin_url}" target="_blank" class="sub-link" title="View LinkedIn Post">
+          ${sub.linkedin_url ? `<a href="${escHtml(sub.linkedin_url)}" target="_blank" rel="noopener noreferrer" class="sub-link" title="View LinkedIn Post">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>` : ''}
         `;
@@ -861,7 +888,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ${task.description ? `
                 <details class="task-step-details"${isLocked ? '' : ' open'}>
                   <summary><span class="task-step-title">Read the brief &amp; do the work</span><span class="task-step-toggle"></span></summary>
-                  <div class="task-step-content dash-markdown">${marked.parse(task.description)}</div>
+                  <div class="task-step-content dash-markdown">${renderMarkdown(task.description)}</div>
                 </details>` : `<div class="task-step-title">Do the work</div><p class="task-step-desc">Follow the task in the PDF guide for this week.</p>`}
               </div>
             </li>
@@ -973,7 +1000,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const res = await fetch(`${API}/api/students/submit-task`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ student_id: studentId, batch_id: batchId, week, linkedin_url: url })
       });
       const resData = await res.json().catch(() => ({}));
@@ -1166,9 +1193,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderCertReady(certSection, student, data) {
-    const email = data._email || '';
     const domain = (data.progress[0] && data.progress[0].domain) || 'web-dev';
-    const certUrl = `${FRONTEND}/certificate.html?email=${encodeURIComponent(email)}&student_id=${student.id}&batch_id=${data._batch_id}&name=${encodeURIComponent(student.name)}&domain=${encodeURIComponent(domain)}`;
+    const certUrl = `${FRONTEND}/certificate.html?student_id=${student.id}&batch_id=${data._batch_id}&name=${encodeURIComponent(student.name)}&domain=${encodeURIComponent(domain)}`;
     const lorUrl  = `${FRONTEND}/lor.html?student_id=${student.id}&batch_id=${data._batch_id}&name=${encodeURIComponent(student.name)}&domain=${encodeURIComponent(domain)}`;
     const portfolioUrl = student.id ? `${FRONTEND}/portfolio.html?student_id=${student.id}` : '#';
 
@@ -1281,7 +1307,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
-      const res = await fetch(`${API}/api/students/urgent-request/status/${student.id}/${data._batch_id}`);
+      const res = await fetch(`${API}/api/students/urgent-request/status/${student.id}/${data._batch_id}`, { headers: authHeaders() });
       const resData = await res.json().catch(() => ({}));
       renderUrgentRequestState(student, data, resData.request || null);
     } catch (e) {
@@ -1361,7 +1387,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const res = await fetch(`${API}/api/students/urgent-request`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ student_id: student.id, batch_id: data._batch_id, request_type: requestType, note: note || null })
       });
       const resData = await res.json().catch(() => ({}));
@@ -1540,11 +1566,10 @@ function showCompletionPopup(student, data, pct) {
   const isFullyComplete = typeof pct === 'number' && pct >= 100;
   // Build credential URLs from available data
   const FRONTEND = window.SKILLME_FRONTEND || window.location.origin;
-  const email    = (data && data._email) || '';
   const domain   = (data && data.progress && data.progress[0] && data.progress[0].domain) || 'web-dev';
   const batchId  = (data && data._batch_id) || '';
   const name     = (student && student.name) || '';
-  const certUrl  = `${FRONTEND}/certificate.html?email=${encodeURIComponent(email)}&student_id=${student ? student.id : ''}&batch_id=${batchId}&name=${encodeURIComponent(name)}&domain=${encodeURIComponent(domain)}`;
+  const certUrl  = `${FRONTEND}/certificate.html?student_id=${student ? student.id : ''}&batch_id=${batchId}&name=${encodeURIComponent(name)}&domain=${encodeURIComponent(domain)}`;
   const lorUrl   = `${FRONTEND}/lor.html?student_id=${student ? student.id : ''}&batch_id=${batchId}&name=${encodeURIComponent(name)}&domain=${encodeURIComponent(domain)}`;
   const portfolioUrl = student ? `${FRONTEND}/portfolio.html?student_id=${student.id}` : '#';
 

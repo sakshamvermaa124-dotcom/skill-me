@@ -629,6 +629,16 @@ textarea.dash-input { resize: vertical; min-height: 84px; }
   color: var(--danger);
   font-size: 0.84rem;
 }
+.login-retry-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
 .login-foot {
   display: flex; align-items: center; justify-content: center; gap: 6px;
   margin-top: 22px; padding-top: 18px;

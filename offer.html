@@ -36,7 +36,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- QR Code Generator -->
-  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js" integrity="sha384-Dr98ddmUw2QkdCarNQ+OL7xLty7cSxgR0T7v1tq4UErS/qLV0132sBYTolRAFuOV" crossorigin="anonymous"></script>
   <script src="docs.js?v=2"></script>
 
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
@@ -918,7 +918,10 @@
     // Hydrate from the backend whenever we know the student — DB values win over the URL.
     if (studentId && studentId !== '1001') {
       const API = window.SKILLME_API || '';
-      fetch(`${API}/api/students/progress/id/${encodeURIComponent(studentId)}`)
+      const token = localStorage.getItem('token');
+      fetch(`${API}/api/students/progress/id/${encodeURIComponent(studentId)}`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+      })
         .then(res => res.ok ? res.json() : null)
         .then(data => {
           if (data && data.student) {

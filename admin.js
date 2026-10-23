@@ -249,7 +249,6 @@ async function adminLogin() {
       throw new Error(errData.detail || `Server error (${res.status})`);
     }
     adminKey = key;
-    localStorage.setItem('skillme_admin_key', key);
     sessionStorage.setItem('skillme_admin_key', key);
 
     showApp();
@@ -535,7 +534,6 @@ function showApp() {
 }
 
 function logoutAdmin() {
-  localStorage.removeItem('skillme_admin_key');
   sessionStorage.removeItem('skillme_admin_key');
   adminKey = '';
   const overlay = document.getElementById('login-overlay');
@@ -556,7 +554,8 @@ function logoutAdmin() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const saved = localStorage.getItem('skillme_admin_key') || sessionStorage.getItem('skillme_admin_key');
+  localStorage.removeItem('skillme_admin_key'); // older sessions kept the key forever
+  const saved = sessionStorage.getItem('skillme_admin_key');
   if (saved) {
     try {
       const res = await fetch(`${getAPI()}/api/admin/stats`, {
@@ -566,7 +565,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         adminKey = saved;
         showApp();
       } else {
-        localStorage.removeItem('skillme_admin_key');
         sessionStorage.removeItem('skillme_admin_key');
         adminKey = '';
       }
@@ -1863,7 +1861,7 @@ function renderDomainTable(domains) {
 }
 
 // ─── INIT ───
-const savedKey = localStorage.getItem('skillme_admin_key') || sessionStorage.getItem('skillme_admin_key');
+const savedKey = sessionStorage.getItem('skillme_admin_key');
 if (savedKey) {
   const input = document.getElementById('admin-key-input') || document.getElementById('api-key-input');
   if (input) input.value = savedKey;

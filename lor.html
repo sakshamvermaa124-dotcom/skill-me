@@ -43,7 +43,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Inter:wght@400;500;600;700&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
 
   <!-- QR Code Generator -->
-  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js" integrity="sha384-Dr98ddmUw2QkdCarNQ+OL7xLty7cSxgR0T7v1tq4UErS/qLV0132sBYTolRAFuOV" crossorigin="anonymous"></script>
   <script src="config.js"></script>
   <script src="docs.js?v=2"></script>
 
@@ -813,6 +813,8 @@
       || String(d.domain || domainParam || '').replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
       || 'Technical Internship';
     const id = d.cert_id;
+    // Shareable address: the public cert_id link, not the dashboard handoff params.
+    if (id) history.replaceState(null, '', `lor.html?cert_id=${encodeURIComponent(id)}`);
     const dateStr = fmtDate(d.issued_at) || fmtDate(null);
     const firstName = name.split(' ')[0];
     lorHolder = name;

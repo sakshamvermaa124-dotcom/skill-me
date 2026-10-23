@@ -59,7 +59,7 @@
     rel="stylesheet" />
 
   <!-- Libraries -->
-  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js" integrity="sha384-Dr98ddmUw2QkdCarNQ+OL7xLty7cSxgR0T7v1tq4UErS/qLV0132sBYTolRAFuOV" crossorigin="anonymous"></script>
   <script src="config.js"></script>
   <script src="docs.js?v=2"></script>
 
@@ -1005,7 +1005,14 @@
 
       if (email && !studentId) {
         try {
-          const res = await fetch(`${API}/api/students/progress/${encodeURIComponent(email)}`);
+          const token = localStorage.getItem('token');
+          const res = await fetch(`${API}/api/students/progress/${encodeURIComponent(email)}`, {
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+          });
+          if (res.status === 401 || res.status === 403) {
+            showError('Sign in to your dashboard to open your certificate.');
+            return;
+          }
           if (!res.ok) throw new Error('Student not found');
           const data = await res.json();
           studentId = data.student?.id;
@@ -1120,6 +1127,11 @@
 
       const id = data.cert_id || '—';
       certHolderName = name;
+      // Once a real credential is shown, the address bar (and "Copy link") becomes the
+      // public cert_id link — never the dashboard handoff with student details in it.
+      if (data.cert_id && !/^PREVIEW/.test(data.cert_id)) {
+        history.replaceState(null, '', `certificate.html?cert_id=${encodeURIComponent(data.cert_id)}`);
+      }
       const rawDateObj = SkillMeDocs.parseDate(data.issued_at);
       const date = rawDateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
       const startDateObj = new Date(rawDateObj.getTime() - (28 * 24 * 60 * 60 * 1000));
