@@ -642,6 +642,16 @@ let score = 0;
 let answers = [];  // {selected, correct, isCorrect, text}
 let answered = false;  // has the current question been answered (UI lock)
 
+// In-progress quiz survives a refresh or an accidental Back (cleared once results show).
+const PROGRESS_KEY = 'skillme_quiz_progress';
+const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function saveProgress() {
+  try { sessionStorage.setItem(PROGRESS_KEY, JSON.stringify({ domain: selectedDomain, score, answers })); } catch (e) { /* storage blocked */ }
+}
+function clearProgress() {
+  try { sessionStorage.removeItem(PROGRESS_KEY); } catch (e) { /* storage blocked */ }
+}
+
 const LETTERS = ['A', 'B', 'C', 'D'];
 const ICON_OK = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
 const ICON_BAD = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>';
@@ -675,6 +685,7 @@ function startQuiz() {
   currentQ = 0;
   score = 0;
   answers = [];
+  clearProgress();
   document.getElementById('q-domain').innerHTML = '';
   const dn = document.createElement('b');
   dn.textContent = domainName(selectedDomain);
@@ -754,6 +765,7 @@ function selectAnswer(chosen, correct, qText) {
   if (!isCorrect) opts[correct].classList.add('correct');
 
   answers.push({ selected: chosen, correct, isCorrect, text: qText });
+  saveProgress();
 
   const fb = document.getElementById('q-feedback');
   if (isCorrect) {
@@ -839,6 +851,7 @@ function showResults() {
     completedAt: new Date().toISOString()
   };
   localStorage.setItem('skillme_quiz_result', JSON.stringify(result));
+  clearProgress();
   localStorage.removeItem('skillme_application_submitted'); // Clear old submission flag on new quiz completion
 
   // Populate breakdown
@@ -891,7 +904,7 @@ function reviewAnswers() {
   const btn = document.getElementById('review-btn');
   btn.setAttribute('aria-expanded', String(open));
   btn.textContent = open ? 'Hide my answers' : 'Review my answers';
-  if (open) bd.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (open) bd.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -908,7 +921,29 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const el = document.getElementById(id);
   el.classList.add('active');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+}
+
+// Pick up a quiz that was interrupted mid-way in this tab.
+function resumeProgress(onlyDomain) {
+  let saved = null;
+  try { saved = JSON.parse(sessionStorage.getItem(PROGRESS_KEY) || 'null'); } catch (e) { /* ignore */ }
+  if (!saved || !saved.domain || !Array.isArray(saved.answers) || !saved.answers.length) return false;
+  if (onlyDomain && saved.domain !== onlyDomain) return false;
+  const card = document.querySelector(`.domain-card[data-domain="${saved.domain}"]`);
+  if (!card) { clearProgress(); return false; }
+  selectDomain(card);
+  questions = [...GENERAL_QUESTIONS, ...(DOMAIN_QUESTIONS[saved.domain] || DOMAIN_QUESTIONS["web-dev"] || [])];
+  answers = saved.answers.slice(0, questions.length);
+  score = answers.filter(a => a && a.isCorrect).length;
+  currentQ = answers.length;
+  if (currentQ >= questions.length) { showResults(); return true; }
+  const dn = document.createElement('b');
+  dn.textContent = domainName(saved.domain);
+  document.getElementById('q-domain').replaceChildren(dn);
+  showScreen('screen-question');
+  renderQuestion();
+  return true;
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -956,17 +991,30 @@ document.addEventListener('keydown', (e) => {
     if (card && !card.classList.contains('disabled')) selectDomain(card);
   }
 
-  // If explicitly retaking via ?retake=1, clear existing result so user can start fresh
+  let existingDomain = null;
+  try { existingDomain = (JSON.parse(existing || 'null') || {}).domain || null; } catch (e) { /* corrupted */ }
+  const requested = domainParam ? (DOMAIN_PARAM_ALIASES[domainParam] || domainParam) : null;
+  // Picking a different track from the homepage means a fresh quiz for that track.
+  const newTrack = requested && requested !== existingDomain;
+
+  // replace(), not href: these hops must not leave a history entry, or Back bounces
+  // the student straight back here.
   if (isRetake) {
+    // If explicitly retaking via ?retake=1, clear existing result so user can start fresh
     localStorage.removeItem('skillme_quiz_result');
-  } else if (submitted) {
-    // If they already successfully submitted an application in the past,
-    // intercept them and send them directly to the Status Tracker window!
-    window.location.href = 'apply.html?view=status';
-    return;
+    resumeProgress();
+  } else if (newTrack) {
+    resumeProgress(requested);
+    // Stay on the quiz; the old result is replaced when this one is finished.
   } else if (existing) {
     // They passed the quiz but haven't submitted yet, drop them back in the form.
-    window.location.href = 'apply.html';
+    window.location.replace('apply.html');
+    return;
+  } else if (resumeProgress()) {
+    // Mid-quiz refresh: carried on where they left off.
+  } else if (submitted) {
+    // Already applied and no new track picked: show the status tracker.
+    window.location.replace('apply.html?view=status');
     return;
   }
 })();

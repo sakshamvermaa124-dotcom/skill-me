@@ -16,22 +16,31 @@ document.addEventListener('DOMContentLoaded', () => {
   'use strict';
 
   const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const apiBase = () => window.SKILLME_API || (window.location.hostname === 'localhost' ? 'http://localhost:8000' : 'https://skill-me.onrender.com');
-  const quizDone = () => { try { return !!localStorage.getItem('skillme_quiz_result'); } catch (e) { return false; } };
+  const apiBase = () => window.SKILLME_API || '';
 
-  // ── Apply links: once the quiz is done, go straight to the application ──
+  // Homepage track ids → the ids the quiz and backend use (quiz.html has the same map)
+  const DOMAIN_ALIASES = { webdev: 'web-dev', datascience: 'data-science', node: 'nodejs', cyber: 'cybersecurity', uiux: 'ui-ux' };
+  const normDomain = (id) => DOMAIN_ALIASES[id] || id;
+  const quizDomain = () => {
+    try { return (JSON.parse(localStorage.getItem('skillme_quiz_result') || 'null') || {}).domain || null; }
+    catch (e) { return null; }
+  };
+
+  // Where an Apply click should land: the application if the quiz was already taken for
+  // this track, otherwise the quiz (pre-selected to the clicked track, if any).
+  function applyTarget(domainId) {
+    const done = quizDomain();
+    if (!domainId) return done ? 'apply.html' : 'quiz.html';
+    if (done && normDomain(domainId) === done) return 'apply.html';
+    return `quiz.html?domain=${encodeURIComponent(domainId)}`;
+  }
+
+  // ── Apply links: once the quiz is done for that track, go straight to the application ──
   window.handleApplyClick = function (e) {
     if (e && e.preventDefault) e.preventDefault();
     const targetUrl = (e && e.currentTarget && e.currentTarget.getAttribute('href')) || '';
-    if (quizDone()) {
-      // Keep a pre-selected track (quiz.html?domain=x → apply.html?domain=x)
-      const query = targetUrl.startsWith('quiz.html?') ? targetUrl.slice('quiz.html'.length) : '';
-      window.location.href = 'apply.html' + query;
-    } else if (targetUrl && targetUrl.startsWith('quiz.html')) {
-      window.location.href = targetUrl;
-    } else {
-      window.location.href = 'quiz.html';
-    }
+    const match = targetUrl.match(/[?&]domain=([^&#]+)/);
+    window.location.href = applyTarget(match ? decodeURIComponent(match[1]) : null);
   };
   document.querySelectorAll('#nav-apply-btn, #hero-apply-btn, #cta-apply-btn, [data-apply]').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -238,8 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
     card.addEventListener('click', (e) => {
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button === 1) return;
       e.preventDefault();
-      const domainId = card.id.replace('domain-', '');
-      window.location.href = quizDone() ? `apply.html?domain=${domainId}` : `quiz.html?domain=${domainId}`;
+      window.location.href = applyTarget(card.id.replace('domain-', ''));
     });
   });
 
