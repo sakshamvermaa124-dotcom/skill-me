@@ -883,7 +883,7 @@ function renderStudents(students) {
         </div>
       </td>
       <td style="color:var(--text-secondary);font-size:0.82rem;">${esc(s.email)}</td>
-      <td>${esc(s.domain || '—')}${s.quiz_total ? `<div style="font-size:0.72rem;color:var(--text-muted);" title="Screening quiz score">Quiz ${esc(s.quiz_score)}/${esc(s.quiz_total)}</div>` : ''}</td>
+      <td>${esc(s.domain || '—')}${s.other_domains ? `<div style="font-size:0.72rem;color:var(--text-muted);" title="Same email, other tracks">Also applied: ${esc(s.other_domains)}</div>` : ''}${s.quiz_total ? `<div style="font-size:0.72rem;color:var(--text-muted);" title="Screening quiz score">Quiz ${esc(s.quiz_score)}/${esc(s.quiz_total)}</div>` : ''}</td>
       <td>${statusBadge(s.status)}</td>
       <td style="color:var(--text-muted);font-size:0.82rem;">${fmtDate(s.created_at)}</td>
       <td>${studentActions(s)}</td>

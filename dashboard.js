@@ -43,6 +43,56 @@ function modalClosed() {
   modalReturnFocus = null;
 }
 
+// One email can hold several applications (one per track). The dashboard opens the one
+// picked last time on this device, else the backend's default (an active internship).
+const APP_KEY = 'skillme_student_id';
+async function loadDashboardData() {
+  const appsRes = await fetch(`${API}/api/students/applications`, { headers: authHeaders() });
+  if (!appsRes.ok) throw Object.assign(new Error('applications'), { status: appsRes.status });
+  const { applications = [], default_student_id } = await appsRes.json();
+  if (!applications.length) throw Object.assign(new Error('no applications'), { status: 404 });
+  const saved = Number(localStorage.getItem(APP_KEY));
+  const chosen = applications.some(a => a.student_id === saved) ? saved : default_student_id;
+  const res = await fetch(`${API}/api/students/progress/id/${chosen}`, { headers: authHeaders() });
+  if (!res.ok) throw Object.assign(new Error('progress'), { status: res.status });
+  const data = await res.json();
+  data._applications = applications;
+  return data;
+}
+
+// "Internship: [Python ▾]" — only when the student has applied to more than one track.
+function renderAppSwitcher(data) {
+  const apps = data._applications || [];
+  document.querySelectorAll('.app-switcher').forEach(el => el.remove());
+  if (apps.length < 2) return;
+  const STATUS = { active: 'active', completed: 'completed', dropped: 'closed' };
+  const build = () => {
+    const wrap = document.createElement('label');
+    wrap.className = 'app-switcher';
+    const text = document.createElement('span');
+    text.textContent = 'Internship';
+    const select = document.createElement('select');
+    apps.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a.student_id;
+      const state = a.enrollment_status ? STATUS[a.enrollment_status] || a.enrollment_status : (a.status === 'applied' ? 'under review' : a.status);
+      opt.textContent = `${a.domain_label || a.domain} · ${state}`;
+      opt.selected = data.student && a.student_id === data.student.id;
+      select.append(opt);
+    });
+    select.addEventListener('change', () => {
+      localStorage.setItem(APP_KEY, select.value);
+      window.location.reload();
+    });
+    wrap.append(text, select);
+    return wrap;
+  };
+  const greet = document.querySelector('#dash-header-el .ov-greet');
+  if (greet) greet.append(build());
+  const unenrolledCard = document.querySelector('#unenrolled-view .login-card');
+  if (unenrolledCard) unenrolledCard.insertBefore(build(), unenrolledCard.querySelector('.login-btn'));
+}
+
 // Signed in but no active internship: under review, or dropped.
 function showUnenrolled(data) {
   const summary = (data && data.summary) || {};
@@ -170,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (!resolvedEmail) throw Object.assign(new Error('expired'), { status: 401 });
 
-      const progressRes = await fetch(`${API}/api/students/progress/${encodeURIComponent(resolvedEmail)}`, { headers: authHeaders() });
+      const data = await loadDashboardData();
 
       // If user clicked sign out while fetch was pending, abort the restore process
       if (!localStorage.getItem('skillme_email') && !localStorage.getItem('token')) {
@@ -178,11 +228,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      if (!progressRes.ok) throw Object.assign(new Error('progress'), { status: progressRes.status });
-
-      const data = await progressRes.json();
       data._email = resolvedEmail;
       renderDashboard(data);
+      renderAppSwitcher(data);
 
       loginView.style.display = 'none';
       if (data.progress && data.progress.length === 0) {
@@ -378,16 +426,17 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('skillme_email', email);
 
       // Successfully verified. Now load student dashboard data.
-      const res = await fetch(`${API}/api/students/progress/${encodeURIComponent(email)}`, { headers: authHeaders() });
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.detail || "Signed in, but we couldn't load your dashboard. Please refresh.");
+      let data;
+      try {
+        data = await loadDashboardData();
+      } catch (e) {
+        if (e instanceof TypeError) throw e;
+        throw new Error("Signed in, but we couldn't load your dashboard. Please refresh.");
       }
-
-      const data = await res.json();
       data._email = email;
       clearInterval(resendTimer);
       renderDashboard(data);
+      renderAppSwitcher(data);
 
       // Transition to dashboard view
       loginView.style.opacity = '0';
@@ -1707,6 +1756,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.signOut = function() {
     localStorage.removeItem('token');
     localStorage.removeItem('skillme_email');
+    localStorage.removeItem(APP_KEY);
     fetch(`${API}/api/auth/logout`, { method: 'POST' }).catch(() => {});
     window.location.reload();
   };

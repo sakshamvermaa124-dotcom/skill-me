@@ -1884,3 +1884,17 @@ html.lenis, html.lenis body { height: auto; }
 }
 .skip-link:focus { top: 12px; }
 main.dash-page:focus { outline: none; }
+
+/* Track switcher (students who applied to more than one track) */
+.app-switcher {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-top: 10px;
+  font-size: 0.8rem; font-weight: 600; color: var(--text-muted);
+}
+.app-switcher select {
+  min-height: 36px; padding: 0 10px;
+  border: 1px solid var(--border-strong); border-radius: 10px;
+  background: var(--surface-1); color: var(--text-strong);
+  font: 500 0.86rem var(--font-ui);
+}
+#unenrolled-view .app-switcher { margin: 0 0 16px; }
