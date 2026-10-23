@@ -3,6 +3,7 @@ Student Tests — Application Submission
 Tests POST /api/students/apply for happy path and validation cases.
 """
 import pytest
+from tests.conftest import test_db
 
 
 VALID_APPLICATION = {
@@ -136,3 +137,18 @@ class TestApplicationValidation:
     async def test_no_body(self, client):
         r = await client.post("/api/students/apply")
         assert r.status_code == 422
+
+
+@pytest.mark.students
+class TestApplicationQuizScore:
+    async def test_quiz_score_is_stored(self, client):
+        r = await client.post("/api/students/apply", json={**VALID_APPLICATION, "quiz_score": 6, "quiz_total": 8})
+        assert r.status_code == 200
+        row = await test_db.fetch_one("SELECT quiz_score, quiz_total FROM students WHERE id = ?", (r.json()["student_id"],))
+        assert (row["quiz_score"], row["quiz_total"]) == (6, 8)
+
+    async def test_quiz_score_is_optional(self, client):
+        r = await client.post("/api/students/apply", json=VALID_APPLICATION)
+        assert r.status_code == 200
+        row = await test_db.fetch_one("SELECT quiz_score FROM students WHERE id = ?", (r.json()["student_id"],))
+        assert row["quiz_score"] is None

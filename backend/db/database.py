@@ -172,6 +172,9 @@ class Database:
             "CREATE INDEX IF NOT EXISTS idx_payments_status ON payments(status)",
             "CREATE INDEX IF NOT EXISTS idx_payments_created ON payments(created_at)",
             "CREATE INDEX IF NOT EXISTS idx_students_domain ON students(domain)",
+            # Screening quiz score submitted with the application (v9)
+            "ALTER TABLE students ADD COLUMN quiz_score INTEGER",
+            "ALTER TABLE students ADD COLUMN quiz_total INTEGER",
         ]
         return migrations
 

@@ -99,6 +99,7 @@ async def _enroll_and_notify(student_id: int, background_tasks: BackgroundTasks)
             last_name=student["last_name"],
             email=student["email"],
             domain=result["domain"],
+            student_id=student_id,
         )
     return result
 
@@ -186,7 +187,7 @@ async def list_students(
     students = await db.fetch_all(
         f"""SELECT s.id, s.first_name, s.last_name, s.email, s.phone, s.github_username,
                    s.linkedin_url, s.college, s.year_of_study, s.domain, s.status,
-                   s.created_at, s.updated_at,
+                   s.quiz_score, s.quiz_total, s.created_at, s.updated_at,
                    {_CURRENT_BATCH_ID_SUBQUERY} AS batch_id,
                    CASE WHEN {paid_exists} THEN 1 ELSE 0 END AS has_paid,
                    (SELECT p.updated_at FROM payments p

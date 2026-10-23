@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% import "_ui.html" as ui %}
 
-{% set offer_url = "https://skill-me-intern.in/offer.html?name=" ~ (first_name|urlencode) ~ "+" ~ (last_name|urlencode) ~ "&domain=" ~ (domain_label|urlencode) %}
-{% set hod_url = "https://skill-me-intern.in/offer.html?view=hod&name=" ~ (first_name|urlencode) ~ "+" ~ (last_name|urlencode) ~ "&domain=" ~ (domain_label|urlencode) %}
+{% set offer_url = "https://skill-me-intern.in/offer.html?name=" ~ (first_name|urlencode) ~ "+" ~ (last_name|urlencode) ~ "&domain=" ~ (domain_label|urlencode) ~ (offer_query or "") %}
+{% set hod_url = "https://skill-me-intern.in/offer.html?view=hod&name=" ~ (first_name|urlencode) ~ "+" ~ (last_name|urlencode) ~ "&domain=" ~ (domain_label|urlencode) ~ (offer_query or "") %}
 
 {% block title %}Your internship offer letter — SkillMe{% endblock %}
 {% block preheader %}Your SkillMe {{ domain_label }} internship is confirmed. View your verified offer letter and get started.{% endblock %}

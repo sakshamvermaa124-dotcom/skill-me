@@ -4,6 +4,7 @@ Handles OTP generation, verification, and JWT token management.
 """
 
 import hashlib
+import hmac
 import random
 import string
 import logging
@@ -26,6 +27,17 @@ def _hash_otp(otp: str) -> str:
 def _generate_otp() -> str:
     """Generate a random 6-digit numeric OTP."""
     return "".join(random.choices(string.digits, k=6))
+
+
+def offer_ref(student_id: int) -> str:
+    """Unguessable reference printed on a student's offer letter / HOD pack (QR + links).
+    Lets a college verify the letter without exposing a lookup by sequential student id."""
+    digest = hmac.new(settings.jwt_secret_key.encode(), f"offer:{int(student_id)}".encode(), hashlib.sha256)
+    return digest.hexdigest()[:16]
+
+
+def offer_ref_valid(student_id: int, ref: str) -> bool:
+    return hmac.compare_digest(offer_ref(student_id), (ref or "").strip().lower())
 
 
 def _create_jwt(student_id: int, email: str) -> str:

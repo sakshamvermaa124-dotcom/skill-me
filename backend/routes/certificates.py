@@ -49,7 +49,8 @@ async def verify_certificate(cert_id: str):
     """Public endpoint to verify if a certificate ID is genuine."""
     row = await db.fetch_one(
         """SELECT c.*, s.first_name, s.last_name,
-                  COALESCE(b.domain, s.domain) AS domain
+                  COALESCE(b.domain, s.domain) AS domain,
+                  b.start_date AS start_date
            FROM certificates c
            JOIN students s ON c.student_id = s.id
            LEFT JOIN batches b ON c.batch_id = b.id
@@ -65,6 +66,7 @@ async def verify_certificate(cert_id: str):
         "domain": row["domain"],
         **_domain_fields(row["domain"]),
         "issued_at": row["issued_at"],
+        "start_date": row["start_date"],
     }
 
 
@@ -182,7 +184,8 @@ async def get_cert_metadata(student_id: int, batch_id: int):
         raise HTTPException(status_code=402, detail="payment_required")
 
     info = await db.fetch_one(
-        """SELECT s.first_name, s.last_name, COALESCE(b.domain, s.domain) AS domain
+        """SELECT s.first_name, s.last_name, COALESCE(b.domain, s.domain) AS domain,
+                  b.start_date AS start_date
            FROM students s LEFT JOIN batches b ON b.id = ?
            WHERE s.id = ?""",
         (cert["batch_id"], student_id),
@@ -200,6 +203,7 @@ async def get_cert_metadata(student_id: int, batch_id: int):
         "first_name": first,
         "last_name": last,
         "domain": domain,
+        "start_date": info["start_date"] if info else None,
         **_domain_fields(domain),
     }
 

@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS students (
     motivation TEXT,
     referral_source TEXT,
     referred_by TEXT,
+    quiz_score INTEGER,                   -- screening quiz result sent with the application
+    quiz_total INTEGER,
     status TEXT NOT NULL DEFAULT 'applied',  -- applied | shortlisted | enrolled | completed | dropped
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

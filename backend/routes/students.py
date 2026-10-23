@@ -10,6 +10,7 @@ from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from pydantic import BaseModel, Field
 from db.database import db
 from middleware.student_auth import require_student
+from services.auth_service import offer_ref, offer_ref_valid
 from services.email_service import email_service, _domain_label
 from services.submission_service import submission_service
 from services.urgent_request_service import urgent_request_service
@@ -34,6 +35,8 @@ class ApplicationRequest(BaseModel):
     domain: str = Field(..., description="Preferred domain")
     motivation: str | None = Field(None, max_length=1000)
     referral_source: str | None = Field(None, max_length=100)
+    quiz_score: int | None = Field(None, ge=0, le=100)
+    quiz_total: int | None = Field(None, ge=1, le=100)
 
 
 class SubmitTaskRequest(BaseModel):
@@ -91,8 +94,9 @@ async def apply(req: ApplicationRequest, background_tasks: BackgroundTasks):
         student_id = await db.insert(
             """INSERT INTO students
                (first_name, last_name, email, phone, linkedin_url,
-                college, year_of_study, domain, motivation, referral_source, status)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'applied')""",
+                college, year_of_study, domain, motivation, referral_source,
+                quiz_score, quiz_total, status)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'applied')""",
             (
                 req.first_name,
                 req.last_name,
@@ -104,6 +108,8 @@ async def apply(req: ApplicationRequest, background_tasks: BackgroundTasks):
                 req.domain,
                 req.motivation,
                 req.referral_source,
+                req.quiz_score,
+                req.quiz_total,
             ),
         )
 
@@ -212,6 +218,7 @@ async def _progress_for_email(email: str) -> dict:
             "email": student["email"],
             "domain": primary_domain,
             "college": student.get("college"),
+            "offer_ref": offer_ref(student["id"]),
         },
         "progress": [dict(p) for p in progress],
         "submissions": [dict(s) for s in submissions],
@@ -225,6 +232,10 @@ async def _progress_for_email(email: str) -> dict:
                 len({int(p["week"]) for p in progress if int(p["issues_completed"]) > 0}) / 4 * 100
             )),
             "payment_unlocked": payment_unlocked,
+            # None (not enrolled yet) | active | completed | dropped — lets the dashboard
+            # tell "under review" apart from "no longer active".
+            "enrollment_status": enrollment["status"] if enrollment else None,
+            "application_status": student["status"],
         },
     }
 
@@ -240,6 +251,32 @@ async def get_progress_by_id(student_id: int, me: dict = Depends(require_student
         raise HTTPException(status_code=404, detail="Student not found.")
 
     return await _progress_for_email(student["email"])
+
+
+@router.get("/offer/{student_id}/{ref}", summary="Verify an offer letter (public, signed reference)")
+async def verify_offer(student_id: int, ref: str):
+    """What a college HOD sees after scanning the QR on an offer letter / NOC pack.
+    Needs the signed `ref` printed on the letter, so ids can't be enumerated."""
+    if not offer_ref_valid(student_id, ref):
+        raise HTTPException(status_code=404, detail="Offer letter not found.")
+    student = await db.fetch_one(
+        "SELECT id, first_name, last_name, college, domain, status FROM students WHERE id = ?",
+        (student_id,),
+    )
+    if not student:
+        raise HTTPException(status_code=404, detail="Offer letter not found.")
+    enrollment = await enrollment_service.get_current_enrollment(student_id)
+    if not enrollment:
+        raise HTTPException(status_code=404, detail="No offer has been issued for this reference.")
+    return {
+        "valid": True,
+        "name": f"{student['first_name']} {student['last_name']}",
+        "college": student["college"],
+        "domain": enrollment["domain"] or student["domain"],
+        "domain_label": _domain_label(enrollment["domain"] or student["domain"] or ""),
+        "enrollment_status": enrollment["status"],
+        "start_date": enrollment["start_date"],
+    }
 
 
 @router.post("/submit-task", summary="Submit a LinkedIn post URL for a week's task")

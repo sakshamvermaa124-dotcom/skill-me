@@ -312,9 +312,13 @@ class EmailService:
         joining_date: str | None = None,
         repo_url: str | None = None,
         github_username: str | None = None,
+        student_id: int | None = None,
     ) -> bool:
         if not joining_date:
             joining_date = datetime.utcnow().strftime("%d %B %Y")
+        # Signed reference so the letter's QR / links can be verified by a college.
+        from services.auth_service import offer_ref
+        offer_query = f"&student_id={student_id}&ref={offer_ref(student_id)}" if student_id else ""
         # Build a filtered issues URL that shows ONLY this student's issues
         issues_url = None
         if repo_url and github_username:
@@ -329,6 +333,7 @@ class EmailService:
             issues_url=issues_url or "",
             github_username=github_username or "",
             dashboard_url=f"{settings.frontend_url}/dashboard.html",
+            offer_query=offer_query,
         )
         return await _send_and_log(
             email,

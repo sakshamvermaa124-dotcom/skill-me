@@ -168,3 +168,27 @@ class TestPublicActivity:
         assert data["stats"]["total_students"] == 1
         assert data["stats"]["total_submissions_approved"] == 0
         assert data["activities"] == []
+
+
+@pytest.mark.students
+class TestOfferVerification:
+    async def test_offer_verifies_with_signed_ref(self, client, enrolled_student):
+        progress = (await client.get(
+            f"/api/students/progress/id/{enrolled_student['id']}", headers=auth_headers(enrolled_student["id"])
+        )).json()
+        ref = progress["student"]["offer_ref"]
+        r = await client.get(f"/api/students/offer/{enrolled_student['id']}/{ref}")
+        assert r.status_code == 200
+        data = r.json()
+        assert data["valid"] is True
+        assert data["name"] == "Test Student"
+        assert "email" not in data
+
+    async def test_offer_rejects_wrong_ref(self, client, enrolled_student):
+        r = await client.get(f"/api/students/offer/{enrolled_student['id']}/0000000000000000")
+        assert r.status_code == 404
+
+    async def test_offer_needs_an_enrollment(self, client, test_student):
+        from services.auth_service import offer_ref
+        r = await client.get(f"/api/students/offer/{test_student['id']}/{offer_ref(test_student['id'])}")
+        assert r.status_code == 404
