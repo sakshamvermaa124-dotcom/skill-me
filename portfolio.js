@@ -167,12 +167,12 @@
 
   function stateCard(icon, title, descHtml, actionHtml) {
     return `
-      <div class="card locked-card fade-in">
+      <div class="wrap"><div class="locked-card">
         <div class="locked-icon-wrap">${icon}</div>
         <div class="locked-title">${title}</div>
         <div class="locked-desc">${descHtml}</div>
         ${actionHtml || ''}
-      </div>
+      </div></div>
     `;
   }
 
@@ -192,6 +192,134 @@
     return null;
   }
 
+  // ── Theme toggle (same key as the main site + dashboard) ─
+  function initThemeToggle() {
+    const btn = document.getElementById('theme-toggle');
+    if (!btn) return;
+    const sync = () => {
+      const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      btn.setAttribute('aria-label', `Switch to ${next} mode`);
+      btn.setAttribute('title', `Switch to ${next} mode`);
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', next === 'dark' ? '#ffffff' : '#09090a');
+    };
+    sync();
+    btn.addEventListener('click', () => {
+      const root = document.documentElement;
+      const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      root.classList.add('theme-switching');
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('skillme-theme', next); } catch (e) {}
+      sync();
+      setTimeout(() => root.classList.remove('theme-switching'), 350);
+    });
+  }
+
+  const prefersReducedMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Public LinkedIn posts can be embedded via their URN; returns null when the link has none.
+  function linkedinEmbedUrl(url) {
+    const safe = safeUrl(url);
+    if (!safe || !/(^|\.)linkedin\.com$/i.test(new URL(safe).hostname)) return null;
+    let s = safe;
+    try { s = decodeURIComponent(safe); } catch (e) {}
+    const TYPES = { activity: 'activity', share: 'share', ugcpost: 'ugcPost' };
+    const m = s.match(/urn:li:(activity|share|ugcPost):(\d+)/i) || s.match(/[-_](activity|share|ugcPost)-(\d{10,})/i);
+    if (!m) return null;
+    return `https://www.linkedin.com/embed/feed/update/urn:li:${TYPES[m[1].toLowerCase()]}:${m[2]}`;
+  }
+
+  // ── Post preview modal ──────────────────────────────────
+  let lastFocus = null;
+  function openPostModal(embedUrl, postUrl, title) {
+    const modal = document.getElementById('post-modal');
+    const wrap = document.getElementById('post-frame-wrap');
+    if (!modal || !wrap) { window.open(postUrl, '_blank', 'noopener'); return; }
+    lastFocus = document.activeElement;
+    document.getElementById('post-modal-title').textContent = title;
+    document.getElementById('post-modal-open').href = postUrl;
+    wrap.innerHTML = '<div class="post-loading">Loading post from LinkedIn…</div>';
+    const frame = document.createElement('iframe');
+    frame.src = embedUrl;
+    frame.title = title;
+    frame.loading = 'lazy';
+    frame.setAttribute('allowfullscreen', '');
+    frame.addEventListener('load', () => { const l = wrap.querySelector('.post-loading'); if (l) l.remove(); });
+    wrap.appendChild(frame);
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    requestAnimationFrame(() => modal.classList.add('show'));
+    document.body.style.overflow = 'hidden';
+    document.getElementById('post-modal-close').focus();
+  }
+  function closePostModal() {
+    const modal = document.getElementById('post-modal');
+    if (!modal || !modal.classList.contains('open')) return;
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    setTimeout(() => {
+      modal.classList.remove('open');
+      const wrap = document.getElementById('post-frame-wrap');
+      if (wrap) wrap.innerHTML = '';
+    }, 250);
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  function initPostModal() {
+    const modal = document.getElementById('post-modal');
+    if (!modal) return;
+    document.getElementById('post-modal-close').addEventListener('click', closePostModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closePostModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePostModal(); });
+  }
+
+  // ── Motion: scroll reveal, count-up, credential tilt ────
+  function initReveal(root) {
+    const els = root.querySelectorAll('.reveal');
+    if (prefersReducedMotion() || !('IntersectionObserver' in window)) { els.forEach(el => el.classList.add('in')); return; }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('in');
+        io.unobserve(entry.target);
+        entry.target.querySelectorAll('[data-count]').forEach(countUp);
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+    els.forEach(el => io.observe(el));
+  }
+  function countUp(el) {
+    const end = Number(el.dataset.count);
+    if (!isFinite(end) || el.dataset.counted) return;
+    el.dataset.counted = '1';
+    if (prefersReducedMotion() || end === 0) { el.textContent = end; return; }
+    const start = performance.now();
+    const dur = 1200;
+    const step = (t) => {
+      const k = Math.min(1, (t - start) / dur);
+      el.textContent = Math.round(end * (1 - Math.pow(1 - k, 3)));
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+  function initTilt(card) {
+    if (!card || prefersReducedMotion() || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    card.addEventListener('pointermove', (e) => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width;
+      const y = (e.clientY - r.top) / r.height;
+      card.classList.add('is-tilting');
+      card.style.setProperty('--ry', `${((x - 0.5) * 10).toFixed(2)}deg`);
+      card.style.setProperty('--rx', `${((0.5 - y) * 8).toFixed(2)}deg`);
+      card.style.setProperty('--mx', `${(x * 100).toFixed(1)}%`);
+      card.style.setProperty('--my', `${(y * 100).toFixed(1)}%`);
+    });
+    card.addEventListener('pointerleave', () => {
+      card.classList.remove('is-tilting');
+      card.style.setProperty('--rx', '0deg');
+      card.style.setProperty('--ry', '0deg');
+    });
+  }
+
   // ── Render ──────────────────────────────────────────────
   function renderPortfolio(container, data, target) {
     const p = data.profile || data.student || {};
@@ -201,6 +329,7 @@
     if (!domains.length && p.domain) domains = [p.domain];
 
     const name = formatName(p.name || [p.first_name, p.last_name].filter(Boolean).join(' ')) || 'SkillMe Intern';
+    const firstName = name.split(' ')[0];
     const initials = name.split(' ').filter(Boolean).slice(0, 2).map(w => w.charAt(0).toUpperCase()).join('') || 'SM';
     const college = p.college || '';
     const studentId = p.id != null ? String(p.id) : (target.type === 'id' ? target.value : '');
@@ -215,173 +344,216 @@
     // how many tracks a student is enrolled in (see dashboard.js completion_pct).
     const totalMilestones = WEEKS_PER_TRACK;
     const approved = submissions.length;
+    const shownApproved = Math.min(approved, totalMilestones);
     const completion = Math.min(100, Math.round((approved / totalMilestones) * 100));
     const dates = submissions.map(sub => parseDate(sub.reviewed_at || sub.submitted_at)).filter(Boolean).sort((a, b) => a - b);
+    const first = dates.length ? dates[0] : null;
     const latest = dates.length ? dates[dates.length - 1] : null;
+    const primaryRole = domains.length === 1 ? domainLabel(domains[0]) : (domains.length ? domains.map(domainLabel).join(' · ') : 'Tech');
 
-    const RING_R = 44;
-    const RING_C = 2 * Math.PI * RING_R;
-    const ringOffset = RING_C * (1 - Math.min(1, approved / totalMilestones));
-
-    const domainTagsHtml = domains.map(d => `<span class="domain-tag">${esc(domainLabel(d))}</span>`).join('');
+    // Rings: avatar (r=48 in a 104 box) and the credential seal (r=42 in a 96 box)
+    const AV_R = 48, AV_C = 2 * Math.PI * AV_R;
+    const SEAL_R = 42, SEAL_C = 2 * Math.PI * SEAL_R;
+    const frac = Math.min(1, approved / totalMilestones);
 
     const skills = new Set();
     domains.forEach(d => (SKILL_MAP[d] || DEFAULT_SKILLS).forEach(sk => skills.add(sk)));
     if (!skills.size) DEFAULT_SKILLS.forEach(sk => skills.add(sk));
     const skillsHtml = Array.from(skills).map(sk => `<span class="skill-pill">${esc(sk)}</span>`).join('');
+    const domainTagsHtml = domains.map(d => `<span class="domain-tag">${ICONS.layers.replace('width="17" height="17"', 'width="13" height="13"')}${esc(domainLabel(d))}</span>`).join('');
 
+    // Highlights — only real numbers
     const score = Number(s.total_score) || 0;
-    const fourthStat = score > 0
-      ? { icon: ICONS.star, cls: '', value: `${score}<small>pts</small>`, label: 'Merit score' }
-      : { icon: ICONS.calendar, cls: '', value: latest ? esc(formatDate(latest, { day: 'numeric', month: 'short' })) : '—', label: 'Last verified' };
+    const spanDays = first && latest ? Math.max(1, Math.round((latest - first) / 86400000) + 1) : 0;
+    const highlights = [
+      { value: shownApproved, suffix: `<small>/${totalMilestones}</small>`, label: 'Milestones verified' },
+      { value: completion, suffix: '<small>%</small>', label: 'Program completed' },
+      score > 0
+        ? { value: score, suffix: '<small>pts</small>', label: 'Merit score' }
+        : { value: domains.length || 1, suffix: '', label: (domains.length || 1) === 1 ? 'Internship track' : 'Internship tracks' },
+      spanDays
+        ? { value: spanDays, suffix: `<small>day${spanDays === 1 ? '' : 's'}</small>`, label: 'From first to last milestone' }
+        : { value: null, text: latest ? esc(formatDate(latest, { day: 'numeric', month: 'short' })) : '—', label: 'Last verified' },
+    ];
+    const highlightsHtml = highlights.map(h => `
+      <div class="highlight">
+        <div class="highlight-value">${h.value == null ? h.text : `<span data-count="${h.value}">0</span>${h.suffix}`}</div>
+        <div class="highlight-label">${h.label}</div>
+      </div>`).join('');
 
     const milestonesHtml = approved
-      ? `<ol class="timeline">${submissions.map(sub => {
+      ? `<ol class="milestones">${submissions.map(sub => {
           const url = safeUrl(sub.linkedin_url);
+          const embed = linkedinEmbedUrl(sub.linkedin_url);
           const d = parseDate(sub.reviewed_at || sub.submitted_at);
-          const tag = url ? 'a' : 'div';
-          const attrs = url ? ` href="${esc(url)}" target="_blank" rel="noopener noreferrer"` : '';
+          const week = esc(sub.week || '');
+          const title = `Week ${week} project`;
           return `
-            <li>
-              <${tag} class="milestone"${attrs}>
-                <span class="milestone-node">W${esc(sub.week || '')}</span>
-                <span class="milestone-body">
-                  <span>
-                    <span class="milestone-title">Week ${esc(sub.week || '')} Milestone</span>
-                    <span class="milestone-meta">
-                      <span class="badge-approved">${ICONS.check} Approved</span>
-                      ${d ? `<span>${esc(formatDate(d))}</span>` : ''}
-                      ${sub.domain ? `<span class="milestone-domain">${esc(domainLabel(sub.domain))}</span>` : ''}
-                    </span>
-                  </span>
-                  ${url ? `<span class="milestone-cta">View post ${ICONS.arrow}</span>` : ''}
-                </span>
-              </${tag}>
+            <li class="milestone">
+              <span class="milestone-num" aria-hidden="true">${String(sub.week || '').padStart(2, '0')}</span>
+              <div class="milestone-top">
+                <span class="badge-approved">${ICONS.check} Verified</span>
+                ${sub.domain ? `<span class="milestone-domain">${esc(domainLabel(sub.domain))}</span>` : ''}
+              </div>
+              <div class="milestone-week">Milestone ${week} of ${totalMilestones}</div>
+              <h3 class="milestone-title">${esc(title.charAt(0).toUpperCase() + title.slice(1))}</h3>
+              ${d ? `<div class="milestone-date">Approved by the SkillMe team on ${esc(formatDate(d))}</div>` : ''}
+              ${url ? `
+              <div class="milestone-actions">
+                ${embed ? `<button type="button" class="btn btn-primary btn-sm" data-preview="${esc(embed)}" data-url="${esc(url)}" data-title="${esc(title.charAt(0).toUpperCase() + title.slice(1))}">Preview post</button>` : ''}
+                <a class="btn ${embed ? 'btn-ghost' : 'btn-primary'} btn-sm" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${ICONS.linkedin} Open on LinkedIn</a>
+              </div>` : ''}
             </li>`;
         }).join('')}</ol>`
       : `<div class="empty-state"><strong>Milestones syncing</strong>Approved LinkedIn milestone posts appear here once reviewed by the SkillMe team.</div>`;
 
+    const ctaHtml = isOwner
+      ? `
+        <section class="cta-band reveal">
+          <div>
+            <div class="cta-title">Your portfolio is live. Put it to work.</div>
+            <p class="cta-sub">Share it on LinkedIn, add it to your resume, or send it to recruiters — it stays up to date as new milestones are approved.</p>
+          </div>
+          <div class="cta-actions">
+            <button type="button" class="btn btn-linkedin" data-action="share">${ICONS.linkedin} Share on LinkedIn</button>
+            <button type="button" class="btn btn-ghost" data-action="copy">${ICONS.link} Copy link</button>
+          </div>
+        </section>`
+      : `
+        <section class="cta-band reveal">
+          <div>
+            <div class="cta-title">Want a verified portfolio like ${esc(firstName)}'s?</div>
+            <p class="cta-sub">Do real weekly projects in a SkillMe internship, get each one reviewed, and earn a public Proof of Work page of your own.</p>
+          </div>
+          <div class="cta-actions">
+            <a href="apply.html" class="btn btn-primary">Apply to SkillMe ${ICONS.arrow}</a>
+            <a href="index.html#how-it-works" class="btn btn-ghost">How it works</a>
+          </div>
+        </section>`;
+
     container.innerHTML = `
-      <section class="card profile-hero-card fade-in">
-        <div class="hero-grid">
+      <section class="profile-hero-card">
+        <div class="aurora" aria-hidden="true"><span class="blob blob-1"></span><span class="blob blob-2"></span><span class="blob blob-3"></span></div>
+        <div class="wrap hero-grid">
           <div class="hero-identity">
-            <div class="avatar-monogram" aria-hidden="true">
-              ${esc(initials)}
+            <div class="avatar" aria-hidden="true">
+              <svg class="avatar-ring" width="104" height="104" viewBox="0 0 104 104">
+                <circle class="track" cx="52" cy="52" r="${AV_R}" fill="none" stroke-width="3"></circle>
+                <circle class="bar" id="avatar-bar" cx="52" cy="52" r="${AV_R}" fill="none" stroke-width="3"
+                  stroke-dasharray="${AV_C.toFixed(2)}" stroke-dashoffset="${AV_C.toFixed(2)}"></circle>
+              </svg>
+              <div class="avatar-monogram">${esc(initials)}</div>
               <span class="avatar-verified" title="Verified by SkillMe">${ICONS.check}</span>
             </div>
-            <div class="hero-meta">
-              <div class="eyebrow"><span class="pulse"></span> Verified Proof of Work</div>
-              <h1 class="hero-name">${esc(name)}</h1>
-              <p class="hero-role">
-                <span>${domains.length === 1 ? esc(domainLabel(domains[0])) + ' ' : ''}Intern at <strong>SkillMe</strong></span>
-                ${college ? `<span class="sep">•</span><span>${esc(college)}</span>` : ''}
-              </p>
-              ${domainTagsHtml ? `<div class="domain-row">${domainTagsHtml}</div>` : ''}
+            <div class="eyebrow"><span class="pulse"></span> Verified by SkillMe${latest ? ` <span class="muted">· Updated ${esc(formatDate(latest, { day: 'numeric', month: 'short', year: 'numeric' }))}</span>` : ''}</div>
+            <h1 class="hero-name">${esc(name)}</h1>
+            <p class="hero-role">
+              <span>${esc(primaryRole)} Intern at <strong>SkillMe</strong></span>
+              ${college ? `<span class="sep" aria-hidden="true"></span><span>${esc(college)}</span>` : ''}
+            </p>
+            ${domains.length > 1 && domainTagsHtml ? `<div class="domain-row">${domainTagsHtml}</div>` : ''}
+            <div class="hero-actions">
+              ${isOwner ? `<button type="button" class="btn btn-linkedin" id="btn-share">${ICONS.linkedin} Share on LinkedIn</button>` : ''}
+              <button type="button" class="btn ${isOwner ? 'btn-ghost' : 'btn-primary'}" id="btn-copy">${ICONS.link} Copy link</button>
+              <button type="button" class="btn btn-ghost" id="btn-print">${ICONS.print} Save as PDF</button>
+            </div>
+            ${isOwner ? `<div class="owner-tip">Only you see this: when posting on LinkedIn, type <strong>@SkillMe</strong> and pick it from the dropdown so the post tags us officially.</div>` : ''}
+          </div>
+
+          <div class="cred-stage">
+            <div class="cred-card" id="cred-card" aria-label="${shownApproved} of ${totalMilestones} milestones verified by SkillMe">
+              <div class="cred-top">
+                <div class="cred-brand"><img src="assets/logo.webp" alt="" onerror="this.src='assets/logo.png'"> SkillMe</div>
+                <div class="cred-type">Proof of Work</div>
+              </div>
+              <div class="cred-main">
+                <div class="seal-ring">
+                  <svg width="96" height="96" viewBox="0 0 96 96">
+                    <circle class="track" cx="48" cy="48" r="${SEAL_R}" fill="none" stroke-width="6"></circle>
+                    <circle class="bar" id="seal-bar" cx="48" cy="48" r="${SEAL_R}" fill="none" stroke-width="6"
+                      stroke-dasharray="${SEAL_C.toFixed(2)}" stroke-dashoffset="${SEAL_C.toFixed(2)}"></circle>
+                  </svg>
+                  <div class="seal-center"><div class="seal-value">${shownApproved}<span>/${totalMilestones}</span></div></div>
+                </div>
+                <div>
+                  <div class="cred-claim">${shownApproved >= totalMilestones ? 'All milestones verified' : `${shownApproved} milestone${shownApproved === 1 ? '' : 's'} verified`}</div>
+                  <div class="cred-claim-sub">Each reviewed by the SkillMe team</div>
+                </div>
+              </div>
+              <dl class="cred-rows">
+                <div class="cred-row"><dt>Holder</dt><dd>${esc(name)}</dd></div>
+                <div class="cred-row"><dt>Track</dt><dd>${esc(primaryRole)}</dd></div>
+                <div class="cred-row"><dt>Last verified</dt><dd>${latest ? esc(formatDate(latest)) : '—'}</dd></div>
+                <div class="cred-row"><dt>Record</dt><dd class="mono">${studentId ? `#${esc(studentId)}` : esc('@' + gh)}</dd></div>
+              </dl>
+              <span class="cred-stamp">${ICONS.check} Verified</span>
             </div>
           </div>
-
-          <div class="hero-seal" aria-label="${approved} of ${totalMilestones} milestones verified">
-            <div class="seal-ring">
-              <svg width="104" height="104" viewBox="0 0 104 104">
-                <circle class="track" cx="52" cy="52" r="${RING_R}" fill="none" stroke-width="7"></circle>
-                <circle class="bar" id="seal-bar" cx="52" cy="52" r="${RING_R}" fill="none" stroke-width="7"
-                  stroke-dasharray="${RING_C.toFixed(2)}" stroke-dashoffset="${RING_C.toFixed(2)}"></circle>
-              </svg>
-              <div class="seal-center"><div class="seal-value">${Math.min(approved, totalMilestones)}<span>/${totalMilestones}</span></div></div>
-            </div>
-            <div class="seal-label">Milestones verified</div>
-          </div>
-        </div>
-
-        <div class="hero-footer">
-          <div class="hero-actions">
-            ${isOwner ? `<button type="button" class="btn btn-primary" id="btn-share">${ICONS.linkedin} Share on LinkedIn</button>` : ''}
-            <button type="button" class="btn ${isOwner ? 'btn-ghost' : 'btn-primary'}" id="btn-copy">${ICONS.link} Copy link</button>
-            <button type="button" class="btn btn-ghost" id="btn-print">${ICONS.print} Save as PDF</button>
-          </div>
-          <div class="hero-issued">Issued by <strong>SkillMe</strong> · UDYAM-UP-50-0294192</div>
-        </div>
-        ${isOwner ? `<div class="owner-tip">Only you see this: when posting on LinkedIn, type <strong>@SkillMe</strong> and pick it from the dropdown so the post tags us officially.</div>` : ''}
-      </section>
-
-      <section class="stats-bento-grid fade-in">
-        <div class="card stat-card">
-          <div class="stat-icon sage">${ICONS.flag}</div>
-          <div class="stat-value">${approved}</div>
-          <div class="stat-label">Milestones approved</div>
-        </div>
-        <div class="card stat-card">
-          <div class="stat-icon">${ICONS.percent}</div>
-          <div class="stat-value">${completion}<small>%</small></div>
-          <div class="stat-label">Program completion</div>
-        </div>
-        <div class="card stat-card">
-          <div class="stat-icon">${ICONS.layers}</div>
-          <div class="stat-value">${domains.length || 1}</div>
-          <div class="stat-label">${(domains.length || 1) === 1 ? 'Internship track' : 'Internship tracks'}</div>
-        </div>
-        <div class="card stat-card">
-          <div class="stat-icon">${fourthStat.icon}</div>
-          <div class="stat-value">${fourthStat.value}</div>
-          <div class="stat-label">${fourthStat.label}</div>
         </div>
       </section>
 
-      <div class="content-grid fade-in">
-        <section class="card panel">
-          <div class="panel-head">
-            <h2 class="panel-title">Proof of Work</h2>
-            <span class="panel-sub">Each milestone is reviewed by the SkillMe team</span>
+      <div class="wrap">
+        <section class="highlights reveal" aria-label="Highlights">${highlightsHtml}</section>
+
+        <section class="section reveal" id="proof">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">Proof of Work</div>
+              <h2 class="section-title">Verified milestones</h2>
+            </div>
+            <p class="section-sub">Every milestone is a public LinkedIn post about real project work, reviewed and approved by the SkillMe team.</p>
           </div>
           ${milestonesHtml}
         </section>
 
-        <aside>
-          <section class="card panel">
-            <div class="panel-head"><h2 class="panel-title">Skills applied</h2></div>
-            <div class="skills-list">${skillsHtml}</div>
-          </section>
-
-          <section class="card panel recruiter-trust-box">
-            <div class="trust-icon">${ICONS.shield}</div>
-            <h2 class="panel-title">For recruiters</h2>
-            <p class="trust-desc">This portfolio is generated from SkillMe's records — it can't be edited by the student.</p>
-            <ul class="trust-list">
-              <li>${ICONS.check} Every milestone is manually reviewed before approval</li>
-              <li>${ICONS.check} Each milestone links to the original public post</li>
-              <li>${ICONS.check} Certificates can be checked independently</li>
-            </ul>
-            <div class="trust-actions">
-              <a href="verify.html" class="btn btn-ghost btn-sm">Verify a certificate &rarr;</a>
+        <section class="section reveal">
+          <div class="split">
+            <div class="panel">
+              <h2 class="panel-title">Skills applied</h2>
+              <p class="panel-sub">Core skills practised across the ${esc(primaryRole)} track.</p>
+              <div class="skills-list">${skillsHtml}</div>
             </div>
-          </section>
-        </aside>
-      </div>
+            <div class="panel">
+              <h2 class="panel-title">Why you can trust this page</h2>
+              <ul class="trust-list">
+                <li><span class="trust-ico">${ICONS.check}</span><div><strong>Reviewed by people</strong><span>Every milestone is checked by the SkillMe team before approval.</span></div></li>
+                <li><span class="trust-ico">${ICONS.link}</span><div><strong>Linked to the original</strong><span>Each milestone points to the student's public LinkedIn post.</span></div></li>
+                <li><span class="trust-ico">${ICONS.shield.replace('width="19" height="19"', 'width="16" height="16"')}</span><div><strong>Can't be edited by the student</strong><span>This page is generated from SkillMe's records.</span></div></li>
+              </ul>
+              <div class="trust-actions"><a href="verify.html" class="btn btn-ghost btn-sm">Verify a certificate ${ICONS.arrow}</a></div>
+            </div>
+          </div>
+        </section>
 
-      <footer class="page-footer">
-        SkillMe Proof of Work Registry &bull;
-        <a href="https://www.linkedin.com/company/skill-me-intern/" target="_blank" rel="noopener noreferrer">Follow SkillMe on LinkedIn ↗</a>
-      </footer>
+        ${ctaHtml}
+
+        <footer class="page-footer">
+          <span>SkillMe Proof of Work Registry · Issued by SkillMe · UDYAM-UP-50-0294192</span>
+          <a href="https://www.linkedin.com/company/skill-me-intern/" target="_blank" rel="noopener noreferrer">Follow SkillMe on LinkedIn ↗</a>
+        </footer>
+      </div>
     `;
 
-    // Animate the progress ring in
-    requestAnimationFrame(() => {
-      const bar = document.getElementById('seal-bar');
-      if (bar) requestAnimationFrame(() => bar.setAttribute('stroke-dashoffset', ringOffset.toFixed(2)));
-    });
+    // Rings animate in
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const seal = document.getElementById('seal-bar');
+      if (seal) seal.setAttribute('stroke-dashoffset', (SEAL_C * (1 - frac)).toFixed(2));
+      const av = document.getElementById('avatar-bar');
+      if (av) av.setAttribute('stroke-dashoffset', (AV_C * (1 - frac)).toFixed(2));
+    }));
+    initReveal(container);
+    initTilt(document.getElementById('cred-card'));
 
-    document.getElementById('btn-copy').addEventListener('click', () => {
-      copyText(shareUrl)
-        .then(() => showToast('Portfolio link copied to clipboard'))
-        .catch(() => showToast(shareUrl));
-    });
-    document.getElementById('btn-print').addEventListener('click', () => window.print());
+    // Owners don't need the "Dashboard" link pointed at login; visitors don't need it at all.
+    const navDash = document.getElementById('nav-dashboard');
+    if (navDash && !isOwner) navDash.textContent = 'Student login';
 
-    const shareBtn = document.getElementById('btn-share');
-    if (shareBtn) {
-      shareBtn.addEventListener('click', () => {
-        const trackText = domains.map(domainLabel).join(', ') || 'my SkillMe track';
-        const text = `🚀 Excited to share my verified Proof of Work portfolio from SkillMe (@SkillMe)!
+    const doCopy = () => copyText(shareUrl)
+      .then(() => showToast('Portfolio link copied to clipboard'))
+      .catch(() => showToast(shareUrl));
+    const doShare = () => {
+      const trackText = domains.map(domainLabel).join(', ') || 'my SkillMe track';
+      const text = `🚀 Excited to share my verified Proof of Work portfolio from SkillMe (@SkillMe)!
 
 I completed ${approved} verified project milestone${approved === 1 ? '' : 's'} in ${trackText}, each reviewed by the SkillMe team before approval.
 
@@ -391,9 +563,22 @@ Check out my live portfolio:
 Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
 
 #SkillMe #ProofOfWork #${FIELD_HASHTAG[domains[0]] || 'SoftwareEngineering'} #Internship`;
-        window.open(`https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(text)}`, '_blank', 'noopener');
-      });
-    }
+      window.open(`https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+    };
+
+    document.getElementById('btn-copy').addEventListener('click', doCopy);
+    document.getElementById('btn-print').addEventListener('click', () => window.print());
+    const shareBtn = document.getElementById('btn-share');
+    if (shareBtn) shareBtn.addEventListener('click', doShare);
+
+    container.addEventListener('click', (e) => {
+      const preview = e.target.closest('[data-preview]');
+      if (preview) { openPostModal(preview.dataset.preview, preview.dataset.url, preview.dataset.title); return; }
+      const action = e.target.closest('[data-action]');
+      if (!action) return;
+      if (action.dataset.action === 'copy') doCopy();
+      if (action.dataset.action === 'share') doShare();
+    });
 
     document.title = `${name} — Proof of Work Portfolio — SkillMe`;
     const desc = `${name}'s verified SkillMe Proof of Work: ${approved} approved milestone${approved === 1 ? '' : 's'}${domains.length ? ' in ' + domains.map(domainLabel).join(', ') : ''}.`;
@@ -403,6 +588,8 @@ Follow SkillMe on LinkedIn: https://www.linkedin.com/company/skill-me-intern/
 
   // ── Boot ────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', async () => {
+    initThemeToggle();
+    initPostModal();
     const container = document.getElementById('content-container');
     if (!container) return;
 
