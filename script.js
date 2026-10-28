@@ -1,29 +1,27 @@
-/* ========================================
-   SkillMe — Interactive Scripts v4
-   Three.js Particle Galaxy  •  GSAP ScrollTrigger  •  Floating Wireframes
-   Web3D Integration Patterns (Layered Separation Architecture)
-   ======================================== */
-
+/* =============================================================
+   script.js — SkillMe home page (index.html only)
+   Theme, sticky nav, mobile drawer and .reveal are handled by theme.js.
+   This file keeps the page's functional features:
+   - Apply links (quiz-gated: apply.html once the quiz is done)
+   - Same-page anchor scrolling
+   - Live activity ticker   GET /api/students/public-activity
+   - Wall of work           GET /api/students/wall?limit=12
+   - Domain category filter + domain card links
+   - FAQ search, category filter, single-open accordion
+   - Final CTA track pills (label + link)
+   ============================================================= */
 document.addEventListener('DOMContentLoaded', () => {
+  'use strict';
 
-  // ═══════════════════════════════════════════════════════════
-  // LAYER 1: SMOOTH SCROLL (Lenis)
-  // ═══════════════════════════════════════════════════════════
-  const lenis = new Lenis({
-    autoRaf: true,
-    duration: 1.2,
-    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    smoothWheel: true,
-  });
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const apiBase = () => window.SKILLME_API || (window.location.hostname === 'localhost' ? 'http://localhost:8000' : 'https://skill-me.onrender.com');
+  const quizDone = () => { try { return !!localStorage.getItem('skillme_quiz_result'); } catch (e) { return false; } };
 
-  // ═══════════════════════════════════════════════════════════
-  // SMART APPLY HANDLER (Quiz Gated vs Direct Application)
-  // ═══════════════════════════════════════════════════════════
-  window.handleApplyClick = function(e) {
+  // ── Apply links: once the quiz is done, go straight to the application ──
+  window.handleApplyClick = function (e) {
     if (e && e.preventDefault) e.preventDefault();
     const targetUrl = (e && e.currentTarget && e.currentTarget.getAttribute('href')) || '';
-    const quizDone = localStorage.getItem('skillme_quiz_result');
-    if (quizDone) {
+    if (quizDone()) {
       window.location.href = 'apply.html';
     } else if (targetUrl && targetUrl.startsWith('quiz.html')) {
       window.location.href = targetUrl;
@@ -31,369 +29,35 @@ document.addEventListener('DOMContentLoaded', () => {
       window.location.href = 'quiz.html';
     }
   };
-
-  document.querySelectorAll('#nav-apply-btn, #hero-apply-btn, #cta-apply-btn, .nav-cta').forEach(btn => {
-    btn.addEventListener('click', window.handleApplyClick);
+  document.querySelectorAll('#nav-apply-btn, #hero-apply-btn, #cta-apply-btn, [data-apply]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      // Let modified clicks (new tab, etc.) behave like a normal link
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button === 1) return;
+      window.handleApplyClick(e);
+    });
   });
 
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  // ── Same-page anchors (#id and index.html#id) ──
+  document.querySelectorAll('a[href^="#"], a[href^="index.html#"]').forEach(anchor => {
     anchor.addEventListener('click', (e) => {
-      const href = anchor.getAttribute('href');
-      if (!href || href === '#') return;
+      const hash = anchor.getAttribute('href').replace(/^index\.html/, '');
+      if (!hash || hash === '#') return;
+      const target = document.getElementById(decodeURIComponent(hash.slice(1)));
+      if (!target || target.hidden) return;
       e.preventDefault();
-      const target = document.querySelector(href);
-      if (target) {
-        lenis.scrollTo(target, { offset: -80, duration: 1.5 });
-        navLinks.classList.remove('open');
-        navToggle.classList.remove('active');
-      }
+      target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+      if (history.pushState) history.pushState(null, '', hash);
+      // Move focus for keyboard / screen reader users without a second jump
+      if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+      target.focus({ preventScroll: true });
     });
   });
 
-  // ═══════════════════════════════════════════════════════════
-  // NAVBAR
-  // ═══════════════════════════════════════════════════════════
-  const navbar    = document.getElementById('navbar');
-  const navToggle = document.getElementById('nav-toggle');
-  const navLinks  = document.getElementById('nav-links-center');
-
-  if (navbar) {
-    lenis.on('scroll', ({ scroll }) => navbar.classList.toggle('scrolled', scroll > 50));
-  }
-
-  if (navToggle && navLinks) {
-    navToggle.addEventListener('click', () => {
-      const isOpen = navLinks.classList.toggle('open');
-      navToggle.classList.toggle('active', isOpen);
-      document.body.style.overflow = isOpen ? 'hidden' : '';
-      if(window.lenis) isOpen ? window.lenis.stop() : window.lenis.start();
-    });
-  }
-
-  if (navLinks) {
-    navLinks.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
-      if (navToggle) navToggle.classList.remove('active');
-      navLinks.classList.remove('open');
-      document.body.style.overflow = '';
-      if(window.lenis) window.lenis.start();
-    }));
-  }
-  // Close mobile menu on Escape key
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && navLinks && navLinks.classList.contains('open')) {
-      if (navToggle) navToggle.classList.remove('active');
-      navLinks.classList.remove('open');
-      document.body.style.overflow = '';
-      if(window.lenis) window.lenis.start();
-    }
-  });
-
-  // Close mobile menu when clicking outside of it
-  document.addEventListener('click', (e) => {
-    if (navLinks && navLinks.classList.contains('open') &&
-        !navLinks.contains(e.target) &&
-        (!navToggle || !navToggle.contains(e.target))) {
-      if (navToggle) navToggle.classList.remove('active');
-      navLinks.classList.remove('open');
-      document.body.style.overflow = '';
-      if(window.lenis) window.lenis.start();
-    }
-  });
-
-  // ═══════════════════════════════════════════════════════════
-  // THEME TOGGLE — Light / Dark with localStorage persistence
-  // ═══════════════════════════════════════════════════════════
-  const themeToggle = document.getElementById('theme-toggle');
-  const html = document.documentElement;
-
-  // Restore saved preference
-  const savedTheme = localStorage.getItem('skillme-theme') || 'dark';
-  html.setAttribute('data-theme', savedTheme);
-
-  themeToggle && themeToggle.addEventListener('click', () => {
-    const current = html.getAttribute('data-theme');
-    const next = current === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-theme', next);
-    localStorage.setItem('skillme-theme', next);
-
-    // Notify Three.js scenes of theme change
-    window.dispatchEvent(new CustomEvent('themechange', { detail: { theme: next } }));
-
-    // Animate the toggle button
-    themeToggle.style.transform = 'rotate(360deg) scale(1.15)';
-    setTimeout(() => { themeToggle.style.transform = ''; }, 500);
-  });
-
-  // ═══════════════════════════════════════════════════════════
-  // LAYER 3: GSAP + ScrollTrigger (Taste-Skill Motion)
-  // Fast, sub-300ms entrances without layout reflows or 3D blur
-  // ═══════════════════════════════════════════════════════════
-  (function initGSAP() {
-    if (typeof gsap === 'undefined') return;
-
-    gsap.registerPlugin(ScrollTrigger);
-
-    // Sync ScrollTrigger with Lenis
-    lenis.on('scroll', ScrollTrigger.update);
-    gsap.ticker.add((time) => lenis.raf(time * 1000));
-    gsap.ticker.lagSmoothing(0);
-
-    // ── 1. Horizontal stagger reveal for step cards ──
-    gsap.fromTo('.step-card', {
-      opacity: 0, y: 24,
-    }, {
-      opacity: 1, y: 0,
-      duration: 0.3,
-      ease: 'power2.out',
-      stagger: 0.08,
-      scrollTrigger: {
-        trigger: '.steps-grid',
-        start: 'top 85%',
-        toggleActions: 'play none none none',
-      },
-    });
-
-    // ── 2. Benefit cards ──
-    gsap.fromTo('.benefit-card', {
-      opacity: 0, y: 24,
-    }, {
-      opacity: 1, y: 0,
-      duration: 0.3,
-      ease: 'power2.out',
-      stagger: 0.06,
-      scrollTrigger: {
-        trigger: '.benefits-grid',
-        start: 'top 85%',
-        toggleActions: 'play none none none',
-      },
-    });
-
-    // ── 3. Domain cards ──
-    gsap.fromTo('.domain-card', {
-      opacity: 0, y: 20,
-    }, {
-      opacity: 1, y: 0,
-      duration: 0.25,
-      ease: 'power2.out',
-      stagger: 0.03,
-      scrollTrigger: {
-        trigger: '.domains-grid',
-        start: 'top 85%',
-        toggleActions: 'play none none none',
-      },
-    });
-
-    // ── 4. Section headers ──
-    gsap.utils.toArray('.section-header').forEach(header => {
-      gsap.fromTo(header, {
-        opacity: 0, y: 20,
-      }, {
-        opacity: 1, y: 0,
-        duration: 0.35,
-        ease: 'power2.out',
-        scrollTrigger: {
-          trigger: header,
-          start: 'top 85%',
-          toggleActions: 'play none none none',
-        },
-      });
-    });
-
-    // ── 5. Testimonials ──
-    gsap.fromTo('.testimonial-card', {
-      opacity: 0, y: 24,
-    }, {
-      opacity: 1, y: 0,
-      duration: 0.3,
-      ease: 'power2.out',
-      stagger: 0.08,
-      scrollTrigger: {
-        trigger: '.testimonials-grid',
-        start: 'top 85%',
-        toggleActions: 'play none none none',
-      },
-    });
-
-    // ── 6. CTA box ──
-    gsap.fromTo('.cta-box', {
-      opacity: 0, y: 24,
-    }, {
-      opacity: 1, y: 0,
-      duration: 0.35,
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: '.cta-section',
-        start: 'top 80%',
-        toggleActions: 'play none none none',
-      },
-    });
-
-    // ── 7. Credibility strip — pinned horizontal parallax ──
-    gsap.to('.strip-track', {
-      x: -60,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: '.credibility-strip',
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: 1,
-      },
-    });
-
-
-
-    // ── 9. Hero title — staggered word entrance on load ──
-    gsap.fromTo('.hero-title .line', {
-      opacity: 0, y: 80,
-    }, {
-      opacity: 1, y: 0,
-      duration: 1.2,
-      ease: 'power4.out',
-      stagger: 0.2,
-      delay: 0.3,
-    });
-
-    gsap.fromTo(['.hero-badge', '.hero-description', '.hero-highlight', '.hero-actions', '.hero-stats'], {
-      opacity: 0, y: 40,
-    }, {
-      opacity: 1, y: 0,
-      duration: 1.0,
-      ease: 'power3.out',
-      stagger: 0.12,
-      delay: 0.6,
-    });
-
-    gsap.fromTo('.hero-visual', {
-      opacity: 0, x: 60, rotateY: -10,
-    }, {
-      opacity: 1, x: 0, rotateY: 0,
-      duration: 1.4,
-      ease: 'power3.out',
-      delay: 0.5,
-    });
-
-  })();
-
-  // ═══════════════════════════════════════════════════════════
-  // SCROLL REVEAL (fallback for non-GSAP elements)
-  // ═══════════════════════════════════════════════════════════
-  const revealElements = document.querySelectorAll('.reveal');
-  const revealObs = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-  }, { threshold: 0, rootMargin: '0px 0px -30px 0px' });
-  revealElements.forEach(el => revealObs.observe(el));
-
-  window.addEventListener('load', () => {
-    revealElements.forEach(el => {
-      const r = el.getBoundingClientRect();
-      if (r.top < window.innerHeight && r.bottom > 0) el.classList.add('visible');
-    });
-  });
-
-  // ═══════════════════════════════════════════════════════════
-  // TERMINAL ANIMATION
-  // ═══════════════════════════════════════════════════════════
-  const terminalBody = document.getElementById('terminal-body');
-  const terminalLines = [
-    { type: 'command', prompt: '$ ', text: 'mkdir week1-milestone && cd week1-milestone', delay: 0 },
-    { type: 'output',  text: 'Cloning into \'skill-me\'...', delay: 700 },
-    { type: 'output',  text: '✓ Done.', class: 'success', delay: 1200 },
-    { type: 'empty',   delay: 1500 },
-    { type: 'command', prompt: '$ ', text: 'npm install', delay: 1900 },
-    { type: 'output',  text: 'Switched to new branch \'fix/navbar-bug\'', delay: 2600 },
-    { type: 'empty',   delay: 2900 },
-    { type: 'comment', text: '# Implement the milestone task locally...', delay: 3200 },
-    { type: 'empty',   delay: 3500 },
-    { type: 'command', prompt: '$ ', text: 'npm run test', delay: 3900 },
-    { type: 'output',  text: 'All tests passed.', delay: 4600 },
-    { type: 'command', prompt: '$ ', text: '# Share progress on LinkedIn & submit on Dashboard', delay: 5100 },
-    { type: 'output',  text: 'https://www.linkedin.com/feed/update/...', class: 'url', delay: 5800 },
-    { type: 'empty',   delay: 6100 },
-    { type: 'output',  text: '✅ Task Approved! +25 progress score added.', class: 'success', delay: 6600 },
-  ];
-
-  let terminalDone = false;
-  function animateTerminal() {
-    if (terminalDone || !terminalBody) return;
-    terminalDone = true;
-    terminalBody.innerHTML = '';
-    terminalLines.forEach(line => {
-      const el = document.createElement('div');
-      el.classList.add('terminal-line');
-      el.style.animationDelay = `${line.delay}ms`;
-      if (line.type === 'empty') {
-        el.innerHTML = '&nbsp;';
-      } else if (line.type === 'command') {
-        el.innerHTML = `<span class="prompt">${line.prompt}</span><span class="command">${line.text}</span>`;
-      } else if (line.type === 'comment') {
-        el.innerHTML = `<span class="comment">${line.text}</span>`;
-      } else {
-        el.innerHTML = `<span class="${line.class || 'output'}">${line.text}</span>`;
-      }
-      terminalBody.appendChild(el);
-    });
-    const cursor = document.createElement('div');
-    cursor.classList.add('terminal-line');
-    cursor.style.animationDelay = `${terminalLines.at(-1).delay + 700}ms`;
-    cursor.innerHTML = `<span class="prompt">$ </span><span class="terminal-cursor"></span>`;
-    terminalBody.appendChild(cursor);
-  }
-
-  new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting) {
-      setTimeout(animateTerminal, 400);
-      entries[0].target._observer?.unobserve(entries[0].target);
-    }
-  }, { threshold: 0.2 }).observe(document.getElementById('terminal-card') || document.body);
-
-  // ═══════════════════════════════════════════════════════════
-  // FAQ ACCORDION
-  // ═══════════════════════════════════════════════════════════
-  document.querySelectorAll('.faq-item').forEach(item => {
-    item.querySelector('.faq-question').addEventListener('click', () => {
-      const isActive = item.classList.contains('active');
-      document.querySelectorAll('.faq-item').forEach(i => {
-        i.classList.remove('active');
-        i.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
-      });
-      if (!isActive) {
-        item.classList.add('active');
-        item.querySelector('.faq-question').setAttribute('aria-expanded', 'true');
-      }
-    });
-  });
-
-  // ═══════════════════════════════════════════════════════════
-  // 3D TILT — shared for all interactive cards
-  // ═══════════════════════════════════════════════════════════
-  function addTilt(selector, strength = 6) {
-    // Skip tilt on touch devices
-    if (!matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-    document.querySelectorAll(selector).forEach(card => {
-      card.addEventListener('mousemove', (e) => {
-        const r = card.getBoundingClientRect();
-        const rX = ((e.clientY - r.top)  / r.height - 0.5) * strength;
-        const rY = ((e.clientX - r.left) / r.width  - 0.5) * -strength;
-        card.style.transform = `perspective(800px) rotateX(${rX}deg) rotateY(${rY}deg) translateY(-3px)`;
-      });
-      card.addEventListener('mouseenter', () => { card.style.transition = 'transform 0.1s ease'; });
-      card.addEventListener('mouseleave', () => {
-        card.style.transform = 'perspective(800px) rotateX(0) rotateY(0) translateY(0)';
-        card.style.transition = 'transform 0.5s cubic-bezier(0.23,1,0.32,1)';
-      });
-    });
-  }
-
-  addTilt('.domain-card', 5);
-  addTilt('.testimonial-card', 4);
-  addTilt('.step-card', 5);
-
-  // ═══════════════════════════════════════════════════════════
-  // LIVE REAL-TIME PROOF-OF-WORK ACTIVITY TICKER ENGINE
-  // ═══════════════════════════════════════════════════════════
+  // ── Live activity ticker (real approved submissions only; hidden until data) ──
   (function initLiveActivityTicker() {
     const ribbon = document.getElementById('live-activity-ribbon');
     const item = document.getElementById('live-ticker-item');
+    if (!ribbon || !item) return;
     const avatarEl = document.getElementById('ticker-avatar');
     const userEl = document.getElementById('ticker-user');
     const collegeEl = document.getElementById('ticker-college');
@@ -401,91 +65,77 @@ document.addEventListener('DOMContentLoaded', () => {
     const timeEl = document.getElementById('ticker-time');
     const prCountEl = document.getElementById('ticker-pr-count');
     const collegeCountEl = document.getElementById('ticker-college-count');
+    const statEl = document.getElementById('live-ticker-stat');
 
-    if (!ribbon || !item) return;
-
-    // Only real approved submissions from the API — the ribbon stays hidden until there are some
     let activities = [];
-
     let currentIndex = 0;
     let isPaused = false;
-    let rotationInterval = null;
 
     function renderItem(act) {
       if (!act) return;
       item.classList.add('switching');
       setTimeout(() => {
-        if (avatarEl) avatarEl.textContent = act.student_initials || act.initials || "SM";
-        if (userEl) userEl.textContent = act.student_name || act.name || "Student Contributor";
-        if (collegeEl) collegeEl.textContent = act.college || "Engineering College";
-        if (actionEl) actionEl.textContent = act.action_text || act.action || "had a milestone approved";
-        if (timeEl) timeEl.textContent = act.time_ago || act.time || "Just now";
+        if (avatarEl) avatarEl.textContent = act.student_initials || act.initials || 'SM';
+        if (userEl) userEl.textContent = act.student_name || act.name || 'Student Contributor';
+        if (collegeEl) collegeEl.textContent = act.college || 'Engineering College';
+        if (actionEl) actionEl.textContent = act.action_text || act.action || 'had a milestone approved';
+        if (timeEl) timeEl.textContent = act.time_ago || act.time || 'Just now';
         item.classList.remove('switching');
-      }, 350);
+      }, reduceMotion ? 0 : 250);
     }
 
     function nextActivity() {
-      if (isPaused || activities.length === 0) return;
+      if (isPaused || activities.length < 2) return;
       currentIndex = (currentIndex + 1) % activities.length;
       renderItem(activities[currentIndex]);
     }
 
-    function startRotation() {
-      if (rotationInterval) clearInterval(rotationInterval);
-      rotationInterval = setInterval(nextActivity, 4500);
-    }
-
-    // Hover pause
     ribbon.addEventListener('mouseenter', () => { isPaused = true; });
     ribbon.addEventListener('mouseleave', () => { isPaused = false; });
+    ribbon.addEventListener('focusin', () => { isPaused = true; });
+    ribbon.addEventListener('focusout', () => { isPaused = false; });
     ribbon.addEventListener('touchstart', () => { isPaused = true; }, { passive: true });
     ribbon.addEventListener('touchend', () => { isPaused = false; }, { passive: true });
 
-    // Fetch live production feed asynchronously from API with graceful timeout
     async function fetchLiveFeed() {
       try {
-        const apiBase = window.SKILLME_API || (window.location.hostname === 'localhost' ? 'http://localhost:8000' : 'https://skill-me.onrender.com');
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 6000);
-        const res = await fetch(`${apiBase}/api/students/public-activity`, { signal: controller.signal });
+        const res = await fetch(`${apiBase()}/api/students/public-activity`, { signal: controller.signal });
         clearTimeout(timeoutId);
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.activities && data.activities.length > 0) {
-            const firstLoad = activities.length === 0;
-            activities = data.activities;
-            if (firstLoad) {
-              currentIndex = 0;
-              renderItem(activities[0]);
-              ribbon.style.display = '';
-            }
-          }
-          if (data && data.stats) {
-            if (prCountEl) prCountEl.textContent = `${data.stats.total_submissions_approved || 0}`;
-            if (collegeCountEl) collegeCountEl.textContent = `${data.stats.total_colleges || 0}`;
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data && data.activities && data.activities.length > 0) {
+          const firstLoad = activities.length === 0;
+          activities = data.activities;
+          if (firstLoad) {
+            currentIndex = 0;
+            renderItem(activities[0]);
+            ribbon.style.display = '';
           }
         }
+        if (data && data.stats) {
+          if (prCountEl) prCountEl.textContent = `${data.stats.total_submissions_approved || 0}`;
+          if (collegeCountEl) collegeCountEl.textContent = `${data.stats.total_colleges || 0}`;
+          if (statEl) statEl.hidden = !data.stats.total_submissions_approved;
+        }
       } catch (err) {
-        // Silently preserve offline resilient pool without crashing
+        // Offline / API down: keep the ribbon hidden, never break the page
       }
     }
 
     fetchLiveFeed();
-    // Poll updates every 60 seconds in the background
     setInterval(fetchLiveFeed, 60000);
-    startRotation();
+    setInterval(nextActivity, 4500);
   })();
 
-  // ═══════════════════════════════════════════════════════════
-  // WALL OF WORK — real approved LinkedIn posts; section stays hidden if there are none
-  // ═══════════════════════════════════════════════════════════
+  // ── Wall of work: real approved LinkedIn posts; section stays hidden if there are none ──
   (async function initWallOfWork() {
     const section = document.getElementById('wall-of-work');
     const grid = document.getElementById('wall-grid');
     if (!section || !grid) return;
     try {
-      const apiBase = window.SKILLME_API || (window.location.hostname === 'localhost' ? 'http://localhost:8000' : 'https://skill-me.onrender.com');
-      const res = await fetch(`${apiBase}/api/students/wall?limit=12`);
+      const res = await fetch(`${apiBase()}/api/students/wall?limit=12`);
       if (!res.ok) return;
       const posts = ((await res.json()).posts || [])
         .filter(p => /^https:\/\/([a-z]{2,3}\.)?(www\.)?linkedin\.com\//i.test(p.url || ''));
@@ -506,8 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const head = el('div', 'wall-card-head');
         const initials = (p.name || 'S').split(/\s+/).map(w => w[0] || '').join('').slice(0, 2).toUpperCase();
         head.appendChild(el('div', 'wall-avatar', initials));
-        const who = el('div');
-        who.style.minWidth = '0';
+        const who = el('div', 'wall-who');
         who.appendChild(el('div', 'wall-name', p.name));
         if (p.college) who.appendChild(el('div', 'wall-college', p.college));
         head.appendChild(who);
@@ -526,120 +175,94 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   })();
 
-  // ═══════════════════════════════════════════════════════════
-  // BENEFIT CARD SPOTLIGHT
-  // ═══════════════════════════════════════════════════════════
-  document.querySelectorAll('.benefit-card').forEach(card => {
-    if (!matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-    card.addEventListener('mousemove', (e) => {
-      const r = card.getBoundingClientRect();
-      const x = e.clientX - r.left, y = e.clientY - r.top;
-      const color = card.classList.contains('featured')
-        ? 'rgba(52, 211, 153, 0.05)'
-        : card.classList.contains('placement')
-          ? 'rgba(245, 158, 11, 0.05)'
-          : 'rgba(34, 211, 238, 0.035)';
-      card.style.background = `radial-gradient(circle 240px at ${x}px ${y}px, ${color}, var(--bg-card))`;
-    });
-    card.addEventListener('mouseleave', () => { card.style.background = ''; });
-  });
-
-  // ═══════════════════════════════════════════════════════════
-  // MAGNETIC BUTTONS
-  // ═══════════════════════════════════════════════════════════
-  if (matchMedia('(hover: hover) and (pointer: fine)').matches) {
-    document.querySelectorAll('.btn-primary, .nav-cta').forEach(btn => {
-      btn.addEventListener('mousemove', (e) => {
-        const r = btn.getBoundingClientRect();
-        const x = (e.clientX - r.left - r.width  / 2) * 0.12;
-        const y = (e.clientY - r.top  - r.height / 2) * 0.12;
-        btn.style.transform = `translate(${x}px, ${y}px) translateY(-2px)`;
-      });
-      btn.addEventListener('mouseenter', () => { btn.style.transition = 'transform 0.1s ease, box-shadow 0.3s ease'; });
-      btn.addEventListener('mouseleave', () => {
-        btn.style.transform = '';
-        btn.style.transition = 'transform 0.5s cubic-bezier(0.23,1,0.32,1), box-shadow 0.3s ease';
-      });
-    });
-  }
-
-  // ═══════════════════════════════════════════════════════════
-  // DOMAIN CATEGORY TAB FILTERING
-  // ═══════════════════════════════════════════════════════════
+  // ── Domain category filter ──
   const filterTabs = document.querySelectorAll('.filter-tab');
   const domainCards = document.querySelectorAll('.domain-card');
+  const domainCount = document.getElementById('domain-count');
+
+  // Show a count on each category chip
+  filterTabs.forEach(tab => {
+    const cat = tab.getAttribute('data-category');
+    if (cat === 'all' || tab.querySelector('.chip-count')) return;
+    const n = Array.from(domainCards).filter(c => c.getAttribute('data-category') === cat).length;
+    const badge = document.createElement('span');
+    badge.className = 'chip-count mono';
+    badge.textContent = n;
+    tab.appendChild(document.createTextNode(' '));
+    tab.appendChild(badge);
+  });
 
   filterTabs.forEach(tab => {
     tab.addEventListener('click', () => {
       filterTabs.forEach(t => {
         t.classList.remove('active');
-        t.setAttribute('aria-selected', 'false');
+        t.setAttribute('aria-pressed', 'false');
       });
       tab.classList.add('active');
-      tab.setAttribute('aria-selected', 'true');
+      tab.setAttribute('aria-pressed', 'true');
 
       const selectedCat = tab.getAttribute('data-category');
-
+      let shown = 0;
       domainCards.forEach(card => {
-        const cardCat = card.getAttribute('data-category');
-        if (selectedCat === 'all' || cardCat === selectedCat) {
-          card.classList.remove('hidden');
-        } else {
-          card.classList.add('hidden');
-        }
+        const match = selectedCat === 'all' || card.getAttribute('data-category') === selectedCat;
+        card.hidden = !match;
+        card.classList.toggle('hidden', !match);
+        if (match) shown++;
       });
+      if (domainCount) domainCount.textContent = `Showing ${shown} domain${shown === 1 ? '' : 's'}`;
     });
   });
 
-  // Make domain cards clickable to navigate to application
+  // Domain cards: quiz first, or straight to the application once the quiz is done
   domainCards.forEach(card => {
-    card.style.cursor = 'pointer';
-    card.addEventListener('click', () => {
+    card.addEventListener('click', (e) => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button === 1) return;
+      e.preventDefault();
       const domainId = card.id.replace('domain-', '');
-      const quizDone = localStorage.getItem('skillme_quiz_result');
-      if (quizDone) {
-        window.location.href = `apply.html?domain=${domainId}`;
-      } else {
-        window.location.href = `quiz.html?domain=${domainId}`;
-      }
+      window.location.href = quizDone() ? `apply.html?domain=${domainId}` : `quiz.html?domain=${domainId}`;
     });
   });
 
-  // ═══════════════════════════════════════════════════════════
-  // FAQ CATEGORY TABS & INSTANT SEARCH
-  // ═══════════════════════════════════════════════════════════
-  const faqFilterPills = document.querySelectorAll('.faq-filter-pill');
+  // ── FAQ: single-open accordion, category filter and instant search ──
   const faqItems = document.querySelectorAll('.faq-item');
+  const faqFilterPills = document.querySelectorAll('.faq-filter-pill');
   const faqSearchInput = document.getElementById('faq-search-input');
-
+  const faqEmpty = document.getElementById('faq-empty');
+  const faqCount = document.getElementById('faq-count');
   let activeFaqCategory = 'all';
   let faqSearchQuery = '';
 
-  function updateFaqVisibility() {
-    faqItems.forEach(item => {
-      const itemCat = item.getAttribute('data-category');
-      const itemText = item.textContent.toLowerCase();
-
-      const matchesCat = activeFaqCategory === 'all' || itemCat === activeFaqCategory;
-      const matchesSearch = !faqSearchQuery || itemText.includes(faqSearchQuery);
-
-      if (matchesCat && matchesSearch) {
-        item.classList.remove('hidden');
-      } else {
-        item.classList.add('hidden');
-      }
+  faqItems.forEach(item => {
+    item.addEventListener('toggle', () => {
+      item.classList.toggle('active', item.open);
+      if (!item.open) return;
+      faqItems.forEach(other => { if (other !== item && other.open) other.open = false; });
     });
+    item.classList.toggle('active', item.open);
+  });
+
+  function updateFaqVisibility() {
+    let shown = 0;
+    faqItems.forEach(item => {
+      const matchesCat = activeFaqCategory === 'all' || item.getAttribute('data-category') === activeFaqCategory;
+      const matchesSearch = !faqSearchQuery || item.textContent.toLowerCase().includes(faqSearchQuery);
+      const visible = matchesCat && matchesSearch;
+      item.hidden = !visible;
+      item.classList.toggle('hidden', !visible);
+      if (visible) shown++;
+    });
+    if (faqEmpty) faqEmpty.hidden = shown > 0;
+    if (faqCount) faqCount.textContent = `${shown} question${shown === 1 ? '' : 's'} shown`;
   }
 
   faqFilterPills.forEach(pill => {
     pill.addEventListener('click', () => {
       faqFilterPills.forEach(p => {
         p.classList.remove('active');
-        p.setAttribute('aria-selected', 'false');
+        p.setAttribute('aria-pressed', 'false');
       });
       pill.classList.add('active');
-      pill.setAttribute('aria-selected', 'true');
-
+      pill.setAttribute('aria-pressed', 'true');
       activeFaqCategory = pill.getAttribute('data-category');
       updateFaqVisibility();
     });
@@ -652,32 +275,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ═══════════════════════════════════════════════════════════
-  // CTA LAUNCHPAD DOMAIN SELECTOR
-  // ═══════════════════════════════════════════════════════════
+  // ── Final CTA track pills: update the button label + quiz link ──
   const ctaTrackPills = document.querySelectorAll('.cta-track-pill');
   const ctaBtnLabel = document.getElementById('cta-btn-label');
   const ctaApplyBtn = document.getElementById('cta-apply-btn');
 
   ctaTrackPills.forEach(pill => {
     pill.addEventListener('click', () => {
-      ctaTrackPills.forEach(p => p.classList.remove('active'));
+      ctaTrackPills.forEach(p => {
+        p.classList.remove('active');
+        p.setAttribute('aria-pressed', 'false');
+      });
       pill.classList.add('active');
+      pill.setAttribute('aria-pressed', 'true');
 
       const domain = pill.getAttribute('data-domain');
       const name = pill.getAttribute('data-name');
-
-      if (ctaBtnLabel) {
-        ctaBtnLabel.textContent = `Start Screening for ${name}`;
-      }
-      if (ctaApplyBtn) {
-        ctaApplyBtn.href = `quiz.html?domain=${domain}`;
-      }
+      if (ctaBtnLabel) ctaBtnLabel.textContent = `Start screening for ${name}`;
+      if (ctaApplyBtn) ctaApplyBtn.href = `quiz.html?domain=${domain}`;
     });
   });
-
 });
-
-
-
-
