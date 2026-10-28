@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en" data-theme="light" class="no-js">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,7 +15,7 @@
   <meta name="language" content="English">
   <meta name="geo.region" content="IN">
   <meta name="geo.placename" content="India">
-  <meta name="theme-color" content="#0c0b0b">
+  <meta name="theme-color" content="#ffffff">
   <meta name="application-name" content="SkillMe">
   <meta name="apple-mobile-web-app-title" content="SkillMe">
 
@@ -46,21 +46,26 @@
   <link rel="apple-touch-icon" href="assets/logo.png">
   <link rel="manifest" href="site.webmanifest">
 
-  <!-- Performance & Resource Hints -->
+
+  <!-- Theme bootstrap (before any stylesheet, avoids a flash) -->
+  <script>
+    (function () {
+      var t;
+      try { t = localStorage.getItem('skillme-theme'); } catch (e) {}
+      if (t !== 'light' && t !== 'dark') {
+        t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+
+  <!-- Fonts + design system -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
-  <link rel="dns-prefetch" href="https://unpkg.com">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-
-  <!-- Lenis Smooth Scroll -->
-  <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.25/dist/lenis.css">
-
-  <!-- Critical logo size enforcement to prevent initial render overspread -->
-  <style>.brand-logo-img,.nav-logo img{width:36px!important;height:36px!important;max-width:36px!important;max-height:36px!important;object-fit:cover!important;border-radius:50%!important;flex-shrink:0!important;}</style>
-
-  <!-- Styles -->
-  <link rel="stylesheet" href="style.css?v=20261009_112826">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="theme.css?v=20261011_ds1">
+  <link rel="stylesheet" href="home.css?v=20261011_home1">
+  <script src="theme.js?v=20261011_ds1" defer></script>
   <script src="config.js?v=20260923_020524" defer></script>
 
   <!-- JSON-LD Structured Data Graph (Brand Entity, Website, Internship Program, FAQ Rich Snippet) -->
@@ -222,993 +227,491 @@
 
 <body>
 
-  <!-- ========== NAVBAR ========== -->
-    <nav class="navbar" id="navbar">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-nav" id="site-nav">
     <div class="container">
-    <div class="nav-left">
-      <a href="index.html" class="nav-logo" id="nav-logo">
-        <img src="assets/logo.webp" alt="SkillMe Logo" class="brand-logo-img" width="36" height="36" style="width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important;">
+      <a href="index.html" class="brand" aria-label="SkillMe home">
+        <img src="assets/logo.webp" alt="" width="32" height="32">
         <span>SkillMe</span>
       </a>
-    </div>
-    
-    <div class="nav-links-center" id="nav-links-center" data-lenis-prevent>
-      <a href="#how-it-works">How It Works</a>
-      <a href="#domains">Domains</a>
-      <a href="#benefits">Benefits</a>
-      <a href="#faq">FAQ</a>
-      <a href="dashboard.html" class="mobile-only-nav" style="color: #6366f1 !important; font-weight: bold;">Student Dashboard &rarr;</a>
-      <a href="quiz.html" class="mobile-only-nav" style="color: #6366f1 !important; font-weight: bold;">Apply Now &rarr;</a>
-    </div>
-    
-    <div class="nav-actions-right">
-      <a href="dashboard.html" class="nav-link-dashboard" id="nav-dashboard-btn">Student Dashboard &rarr;</a>
-      <a href="quiz.html" class="nav-cta" id="nav-apply-btn">Apply Now &rarr;</a>
-      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-    </div>
-  </div>
-  </nav>
-
-  <!-- ========== MAIN CONTENT ========== -->
-  <main id="main-content">
-
-  <!-- ========== HERO ========== -->
-  <section class="hero" id="hero">
-  <div class="container">
-    <div class="hero-content reveal">
-
-      <h1 class="hero-title">
-        Bridge the gap to production engineering.
-      </h1>
-
-      <p class="hero-description">
-        Move beyond tutorials. Build real projects, get every milestone reviewed by the SkillMe team, and earn a credential that proves your technical competence to top-tier employers.
-      </p>
-
-      <div class="hero-badges-row" style="justify-content: center;">
-        <div class="hero-pill stipend-pill">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span>Verified <strong>Project Track</strong></span>
-        </div>
-        <div class="hero-pill placement-pill">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          <span>Placement <strong>Assistance</strong></span>
-        </div>
-      </div>
-
-      <div class="hero-actions" style="justify-content: center; margin-top: 24px;">
-        <a href="quiz.html" class="btn-primary" id="hero-apply-btn">
-          Apply Now
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
-        <a href="#how-it-works" class="btn-secondary" id="hero-learn-btn">
-          How It Works
-        </a>
-        <a href="verify.html" class="btn-secondary" id="hero-verify-btn" style="display:inline-flex;align-items:center;gap:7px;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
-          Verify Certificate
-        </a>
-      </div>
-
-      <div class="hero-stats" style="justify-content: center;">
-        <div class="hero-stat">
-          <div class="stat-number">12+</div>
-          <div class="stat-label">Domains</div>
-        </div>
-        <div class="hero-stat">
-          <div class="stat-number">100%</div>
-          <div class="stat-label">Remote &amp; Flexible</div>
-        </div>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="index.html#how-it-works">How it works</a>
+        <a href="index.html#domains">Domains</a>
+        <a href="index.html#benefits">Benefits</a>
+        <a href="verify.html">Verify</a>
+        <a href="index.html#faq">FAQ</a>
+      </nav>
+      <div class="nav-actions">
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle theme">
+          <svg class="ti-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          <svg class="ti-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <a href="dashboard.html" class="btn btn-ghost btn-sm nav-hide-sm" id="nav-dashboard-btn">Student login</a>
+        <a href="quiz.html" class="btn btn-primary btn-sm nav-hide-sm" id="nav-apply-btn" data-apply>Apply now</a>
+        <button type="button" class="nav-menu-btn" data-nav-toggle aria-label="Open menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
       </div>
     </div>
-
-    <div class="hero-visual reveal reveal-delay-2" style="margin-top: 48px; width: 100%;">
-      <!-- Aesthetic Floating Proof-of-Work Status Pill -->
-      <div class="terminal-status-tag" id="live-activity-ribbon" role="region" aria-label="Live Activity Status" style="margin: 0 auto 24px; display: none;">
-        <div class="status-live-beacon">
-          <span class="live-pulse-dot"></span>
-          <span class="status-beacon-text">LIVE ACTIVITY</span>
-        </div>
-        <div class="status-ticker-text" id="live-ticker-track">
-          <div class="live-ticker-item" id="live-ticker-item">
-            <span class="activity-avatar" id="ticker-avatar"></span>
-            <span class="activity-user" id="ticker-user"></span>
-            <span class="activity-college-pill" id="ticker-college"></span>
-            <span class="activity-action" id="ticker-action"></span>
-            <span class="activity-time" id="ticker-time"></span>
-          </div>
-        </div>
-        <div class="status-stat-pill" id="live-ticker-stat">
-          <strong id="ticker-pr-count"></strong> Milestones Approved Across <strong id="ticker-college-count"></strong> Colleges
-        </div>
-      </div>
-
-      <div class="terminal-card" id="terminal-card" style="margin: 0 auto;">
-        <div class="terminal-header">
-          <span class="terminal-dot red"></span>
-          <span class="terminal-dot yellow"></span>
-          <span class="terminal-dot green"></span>
-          <span class="terminal-title">~/skillme-internship</span>
-        </div>
-        <div class="terminal-body" id="terminal-body">
-          <!-- Animated by JS -->
-        </div>
-      </div>
-
-      <!-- Aesthetic Terminal Sub-Deck: Proof-of-Work Feature Strip -->
-      <div class="terminal-sub-deck" aria-label="Internship Track Highlights" style="justify-content: center; margin-top: 32px;">
-        <div class="sub-deck-item" title="Real Project Milestones">
-          <div class="sub-deck-icon cyan">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 9v12"/><path d="M18 9a9 9 0 0 0-9 9"/></svg>
-          </div>
-          <div class="sub-deck-info">
-            <span class="sub-deck-title">Verified Tasks</span>
-            <span class="sub-deck-sub">Real Project Work</span>
-          </div>
-        </div>
-
-        <div class="sub-deck-item" title="Direct Recruiter Access & Hiring Partners">
-          <div class="sub-deck-icon gold">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
-          </div>
-          <div class="sub-deck-info">
-            <span class="sub-deck-title">Recruiter Access</span>
-            <span class="sub-deck-sub">Direct Hiring Network</span>
-          </div>
-        </div>
-
-        <div class="sub-deck-item" title="QR-Verifiable Credentials + LOR">
-          <div class="sub-deck-icon emerald">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-          </div>
-          <div class="sub-deck-info">
-            <span class="sub-deck-title">Verified Credentials</span>
-            <span class="sub-deck-sub">Verifiable QR + LOR</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-  <!-- ========== CREDIBILITY STRIP ========== -->
-  <div class="credibility-strip" aria-label="Platform highlights">
-    <div class="strip-track" id="strip-track">
-      <!-- Set A -->
-      <div class="strip-item highlight">
-        <span class="strip-icon">⚡</span>
-        <span class="strip-value">100%</span>
-        <span>Project-Based Sprint</span>
-      </div>
-      <div class="strip-item highlight-violet">
-        <span class="strip-icon">🎯</span>
-        <span class="strip-value">Verified</span>
-        <span>Reviewed Milestones</span>
-      </div>
-      <div class="strip-item">
-        <span class="strip-icon">⭐</span>
-        <span class="strip-value">12+</span>
-        <span>Tech Domains</span>
-      </div>
-      <div class="strip-item highlight-violet">
-        <span class="strip-icon">🔀</span>
-        <span class="strip-value">Real</span>
-        <span>Project Milestones</span>
-      </div>
-      <div class="strip-item">
-        <span class="strip-icon">📜</span>
-        <span class="strip-value">Verified</span>
-        <span>Certificate Included</span>
-      </div>
-      <div class="strip-item highlight">
-        <span class="strip-icon">🚀</span>
-        <span class="strip-value">4 Weeks</span>
-        <span>Structured Program</span>
-      </div>
-      <div class="strip-item">
-        <span class="strip-icon">🌐</span>
-        <span class="strip-value">100%</span>
-        <span>Remote & Flexible</span>
-      </div>
-      <div class="strip-item highlight-violet">
-        <span class="strip-icon">🤝</span>
-        <span class="strip-value">Placement</span>
-        <span>Assistance Included</span>
-      </div>
-      <!-- Set B (mirror for infinite scroll) -->
-      <div class="strip-item highlight">
-        <span class="strip-icon">⚡</span>
-        <span class="strip-value">100%</span>
-        <span>Project-Based Sprint</span>
-      </div>
-      <div class="strip-item highlight-violet">
-        <span class="strip-icon">🎯</span>
-        <span class="strip-value">Verified</span>
-        <span>Reviewed Milestones</span>
-      </div>
-      <div class="strip-item">
-        <span class="strip-value">12+</span>
-        <span>Tech Domains</span>
-      </div>
-      <div class="strip-item highlight-sage">
-        <span class="strip-value">Real</span>
-        <span>Project Milestones</span>
-      </div>
-      <div class="strip-item">
-        <span class="strip-value">Verified</span>
-        <span>Certificate Included</span>
-      </div>
-      <div class="strip-item highlight">
-        <span class="strip-value">4 Weeks</span>
-        <span>Structured Program</span>
-      </div>
-      <div class="strip-item">
-        <span class="strip-value">100%</span>
-        <span>Remote & Flexible</span>
-      </div>
-      <div class="strip-item highlight-sage">
-        <span class="strip-value">Placement</span>
-        <span>Assistance Included</span>
-      </div>
-    </div>
+  </header>
+  <div class="nav-drawer" id="nav-drawer">
+    <a href="index.html#how-it-works">How it works</a>
+    <a href="index.html#domains">Domains</a>
+    <a href="index.html#benefits">Benefits</a>
+    <a href="verify.html">Verify a certificate</a>
+    <a href="index.html#faq">FAQ</a>
+    <a href="dashboard.html">Student login</a>
+    <a href="quiz.html" class="btn btn-primary" data-apply>Apply now</a>
   </div>
 
-  <!-- ========== HOW IT WORKS ========== -->
-  <section class="how-it-works" id="how-it-works">
-    <div class="dot-grid" aria-hidden="true"></div>
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="section-label">
-          How It Works
-        </span>
-        <h2 class="section-title">
-          From Application to Career
-        </h2>
-        <p class="section-subtitle">
-          A clear, structured process. Apply online, work on real code, earn your certificate and get placement support.
-        </p>
-      </div>
+  <main id="main">
 
-      <div class="steps-grid">
-        <div class="step-card featured-step reveal reveal-delay-1">
-          <div>
-            <span class="step-badge">Step 01 — Getting Started</span>
-            <h3>Apply &amp; Take Screening Quiz</h3>
-            <p>Choose your domain, fill in your details, and take a short screening quiz to get shortlisted. Completely structured and flexible.</p>
+    <!-- ========== HERO ========== -->
+    <section class="hero bg-grid" id="hero" aria-labelledby="hero-title">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <span class="badge badge-accent hero-badge"><span class="dot pulse" aria-hidden="true"></span>Applications open · 4-week remote internship</span>
+          <h1 class="display hero-title" id="hero-title">Real projects.<br>Reviewed weekly.<br><span class="hero-title-soft">Proof you can show.</span></h1>
+          <p class="lead hero-lead">Move beyond tutorials. Build one project milestone a week, get each one reviewed by the SkillMe team, and finish with a QR-verifiable certificate that proves what you can do.</p>
+
+          <div class="hero-actions">
+            <a href="quiz.html" class="btn btn-primary btn-lg" id="hero-apply-btn" data-apply>
+              Apply now
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+            <a href="#how-it-works" class="btn btn-secondary btn-lg" id="hero-learn-btn">See how it works</a>
           </div>
+          <p class="hero-note">
+            Free screening quiz to start.
+            <a href="verify.html" class="btn-link" id="hero-verify-btn">Verify a certificate &rarr;</a>
+          </p>
         </div>
 
-        <div class="step-card reveal reveal-delay-2">
-          <div>
-            <span class="step-badge">Step 02</span>
-            <h3>Official Offer Letter</h3>
-            <p>Receive a verified offer letter with your domain and start date.</p>
-          </div>
-        </div>
-
-        <div class="step-card reveal reveal-delay-3">
-          <div>
-            <span class="step-badge">Step 03</span>
-            <h3>Post Updates on LinkedIn</h3>
-            <p>Complete assigned tasks and share your progress via weekly LinkedIn posts for admin review.</p>
-          </div>
-        </div>
-
-        <div class="step-card featured-step reveal reveal-delay-4">
-          <div>
-            <span class="step-badge">Step 04 — Certificate &amp; Career</span>
-            <h3>Certify, Build Portfolio &amp; Get Placed</h3>
-            <p>Complete your weekly tasks and LinkedIn progress updates to receive your QR-verifiable certificate and direct hiring partner referrals.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- 4-Week Engineering Sprint Timeline -->
-      <div class="sprint-roadmap-card reveal">
-        <div class="roadmap-header">
-          <div class="roadmap-title-group">
-            <span class="roadmap-tag">Structured 4-Week Sprint</span>
-            <h3>Week-by-Week Engineering Milestones</h3>
-          </div>
-          <span class="roadmap-badge">100% Production Workflow</span>
-        </div>
-
-        <div class="roadmap-timeline">
-          <div class="roadmap-step">
-            <div class="roadmap-step-num">W1</div>
-            <div class="roadmap-step-content">
-              <h4>Setup &amp; First Task</h4>
-              <p>Configure your local environment, complete your first task, and post your progress on LinkedIn.</p>
-              <div class="roadmap-tech-tags">
-                <span>Setup</span>
-                <span>First Task</span>
-                <span>LinkedIn Post</span>
+        <div class="hero-visual">
+          <!-- Live activity: real approved submissions only; stays hidden until the API returns some -->
+          <div class="live-ribbon" id="live-activity-ribbon" role="region" aria-label="Live activity" style="display: none;">
+            <span class="live-beacon mono"><span class="live-dot" aria-hidden="true"></span>Live</span>
+            <div class="live-ticker" id="live-ticker-track" aria-live="polite">
+              <div class="live-ticker-item" id="live-ticker-item">
+                <span class="live-avatar mono" id="ticker-avatar" aria-hidden="true"></span>
+                <span class="live-text">
+                  <strong id="ticker-user"></strong>
+                  <span class="live-college" id="ticker-college"></span>
+                  <span id="ticker-action"></span>
+                  <span class="live-time mono" id="ticker-time"></span>
+                </span>
               </div>
+            </div>
+            <div class="live-stat" id="live-ticker-stat">
+              <strong class="mono" id="ticker-pr-count"></strong> milestones approved across <strong class="mono" id="ticker-college-count"></strong> colleges
             </div>
           </div>
 
-          <div class="roadmap-step">
-            <div class="roadmap-step-num">W2</div>
-            <div class="roadmap-step-content">
-              <h4>Core Feature Engineering</h4>
-              <p>Build backend REST endpoints, modular components, or algorithms against the milestone's acceptance criteria.</p>
-              <div class="roadmap-tech-tags">
-                <span>REST APIs</span>
-                <span>Components</span>
-                <span>Team Review</span>
+          <!-- Illustration of the 4-week milestone flow -->
+          <div class="tracker card" aria-label="Example of the 4-week milestone tracker">
+            <div class="tracker-head">
+              <div>
+                <span class="tracker-kicker mono">Your internship</span>
+                <h2 class="tracker-title">4 weekly milestones</h2>
               </div>
+              <span class="badge mono">Example</span>
             </div>
-          </div>
-
-          <div class="roadmap-step">
-            <div class="roadmap-step-num">W3</div>
-            <div class="roadmap-step-content">
-              <h4>Integration &amp; Optimization</h4>
-              <p>Refactor architecture, optimize performance, and integrate your features into a working project.</p>
-              <div class="roadmap-tech-tags">
-                <span>Optimization</span>
-                <span>Integration</span>
-                <span>LinkedIn Post</span>
+            <ol class="tracker-list" role="list">
+              <li class="tracker-row is-done">
+                <span class="tracker-week mono">W1</span>
+                <span class="tracker-name">Setup &amp; first task</span>
+                <span class="badge badge-ok">Approved</span>
+              </li>
+              <li class="tracker-row is-done">
+                <span class="tracker-week mono">W2</span>
+                <span class="tracker-name">Core feature</span>
+                <span class="badge badge-ok">Approved</span>
+              </li>
+              <li class="tracker-row is-active">
+                <span class="tracker-week mono">W3</span>
+                <span class="tracker-name">Integration &amp; polish</span>
+                <span class="badge badge-accent">In review</span>
+              </li>
+              <li class="tracker-row">
+                <span class="tracker-week mono">W4</span>
+                <span class="tracker-name">Final review</span>
+                <span class="badge">Up next</span>
+              </li>
+            </ol>
+            <div class="tracker-progress">
+              <div class="tracker-progress-top">
+                <span>Milestones approved</span>
+                <span class="mono">2 / 4</span>
               </div>
-            </div>
-          </div>
-
-          <div class="roadmap-step">
-            <div class="roadmap-step-num">W4</div>
-            <div class="roadmap-step-content">
-              <h4>Review &amp; Certification</h4>
-              <p>Pass mentor review, submit your final LinkedIn updates, and receive tamper-proof cert + LOR.</p>
-              <div class="roadmap-tech-tags">
-                <span>Final Review</span>
-                <span>QR Cert</span>
-                <span>Placement LOR</span>
-              </div>
+              <div class="progress" aria-hidden="true"><span style="width: 50%"></span></div>
+              <p class="tracker-foot">Certificate + LOR unlock once 3 of 4 milestones are approved.</p>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- ========== DOMAINS ========== -->
-  <section class="domains" id="domains">
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="section-label">Domains</span>
-        <h2 class="section-title">Choose Your Track</h2>
-        <p class="section-subtitle">
-          20 domains across the tech landscape. Pick the one that matches your interest and skill level.
-        </p>
+      <div class="container">
+        <ul class="facts" role="list" aria-label="Program at a glance">
+          <li><span class="fact-value mono">4 weeks</span><span class="fact-label">Structured program</span></li>
+          <li><span class="fact-value mono">20</span><span class="fact-label">Tech domains</span></li>
+          <li><span class="fact-value mono">100%</span><span class="fact-label">Remote &amp; flexible</span></li>
+          <li><span class="fact-value mono">QR</span><span class="fact-label">Verifiable certificate</span></li>
+        </ul>
       </div>
+    </section>
 
-      <!-- Domain Category Tabs -->
-      <div class="domain-filter-tabs reveal" role="tablist" aria-label="Domain Category Filter">
-        <button class="filter-tab active" data-category="all" role="tab" aria-selected="true">All Tracks (20)</button>
-        <button class="filter-tab" data-category="fullstack" role="tab" aria-selected="false">Web &amp; Full Stack</button>
-        <button class="filter-tab" data-category="ai" role="tab" aria-selected="false">AI &amp; Python</button>
-        <button class="filter-tab" data-category="systems" role="tab" aria-selected="false">DevOps &amp; Core</button>
-        <button class="filter-tab" data-category="mobile" role="tab" aria-selected="false">Mobile &amp; Cloud</button>
-      </div>
-
-      <div class="domains-grid">
-        <div class="domain-card reveal reveal-delay-1" id="domain-webdev" data-category="fullstack">
-          <div>
-            <h3>Full Stack Engineer</h3>
-            <span class="domain-tech">HTML5 • CSS3 • JavaScript</span>
-          </div>
-          <span class="domain-badge open">Open</span>
+    <!-- ========== HOW IT WORKS ========== -->
+    <section class="section" id="how-it-works" aria-labelledby="how-title">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">How it works</span>
+          <h2 class="h2" id="how-title">From application to career, in four steps</h2>
+          <p class="lead">A clear, structured process. Apply online, build real projects, earn your certificate and get placement support.</p>
         </div>
 
-        <div class="domain-card reveal reveal-delay-1" id="domain-python" data-category="ai">
-          <div>
-            <h3>Python Engineering</h3>
-            <span class="domain-tech">Python 3 • OOP • APIs</span>
-          </div>
-          <span class="domain-badge open">Open</span>
-        </div>
+        <ol class="steps" role="list">
+          <li class="step card card-pad reveal">
+            <span class="step-num mono">01</span>
+            <h3 class="h3">Apply &amp; take the screening quiz</h3>
+            <p class="muted">Choose your domain, fill in your details and take a short screening quiz to get shortlisted.</p>
+          </li>
+          <li class="step card card-pad reveal">
+            <span class="step-num mono">02</span>
+            <h3 class="h3">Get your offer letter</h3>
+            <p class="muted">Receive a verified offer letter with your domain and start date.</p>
+          </li>
+          <li class="step card card-pad reveal">
+            <span class="step-num mono">03</span>
+            <h3 class="h3">Build &amp; share weekly</h3>
+            <p class="muted">Complete each week's milestone and share it as a LinkedIn post. The SkillMe team reviews every submission.</p>
+          </li>
+          <li class="step card card-pad reveal">
+            <span class="step-num mono">04</span>
+            <h3 class="h3">Certify &amp; get referred</h3>
+            <p class="muted">Earn a QR-verifiable certificate and LOR. Top performers get direct referrals to hiring partners.</p>
+          </li>
+        </ol>
 
-        <div class="domain-card reveal reveal-delay-2" id="domain-react" data-category="fullstack">
-          <div>
-            <h3>Frontend Engineer</h3>
-            <span class="domain-tech">React 18 • Next.js • TypeScript</span>
-          </div>
-          <span class="domain-badge open">Open</span>
-        </div>
-
-        <div class="domain-card reveal reveal-delay-2" id="domain-node" data-category="fullstack">
-          <div>
-            <h3>Backend Engineer</h3>
-            <span class="domain-tech">Node • Express • REST APIs</span>
-          </div>
-          <span class="domain-badge open">Open</span>
-        </div>
-
-        <div class="domain-card reveal reveal-delay-3" id="domain-java" data-category="systems">
-          <div>
-            <h3>Java / Spring Boot</h3>
-            <span class="domain-tech">Java 17 • Spring Boot • Maven</span>
-          </div>
-          <span class="domain-badge open">Open</span>
-        </div>
-
-        <div class="domain-card reveal reveal-delay-3" id="domain-ml" data-category="ai">
-          <div>
-            <h3>Machine Learning</h3>
-            <span class="domain-tech">PyTorch • Scikit-Learn • Pandas</span>
-          </div>
-          <span class="domain-badge open">Open</span>
-        </div>
-
-        <div class="domain-card reveal reveal-delay-4" id="domain-datascience" data-category="ai">
-          <div>
-            <h3>Data Science</h3>
-            <span class="domain-tech">Python • SQL • Data Viz</span>
-          </div>
-          <span class="domain-badge open">Open</span>
-        </div>
-
-        <div class="domain-card reveal reveal-delay-4" id="domain-flutter" data-category="mobile">
-          <div>
-            <h3>App Developer</h3>
-            <span class="domain-tech">Dart • Flutter • Cross-Platform</span>
-          </div>
-          <span class="domain-badge open">Open</span>
-        </div>
-
-        <div class="domain-card reveal reveal-delay-5" id="domain-devops" data-category="systems">
-          <div>
-            <h3>DevOps / CI-CD</h3>
-            <span class="domain-tech">Docker • GitHub Actions • CI/CD</span>
-          </div>
-          <span class="domain-badge open">Open</span>
-        </div>
-
-        <div class="domain-card reveal reveal-delay-5" id="domain-cpp" data-category="systems">
-          <div>
-            <h3>C++ / Algorithms</h3>
-            <span class="domain-tech">C++20 • DSA • Problem Solving</span>
-          </div>
-          <span class="domain-badge open">Open</span>
-        </div>
-
-        <div class="domain-card reveal reveal-delay-6" id="domain-cloud" data-category="mobile">
-          <div>
-            <h3>Cloud / AWS</h3>
-            <span class="domain-tech">AWS • Serverless • Storage</span>
-          </div>
-          <span class="domain-badge open">Open</span>
-        </div>
-
-        <div class="domain-card reveal reveal-delay-6" id="domain-cyber" data-category="systems">
-          <div>
-            <h3>Cybersecurity</h3>
-            <span class="domain-tech">Web Security • Python • OWASP</span>
-          </div>
-          <span class="domain-badge open">Open</span>
-        </div>
-
-        <div class="domain-card reveal reveal-delay-6" id="domain-uiux" data-category="fullstack">
-          <div>
-            <h3>UI/UX Design</h3>
-            <span class="domain-tech">Figma • Research • Prototyping</span>
-          </div>
-          <span class="domain-badge open">Open</span>
-        </div>
-
-        <div class="domain-card reveal reveal-delay-6" id="domain-genai" data-category="ai">
-          <div>
-            <h3>Generative AI</h3>
-            <span class="domain-tech">LLM APIs • Prompting • RAG</span>
-          </div>
-          <span class="domain-badge open">Open</span>
-        </div>
-
-        <div class="domain-card reveal reveal-delay-6" id="domain-sql" data-category="systems">
-          <div>
-            <h3>SQL / Databases</h3>
-            <span class="domain-tech">SQL • PostgreSQL • Data Modeling</span>
-          </div>
-          <span class="domain-badge open">Open</span>
-        </div>
-
-        <div class="domain-card reveal reveal-delay-6" id="domain-ai-engineer" data-category="ai">
-          <div>
-            <h3>AI Engineer</h3>
-            <span class="domain-tech">LLM APIs • RAG • Agents</span>
-          </div>
-          <span class="domain-badge open">Open</span>
-        </div>
-
-        <div class="domain-card reveal reveal-delay-6" id="domain-fde" data-category="systems">
-          <div>
-            <h3>Forward Deployed Engineer</h3>
-            <span class="domain-tech">API Integration • Client Tools • Docs</span>
-          </div>
-          <span class="domain-badge open">Open</span>
-        </div>
-
-        <div class="domain-card reveal reveal-delay-6" id="domain-sde" data-category="systems">
-          <div>
-            <h3>SDE / SWE</h3>
-            <span class="domain-tech">Data Structures • System Design • Testing</span>
-          </div>
-          <span class="domain-badge open">Open</span>
-        </div>
-
-        <div class="domain-card reveal reveal-delay-6" id="domain-ai-pm" data-category="ai">
-          <div>
-            <h3>AI Product Management</h3>
-            <span class="domain-tech">PRDs • AI Evals • Roadmapping</span>
-          </div>
-          <span class="domain-badge open">Open</span>
-        </div>
-
-        <div class="domain-card reveal reveal-delay-6" id="domain-qa" data-category="systems">
-          <div>
-            <h3>Software Quality</h3>
-            <span class="domain-tech">Test Automation • Selenium • Bug Reports</span>
-          </div>
-          <span class="domain-badge open">Open</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========== BENEFITS ========== -->
-  <section class="benefits" id="benefits">
-    <div class="container">
-      <div class="section-header reveal">
-        <span class="section-label">Benefits</span>
-        <h2 class="section-title">Everything You Gain</h2>
-        <p class="section-subtitle">
-          This isn't a course or tutorial. This is real work experience — with real rewards.
-        </p>
-      </div>
-
-      <div class="benefits-grid">
-        <div class="benefit-card featured reveal reveal-delay-1" id="benefit-stipend">
-          <h3>Verified Track Record</h3>
-          <p>Build a real performance-based engineering portfolio. Every milestone you complete adds authentic tasks to your public portfolio for recruiters to see.</p>
-          <span class="benefit-tag gold">Production Proof</span>
-        </div>
-
-        <div class="benefit-card placement reveal reveal-delay-2" id="benefit-placement">
-          <h3>Placement Assistance</h3>
-          <p>We refer top interns to our hiring partner network. Top performers get direct referrals to openings at startups and product companies across India, plus an LOR.</p>
-          <span class="benefit-tag lavender">Hiring Network Access</span>
-        </div>
-
-        <div class="benefit-card reveal reveal-delay-3" id="benefit-opensource">
-          <h3>Real Milestone Progress</h3>
-          <p>Every task you submit is a genuine project milestone. Interviewers check your proof of work — make yours shine with real projects, not just tutorials.</p>
-          <span class="benefit-tag sage">Public Verified</span>
-        </div>
-
-        <div class="benefit-card reveal reveal-delay-4" id="benefit-certificate">
-          <h3>Verified Certificate</h3>
-          <p>QR-coded, verifiable certificate with a unique ID. Anyone can validate it. LinkedIn-ready with one click. Proves you did the work — because you actually did.</p>
-          <span class="benefit-tag sage">Verifiable Online</span>
-        </div>
-
-        <div class="benefit-card reveal reveal-delay-5" id="benefit-offer">
-          <h3>Official Offer Letter</h3>
-          <p>Receive a proper internship offer letter with joining date and domain assignment. Exactly what you need for your resume and college records.</p>
-        </div>
-
-        <div class="benefit-card reveal reveal-delay-6" id="benefit-github">
-          <h3>Industry-Standard Workflow</h3>
-          <p>Build features, solve problems, submit tasks, and receive admin feedback — the exact same structured workflow used at top tech companies worldwide.</p>
-        </div>
-      </div>
-
-      <!-- Interactive Certificate & Proof Inspector Showcase -->
-      <div class="cert-showcase-box reveal">
-        <div class="cert-showcase-visual">
-          <div class="cert-preview-mockup">
-            <div class="cert-mockup-header">
-              <div class="cert-mockup-badge">
-                <span class="cert-gold-seal">★</span>
-                <span>SkillMe · MSME Recognized</span>
-              </div>
-              <span class="cert-id-tag">ID: SKM-2026-8842</span>
+        <div class="roadmap card reveal">
+          <div class="roadmap-head">
+            <div>
+              <span class="eyebrow">Structured 4-week sprint</span>
+              <h3 class="h3 roadmap-title">Week-by-week milestones</h3>
             </div>
-            <div class="cert-mockup-body">
-              <div class="cert-recipient-title">Certificate of Internship Completion</div>
-              <div class="cert-recipient-name">Rahul Sharma</div>
-              <div class="cert-recipient-desc">Has successfully completed 4 weeks of team-reviewed project milestones in <strong>Full Stack Engineering</strong> with distinction.</div>
-              <div class="cert-mockup-footer">
-                <div class="cert-hash">
-                  <span class="hash-label">CRYPTOGRAPHIC SHA-256 HASH</span>
-                  <code>7f8a9e2d3b4c1a5e8f9021...</code>
-                </div>
-                <div class="cert-qr-pill">
-                  <span class="qr-icon">▦</span>
-                  <span>Scan to Verify</span>
-                </div>
+            <span class="badge">One milestone per week</span>
+          </div>
+          <ol class="roadmap-grid" role="list">
+            <li class="roadmap-step">
+              <span class="roadmap-num mono">W1</span>
+              <h4>Setup &amp; first task</h4>
+              <p>Configure your local environment, complete your first task and post your progress on LinkedIn.</p>
+              <div class="tags"><span>Setup</span><span>First task</span><span>LinkedIn post</span></div>
+            </li>
+            <li class="roadmap-step">
+              <span class="roadmap-num mono">W2</span>
+              <h4>Core feature</h4>
+              <p>Build REST endpoints, modular components or algorithms against the milestone's acceptance criteria.</p>
+              <div class="tags"><span>REST APIs</span><span>Components</span><span>Team review</span></div>
+            </li>
+            <li class="roadmap-step">
+              <span class="roadmap-num mono">W3</span>
+              <h4>Integration &amp; optimisation</h4>
+              <p>Refactor, optimise performance and integrate your features into one working project.</p>
+              <div class="tags"><span>Optimisation</span><span>Integration</span><span>LinkedIn post</span></div>
+            </li>
+            <li class="roadmap-step">
+              <span class="roadmap-num mono">W4</span>
+              <h4>Review &amp; certification</h4>
+              <p>Pass the final review, submit your last LinkedIn update and receive your certificate + LOR.</p>
+              <div class="tags"><span>Final review</span><span>QR certificate</span><span>LOR</span></div>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== DOMAINS ========== -->
+    <section class="section section-soft" id="domains" aria-labelledby="domains-title">
+      <div class="container">
+        <div class="section-split reveal">
+          <div class="section-head">
+            <span class="eyebrow">Domains</span>
+            <h2 class="h2" id="domains-title">Choose your track</h2>
+            <p class="lead">20 domains across the tech landscape. Pick the one that matches your interest and skill level.</p>
+          </div>
+          <div class="domain-filters" role="group" aria-label="Filter domains by category">
+            <button type="button" class="chip filter-tab active" data-category="all" aria-pressed="true">All tracks <span class="chip-count mono">20</span></button>
+            <button type="button" class="chip filter-tab" data-category="fullstack" aria-pressed="false">Web &amp; full stack</button>
+            <button type="button" class="chip filter-tab" data-category="ai" aria-pressed="false">AI &amp; Python</button>
+            <button type="button" class="chip filter-tab" data-category="systems" aria-pressed="false">DevOps &amp; core</button>
+            <button type="button" class="chip filter-tab" data-category="mobile" aria-pressed="false">Mobile &amp; cloud</button>
+          </div>
+        </div>
+        <p class="sr-only" id="domain-count" aria-live="polite"></p>
+
+        <div class="domains-grid">
+          <a href="quiz.html?domain=webdev" class="domain-card" id="domain-webdev" data-category="fullstack"><div class="domain-body"><h3>Full Stack Engineer</h3><span class="domain-tech mono">HTML5 · CSS3 · JavaScript</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=python" class="domain-card" id="domain-python" data-category="ai"><div class="domain-body"><h3>Python Engineering</h3><span class="domain-tech mono">Python 3 · OOP · APIs</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=react" class="domain-card" id="domain-react" data-category="fullstack"><div class="domain-body"><h3>Frontend Engineer</h3><span class="domain-tech mono">React 18 · Next.js · TypeScript</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=node" class="domain-card" id="domain-node" data-category="fullstack"><div class="domain-body"><h3>Backend Engineer</h3><span class="domain-tech mono">Node · Express · REST APIs</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=java" class="domain-card" id="domain-java" data-category="systems"><div class="domain-body"><h3>Java / Spring Boot</h3><span class="domain-tech mono">Java 17 · Spring Boot · Maven</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=ml" class="domain-card" id="domain-ml" data-category="ai"><div class="domain-body"><h3>Machine Learning</h3><span class="domain-tech mono">PyTorch · Scikit-Learn · Pandas</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=datascience" class="domain-card" id="domain-datascience" data-category="ai"><div class="domain-body"><h3>Data Science</h3><span class="domain-tech mono">Python · SQL · Data Viz</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=flutter" class="domain-card" id="domain-flutter" data-category="mobile"><div class="domain-body"><h3>App Developer</h3><span class="domain-tech mono">Dart · Flutter · Cross-Platform</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=devops" class="domain-card" id="domain-devops" data-category="systems"><div class="domain-body"><h3>DevOps / CI-CD</h3><span class="domain-tech mono">Docker · GitHub Actions · CI/CD</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=cpp" class="domain-card" id="domain-cpp" data-category="systems"><div class="domain-body"><h3>C++ / Algorithms</h3><span class="domain-tech mono">C++20 · DSA · Problem Solving</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=cloud" class="domain-card" id="domain-cloud" data-category="mobile"><div class="domain-body"><h3>Cloud / AWS</h3><span class="domain-tech mono">AWS · Serverless · Storage</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=cyber" class="domain-card" id="domain-cyber" data-category="systems"><div class="domain-body"><h3>Cybersecurity</h3><span class="domain-tech mono">Web Security · Python · OWASP</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=uiux" class="domain-card" id="domain-uiux" data-category="fullstack"><div class="domain-body"><h3>UI/UX Design</h3><span class="domain-tech mono">Figma · Research · Prototyping</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=genai" class="domain-card" id="domain-genai" data-category="ai"><div class="domain-body"><h3>Generative AI</h3><span class="domain-tech mono">LLM APIs · Prompting · RAG</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=sql" class="domain-card" id="domain-sql" data-category="systems"><div class="domain-body"><h3>SQL / Databases</h3><span class="domain-tech mono">SQL · PostgreSQL · Data Modeling</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=ai-engineer" class="domain-card" id="domain-ai-engineer" data-category="ai"><div class="domain-body"><h3>AI Engineer</h3><span class="domain-tech mono">LLM APIs · RAG · Agents</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=fde" class="domain-card" id="domain-fde" data-category="systems"><div class="domain-body"><h3>Forward Deployed Engineer</h3><span class="domain-tech mono">API Integration · Client Tools · Docs</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=sde" class="domain-card" id="domain-sde" data-category="systems"><div class="domain-body"><h3>SDE / SWE</h3><span class="domain-tech mono">Data Structures · System Design · Testing</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=ai-pm" class="domain-card" id="domain-ai-pm" data-category="ai"><div class="domain-body"><h3>AI Product Management</h3><span class="domain-tech mono">PRDs · AI Evals · Roadmapping</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=qa" class="domain-card" id="domain-qa" data-category="systems"><div class="domain-body"><h3>Software Quality</h3><span class="domain-tech mono">Test Automation · Selenium · Bug Reports</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== BENEFITS ========== -->
+    <section class="section" id="benefits" aria-labelledby="benefits-title">
+      <div class="container">
+        <div class="section-head reveal">
+          <span class="eyebrow">Benefits</span>
+          <h2 class="h2" id="benefits-title">Everything you gain</h2>
+          <p class="lead">This isn't a course or a tutorial. It's real project work, reviewed by people, with credentials you can prove.</p>
+        </div>
+
+        <div class="grid grid-3 benefits-grid">
+          <article class="benefit card card-pad card-hover reveal" id="benefit-stipend">
+            <span class="icon-tile" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg></span>
+            <h3 class="h3">Verified track record</h3>
+            <p class="muted">Every milestone you complete is added to your public portfolio, so recruiters can see the work behind your profile.</p>
+            <span class="benefit-tag mono">Proof of work</span>
+          </article>
+          <article class="benefit card card-pad card-hover reveal" id="benefit-placement">
+            <span class="icon-tile" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
+            <h3 class="h3">Placement assistance</h3>
+            <p class="muted">Top performers get direct referrals to openings at startups and product companies in our hiring partner network, plus an LOR.</p>
+            <span class="benefit-tag mono">Hiring network</span>
+          </article>
+          <article class="benefit card card-pad card-hover reveal" id="benefit-opensource">
+            <span class="icon-tile" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 9v12"/><path d="M18 9a9 9 0 0 0-9 9"/></svg></span>
+            <h3 class="h3">Real milestone progress</h3>
+            <p class="muted">Every task you submit is a genuine project milestone. Interviewers look for proof of work — real projects, not tutorials.</p>
+            <span class="benefit-tag mono">Publicly shared</span>
+          </article>
+          <article class="benefit card card-pad card-hover reveal" id="benefit-certificate">
+            <span class="icon-tile" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <h3 class="h3">Verified certificate</h3>
+            <p class="muted">A QR-coded certificate with a unique ID that anyone can check. Add it to LinkedIn in one click.</p>
+            <span class="benefit-tag mono">Verifiable online</span>
+          </article>
+          <article class="benefit card card-pad card-hover reveal" id="benefit-offer">
+            <span class="icon-tile" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg></span>
+            <h3 class="h3">Official offer letter</h3>
+            <p class="muted">A proper internship offer letter with your joining date and domain — ready for your resume and college records.</p>
+          </article>
+          <article class="benefit card card-pad card-hover reveal" id="benefit-github">
+            <span class="icon-tile" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/></svg></span>
+            <h3 class="h3">Industry-standard workflow</h3>
+            <p class="muted">Build features, solve problems, submit your work and act on review feedback — the way real engineering teams work.</p>
+          </article>
+        </div>
+
+        <!-- Certificate showcase -->
+        <div class="cert-showcase card reveal">
+          <div class="cert-visual">
+            <div class="cert-mock" aria-hidden="true">
+              <div class="cert-mock-top">
+                <span class="cert-brand"><img src="assets/logo.webp" alt="" width="22" height="22">SkillMe</span>
+                <span class="cert-id mono">ID · SKM-XXXX-XXXX</span>
+              </div>
+              <span class="cert-kicker mono">Certificate of internship completion</span>
+              <span class="cert-name">Your name here</span>
+              <span class="cert-desc">has completed 4 weeks of team-reviewed project milestones in <strong>Full Stack Engineering</strong>.</span>
+              <div class="cert-mock-foot">
+                <span class="cert-qr" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+                <span class="cert-scan mono">Scan to verify</span>
               </div>
             </div>
+            <span class="cert-caption mono">Illustrative preview</span>
           </div>
-        </div>
-        <div class="cert-showcase-info">
-          <span class="showcase-tag">Tamper-Proof Proof of Work</span>
-          <h3>Recruiters See Your Actual Work</h3>
-          <p>Unlike generic completion certificates that anyone can edit, every SkillMe certificate has a unique ID that anyone can check on our verification page, backed by your approved weekly submissions.</p>
-          <ul class="showcase-features">
-            <li><span>✓</span> <strong>Instant QR Code Validation:</strong> Any employer can scan and verify authenticity in seconds.</li>
-            <li><span>✓</span> <strong>Letter of Recommendation (LOR):</strong> Performance-based endorsement highlighting your approved project milestones.</li>
-            <li><span>✓</span> <strong>One-Click LinkedIn Add:</strong> Add official certificate credentials directly to your LinkedIn profile.</li>
-          </ul>
-          <div class="showcase-actions">
-            <a href="verify.html" class="btn-primary">
-              Verify a Certificate
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          <div class="cert-info">
+            <span class="eyebrow">Verifiable proof of work</span>
+            <h3 class="h2 cert-title">Recruiters can check your work</h3>
+            <p class="muted">Every SkillMe certificate has a unique ID that anyone can check on our verification page, backed by your approved weekly submissions.</p>
+            <ul class="checklist" role="list">
+              <li><strong>QR code validation.</strong> Any employer can scan and confirm it in seconds.</li>
+              <li><strong>Letter of Recommendation.</strong> A performance-based endorsement of your approved milestones.</li>
+              <li><strong>One-click LinkedIn add.</strong> Add the credential straight to your LinkedIn profile.</li>
+            </ul>
+            <a href="verify.html" class="btn btn-secondary">
+              Verify a certificate
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-
-  <!-- ========== WALL OF WORK (real approved LinkedIn posts, filled by script.js) ========== -->
-  <section class="wall-of-work" id="wall-of-work" hidden>
-    <div class="container">
-      <div class="section-header">
-        <span class="section-label">Wall of Work</span>
-        <h2 class="section-title">Real Interns. Real Posts.</h2>
-        <p class="section-subtitle">
-          Every card below is a milestone approved by the SkillMe team and posted publicly by the intern on LinkedIn. Click any card to see the post.
-        </p>
+    <!-- ========== WALL OF WORK (real approved LinkedIn posts, filled by script.js; hidden until data) ========== -->
+    <section class="section section-soft wall-of-work" id="wall-of-work" hidden aria-labelledby="wall-title">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Wall of work</span>
+          <h2 class="h2" id="wall-title">Real interns. Real posts.</h2>
+          <p class="lead">Every card is a milestone approved by the SkillMe team and posted publicly by the intern on LinkedIn. Open any card to see the post.</p>
+        </div>
+        <div class="wall-grid" id="wall-grid"></div>
       </div>
-      <div class="wall-grid" id="wall-grid"></div>
-    </div>
-  </section>
+    </section>
 
+    <!-- ========== FAQ ========== -->
+    <section class="section" id="faq" aria-labelledby="faq-title">
+      <div class="container faq-layout">
+        <div class="faq-side reveal">
+          <span class="eyebrow">FAQ</span>
+          <h2 class="h2" id="faq-title">Questions, answered</h2>
+          <p class="lead">Everything about the 4-week sprint, weekly reviews, certificates and placement support.</p>
 
-  <!-- ========== FAQ & HELP HUB ========== -->
-  <section class="faq" id="faq">
-    <div class="container">
-      <div class="faq-layout">
-        <!-- Left Side: Sticky Info & Help Card -->
-        <div class="faq-sidebar reveal">
-          <span class="section-label">FAQ &amp; Help Desk</span>
-          <h2 class="section-title">Got Questions? We've Got Answers.</h2>
-          <p class="section-subtitle">
-            Everything you need to know about the 4-week project sprint, weekly milestone reviews, certificates, and placement support.
-          </p>
-
-          <!-- Interactive Instant Search Box -->
-          <div class="faq-search-box">
-            <svg class="faq-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="faq-search-input" placeholder="Search questions (e.g. stipend, LinkedIn, cert)..." aria-label="Search FAQ questions">
+          <div class="faq-search">
+            <label for="faq-search-input" class="sr-only">Search FAQ questions</label>
+            <svg class="faq-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input type="search" class="input" id="faq-search-input" placeholder="Search, e.g. certificate, LinkedIn" autocomplete="off">
           </div>
 
-          <!-- Student Support Glass Card -->
-          <div class="faq-support-card">
-            <div class="support-card-header">
-              <span class="support-beacon-dot"></span>
-              <span class="support-header-text">Student Support Active</span>
-            </div>
-            <h4>Still Have Questions?</h4>
-            <p>Our student mentors and coordinators are available to help you choose the right domain.</p>
-            <div class="support-actions">
-              <a href="contact.html" class="support-btn">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                Contact Support Desk
-              </a>
-            </div>
+          <div class="support card card-pad">
+            <h3 class="h3">Still have questions?</h3>
+            <p class="muted">Our team can help you choose the right domain or answer anything not covered here.</p>
+            <a href="contact.html" class="btn btn-secondary btn-sm">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>
+              Contact us
+            </a>
           </div>
         </div>
 
-        <!-- Right Side: Categorized Interactive Accordion -->
-        <div class="faq-main-content reveal reveal-delay-1">
-          <!-- FAQ Category Filter Tabs -->
-          <div class="faq-filter-pills" role="tablist" aria-label="FAQ Categories">
-            <button class="faq-filter-pill active" data-category="all" role="tab" aria-selected="true">All Questions (8)</button>
-            <button class="faq-filter-pill" data-category="program" role="tab" aria-selected="false">Program &amp; Milestones</button>
-            <button class="faq-filter-pill" data-category="cert" role="tab" aria-selected="false">Certificates</button>
-            <button class="faq-filter-pill" data-category="career" role="tab" aria-selected="false">Placement &amp; Stipend</button>
+        <div class="faq-main reveal">
+          <div class="faq-filters" role="group" aria-label="Filter questions by category">
+            <button type="button" class="chip faq-filter-pill active" data-category="all" aria-pressed="true">All <span class="chip-count mono">8</span></button>
+            <button type="button" class="chip faq-filter-pill" data-category="program" aria-pressed="false">Program &amp; milestones</button>
+            <button type="button" class="chip faq-filter-pill" data-category="cert" aria-pressed="false">Certificates</button>
+            <button type="button" class="chip faq-filter-pill" data-category="career" aria-pressed="false">Placement</button>
           </div>
 
-          <div class="faq-list">
-            <div class="faq-item active" id="faq-1" data-category="program">
-              <button class="faq-question" aria-expanded="true">
-                <div class="faq-q-left">
-                  <span class="faq-num">01</span>
-                  <span>What are the requirements for this internship?</span>
-                </div>
-                <span class="faq-icon">+</span>
-              </button>
-              <div class="faq-answer">
-                <p>The entire 4-week internship — tasks, offer letter, and guidance — is free for every student who takes the screening quiz. You work remotely at your own pace, build each week's project, and submit it as a LinkedIn post. There's an optional fee if you want the verified certificate + LOR, which unlocks at the end, once 3 of your 4 weekly milestones are approved.</p>
-                <div class="faq-tag-row">
-                  <span class="faq-tag">Screening Quiz</span>
-                  <span class="faq-tag">100% Remote</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="faq-item" id="faq-2" data-category="program">
-              <button class="faq-question" aria-expanded="false">
-                <div class="faq-q-left">
-                  <span class="faq-num">02</span>
-                  <span>How is my performance evaluated?</span>
-                </div>
-                <span class="faq-icon">+</span>
-              </button>
-              <div class="faq-answer">
-                <p>Your performance is tracked through verified milestone submissions and admin reviews. Scores are based on the number of tasks resolved, submission quality, and project completion. Top performers are highlighted to our hiring partners for direct referrals.</p>
-                <div class="faq-tag-row">
-                  <span class="faq-tag">Weekly Review</span>
-                  <span class="faq-tag">4 Milestones</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="faq-item" id="faq-3" data-category="career">
-              <button class="faq-question" aria-expanded="false">
-                <div class="faq-q-left">
-                  <span class="faq-num">03</span>
-                  <span>What does the placement assistance include?</span>
-                </div>
-                <span class="faq-icon">+</span>
-              </button>
-              <div class="faq-answer">
-                <p>Top interns get access to our hiring partner network — startups and product companies that actively recruit from SkillMe. Top performers also get direct referrals from our team to relevant openings and a Letter of Recommendation (LOR).</p>
-                <div class="faq-tag-row">
-                  <span class="faq-tag">Hiring Partners</span>
-                  <span class="faq-tag">Direct Referrals</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="faq-item" id="faq-4" data-category="program">
-              <button class="faq-question" aria-expanded="false">
-                <div class="faq-q-left">
-                  <span class="faq-num">04</span>
-                  <span>What is the duration and commitment required?</span>
-                </div>
-                <span class="faq-icon">+</span>
-              </button>
-              <div class="faq-answer">
-                <p>The internship is 4 weeks long, with one project milestone per week. You work at your own pace within your 4-week window. Most students spend 2–4 hours per day on tasks — it's fully remote and flexible.</p>
-                <div class="faq-tag-row">
-                  <span class="faq-tag">4 Weeks</span>
-                  <span class="faq-tag">Flexible Hours</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="faq-item" id="faq-5" data-category="program">
-              <button class="faq-question" aria-expanded="false">
-                <div class="faq-q-left">
-                  <span class="faq-num">05</span>
-                  <span>Do I need prior experience to apply?</span>
-                </div>
-                <span class="faq-icon">+</span>
-              </button>
-              <div class="faq-answer">
-                <p>Basic knowledge of your chosen domain is recommended (fundamentals, not expert level). The screening quiz covers basics to make sure you're ready. You don't need prior internship experience — that's exactly what SkillMe provides.</p>
-                <div class="faq-tag-row">
-                  <span class="faq-tag">Beginner Friendly</span>
-                  <span class="faq-tag">Domain Basics</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="faq-item" id="faq-6" data-category="program">
-              <button class="faq-question" aria-expanded="false">
-                <div class="faq-q-left">
-                  <span class="faq-num">06</span>
-                  <span>How do the weekly tasks work?</span>
-                </div>
-                <span class="faq-icon">+</span>
-              </button>
-              <div class="faq-answer">
-                <p>Each week has one milestone on your project, with clear requirements and acceptance criteria in your dashboard. Build it, share it as a LinkedIn post using the caption we provide, and paste the post link into your dashboard. The SkillMe team reviews it and approves the milestone or tells you what to fix.</p>
-                <div class="faq-tag-row">
-                  <span class="faq-tag">Verified Tasks</span>
-                  <span class="faq-tag">Real Projects</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="faq-item" id="faq-7" data-category="cert">
-              <button class="faq-question" aria-expanded="false">
-                <div class="faq-q-left">
-                  <span class="faq-num">07</span>
-                  <span>How is the certificate verified?</span>
-                </div>
-                <span class="faq-icon">+</span>
-              </button>
-              <div class="faq-answer">
-                <p>Every certificate has a unique ID and QR code. Anyone — a recruiter, college, or employer — can visit our verification page, enter the ID, and see your certificate details including name, domain, issue date, and duration. It's fully tamper-proof and publicly verifiable.</p>
-                <div class="faq-tag-row">
-                  <span class="faq-tag">QR Verifiable</span>
-                  <span class="faq-tag">Tamper-Proof</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="faq-item" id="faq-8" data-category="cert">
-              <button class="faq-question" aria-expanded="false">
-                <div class="faq-q-left">
-                  <span class="faq-num">08</span>
-                  <span>Can I do internships in multiple domains?</span>
-                </div>
-                <span class="faq-icon">+</span>
-              </button>
-              <div class="faq-answer">
-                <p>Absolutely. Each domain is an independent internship with its own timeline, projects, and certificate. Many students do 2–3 domains to build a diverse project portfolio. Each one adds a new set of approved milestones and a new certificate to your profile.</p>
-                <div class="faq-tag-row">
-                  <span class="faq-tag">Multi-Track</span>
-                  <span class="faq-tag">Diverse Portfolio</span>
-                </div>
-              </div>
-            </div>
+          <div class="accordion faq-list">
+            <details class="faq-item" id="faq-1" data-category="program" open>
+              <summary class="faq-question"><span class="faq-num mono">01</span><span class="faq-q">What are the requirements for this internship?</span></summary>
+              <div class="acc-body faq-answer"><p>The entire 4-week internship — tasks, offer letter, and guidance — is free for every student who takes the screening quiz. You work remotely at your own pace, build each week's project, and submit it as a LinkedIn post. There's an optional fee if you want the verified certificate + LOR, which unlocks at the end, once 3 of your 4 weekly milestones are approved.</p><div class="tags"><span>Screening quiz</span><span>100% remote</span></div></div>
+            </details>
+            <details class="faq-item" id="faq-2" data-category="program">
+              <summary class="faq-question"><span class="faq-num mono">02</span><span class="faq-q">How is my performance evaluated?</span></summary>
+              <div class="acc-body faq-answer"><p>Your performance is tracked through verified milestone submissions and admin reviews. Scores are based on the number of tasks resolved, submission quality, and project completion. Top performers are highlighted to our hiring partners for direct referrals.</p><div class="tags"><span>Weekly review</span><span>4 milestones</span></div></div>
+            </details>
+            <details class="faq-item" id="faq-3" data-category="career">
+              <summary class="faq-question"><span class="faq-num mono">03</span><span class="faq-q">What does the placement assistance include?</span></summary>
+              <div class="acc-body faq-answer"><p>Top interns get access to our hiring partner network — startups and product companies that actively recruit from SkillMe. Top performers also get direct referrals from our team to relevant openings and a Letter of Recommendation (LOR).</p><div class="tags"><span>Hiring partners</span><span>Direct referrals</span></div></div>
+            </details>
+            <details class="faq-item" id="faq-4" data-category="program">
+              <summary class="faq-question"><span class="faq-num mono">04</span><span class="faq-q">What is the duration and commitment required?</span></summary>
+              <div class="acc-body faq-answer"><p>The internship is 4 weeks long, with one project milestone per week. You work at your own pace within your 4-week window. Most students spend 2–4 hours per day on tasks — it's fully remote and flexible.</p><div class="tags"><span>4 weeks</span><span>Flexible hours</span></div></div>
+            </details>
+            <details class="faq-item" id="faq-5" data-category="program">
+              <summary class="faq-question"><span class="faq-num mono">05</span><span class="faq-q">Do I need prior experience to apply?</span></summary>
+              <div class="acc-body faq-answer"><p>Basic knowledge of your chosen domain is recommended (fundamentals, not expert level). The screening quiz covers basics to make sure you're ready. You don't need prior internship experience — that's exactly what SkillMe provides.</p><div class="tags"><span>Beginner friendly</span><span>Domain basics</span></div></div>
+            </details>
+            <details class="faq-item" id="faq-6" data-category="program">
+              <summary class="faq-question"><span class="faq-num mono">06</span><span class="faq-q">How do the weekly tasks work?</span></summary>
+              <div class="acc-body faq-answer"><p>Each week has one milestone on your project, with clear requirements and acceptance criteria in your dashboard. Build it, share it as a LinkedIn post using the caption we provide, and paste the post link into your dashboard. The SkillMe team reviews it and approves the milestone or tells you what to fix.</p><div class="tags"><span>Verified tasks</span><span>Real projects</span></div></div>
+            </details>
+            <details class="faq-item" id="faq-7" data-category="cert">
+              <summary class="faq-question"><span class="faq-num mono">07</span><span class="faq-q">How is the certificate verified?</span></summary>
+              <div class="acc-body faq-answer"><p>Every certificate has a unique ID and QR code. Anyone — a recruiter, college, or employer — can visit our verification page, enter the ID, and see your certificate details including name, domain, issue date, and duration. It's fully tamper-proof and publicly verifiable.</p><div class="tags"><span>QR verifiable</span><span>Tamper-proof</span></div></div>
+            </details>
+            <details class="faq-item" id="faq-8" data-category="cert">
+              <summary class="faq-question"><span class="faq-num mono">08</span><span class="faq-q">Can I do internships in multiple domains?</span></summary>
+              <div class="acc-body faq-answer"><p>Absolutely. Each domain is an independent internship with its own timeline, projects, and certificate. Many students do 2–3 domains to build a diverse project portfolio. Each one adds a new set of approved milestones and a new certificate to your profile.</p><div class="tags"><span>Multi-track</span><span>Diverse portfolio</span></div></div>
+            </details>
           </div>
+          <p class="faq-empty" id="faq-empty" hidden>No questions match your search. Try another word, or <a href="contact.html" class="btn-link">contact us</a>.</p>
+          <p class="sr-only" id="faq-count" aria-live="polite"></p>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ========== CAREER LAUNCHPAD CTA SECTION ========== -->
-  <section class="cta-section" id="apply">
-    <div class="container">
-      <div class="cta-launchpad-card reveal">
-        <div class="cta-glow-backdrop" aria-hidden="true"></div>
+    <!-- ========== FINAL CTA ========== -->
+    <section class="section cta-section" id="apply" aria-labelledby="cta-title">
+      <div class="container">
+        <div class="cta-card reveal">
+          <span class="cta-badge mono"><span class="live-dot" aria-hidden="true"></span>Applications open</span>
+          <h2 class="h1 cta-title" id="cta-title">Join SkillMe. Build your portfolio. Get referred.</h2>
+          <p class="cta-lead">Build real project milestones, share them on LinkedIn, earn a verifiable certificate and unlock hiring partner referrals in 4 weeks.</p>
 
-        <!-- Top Live Badge & Counter -->
-        <div class="cta-top-badge">
-          <span class="cta-live-beacon"></span>
-          <span class="cta-badge-text">APPLICATIONS OPEN</span>
-        </div>
-
-        <h2 class="cta-main-title">Join SkillMe. Build Portfolio. Get Placed.</h2>
-        <p class="cta-main-subtitle">
-          Build real project milestones, share them on LinkedIn, earn a verifiable certificate, and unlock hiring partner referrals in 4 weeks.
-        </p>
-
-        <!-- Interactive Domain Quick Selector -->
-        <div class="cta-domain-selector" role="group" aria-label="Select Target Domain">
-          <span class="selector-label">Choose Track:</span>
-          <button class="cta-track-pill active" data-domain="webdev" data-name="Web Development">
-            <span class="track-icon">🌐</span> Web Dev
-          </button>
-          <button class="cta-track-pill" data-domain="python" data-name="Python Engineering">
-            <span class="track-icon">🐍</span> Python &amp; AI
-          </button>
-          <button class="cta-track-pill" data-domain="react" data-name="React &amp; Next.js">
-            <span class="track-icon">⚡</span> React / Next.js
-          </button>
-          <button class="cta-track-pill" data-domain="devops" data-name="DevOps &amp; Cloud">
-            <span class="track-icon">⚙️</span> DevOps / CI-CD
-          </button>
-        </div>
-
-        <!-- Action Row -->
-        <div class="cta-action-row">
-          <a href="quiz.html" class="btn-primary cta-hero-btn" id="cta-apply-btn">
-            <span id="cta-btn-label">Start Screening for Web Dev</span>
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </a>
-          <a href="#how-it-works" class="btn-secondary cta-secondary-btn">
-            Review 4-Week Sprint
-          </a>
-        </div>
-
-        <!-- Enrollment Status Pill -->
-        <div class="cta-cohort-status">
-          <span class="cohort-dot"></span>
-          <span>Enrollment Open for <strong>Upcoming Sprints</strong></span>
-        </div>
-
-        <!-- 4-Bento Trust Feature Chips -->
-        <div class="cta-bento-grid">
-          <div class="cta-bento-card">
-            <div class="bento-icon emerald">✓</div>
-            <div class="bento-text">
-              <strong>Zero Upfront Risk</strong>
-              <span>Screening quiz &amp; enrollment are free to start</span>
-            </div>
+          <div class="cta-tracks" role="group" aria-label="Choose a track">
+            <span class="cta-tracks-label mono">Choose a track</span>
+            <button type="button" class="cta-track-pill active" data-domain="webdev" data-name="Web Development" aria-pressed="true">Web dev</button>
+            <button type="button" class="cta-track-pill" data-domain="python" data-name="Python Engineering" aria-pressed="false">Python &amp; AI</button>
+            <button type="button" class="cta-track-pill" data-domain="react" data-name="React &amp; Next.js" aria-pressed="false">React / Next.js</button>
+            <button type="button" class="cta-track-pill" data-domain="devops" data-name="DevOps &amp; Cloud" aria-pressed="false">DevOps / CI-CD</button>
           </div>
-          <div class="cta-bento-card">
-            <div class="bento-icon indigo">🌐</div>
-            <div class="bento-text">
-              <strong>100% Remote &amp; Flexible</strong>
-              <span>2–4 hrs daily sprint around your college schedule</span>
-            </div>
+
+          <div class="cta-actions">
+            <a href="quiz.html" class="btn btn-primary btn-lg" id="cta-apply-btn" data-apply>
+              <span id="cta-btn-label">Start screening for Web Development</span>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+            <a href="#how-it-works" class="btn btn-lg cta-secondary">Review the 4-week sprint</a>
           </div>
-          <div class="cta-bento-card">
-            <div class="bento-icon gold">📜</div>
-            <div class="bento-text">
-              <strong>Cryptographic QR Cert</strong>
-              <span>Tamper-proof SHA-256 certificate + LOR</span>
-            </div>
-          </div>
-          <div class="cta-bento-card">
-            <div class="bento-icon rose">💼</div>
-            <div class="bento-text">
-              <strong>Placement Fast Track</strong>
-              <span>Direct hiring partner referrals for top performers</span>
-            </div>
-          </div>
+
+          <ul class="cta-points" role="list">
+            <li><strong>Free to start</strong><span>Screening quiz and enrolment are free</span></li>
+            <li><strong>100% remote</strong><span>2–4 hrs a day around your college schedule</span></li>
+            <li><strong>QR-verifiable certificate</strong><span>Unique ID anyone can check, plus an LOR</span></li>
+            <li><strong>Placement referrals</strong><span>Direct hiring partner referrals for top performers</span></li>
+          </ul>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
   </main>
 
-  <!-- ========== FOOTER ========== -->
-  <footer class="footer" id="footer">
+  <footer class="site-footer">
     <div class="container">
       <div class="footer-grid">
-        <div class="footer-brand">
-          <a href="index.html" class="nav-logo">
-            <img width="36" height="36" src="assets/logo.webp" alt="SkillMe Logo" style="width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important;">
-            <span>SkillMe</span>
-          </a>
-          <p>Build real projects, earn real experience, and get placed at top companies.</p>
-          <div style="margin-top: 14px; font-size: 0.78rem; color: var(--text-primary); display: inline-flex; align-items: center; gap: 7px; background: rgba(0,0,0,0.05); padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border);">
-            <span style="display:inline-block; width:7px; height:7px; background:#10b981; border-radius:50%;"></span>
-            <span>Udyam Registered &bull; <strong>UDYAM-UP-50-0294192</strong></span>
-          </div>
-          <div class="footer-social">
-            <a href="https://www.linkedin.com/company/skill-me-intern/" target="_blank" aria-label="SkillMe on LinkedIn">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
-            </a>
-          </div>
+        <div>
+          <a href="index.html" class="brand"><img src="assets/logo.webp" alt="" width="32" height="32"><span>SkillMe</span></a>
+          <p class="footer-about">Remote internships with real weekly projects, human review and verifiable credentials.</p>
         </div>
-
-        <div class="footer-column">
-          <h4>Platform</h4>
-          <a href="#how-it-works">How It Works</a>
-          <a href="#domains">Domains</a>
-          <a href="#benefits">Benefits</a>
-          <a href="#faq">FAQ</a>
-          <a href="dashboard.html" style="color: var(--accent-sage); font-weight: 600;">Student Login</a>
+        <div class="footer-col">
+          <h4>Program</h4>
+          <a href="index.html#how-it-works">How it works</a>
+          <a href="index.html#domains">Domains</a>
+          <a href="quiz.html">Apply now</a>
+          <a href="index.html#faq">FAQ</a>
         </div>
-
-        <div class="footer-column">
-          <h4>Resources</h4>
-          <a href="https://github.com/sakshamvermaa124-dotcom/skill-me" target="_blank" rel="noopener noreferrer">GitHub Org</a>
-          <a href="apply.html">Apply Now</a>
-          <a href="/llms.txt">Agent Instructions</a>
+        <div class="footer-col">
+          <h4>Students</h4>
+          <a href="dashboard.html">Student dashboard</a>
+          <a href="verify.html">Verify a certificate</a>
+          <a href="https://www.linkedin.com/company/skill-me-intern/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          <a href="https://github.com/sakshamvermaa124-dotcom/skill-me" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="contact.html">Contact us</a>
         </div>
-
-        <div class="footer-column">
-          <h4>Company</h4>
-          <a href="contact.html">Contact Us</a>
-          <a href="privacy.html">Privacy Policy</a>
-          <a href="terms.html">Terms of Service</a>
-          <a href="refunds.html">Cancellation &amp; Refunds</a>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <a href="privacy.html">Privacy policy</a>
+          <a href="terms.html">Terms of service</a>
+          <a href="refunds.html">Cancellation &amp; refunds</a>
+          <a href="/llms.txt">Agent instructions</a>
         </div>
       </div>
-
       <div class="footer-bottom">
-        <p>© 2026 SkillMe. All rights reserved. &bull; Govt. of India Udyam Reg. UDYAM-UP-50-0294192</p>
-        <p>Ministry of MSME Recognized &bull; Built with ❤️ for India's students</p>
+        <span>© <span data-year>2026</span> SkillMe · MSME registered · UDYAM-UP-50-0294192</span>
+        <span>Made for students, reviewed by people.</span>
       </div>
     </div>
   </footer>
 
-  <!-- Lenis Smooth Scroll -->
-  <script src="https://unpkg.com/lenis@1.3.25/dist/lenis.min.js" defer></script>
-
-  <!-- GSAP + ScrollTrigger -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-
-  <!-- Three.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
-
-  <!-- Scripts -->
-  <script src="script.js?v=20261009_112826" defer></script>
+  <script src="script.js?v=20261011_home1" defer></script>
 </body>
 </html>
-
