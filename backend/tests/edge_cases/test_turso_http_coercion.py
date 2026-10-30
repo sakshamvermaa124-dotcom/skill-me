@@ -50,3 +50,21 @@ class TestHranaValueCoercion:
         """The exact expression that crashed in production: max(1, -(-total // limit))."""
         total = Database._coerce_hrana_value({"type": "integer", "value": "37"})
         assert max(1, -(-total // 15)) == 3
+
+
+@pytest.mark.edge
+class TestTursoBatch:
+    async def test_fetch_batch_is_one_http_call_and_decodes_each_result(self):
+        from unittest.mock import MagicMock
+        d = Database(url="libsql://x.turso.io", auth_token="tok")
+        ok = lambda col, val: {"type": "ok", "response": {"result": {
+            "cols": [{"name": col}], "rows": [[{"type": "integer", "value": val}]]}}}
+        client = MagicMock()
+        client.post.return_value.json.return_value = {"results": [ok("a", "1"), ok("b", "2"), {"type": "ok", "response": {"type": "close"}}]}
+        d._http = client
+        d._auth_token = "tok"
+        out = await d.fetch_batch([("SELECT 1 AS a", ()), ("SELECT ? AS b", (2,))])
+        assert out == [[{"a": 1}], [{"b": 2}]]
+        assert client.post.call_count == 1
+        sent = client.post.call_args.kwargs["json"]["requests"]
+        assert [r["type"] for r in sent] == ["execute", "execute", "close"]

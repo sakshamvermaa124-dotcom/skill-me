@@ -156,3 +156,90 @@ class TestAnalytics:
 
         stats = (await client.get("/api/admin/stats", headers=admin_headers)).json()
         assert stats["total_alumni"] == 2
+
+
+@pytest.mark.admin
+class TestBusinessMetrics:
+    async def _student(self, email, **cols):
+        from tests.conftest import test_db
+        fields = {"first_name": "T", "last_name": "S", "email": email, "domain": "web-dev", **cols}
+        names = ", ".join(fields)
+        return await test_db.insert(
+            f"INSERT INTO students ({names}) VALUES ({', '.join('?' for _ in fields)})",
+            tuple(fields.values()),
+        )
+
+    async def test_new_analytics_blocks_present_on_empty_db(self, client, admin_headers):
+        data = (await client.get("/api/admin/analytics", headers=admin_headers)).json()
+        for key in ("growth", "acquisition", "audience", "speed", "quiz_outcomes"):
+            assert key in data
+        assert data["speed"]["median_days_to_first_task"] is None
+        assert [q["band"] for q in data["quiz_outcomes"]] == ["0-49%", "50-79%", "80-100%"]
+        stats = (await client.get("/api/admin/stats", headers=admin_headers)).json()
+        for key in ("apps_today", "apps_7d", "active_7d", "eligible_unpaid", "revenue_month_rupees"):
+            assert stats[key] == 0
+
+    async def test_acquisition_groups_by_source_with_paid_rate(self, client, admin_headers):
+        from tests.conftest import test_db, seed_batch
+        b = await seed_batch(test_db)
+        a = await self._student("a@x.com", referral_source="LinkedIn", college="IIT Delhi")
+        await self._student("b@x.com", referral_source="linkedin", college="IIT Delhi")
+        await self._student("c@x.com", referral_source="Friend")
+        await test_db.insert(
+            "INSERT INTO payments (student_id, batch_id, razorpay_order_id, razorpay_payment_id, amount, status)"
+            " VALUES (?, ?, 'o1', 'pay_Real1', 12900, 'paid')", (a, b))
+        data = (await client.get("/api/admin/analytics", headers=admin_headers)).json()
+        src = {s["label"].lower(): s for s in data["acquisition"]["sources"]}
+        assert src["linkedin"]["total"] == 2 and src["linkedin"]["paid"] == 1
+        assert src["linkedin"]["paid_rate"] == 50.0
+        assert data["audience"]["colleges"][0]["total"] == 2
+
+    async def test_eligible_unpaid_excludes_paid_and_test_payments(self, client, admin_headers):
+        from tests.conftest import test_db, seed_batch
+        b = await seed_batch(test_db)
+        paid = await self._student("paid@x.com")
+        fake = await self._student("fake@x.com")
+        owes = await self._student("owes@x.com")
+        low = await self._student("low@x.com")
+        for sid, weeks in ((paid, 3), (fake, 3), (owes, 3), (low, 2)):
+            for w in range(1, weeks + 1):
+                await test_db.insert(
+                    "INSERT INTO submissions (student_id, batch_id, week, linkedin_url, status)"
+                    " VALUES (?, ?, ?, 'u', 'approved')", (sid, b, w))
+        await test_db.insert(
+            "INSERT INTO payments (student_id, batch_id, razorpay_order_id, razorpay_payment_id, amount, status)"
+            " VALUES (?, ?, 'o1', 'pay_Real1', 12900, 'paid')", (paid, b))
+        await test_db.insert(
+            "INSERT INTO payments (student_id, batch_id, razorpay_order_id, razorpay_payment_id, amount, status)"
+            " VALUES (?, ?, 'o2', 'pay_test1', 12900, 'paid')", (fake, b))
+        stats = (await client.get("/api/admin/stats", headers=admin_headers)).json()
+        assert stats["eligible_unpaid"] == 2  # fake (test payment) + owes
+        data = (await client.get("/api/admin/analytics", headers=admin_headers)).json()
+        assert data["revenue"]["eligible_unpaid"] == 2
+
+    async def test_quiz_bands_and_median_days(self, client, admin_headers):
+        from tests.conftest import test_db, seed_batch
+        b = await seed_batch(test_db)
+        hi = await self._student("hi@x.com", quiz_score=9, quiz_total=10, created_at="2026-01-01 00:00:00")
+        await self._student("lo@x.com", quiz_score=2, quiz_total=10)
+        await test_db.insert(
+            "INSERT INTO submissions (student_id, batch_id, week, linkedin_url, status, submitted_at)"
+            " VALUES (?, ?, 1, 'u', 'approved', '2026-01-03 00:00:00')", (hi, b))
+        data = (await client.get("/api/admin/analytics", headers=admin_headers)).json()
+        bands = {q["band"]: q for q in data["quiz_outcomes"]}
+        assert bands["80-100%"]["total"] == 1 and bands["0-49%"]["total"] == 1
+        assert data["speed"]["median_days_to_first_task"] == 2.0
+
+    async def test_analytics_cache_and_fresh_bypass(self, client, admin_headers):
+        await self._student("one@x.com")
+        first = (await client.get("/api/admin/analytics", headers=admin_headers)).json()
+        await self._student("two@x.com")
+        cached = (await client.get("/api/admin/analytics", headers=admin_headers)).json()
+        assert cached["funnel"]["total"] == first["funnel"]["total"] == 1
+        fresh = (await client.get("/api/admin/analytics?fresh=true", headers=admin_headers)).json()
+        assert fresh["funnel"]["total"] == 2
+
+    async def test_fetch_batch_preserves_order(self):
+        from tests.conftest import test_db
+        res = await test_db.fetch_batch([("SELECT 1 AS a", ()), ("SELECT 2 AS a", ())])
+        assert [r[0]["a"] for r in res] == [1, 2]

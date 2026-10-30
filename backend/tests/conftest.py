@@ -117,6 +117,9 @@ class TestDatabase:
         rows = cursor.fetchall()
         return [dict(r) for r in rows]
 
+    async def fetch_batch(self, queries: list[tuple[str, tuple]]) -> list[list[dict]]:
+        return [await self.fetch_all(q, p) for q, p in queries]
+
     async def insert(self, query: str, params: tuple = ()) -> int:
         cursor = self._execute_sql(query, params)
         return cursor.lastrowid
@@ -250,6 +253,8 @@ def mock_scheduler_service():
 def _reset_db():
     """Reset the test DB before every test."""
     test_db.reset()
+    from routes import admin as _admin_routes
+    _admin_routes._analytics_cache.update(at=0.0, data=None)  # 60s cache must not leak between tests
     yield
 
 

@@ -4,7 +4,9 @@ Async LibSQL (Turso) database client.
 Replaces aiosqlite with cloud-persistent storage so data survives redeployments.
 """
 
+import asyncio
 import logging
+import threading
 from pathlib import Path
 from config import settings
 
@@ -29,6 +31,8 @@ class Database:
         self._url = url
         self._auth_token = auth_token
         self._conn: libsql.Connection | None = None
+        self._http = None  # shared httpx.Client: keep-alive avoids a TLS handshake per query
+        self._http_lock = threading.Lock()
 
     def _make_connection(self) -> libsql.Connection:
         """Create a fresh libsql / sqlite3 connection."""
@@ -178,12 +182,17 @@ class Database:
             # One application per (email, track) (v10). Databases created before v10 also need
             # scripts/migrate_multi_domain.py to drop the old UNIQUE(email) column constraint.
             "CREATE UNIQUE INDEX IF NOT EXISTS ux_students_email_domain ON students(lower(email), domain)",
+            # Lets the admin list's "other tracks" lookup (lower(email) = lower(email)) use an index (v11)
+            "CREATE INDEX IF NOT EXISTS idx_students_email_lower ON students(lower(email))",
         ]
         return migrations
 
     async def disconnect(self):
-        """No-op since connections are created per-query."""
-        pass
+        """Close the shared HTTP client (native/sqlite connections are per-query)."""
+        with self._http_lock:
+            if self._http is not None:
+                self._http.close()
+                self._http = None
 
     @staticmethod
     def _coerce_hrana_value(v):
@@ -211,61 +220,72 @@ class Database:
                 return value
         return value
 
-    def _run_turso_http(self, query: str, params: tuple = ()):
-        """Query Turso Cloud DB via HTTP Pipeline API when libsql_experimental native driver is unavailable."""
+    def _http_client(self):
         import httpx
+        with self._http_lock:
+            if self._http is None:
+                self._http = httpx.Client(timeout=15.0)
+            return self._http
+
+    @staticmethod
+    def _format_arg(p) -> dict:
+        if isinstance(p, bool):
+            return {"type": "integer", "value": str(int(p))}
+        if isinstance(p, int):
+            return {"type": "integer", "value": str(p)}
+        if isinstance(p, float):
+            return {"type": "float", "value": p}
+        if p is None:
+            return {"type": "null"}
+        return {"type": "text", "value": str(p)}
+
+    def _run_turso_batch(self, queries: list[tuple[str, tuple]]):
+        """Run N statements in ONE Turso HTTP pipeline call. Returns [(rows, last_insert_id), ...]."""
         http_url = self._url.replace("libsql://", "https://")
         if not http_url.startswith("http"):
             http_url = "https://" + http_url
         if not http_url.endswith("/v2/pipeline"):
             http_url = http_url.rstrip("/") + "/v2/pipeline"
 
-        formatted_args = []
-        for p in params:
-            if isinstance(p, int):
-                formatted_args.append({"type": "integer", "value": str(p)})
-            elif isinstance(p, float):
-                formatted_args.append({"type": "float", "value": p})
-            elif p is None:
-                formatted_args.append({"type": "null"})
-            else:
-                formatted_args.append({"type": "text", "value": str(p)})
-
-        payload = {
-            "requests": [
-                {
-                    "type": "execute",
-                    "stmt": {
-                        "sql": query,
-                        "args": formatted_args
-                    }
-                },
-                {"type": "close"}
-            ]
-        }
+        requests = [
+            {"type": "execute",
+             "stmt": {"sql": q, "args": [self._format_arg(p) for p in params]}}
+            for q, params in queries
+        ]
+        requests.append({"type": "close"})
         headers = {"Authorization": f"Bearer {self._auth_token}", "Content-Type": "application/json"}
-        with httpx.Client(timeout=10.0) as client:
-            res = client.post(http_url, headers=headers, json=payload)
-            res.raise_for_status()
-            data = res.json()
-            results = data.get("results", [])
-            if not results:
-                return [], None
-            if results[0].get("type") == "error" or "response" not in results[0]:
-                msg = (results[0].get("error") or {}).get("message", "unknown error")
+        res = self._http_client().post(http_url, headers=headers, json={"requests": requests})
+        res.raise_for_status()
+        results = res.json().get("results", [])
+
+        out = []
+        for i in range(len(queries)):
+            if i >= len(results):
+                out.append(([], None))
+                continue
+            r = results[i]
+            if r.get("type") == "error" or "response" not in r:
+                msg = (r.get("error") or {}).get("message", "unknown error")
                 raise RuntimeError(f"Turso query failed: {msg}")
-            result = results[0]["response"].get("result", {})
+            result = r["response"].get("result", {})
             cols = [c["name"] for c in result.get("cols", [])]
-            rows = []
-            for r in result.get("rows", []):
-                row_vals = [self._coerce_hrana_value(v) for v in r]
-                rows.append(dict(zip(cols, row_vals)))
+            rows = [
+                dict(zip(cols, [self._coerce_hrana_value(v) for v in row]))
+                for row in result.get("rows", [])
+            ]
             last_id = result.get("last_insert_rowid")
             if last_id is not None and str(last_id).isdigit():
                 last_id = int(last_id)
-            return rows, last_id
+            out.append((rows, last_id))
+        return out
+
+    def _run_turso_http(self, query: str, params: tuple = ()):
+        """Query Turso Cloud DB via HTTP Pipeline API when libsql_experimental native driver is unavailable."""
+        return self._run_turso_batch([(query, params)])[0]
 
     # ── Query helpers ──────────────────────────────────────────────
+    # Every query runs in a worker thread (asyncio.to_thread) so the blocking
+    # network/disk call never stalls the event loop — concurrent requests overlap.
 
     def _run_query(self, fn):
         """Helper to run a function with a fresh connection, retrying once on network errors."""
@@ -288,18 +308,18 @@ class Database:
 
     async def execute(self, query: str, params: tuple = ()):
         """Execute a single write query."""
-        if self._auth_token and getattr(libsql, "__name__", "") != "libsql_experimental":
-            self._run_turso_http(query, params)
+        if self._uses_http():
+            await asyncio.to_thread(self._run_turso_http, query, params)
             return
         def _run(conn):
             conn.execute(query, params)
             conn.commit()
-        return self._run_query(_run)
+        return await asyncio.to_thread(self._run_query, _run)
 
     async def fetch_one(self, query: str, params: tuple = ()) -> dict | None:
         """Fetch a single row as a dict."""
-        if self._auth_token and getattr(libsql, "__name__", "") != "libsql_experimental":
-            rows, _ = self._run_turso_http(query, params)
+        if self._uses_http():
+            rows, _ = await asyncio.to_thread(self._run_turso_http, query, params)
             return rows[0] if rows else None
         def _run(conn):
             cursor = conn.execute(query, params)
@@ -308,30 +328,48 @@ class Database:
                 return None
             columns = [description[0] for description in cursor.description]
             return dict(zip(columns, row))
-        return self._run_query(_run)
+        return await asyncio.to_thread(self._run_query, _run)
 
     async def fetch_all(self, query: str, params: tuple = ()) -> list[dict]:
         """Fetch all rows as a list of dicts."""
-        if self._auth_token and getattr(libsql, "__name__", "") != "libsql_experimental":
-            rows, _ = self._run_turso_http(query, params)
+        if self._uses_http():
+            rows, _ = await asyncio.to_thread(self._run_turso_http, query, params)
             return rows
         def _run(conn):
             cursor = conn.execute(query, params)
             rows = cursor.fetchall()
             columns = [description[0] for description in cursor.description]
             return [dict(zip(columns, row)) for row in rows]
-        return self._run_query(_run)
+        return await asyncio.to_thread(self._run_query, _run)
+
+    async def fetch_batch(self, queries: list[tuple[str, tuple]]) -> list[list[dict]]:
+        """Run several read queries and return one row-list per query, in order.
+        Over Turso HTTP this is a single round trip instead of N."""
+        if not queries:
+            return []
+        if self._uses_http():
+            results = await asyncio.to_thread(self._run_turso_batch, queries)
+            return [rows for rows, _ in results]
+        def _run(conn):
+            out = []
+            for q, params in queries:
+                cursor = conn.execute(q, params)
+                rows = cursor.fetchall()
+                columns = [d[0] for d in cursor.description]
+                out.append([dict(zip(columns, row)) for row in rows])
+            return out
+        return await asyncio.to_thread(self._run_query, _run)
 
     async def insert(self, query: str, params: tuple = ()) -> int:
         """Insert a row and return the last inserted ID."""
-        if self._auth_token and getattr(libsql, "__name__", "") != "libsql_experimental":
-            _, last_id = self._run_turso_http(query, params)
+        if self._uses_http():
+            _, last_id = await asyncio.to_thread(self._run_turso_http, query, params)
             return last_id or 0
         def _run(conn):
             cursor = conn.execute(query, params)
             conn.commit()
             return cursor.lastrowid
-        return self._run_query(_run)
+        return await asyncio.to_thread(self._run_query, _run)
 
 
 # Global database instance — reads TURSO_DB_URL and TURSO_AUTH_TOKEN from env

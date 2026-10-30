@@ -254,7 +254,7 @@ async function adminLogin() {
     adminKey = key;
     sessionStorage.setItem('skillme_admin_key', key);
 
-    showApp();
+    showApp(await res.json().catch(() => null));
     if (btn) { btn.disabled = false; btn.textContent = 'ACCESS CONSOLE →'; }
 
     try {
@@ -515,7 +515,7 @@ function initAdmin3DCrystalEngine() {
   });
 }
 
-function showApp() {
+function showApp(prefetchedStats) {
   const overlay = document.getElementById('login-overlay');
   if (overlay) {
     overlay.style.display = 'none';
@@ -533,7 +533,7 @@ function showApp() {
   appStarted = true;
   try { initAdminBgLattice(); } catch(e) {}
   try { initAdmin3DCrystalEngine(); } catch(e) {}
-  loadOverview();
+  loadOverview(prefetchedStats);
 }
 
 function logoutAdmin() {
@@ -556,26 +556,8 @@ function logoutAdmin() {
   if (app) app.style.display = 'none';
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
   localStorage.removeItem('skillme_admin_key'); // older sessions kept the key forever
-  const saved = sessionStorage.getItem('skillme_admin_key');
-  if (saved) {
-    try {
-      const res = await fetch(`${getAPI()}/api/admin/stats`, {
-        headers: { 'X-Admin-Key': saved }
-      });
-      if (res.ok) {
-        adminKey = saved;
-        showApp();
-      } else {
-        sessionStorage.removeItem('skillme_admin_key');
-        adminKey = '';
-      }
-    } catch(e) {
-      adminKey = saved;
-      showApp();
-    }
-  }
 });
 
 // ─── NAVIGATION ───
@@ -607,6 +589,12 @@ async function api(path, opts = {}) {
     ...opts,
     headers: { 'X-Admin-Key': adminKey, 'Content-Type': 'application/json', ...(opts.headers || {}) }
   });
+  if (res.status === 403 && adminKey) {
+    logoutAdmin();
+    const errEl = document.getElementById('login-error');
+    if (errEl) errEl.textContent = 'Session expired. Please enter your passkey again.';
+    throw new Error('Session expired');
+  }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
     throw new Error(err.detail || res.statusText);
@@ -663,29 +651,62 @@ function fmtDate(iso) {
 }
 
 // ─── OVERVIEW ───
-async function loadOverview() {
-  loadStats();
+async function loadOverview(prefetchedStats) {
+  loadStats(prefetchedStats);
   loadRecentApplications();
   loadShortlisted();
 }
 
-async function loadStats() {
+// `prefetched` is the /stats payload when the caller already has it (login). Other callers
+// pass `true`/nothing, which just means "fetch it".
+async function loadStats(prefetched) {
   const grid = document.getElementById('stats-grid');
+  // Render hosts spin down when idle; the first request can take a while.
+  const wakeHint = setTimeout(() => {
+    if (grid && grid.querySelector('.loading-overlay')) {
+      grid.innerHTML = `<div class="loading-overlay"><div class="spinner"></div> Waking the server — the first load after a quiet spell can take up to a minute…</div>`;
+    }
+  }, 4000);
   try {
-    const data = await api('/api/admin/stats');
-    grid.innerHTML = `
-      ${statCard('👥', data.total_students, 'Total Students', 'rgba(201,154,78,0.12)', '#c99a4e')}
-      ${statCard('📋', data.pending_applications, 'Pending Applications', 'rgba(201,154,78,0.15)', '#d8ac63')}
-      ${statCard('🟢', data.enrolled_students, 'Enrolled Students', 'rgba(79,163,107,0.15)', '#4fa36b')}
-      ${statCard('📝', data.pending_submissions, 'Pending Submissions', 'rgba(181,135,61,0.15)', '#b5873d')}
-    `;
-    setNavBadge('pending-badge', data.pending_applications);
-    setNavBadge('submissions-badge', data.pending_submissions);
-    setNavBadge('alumni-badge', data.total_alumni);
-    updateUrgentRequestsBadge(data.pending_urgent_requests || 0);
+    const data = prefetched && typeof prefetched === 'object' ? prefetched : await api('/api/admin/stats');
+    renderStats(data);
   } catch (e) {
     grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-text">${esc(e.message)}</div></div>`;
+  } finally {
+    clearTimeout(wakeHint);
   }
+}
+
+function pctChange(now, prev) {
+  if (!prev) return now ? 'new this week' : '—';
+  const c = Math.round((now - prev) * 100 / prev);
+  return `${c >= 0 ? '▲' : '▼'} ${Math.abs(c)}% vs previous 7 days`;
+}
+
+function renderStats(data) {
+  const grid = document.getElementById('stats-grid');
+  grid.innerHTML = `
+    ${statCard('👥', data.total_students, 'Total Students', 'rgba(201,154,78,0.12)', '#c99a4e')}
+    ${statCard('📋', data.pending_applications, 'Pending Applications', 'rgba(201,154,78,0.15)', '#d8ac63')}
+    ${statCard('🟢', data.enrolled_students, 'Enrolled Students', 'rgba(79,163,107,0.15)', '#4fa36b')}
+    ${statCard('📝', data.pending_submissions, 'Pending Submissions', 'rgba(181,135,61,0.15)', '#b5873d')}
+  `;
+  const pulse = document.getElementById('pulse-grid');
+  if (pulse && data.apps_7d !== undefined) {
+    const revDelta = data.revenue_prev_month_rupees
+      ? `${data.revenue_month_rupees >= data.revenue_prev_month_rupees ? '▲' : '▼'} vs ${fmtINR(data.revenue_prev_month_rupees)} last month`
+      : 'no revenue last month';
+    pulse.innerHTML = `
+      ${analyticsCard('🆕', data.apps_7d || 0, 'Applications (7 days)', `${data.apps_today || 0} today · ${pctChange(data.apps_7d || 0, data.apps_prev_7d || 0)}`)}
+      ${analyticsCard('⚡', data.active_7d || 0, 'Active People (7 days)', 'logged in or submitted a task')}
+      ${analyticsCard('💰', fmtINR(data.revenue_month_rupees), 'Revenue This Month', revDelta)}
+      ${analyticsCard('🎯', data.eligible_unpaid || 0, 'Eligible but Unpaid', 'finished 3+ weeks, no payment yet — nudge them')}
+    `;
+  }
+  setNavBadge('pending-badge', data.pending_applications);
+  setNavBadge('submissions-badge', data.pending_submissions);
+  setNavBadge('alumni-badge', data.total_alumni);
+  updateUrgentRequestsBadge(data.pending_urgent_requests || 0);
 }
 
 function setNavBadge(id, count) {
@@ -1659,6 +1680,26 @@ async function sendRemindersNow() {
 // chart before drawing a new one instead of leaking canvases/listeners.
 const _analyticsCharts = {};
 
+const CHART_JS_SRC = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
+const CHART_JS_SRI = 'sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g';
+let _chartJsPromise = null;
+// Chart.js is ~200 KB and only the Analytics page needs it — load it on first visit.
+function ensureChartJs() {
+  if (typeof Chart !== 'undefined') return Promise.resolve();
+  if (!_chartJsPromise) {
+    _chartJsPromise = new Promise((resolve, reject) => {
+      const el = document.createElement('script');
+      el.src = CHART_JS_SRC;
+      el.integrity = CHART_JS_SRI;
+      el.crossOrigin = 'anonymous';
+      el.onload = resolve;
+      el.onerror = () => { _chartJsPromise = null; reject(new Error('Could not load the chart library')); };
+      document.head.appendChild(el);
+    });
+  }
+  return _chartJsPromise;
+}
+
 function _drawChart(canvasId, config) {
   const canvas = document.getElementById(canvasId);
   if (!canvas || typeof Chart === 'undefined') return;
@@ -1684,12 +1725,15 @@ function _monthLabel(ym) {
 }
 
 let _analyticsReq = 0;
-async function loadAnalytics() {
+async function loadAnalytics(fresh = false) {
   const grid = document.getElementById('analytics-funnel-grid');
   if (!grid) return;
   const reqId = ++_analyticsReq;
   try {
-    const data = await api('/api/admin/analytics');
+    const [data] = await Promise.all([
+      api(`/api/admin/analytics${fresh === true ? '?fresh=true' : ''}`),
+      ensureChartJs(),
+    ]);
     if (reqId !== _analyticsReq) return;
     renderAnalyticsFunnel(data.funnel || {});
     renderWeeklyCompletionChart(data.weekly_completion || []);
@@ -1697,6 +1741,11 @@ async function loadAnalytics() {
     renderDomainBreakdownChart(data.domains || []);
     renderApplicationsTrendChart(data.applications_trend || []);
     renderDomainTable(data.domains || []);
+    renderGrowth(data.growth || {}, data.revenue || {});
+    renderAcquisition(data.acquisition || {});
+    renderAudience(data.audience || {});
+    renderSpeed(data.speed || {}, data.revenue || {});
+    renderQuizOutcomes(data.quiz_outcomes || []);
   } catch (e) {
     if (reqId !== _analyticsReq) return;
     grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-text">${esc(e.message)}</div></div>`;
@@ -1863,10 +1912,121 @@ function renderDomainTable(domains) {
   }).join('');
 }
 
+function renderGrowth(g, rev) {
+  const grid = document.getElementById('analytics-growth-grid');
+  if (grid) {
+    grid.innerHTML = `
+      ${analyticsCard('🧑', g.unique_people || 0, 'Unique People', `${(g.total_applications || 0).toLocaleString('en-IN')} applications in total`)}
+      ${analyticsCard('🔀', `${g.multi_track_rate || 0}%`, 'Apply to Multiple Tracks', 'extra applications per person')}
+      ${analyticsCard('📆', g.wau || 0, 'Weekly Active People', 'login or task submission, last 7 days')}
+      ${analyticsCard('🗓️', g.mau || 0, 'Monthly Active People', 'last 30 days')}
+      ${analyticsCard('💵', fmtINR(rev.per_applicant_rupees), 'Revenue per Applicant', 'verified revenue ÷ all applicants')}
+    `;
+  }
+  const daily = g.daily_applications || [];
+  _drawChart('chart-daily-apps', {
+    type: 'bar',
+    data: {
+      labels: daily.map(d => new Date(d.day + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })),
+      datasets: [{ label: 'Applications', data: daily.map(d => d.count), backgroundColor: '#c99a4e', borderRadius: 3 }],
+    },
+    options: { ...CHART_BASE_OPTIONS, plugins: { legend: { display: false } } },
+  });
+}
+
+// One row per group: name | applicants | started (rate) | paid [| paid %]
+function _funnelRows(rows, emptyText, withPaidRate) {
+  const cols = withPaidRate ? 5 : 4;
+  if (!rows.length) {
+    return `<tr><td colspan="${cols}" style="text-align:center;color:var(--text-secondary);padding:24px;">${emptyText}</td></tr>`;
+  }
+  return rows.map(r => `
+    <tr>
+      <td style="font-weight:500;">${esc(r.label)}</td>
+      <td>${r.total}</td>
+      <td style="color:#38bdf8;">${r.started} <span style="color:var(--text-muted);font-size:0.72rem;">(${r.started_rate}%)</span></td>
+      <td style="color:#818cf8;">${r.paid}</td>
+      ${withPaidRate ? `<td>${r.paid_rate}%</td>` : ''}
+    </tr>`).join('');
+}
+
+function renderAcquisition(a) {
+  const sources = a.sources || [];
+  const tbody = document.getElementById('analytics-sources-tbody');
+  if (tbody) {
+    tbody.innerHTML = _funnelRows(sources, 'No applicants yet.', true);
+    if (sources.length && sources.every(s => s.label === 'Unknown')) {
+      tbody.insertAdjacentHTML('beforeend', `<tr><td colspan="5" style="color:var(--text-muted);font-size:0.72rem;padding:8px 12px;">Every applicant is "Unknown" — no source has been recorded yet.</td></tr>`);
+    }
+  }
+  const ref = a.referrals || {};
+  const sub = document.getElementById('analytics-referral-subtitle');
+  if (sub) {
+    sub.textContent = ref.clicked
+      ? `Referral program: ${ref.clicked} clicked → ${ref.applied} applied → ${ref.enrolled} enrolled`
+      : 'Which channels bring people who start and pay · no referral activity yet';
+  }
+}
+
+function renderAudience(a) {
+  const tbody = document.getElementById('analytics-colleges-tbody');
+  if (tbody) tbody.innerHTML = _funnelRows(a.colleges || [], 'Not captured yet — no applicant has a college recorded.', false);
+  const years = a.years || [];
+  _drawChart('chart-years', {
+    type: 'bar',
+    data: {
+      labels: years.map(y => y.label),
+      datasets: [
+        { label: 'Applicants', data: years.map(y => y.total), backgroundColor: 'rgba(201,154,78,0.55)', borderRadius: 4 },
+        { label: 'Started', data: years.map(y => y.started), backgroundColor: '#38bdf8', borderRadius: 4 },
+        { label: 'Paid', data: years.map(y => y.paid), backgroundColor: '#818cf8', borderRadius: 4 },
+      ],
+    },
+    options: CHART_BASE_OPTIONS,
+  });
+}
+
+function renderSpeed(sp, rev) {
+  const el = document.getElementById('analytics-speed-grid');
+  if (!el) return;
+  const chip = (label, value, note, color) => `
+    <div style="padding:10px 14px;border-radius:8px;background:${color}1a;border:1px solid ${color}4d;font-size:0.8rem;min-width:170px;flex:1;">
+      <div style="color:var(--text-secondary);font-size:0.68rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">${label}</div>
+      <div style="color:${color};font-weight:700;font-size:1.05rem;">${value}</div>
+      <div style="color:var(--text-muted);font-size:0.72rem;">${note}</div>
+    </div>`;
+  const none = v => v === null || v === undefined;
+  const days = v => none(v) ? '—' : `${v} day${v === 1 ? '' : 's'}`;
+  el.innerHTML = [
+    chip('Apply → first task', days(sp.median_days_to_first_task), 'median', '#38bdf8'),
+    chip('Apply → payment', days(sp.median_days_to_payment), 'median', '#818cf8'),
+    chip('Review turnaround', none(sp.avg_review_hours) ? '—' : `${sp.avg_review_hours} h`, 'average, submission to decision', '#34d399'),
+    chip('Review backlog', `${sp.pending_reviews || 0} pending`, none(sp.oldest_pending_days) ? 'nothing waiting' : `oldest waiting ${days(sp.oldest_pending_days)}`, '#f59e0b'),
+    chip('Eligible but unpaid', `${rev.eligible_unpaid || 0} students`, 'finished 3+ weeks, not paid yet', '#fb7185'),
+  ].join('');
+}
+
+function renderQuizOutcomes(rows) {
+  const tbody = document.getElementById('analytics-quiz-tbody');
+  if (!tbody) return;
+  if (!rows.some(r => r.total)) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-secondary);padding:24px;">Not captured yet — no applicant has a quiz score.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td style="font-weight:500;">${esc(r.band)}</td>
+      <td>${r.total}</td>
+      <td style="color:#34d399;">${r.completion_rate}%</td>
+      <td style="color:#818cf8;">${r.paid_rate}%</td>
+    </tr>`).join('');
+}
+
 // ─── INIT ───
 const savedKey = sessionStorage.getItem('skillme_admin_key');
 if (savedKey) {
   const input = document.getElementById('admin-key-input') || document.getElementById('api-key-input');
   if (input) input.value = savedKey;
-  adminLogin();
+  adminKey = savedKey;
+  showApp();
 }

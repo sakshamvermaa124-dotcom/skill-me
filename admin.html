@@ -926,6 +926,7 @@
       <div class="stats-grid" id="stats-grid">
         <div class="loading-overlay"><div class="spinner"></div> Loading stats...</div>
       </div>
+      <div class="stats-grid" id="pulse-grid" style="margin-top:16px;"></div>
       <div class="grid-2">
         <div class="panel">
           <div class="panel-header">
@@ -1028,7 +1029,7 @@
     <!-- ─── ANALYTICS PAGE ─── -->
     <section class="page" id="page-analytics">
       <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
-        <button class="btn btn-secondary" onclick="loadAnalytics()" style="font-size:0.8rem;padding:6px 14px;">↻ Refresh</button>
+        <button class="btn btn-secondary" onclick="loadAnalytics(true)" style="font-size:0.8rem;padding:6px 14px;">↻ Refresh</button>
       </div>
 
       <div class="stats-grid" id="analytics-funnel-grid">
@@ -1083,6 +1084,98 @@
           </div>
           <div class="panel-body" style="max-height:none;">
             <div style="position:relative;height:280px;"><canvas id="chart-applications-trend"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-grid" id="analytics-growth-grid" style="margin-top:24px;"></div>
+
+      <div class="grid-2" style="margin-top:24px;">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">📅 Daily Applications, Last 30 Days</div>
+              <div class="panel-subtitle">Spot spikes from posts, campaigns or referrals</div>
+            </div>
+          </div>
+          <div class="panel-body" style="max-height:none;">
+            <div style="position:relative;height:240px;"><canvas id="chart-daily-apps"></canvas></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">📣 Acquisition: where users come from</div>
+              <div class="panel-subtitle" id="analytics-referral-subtitle">Which channels bring people who start and pay</div>
+            </div>
+          </div>
+          <div class="panel-body" style="max-height:none;">
+            <div style="overflow-x:auto;">
+              <table class="students-table">
+                <thead><tr><th>Source</th><th style="width:80px;">Applicants</th><th style="width:90px;">Started</th><th style="width:70px;">Paid</th><th style="width:80px;">Paid %</th></tr></thead>
+                <tbody id="analytics-sources-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:24px;">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">🏫 Top Colleges</div>
+              <div class="panel-subtitle">Top 10 by applicants, with how many started and paid</div>
+            </div>
+          </div>
+          <div class="panel-body" style="max-height:none;">
+            <div style="overflow-x:auto;">
+              <table class="students-table">
+                <thead><tr><th>College</th><th style="width:80px;">Applicants</th><th style="width:90px;">Started</th><th style="width:70px;">Paid</th></tr></thead>
+                <tbody id="analytics-colleges-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">🎓 Year of Study</div>
+              <div class="panel-subtitle">Who applies, and who converts</div>
+            </div>
+          </div>
+          <div class="panel-body" style="max-height:none;">
+            <div style="position:relative;height:260px;"><canvas id="chart-years"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:24px;">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">⏱️ Speed &amp; Money</div>
+              <div class="panel-subtitle">How fast people move, how fast we review, and revenue left on the table</div>
+            </div>
+          </div>
+          <div class="panel-body" style="max-height:none;">
+            <div id="analytics-speed-grid" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">🧠 Quiz Score vs Outcome</div>
+              <div class="panel-subtitle">Does the screening quiz predict who finishes and who pays?</div>
+            </div>
+          </div>
+          <div class="panel-body" style="max-height:none;">
+            <div style="overflow-x:auto;">
+              <table class="students-table">
+                <thead><tr><th>Quiz score</th><th style="width:80px;">Students</th><th style="width:110px;">Completed %</th><th style="width:90px;">Paid %</th></tr></thead>
+                <tbody id="analytics-quiz-tbody"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -1525,11 +1618,10 @@
 <!-- ─── TOAST CONTAINER ─── -->
 <div id="toast-container"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" integrity="sha384-e6nUZLBkQ86NJ6TVVKAeSaK8jWa3NhkYWZFomE39AvDbQWeie9PlQqM3pmYW5d1g" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" integrity="sha384-g4NTh/Iv5PPU4xPyhEWqPcwtNXOvdaDI8LLnyYfyNZOjKJeYQyjzQ9X5275eBjpt" crossorigin="anonymous"></script>
-<script src="config.js?v=b82b38a780"></script>
-<script src="admin.js?v=adddbfa488"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" integrity="sha384-g4NTh/Iv5PPU4xPyhEWqPcwtNXOvdaDI8LLnyYfyNZOjKJeYQyjzQ9X5275eBjpt" crossorigin="anonymous" defer></script>
+<script src="config.js?v=b82b38a780" defer></script>
+<script src="admin.js?v=c39fd4f36f" defer></script>
 <script>
 // ─── Email Logs ───────────────────────────────────────────────────────────────
 const EMAIL_TYPE_LABELS = {
