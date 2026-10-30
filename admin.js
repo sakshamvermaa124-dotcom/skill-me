@@ -270,13 +270,16 @@ function renderStats(data) {
   `;
   const pulse = document.getElementById('pulse-grid');
   if (pulse && data.apps_7d !== undefined) {
-    const revDelta = data.revenue_prev_month_rupees
-      ? `${data.revenue_month_rupees >= data.revenue_prev_month_rupees ? '▲' : '▼'} vs ${fmtINR(data.revenue_prev_month_rupees)} last month`
-      : 'no revenue last month';
+    const reviewed = (data.approved_30d || 0) + (data.rejected_30d || 0);
+    const oldest = data.oldest_pending_days;
     pulse.innerHTML = `
       ${analyticsCard('🆕', data.apps_7d || 0, 'Applications (7 days)', `${data.apps_today || 0} today · ${pctChange(data.apps_7d || 0, data.apps_prev_7d || 0)}`)}
       ${analyticsCard('⚡', data.active_7d || 0, 'Active People (7 days)', 'logged in or submitted a task')}
-      ${analyticsCard('💰', fmtINR(data.revenue_month_rupees), 'Revenue This Month', revDelta)}
+      ${analyticsCard('📤', data.subs_7d || 0, 'Task Submissions (7 days)', pctChange(data.subs_7d || 0, data.subs_prev_7d || 0))}
+      ${analyticsCard('🤝', data.enrolled_7d || 0, 'New Enrollments (7 days)', `${(data.shortlisted_students || 0).toLocaleString('en-IN')} shortlisted, waiting to enroll`)}
+      ${analyticsCard('✅', reviewed ? `${data.approval_rate_30d}%` : '—', 'Approval Rate (30 days)', `${data.approved_30d || 0} approved · ${data.rejected_30d || 0} rejected`)}
+      ${analyticsCard('⏳', oldest === null || oldest === undefined ? '—' : `${oldest}d`, 'Oldest Pending Review', `${data.pending_submissions || 0} submissions waiting`)}
+      ${analyticsCard('🏁', data.completed_total || 0, 'Completed All 4 Weeks', 'students with every week approved')}
       ${analyticsCard('🎯', data.eligible_unpaid || 0, 'Eligible but Unpaid', 'finished 3+ weeks, no payment yet — nudge them')}
     `;
   }

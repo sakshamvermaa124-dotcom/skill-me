@@ -176,8 +176,10 @@ class TestBusinessMetrics:
         assert data["speed"]["median_days_to_first_task"] is None
         assert [q["band"] for q in data["quiz_outcomes"]] == ["0-49%", "50-79%", "80-100%"]
         stats = (await client.get("/api/admin/stats", headers=admin_headers)).json()
-        for key in ("apps_today", "apps_7d", "active_7d", "eligible_unpaid", "revenue_month_rupees"):
+        for key in ("apps_today", "apps_7d", "active_7d", "eligible_unpaid", "subs_7d", "enrolled_7d", "completed_total"):
             assert stats[key] == 0
+        assert "revenue_month_rupees" not in stats  # revenue lives on Analytics only
+        assert stats["oldest_pending_days"] is None
 
     async def test_acquisition_groups_by_source_with_paid_rate(self, client, admin_headers):
         from tests.conftest import test_db, seed_batch
@@ -251,13 +253,26 @@ class TestBusinessMetrics:
         stats = (await client.get("/api/admin/stats", headers=admin_headers)).json()
         assert stats["active_7d"] == 1
 
-    async def test_revenue_month_uses_payment_time(self, client, admin_headers):
+    async def test_overview_ops_metrics(self, client, admin_headers):
         from tests.conftest import test_db, seed_batch
         b = await seed_batch(test_db)
-        sid = await self._student("pay@x.com")
-        # order created two months ago, paid now -> belongs to this month
+        done = await self._student("done@x.com")
+        other = await self._student("other@x.com")
+        await test_db.insert("INSERT INTO enrollments (student_id, batch_id) VALUES (?, ?)", (done, b))
+        for w in range(1, 5):
+            await test_db.insert(
+                "INSERT INTO submissions (student_id, batch_id, week, linkedin_url, status, reviewed_at)"
+                " VALUES (?, ?, ?, 'u', 'approved', datetime('now'))", (done, b, w))
         await test_db.insert(
-            "INSERT INTO payments (student_id, batch_id, razorpay_order_id, razorpay_payment_id, amount, status, created_at, updated_at)"
-            " VALUES (?, ?, 'o1', 'pay_Real1', 12900, 'paid', datetime('now', '-62 days'), datetime('now'))", (sid, b))
-        stats = (await client.get("/api/admin/stats", headers=admin_headers)).json()
-        assert stats["revenue_month_rupees"] == 129.0
+            "INSERT INTO submissions (student_id, batch_id, week, linkedin_url, status, reviewed_at)"
+            " VALUES (?, ?, 1, 'u', 'rejected', datetime('now'))", (other, b))
+        await test_db.insert(
+            "INSERT INTO submissions (student_id, batch_id, week, linkedin_url, status, submitted_at)"
+            " VALUES (?, ?, 2, 'u', 'pending', datetime('now', '-3 days'))", (other, b))
+        s = (await client.get("/api/admin/stats", headers=admin_headers)).json()
+        assert s["subs_7d"] == 6
+        assert s["enrolled_7d"] == 1
+        assert s["approved_30d"] == 4 and s["rejected_30d"] == 1
+        assert s["approval_rate_30d"] == 80.0
+        assert s["completed_total"] == 1
+        assert 2.9 <= s["oldest_pending_days"] <= 3.1

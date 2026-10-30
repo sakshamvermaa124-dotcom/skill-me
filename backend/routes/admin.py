@@ -89,10 +89,22 @@ async def get_stats(_: str = Depends(require_admin)):
                 SELECT lower(s.email) FROM submissions sub JOIN students s ON s.id = sub.student_id
                   WHERE datetime(sub.submitted_at) >= datetime('now', '-7 days')
              )) AS active_7d,
-             (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'paid' AND {REAL_PAYMENT_SQL}
-                AND strftime('%Y-%m', updated_at) = strftime('%Y-%m', 'now')) AS revenue_month_paise,
-             (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'paid' AND {REAL_PAYMENT_SQL}
-                AND strftime('%Y-%m', updated_at) = strftime('%Y-%m', 'now', 'start of month', '-1 month')) AS revenue_prev_month_paise,
+             (SELECT COUNT(*) FROM submissions
+                WHERE datetime(submitted_at) >= datetime('now', '-7 days')) AS subs_7d,
+             (SELECT COUNT(*) FROM submissions
+                WHERE datetime(submitted_at) >= datetime('now', '-14 days')
+                  AND datetime(submitted_at) < datetime('now', '-7 days')) AS subs_prev_7d,
+             (SELECT COUNT(*) FROM enrollments
+                WHERE datetime(joined_at) >= datetime('now', '-7 days')) AS enrolled_7d,
+             (SELECT COUNT(*) FROM submissions WHERE status = 'approved'
+                AND datetime(reviewed_at) >= datetime('now', '-30 days')) AS approved_30d,
+             (SELECT COUNT(*) FROM submissions WHERE status = 'rejected'
+                AND datetime(reviewed_at) >= datetime('now', '-30 days')) AS rejected_30d,
+             (SELECT julianday('now') - julianday(MIN(datetime(submitted_at)))
+                FROM submissions WHERE status = 'pending') AS oldest_pending_days,
+             (SELECT COUNT(*) FROM (
+                SELECT student_id FROM submissions WHERE status = 'approved'
+                GROUP BY student_id HAVING COUNT(DISTINCT week) >= {TOTAL_WEEKS})) AS completed_total,
              (SELECT COUNT(*) FROM (
                 SELECT student_id FROM submissions WHERE status = 'approved'
                 GROUP BY student_id HAVING COUNT(DISTINCT week) >= {ELIGIBLE_WEEKS}
@@ -102,10 +114,13 @@ async def get_stats(_: str = Depends(require_admin)):
     ) or {}
     keys = ("total_students", "pending_applications", "shortlisted_students", "enrolled_students",
             "total_alumni", "pending_submissions", "pending_urgent_requests",
-            "apps_today", "apps_7d", "apps_prev_7d", "active_7d", "eligible_unpaid")
+            "apps_today", "apps_7d", "apps_prev_7d", "active_7d", "eligible_unpaid",
+            "subs_7d", "subs_prev_7d", "enrolled_7d", "approved_30d", "rejected_30d", "completed_total")
     out = {k: row.get(k) or 0 for k in keys}
-    out["revenue_month_rupees"] = (row.get("revenue_month_paise") or 0) / 100
-    out["revenue_prev_month_rupees"] = (row.get("revenue_prev_month_paise") or 0) / 100
+    reviewed = out["approved_30d"] + out["rejected_30d"]
+    out["approval_rate_30d"] = _pct(out["approved_30d"], reviewed)
+    oldest = row.get("oldest_pending_days")
+    out["oldest_pending_days"] = round(max(0.0, oldest), 1) if oldest is not None else None
     return out
 
 
