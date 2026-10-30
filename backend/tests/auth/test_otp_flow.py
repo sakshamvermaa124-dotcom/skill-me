@@ -19,6 +19,15 @@ class TestOTPRequest:
         assert data["status"] == "sent"
         assert test_student["email"] in data["message"]
 
+    async def test_new_otp_marks_old_one_superseded_not_used(self, client, test_student):
+        """used=1 means a real login (admin "active people" counts it); a replaced code is 2."""
+        email = test_student["email"]
+        for _ in range(2):
+            r = await client.post("/api/auth/request-otp", json={"email": email})
+            assert r.status_code == 200
+        rows = await test_db.fetch_all("SELECT used FROM otp_tokens WHERE email = ? ORDER BY id", (email,))
+        assert [r["used"] for r in rows] == [2, 0]
+
     async def test_request_otp_unknown_email(self, client):
         """Unknown email should return 404."""
         r = await client.post(

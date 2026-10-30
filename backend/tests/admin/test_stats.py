@@ -243,3 +243,21 @@ class TestBusinessMetrics:
         from tests.conftest import test_db
         res = await test_db.fetch_batch([("SELECT 1 AS a", ()), ("SELECT 2 AS a", ())])
         assert [r[0]["a"] for r in res] == [1, 2]
+
+    async def test_active_people_ignores_superseded_otps(self, client, admin_headers):
+        from tests.conftest import test_db
+        await test_db.insert("INSERT INTO otp_tokens (email, otp_hash, expires_at, used) VALUES ('in@x.com', 'h', '2099-01-01', 1)")
+        await test_db.insert("INSERT INTO otp_tokens (email, otp_hash, expires_at, used) VALUES ('never@x.com', 'h', '2099-01-01', 2)")
+        stats = (await client.get("/api/admin/stats", headers=admin_headers)).json()
+        assert stats["active_7d"] == 1
+
+    async def test_revenue_month_uses_payment_time(self, client, admin_headers):
+        from tests.conftest import test_db, seed_batch
+        b = await seed_batch(test_db)
+        sid = await self._student("pay@x.com")
+        # order created two months ago, paid now -> belongs to this month
+        await test_db.insert(
+            "INSERT INTO payments (student_id, batch_id, razorpay_order_id, razorpay_payment_id, amount, status, created_at, updated_at)"
+            " VALUES (?, ?, 'o1', 'pay_Real1', 12900, 'paid', datetime('now', '-62 days'), datetime('now'))", (sid, b))
+        stats = (await client.get("/api/admin/stats", headers=admin_headers)).json()
+        assert stats["revenue_month_rupees"] == 129.0

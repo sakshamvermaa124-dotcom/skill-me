@@ -90,9 +90,9 @@ async def get_stats(_: str = Depends(require_admin)):
                   WHERE datetime(sub.submitted_at) >= datetime('now', '-7 days')
              )) AS active_7d,
              (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'paid' AND {REAL_PAYMENT_SQL}
-                AND strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')) AS revenue_month_paise,
+                AND strftime('%Y-%m', updated_at) = strftime('%Y-%m', 'now')) AS revenue_month_paise,
              (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE status = 'paid' AND {REAL_PAYMENT_SQL}
-                AND strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now', 'start of month', '-1 month')) AS revenue_prev_month_paise,
+                AND strftime('%Y-%m', updated_at) = strftime('%Y-%m', 'now', 'start of month', '-1 month')) AS revenue_prev_month_paise,
              (SELECT COUNT(*) FROM (
                 SELECT student_id FROM submissions WHERE status = 'approved'
                 GROUP BY student_id HAVING COUNT(DISTINCT week) >= {ELIGIBLE_WEEKS}
@@ -939,11 +939,11 @@ async def get_analytics(fresh: bool = False, _: str = Depends(require_admin)):
              WHERE status = 'pending' AND student_id NOT IN (
                  SELECT student_id FROM payments WHERE status = 'paid' AND {REAL_PAYMENT_SQL})""", ()),
         # 5 — monthly revenue
-        (f"""SELECT strftime('%Y-%m', created_at) AS month,
+        (f"""SELECT strftime('%Y-%m', updated_at) AS month,
                     COUNT(*) AS orders, COALESCE(SUM(amount), 0) AS revenue_paise
              FROM payments
              WHERE status = 'paid' AND {REAL_PAYMENT_SQL}
-               AND created_at >= datetime('now', '-12 months')
+               AND updated_at >= datetime('now', '-12 months')
              GROUP BY month ORDER BY month""", ()),
         # 6 — monthly applications
         ("""SELECT strftime('%Y-%m', created_at) AS month, COUNT(*) AS count

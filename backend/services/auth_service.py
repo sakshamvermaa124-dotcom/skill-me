@@ -83,9 +83,10 @@ async def request_otp(email: str) -> dict:
         "%Y-%m-%d %H:%M:%S"
     )
 
-    # Invalidate any existing unused OTPs for this email
+    # Invalidate any existing unused OTPs for this email. 2 = superseded, distinct from
+    # 1 = actually used to log in, so admin "active people" counts real logins only.
     await db.execute(
-        "UPDATE otp_tokens SET used = 1 WHERE email = ? AND used = 0",
+        "UPDATE otp_tokens SET used = 2 WHERE email = ? AND used = 0",
         (email.lower().strip(),)
     )
 
