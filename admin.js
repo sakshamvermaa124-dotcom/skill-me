@@ -19,6 +19,20 @@ try {
   });
 } catch(e) {}
 
+// ─── THEME COLOURS ───
+// CSS variables can't be used inside <canvas>, so charts read the resolved token values.
+const cssVar = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+function cssColor(name, alpha) {
+  const v = cssVar(name);
+  if (alpha === undefined) return v;
+  const m = /^#([0-9a-f]{6})$/i.exec(v);
+  if (!m) return v;
+  const n = parseInt(m[1], 16);
+  return `rgba(${n >> 16}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+}
+// Translucent version of any CSS colour (including var(--x)) for inline HTML styles.
+const tint = (color, pct) => `color-mix(in srgb, ${color} ${pct}%, transparent)`;
+
 let adminKey = '';
 let allStudents = [];
 let allAlumni = [];
@@ -41,185 +55,6 @@ const PAGE_META = {
   announcements: { title: 'Announcements', subtitle: 'Send platform-wide update emails to students' },
 };
 
-// ═══════════════════════════════════════════════════════════
-// THREE.JS SCENE 2: BACKGROUND 3D VOLCANIC RED LAVA ROCK (#admin-bg-canvas)
-// Real-time 3D Ember Lava Core on Warm Alabaster Surface
-// ═══════════════════════════════════════════════════════════
-let bgScene, bgCamera, bgRenderer, bgMesh, bgParticles;
-
-// Reduced motion: draw the 3D scenes once, never animate them or play the unzip transition.
-const ADMIN_REDUCED_MOTION = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-
-function initAdminBgLattice() {
-  const canvas = document.getElementById('admin-bg-canvas');
-  if (!canvas || typeof THREE === 'undefined') return;
-  // The canvas is hidden via CSS — don't burn GPU on a 60fps loop nobody can see.
-  if (getComputedStyle(canvas).display === 'none') return;
-
-  bgRenderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-  bgRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  bgRenderer.setSize(window.innerWidth, window.innerHeight);
-
-  bgScene = new THREE.Scene();
-  bgCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-  bgCamera.position.set(0, 0, 8);
-
-  // Volcanic Lighting
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
-  bgScene.add(ambientLight);
-
-  const redLight = new THREE.PointLight(0xff2a4b, 4, 12);
-  redLight.position.set(3, 3, 4);
-  bgScene.add(redLight);
-
-  const amberLight = new THREE.PointLight(0xffb703, 3, 10);
-  amberLight.position.set(-3, -3, 3);
-  bgScene.add(amberLight);
-
-  // Faceted 3D Crimson Lava Crystal Core Geometry
-  const geo = new THREE.IcosahedronGeometry(3.0, 1);
-  const mat = new THREE.MeshStandardMaterial({
-    color: 0xc1121f,
-    roughness: 0.15,
-    metalness: 0.8,
-    emissive: 0xff2a4b,
-    emissiveIntensity: 0.75,
-    flatShading: true
-  });
-
-  bgMesh = new THREE.Mesh(geo, mat);
-  bgMesh.position.set(2.8, -0.2, 0); // Positioned on the right alabaster half matching EMBER split view
-  bgScene.add(bgMesh);
-
-  // Outer glowing wireframe crystal shell
-  const wireGeo = new THREE.IcosahedronGeometry(3.3, 1);
-  const wireMat = new THREE.MeshBasicMaterial({
-    color: 0xff2a4b, wireframe: true, transparent: true, opacity: 0.6
-  });
-  bgMesh.add(new THREE.Mesh(wireGeo, wireMat));
-
-  // Floating amber droplets
-  const particleCount = 120;
-  const pGeo = new THREE.BufferGeometry();
-  const pPos = new Float32Array(particleCount * 3);
-  for (let i = 0; i < particleCount; i++) {
-    pPos[i * 3]     = (Math.random() - 0.5) * 12;
-    pPos[i * 3 + 1] = (Math.random() - 0.5) * 12;
-    pPos[i * 3 + 2] = (Math.random() - 0.5) * 6;
-  }
-  pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-  const pMat = new THREE.PointsMaterial({
-    color: 0xffb703, size: 0.06, transparent: true, opacity: 0.85,
-    blending: THREE.AdditiveBlending, depthWrite: false
-  });
-  bgParticles = new THREE.Points(pGeo, pMat);
-  bgScene.add(bgParticles);
-
-  // Mouse tracking
-  let mouseX = 0, mouseY = 0;
-  window.addEventListener('mousemove', (e) => {
-    mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
-    mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
-  });
-
-  const clock = new THREE.Clock();
-  function animateBg() {
-    if (!ADMIN_REDUCED_MOTION) requestAnimationFrame(animateBg);
-    const t = clock.getElapsedTime();
-
-    bgMesh.rotation.y = t * 0.2;
-    bgMesh.rotation.x = Math.sin(t * 0.18) * 0.15;
-    bgParticles.rotation.y = -t * 0.08;
-
-    bgCamera.position.x += (mouseX * 0.4 - bgCamera.position.x) * 0.04;
-    bgCamera.position.y += (-mouseY * 0.4 - bgCamera.position.y) * 0.04;
-    bgCamera.lookAt(0, 0, 0);
-
-    bgRenderer.render(bgScene, bgCamera);
-  }
-  animateBg();
-
-  window.addEventListener('resize', () => {
-    bgRenderer.setSize(window.innerWidth, window.innerHeight);
-    bgCamera.aspect = window.innerWidth / window.innerHeight;
-    bgCamera.updateProjectionMatrix();
-  });
-}
-
-// ═══════════════════════════════════════════════════════════
-// SIGNATURE 3D PLANE "UNZIP & REVEAL" TRANSITION ON LOGIN
-// ═══════════════════════════════════════════════════════════
-let isUnzipping = false;
-
-function playUnzipTransition(callback) {
-  if (isUnzipping) {
-    if (callback) callback();
-    return;
-  }
-  isUnzipping = true;
-
-  const canvas = document.getElementById('unzip-canvas');
-  const overlay = document.getElementById('login-overlay');
-  const card = document.querySelector('.center-login-card');
-  const leftPanel = document.querySelector('.split-left');
-  const rightPanel = document.querySelector('.split-right');
-
-  if (ADMIN_REDUCED_MOTION || !canvas || typeof THREE === 'undefined' || typeof gsap === 'undefined') {
-    isUnzipping = false;
-    if (callback) callback();
-    return;
-  }
-
-  canvas.style.opacity = '1';
-  const W = window.innerWidth;
-  const H = window.innerHeight;
-
-  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(W, H);
-
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(50, W / H, 0.1, 100);
-  camera.position.z = 5;
-
-  const planeGeo = new THREE.PlaneGeometry(14, 0.12, 32, 1);
-  const planeMat = new THREE.MeshBasicMaterial({ color: 0xff2a4b, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
-  const planeMesh = new THREE.Mesh(planeGeo, planeMat);
-  planeMesh.position.y = 4;
-  scene.add(planeMesh);
-
-  let animId;
-  function renderUnzip() {
-    animId = requestAnimationFrame(renderUnzip);
-    renderer.render(scene, camera);
-  }
-  renderUnzip();
-
-  const laserSeam = document.querySelector('.laser-seam');
-
-  const tl = gsap.timeline({
-    onComplete: () => {
-      cancelAnimationFrame(animId);
-      canvas.style.opacity = '0';
-      overlay.style.display = 'none';
-      renderer.dispose();
-      isUnzipping = false;
-      if (callback) callback();
-    }
-  });
-
-  if (card) tl.to(card, { opacity: 0, scale: 0.85, duration: 0.25, ease: 'power2.in' });
-  if (laserSeam) tl.to(laserSeam, { opacity: 0, duration: 0.15, ease: 'power2.out' }, '<');
-  tl.to(planeMesh.position, { y: -4, duration: 0.8, ease: 'power2.inOut' }, '-=0.1');
-
-  if (leftPanel && rightPanel) {
-    tl.to(leftPanel, { x: '-100%', duration: 0.8, ease: 'power3.inOut' }, '-=0.7');
-    tl.to(rightPanel, { x: '100%', duration: 0.8, ease: 'power3.inOut' }, '-=0.8');
-  } else {
-    tl.to(overlay, { opacity: 0, duration: 0.5 }, '-=0.5');
-  }
-}
-
 // ─── AUTH ───
 async function handleLogin(e) {
   if (e && e.preventDefault) e.preventDefault();
@@ -227,7 +62,6 @@ async function handleLogin(e) {
 }
 
 async function adminLogin() {
-  if (isUnzipping) return;
   const keyInput = document.getElementById('admin-key-input') || document.getElementById('api-key-input');
   const key = keyInput ? keyInput.value.trim() : '';
   const errEl = document.getElementById('login-error');
@@ -244,7 +78,7 @@ async function adminLogin() {
     });
     if (res.status === 403) {
       if (errEl) errEl.textContent = 'Invalid admin passkey. Please try again.';
-      if (btn) { btn.disabled = false; btn.textContent = 'ACCESS CONSOLE →'; }
+      if (btn) { btn.disabled = false; btn.textContent = 'Access console →'; }
       return;
     }
     if (!res.ok) {
@@ -255,264 +89,13 @@ async function adminLogin() {
     sessionStorage.setItem('skillme_admin_key', key);
 
     showApp(await res.json().catch(() => null));
-    if (btn) { btn.disabled = false; btn.textContent = 'ACCESS CONSOLE →'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Access console →'; }
 
-    try {
-      playUnzipTransition();
-    } catch(e) {}
   } catch (e) {
     console.error("Admin login error:", e);
     if (errEl) errEl.textContent = e.message || 'Could not connect to backend.';
-    if (btn) { btn.disabled = false; btn.textContent = 'ACCESS CONSOLE →'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Access console →'; }
   }
-}
-
-// ═══════════════════════════════════════════════════════════
-// THREE.JS SCENE: INTERIOR 3D RED LAVA ROCK (#interior-lava-canvas)
-// Real-time 3D Volcanic Ember Core on Interior Alabaster Panel
-// ═══════════════════════════════════════════════════════════
-let intLavaScene, intLavaCamera, intLavaRenderer, intLavaMesh, intLavaParticles;
-
-function initInteriorLavaRock() {
-  const canvas = document.getElementById('interior-lava-canvas');
-  if (!canvas || typeof THREE === 'undefined') return;
-  canvas.style.display = 'none';
-  return;
-
-  const container = canvas.parentElement;
-  const W = () => container.offsetWidth || Math.floor(window.innerWidth * 0.45);
-  const H = () => container.offsetHeight || window.innerHeight;
-
-  intLavaRenderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-  intLavaRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  intLavaRenderer.setSize(W(), H());
-
-  intLavaScene = new THREE.Scene();
-  intLavaCamera = new THREE.PerspectiveCamera(45, W() / H(), 0.1, 100);
-  intLavaCamera.position.set(0, 0, 5.2);
-
-  // Volcanic Lighting
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
-  intLavaScene.add(ambientLight);
-
-  const redLight = new THREE.PointLight(0xff2a4b, 3.5, 10);
-  redLight.position.set(2, 2, 3);
-  intLavaScene.add(redLight);
-
-  const amberLight = new THREE.PointLight(0xffb703, 2.5, 8);
-  amberLight.position.set(-2, -2, 2);
-  intLavaScene.add(amberLight);
-
-  // 3D Organic Lava Rock Geometry with vertex noise displacement
-  const geo = new THREE.IcosahedronGeometry(1.5, 2);
-  const pos = geo.attributes.position;
-  for (let i = 0; i < pos.count; i++) {
-    const v = new THREE.Vector3().fromBufferAttribute(pos, i);
-    const noise = (Math.sin(v.x * 3) + Math.cos(v.y * 3) + Math.sin(v.z * 3)) * 0.12;
-    v.multiplyScalar(1 + noise);
-    pos.setXYZ(i, v.x, v.y, v.z);
-  }
-  geo.computeVertexNormals();
-
-  const mat = new THREE.MeshStandardMaterial({
-    color: 0x1c0c11,
-    roughness: 0.35,
-    metalness: 0.6,
-    emissive: 0x900c1e,
-    emissiveIntensity: 0.55,
-  });
-
-  intLavaMesh = new THREE.Mesh(geo, mat);
-  intLavaScene.add(intLavaMesh);
-
-  // Outer wireframe shell
-  const wireGeo = new THREE.IcosahedronGeometry(1.65, 1);
-  const wireMat = new THREE.MeshBasicMaterial({
-    color: 0xff2a4b, wireframe: true, transparent: true, opacity: 0.22
-  });
-  intLavaMesh.add(new THREE.Mesh(wireGeo, wireMat));
-
-  // Floating amber droplets
-  const particleCount = 70;
-  const pGeo = new THREE.BufferGeometry();
-  const pPos = new Float32Array(particleCount * 3);
-  for (let i = 0; i < particleCount; i++) {
-    pPos[i * 3]     = (Math.random() - 0.5) * 5;
-    pPos[i * 3 + 1] = (Math.random() - 0.5) * 5;
-    pPos[i * 3 + 2] = (Math.random() - 0.5) * 3;
-  }
-  pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-  const pMat = new THREE.PointsMaterial({
-    color: 0xffb703, size: 0.045, transparent: true, opacity: 0.85,
-    blending: THREE.AdditiveBlending, depthWrite: false
-  });
-  intLavaParticles = new THREE.Points(pGeo, pMat);
-  intLavaScene.add(intLavaParticles);
-
-  // Mouse tracking
-  let mouseX = 0, mouseY = 0;
-  window.addEventListener('mousemove', (e) => {
-    mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
-    mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
-  });
-
-  const clock = new THREE.Clock();
-  function animateInteriorLava() {
-    if (!canvas.parentElement || canvas.offsetParent === null) return;
-    if (!ADMIN_REDUCED_MOTION) requestAnimationFrame(animateInteriorLava);
-    const t = clock.getElapsedTime();
-
-    intLavaMesh.rotation.y = t * 0.22;
-    intLavaMesh.rotation.x = Math.sin(t * 0.2) * 0.12;
-    intLavaParticles.rotation.y = -t * 0.1;
-
-    intLavaCamera.position.x += (mouseX * 0.3 - intLavaCamera.position.x) * 0.03;
-    intLavaCamera.position.y += (-mouseY * 0.3 - intLavaCamera.position.y) * 0.03;
-    intLavaCamera.lookAt(0, 0, 0);
-
-    intLavaRenderer.render(intLavaScene, intLavaCamera);
-  }
-
-  animateInteriorLava();
-
-  window.addEventListener('resize', () => {
-    if (!container) return;
-    intLavaRenderer.setSize(W(), H());
-    intLavaCamera.aspect = W() / H();
-    intLavaCamera.updateProjectionMatrix();
-  });
-}
-
-// ═══════════════════════════════════════════════════════════
-// THREE.JS REAL-TIME 3D VOLCANIC LAVA / EMBER CORE CRYSTAL
-// Dedicated Canvas (#admin-3d-canvas) over Warm Alabaster Surface
-// ═══════════════════════════════════════════════════════════
-let admin3DScene, admin3DCamera, admin3DRenderer, admin3DMesh, admin3DParticles;
-
-function initAdmin3DCrystalEngine() {
-  const canvas = document.getElementById('admin-3d-canvas');
-  if (!canvas || typeof THREE === 'undefined') return;
-  canvas.style.display = 'none';
-  return;
-
-  const W = () => Math.floor(window.innerWidth - 280);
-  const H = () => window.innerHeight;
-
-  admin3DRenderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: "high-performance" });
-  admin3DRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  admin3DRenderer.setSize(W(), H());
-
-  admin3DScene = new THREE.Scene();
-  admin3DCamera = new THREE.PerspectiveCamera(45, W() / H(), 0.1, 100);
-  admin3DCamera.position.set(0, 0, 7.0);
-
-  // Volcanic Volumetric Lighting
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.95);
-  admin3DScene.add(ambientLight);
-
-  const crimsonPointLight = new THREE.PointLight(0xff2a4b, 5, 16);
-  crimsonPointLight.position.set(2, 3, 4);
-  admin3DScene.add(crimsonPointLight);
-
-  const amberPointLight = new THREE.PointLight(0xffb703, 4, 12);
-  amberPointLight.position.set(-2, -3, 3);
-  admin3DScene.add(amberPointLight);
-
-  // Load Texture for Real-time 3D Lava Rock
-  const textureLoader = new THREE.TextureLoader();
-  const lavaTexture = textureLoader.load('lava_rock_texture.webp', (tex) => {
-    tex.wrapS = THREE.RepeatWrapping;
-    tex.wrapT = THREE.RepeatWrapping;
-    tex.minFilter = THREE.LinearFilter;
-    tex.magFilter = THREE.LinearFilter;
-  });
-
-  // 3D Volcanic Lava Core Crystal Geometry with organic vertex noise displacement
-  const geo = new THREE.IcosahedronGeometry(2.2, 3);
-  const pos = geo.attributes.position;
-  for (let i = 0; i < pos.count; i++) {
-    const v = new THREE.Vector3().fromBufferAttribute(pos, i);
-    const noise = (Math.sin(v.x * 2.2) + Math.cos(v.y * 2.2) + Math.sin(v.z * 2.2)) * 0.25;
-    v.multiplyScalar(1 + noise);
-    pos.setXYZ(i, v.x, v.y, v.z);
-  }
-  geo.computeVertexNormals();
-
-  const mat = new THREE.MeshStandardMaterial({
-    map: lavaTexture,
-    bumpMap: lavaTexture,
-    bumpScale: 0.15,
-    emissiveMap: lavaTexture,
-    emissive: 0xff2a4b,
-    emissiveIntensity: 0.65,
-    roughness: 0.35,
-    metalness: 0.4,
-  });
-
-  admin3DMesh = new THREE.Mesh(geo, mat);
-  admin3DMesh.position.set(0.1, 0, 0); // Shifted left to sit in the exact center of content area
-  admin3DScene.add(admin3DMesh);
-
-  // Outer glowing wireframe crystal shell
-  const wireGeo = new THREE.IcosahedronGeometry(2.45, 1);
-  const wireMat = new THREE.MeshBasicMaterial({
-    color: 0xff2a4b, wireframe: true, transparent: true, opacity: 0.45
-  });
-  admin3DMesh.add(new THREE.Mesh(wireGeo, wireMat));
-
-  // 150 Orbiting Liquid Amber Droplets
-  const particleCount = 150;
-  const pGeo = new THREE.BufferGeometry();
-  const pPos = new Float32Array(particleCount * 3);
-  for (let i = 0; i < particleCount; i++) {
-    pPos[i * 3]     = (Math.random() - 0.5) * 10;
-    pPos[i * 3 + 1] = (Math.random() - 0.5) * 10;
-    pPos[i * 3 + 2] = (Math.random() - 0.5) * 5;
-  }
-  pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-  const pMat = new THREE.PointsMaterial({
-    color: 0xffb703, size: 0.055, transparent: true, opacity: 0.9,
-    blending: THREE.AdditiveBlending, depthWrite: false
-  });
-  admin3DParticles = new THREE.Points(pGeo, pMat);
-  admin3DScene.add(admin3DParticles);
-
-  // Smooth Emil Kowalski Mouse Parallax Tracking (Physics Damping)
-  let targetMouseX = 0, targetMouseY = 0;
-  let currentMouseX = 0, currentMouseY = 0;
-
-  window.addEventListener('mousemove', (e) => {
-    targetMouseX = (e.clientX / window.innerWidth - 0.5) * 2;
-    targetMouseY = (e.clientY / window.innerHeight - 0.5) * 2;
-  });
-
-  const clock = new THREE.Clock();
-  function render3DCrystalLoop() {
-    if (!ADMIN_REDUCED_MOTION) requestAnimationFrame(render3DCrystalLoop);
-    const t = clock.getElapsedTime();
-
-    admin3DMesh.rotation.y = t * 0.22;
-    admin3DMesh.rotation.x = Math.sin(t * 0.2) * 0.16;
-    admin3DParticles.rotation.y = -t * 0.1;
-
-    // Sub-300ms responsive spring physics lerp factor (0.05 damping)
-    currentMouseX += (targetMouseX - currentMouseX) * 0.05;
-    currentMouseY += (targetMouseY - currentMouseY) * 0.05;
-
-    admin3DCamera.position.x = currentMouseX * 0.6;
-    admin3DCamera.position.y = -currentMouseY * 0.6;
-    admin3DCamera.lookAt(0, 0, 0);
-
-    admin3DRenderer.render(admin3DScene, admin3DCamera);
-  }
-
-  render3DCrystalLoop();
-
-  window.addEventListener('resize', () => {
-    admin3DRenderer.setSize(W(), H());
-    admin3DCamera.aspect = W() / H();
-    admin3DCamera.updateProjectionMatrix();
-  });
 }
 
 function showApp(prefetchedStats) {
@@ -531,8 +114,6 @@ function showApp(prefetchedStats) {
   // only start the render loops, clock and data fetches once.
   if (appStarted) return;
   appStarted = true;
-  try { initAdminBgLattice(); } catch(e) {}
-  try { initAdmin3DCrystalEngine(); } catch(e) {}
   loadOverview(prefetchedStats);
 }
 
@@ -542,19 +123,15 @@ function logoutAdmin() {
   const overlay = document.getElementById('login-overlay');
   const app = document.getElementById('app');
   if (overlay) {
-    overlay.style.display = 'flex';
-    overlay.style.clipPath = 'none';
+    overlay.style.display = 'grid';
     overlay.style.opacity = '1';
+    overlay.style.pointerEvents = '';
     overlay.classList.remove('hidden');
-    const left = document.querySelector('.split-left');
-    const right = document.querySelector('.split-right');
-    const card = document.querySelector('.center-login-card');
-    if (left) left.style.transform = 'none';
-    if (right) right.style.transform = 'none';
-    if (card) { card.style.opacity = '1'; card.style.transform = 'translate(-50%, -50%) scale(1)'; }
   }
   if (app) app.style.display = 'none';
 }
+
+window.addEventListener('themechange', () => { if (currentPage === 'analytics') loadAnalytics(); });
 
 document.addEventListener('DOMContentLoaded', () => {
   localStorage.removeItem('skillme_admin_key'); // older sessions kept the key forever
@@ -686,10 +263,10 @@ function pctChange(now, prev) {
 function renderStats(data) {
   const grid = document.getElementById('stats-grid');
   grid.innerHTML = `
-    ${statCard('👥', data.total_students, 'Total Students', 'rgba(201,154,78,0.12)', '#c99a4e')}
-    ${statCard('📋', data.pending_applications, 'Pending Applications', 'rgba(201,154,78,0.15)', '#d8ac63')}
-    ${statCard('🟢', data.enrolled_students, 'Enrolled Students', 'rgba(79,163,107,0.15)', '#4fa36b')}
-    ${statCard('📝', data.pending_submissions, 'Pending Submissions', 'rgba(181,135,61,0.15)', '#b5873d')}
+    ${statCard('👥', data.total_students, 'Total Students', 'var(--accent-wash)', 'var(--accent-text)')}
+    ${statCard('📋', data.pending_applications, 'Pending Applications', 'var(--accent-wash)', 'var(--accent-text)')}
+    ${statCard('🟢', data.enrolled_students, 'Enrolled Students', 'var(--ok-wash)', 'var(--ok)')}
+    ${statCard('📝', data.pending_submissions, 'Pending Submissions', 'var(--accent-wash)', 'var(--accent-text)')}
   `;
   const pulse = document.getElementById('pulse-grid');
   if (pulse && data.apps_7d !== undefined) {
@@ -734,18 +311,18 @@ function studentActions(s, { compact = false } = {}) {
   const email = jsArg(s.email);
   const btns = [];
   if (s.status === 'applied') {
-    btns.push(`<button class="btn btn-sm" style="background:rgba(201,154,78,0.12);color:#c99a4e;border:1px solid rgba(201,154,78,0.22);" onclick="updateStatus(${s.id},'shortlisted', this)">Shortlist</button>`);
+    btns.push(`<button class="btn btn-sm btn-tone-accent" onclick="updateStatus(${s.id},'shortlisted', this)">Shortlist</button>`);
   }
   if (['applied', 'shortlisted', 'dropped'].includes(s.status)) {
-    btns.push(`<button class="btn btn-sm" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.25);" onclick="enrollStudent(${s.id}, ${name}, this)">${s.status === 'dropped' ? 'Re-enroll' : 'Enroll'}</button>`);
+    btns.push(`<button class="btn btn-sm btn-tone-ok" onclick="enrollStudent(${s.id}, ${name}, this)">${s.status === 'dropped' ? 'Re-enroll' : 'Enroll'}</button>`);
   }
   if (!compact && ['enrolled', 'completed'].includes(s.status) && s.batch_id) {
-    btns.push(`<button class="btn btn-sm" style="background:rgba(212,168,83,0.15);color:#d4a853;border:1px solid rgba(212,168,83,0.3);" onclick="issueCertificate(${s.id}, ${Number(s.batch_id)}, ${name})">🏅 Certificate</button>`);
+    btns.push(`<button class="btn btn-sm btn-tone-accent" onclick="issueCertificate(${s.id}, ${Number(s.batch_id)}, ${name})">🏅 Certificate</button>`);
   }
   if (!compact && s.status !== 'dropped') {
-    btns.push(`<button class="btn btn-sm" style="background:rgba(251,113,133,0.12);color:#fb7185;border:1px solid rgba(251,113,133,0.2);" onclick="dropStudent(${s.id}, ${name}, this)">Drop</button>`);
+    btns.push(`<button class="btn btn-sm btn-tone-danger" onclick="dropStudent(${s.id}, ${name}, this)">Drop</button>`);
   }
-  btns.push(`<button class="btn btn-sm" style="background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.25);" onclick="deleteStudent(${s.id}, ${name}, ${email})" title="Permanently delete entire record from database">🗑️${compact ? '' : ' Delete'}</button>`);
+  btns.push(`<button class="btn btn-sm btn-tone-danger" onclick="deleteStudent(${s.id}, ${name}, ${email})" title="Permanently delete entire record from database">🗑️${compact ? '' : ' Delete'}</button>`);
   return `<div style="display:flex;gap:6px;flex-wrap:wrap;">${btns.join('')}</div>`;
 }
 
@@ -896,7 +473,7 @@ function renderStudents(students) {
     <tr>
       <td>
         <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#c99a4e,#b5873d);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;flex-shrink:0;">${esc(((s.first_name || '?')[0] || '?').toUpperCase())}</div>
+          <div class="avatar">${esc(((s.first_name || '?')[0] || '?').toUpperCase())}</div>
           <div>
             <div style="font-weight:500;">${esc(s.first_name)} ${esc(s.last_name)}</div>
             ${s.college ? `<div style="font-size:0.72rem;color:var(--text-muted);">${esc(s.college)}</div>` : ''}
@@ -968,7 +545,7 @@ function renderAlumni(alumni) {
     <tr>
       <td>
         <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#34d399,#059669);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;flex-shrink:0;">${esc(((s.first_name || '?')[0] || '?').toUpperCase())}</div>
+          <div class="avatar is-ok">${esc(((s.first_name || '?')[0] || '?').toUpperCase())}</div>
           <div>
             <div style="font-weight:500;">${esc(s.first_name)} ${esc(s.last_name)}</div>
             ${s.college ? `<div style="font-size:0.72rem;color:var(--text-muted);">${esc(s.college)}</div>` : ''}
@@ -977,12 +554,12 @@ function renderAlumni(alumni) {
       </td>
       <td style="color:var(--text-secondary);font-size:0.82rem;">${esc(s.email)}</td>
       <td>${esc(s.domain || '—')}</td>
-      <td><span style="padding:4px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.3);color:#34d399;">✓ Paid</span></td>
+      <td><span style="padding:4px 10px;border-radius:20px;font-size:0.72rem;font-weight:600;background:var(--ok-wash);border:1px solid var(--ok-line);color:var(--ok);">✓ Paid</span></td>
       <td style="color:var(--text-muted);font-size:0.82rem;">${fmtDate(s.paid_at || s.created_at)}</td>
       <td>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          ${s.batch_id ? `<button class="btn btn-sm" style="background:rgba(212,168,83,0.15);color:#d4a853;border:1px solid rgba(212,168,83,0.3);" onclick="issueCertificate(${s.id}, ${Number(s.batch_id)}, ${name})">🏅 Certificate</button>` : ''}
-          <button class="btn btn-sm" style="background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.25);" onclick="deleteStudent(${s.id}, ${name}, ${jsArg(s.email)})" title="Permanently delete entire record from database">🗑️ Delete</button>
+          ${s.batch_id ? `<button class="btn btn-sm btn-tone-accent" onclick="issueCertificate(${s.id}, ${Number(s.batch_id)}, ${name})">🏅 Certificate</button>` : ''}
+          <button class="btn btn-sm btn-tone-danger" onclick="deleteStudent(${s.id}, ${name}, ${jsArg(s.email)})" title="Permanently delete entire record from database">🗑️ Delete</button>
         </div>
       </td>
     </tr>`;
@@ -1066,15 +643,15 @@ async function loadEmailStatus() {
     // Try sending a test via a simple health ping to the backend
     const res = await fetch(`${API}/api/admin/stats`, { headers: { 'X-Admin-Key': adminKey } });
     if (res.ok) {
-      badge.style.background = 'rgba(52,211,153,0.15)';
-      badge.style.borderColor = 'rgba(52,211,153,0.3)';
-      badge.style.color = '#34d399';
+      badge.style.background = 'var(--ok-wash)';
+      badge.style.borderColor = 'var(--ok-line)';
+      badge.style.color = 'var(--ok)';
       badge.textContent = '\u25cf Email Enabled';
     }
   } catch(e) {
-    badge.style.background = 'rgba(251,113,133,0.15)';
-    badge.style.borderColor = 'rgba(251,113,133,0.3)';
-    badge.style.color = '#fb7185';
+    badge.style.background = 'var(--danger-wash)';
+    badge.style.borderColor = 'var(--danger-line)';
+    badge.style.color = 'var(--danger)';
     badge.textContent = '\u25cf Offline';
   }
   // Show from email from .env config — we can infer from backend info
@@ -1088,7 +665,7 @@ async function sendTestEmail() {
   const email = input.value.trim();
   if (!email || !email.includes('@')) {
     result.style.display = 'block';
-    result.style.color = '#fb7185';
+    result.style.color = 'var(--danger)';
     result.textContent = '\u274c Please enter a valid email address.';
     return;
   }
@@ -1102,16 +679,16 @@ async function sendTestEmail() {
     });
     result.style.display = 'block';
     if (data.status === 'sent') {
-      result.style.color = '#34d399';
+      result.style.color = 'var(--ok)';
       result.textContent = `\u2705 Test email sent successfully to ${email}! Check your inbox.`;
       toast('Test email sent!');
     } else {
-      result.style.color = '#fb7185';
+      result.style.color = 'var(--danger)';
       result.textContent = `\u274c ${data.message || 'Failed to send email. Check SMTP credentials.'}`;
     }
   } catch(e) {
     result.style.display = 'block';
-    result.style.color = '#fb7185';
+    result.style.color = 'var(--danger)';
     result.textContent = `\u274c ${e.message}`;
   } finally {
     btn.textContent = 'Send Test';
@@ -1158,10 +735,10 @@ function renderEmailDirectory(students) {
   }
   tbody.innerHTML = students.map(s => {
     const bounced = s.emails_bounced > 0
-      ? `<span style="color:#fb7185;font-weight:700;">${s.emails_bounced}</span>`
+      ? `<span style="color:var(--danger);font-weight:700;">${s.emails_bounced}</span>`
       : `<span style="color:var(--text-secondary);">0</span>`;
     const failed = s.emails_failed > 0
-      ? `<span style="color:#f59e0b;font-weight:700;">${s.emails_failed}</span>`
+      ? `<span style="color:var(--warn);font-weight:700;">${s.emails_failed}</span>`
       : `<span style="color:var(--text-secondary);">0</span>`;
     return `
     <tr>
@@ -1229,8 +806,8 @@ function renderEmailLogs(logs) {
   }
   tbody.innerHTML = logs.map(l => {
     const statusChip = l.status === 'sent'
-      ? `<span style="color:#34d399;font-weight:600;">Sent</span>`
-      : `<span style="color:#fb7185;font-weight:600;" title="${esc(l.error_message || '')}">Failed</span>`;
+      ? `<span style="color:var(--ok);font-weight:600;">Sent</span>`
+      : `<span style="color:var(--danger);font-weight:600;" title="${esc(l.error_message || '')}">Failed</span>`;
     const engagement = [];
     if (l.delivered_at) engagement.push('📬 Delivered');
     if (l.opened_at) engagement.push(`👁️ Opened${l.opened_count > 1 ? ' x' + l.opened_count : ''}`);
@@ -1265,18 +842,18 @@ async function loadEmailAggStats() {
   try {
     const s = await api('/api/admin/email/stats');
     const chip = (label, value, color) => `
-      <div style="padding:10px 16px;border-radius:8px;background:${color}1a;border:1px solid ${color}4d;font-size:0.8rem;min-width:110px;">
+      <div style="padding:10px 16px;border-radius:8px;background:${tint(color,10)};border:1px solid ${tint(color,30)};font-size:0.8rem;min-width:110px;">
         <div style="color:var(--text-secondary);font-size:0.68rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">${label}</div>
         <div style="color:${color};font-weight:700;font-size:1.05rem;">${(value ?? 0).toLocaleString()}</div>
       </div>`;
     el.innerHTML = [
-      chip('Total Sent', s.total, '#c99a4e'),
-      chip('Delivered', s.delivered, '#34d399'),
-      chip('Opened', s.opened, '#38bdf8'),
-      chip('Clicked', s.clicked, '#818cf8'),
-      chip('Failed', s.failed, '#fb7185'),
-      chip('Bounced', s.bounced, '#f59e0b'),
-      chip('Spam Reports', s.spam_reported, '#ef4444'),
+      chip('Total Sent', s.total, 'var(--accent-text)'),
+      chip('Delivered', s.delivered, 'var(--ok)'),
+      chip('Opened', s.opened, 'var(--info)'),
+      chip('Clicked', s.clicked, 'var(--violet)'),
+      chip('Failed', s.failed, 'var(--danger)'),
+      chip('Bounced', s.bounced, 'var(--warn)'),
+      chip('Spam Reports', s.spam_reported, 'var(--danger)'),
     ].join('');
   } catch(e) {
     el.innerHTML = `<div class="empty-state-text" style="font-size:0.8rem;">${esc(e.message)}</div>`;
@@ -1321,14 +898,14 @@ function renderSubmissions(submissions) {
       </td>
       <td style="color:var(--text-secondary);font-size:0.82rem;">${esc(s.email || '—')}</td>
       <td>Week ${Number(s.week) || '—'}</td>
-      <td>${safeUrl(s.linkedin_url) ? `<a href="${safeUrl(s.linkedin_url)}" target="_blank" rel="noopener noreferrer" style="color:#38bdf8;">View Post ↗</a>` : esc(s.linkedin_url || '—')}</td>
+      <td>${safeUrl(s.linkedin_url) ? `<a href="${safeUrl(s.linkedin_url)}" target="_blank" rel="noopener noreferrer" style="color:var(--info);">View Post ↗</a>` : esc(s.linkedin_url || '—')}</td>
       <td style="color:var(--text-muted);font-size:0.8rem;">${fmtDate(s.submitted_at)}</td>
       <td>${statusBadge(s.status)}</td>
       <td>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           ${s.status === 'pending' ? `
-            <button class="btn btn-sm" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.3);" onclick="approveSubmission(${s.id})">✅ Approve</button>
-            <button class="btn btn-sm" style="background:rgba(251,113,133,0.15);color:#fb7185;border:1px solid rgba(251,113,133,0.3);" onclick="rejectSubmission(${s.id})">❌ Reject</button>
+            <button class="btn btn-sm btn-tone-ok" onclick="approveSubmission(${s.id})">✅ Approve</button>
+            <button class="btn btn-sm btn-tone-danger" onclick="rejectSubmission(${s.id})">❌ Reject</button>
           ` : '—'}
         </div>
       </td>
@@ -1480,8 +1057,8 @@ function renderUrgentRequests(requests) {
       <td>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           ${r.status === 'pending' ? `
-            <button class="btn btn-sm" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.3);" onclick="fulfillUrgentRequest(${r.id})">✅ Fulfill</button>
-            <button class="btn btn-sm" style="background:rgba(251,113,133,0.15);color:#fb7185;border:1px solid rgba(251,113,133,0.3);" onclick="rejectUrgentRequest(${r.id})">❌ Reject</button>
+            <button class="btn btn-sm btn-tone-ok" onclick="fulfillUrgentRequest(${r.id})">✅ Fulfill</button>
+            <button class="btn btn-sm btn-tone-danger" onclick="rejectUrgentRequest(${r.id})">❌ Reject</button>
           ` : '—'}
         </div>
       </td>
@@ -1600,9 +1177,9 @@ async function loadInactiveStudents() {
 
     // Stats card
     if (statsEl) {
-      statsEl.innerHTML = `<div style="padding:10px 16px;border-radius:8px;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.25);font-size:0.8rem;min-width:140px;">
+      statsEl.innerHTML = `<div style="padding:10px 16px;border-radius:8px;background:var(--warn-wash);border:1px solid var(--warn-line);font-size:0.8rem;min-width:140px;">
         <div style="color:var(--text-secondary);font-size:0.72rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Inactive Students</div>
-        <div style="color:#f59e0b;font-weight:700;font-size:1.1rem;">${count}</div>
+        <div style="color:var(--warn);font-weight:700;font-size:1.1rem;">${count}</div>
       </div>`;
     }
 
@@ -1617,17 +1194,17 @@ async function loadInactiveStudents() {
         <td style="font-weight:600;">${esc(s.first_name)} ${esc(s.last_name)}</td>
         <td style="font-size:0.82rem;color:var(--text-secondary);">${esc(s.email)}</td>
         <td>${esc(s.domain || '—')}</td>
-        <td><span style="background:rgba(245,158,11,0.15);color:#f59e0b;padding:3px 10px;border-radius:6px;font-size:0.78rem;font-weight:700;">Week ${s.week_due}</span></td>
-        <td style="color:#f87171;font-weight:600;">${s.days_inactive} days</td>
+        <td><span style="background:var(--warn-wash);color:var(--warn);padding:3px 10px;border-radius:6px;font-size:0.78rem;font-weight:700;">Week ${s.week_due}</span></td>
+        <td style="color:var(--danger);font-weight:600;">${s.days_inactive} days</td>
         <td>${s.completed_tasks}/4</td>
         <td style="font-size:0.82rem;color:var(--text-secondary);">${lastAct}</td>
-        <td><button class="btn" style="padding:4px 8px;font-size:0.75rem;background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);" onclick="confirmSendReminders(${s.student_id})">Send</button></td>
+        <td><button class="btn" style="padding:4px 8px;font-size:0.75rem;background:var(--warn-wash);color:var(--warn);border:1px solid var(--warn-line);" onclick="confirmSendReminders(${s.student_id})">Send</button></td>
       </tr>`;
     }).join('');
 
     if (sendBtn) sendBtn.disabled = false;
   } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#f87171;padding:30px;">Failed to load: ${err.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--danger);padding:30px;">Failed to load: ${err.message}</td></tr>`;
   }
 }
 
@@ -1707,15 +1284,15 @@ function _drawChart(canvasId, config) {
   _analyticsCharts[canvasId] = new Chart(canvas.getContext('2d'), config);
 }
 
-const CHART_BASE_OPTIONS = {
+const chartBase = () => ({
   responsive: true,
   maintainAspectRatio: false,
-  plugins: { legend: { labels: { color: 'rgba(244,235,225,0.75)', boxWidth: 12, font: { size: 11 } } } },
+  plugins: { legend: { labels: { color: cssColor('--text-2'), boxWidth: 12, font: { size: 11 } } } },
   scales: {
-    x: { ticks: { color: 'rgba(244,235,225,0.55)', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
-    y: { ticks: { color: 'rgba(244,235,225,0.55)', font: { size: 10 }, precision: 0 }, grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true },
+    x: { ticks: { color: cssColor('--text-3'), font: { size: 10 } }, grid: { color: cssColor('--line') } },
+    y: { ticks: { color: cssColor('--text-3'), font: { size: 10 }, precision: 0 }, grid: { color: cssColor('--line') }, beginAtZero: true },
   },
-};
+});
 
 const fmtINR = n => `₹${Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
 
@@ -1782,16 +1359,16 @@ function renderWeeklyCompletionChart(weekly) {
     data: {
       labels: weekly.map(w => `Week ${w.week}`),
       datasets: [
-        { label: 'Approved', data: weekly.map(w => w.approved), backgroundColor: '#34d399', borderRadius: 4 },
-        { label: 'Pending review', data: weekly.map(w => w.pending), backgroundColor: '#f59e0b', borderRadius: 4 },
-        { label: 'Rejected', data: weekly.map(w => w.rejected), backgroundColor: '#fb7185', borderRadius: 4 },
+        { label: 'Approved', data: weekly.map(w => w.approved), backgroundColor: cssColor('--ok'), borderRadius: 4 },
+        { label: 'Pending review', data: weekly.map(w => w.pending), backgroundColor: cssColor('--warn'), borderRadius: 4 },
+        { label: 'Rejected', data: weekly.map(w => w.rejected), backgroundColor: cssColor('--danger'), borderRadius: 4 },
       ],
     },
     options: {
-      ...CHART_BASE_OPTIONS,
+      ...chartBase(),
       scales: {
-        x: { ...CHART_BASE_OPTIONS.scales.x, stacked: true },
-        y: { ...CHART_BASE_OPTIONS.scales.y, stacked: true },
+        x: { ...chartBase().scales.x, stacked: true },
+        y: { ...chartBase().scales.y, stacked: true },
       },
     },
   });
@@ -1804,9 +1381,9 @@ function renderRevenue(r) {
   }
 
   const TIER_META = {
-    full:       { label: 'Full price',    color: '#4fa36b' },
-    discounted: { label: 'Discount code', color: '#38bdf8' },
-    legacy:     { label: 'Older price',   color: '#818cf8' },
+    full:       { label: 'Full price',    color: 'var(--ok)' },
+    discounted: { label: 'Discount code', color: 'var(--info)' },
+    legacy:     { label: 'Older price',   color: 'var(--violet)' },
   };
   const tiersEl = document.getElementById('analytics-revenue-tiers');
   if (tiersEl) {
@@ -1814,7 +1391,7 @@ function renderRevenue(r) {
     tiersEl.innerHTML = tiers.length ? tiers.map(t => {
       const m = TIER_META[t.kind] || TIER_META.legacy;
       return `
-        <div style="padding:10px 14px;border-radius:8px;background:${m.color}1a;border:1px solid ${m.color}4d;font-size:0.8rem;min-width:150px;">
+        <div style="padding:10px 14px;border-radius:8px;background:${tint(m.color,10)};border:1px solid ${tint(m.color,30)};font-size:0.8rem;min-width:150px;">
           <div style="color:var(--text-secondary);font-size:0.68rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">${m.label} · ${fmtINR(t.price_rupees)}</div>
           <div style="color:${m.color};font-weight:700;font-size:1.05rem;">${fmtINR(t.revenue_rupees)}</div>
           <div style="color:var(--text-muted);font-size:0.72rem;">${t.orders} order${t.orders === 1 ? '' : 's'}</div>
@@ -1835,10 +1412,10 @@ function renderRevenue(r) {
     type: 'bar',
     data: {
       labels: trend.map(t => _monthLabel(t.month)),
-      datasets: [{ label: 'Revenue (₹)', data: trend.map(t => t.revenue_rupees), backgroundColor: '#4fa36b', borderRadius: 4 }],
+      datasets: [{ label: 'Revenue (₹)', data: trend.map(t => t.revenue_rupees), backgroundColor: cssColor('--ok'), borderRadius: 4 }],
     },
     options: {
-      ...CHART_BASE_OPTIONS,
+      ...chartBase(),
       plugins: {
         legend: { display: false },
         tooltip: { callbacks: { label: ctx => `${fmtINR(ctx.parsed.y)} · ${trend[ctx.dataIndex].orders} orders` } },
@@ -1853,13 +1430,13 @@ function renderDomainBreakdownChart(domains) {
     data: {
       labels: domains.map(d => d.label),
       datasets: [
-        { label: 'Applicants', data: domains.map(d => d.total), backgroundColor: 'rgba(201,154,78,0.55)', borderRadius: 4 },
-        { label: 'Started', data: domains.map(d => d.started), backgroundColor: '#38bdf8', borderRadius: 4 },
-        { label: 'Completed', data: domains.map(d => d.completed), backgroundColor: '#34d399', borderRadius: 4 },
-        { label: 'Paid', data: domains.map(d => d.paid), backgroundColor: '#818cf8', borderRadius: 4 },
+        { label: 'Applicants', data: domains.map(d => d.total), backgroundColor: cssColor('--accent', 0.55), borderRadius: 4 },
+        { label: 'Started', data: domains.map(d => d.started), backgroundColor: cssColor('--info'), borderRadius: 4 },
+        { label: 'Completed', data: domains.map(d => d.completed), backgroundColor: cssColor('--ok'), borderRadius: 4 },
+        { label: 'Paid', data: domains.map(d => d.paid), backgroundColor: cssColor('--violet'), borderRadius: 4 },
       ],
     },
-    options: { ...CHART_BASE_OPTIONS, indexAxis: 'y' },
+    options: { ...chartBase(), indexAxis: 'y' },
   });
 }
 
@@ -1871,13 +1448,13 @@ function renderApplicationsTrendChart(trend) {
       datasets: [{
         label: 'Applications',
         data: trend.map(t => t.count),
-        borderColor: '#c99a4e',
-        backgroundColor: 'rgba(201,154,78,0.15)',
+        borderColor: cssColor('--accent'),
+        backgroundColor: cssColor('--accent', 0.15),
         fill: true,
         tension: 0.35,
       }],
     },
-    options: { ...CHART_BASE_OPTIONS, plugins: { legend: { display: false } } },
+    options: { ...chartBase(), plugins: { legend: { display: false } } },
   });
 }
 
@@ -1892,8 +1469,8 @@ function renderDomainTable(domains) {
     const rate = d.completion_rate || 0;
     const rateCell = d.started
       ? `<div style="display:flex;align-items:center;gap:8px;">
-           <div style="flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,0.08);overflow:hidden;">
-             <div style="width:${Math.min(rate, 100)}%;height:100%;background:#34d399;"></div>
+           <div style="flex:1;height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden;">
+             <div style="width:${Math.min(rate, 100)}%;height:100%;background:var(--ok);"></div>
            </div>
            <span style="font-size:0.78rem;color:var(--text-secondary);min-width:40px;">${rate}%</span>
          </div>`
@@ -1902,10 +1479,10 @@ function renderDomainTable(domains) {
     <tr>
       <td><div style="font-weight:600;">${esc(d.label)}</div><div style="font-size:0.7rem;color:var(--text-muted);">${esc(d.domain)}</div></td>
       <td>${d.total}</td>
-      <td style="color:#38bdf8;">${d.started}</td>
-      <td style="color:#34d399;">${d.completed}</td>
+      <td style="color:var(--info);">${d.started}</td>
+      <td style="color:var(--ok);">${d.completed}</td>
       <td>${d.certified}</td>
-      <td style="color:#818cf8;">${d.paid}</td>
+      <td style="color:var(--violet);">${d.paid}</td>
       <td>${fmtINR(d.revenue_rupees)}</td>
       <td>${rateCell}</td>
     </tr>`;
@@ -1928,9 +1505,9 @@ function renderGrowth(g, rev) {
     type: 'bar',
     data: {
       labels: daily.map(d => new Date(d.day + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })),
-      datasets: [{ label: 'Applications', data: daily.map(d => d.count), backgroundColor: '#c99a4e', borderRadius: 3 }],
+      datasets: [{ label: 'Applications', data: daily.map(d => d.count), backgroundColor: cssColor('--accent'), borderRadius: 3 }],
     },
-    options: { ...CHART_BASE_OPTIONS, plugins: { legend: { display: false } } },
+    options: { ...chartBase(), plugins: { legend: { display: false } } },
   });
 }
 
@@ -1944,8 +1521,8 @@ function _funnelRows(rows, emptyText, withPaidRate) {
     <tr>
       <td style="font-weight:500;">${esc(r.label)}</td>
       <td>${r.total}</td>
-      <td style="color:#38bdf8;">${r.started} <span style="color:var(--text-muted);font-size:0.72rem;">(${r.started_rate}%)</span></td>
-      <td style="color:#818cf8;">${r.paid}</td>
+      <td style="color:var(--info);">${r.started} <span style="color:var(--text-muted);font-size:0.72rem;">(${r.started_rate}%)</span></td>
+      <td style="color:var(--violet);">${r.paid}</td>
       ${withPaidRate ? `<td>${r.paid_rate}%</td>` : ''}
     </tr>`).join('');
 }
@@ -1977,12 +1554,12 @@ function renderAudience(a) {
     data: {
       labels: years.map(y => y.label),
       datasets: [
-        { label: 'Applicants', data: years.map(y => y.total), backgroundColor: 'rgba(201,154,78,0.55)', borderRadius: 4 },
-        { label: 'Started', data: years.map(y => y.started), backgroundColor: '#38bdf8', borderRadius: 4 },
-        { label: 'Paid', data: years.map(y => y.paid), backgroundColor: '#818cf8', borderRadius: 4 },
+        { label: 'Applicants', data: years.map(y => y.total), backgroundColor: cssColor('--accent', 0.55), borderRadius: 4 },
+        { label: 'Started', data: years.map(y => y.started), backgroundColor: cssColor('--info'), borderRadius: 4 },
+        { label: 'Paid', data: years.map(y => y.paid), backgroundColor: cssColor('--violet'), borderRadius: 4 },
       ],
     },
-    options: CHART_BASE_OPTIONS,
+    options: chartBase(),
   });
 }
 
@@ -1990,7 +1567,7 @@ function renderSpeed(sp, rev) {
   const el = document.getElementById('analytics-speed-grid');
   if (!el) return;
   const chip = (label, value, note, color) => `
-    <div style="padding:10px 14px;border-radius:8px;background:${color}1a;border:1px solid ${color}4d;font-size:0.8rem;min-width:170px;flex:1;">
+    <div style="padding:10px 14px;border-radius:8px;background:${tint(color,10)};border:1px solid ${tint(color,30)};font-size:0.8rem;min-width:170px;flex:1;">
       <div style="color:var(--text-secondary);font-size:0.68rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">${label}</div>
       <div style="color:${color};font-weight:700;font-size:1.05rem;">${value}</div>
       <div style="color:var(--text-muted);font-size:0.72rem;">${note}</div>
@@ -1998,11 +1575,11 @@ function renderSpeed(sp, rev) {
   const none = v => v === null || v === undefined;
   const days = v => none(v) ? '—' : `${v} day${v === 1 ? '' : 's'}`;
   el.innerHTML = [
-    chip('Apply → first task', days(sp.median_days_to_first_task), 'median', '#38bdf8'),
-    chip('Apply → payment', days(sp.median_days_to_payment), 'median', '#818cf8'),
-    chip('Review turnaround', none(sp.avg_review_hours) ? '—' : `${sp.avg_review_hours} h`, 'average, submission to decision', '#34d399'),
-    chip('Review backlog', `${sp.pending_reviews || 0} pending`, none(sp.oldest_pending_days) ? 'nothing waiting' : `oldest waiting ${days(sp.oldest_pending_days)}`, '#f59e0b'),
-    chip('Eligible but unpaid', `${rev.eligible_unpaid || 0} students`, 'finished 3+ weeks, not paid yet', '#fb7185'),
+    chip('Apply → first task', days(sp.median_days_to_first_task), 'median', 'var(--info)'),
+    chip('Apply → payment', days(sp.median_days_to_payment), 'median', 'var(--violet)'),
+    chip('Review turnaround', none(sp.avg_review_hours) ? '—' : `${sp.avg_review_hours} h`, 'average, submission to decision', 'var(--ok)'),
+    chip('Review backlog', `${sp.pending_reviews || 0} pending`, none(sp.oldest_pending_days) ? 'nothing waiting' : `oldest waiting ${days(sp.oldest_pending_days)}`, 'var(--warn)'),
+    chip('Eligible but unpaid', `${rev.eligible_unpaid || 0} students`, 'finished 3+ weeks, not paid yet', 'var(--danger)'),
   ].join('');
 }
 
@@ -2017,8 +1594,8 @@ function renderQuizOutcomes(rows) {
     <tr>
       <td style="font-weight:500;">${esc(r.band)}</td>
       <td>${r.total}</td>
-      <td style="color:#34d399;">${r.completion_rate}%</td>
-      <td style="color:#818cf8;">${r.paid_rate}%</td>
+      <td style="color:var(--ok);">${r.completion_rate}%</td>
+      <td style="color:var(--violet);">${r.paid_rate}%</td>
     </tr>`).join('');
 }
 
