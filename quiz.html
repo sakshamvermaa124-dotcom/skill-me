@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light" class="no-js">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,7 +13,17 @@
   <meta name="language" content="English">
   <meta name="geo.region" content="IN">
   <meta name="geo.placename" content="India">
-  <meta name="theme-color" content="#0c0b0b">
+  <meta name="theme-color" content="#ffffff">
+  <script>
+    (function () {
+      var t;
+      try { t = localStorage.getItem('skillme-theme'); } catch (e) {}
+      if (t !== 'light' && t !== 'dark') {
+        t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
 
   <!-- Canonical URL -->
   <link rel="canonical" href="https://www.skill-me-intern.in/quiz">
@@ -38,10 +48,12 @@
   <link rel="apple-touch-icon" href="assets/logo.png">
   <link rel="manifest" href="site.webmanifest">
 
-  <!-- Fonts & Resource Hints -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <!-- Fonts + shared design system -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="theme.css?v=20261011_ds1">
+  <script src="theme.js?v=20261011_ds1" defer></script>
 
   <!-- Structured Data Graph (Breadcrumbs & Screening Assessment Quiz) -->
   <script type="application/ld+json">
@@ -82,601 +94,382 @@
   }
   </script>
   <style>
-    :root {
-      --bg: #0c0b0b;
-      --surface: #141313;
-      --surface2: #181717;
-      --border: rgba(235,230,224,0.07);
-      --border-gold: rgba(201,154,78,0.25);
-      --gold: #c99a4e;
-      --gold-light: #d8ac63;
-      --purple: #c99a4e;
-      --blue: #b5873d;
-      --green: #4fa36b;
-      --red: #c85555;
-      --text: #ebe6e0;
-      --text-muted: #a39f99;
-      --text-dim: #5e5852;
-    }
-    
-    [data-theme="light"] {
-      --bg: #fafafa;
-      --surface: #ffffff;
-      --surface2: #f4f4f5;
-      --border: rgba(0,0,0,0.1);
-      --border-gold: rgba(201,154,78,0.4);
-      --text: #171717;
-      --text-muted: #525252;
-    }
+    /* ── Quiz page (page-specific; tokens come from theme.css) ── */
+    body { display: flex; flex-direction: column; }
+    .quiz-nav .container { gap: 16px; }
+    .quiz-nav .brand-tag { white-space: nowrap; }
+    .exit-link { gap: 6px; }
+    @media (max-width: 480px) { .quiz-nav .brand-tag { display: none; } }
 
-    [data-theme="light"] .theme-icon#sun-icon { display: none; }
-    [data-theme="dark"] .theme-icon#moon-icon { display: none; }
-    
-    
-    
-    
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+    .quiz-main { flex: 1; width: 100%; padding: clamp(28px, 5vw, 56px) 0 clamp(40px, 6vw, 72px); }
+    .quiz-wrap { max-width: 880px; }
 
-    /* ── Orbs ── */
-    .orb {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(100px);
-      pointer-events: none;
-      z-index: 0;
-      animation: orb-drift 12s ease-in-out infinite alternate;
-    }
-    .orb-1 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(201,154,78,0.06) 0%, transparent 70%); top: -150px; left: -100px; }
-    .orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(181,135,61,0.05) 0%, transparent 70%); bottom: 0; right: -100px; animation-delay: -6s; }
-    .orb-3 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(201,154,78,0.04) 0%, transparent 70%); top: 50%; left: 50%; transform: translate(-50%,-50%); }
-    @keyframes orb-drift { from { transform: translateY(0) scale(1); } to { transform: translateY(-30px) scale(1.05); } }
+    /* Screens */
+    .screen { display: none; }
+    .screen.active { display: block; animation: screenIn 0.45s var(--ease); }
+    @keyframes screenIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
-    /* ── Layout ── */
-    .shell {
-      position: relative;
-      z-index: 1;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    /* ── Welcome ── */
+    .welcome-head { max-width: 640px; margin-bottom: 28px; }
+    .welcome-head .eyebrow { margin-bottom: 14px; }
+    .welcome-head .lead { margin-top: 14px; }
+    .facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+    .fact {
+      display: inline-flex; align-items: center; gap: 8px;
+      height: 32px; padding: 0 12px;
+      border: 1px solid var(--line); border-radius: var(--r-full);
+      background: var(--surface-2);
+      font-size: 0.82rem; color: var(--text-2);
     }
+    .fact svg { color: var(--accent-text); }
+    .fact b { font-family: var(--font-mono); font-weight: 500; color: var(--text); }
 
-    /* ── Nav ── */
-    nav {
-      width: 100%;
-      padding: 14px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--border);
-    }
-    .logo { font-size: 20px; font-weight: 800; color: var(--text); text-decoration: none; }
-    .logo span { color: var(--gold); }
-    .brand-logo-img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--gold); flex-shrink: 0; }
-    .nav-badge { font-size: 12px; padding: 4px 12px; border-radius: 20px; background: rgba(212,168,83,0.1); border: 1px solid var(--border-gold); color: var(--gold); font-weight: 600; letter-spacing: 0.06em; }
+    .picker-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 34px 0 14px; }
+    .picker-head h2 { font-size: 1.05rem; letter-spacing: -0.02em; font-weight: 600; line-height: 1.3; }
+    .picker-head .step-num { font-family: var(--font-mono); font-weight: 500; color: var(--accent-text); margin-right: 8px; }
+    .picker-head .subtle { font-size: 0.82rem; }
 
-    /* ── Main container ── */
-    .main {
-      flex: 1;
-      width: 100%;
-      max-width: 780px;
-      padding: 20px 24px 40px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    /* ── Screens ── */
-    .screen { width: 100%; display: none; animation: fadeUp 0.4s ease; }
-    .screen.active { display: flex; flex-direction: column; align-items: center; }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* ── Screen: Welcome ── */
-    .welcome-icon {
-      font-size: 36px;
-      margin-bottom: 8px;
-      animation: pulse-soft 3s ease-in-out infinite;
-    }
-    @keyframes pulse-soft { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
-    .welcome-title { font-size: 26px; font-weight: 800; text-align: center; margin-bottom: 6px; line-height: 1.2; }
-    .welcome-title .hl { color: var(--gold); }
-    .welcome-sub { font-size: 13px; color: var(--text-muted); text-align: center; margin-bottom: 14px; line-height: 1.6; max-width: 480px; }
-    .info-chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 16px; }
-    .chip { display: flex; align-items: center; gap: 5px; padding: 5px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 40px; font-size: 11px; color: var(--text-muted); }
-    .chip span { font-size: 13px; }
-
-    /* ── Domain picker ── */
-    .section-label { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); font-weight: 600; margin-bottom: 10px; text-align: center; }
-    .domain-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      margin-bottom: 16px;
-      width: 100%;
-    }
+    .domain-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+    @media (max-width: 860px) { .domain-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 620px) { .domain-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } }
     .domain-card {
+      position: relative;
+      display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; gap: 6px;
+      min-height: 92px; width: 100%;
+      padding: 14px 14px 14px;
+      text-align: left;
+      border-radius: var(--r-md);
+      border: 1px solid var(--line-strong);
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 6px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 72px;
+      color: var(--text);
+      transition: border-color 0.15s, background-color 0.15s, box-shadow 0.2s var(--ease), transform 0.2s var(--ease);
     }
-    .domain-card:hover { border-color: rgba(201,154,78,0.5); background: rgba(201,154,78,0.06); transform: translateY(-2px); }
-    .domain-card.selected { border-color: var(--gold); background: rgba(201,154,78,0.12); box-shadow: 0 0 16px rgba(201,154,78,0.2); }
-    .domain-card .icon { font-size: 20px; margin-bottom: 4px; }
-    .domain-card .label { font-size: 11px; font-weight: 600; color: var(--text); line-height: 1.2; }
-.domain-card .sublabel { font-size: 9px; color: var(--text-muted); margin-top: 2px; }
-    .domain-card .status-badge { font-size: 8px; font-weight: 700; padding: 2px 7px; border-radius: 10px; margin-top: 4px; letter-spacing: 0.06em; text-transform: uppercase; }
-    .domain-card .status-badge.open { background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
-    .domain-card .status-badge.soon { background: rgba(100,116,139,0.15); color: #94a3b8; border: 1px solid rgba(100,116,139,0.3); }
+    .domain-card:hover { border-color: var(--text-3); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+    .domain-card .dc-name { font-size: 0.92rem; font-weight: 600; letter-spacing: -0.015em; line-height: 1.25; padding-right: 22px; }
+    .domain-card .dc-stack { font-family: var(--font-mono); font-size: 0.7rem; line-height: 1.45; color: var(--text-3); }
+    .domain-card .dc-check {
+      position: absolute; top: 12px; right: 12px;
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 1.5px solid var(--line-strong);
+      display: grid; place-items: center;
+      color: var(--primary-fg);
+      transition: background-color 0.15s, border-color 0.15s;
+    }
+    .domain-card .dc-check svg { opacity: 0; transform: scale(0.6); transition: opacity 0.15s, transform 0.2s var(--ease); }
+    .domain-card.selected { border-color: var(--primary); background: var(--primary-wash); box-shadow: 0 0 0 1px var(--primary); transform: none; }
+    .domain-card.selected .dc-check { background: var(--primary); border-color: var(--primary); }
+    .domain-card.selected .dc-check svg { opacity: 1; transform: none; }
+    .domain-card:focus-visible { outline-offset: 2px; border-radius: var(--r-md); }
     .domain-card.disabled { opacity: 0.55; cursor: not-allowed; }
-    .domain-card.disabled:hover { transform: none; border-color: var(--border); background: var(--surface); }
 
-    /* ── Start button ── */
-    .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 15px 36px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, var(--gold), var(--gold-light));
-      color: #0a0a12;
-      font-size: 15px;
-      font-weight: 700;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      letter-spacing: 0.02em;
+    /* Sticky start bar */
+    .start-bar {
+      position: sticky; bottom: 0; z-index: 20;
+      margin-top: 24px;
+      padding: 14px 0 calc(14px + env(safe-area-inset-bottom));
+      background: linear-gradient(to bottom, transparent, var(--bg) 22%);
     }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(212,168,83,0.3); }
-    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
-    .btn-secondary {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 28px;
-      border-radius: 10px;
-      background: transparent;
-      border: 1px solid var(--border-gold);
-      color: var(--gold);
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
+    .start-bar-inner {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      padding: 12px 12px 12px 18px;
+      border: 1px solid var(--line); border-radius: var(--r-lg);
+      background: var(--surface);
+      box-shadow: var(--shadow-md);
     }
-    .btn-secondary:hover { background: rgba(212,168,83,0.08); transform: translateY(-1px); }
+    .start-status { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+    .start-status .ss-label { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
+    .start-status .ss-value { font-weight: 600; font-size: 0.95rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .start-status .ss-value.is-empty { color: var(--text-2); font-weight: 500; }
+    .status-link { display: block; margin-top: 14px; text-align: center; font-size: 0.88rem; color: var(--text-2); }
+    .status-link a { color: var(--text); font-weight: 600; text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 3px; }
+    .status-link a:hover { color: var(--primary); text-decoration-color: currentColor; }
+    @media (max-width: 520px) {
+      .start-bar-inner { padding: 10px 10px 10px 14px; gap: 10px; }
+      .start-bar-inner .btn { height: 46px; padding: 0 16px; }
+    }
 
-    /* ── Screen: Question ── */
-    .progress-bar-wrap { width: 100%; margin-bottom: 32px; }
-    .progress-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .progress-label { font-size: 13px; color: var(--text-muted); }
-    .progress-count { font-size: 13px; font-weight: 600; color: var(--purple); }
-    .progress-track { width: 100%; height: 4px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
-    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--purple), var(--blue)); border-radius: 4px; transition: width 0.4s ease; }
+    /* ── Question ── */
+    .q-shell { max-width: 720px; margin: 0 auto; }
+    .q-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; min-height: 34px; }
+    .q-domain { font-size: 0.86rem; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .q-domain b { color: var(--text); font-weight: 600; }
+    .progress-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 10px; font-family: var(--font-mono); font-size: 0.8rem; }
+    .progress-label { color: var(--text); font-weight: 500; }
+    .progress-count { color: var(--accent-text); font-weight: 500; }
+    .progress-track { width: 100%; height: 6px; background: var(--surface-3); border-radius: var(--r-full); overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: var(--r-full); transition: width 0.5s var(--ease); }
 
-    .q-category { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); font-weight: 600; margin-bottom: 12px; }
-    .q-text { font-size: 22px; font-weight: 700; line-height: 1.4; margin-bottom: 32px; }
-    .q-options { display: flex; flex-direction: column; gap: 12px; width: 100%; margin-bottom: 28px; }
+    .q-card { margin-top: 26px; padding: clamp(22px, 4vw, 34px); }
+    .q-category { margin-bottom: 12px; }
+    .q-text { font-size: clamp(1.25rem, 2.6vw, 1.6rem); letter-spacing: -0.025em; line-height: 1.3; font-weight: 650; margin-bottom: 24px; outline: none; }
+    .q-options { display: flex; flex-direction: column; gap: 10px; }
     .q-option {
       width: 100%;
+      min-height: 60px;
       text-align: left;
-      padding: 16px 20px;
-      border-radius: 12px;
-      background: var(--surface);
-      border: 1px solid var(--border);
+      font-size: 0.98rem; line-height: 1.4;
       color: var(--text);
-      font-size: 15px;
-      cursor: pointer;
-      transition: all 0.18s ease;
-      display: flex;
-      align-items: center;
+      padding: 14px 16px 14px 14px;
       gap: 14px;
-      font-family: 'Inter', sans-serif;
+      transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s, transform 0.15s var(--ease);
     }
-    .q-option:hover:not(:disabled) { border-color: rgba(129,140,248,0.4); background: rgba(129,140,248,0.06); }
-    .q-option .opt-letter {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 700;
-      flex-shrink: 0;
-      color: var(--text-muted);
-      transition: all 0.18s ease;
+    .q-option:hover:not(:disabled) { background: var(--surface-2); }
+    .q-option:active:not(:disabled) { transform: scale(0.995); }
+    .q-option .opt-key {
+      width: 30px; height: 30px; flex-shrink: 0;
+      display: grid; place-items: center;
+      border-radius: var(--r-sm);
+      border: 1px solid var(--line-strong);
+      background: var(--surface-2);
+      font-family: var(--font-mono); font-size: 0.8rem; font-weight: 500;
+      color: var(--text-2);
+      transition: background-color 0.15s, border-color 0.15s, color 0.15s;
     }
-    .q-option.selected { border-color: var(--purple); background: rgba(129,140,248,0.1); }
-    .q-option.selected .opt-letter { background: var(--purple); color: #fff; border-color: var(--purple); }
-    .q-option.correct { border-color: var(--green); background: rgba(52,211,153,0.1); }
-    .q-option.correct .opt-letter { background: var(--green); color: #fff; border-color: var(--green); }
-    .q-option.wrong { border-color: var(--red); background: rgba(248,113,113,0.08); }
-    .q-option.wrong .opt-letter { background: var(--red); color: #fff; border-color: var(--red); }
-    .q-option:disabled { cursor: not-allowed; }
-    .q-option.correct:disabled { opacity: 1; }
-    .q-option.wrong:disabled { opacity: 0.7; }
+    .q-option .opt-text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+    .q-option .opt-mark { flex-shrink: 0; display: none; }
+    .q-option:disabled { cursor: default; }
+    .q-option:disabled:not(.correct):not(.wrong) { opacity: 0.55; }
+    .q-option.correct { border-color: var(--ok); background: var(--ok-wash); box-shadow: 0 0 0 1px var(--ok); }
+    .q-option.correct .opt-key { background: var(--ok); border-color: var(--ok); color: var(--bg); }
+    .q-option.correct .opt-mark.is-ok { display: block; color: var(--ok); }
+    .q-option.wrong { border-color: var(--danger); background: var(--danger-wash); box-shadow: 0 0 0 1px var(--danger); }
+    .q-option.wrong .opt-key { background: var(--danger); border-color: var(--danger); color: var(--bg); }
+    .q-option.wrong .opt-mark.is-bad { display: block; color: var(--danger); }
 
-    .next-btn-wrap { display: flex; justify-content: flex-end; width: 100%; }
+    .q-feedback { min-height: 24px; margin-top: 16px; font-size: 0.9rem; font-weight: 500; }
+    .q-feedback.ok { color: var(--ok); }
+    .q-feedback.bad { color: var(--danger); }
+    .q-foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); }
+    .kbd-hint { font-size: 0.8rem; color: var(--text-3); }
+    kbd {
+      display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 5px;
+      border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 5px;
+      background: var(--surface-2);
+      font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-2);
+    }
+    @media (hover: none), (max-width: 620px) { .kbd-hint { display: none; } .q-foot { justify-content: flex-end; } }
+    @media (max-width: 520px) {
+      .q-card { margin-top: 20px; }
+      .q-option { min-height: 56px; font-size: 0.95rem; }
+      .q-foot .btn { width: 100%; }
+    }
 
-    /* ── Screen: Result ── */
+    /* ── Result ── */
+    .result-shell { max-width: 640px; margin: 0 auto; }
+    .result-card { padding: clamp(28px, 5vw, 44px); text-align: center; display: flex; flex-direction: column; align-items: center; }
     .result-ring {
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-      border: 4px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      margin-bottom: 28px;
+      --pct: 0%;
       position: relative;
-      overflow: hidden;
+      width: 148px; height: 148px; border-radius: 50%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      margin-bottom: 24px;
     }
     .result-ring::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      background: conic-gradient(var(--gold) var(--pct, 0%), var(--surface2) 0%);
-      mask: radial-gradient(circle, transparent 52%, black 53%);
-      -webkit-mask: radial-gradient(circle, transparent 52%, black 53%);
+      content: ''; position: absolute; inset: 0; border-radius: 50%;
+      background: conic-gradient(var(--accent) var(--pct), var(--surface-3) 0);
+      -webkit-mask: radial-gradient(circle, transparent 60%, #000 61%);
+      mask: radial-gradient(circle, transparent 60%, #000 61%);
     }
-    .result-score { font-size: 36px; font-weight: 800; color: var(--text); position: relative; z-index: 1; }
-    .result-total { font-size: 14px; color: var(--text-muted); position: relative; z-index: 1; }
-    .result-title { font-size: 30px; font-weight: 800; text-align: center; margin-bottom: 10px; }
-    .result-sub { font-size: 15px; color: var(--text-muted); text-align: center; margin-bottom: 12px; line-height: 1.7; max-width: 500px; }
-    .result-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 20px;
-      border-radius: 30px;
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 36px;
-    }
-    .result-badge.pass { background: rgba(52,211,153,0.12); border: 1px solid rgba(52,211,153,0.3); color: var(--green); }
-    .result-badge.try-harder { background: rgba(212,168,83,0.1); border: 1px solid var(--border-gold); color: var(--gold); }
-    .result-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .result-score { position: relative; font-family: var(--font-mono); font-size: 2.6rem; font-weight: 600; line-height: 1; color: var(--text); letter-spacing: -0.04em; }
+    .result-total { position: relative; margin-top: 4px; font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-3); }
+    .result-badge { margin-bottom: 14px; }
+    .result-title { font-size: clamp(1.7rem, 4vw, 2.2rem); letter-spacing: -0.035em; outline: none; }
+    .result-sub { margin-top: 10px; max-width: 480px; color: var(--text-2); }
+    .result-actions { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 28px; }
+    .result-actions .btn-primary { min-width: 280px; }
+    .result-next { margin-top: 6px; font-size: 0.82rem; color: var(--text-3); }
+    @media (max-width: 520px) { .result-actions .btn-primary { min-width: 0; width: 100%; } }
 
-    /* ── Breakdown ── */
-    .breakdown { width: 100%; margin: 28px 0; }
-    .breakdown-title { font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); font-weight: 600; margin-bottom: 14px; }
-    .breakdown-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      margin-bottom: 8px;
-      font-size: 14px;
-    }
-    .breakdown-q { flex: 1; color: var(--text-muted); margin-right: 12px; }
-    .breakdown-result { font-size: 16px; }
+    .breakdown { margin-top: 20px; }
+    .breakdown-title { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+    .breakdown-title h3 { font-size: 0.95rem; font-weight: 600; letter-spacing: -0.01em; }
+    .breakdown-list { display: flex; flex-direction: column; gap: 8px; list-style: none; }
+    .breakdown-item { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; }
+    .breakdown-item .bi-num { flex-shrink: 0; width: 24px; font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-3); padding-top: 2px; }
+    .breakdown-item .bi-body { flex: 1; min-width: 0; }
+    .breakdown-q { font-size: 0.92rem; font-weight: 500; color: var(--text); line-height: 1.4; }
+    .breakdown-a { margin-top: 4px; font-size: 0.82rem; color: var(--text-2); overflow-wrap: anywhere; }
+    .breakdown-a .ok { color: var(--ok); } .breakdown-a .bad { color: var(--danger); }
+    .breakdown-result { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; }
+    .breakdown-result.ok { background: var(--ok-wash); color: var(--ok); }
+    .breakdown-result.bad { background: var(--danger-wash); color: var(--danger); }
 
-    @media (max-width: 768px) {
-      nav { padding: 14px 20px; }
-      .main { padding: 36px 16px 60px; }
-      .welcome-title { font-size: 28px; }
-      .welcome-sub { font-size: 15px; }
-      .domain-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-      .domain-card { padding: 14px 10px; }
-      .domain-card .icon { font-size: 22px; }
-      .q-text { font-size: 19px; }
-      .info-chips { gap: 8px; }
-      .chip { font-size: 12px; padding: 7px 14px; }
-      .result-title { font-size: 24px; }
-      .result-sub { font-size: 14px; }
-    }
-    @media (max-width: 480px) {
-      nav { padding: 12px 16px; }
-      .nav-badge { font-size: 11px; padding: 4px 10px; }
-      .main { padding: 28px 14px 60px; }
-      .welcome-icon { font-size: 44px; }
-      .welcome-title { font-size: 24px; }
-      .welcome-sub { font-size: 14px; margin-bottom: 24px; }
-      .info-chips { flex-direction: row; flex-wrap: wrap; }
-      .domain-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-      .domain-card { padding: 12px 8px; }
-      .domain-card .label { font-size: 12px; }
-      .domain-card .sublabel { font-size: 10px; }
-      .btn-primary { padding: 14px 28px; font-size: 14px; width: 100%; justify-content: center; }
-      .q-text { font-size: 17px; margin-bottom: 20px; }
-      .q-option { padding: 14px 16px; font-size: 14px; }
-      .q-option .opt-letter { width: 26px; height: 26px; }
-      .result-ring { width: 120px; height: 120px; }
-      .result-score { font-size: 30px; }
-      .result-title { font-size: 22px; }
-      .result-actions { flex-direction: column; align-items: stretch; }
-      .result-actions .btn-primary,
-      .result-actions .btn-secondary { width: 100%; justify-content: center; }
-      .breakdown-item { flex-direction: column; gap: 6px; }
-      .breakdown-q { margin-right: 0; }
-    }
-
-    /* LinkedIn Prerequisite Banner */
-    .quiz-linkedin-prereq {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      background: linear-gradient(135deg, rgba(10, 102, 194, 0.1) 0%, rgba(20, 19, 19, 0.95) 100%);
-      border: 1px solid rgba(10, 102, 194, 0.3);
-      padding: 14px 18px;
-      border-radius: 12px;
-      margin-bottom: 24px;
-      max-width: 500px;
-      width: 100%;
-      text-align: left;
-    }
-    .quiz-linkedin-icon {
-      width: 34px;
-      height: 34px;
-      border-radius: 8px;
-      background: rgba(10, 102, 194, 0.15);
-      border: 1px solid rgba(10, 102, 194, 0.25);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .quiz-linkedin-text {
-      font-size: 12.5px;
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
-    .quiz-linkedin-text strong {
-      color: var(--text);
-    }
-    .quiz-linkedin-text a {
-      color: #38bdf8;
-      font-weight: 700;
-      text-decoration: none;
-      border-bottom: 1px dashed rgba(56, 189, 248, 0.5);
-      transition: color 0.2s ease;
-    }
-    .quiz-linkedin-text a:hover {
-      color: #7dd3fc;
-      border-bottom-style: solid;
-    }
+    /* Footer (minimal) */
+    .quiz-footer { border-top: 1px solid var(--line); padding: 20px 0 24px; font-size: 0.8rem; color: var(--text-3); }
+    .quiz-footer .container { display: flex; justify-content: space-between; align-items: center; gap: 12px 20px; flex-wrap: wrap; }
+    .quiz-footer nav { display: flex; gap: 16px; flex-wrap: wrap; }
+    .quiz-footer a { color: var(--text-2); }
+    .quiz-footer a:hover { color: var(--text); }
   </style>
   <script src="config.js"></script>
-  </head>
+</head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
 
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-
-  <div class="shell">
-
-    <!-- Nav -->
-    <nav>
-      <a href="index.html" class="logo">
-        <img src="assets/logo.webp" alt="SkillMe Logo" class="brand-logo-img" style="vertical-align: middle; margin-right: 8px;">
-        Skill<span>Me</span>
+  <header class="site-nav is-solid quiz-nav" id="site-nav">
+    <div class="container">
+      <a href="index.html" class="brand" aria-label="SkillMe home">
+        <img src="assets/logo.webp" alt="" width="32" height="32">
+        <span>SkillMe</span>
+        <span class="brand-tag">Screening quiz</span>
       </a>
-      <div class="nav-badge">Screening Quiz</div>
-    </nav>
-
-    <!-- Main -->
-    <div class="main">
-
-      <!-- Screen 1: Welcome -->
-      <div class="screen active" id="screen-welcome">
-      <div class="welcome-icon">🧠</div>
-      <h1 class="welcome-title"><span style="position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0;">SkillMe </span>The <span class="hl">Screening Quiz</span></h1>
-      <p class="welcome-sub">
-        Before applying, we want to see where you're starting from.
-        8 quick questions — no tricks, no pressure. Pick your domain and let's go.
-      </p>
-      <div class="info-chips">
-        <div class="chip"><span>📋</span> 8 Questions</div>
-        <div class="chip"><span>⏱️</span> ~5 Minutes</div>
-        <div class="chip"><span>🔁</span> One Attempt</div>
-        <div class="chip"><span>✅</span> All eligible to apply</div>
-      </div>
-
-      <p class="section-label">Select Your Domain</p>
-            <div class="domain-grid" id="domain-grid">
-        <div class="domain-card" data-domain="web-dev" onclick="selectDomain(this)">
-          <div class="icon">🌐</div>
-          <div class="label">Full Stack Engineer</div>
-          <div class="sublabel">HTML5 &bull; CSS3 &bull; JavaScript</div>
-          <div class="status-badge open">Open</div>
-        </div>
-        <div class="domain-card" data-domain="python" onclick="selectDomain(this)">
-          <div class="icon">🐍</div>
-          <div class="label">Python Engineering</div>
-          <div class="sublabel">Python 3 &bull; OOP &bull; APIs</div>
-          <div class="status-badge open">Open</div>
-        </div>
-        <div class="domain-card" data-domain="react" onclick="selectDomain(this)">
-          <div class="icon">⚛️</div>
-          <div class="label">Frontend Engineer</div>
-          <div class="sublabel">React 18 &bull; Next.js &bull; TypeScript</div>
-          <div class="status-badge open">Open</div>
-        </div>
-        <div class="domain-card" data-domain="nodejs" onclick="selectDomain(this)">
-          <div class="icon">🟩</div>
-          <div class="label">Backend Engineer</div>
-          <div class="sublabel">Node &bull; Express &bull; REST APIs</div>
-          <div class="status-badge open">Open</div>
-        </div>
-        <div class="domain-card" data-domain="java" onclick="selectDomain(this)">
-          <div class="icon">☕</div>
-          <div class="label">Java / Spring Boot</div>
-          <div class="sublabel">Java 17 &bull; Spring Boot &bull; Maven</div>
-          <div class="status-badge open">Open</div>
-        </div>
-        <div class="domain-card" data-domain="ml" onclick="selectDomain(this)">
-          <div class="icon">🤖</div>
-          <div class="label">Machine Learning</div>
-          <div class="sublabel">PyTorch &bull; Scikit-Learn &bull; Pandas</div>
-          <div class="status-badge open">Open</div>
-        </div>
-        <div class="domain-card" data-domain="data-science" onclick="selectDomain(this)">
-          <div class="icon">📊</div>
-          <div class="label">Data Science</div>
-          <div class="sublabel">Python &bull; SQL &bull; Data Viz</div>
-          <div class="status-badge open">Open</div>
-        </div>
-        <div class="domain-card" data-domain="flutter" onclick="selectDomain(this)">
-          <div class="icon">📱</div>
-          <div class="label">App Developer</div>
-          <div class="sublabel">Dart &bull; Flutter &bull; Cross-Platform</div>
-          <div class="status-badge open">Open</div>
-        </div>
-        <div class="domain-card" data-domain="devops" onclick="selectDomain(this)">
-          <div class="icon">⚙️</div>
-          <div class="label">DevOps / CI-CD</div>
-          <div class="sublabel">Docker &bull; GitHub Actions &bull; CI/CD</div>
-          <div class="status-badge open">Open</div>
-        </div>
-        <div class="domain-card" data-domain="cpp" onclick="selectDomain(this)">
-          <div class="icon">🔷</div>
-          <div class="label">C++ / Algorithms</div>
-          <div class="sublabel">C++20 &bull; DSA &bull; Problem Solving</div>
-          <div class="status-badge open">Open</div>
-        </div>
-        <div class="domain-card" data-domain="cloud" onclick="selectDomain(this)">
-          <div class="icon">☁️</div>
-          <div class="label">Cloud / AWS</div>
-          <div class="sublabel">AWS &bull; Serverless &bull; Storage</div>
-          <div class="status-badge open">Open</div>
-        </div>
-        <div class="domain-card" data-domain="cybersecurity" onclick="selectDomain(this)">
-          <div class="icon">🔒</div>
-          <div class="label">Cybersecurity</div>
-          <div class="sublabel">Web Security &bull; Python &bull; OWASP</div>
-          <div class="status-badge open">Open</div>
-        </div>
-        <div class="domain-card" data-domain="ui-ux" onclick="selectDomain(this)">
-          <div class="icon">🎨</div>
-          <div class="label">UI/UX Design</div>
-          <div class="sublabel">Figma &bull; Research &bull; Prototyping</div>
-          <div class="status-badge open">Open</div>
-        </div>
-        <div class="domain-card" data-domain="genai" onclick="selectDomain(this)">
-          <div class="icon">✨</div>
-          <div class="label">Generative AI</div>
-          <div class="sublabel">LLM APIs &bull; Prompting &bull; RAG</div>
-          <div class="status-badge open">Open</div>
-        </div>
-        <div class="domain-card" data-domain="sql" onclick="selectDomain(this)">
-          <div class="icon">🗄️</div>
-          <div class="label">SQL / Databases</div>
-          <div class="sublabel">SQL &bull; PostgreSQL &bull; Data Modeling</div>
-          <div class="status-badge open">Open</div>
-        </div>
-        <div class="domain-card" data-domain="ai-engineer" onclick="selectDomain(this)">
-          <div class="icon">🧠</div>
-          <div class="label">AI Engineer</div>
-          <div class="sublabel">LLM APIs &bull; RAG &bull; Agents</div>
-          <div class="status-badge open">Open</div>
-        </div>
-        <div class="domain-card" data-domain="fde" onclick="selectDomain(this)">
-          <div class="icon">🛠️</div>
-          <div class="label">Forward Deployed Engineer</div>
-          <div class="sublabel">API Integration &bull; Client Tools &bull; Docs</div>
-          <div class="status-badge open">Open</div>
-        </div>
-        <div class="domain-card" data-domain="sde" onclick="selectDomain(this)">
-          <div class="icon">💻</div>
-          <div class="label">SDE / SWE</div>
-          <div class="sublabel">Data Structures &bull; System Design &bull; Testing</div>
-          <div class="status-badge open">Open</div>
-        </div>
-        <div class="domain-card" data-domain="ai-pm" onclick="selectDomain(this)">
-          <div class="icon">📋</div>
-          <div class="label">AI Product Management</div>
-          <div class="sublabel">PRDs &bull; AI Evals &bull; Roadmapping</div>
-          <div class="status-badge open">Open</div>
-        </div>
-        <div class="domain-card" data-domain="qa" onclick="selectDomain(this)">
-          <div class="icon">🧪</div>
-          <div class="label">Software Quality</div>
-          <div class="sublabel">Test Automation &bull; Selenium &bull; Bug Reports</div>
-          <div class="status-badge open">Open</div>
-        </div>
-      </div>
-
-      <button class="btn-primary" id="start-btn" onclick="startQuiz()" disabled>
-        Start Quiz &nbsp; →
-      </button>
-
-      <div style="margin-top: 24px; text-align: center;">
-        <a href="apply.html?view=status" style="display: inline-block; padding: 12px; color: rgba(255,255,255,0.7); font-size: 0.95rem; text-decoration: underline; transition: color 0.2s;" onmouseover="this.style.color='#c99a4e'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">Already applied? Check your status here</a>
-      </div>
-    </div>
-
-    <!-- ══ SCREEN 2: Question ══ -->
-    <div class="screen" id="screen-question" style="width:100%;">
-      <div class="progress-bar-wrap">
-        <div class="progress-meta">
-          <span class="progress-label" id="prog-label">Question 1 of 8</span>
-          <span class="progress-count" id="prog-count">0 / 8</span>
-        </div>
-        <div class="progress-track">
-          <div class="progress-fill" id="prog-fill" style="width:0%"></div>
-        </div>
-      </div>
-
-      <p class="q-category" id="q-category">General</p>
-      <p class="q-text" id="q-text">Loading…</p>
-
-      <div class="q-options" id="q-options"></div>
-
-      <div class="next-btn-wrap">
-        <button class="btn-primary" id="next-btn" onclick="nextQuestion()" style="display:none;">
-          Next Question &nbsp; →
+      <div class="nav-actions">
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle theme">
+          <svg class="ti-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          <svg class="ti-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
+        <a href="index.html" class="btn btn-ghost btn-sm exit-link">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          Exit
+        </a>
       </div>
     </div>
+  </header>
 
-    <!-- ══ SCREEN 3: Result ══ -->
-    <div class="screen" id="screen-result" style="width:100%; align-items:center;">
-      <div class="result-ring" id="result-ring">
-        <div class="result-score" id="result-score">0</div>
-        <div class="result-total" id="result-total">/ 8</div>
-      </div>
-      <h2 class="result-title" id="result-title">Great job!</h2>
-      <p class="result-sub" id="result-sub">You've completed the screening quiz.</p>
-      <div class="result-badge pass" id="result-badge">✅ Eligible to Apply</div>
+  <main id="main" class="quiz-main">
+    <div class="container quiz-wrap">
 
+      <!-- ══ SCREEN 1: Welcome + domain ══ -->
+      <section class="screen active" id="screen-welcome" aria-labelledby="welcome-title">
+        <div class="welcome-head">
+          <span class="eyebrow">Before you apply</span>
+          <h1 class="h1" id="welcome-title"><span class="sr-only">SkillMe </span>The screening quiz</h1>
+          <p class="lead">We'd like to see where you're starting from. 8 quick questions — no tricks, no pressure. Pick your domain to begin.</p>
+          <div class="facts">
+            <span class="fact"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg><b>8</b> questions</span>
+            <span class="fact"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><b>~5</b> minutes</span>
+            <span class="fact"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 12h16M14 6l6 6-6 6"/></svg>One attempt</span>
+            <span class="fact"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Everyone is eligible to apply</span>
+          </div>
+        </div>
 
+        <div class="picker-head">
+          <h2 id="domain-heading"><span class="step-num">01</span>Choose your domain</h2>
+          <span class="subtle mono">All domains open</span>
+        </div>
 
-      <div class="result-actions">
-        <button class="btn-primary" onclick="proceedToApply()">Apply Now &nbsp; →</button>
-        <button class="btn-secondary" onclick="reviewAnswers()">Review Answers</button>
-      </div>
+        <div class="domain-grid" id="domain-grid" role="group" aria-labelledby="domain-heading">
+          <button type="button" class="domain-card" data-domain="web-dev" onclick="selectDomain(this)" aria-pressed="false"><span class="dc-name">Full Stack Engineer</span><span class="dc-stack">HTML5 · CSS3 · JavaScript</span><span class="dc-check" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+          <button type="button" class="domain-card" data-domain="python" onclick="selectDomain(this)" aria-pressed="false"><span class="dc-name">Python Engineering</span><span class="dc-stack">Python 3 · OOP · APIs</span><span class="dc-check" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+          <button type="button" class="domain-card" data-domain="react" onclick="selectDomain(this)" aria-pressed="false"><span class="dc-name">Frontend Engineer</span><span class="dc-stack">React 18 · Next.js · TypeScript</span><span class="dc-check" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+          <button type="button" class="domain-card" data-domain="nodejs" onclick="selectDomain(this)" aria-pressed="false"><span class="dc-name">Backend Engineer</span><span class="dc-stack">Node · Express · REST APIs</span><span class="dc-check" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+          <button type="button" class="domain-card" data-domain="java" onclick="selectDomain(this)" aria-pressed="false"><span class="dc-name">Java / Spring Boot</span><span class="dc-stack">Java 17 · Spring Boot · Maven</span><span class="dc-check" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+          <button type="button" class="domain-card" data-domain="ml" onclick="selectDomain(this)" aria-pressed="false"><span class="dc-name">Machine Learning</span><span class="dc-stack">PyTorch · Scikit-Learn · Pandas</span><span class="dc-check" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+          <button type="button" class="domain-card" data-domain="data-science" onclick="selectDomain(this)" aria-pressed="false"><span class="dc-name">Data Science</span><span class="dc-stack">Python · SQL · Data Viz</span><span class="dc-check" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+          <button type="button" class="domain-card" data-domain="flutter" onclick="selectDomain(this)" aria-pressed="false"><span class="dc-name">App Developer</span><span class="dc-stack">Dart · Flutter · Cross-Platform</span><span class="dc-check" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+          <button type="button" class="domain-card" data-domain="devops" onclick="selectDomain(this)" aria-pressed="false"><span class="dc-name">DevOps / CI-CD</span><span class="dc-stack">Docker · GitHub Actions · CI/CD</span><span class="dc-check" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+          <button type="button" class="domain-card" data-domain="cpp" onclick="selectDomain(this)" aria-pressed="false"><span class="dc-name">C++ / Algorithms</span><span class="dc-stack">C++20 · DSA · Problem Solving</span><span class="dc-check" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+          <button type="button" class="domain-card" data-domain="cloud" onclick="selectDomain(this)" aria-pressed="false"><span class="dc-name">Cloud / AWS</span><span class="dc-stack">AWS · Serverless · Storage</span><span class="dc-check" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+          <button type="button" class="domain-card" data-domain="cybersecurity" onclick="selectDomain(this)" aria-pressed="false"><span class="dc-name">Cybersecurity</span><span class="dc-stack">Web Security · Python · OWASP</span><span class="dc-check" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+          <button type="button" class="domain-card" data-domain="ui-ux" onclick="selectDomain(this)" aria-pressed="false"><span class="dc-name">UI/UX Design</span><span class="dc-stack">Figma · Research · Prototyping</span><span class="dc-check" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+          <button type="button" class="domain-card" data-domain="genai" onclick="selectDomain(this)" aria-pressed="false"><span class="dc-name">Generative AI</span><span class="dc-stack">LLM APIs · Prompting · RAG</span><span class="dc-check" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+          <button type="button" class="domain-card" data-domain="sql" onclick="selectDomain(this)" aria-pressed="false"><span class="dc-name">SQL / Databases</span><span class="dc-stack">SQL · PostgreSQL · Data Modeling</span><span class="dc-check" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+          <button type="button" class="domain-card" data-domain="ai-engineer" onclick="selectDomain(this)" aria-pressed="false"><span class="dc-name">AI Engineer</span><span class="dc-stack">LLM APIs · RAG · Agents</span><span class="dc-check" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+          <button type="button" class="domain-card" data-domain="fde" onclick="selectDomain(this)" aria-pressed="false"><span class="dc-name">Forward Deployed Engineer</span><span class="dc-stack">API Integration · Client Tools · Docs</span><span class="dc-check" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+          <button type="button" class="domain-card" data-domain="sde" onclick="selectDomain(this)" aria-pressed="false"><span class="dc-name">SDE / SWE</span><span class="dc-stack">Data Structures · System Design · Testing</span><span class="dc-check" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+          <button type="button" class="domain-card" data-domain="ai-pm" onclick="selectDomain(this)" aria-pressed="false"><span class="dc-name">AI Product Management</span><span class="dc-stack">PRDs · AI Evals · Roadmapping</span><span class="dc-check" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+          <button type="button" class="domain-card" data-domain="qa" onclick="selectDomain(this)" aria-pressed="false"><span class="dc-name">Software Quality</span><span class="dc-stack">Test Automation · Selenium · Bug Reports</span><span class="dc-check" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></button>
+        </div>
 
-      <div class="breakdown" id="breakdown" style="display:none;">
-        <p class="breakdown-title">Question Breakdown</p>
-        <div id="breakdown-list"></div>
-      </div>
+        <div class="start-bar">
+          <div class="start-bar-inner">
+            <div class="start-status" aria-live="polite">
+              <span class="ss-label">Domain</span>
+              <span class="ss-value is-empty" id="start-selected">Select a domain to begin</span>
+            </div>
+            <button type="button" class="btn btn-primary btn-lg" id="start-btn" onclick="startQuiz()" disabled>
+              Start quiz
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <p class="status-link">Already applied? <a href="apply.html?view=status">Check your application status</a></p>
+      </section>
+
+      <!-- ══ SCREEN 2: Question ══ -->
+      <section class="screen" id="screen-question" aria-label="Quiz question">
+        <div class="q-shell">
+          <div class="q-top">
+            <button type="button" class="btn btn-ghost btn-sm" id="back-btn" onclick="goBack()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+              Change domain
+            </button>
+            <span class="q-domain" id="q-domain"></span>
+          </div>
+
+          <div class="progress-bar-wrap">
+            <div class="progress-meta">
+              <span class="progress-label" id="prog-label">Question 1 of 8</span>
+              <span class="progress-count" id="prog-count">0 correct</span>
+            </div>
+            <div class="progress-track" role="progressbar" id="prog-bar" aria-label="Quiz progress" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0">
+              <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+            </div>
+          </div>
+
+          <div class="card q-card">
+            <p class="eyebrow q-category" id="q-category">General</p>
+            <h2 class="q-text" id="q-text" tabindex="-1">Loading…</h2>
+            <div class="q-options" id="q-options" role="group" aria-labelledby="q-text"></div>
+            <p class="q-feedback" id="q-feedback" aria-live="polite"></p>
+            <div class="q-foot">
+              <span class="kbd-hint">Press <kbd>A</kbd>–<kbd>D</kbd> or <kbd>1</kbd>–<kbd>4</kbd> to answer · <kbd>Enter</kbd> to continue</span>
+              <button type="button" class="btn btn-primary btn-lg" id="next-btn" onclick="nextQuestion()" disabled>
+                <span id="next-label">Next question</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ SCREEN 3: Result ══ -->
+      <section class="screen" id="screen-result" aria-labelledby="result-title">
+        <div class="result-shell">
+          <div class="card result-card">
+            <div class="result-ring" id="result-ring" role="img" aria-label="Score">
+              <div class="result-score" id="result-score">0</div>
+              <div class="result-total" id="result-total">/ 8</div>
+            </div>
+            <span class="badge badge-ok result-badge" id="result-badge">Eligible to apply</span>
+            <h2 class="result-title" id="result-title" tabindex="-1">Great job!</h2>
+            <p class="result-sub" id="result-sub">You've completed the screening quiz.</p>
+
+            <div class="result-actions">
+              <button type="button" class="btn btn-primary btn-lg" id="apply-btn" onclick="proceedToApply()">
+                Continue to application
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm" id="review-btn" onclick="reviewAnswers()" aria-expanded="false" aria-controls="breakdown">Review my answers</button>
+              <p class="result-next">Next step: a short application form. Your quiz result is saved on this device.</p>
+            </div>
+          </div>
+
+          <div class="breakdown" id="breakdown" style="display:none;">
+            <div class="breakdown-title">
+              <h3>Question breakdown</h3>
+              <span class="subtle mono" id="breakdown-sum"></span>
+            </div>
+            <ol class="breakdown-list" id="breakdown-list"></ol>
+          </div>
+        </div>
+      </section>
+
     </div>
+  </main>
 
-  </div><!-- /main -->
-</div><!-- /shell -->
+  <footer class="quiz-footer">
+    <div class="container">
+      <span>© <span data-year>2026</span> SkillMe · MSME registered · UDYAM-UP-50-0294192</span>
+      <nav aria-label="Legal">
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <a href="refunds.html">Refunds</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </div>
+  </footer>
 
 <script>
 // ──────────────────────────────────────────────────────────────
@@ -838,6 +631,7 @@ const DOMAIN_QUESTIONS = {
   ]
 };
 
+
 // ──────────────────────────────────────────────────────────────
 // State
 // ──────────────────────────────────────────────────────────────
@@ -845,16 +639,30 @@ let selectedDomain = null;
 let questions = [];
 let currentQ = 0;
 let score = 0;
-let answers = [];  // {selected, correct, text}
+let answers = [];  // {selected, correct, isCorrect, text}
+let answered = false;  // has the current question been answered (UI lock)
+
+const LETTERS = ['A', 'B', 'C', 'D'];
+const ICON_OK = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+const ICON_BAD = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+
+function domainName(id) {
+  const card = document.querySelector(`.domain-card[data-domain="${id}"] .dc-name`);
+  return card ? card.textContent : id;
+}
 
 // ──────────────────────────────────────────────────────────────
 // Domain selection
 // ──────────────────────────────────────────────────────────────
 function selectDomain(el) {
-  document.querySelectorAll('.domain-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.domain-card').forEach(c => { c.classList.remove('selected'); c.setAttribute('aria-pressed', 'false'); });
   el.classList.add('selected');
+  el.setAttribute('aria-pressed', 'true');
   selectedDomain = el.dataset.domain;
   document.getElementById('start-btn').disabled = false;
+  const sel = document.getElementById('start-selected');
+  sel.textContent = domainName(selectedDomain);
+  sel.classList.remove('is-empty');
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -867,8 +675,20 @@ function startQuiz() {
   currentQ = 0;
   score = 0;
   answers = [];
+  document.getElementById('q-domain').innerHTML = '';
+  const dn = document.createElement('b');
+  dn.textContent = domainName(selectedDomain);
+  document.getElementById('q-domain').append(dn);
   showScreen('screen-question');
   renderQuestion();
+}
+
+// Back: only possible before the first answer is locked in (answers are final once chosen)
+function goBack() {
+  if (answers.length > 0) return;
+  showScreen('screen-welcome');
+  const sel = document.querySelector('.domain-card.selected');
+  if (sel) sel.focus({ preventScroll: true });
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -877,30 +697,53 @@ function startQuiz() {
 function renderQuestion() {
   const q = questions[currentQ];
   const total = questions.length;
+  answered = false;
 
   document.getElementById('prog-label').textContent = `Question ${currentQ + 1} of ${total}`;
   document.getElementById('prog-count').textContent = `${score} correct`;
   document.getElementById('prog-fill').style.width = `${(currentQ / total) * 100}%`;
+  const bar = document.getElementById('prog-bar');
+  bar.setAttribute('aria-valuemax', String(total));
+  bar.setAttribute('aria-valuenow', String(currentQ));
   document.getElementById('q-category').textContent = q.category;
   document.getElementById('q-text').textContent = q.text;
-  document.getElementById('next-btn').style.display = 'none';
+  document.getElementById('q-feedback').textContent = '';
+  document.getElementById('q-feedback').className = 'q-feedback';
+  document.getElementById('back-btn').hidden = currentQ !== 0;
 
-  const LETTERS = ['A', 'B', 'C', 'D'];
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.disabled = true;
+  document.getElementById('next-label').textContent = currentQ === total - 1 ? 'See results' : 'Next question';
+
   const container = document.getElementById('q-options');
   container.innerHTML = '';
   q.options.forEach((opt, i) => {
     const btn = document.createElement('button');
-    btn.className = 'q-option';
-    btn.innerHTML = `<span class="opt-letter">${LETTERS[i]}</span>${opt}`;
+    btn.type = 'button';
+    btn.className = 'option-card q-option';
+    const key = document.createElement('span');
+    key.className = 'opt-key';
+    key.setAttribute('aria-hidden', 'true');
+    key.textContent = LETTERS[i];
+    const text = document.createElement('span');
+    text.className = 'opt-text';
+    text.textContent = opt;
+    btn.append(key, text);
+    btn.insertAdjacentHTML('beforeend', `<span class="opt-mark is-ok">${ICON_OK}</span><span class="opt-mark is-bad">${ICON_BAD}</span>`);
+    btn.setAttribute('aria-label', `${LETTERS[i]}: ${opt}`);
     btn.onclick = () => selectAnswer(i, q.answer, q.text);
     container.appendChild(btn);
   });
+
+  document.getElementById('q-text').focus({ preventScroll: true });
 }
 
 // ──────────────────────────────────────────────────────────────
 // Handle answer selection
 // ──────────────────────────────────────────────────────────────
 function selectAnswer(chosen, correct, qText) {
+  if (answered) return;
+  answered = true;
   const opts = document.querySelectorAll('.q-option');
   opts.forEach(o => o.disabled = true);
 
@@ -912,19 +755,29 @@ function selectAnswer(chosen, correct, qText) {
 
   answers.push({ selected: chosen, correct, isCorrect, text: qText });
 
-  const nextBtn = document.getElementById('next-btn');
-  nextBtn.style.display = 'inline-flex';
-  if (currentQ === questions.length - 1) {
-    nextBtn.textContent = 'See Results  →';
+  const fb = document.getElementById('q-feedback');
+  if (isCorrect) {
+    fb.textContent = 'Correct.';
+    fb.className = 'q-feedback ok';
   } else {
-    nextBtn.textContent = 'Next Question  →';
+    fb.textContent = `Not quite. The correct answer is ${LETTERS[correct]}.`;
+    fb.className = 'q-feedback bad';
   }
+  document.getElementById('prog-count').textContent = `${score} correct`;
+  document.getElementById('prog-fill').style.width = `${((currentQ + 1) / questions.length) * 100}%`;
+  document.getElementById('prog-bar').setAttribute('aria-valuenow', String(currentQ + 1));
+  document.getElementById('back-btn').hidden = true;
+
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.disabled = false;
+  nextBtn.focus({ preventScroll: true });
 }
 
 // ──────────────────────────────────────────────────────────────
 // Next question / finish
 // ──────────────────────────────────────────────────────────────
 function nextQuestion() {
+  if (!answered) return;
   currentQ++;
   if (currentQ >= questions.length) {
     showResults();
@@ -940,42 +793,43 @@ function showResults() {
   const total = questions.length;
   const pct = Math.round((score / total) * 100);
 
-  // Animate score ring
   document.getElementById('result-ring').style.setProperty('--pct', `${pct}%`);
+  document.getElementById('result-ring').setAttribute('aria-label', `Score: ${score} out of ${total}`);
   document.getElementById('result-score').textContent = score;
   document.getElementById('result-total').textContent = `/ ${total}`;
 
   // Message based on score
   let title, sub, badgeClass, badgeText;
   if (score >= 7) {
-    title = '🔥 Outstanding!';
+    title = 'Outstanding!';
     sub = `You scored ${score}/${total} — that's impressive! You clearly know your domain well. Your application is going to stand out.`;
     badgeClass = 'pass';
-    badgeText = '✅ Eligible to Apply';
+    badgeText = 'Eligible to apply';
   } else if (score >= 5) {
-    title = '👏 Well Done!';
+    title = 'Well done!';
     sub = `You scored ${score}/${total}. Solid fundamentals — the internship will sharpen the rest. You're ready to apply!`;
     badgeClass = 'pass';
-    badgeText = '✅ Eligible to Apply';
+    badgeText = 'Eligible to apply';
   } else if (score >= 3) {
-    title = '💪 Good Effort!';
+    title = 'Good effort!';
     sub = `You scored ${score}/${total}. Don't worry — the internship is built for learners exactly like you. Apply and grow with us!`;
     badgeClass = 'try-harder';
-    badgeText = '🎯 Apply & Level Up';
+    badgeText = 'Apply & level up';
   } else {
-    title = '🌱 Just Getting Started!';
+    title = 'Just getting started!';
     sub = `You scored ${score}/${total}. Everyone starts somewhere! Our internship is designed to take you from beginner to contributor. Apply now!`;
     badgeClass = 'try-harder';
-    badgeText = '🎯 Apply & Level Up';
+    badgeText = 'Apply & level up';
   }
 
   document.getElementById('result-title').textContent = title;
   document.getElementById('result-sub').textContent = sub;
   const badge = document.getElementById('result-badge');
-  badge.className = `result-badge ${badgeClass}`;
-  badge.textContent = badgeText;
+  badge.className = `badge result-badge ${badgeClass} ${badgeClass === 'pass' ? 'badge-ok' : 'badge-accent'}`;
+  badge.innerHTML = '<span class="dot"></span>';
+  badge.append(badgeText);
 
-  // Save to localStorage
+  // Save to localStorage (handoff contract read by apply.html — do not change)
   const result = {
     passed: true,
     score,
@@ -992,13 +846,39 @@ function showResults() {
   list.innerHTML = '';
   questions.forEach((q, i) => {
     const a = answers[i];
-    const item = document.createElement('div');
-    item.className = 'breakdown-item';
-    item.innerHTML = `<span class="breakdown-q">${q.text}</span><span class="breakdown-result">${a?.isCorrect ? '✅' : '❌'}</span>`;
+    const ok = !!(a && a.isCorrect);
+    const item = document.createElement('li');
+    item.className = 'card breakdown-item';
+    const num = document.createElement('span');
+    num.className = 'bi-num';
+    num.textContent = String(i + 1).padStart(2, '0');
+    const body = document.createElement('div');
+    body.className = 'bi-body';
+    const qt = document.createElement('p');
+    qt.className = 'breakdown-q';
+    qt.textContent = q.text;
+    const at = document.createElement('p');
+    at.className = 'breakdown-a';
+    if (a) {
+      const yours = document.createElement('span');
+      yours.className = ok ? 'ok' : 'bad';
+      yours.textContent = `${LETTERS[a.selected]}. ${q.options[a.selected]}`;
+      at.append('Your answer: ', yours);
+      if (!ok) at.append(` · Correct: ${LETTERS[q.answer]}. ${q.options[q.answer]}`);
+    }
+    body.append(qt, at);
+    const res = document.createElement('span');
+    res.className = `breakdown-result ${ok ? 'ok' : 'bad'}`;
+    res.innerHTML = ok ? ICON_OK : ICON_BAD;
+    res.setAttribute('role', 'img');
+    res.setAttribute('aria-label', ok ? 'Correct' : 'Incorrect');
+    item.append(num, body, res);
     list.appendChild(item);
   });
+  document.getElementById('breakdown-sum').textContent = `${score}/${total} correct`;
 
   showScreen('screen-result');
+  document.getElementById('result-title').focus({ preventScroll: true });
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -1006,7 +886,12 @@ function showResults() {
 // ──────────────────────────────────────────────────────────────
 function reviewAnswers() {
   const bd = document.getElementById('breakdown');
-  bd.style.display = bd.style.display === 'none' ? 'block' : 'none';
+  const open = bd.style.display === 'none';
+  bd.style.display = open ? 'block' : 'none';
+  const btn = document.getElementById('review-btn');
+  btn.setAttribute('aria-expanded', String(open));
+  btn.textContent = open ? 'Hide my answers' : 'Review my answers';
+  if (open) bd.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -1025,6 +910,34 @@ function showScreen(id) {
   el.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+// ──────────────────────────────────────────────────────────────
+// Keyboard: 1–4 / A–D answer, Enter continues
+// ──────────────────────────────────────────────────────────────
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey || e.altKey || e.isComposing) return;
+  const t = e.target;
+  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+  const onBtn = t && t.closest && t.closest('button, a');
+
+  if (document.getElementById('screen-question').classList.contains('active')) {
+    const k = e.key.toLowerCase();
+    let idx = -1;
+    if (/^[1-9]$/.test(k)) idx = Number(k) - 1;
+    else if (/^[a-d]$/.test(k)) idx = k.charCodeAt(0) - 97;
+    if (idx >= 0) {
+      const opts = document.querySelectorAll('.q-option');
+      if (!answered && opts[idx]) { e.preventDefault(); opts[idx].click(); }
+      return;
+    }
+    if (e.key === 'Enter' && answered && !onBtn) { e.preventDefault(); nextQuestion(); }
+    return;
+  }
+
+  if (document.getElementById('screen-welcome').classList.contains('active')) {
+    if (e.key === 'Enter' && selectedDomain && !onBtn) { e.preventDefault(); startQuiz(); }
+  }
+});
 
 // ──────────────────────────────────────────────────────────────
 // Check if quiz already completed — redirect returning candidates directly to apply.html
