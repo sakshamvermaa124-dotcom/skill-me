@@ -205,15 +205,32 @@
 .ck::after { content: ''; position: absolute; left: 7px; top: 4px; width: 5px; height: 9px; border: solid var(--ok); border-width: 0 2px 2px 0; transform: rotate(45deg); }
 
 /* ── How it works ────────────────────────────────────────────── */
-.steps { list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; counter-reset: none; }
-.step { position: relative; display: flex; flex-direction: column; gap: 10px; }
+.steps { list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; position: relative; }
+.step {
+  position: relative;
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+}
+/* connector between steps */
+.step:not(:last-child)::after {
+  content: '';
+  position: absolute; top: 41px; right: -17px;
+  width: 18px; height: 1px;
+  background: var(--line-strong);
+}
 .step-num {
-  width: 36px; height: 36px; display: grid; place-items: center; margin-bottom: 6px;
+  width: 36px; height: 36px; display: grid; place-items: center; margin-bottom: 8px;
   border-radius: var(--r-sm);
   background: var(--accent-wash); color: var(--accent-text);
   font-size: 0.82rem; font-weight: 600;
 }
-.step p { font-size: 0.93rem; }
+.step:first-child .step-num { background: var(--primary); color: var(--primary-fg); }
+.step p { font-size: 0.92rem; color: var(--text-2); flex: 1; }
+.step-meta { margin-top: 6px; font-size: 0.72rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-3); }
 
 .roadmap { margin-top: 24px; padding: clamp(22px, 3vw, 32px); border-radius: var(--r-xl); }
 .roadmap-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
