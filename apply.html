@@ -486,15 +486,19 @@
                   </div>
 
                   <div class="field form-group">
-                    <label class="label" for="referral">How did you hear about us? <span class="opt">(optional)</span></label>
-                    <select class="select form-select" id="referral" name="referral">
+                    <label class="label" for="referral">How did you hear about us? <span class="req" aria-hidden="true">*</span></label>
+                    <select class="select form-select" id="referral" name="referral" required aria-describedby="referral-error">
                       <option value="" disabled selected>Select one</option>
                       <option value="LinkedIn">LinkedIn</option>
+                      <option value="Instagram">Instagram</option>
+                      <option value="WhatsApp">WhatsApp</option>
+                      <option value="YouTube">YouTube</option>
                       <option value="Friend/Referral">Friend / Referral</option>
                       <option value="College Group">College WhatsApp Group</option>
                       <option value="Google Search">Google Search</option>
                       <option value="Other">Other</option>
                     </select>
+                    <div class="form-error" id="referral-error">Please tell us how you found SkillMe</div>
                   </div>
                 </div>
 
@@ -620,6 +624,7 @@
   </footer>
 
   <script src="config.js?v=b82b38a780" defer></script>
+  <script src="attribution.js?v=aeaeb77e33" defer></script>
 
   <script>
     // Smooth scroll to the top of the application card (replaces Lenis; respects reduced motion)
@@ -827,7 +832,7 @@
       } else if (step === 2) {
         valid = validateField('college', silent) & validateSelect('year', silent);
       } else if (step === 3) {
-        valid = validateMotivation('motivation', silent);
+        valid = validateMotivation('motivation', silent) & validateSelect('referral', silent);
       }
 
       return valid;
@@ -1060,6 +1065,8 @@
         domain: document.getElementById('hidden-domain').value,
         motivation: document.getElementById('motivation').value.trim(),
         referral_source: document.getElementById('referral').value || null,
+        // Tracked acquisition (UTM, referrer, landing page, first/last touch); kept separate from the self-reported answer above
+        attribution: window.SkillMeAttribution ? window.SkillMeAttribution.payload() : undefined,
       };
       try {
         const quiz = JSON.parse(localStorage.getItem('skillme_quiz_result') || 'null');

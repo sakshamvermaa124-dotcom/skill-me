@@ -46,6 +46,8 @@ class Settings(BaseSettings):
     # ── Razorpay (Payment Gateway) ──────────────
     razorpay_key_id: str = ""
     razorpay_key_secret: str = ""
+    # Webhook secret from Razorpay Dashboard > Webhooks (NOT the API key secret). Blank = webhook rejected.
+    razorpay_webhook_secret: str = ""
     certificate_price_paise: int = 12900  # ₹129 in paise
 
     # ── Student Auth (OTP + JWT) ─────────────────

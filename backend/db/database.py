@@ -186,6 +186,51 @@ class Database:
             "CREATE INDEX IF NOT EXISTS idx_students_email_lower ON students(lower(email))",
             # How many tries a weekly task took (v12) — admin UX analytics
             "ALTER TABLE submissions ADD COLUMN attempts INTEGER DEFAULT 1",
+            # Analytics v2 (v13): attribution, payment lifecycle, test flags — additive only
+            "ALTER TABLE students ADD COLUMN is_test INTEGER DEFAULT 0",
+            "ALTER TABLE students ADD COLUMN utm_source TEXT",
+            "ALTER TABLE students ADD COLUMN utm_medium TEXT",
+            "ALTER TABLE students ADD COLUMN utm_campaign TEXT",
+            "ALTER TABLE students ADD COLUMN utm_content TEXT",
+            "ALTER TABLE students ADD COLUMN referral_code TEXT",
+            "ALTER TABLE students ADD COLUMN landing_page TEXT",
+            "ALTER TABLE students ADD COLUMN referrer TEXT",
+            "ALTER TABLE students ADD COLUMN first_touch_source TEXT",
+            "ALTER TABLE students ADD COLUMN first_touch_at TIMESTAMP",
+            "ALTER TABLE students ADD COLUMN last_touch_source TEXT",
+            "ALTER TABLE students ADD COLUMN last_touch_campaign TEXT",
+            "ALTER TABLE students ADD COLUMN last_touch_at TIMESTAMP",
+            "ALTER TABLE students ADD COLUMN attribution_captured INTEGER DEFAULT 0",
+            "ALTER TABLE payments ADD COLUMN is_test INTEGER DEFAULT 0",
+            "ALTER TABLE payments ADD COLUMN initiated_at TIMESTAMP",
+            "ALTER TABLE payments ADD COLUMN completed_at TIMESTAMP",
+            "ALTER TABLE payments ADD COLUMN failure_code TEXT",
+            "ALTER TABLE payments ADD COLUMN failure_reason TEXT",
+            "ALTER TABLE payments ADD COLUMN discount_code TEXT",
+            "ALTER TABLE payments ADD COLUMN confirmed_via TEXT",
+            "ALTER TABLE payments ADD COLUMN last_touch_source TEXT",
+            "ALTER TABLE payments ADD COLUMN last_touch_campaign TEXT",
+            "ALTER TABLE certificates ADD COLUMN issued_via TEXT",
+            "ALTER TABLE certificates ADD COLUMN payment_id INTEGER",
+            "ALTER TABLE otp_tokens ADD COLUMN verified_at TIMESTAMP",
+            """CREATE TABLE IF NOT EXISTS payment_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                provider_event_id TEXT NOT NULL UNIQUE,
+                event_type TEXT NOT NULL,
+                razorpay_order_id TEXT,
+                razorpay_payment_id TEXT,
+                payload TEXT,
+                received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )""",
+            # Codifies the existing test-id rule only; no other row is touched.
+            "UPDATE payments SET is_test = 1 WHERE COALESCE(is_test,0) = 0 AND (COALESCE(razorpay_payment_id,'') LIKE 'pay_test%' OR COALESCE(razorpay_payment_id,'') LIKE 'pay_mock%')",
+            # Constraints/indexes. Unique ones are no-ops (ignored) if legacy duplicates exist.
+            "CREATE UNIQUE INDEX IF NOT EXISTS ux_payments_rzp_payment ON payments(razorpay_payment_id) WHERE razorpay_payment_id IS NOT NULL",
+            "CREATE UNIQUE INDEX IF NOT EXISTS ux_enrollments_one_active ON enrollments(student_id) WHERE status != 'dropped'",
+            "CREATE INDEX IF NOT EXISTS idx_payments_student_status ON payments(student_id, status)",
+            "CREATE INDEX IF NOT EXISTS idx_submissions_student_status_week ON submissions(student_id, status, week)",
+            "CREATE INDEX IF NOT EXISTS idx_students_is_test ON students(is_test)",
+            "CREATE INDEX IF NOT EXISTS idx_otp_email_used ON otp_tokens(email, used)",
         ]
         return migrations
 

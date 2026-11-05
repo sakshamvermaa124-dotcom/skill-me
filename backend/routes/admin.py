@@ -4,7 +4,7 @@ Protected endpoints for student shortlisting/enrollment
 and LinkedIn submission review. Requires X-Admin-Key header.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query
 from pydantic import BaseModel, Field
 import logging
 import time
@@ -14,6 +14,7 @@ from services.enrollment_service import enrollment_service
 from services.submission_service import submission_service, SCORE_PER_APPROVAL
 from services.urgent_request_service import urgent_request_service
 from services.email_service import email_service
+from services import analytics_service
 from db.database import db
 from config import settings
 
@@ -70,7 +71,7 @@ async def get_stats(_: str = Depends(require_admin)):
     """Get aggregated stats for the admin dashboard (single round-trip)."""
     row = await db.fetch_one(
         f"""SELECT
-             (SELECT COUNT(*) FROM students) AS total_students,
+             (SELECT COUNT(*) FROM students WHERE COALESCE(is_test, 0) = 0) AS total_students,
              (SELECT COUNT(*) FROM students WHERE status = 'applied') AS pending_applications,
              (SELECT COUNT(*) FROM students WHERE status = 'shortlisted') AS shortlisted_students,
              (SELECT COUNT(*) FROM students WHERE status = 'enrolled') AS enrolled_students,
@@ -117,6 +118,13 @@ async def get_stats(_: str = Depends(require_admin)):
             "apps_today", "apps_7d", "apps_prev_7d", "active_7d", "eligible_unpaid",
             "subs_7d", "subs_prev_7d", "enrolled_7d", "approved_30d", "rejected_30d", "completed_total")
     out = {k: row.get(k) or 0 for k in keys}
+    # Completed / eligible-unpaid / paying students come from the shared per-student rollup so the
+    # Overview page and the Analytics page can never show different numbers for the same metric.
+    _, students = await _dataset()
+    ov = analytics_service.overview(analytics_service.apply_filters(students), datetime.utcnow())
+    out["completed_total"] = ov["completed"]
+    out["eligible_unpaid"] = ov["eligible_unpaid"]
+    out["total_alumni"] = ov["paying_students"]
     reviewed = out["approved_30d"] + out["rejected_30d"]
     out["approval_rate_30d"] = _pct(out["approved_30d"], reviewed)
     oldest = row.get("oldest_pending_days")
@@ -331,7 +339,7 @@ async def update_student_status(
 
 
 @router.delete("/students/{student_id}", summary="Delete student and all associated records")
-async def delete_student(student_id: int, _: str = Depends(require_admin)):
+async def delete_student(student_id: int, force: bool = False, _: str = Depends(require_admin)):
     """
     Permanently delete a student and all their associated records from the database:
     - Submissions, weekly progress, certificates, payment records, enrollments,
@@ -344,6 +352,21 @@ async def delete_student(student_id: int, _: str = Depends(require_admin)):
         raise HTTPException(status_code=404, detail="Student not found")
 
     email = student["email"]
+
+    # Revenue history is not deleted by accident: a student with a real (non-test) paid payment or an
+    # issued certificate needs an explicit ?force=true. Test accounts / test payments never block.
+    if not force:
+        kept = await db.fetch_one(
+            f"""SELECT (SELECT COUNT(*) FROM payments WHERE student_id = ? AND status = 'paid' AND {REAL_PAYMENT_SQL}) AS paid,
+                       (SELECT COUNT(*) FROM certificates WHERE student_id = ?) AS certs""",
+            (student_id, student_id),
+        )
+        if kept and not student.get("is_test") and ((kept["paid"] or 0) or (kept["certs"] or 0)):
+            raise HTTPException(
+                status_code=409,
+                detail=f"Student #{student_id} has {kept['paid']} paid payment(s) and {kept['certs']} certificate(s). "
+                       "Deleting erases that revenue history. Re-send with ?force=true if you are sure.",
+            )
 
     try:
         enrolled = await db.fetch_all(
@@ -388,6 +411,7 @@ async def delete_student(student_id: int, _: str = Depends(require_admin)):
 
         await db.execute("DELETE FROM students WHERE id = ?", (student_id,))
 
+        _invalidate_analytics()
         logger.info(f"Admin permanently deleted student #{student_id} ({student['first_name']} {student['last_name']} - {email})")
         return {
             "status": "deleted",
@@ -847,20 +871,20 @@ async def send_task_reminders(
 
 
 # ──────────────────────────────────────────────
-# Analytics
+# Analytics — definitions live in services/analytics_service.py
 # ──────────────────────────────────────────────
 
-# Payments that never went through Razorpay checkout (seeded/manual test rows such
-# as pay_test123 / pay_mock_456). Every real paid row passes signature verification
-# in routes/payments.py and carries a genuine pay_… id, so these are excluded from
-# every revenue / paid figure — the dashboard only reports money actually collected.
+# SQL fragment: a payment that counts as real money (not flagged test, not a seeded pay_test/pay_mock row)
 REAL_PAYMENT_SQL = (
-    "COALESCE(razorpay_payment_id, '') NOT LIKE 'pay_test%' "
+    "COALESCE(is_test, 0) = 0 "
+    "AND COALESCE(razorpay_payment_id, '') NOT LIKE 'pay_test%' "
     "AND COALESCE(razorpay_payment_id, '') NOT LIKE 'pay_mock%'"
 )
-TOTAL_WEEKS = 4
-ELIGIBLE_WEEKS = 3   # approvals needed before the certificate can be bought (see pricing copy)
+TOTAL_WEEKS = analytics_service.TOTAL_WEEKS
+ELIGIBLE_WEEKS = analytics_service.ELIGIBLE_WEEKS
 ANALYTICS_TTL_SECONDS = 60
+# The raw rows are cached (not the filtered result): every filter combination is then computed
+# from the same snapshot, so tabs and drill-downs can never disagree within a refresh.
 _analytics_cache: dict = {"at": 0.0, "data": None}
 
 
@@ -868,439 +892,150 @@ def _pct(part: int, whole: int) -> float:
     return round(part * 100 / whole, 1) if whole else 0.0
 
 
-def _median(values: list[float]) -> float | None:
-    values = sorted(v for v in values if v is not None)
-    if not values:
-        return None
-    mid = len(values) // 2
-    med = values[mid] if len(values) % 2 else (values[mid - 1] + values[mid]) / 2
-    return round(med, 1)
-
-
-def _quiz_band(score, total) -> str | None:
-    if not total:
-        return None
-    pct = score * 100 / total if score is not None else 0
-    return "0-49%" if pct < 50 else ("50-79%" if pct < 80 else "80-100%")
-
-
-QUIZ_BANDS = ("0-49%", "50-79%", "80-100%")
-
-
-@router.get("/analytics", summary="Aggregated platform analytics for the admin dashboard")
-async def get_analytics(fresh: bool = False, _: str = Depends(require_admin)):
-    """
-    Built from real activity rather than students.status (which stays 'enrolled'
-    for almost everyone and never records completion):
-      started   = has at least one task submission
-      completed = all 4 weeks approved
-      certified = has a certificate row
-      paid      = at least one verified Razorpay payment (test ids excluded)
-
-    Domains are merged through task_service.normalize_domain_slug — the same resolver
-    tasks, emails and certificates already use — so stored variants like
-    'Data Science' / 'data-science' count as one domain.
-
-    Every query goes out in ONE batched round trip, and the result is cached for
-    ANALYTICS_TTL_SECONDS (pass ?fresh=true to bypass — the Refresh button does).
-    The per-student rollup feeds the funnel, the domain table and the business
-    metrics (acquisition, colleges, quiz bands, time-to-first-task/payment), so
-    all of those numbers agree with each other.
-    """
+async def _dataset(fresh: bool = False) -> tuple[dict, list[dict]]:
     now = time.monotonic()
-    if not fresh and _analytics_cache["data"] is not None and now - _analytics_cache["at"] < ANALYTICS_TTL_SECONDS:
-        return _analytics_cache["data"]
-
-    from services.task_service import task_service
-    from services.email_service import _domain_label
-
-    (students, weekly, tiers, excluded_rows, abandoned_rows, revenue_trend, applications_trend,
-     daily_rows, people_rows, active_rows, referral_rows, review_rows,
-     journey_rows, enrolled_rows, login_rows, pace_rows, wait_rows, urgent_rows, mail_rows,
-     onboard_rows) = await db.fetch_batch([
-        # 0 — per-student rollup
-        (f"""SELECT s.id, s.domain, s.referral_source, s.college, s.year_of_study,
-                    s.quiz_score, s.quiz_total,
-                    COALESCE(sub.submitted, 0)      AS submitted,
-                    COALESCE(sub.weeks_approved, 0) AS weeks_approved,
-                    CASE WHEN pay.student_id  IS NULL THEN 0 ELSE 1 END AS has_paid,
-                    COALESCE(pay.revenue, 0)        AS revenue_paise,
-                    CASE WHEN cert.student_id IS NULL THEN 0 ELSE 1 END AS has_cert,
-                    MAX(0, julianday(sub.first_submit) - julianday(datetime(s.created_at))) AS days_to_submit,
-                    MAX(0, julianday(pay.first_paid)   - julianday(datetime(s.created_at))) AS days_to_pay
-             FROM students s
-             LEFT JOIN (SELECT student_id, COUNT(*) AS submitted,
-                               COUNT(DISTINCT CASE WHEN status = 'approved' THEN week END) AS weeks_approved,
-                               MIN(datetime(submitted_at)) AS first_submit
-                        FROM submissions GROUP BY student_id) sub ON sub.student_id = s.id
-             LEFT JOIN (SELECT student_id, SUM(amount) AS revenue, MIN(datetime(updated_at)) AS first_paid
-                        FROM payments WHERE status = 'paid' AND {REAL_PAYMENT_SQL}
-                        GROUP BY student_id) pay ON pay.student_id = s.id
-             LEFT JOIN (SELECT DISTINCT student_id FROM certificates) cert ON cert.student_id = s.id""", ()),
-        # 1 — week-by-week review status (drop-off curve)
-        ("""SELECT week,
-                  SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) AS approved,
-                  SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) AS rejected,
-                  SUM(CASE WHEN status = 'pending'  THEN 1 ELSE 0 END) AS pending
-           FROM submissions GROUP BY week ORDER BY week""", ()),
-        # 2 — revenue by price point (full-price vs discount-code orders reported separately)
-        (f"""SELECT amount, COUNT(*) AS orders FROM payments
-             WHERE status = 'paid' AND {REAL_PAYMENT_SQL}
-             GROUP BY amount ORDER BY amount DESC""", ()),
-        # 3 — seeded/manual test payments that are excluded everywhere
-        (f"""SELECT COUNT(*) AS orders, COALESCE(SUM(amount), 0) AS amount FROM payments
-             WHERE status = 'paid' AND NOT ({REAL_PAYMENT_SQL})""", ()),
-        # 4 — students who opened checkout but never paid (an order row is created per "Pay" click,
-        #     so count students, not rows)
-        (f"""SELECT COUNT(DISTINCT student_id) AS students FROM payments
-             WHERE status = 'pending' AND student_id NOT IN (
-                 SELECT student_id FROM payments WHERE status = 'paid' AND {REAL_PAYMENT_SQL})""", ()),
-        # 5 — monthly revenue
-        (f"""SELECT strftime('%Y-%m', updated_at) AS month,
-                    COUNT(*) AS orders, COALESCE(SUM(amount), 0) AS revenue_paise
-             FROM payments
-             WHERE status = 'paid' AND {REAL_PAYMENT_SQL}
-               AND updated_at >= datetime('now', '-12 months')
-             GROUP BY month ORDER BY month""", ()),
-        # 6 — monthly applications
-        ("""SELECT strftime('%Y-%m', created_at) AS month, COUNT(*) AS count
-            FROM students
-            WHERE created_at >= datetime('now', '-12 months')
-            GROUP BY month ORDER BY month""", ()),
-        # 7 — daily applications, last 30 days
-        ("""SELECT date(created_at) AS day, COUNT(*) AS count
-            FROM students WHERE created_at >= datetime('now', '-30 days')
-            GROUP BY day ORDER BY day""", ()),
-        # 8 — unique people vs total applications (one person can apply to several tracks)
-        ("SELECT COUNT(DISTINCT lower(email)) AS people, COUNT(*) AS applications FROM students", ()),
-        # 9 — weekly / monthly active people (OTP login or task submission)
-        ("""SELECT COUNT(DISTINCT CASE WHEN t >= datetime('now', '-7 days')  THEN e END) AS wau,
-                   COUNT(DISTINCT CASE WHEN t >= datetime('now', '-30 days') THEN e END) AS mau
-            FROM (SELECT lower(email) AS e, datetime(created_at) AS t FROM otp_tokens WHERE used = 1
-                  UNION ALL
-                  SELECT lower(s.email), datetime(sub.submitted_at)
-                  FROM submissions sub JOIN students s ON s.id = sub.student_id)""", ()),
-        # 10 — referral program funnel
-        ("SELECT status, COUNT(*) AS count FROM referral_conversions GROUP BY status", ()),
-        # 11 — review turnaround + backlog
-        ("""SELECT
-              (SELECT AVG((julianday(datetime(reviewed_at)) - julianday(datetime(submitted_at))) * 24)
-                 FROM submissions WHERE reviewed_at IS NOT NULL AND status IN ('approved', 'rejected')) AS avg_review_hours,
-              (SELECT COUNT(*) FROM submissions WHERE status = 'pending') AS pending,
-              (SELECT MIN(datetime(submitted_at)) FROM submissions WHERE status = 'pending') AS oldest_pending""", ()),
-        # ── User experience ──
-        # 12 — journey per week: who reached it, who got it approved, how many tries it took
-        ("""SELECT week,
-                  COUNT(DISTINCT student_id) AS reached,
-                  COUNT(DISTINCT CASE WHEN status = 'approved' THEN student_id END) AS approved,
-                  SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) AS rejected_now,
-                  SUM(CASE WHEN status = 'pending'  THEN 1 ELSE 0 END) AS pending_now,
-                  AVG(COALESCE(attempts, 1)) AS avg_attempts,
-                  SUM(CASE WHEN COALESCE(attempts, 1) > 1 THEN 1 ELSE 0 END) AS resubmitted
-           FROM submissions GROUP BY week ORDER BY week""", ()),
-        # 13 — enrolled students, and how many never signed in to the dashboard
-        ("""SELECT COUNT(*) AS enrolled,
-                  SUM(CASE WHEN NOT EXISTS (SELECT 1 FROM otp_tokens o
-                                            WHERE lower(o.email) = lower(s.email) AND o.used = 1)
-                           THEN 1 ELSE 0 END) AS never_logged_in
-           FROM students s
-           WHERE EXISTS (SELECT 1 FROM enrollments e WHERE e.student_id = s.id AND e.status != 'dropped')""", ()),
-        # 14 — login experience, last 30 days, per person
-        ("""SELECT COUNT(DISTINCT lower(email)) AS requesters,
-                  COUNT(DISTINCT CASE WHEN used = 1 THEN lower(email) END) AS succeeded,
-                  COUNT(*) AS codes,
-                  SUM(CASE WHEN used = 2 THEN 1 ELSE 0 END) AS superseded,
-                  SUM(CASE WHEN used = 0 AND datetime(expires_at) < datetime('now') THEN 1 ELSE 0 END) AS expired_unused
-           FROM otp_tokens WHERE datetime(created_at) >= datetime('now', '-30 days')""", ()),
-        # 15 — pace: days between a student's week N and week N+1 submissions
-        ("""SELECT b.week AS week,
-                  julianday(datetime(b.submitted_at)) - julianday(datetime(a.submitted_at)) AS gap_days
-           FROM submissions a
-           JOIN submissions b ON b.student_id = a.student_id AND b.batch_id = a.batch_id AND b.week = a.week + 1""", ()),
-        # 16 — how long students wait for a review (last 90 days)
-        ("""SELECT (julianday(datetime(reviewed_at)) - julianday(datetime(submitted_at))) * 24 AS hours
-           FROM submissions
-           WHERE reviewed_at IS NOT NULL AND status IN ('approved', 'rejected')
-             AND datetime(reviewed_at) >= datetime('now', '-90 days')""", ()),
-        # 17 — students who paid to skip the wait (last 30 days)
-        ("""SELECT COUNT(*) AS requests, COUNT(DISTINCT student_id) AS students
-           FROM urgent_requests WHERE datetime(created_at) >= datetime('now', '-30 days')""", ()),
-        # 18 — lifecycle email engagement (last 30 days)
-        ("""SELECT SUM(CASE WHEN delivered_at IS NOT NULL THEN 1 ELSE 0 END) AS delivered,
-                  SUM(CASE WHEN opened_at    IS NOT NULL THEN 1 ELSE 0 END) AS opened,
-                  SUM(CASE WHEN clicked_at   IS NOT NULL THEN 1 ELSE 0 END) AS clicked
-           FROM email_logs WHERE status = 'sent' AND datetime(sent_at) >= datetime('now', '-30 days')""", ()),
-        # 19 — onboarding: days from enrollment to the first task submission
-        ("""SELECT julianday(MIN(datetime(sub.submitted_at))) - julianday(datetime(e.joined_at)) AS days
-           FROM enrollments e
-           JOIN submissions sub ON sub.student_id = e.student_id AND sub.batch_id = e.batch_id
-           GROUP BY e.id""", ()),
-    ])
-
-    funnel = {"total": 0, "started": 0, "completed": 0, "certified": 0, "paid": 0}
-    domains: dict[str, dict] = {}
-    sources: dict[str, dict] = {}
-    colleges: dict[str, dict] = {}
-    years: dict[str, dict] = {}
-    quiz = {b: {"band": b, "total": 0, "completed": 0, "paid": 0} for b in QUIZ_BANDS}
-    days_to_submit: list[float] = []
-    days_to_pay: list[float] = []
-    eligible_unpaid = 0
-
-    def _group(store: dict, key: str, label: str) -> dict:
-        return store.setdefault(key, {"label": label, "total": 0, "started": 0, "completed": 0, "paid": 0})
-
-    for s in students:
-        raw = (s["domain"] or "").strip()
-        key = task_service.normalize_domain_slug(raw) if raw else "unspecified"
-        d = domains.setdefault(key, {
-            "domain": key,
-            "label": _domain_label(key) if raw else "Unspecified",
-            "total": 0, "started": 0, "completed": 0, "certified": 0, "paid": 0,
-            "revenue_rupees": 0.0,
-        })
-        started = (s["submitted"] or 0) > 0
-        completed = (s["weeks_approved"] or 0) >= TOTAL_WEEKS
-        for bucket in (funnel, d):
-            bucket["total"] += 1
-            bucket["started"] += started
-            bucket["completed"] += completed
-            bucket["certified"] += bool(s["has_cert"])
-            bucket["paid"] += bool(s["has_paid"])
-        d["revenue_rupees"] += (s["revenue_paise"] or 0) / 100
-
-        src = (s.get("referral_source") or "").strip()
-        college = (s.get("college") or "").strip()
-        year = (s.get("year_of_study") or "").strip()
-        groups = [_group(sources, src.lower() or "unknown", src or "Unknown")]
-        if college:
-            groups.append(_group(colleges, college.lower(), college))
-        if year:
-            groups.append(_group(years, year.lower(), year))
-        band = _quiz_band(s.get("quiz_score"), s.get("quiz_total"))
-        if band:
-            groups.append(quiz[band])
-        for g in groups:
-            g["total"] += 1
-            g["started"] = g.get("started", 0) + started
-            g["completed"] += completed
-            g["paid"] += bool(s["has_paid"])
-
-        if s.get("days_to_submit") is not None:
-            days_to_submit.append(s["days_to_submit"])
-        if s.get("days_to_pay") is not None:
-            days_to_pay.append(s["days_to_pay"])
-        if (s["weeks_approved"] or 0) >= ELIGIBLE_WEEKS and not s["has_paid"]:
-            eligible_unpaid += 1
-
-    domain_list = sorted(domains.values(), key=lambda d: d["total"], reverse=True)
-    for d in domain_list:
-        d["completion_rate"] = _pct(d["completed"], d["started"])
-
-    def _ranked(store: dict, limit: int | None = None) -> list[dict]:
-        rows = sorted(store.values(), key=lambda g: (g["total"], g["paid"]), reverse=True)
-        for g in rows:
-            g["started_rate"] = _pct(g["started"], g["total"])
-            g["paid_rate"] = _pct(g["paid"], g["total"])
-        return rows[:limit] if limit else rows
-
-    full_price = settings.certificate_price_paise
-    tier_list = []
-    for t in tiers:
-        amount = t["amount"] or 0
-        orders = t["orders"] or 0
-        kind = "full" if amount == full_price else ("discounted" if amount < full_price else "legacy")
-        tier_list.append({
-            "kind": kind,
-            "price_rupees": amount / 100,
-            "orders": orders,
-            "revenue_rupees": amount * orders / 100,
-        })
-    total_revenue = sum(t["revenue_rupees"] for t in tier_list)
-    paid_orders = sum(t["orders"] for t in tier_list)
-
-    excluded = excluded_rows[0] if excluded_rows else {}
-    abandoned = abandoned_rows[0] if abandoned_rows else {}
-    people = people_rows[0] if people_rows else {}
-    active = active_rows[0] if active_rows else {}
-    review = review_rows[0] if review_rows else {}
-
-    ref = {r["status"]: r["count"] or 0 for r in referral_rows}
-    ref_clicked = sum(ref.values())
-    ref_enrolled = ref.get("enrolled", 0)
-    ref_applied = ref.get("applied", 0) + ref_enrolled
-
-    oldest_days = None
-    if review.get("oldest_pending"):
-        try:
-            oldest = datetime.fromisoformat(str(review["oldest_pending"]))
-            oldest_days = max(0.0, round((datetime.utcnow() - oldest).total_seconds() / 86400, 1))
-        except ValueError:
-            pass
-
-    people_n = people.get("people") or 0
-    applications_n = people.get("applications") or 0
-
-    data = {
-        "funnel": {
-            **funnel,
-            "never_started": funnel["total"] - funnel["started"],
-            "start_rate": _pct(funnel["started"], funnel["total"]),
-            "completion_rate": _pct(funnel["completed"], funnel["started"]),
-            "paid_rate": _pct(funnel["paid"], funnel["total"]),
-        },
-        "domains": domain_list,
-        "weekly_completion": [
-            {"week": r["week"], "approved": r["approved"] or 0,
-             "rejected": r["rejected"] or 0, "pending": r["pending"] or 0}
-            for r in weekly
-        ],
-        "revenue": {
-            "total_revenue_rupees": total_revenue,
-            "paid_orders": paid_orders,
-            "paid_students": funnel["paid"],
-            "avg_order_rupees": round(total_revenue / paid_orders, 2) if paid_orders else 0,
-            "tiers": tier_list,
-            "abandoned_checkouts": abandoned.get("students") or 0,
-            "excluded_test_orders": excluded.get("orders") or 0,
-            "excluded_test_rupees": (excluded.get("amount") or 0) / 100,
-            "trend": [
-                {"month": r["month"], "orders": r["orders"] or 0,
-                 "revenue_rupees": (r["revenue_paise"] or 0) / 100}
-                for r in revenue_trend
-            ],
-            "per_applicant_rupees": round(total_revenue / funnel["total"], 2) if funnel["total"] else 0,
-            "eligible_unpaid": eligible_unpaid,
-        },
-        "applications_trend": [
-            {"month": r["month"], "count": r["count"] or 0} for r in applications_trend
-        ],
-        "growth": {
-            "daily_applications": [{"day": r["day"], "count": r["count"] or 0} for r in daily_rows],
-            "unique_people": people_n,
-            "total_applications": applications_n,
-            "multi_track_rate": _pct(applications_n - people_n, people_n),
-            "wau": active.get("wau") or 0,
-            "mau": active.get("mau") or 0,
-        },
-        "acquisition": {
-            "sources": _ranked(sources),
-            "referrals": {"clicked": ref_clicked, "applied": ref_applied, "enrolled": ref_enrolled},
-        },
-        "audience": {
-            "colleges": _ranked(colleges, 10),
-            "years": _ranked(years),
-        },
-        "speed": {
-            "median_days_to_first_task": _median(days_to_submit),
-            "median_days_to_payment": _median(days_to_pay),
-            "avg_review_hours": round(review["avg_review_hours"], 1) if review.get("avg_review_hours") is not None else None,
-            "pending_reviews": review.get("pending") or 0,
-            "oldest_pending_days": oldest_days,
-        },
-        "quiz_outcomes": [
-            {**q, "completion_rate": _pct(q["completed"], q["total"]), "paid_rate": _pct(q["paid"], q["total"])}
-            for q in quiz.values()
-        ],
-        "ux": _ux_block(journey_rows, enrolled_rows, login_rows, pace_rows, wait_rows, urgent_rows,
-                        mail_rows, onboard_rows, funnel, abandoned.get("students") or 0),
-    }
+    cached = _analytics_cache["data"]
+    if not fresh and cached is not None and now - _analytics_cache["at"] < ANALYTICS_TTL_SECONDS:
+        return cached
+    raw = await analytics_service.load_raw(db)
+    data = (raw, analytics_service.build_students(raw))
     _analytics_cache["at"] = now
     _analytics_cache["data"] = data
     return data
 
 
-def _p90(values: list[float]) -> float | None:
-    values = sorted(v for v in values if v is not None)
-    if not values:
-        return None
-    return round(values[min(len(values) - 1, int(len(values) * 0.9))], 1)
+def _invalidate_analytics() -> None:
+    _analytics_cache.update(at=0.0, data=None)
 
 
-def _ux_block(journey_rows, enrolled_rows, login_rows, pace_rows, wait_rows, urgent_rows,
-              mail_rows, onboard_rows, funnel: dict, abandoned_students: int) -> dict:
-    """User-experience signals derived from what students actually do: where they stall,
-    how hard each week is, how logging in goes, how long they wait on us, and where
-    they drop at checkout. (There is no page-view tracking, so this is behaviour-based.)"""
-    enrolled = enrolled_rows[0] if enrolled_rows else {}
-    login = login_rows[0] if login_rows else {}
-    urgent = urgent_rows[0] if urgent_rows else {}
-    mail = mail_rows[0] if mail_rows else {}
+def _filters(date_from, date_to, domain, source, campaign, include_test) -> dict:
+    return {"date_from": date_from or None, "date_to": date_to or None, "domain": domain or None,
+            "source": source or None, "campaign": campaign or None, "include_test": include_test}
 
-    pace: dict[int, list[float]] = {}
-    for r in pace_rows:
-        if r["gap_days"] is not None and r["gap_days"] >= 0:
-            pace.setdefault(r["week"], []).append(r["gap_days"])
 
-    weeks = []
-    total_tasks = total_resubmitted = 0
-    weighted_attempts = 0.0
-    for r in journey_rows:
-        reached = r["reached"] or 0
-        resubmitted = r["resubmitted"] or 0
-        avg_attempts = r["avg_attempts"] or 1
-        total_tasks += reached
-        total_resubmitted += resubmitted
-        weighted_attempts += avg_attempts * reached
-        weeks.append({
-            "week": r["week"],
-            "reached": reached,
-            "approved": r["approved"] or 0,
-            "rejected_now": r["rejected_now"] or 0,
-            "pending_now": r["pending_now"] or 0,
-            "avg_attempts": round(avg_attempts, 2),
-            "resubmitted": resubmitted,
-            "median_days_from_prev_week": _median(pace.get(r["week"], [])),
-        })
+@router.get("/analytics", summary="Aggregated platform analytics for the admin dashboard")
+async def get_analytics(
+    fresh: bool = False,
+    date_from: str | None = Query(None, alias="from", description="Applied on/after (IST date, YYYY-MM-DD)"),
+    date_to: str | None = Query(None, alias="to", description="Applied on/before (IST date, YYYY-MM-DD)"),
+    domain: str | None = None,
+    source: str | None = None,
+    campaign: str | None = None,
+    include_test: bool = False,
+    inactive_days: int = 7,
+    _: str = Depends(require_admin),
+):
+    """
+    Every figure is computed by services/analytics_service.py from one per-student rollup
+    (see DEFINITIONS in the response). The date range is a COHORT filter: students who applied in
+    the range (IST). Test accounts and test payments are excluded unless include_test=true.
+    """
+    raw, students = await _dataset(fresh)
+    return analytics_service.compute(
+        raw, students, _filters(date_from, date_to, domain, source, campaign, include_test),
+        inactive_days=max(1, min(inactive_days, 90)))
 
-    by_week = {w["week"]: w["reached"] for w in weeks}
-    enrolled_n = enrolled.get("enrolled") or 0
-    journey = [{"step": "Enrolled", "count": enrolled_n}]
-    journey += [{"step": f"Week {w}", "count": by_week.get(w, 0)} for w in range(1, TOTAL_WEEKS + 1)]
-    journey += [{"step": "Completed", "count": funnel["completed"]}, {"step": "Paid", "count": funnel["paid"]}]
 
-    waits = [r["hours"] for r in wait_rows if r["hours"] is not None and r["hours"] >= 0]
-    requesters = login.get("requesters") or 0
-    delivered = mail.get("delivered") or 0
-    checkout_starts = abandoned_students + funnel["paid"]
+@router.get("/analytics/students", summary="Drill-down: students behind a metric")
+async def analytics_students(
+    stage: str,
+    date_from: str | None = Query(None, alias="from"),
+    date_to: str | None = Query(None, alias="to"),
+    domain: str | None = None,
+    source: str | None = None,
+    campaign: str | None = None,
+    include_test: bool = False,
+    q: str | None = None,
+    page: int = 1,
+    limit: int = 25,
+    _: str = Depends(require_admin),
+):
+    """The exact students counted by a funnel stage / payment state, using the same filters and rollup."""
+    _, students = await _dataset()
+    try:
+        return analytics_service.drilldown(
+            students, _filters(date_from, date_to, domain, source, campaign, include_test), stage, page, limit, q)
+    except KeyError:
+        raise HTTPException(status_code=400, detail=f"Unknown stage '{stage}'")
 
-    return {
-        "journey": journey,
-        "weeks": weeks,
-        "onboarding": {
-            "enrolled": enrolled_n,
-            "never_logged_in": enrolled.get("never_logged_in") or 0,
-            "median_days_to_first_task": _median([r["days"] for r in onboard_rows if r["days"] is not None and r["days"] >= 0]),
-        },
-        "login": {
-            "people_requested": requesters,
-            "people_signed_in": login.get("succeeded") or 0,
-            "success_rate": _pct(login.get("succeeded") or 0, requesters),
-            "codes_sent": login.get("codes") or 0,
-            "codes_replaced": login.get("superseded") or 0,
-            "codes_expired_unused": login.get("expired_unused") or 0,
-        },
-        "tasks": {
-            "avg_attempts": round(weighted_attempts / total_tasks, 2) if total_tasks else None,
-            "resubmitted": total_resubmitted,
-        },
-        "review_wait": {
-            "median_hours": _median(waits),
-            "p90_hours": _p90(waits),
-            "reviews": len(waits),
-        },
-        "urgent_requests_30d": {
-            "requests": urgent.get("requests") or 0,
-            "students": urgent.get("students") or 0,
-        },
-        "checkout": {
-            "started": checkout_starts,
-            "abandoned": abandoned_students,
-            "drop_rate": _pct(abandoned_students, checkout_starts),
-        },
-        "email_30d": {
-            "delivered": delivered,
-            "open_rate": _pct(mail.get("opened") or 0, delivered),
-            "click_rate": _pct(mail.get("clicked") or 0, delivered),
-        },
-    }
+
+@router.get("/analytics/data-quality", summary="Inconsistent records and metric validation warnings")
+async def analytics_data_quality(_: str = Depends(require_admin)):
+    _, students = await _dataset()
+    return await analytics_service.data_quality(db, students)
+
+
+@router.get("/students/{student_id}/journey", summary="One student's full timeline")
+async def student_journey(student_id: int, _: str = Depends(require_admin)):
+    data = await analytics_service.journey(db, student_id)
+    if not data:
+        raise HTTPException(status_code=404, detail="Student not found")
+    return data
+
+
+class TestFlagRequest(BaseModel):
+    is_test: bool
+
+
+@router.patch("/students/{student_id}/test-flag", summary="Mark a student account as test (or real)")
+async def set_student_test_flag(student_id: int, req: TestFlagRequest, _: str = Depends(require_admin)):
+    """Flags only; nothing is deleted. Flagged students drop out of every analytics figure by default."""
+    if not await db.fetch_one("SELECT id FROM students WHERE id = ?", (student_id,)):
+        raise HTTPException(status_code=404, detail="Student not found")
+    await db.execute("UPDATE students SET is_test = ? WHERE id = ?", (1 if req.is_test else 0, student_id))
+    _invalidate_analytics()
+    return {"student_id": student_id, "is_test": req.is_test}
+
+
+@router.patch("/payments/{payment_id}/test-flag", summary="Mark a payment as a test transaction (or real)")
+async def set_payment_test_flag(payment_id: int, req: TestFlagRequest, _: str = Depends(require_admin)):
+    if not await db.fetch_one("SELECT id FROM payments WHERE id = ?", (payment_id,)):
+        raise HTTPException(status_code=404, detail="Payment not found")
+    await db.execute("UPDATE payments SET is_test = ? WHERE id = ?", (1 if req.is_test else 0, payment_id))
+    _invalidate_analytics()
+    return {"payment_id": payment_id, "is_test": req.is_test}
+
+
+@router.get("/payments", summary="Payment lifecycle list (orders, transactions, failures)")
+async def list_payments(
+    status: str | None = None,     # created | pending | paid | failed | abandoned | test
+    q: str | None = None,
+    page: int = 1,
+    limit: int = 25,
+    _: str = Depends(require_admin),
+):
+    """Order-level view. 'abandoned' is derived (see DEFINITIONS); 'test' lists flagged test transactions."""
+    from datetime import datetime, timedelta
+    rows = await db.fetch_all(
+        """SELECT p.id, p.student_id, p.razorpay_order_id, p.razorpay_payment_id, p.amount, p.status,
+                  COALESCE(p.is_test, 0) AS is_test, p.created_at, p.initiated_at, p.completed_at, p.updated_at,
+                  p.failure_code, p.failure_reason, p.discount_code, p.confirmed_via,
+                  s.first_name || ' ' || s.last_name AS student_name, s.email, s.domain
+           FROM payments p LEFT JOIN students s ON s.id = p.student_id ORDER BY p.id DESC"""
+    )
+    now = datetime.utcnow()
+    out = []
+    for r in rows:
+        shown = r["status"]
+        if r["status"] in ("created", "pending"):
+            started = analytics_service.parse_ts(r["initiated_at"] or r["created_at"])
+            limit_age = timedelta(hours=analytics_service.PENDING_ABANDON_HOURS) if r["status"] == "pending" \
+                else timedelta(minutes=analytics_service.FIRST_STEP_ABANDON_MIN)
+            if started and now - started > limit_age:
+                shown = "abandoned"
+        r["lifecycle"] = shown
+        r["legacy"] = not r["initiated_at"]
+        r["paid_at"] = (r["completed_at"] or r["updated_at"]) if r["status"] == "paid" else None
+        out.append(r)
+    if status == "test":
+        out = [r for r in out if r["is_test"]]
+    elif status:
+        out = [r for r in out if r["lifecycle"] == status and not r["is_test"]]
+    if q and q.strip():
+        n = q.strip().lower()
+        out = [r for r in out if n in f"{r['student_name']} {r['email']} {r['razorpay_order_id']} {r['razorpay_payment_id']}".lower()]
+    total = len(out)
+    limit = max(1, min(limit, 100))
+    page = max(1, page)
+    return {"payments": out[(page - 1) * limit: page * limit], "total": total, "page": page,
+            "limit": limit, "total_pages": max(1, -(-total // limit))}

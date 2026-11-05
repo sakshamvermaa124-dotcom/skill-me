@@ -1649,8 +1649,9 @@ document.addEventListener('DOMContentLoaded', () => {
       // 1. Create Razorpay order on backend
       const orderRes = await fetch(`${API}/api/payments/create-order`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ student_id: studentId, batch_id: batchId, discount_code: discountCode })
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ student_id: studentId, batch_id: batchId, discount_code: discountCode,
+          ...(window.SkillMeAttribution ? window.SkillMeAttribution.lastTouch() : {}) })
       });
       const orderData = await orderRes.json().catch(() => ({}));
 
@@ -1732,6 +1733,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       };
       const rzp = new window.Razorpay(options);
+      // Record why an attempt failed (card declined, bank timeout...). Closing the modal is NOT sent:
+      // an unpaid order that goes quiet is counted as abandoned by the server.
+      rzp.on('payment.failed', function (resp) {
+        const err = (resp && resp.error) || {};
+        fetch(`${API}/api/payments/failed`, {
+          method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({ razorpay_order_id: orderData.order_id, razorpay_payment_id: err.metadata && err.metadata.payment_id || null,
+            code: err.code || null, reason: err.description || err.reason || null })
+        }).catch(() => {});
+      });
       rzp.open();
 
     } catch(err) {

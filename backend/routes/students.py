@@ -24,6 +24,27 @@ router = APIRouter(prefix="/api/students", tags=["students"])
 # Request Models
 # ──────────────────────────────────────────────
 
+class Attribution(BaseModel):
+    """Marketing attribution captured client-side (attribution.js). Everything is optional."""
+    utm_source: str | None = Field(None, max_length=100)
+    utm_medium: str | None = Field(None, max_length=100)
+    utm_campaign: str | None = Field(None, max_length=150)
+    utm_content: str | None = Field(None, max_length=150)
+    referral_code: str | None = Field(None, max_length=40)
+    landing_page: str | None = Field(None, max_length=300)
+    referrer: str | None = Field(None, max_length=300)
+    first_touch_source: str | None = Field(None, max_length=100)
+    first_touch_at: str | None = Field(None, max_length=40)
+    last_touch_source: str | None = Field(None, max_length=100)
+    last_touch_campaign: str | None = Field(None, max_length=150)
+    last_touch_at: str | None = Field(None, max_length=40)
+
+
+def _clean(v: str | None) -> str | None:
+    v = (v or "").strip()
+    return v or None
+
+
 class ApplicationRequest(BaseModel):
     first_name: str = Field(..., min_length=1, max_length=100)
     last_name: str = Field(..., min_length=1, max_length=100)
@@ -37,6 +58,7 @@ class ApplicationRequest(BaseModel):
     referral_source: str | None = Field(None, max_length=100)
     quiz_score: int | None = Field(None, ge=0, le=100)
     quiz_total: int | None = Field(None, ge=1, le=100)
+    attribution: Attribution | None = None
 
 
 class SubmitTaskRequest(BaseModel):
@@ -115,9 +137,17 @@ async def apply(req: ApplicationRequest, background_tasks: BackgroundTasks):
     """
     try:
         req.email = req.email.strip()
-        existing = await db.fetch_one(
-            "SELECT id, status FROM students WHERE lower(email) = lower(?) AND domain = ?",
-            (req.email, req.domain),
+        # Compare tracks by their normalized slug so 'Data Science' and 'data-science' (or a
+        # case variant) can't create a second application for the same person and track.
+        from services.task_service import task_service
+        wanted = task_service.normalize_domain_slug(req.domain)
+        same_email = await db.fetch_all(
+            "SELECT id, status, domain FROM students WHERE lower(email) = lower(?)", (req.email,)
+        )
+        existing = next(
+            (r for r in same_email
+             if r["domain"] == req.domain or (r["domain"] and task_service.normalize_domain_slug(r["domain"]) == wanted)),
+            None,
         )
         if existing:
             return {
@@ -127,13 +157,29 @@ async def apply(req: ApplicationRequest, background_tasks: BackgroundTasks):
                 "current_status": existing["status"],
             }
 
+        a = req.attribution
+        # attribution_captured separates "applied before tracking existed" (0, unknown) from
+        # "tracked, and the visitor really had no campaign/referrer" (1, direct).
+        attr_values = (
+            _clean(a.utm_source) if a else None, _clean(a.utm_medium) if a else None,
+            _clean(a.utm_campaign) if a else None, _clean(a.utm_content) if a else None,
+            ((_clean(a.referral_code) or "").upper() or None) if a else None,
+            _clean(a.landing_page) if a else None, _clean(a.referrer) if a else None,
+            _clean(a.first_touch_source) if a else None, _clean(a.first_touch_at) if a else None,
+            _clean(a.last_touch_source) if a else None, _clean(a.last_touch_campaign) if a else None,
+            _clean(a.last_touch_at) if a else None, 1 if a else 0,
+        )
         try:
             student_id = await db.insert(
                 """INSERT INTO students
                    (first_name, last_name, email, phone, linkedin_url,
                     college, year_of_study, domain, motivation, referral_source,
-                    quiz_score, quiz_total, status)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'applied')""",
+                    quiz_score, quiz_total, status,
+                    utm_source, utm_medium, utm_campaign, utm_content, referral_code,
+                    landing_page, referrer, first_touch_source, first_touch_at,
+                    last_touch_source, last_touch_campaign, last_touch_at, attribution_captured)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'applied',
+                           ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     req.first_name,
                     req.last_name,
@@ -147,6 +193,7 @@ async def apply(req: ApplicationRequest, background_tasks: BackgroundTasks):
                     req.referral_source,
                     req.quiz_score,
                     req.quiz_total,
+                    *attr_values,
                 ),
             )
         except Exception as e:
@@ -159,6 +206,18 @@ async def apply(req: ApplicationRequest, background_tasks: BackgroundTasks):
                            "isn't available yet; please write to admin@skill-me-intern.in.",
                 )
             raise
+
+        # A referral code that matches a real student links the new application to its referrer.
+        code = attr_values[4]
+        if code:
+            referrer_row = await db.fetch_one("SELECT student_id FROM referral_codes WHERE code = ?", (code,))
+            if referrer_row and referrer_row["student_id"] != student_id:
+                await db.execute(
+                    """INSERT INTO referral_conversions
+                       (referrer_student_id, referred_student_id, referred_email, status)
+                       VALUES (?, ?, ?, 'applied')""",
+                    (referrer_row["student_id"], student_id, req.email),
+                )
 
         # Fire confirmation email in the background (non-blocking)
         background_tasks.add_task(

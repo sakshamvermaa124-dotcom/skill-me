@@ -107,7 +107,7 @@ async def download_certificate(student_id: int, batch_id: int):
     cert_id = None
     issued_on = None
     try:
-        issued = await certificate_service.issue_certificate(student["id"], enrollment["id"])
+        issued = await certificate_service.issue_certificate(student["id"], enrollment["id"], via="download")
         cert_id, issued_on = issued["cert_id"], issued["issued_on"]
     except Exception as e:
         # Non-critical: the PDF falls back to the deterministic ID

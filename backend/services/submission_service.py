@@ -14,6 +14,7 @@ from services.feedback_service import build_feedback, feedback_to_text
 logger = logging.getLogger("skillme.submission")
 
 SCORE_PER_APPROVAL = 25
+TOTAL_WEEKS = 4
 
 
 def _is_linkedin_url(url: str) -> bool:
@@ -84,6 +85,28 @@ class SubmissionService:
             "feedback_text": feedback_text,
         }
 
+    async def _sync_completion(self, student_id: int, batch_id: int) -> None:
+        """Keep enrollments.status/completed_at in line with the approvals: completed exactly when
+        all TOTAL_WEEKS distinct weeks are approved (derived from submissions, the source of truth)."""
+        row = await db.fetch_one(
+            """SELECT COUNT(DISTINCT week) AS weeks, MAX(reviewed_at) AS last_review
+               FROM submissions WHERE student_id = ? AND batch_id = ? AND status = 'approved'""",
+            (student_id, batch_id),
+        )
+        weeks = (row or {}).get("weeks") or 0
+        if weeks >= TOTAL_WEEKS:
+            await db.execute(
+                """UPDATE enrollments SET status = 'completed', completed_at = COALESCE(completed_at, ?)
+                   WHERE student_id = ? AND batch_id = ? AND status IN ('enrolled', 'active')""",
+                (row["last_review"], student_id, batch_id),
+            )
+        else:
+            await db.execute(
+                """UPDATE enrollments SET status = 'enrolled', completed_at = NULL
+                   WHERE student_id = ? AND batch_id = ? AND status = 'completed'""",
+                (student_id, batch_id),
+            )
+
     async def approve_submission(self, submission_id: int, admin_note: str | None = None) -> dict:
         submission = await db.fetch_one("SELECT * FROM submissions WHERE id = ?", (submission_id,))
         if not submission:
@@ -91,7 +114,7 @@ class SubmissionService:
         if submission["status"] == "approved":
             return {"submission_id": submission_id, "status": "approved", "already": True}
 
-        now = datetime.utcnow().isoformat()
+        now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")  # same format as CURRENT_TIMESTAMP columns
         await db.execute(
             "UPDATE submissions SET status = 'approved', admin_note = ?, reviewed_at = ? WHERE id = ?",
             (admin_note, now, submission_id),
@@ -121,6 +144,7 @@ class SubmissionService:
                 (student_id, batch_id, week, SCORE_PER_APPROVAL),
             )
 
+        await self._sync_completion(student_id, batch_id)
         logger.info(f"Approved submission {submission_id} (student {student_id}, week {week}): +{SCORE_PER_APPROVAL} score")
         return {"submission_id": submission_id, "status": "approved"}
 
@@ -131,7 +155,7 @@ class SubmissionService:
 
         was_approved = submission["status"] == "approved"
 
-        now = datetime.utcnow().isoformat()
+        now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")  # same format as CURRENT_TIMESTAMP columns
         await db.execute(
             "UPDATE submissions SET status = 'rejected', admin_note = ?, reviewed_at = ? WHERE id = ?",
             (admin_note, now, submission_id),
@@ -148,6 +172,8 @@ class SubmissionService:
                    WHERE student_id = ? AND batch_id = ? AND week = ?""",
                 (SCORE_PER_APPROVAL, submission["student_id"], submission["batch_id"], submission["week"]),
             )
+
+            await self._sync_completion(submission["student_id"], submission["batch_id"])
 
         logger.info(f"Rejected submission {submission_id}: {admin_note or ''}")
         return {"submission_id": submission_id, "status": "rejected"}

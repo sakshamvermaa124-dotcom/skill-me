@@ -14,7 +14,7 @@ import hmac
 import logging
 
 import httpx
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from config import settings
@@ -22,6 +22,8 @@ from db.database import db
 from services.certificate_service import certificate_service
 from services.enrollment_service import enrollment_service
 from services.email_service import email_service
+from services import payment_service
+from middleware.student_auth import require_student
 
 logger = logging.getLogger("skillme.payments")
 router = APIRouter(prefix="/api/payments", tags=["payments"])
@@ -38,6 +40,15 @@ class CreateOrderRequest(BaseModel):
     student_id: int = Field(..., description="Student database ID")
     batch_id: int | None = Field(None, description="Internal enrollment reference (validated server-side)")
     discount_code: str | None = Field(None, description="Optional discount code")
+    last_touch_source: str | None = Field(None, max_length=100)
+    last_touch_campaign: str | None = Field(None, max_length=150)
+
+
+class PaymentFailedRequest(BaseModel):
+    razorpay_order_id: str
+    razorpay_payment_id: str | None = None
+    code: str | None = Field(None, max_length=100)
+    reason: str | None = Field(None, max_length=300)
 
 
 class VerifyPaymentRequest(BaseModel):
@@ -76,7 +87,7 @@ def _verify_signature(order_id: str, payment_id: str, signature: str) -> bool:
 # ──────────────────────────────────────────────
 
 @router.post("/create-order", summary="Create a Razorpay payment order for certificate")
-async def create_order(req: CreateOrderRequest):
+async def create_order(req: CreateOrderRequest, me: dict = Depends(require_student)):
     """
     Creates a Razorpay order for the student to pay for their certificate.
     Returns the order_id and key_id needed by the frontend Razorpay Checkout.
@@ -86,6 +97,9 @@ async def create_order(req: CreateOrderRequest):
             status_code=503,
             detail="Payment gateway not configured. Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to .env"
         )
+
+    if me["id"] != req.student_id:
+        raise HTTPException(status_code=403, detail="You can only pay for your own internship.")
 
     # Validate student exists
     student = await db.fetch_one(
@@ -140,6 +154,26 @@ async def create_order(req: CreateOrderRequest):
     if req.discount_code and req.discount_code.strip().upper() == "BLACKYY":
         amount = 500
 
+    # Reuse a recent unpaid order for the same enrollment and price instead of creating one
+    # per click — keeps "checkout initiated" meaning one attempt, not one button press.
+    open_order = await db.fetch_one(
+        """SELECT razorpay_order_id FROM payments
+           WHERE student_id = ? AND batch_id = ? AND status IN ('created', 'pending')
+             AND amount = ? AND razorpay_order_id IS NOT NULL
+             AND datetime(COALESCE(initiated_at, created_at)) >= datetime('now', '-30 minutes')
+           ORDER BY id DESC LIMIT 1""",
+        (req.student_id, batch_id, amount),
+    )
+    if open_order:
+        return {
+            "order_id": open_order["razorpay_order_id"],
+            "amount": amount,
+            "currency": "INR",
+            "key_id": settings.razorpay_key_id,
+            "student_name": f"{student['first_name']} {student['last_name']}",
+            "student_email": student["email"],
+        }
+
     # Create order via Razorpay API
     async with httpx.AsyncClient(timeout=15) as client:
         resp = await client.post(
@@ -167,12 +201,17 @@ async def create_order(req: CreateOrderRequest):
 
     order = resp.json()
 
-    # Record pending payment
+    # Record the checkout. Razorpay test-mode keys produce real-looking pay_ ids, so flag the
+    # order as a test transaction from the key itself rather than guessing from the id later.
+    is_test = 1 if (settings.razorpay_key_id or "").startswith("rzp_test") else 0
+    code = (req.discount_code or "").strip().upper()[:50] or None
     await db.execute(
-        """INSERT INTO payments (student_id, batch_id, razorpay_order_id, amount, status)
-           VALUES (?, ?, ?, ?, 'pending')
+        """INSERT INTO payments (student_id, batch_id, razorpay_order_id, amount, status, is_test,
+                                 initiated_at, discount_code, last_touch_source, last_touch_campaign)
+           VALUES (?, ?, ?, ?, 'created', ?, CURRENT_TIMESTAMP, ?, ?, ?)
            ON CONFLICT(razorpay_order_id) DO NOTHING""",
-        (req.student_id, batch_id, order["id"], amount),
+        (req.student_id, batch_id, order["id"], amount, is_test, code,
+         (req.last_touch_source or "").strip() or None, (req.last_touch_campaign or "").strip() or None),
     )
 
     logger.info("Created Razorpay order %s for student %s", order["id"], req.student_id)
@@ -197,34 +236,30 @@ async def verify_payment(req: VerifyPaymentRequest, background_tasks: Background
         logger.warning("Invalid payment signature for order %s", req.razorpay_order_id)
         raise HTTPException(status_code=400, detail="Payment signature verification failed — possible fraud attempt")
 
-    # Update payment record
-    await db.execute(
-        """UPDATE payments
-           SET razorpay_payment_id = ?, status = 'paid', updated_at = CURRENT_TIMESTAMP
-           WHERE razorpay_order_id = ?""",
-        (req.razorpay_payment_id, req.razorpay_order_id),
-    )
+    # The order row is the source of truth. An order we never created (or one belonging to a
+    # different student) must not produce a payment or a certificate.
+    order_row = await payment_service.get_order(req.razorpay_order_id)
+    if not order_row or order_row["student_id"] != req.student_id:
+        logger.warning("Verify for unknown/mismatched order %s (student %s)", req.razorpay_order_id, req.student_id)
+        raise HTTPException(status_code=400, detail="This payment does not match any order on record")
 
-    # The order row is the source of truth for which student/enrollment was paid for
-    order_row = await db.fetch_one(
-        "SELECT student_id, batch_id FROM payments WHERE razorpay_order_id = ?",
-        (req.razorpay_order_id,),
+    # Idempotent: a second verify (or a webhook that got there first) changes nothing.
+    order_row, newly_paid = await payment_service.mark_paid(
+        req.razorpay_order_id, req.razorpay_payment_id, via="verify"
     )
-    student_id = order_row["student_id"] if order_row else req.student_id
-    batch_id = order_row["batch_id"] if order_row else await enrollment_service.resolve_batch_id(
-        req.student_id, req.batch_id
-    )
-    if not batch_id:
-        raise HTTPException(status_code=400, detail="No enrollment found for this payment")
+    student_id = order_row["student_id"]
+    batch_id = order_row["batch_id"]
 
     logger.info(
-        "Payment verified: order=%s payment=%s student=%s",
-        req.razorpay_order_id, req.razorpay_payment_id, student_id
+        "Payment verified: order=%s payment=%s student=%s newly_paid=%s",
+        req.razorpay_order_id, req.razorpay_payment_id, student_id, newly_paid
     )
 
     # Issue certificate (or return existing if already issued)
     try:
-        cert_data = await certificate_service.issue_certificate(student_id, batch_id, suppress_email=True)
+        cert_data = await certificate_service.issue_certificate(
+            student_id, batch_id, suppress_email=True, via="payment", payment_id=order_row["id"]
+        )
     except ValueError:
         # May already exist — fetch it
         cert = await db.fetch_one(
@@ -243,7 +278,7 @@ async def verify_payment(req: VerifyPaymentRequest, background_tasks: Background
            WHERE s.id = ?""",
         (batch_id, student_id)
     )
-    if student:
+    if student and newly_paid:
         background_tasks.add_task(
             email_service.send_certificate_ready,
             first_name=student["first_name"],
@@ -258,6 +293,16 @@ async def verify_payment(req: VerifyPaymentRequest, background_tasks: Background
         "cert_id": cert_data["cert_id"],
         "message": "Payment successful! Your certificate has been issued.",
     }
+
+
+@router.post("/failed", summary="Record a failed checkout attempt (Razorpay payment.failed)")
+async def payment_failed(req: PaymentFailedRequest, me: dict = Depends(require_student)):
+    """Called by the dashboard when Razorpay reports a failed attempt. Never overrides a paid order."""
+    order = await payment_service.get_order(req.razorpay_order_id)
+    if not order or order["student_id"] != me["id"]:
+        raise HTTPException(status_code=404, detail="Order not found")
+    changed = await payment_service.mark_failed(req.razorpay_order_id, req.code, req.reason)
+    return {"status": "recorded" if changed else "ignored"}
 
 
 @router.get("/status/{student_id}/{batch_id}", summary="Check a student's certificate payment status")

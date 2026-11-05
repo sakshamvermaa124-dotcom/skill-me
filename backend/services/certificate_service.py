@@ -410,9 +410,16 @@ class CertificateService:
         student_id: int,
         batch_id: int,
         suppress_email: bool = False,
+        via: str = "admin",
+        payment_id: int | None = None,
     ) -> dict:
         """
         Issue a certificate for a student who completed their internship.
+
+        Integrity rules (certificates must hang off a real enrollment):
+          - the enrollment (student_id, batch_id) must exist and not be dropped;
+          - via='payment' / 'download' additionally require a paid payment on that enrollment.
+        `via` is recorded on the row; rows issued before this column existed stay NULL (legacy).
         Records the certificate and — on first issuance only — sends the
         certificate_ready notification email.
 
@@ -438,6 +445,22 @@ class CertificateService:
             (student_id, batch_id),
         )
 
+        if not existing:
+            enrollment = await db.fetch_one(
+                "SELECT status FROM enrollments WHERE student_id = ? AND batch_id = ?",
+                (student_id, batch_id),
+            )
+            if not enrollment or enrollment["status"] == "dropped":
+                raise ValueError(f"Student {student_id} has no active enrollment {batch_id}")
+            if via in ("payment", "download"):
+                paid = await db.fetch_one(
+                    "SELECT id FROM payments WHERE student_id = ? AND batch_id = ? AND status = 'paid'",
+                    (student_id, batch_id),
+                )
+                if not paid:
+                    raise ValueError("A paid payment is required before a certificate can be issued")
+                payment_id = payment_id or paid["id"]
+
         # Always prefer the stored ID so a PDF/email never shows an ID that won't verify
         cert_id = existing["cert_id"] if existing else _cert_id_from_student(student_id, batch_id)
         issued_on = _format_issued_on(existing["issued_at"]) if existing else datetime.utcnow().strftime("%d %B %Y")
@@ -445,9 +468,9 @@ class CertificateService:
 
         if is_new:
             await db.insert(
-                """INSERT INTO certificates (student_id, batch_id, cert_id, issued_at)
-                   VALUES (?, ?, ?, CURRENT_TIMESTAMP)""",
-                (student_id, batch_id, cert_id),
+                """INSERT INTO certificates (student_id, batch_id, cert_id, issued_at, issued_via, payment_id)
+                   VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?)""",
+                (student_id, batch_id, cert_id, via, payment_id),
             )
             logger.info(f"Issued certificate {cert_id} to student {student_id} (enrollment {batch_id})")
 

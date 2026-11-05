@@ -138,7 +138,7 @@ async def verify_otp(email: str, otp: str) -> Optional[str]:
     # We still await this to prevent race conditions on double OTP usage,
     # but we've eliminated one full sequential DB roundtrip.
     await db.execute(
-        "UPDATE otp_tokens SET used = 1 WHERE id = ?",
+        "UPDATE otp_tokens SET used = 1, verified_at = CURRENT_TIMESTAMP WHERE id = ?",
         (row["id"],)
     )
 

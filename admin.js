@@ -48,7 +48,7 @@ const PAGE_META = {
   overview:  { title: 'Overview',  subtitle: 'Platform summary and recent activity' },
   students:  { title: 'Students',  subtitle: 'Shortlist and enroll applicants' },
   alumni:    { title: 'Alumni',    subtitle: 'Students who completed their internship' },
-  analytics: { title: 'Analytics', subtitle: 'Domain performance, completion rates and revenue at a glance' },
+  analytics: { title: 'Analytics', subtitle: 'One set of definitions: funnel, acquisition, payments, engagement and data quality' },
   email:     { title: 'Email Settings', subtitle: 'Brevo SMTP relay — test and monitor email delivery' },
   submissions: { title: 'Submissions', subtitle: 'Review and approve/reject weekly LinkedIn submissions' },
   'urgent-requests': { title: 'Urgent Requests', subtitle: 'Expedited (24h) certificate/LOR/portfolio processing requests' },
@@ -131,7 +131,7 @@ function logoutAdmin() {
   if (app) app.style.display = 'none';
 }
 
-window.addEventListener('themechange', () => { if (currentPage === 'analytics') loadAnalytics(); });
+window.addEventListener('themechange', () => { if (currentPage === 'analytics' && window.loadAnalytics) loadAnalytics(); });
 
 document.addEventListener('DOMContentLoaded', () => {
   localStorage.removeItem('skillme_admin_key'); // older sessions kept the key forever
@@ -150,7 +150,7 @@ function navigate(page) {
   if (page === 'overview') loadOverview();
   if (page === 'students') loadStudents();
   if (page === 'alumni') loadAlumni();
-  if (page === 'analytics') loadAnalytics();
+  if (page === 'analytics' && window.loadAnalytics) loadAnalytics();
   if (page === 'email') { loadEmailStatus(); loadEmailDirectory(); loadEmailLogs(); loadEmailAggStats(); }
   if (page === 'submissions') loadSubmissions();
   if (page === 'urgent-requests') loadUrgentRequests();
@@ -1304,35 +1304,8 @@ function _monthLabel(ym) {
   return new Date(Number(y), Number(m) - 1, 1).toLocaleDateString('en-IN', { month: 'short', year: '2-digit' });
 }
 
-let _analyticsReq = 0;
-async function loadAnalytics(fresh = false) {
-  const grid = document.getElementById('analytics-funnel-grid');
-  if (!grid) return;
-  const reqId = ++_analyticsReq;
-  try {
-    const [data] = await Promise.all([
-      api(`/api/admin/analytics${fresh === true ? '?fresh=true' : ''}`),
-      ensureChartJs(),
-    ]);
-    if (reqId !== _analyticsReq) return;
-    renderAnalyticsFunnel(data.funnel || {});
-    renderWeeklyCompletionChart(data.weekly_completion || []);
-    renderRevenue(data.revenue || {});
-    renderDomainBreakdownChart(data.domains || []);
-    renderApplicationsTrendChart(data.applications_trend || []);
-    renderDomainTable(data.domains || []);
-    renderGrowth(data.growth || {}, data.revenue || {});
-    renderAcquisition(data.acquisition || {});
-    renderAudience(data.audience || {});
-    renderSpeed(data.speed || {}, data.revenue || {});
-    renderQuizOutcomes(data.quiz_outcomes || []);
-    renderUX(data.ux || {});
-  } catch (e) {
-    if (reqId !== _analyticsReq) return;
-    grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-text">${esc(e.message)}</div></div>`;
-  }
-}
-
+// The Analytics page itself lives in admin-analytics.js (loaded after this file).
+// Shared helpers it uses (ensureChartJs, _drawChart, chartBase, fmtINR, analyticsCard) stay here.
 function analyticsCard(icon, value, label, sub) {
   return `
     <div class="stat-card">
@@ -1343,330 +1316,6 @@ function analyticsCard(icon, value, label, sub) {
       <div class="stat-card-value">${typeof value === 'number' ? value.toLocaleString('en-IN') : value}</div>
       ${sub ? `<div class="stat-card-sub">${sub}</div>` : ''}
     </div>`;
-}
-
-function renderAnalyticsFunnel(f) {
-  const grid = document.getElementById('analytics-funnel-grid');
-  if (!grid) return;
-  grid.innerHTML = `
-    ${analyticsCard('👥', f.total || 0, 'Total Applicants', `${(f.never_started || 0).toLocaleString('en-IN')} haven't started yet`)}
-    ${analyticsCard('🚀', f.started || 0, 'Started Tasks', `${f.start_rate || 0}% of applicants`)}
-    ${analyticsCard('🏁', f.completed || 0, 'Completed 4/4 Weeks', `${f.completion_rate || 0}% of those who started`)}
-    ${analyticsCard('🎓', f.certified || 0, 'Certificates Issued', 'includes early unlocks')}
-    ${analyticsCard('💳', f.paid || 0, 'Paying Students', `${f.paid_rate || 0}% of applicants`)}
-  `;
-}
-
-function renderWeeklyCompletionChart(weekly) {
-  _drawChart('chart-weekly-completion', {
-    type: 'bar',
-    data: {
-      labels: weekly.map(w => `Week ${w.week}`),
-      datasets: [
-        { label: 'Approved', data: weekly.map(w => w.approved), backgroundColor: cssColor('--ok'), borderRadius: 4 },
-        { label: 'Pending review', data: weekly.map(w => w.pending), backgroundColor: cssColor('--warn'), borderRadius: 4 },
-        { label: 'Rejected', data: weekly.map(w => w.rejected), backgroundColor: cssColor('--danger'), borderRadius: 4 },
-      ],
-    },
-    options: {
-      ...chartBase(),
-      scales: {
-        x: { ...chartBase().scales.x, stacked: true },
-        y: { ...chartBase().scales.y, stacked: true },
-      },
-    },
-  });
-}
-
-function renderRevenue(r) {
-  const subtitle = document.getElementById('analytics-revenue-subtitle');
-  if (subtitle) {
-    subtitle.textContent = `${fmtINR(r.total_revenue_rupees)} from ${r.paid_orders || 0} verified payment${r.paid_orders === 1 ? '' : 's'} · avg ${fmtINR(r.avg_order_rupees)}`;
-  }
-
-  const TIER_META = {
-    full:       { label: 'Full price',    color: 'var(--ok)' },
-    discounted: { label: 'Discount code', color: 'var(--info)' },
-    legacy:     { label: 'Older price',   color: 'var(--violet)' },
-  };
-  const tiersEl = document.getElementById('analytics-revenue-tiers');
-  if (tiersEl) {
-    const tiers = r.tiers || [];
-    tiersEl.innerHTML = tiers.length ? tiers.map(t => {
-      const m = TIER_META[t.kind] || TIER_META.legacy;
-      return `
-        <div style="padding:10px 14px;border-radius:8px;background:${tint(m.color,10)};border:1px solid ${tint(m.color,30)};font-size:0.8rem;min-width:150px;">
-          <div style="color:var(--text-secondary);font-size:0.68rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">${m.label} · ${fmtINR(t.price_rupees)}</div>
-          <div style="color:${m.color};font-weight:700;font-size:1.05rem;">${fmtINR(t.revenue_rupees)}</div>
-          <div style="color:var(--text-muted);font-size:0.72rem;">${t.orders} order${t.orders === 1 ? '' : 's'}</div>
-        </div>`;
-    }).join('') : `<div style="font-size:0.8rem;color:var(--text-secondary);">No verified payments yet.</div>`;
-  }
-
-  const noteEl = document.getElementById('analytics-revenue-note');
-  if (noteEl) {
-    const parts = [];
-    if (r.abandoned_checkouts) parts.push(`${r.abandoned_checkouts} student${r.abandoned_checkouts === 1 ? '' : 's'} opened checkout but never paid.`);
-    if (r.excluded_test_orders) parts.push(`${r.excluded_test_orders} test payment record${r.excluded_test_orders === 1 ? '' : 's'} (${fmtINR(r.excluded_test_rupees)}) excluded.`);
-    noteEl.textContent = parts.join(' ');
-  }
-
-  const trend = r.trend || [];
-  _drawChart('chart-revenue-trend', {
-    type: 'bar',
-    data: {
-      labels: trend.map(t => _monthLabel(t.month)),
-      datasets: [{ label: 'Revenue (₹)', data: trend.map(t => t.revenue_rupees), backgroundColor: cssColor('--ok'), borderRadius: 4 }],
-    },
-    options: {
-      ...chartBase(),
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: ctx => `${fmtINR(ctx.parsed.y)} · ${trend[ctx.dataIndex].orders} orders` } },
-      },
-    },
-  });
-}
-
-function renderDomainBreakdownChart(domains) {
-  _drawChart('chart-domain-breakdown', {
-    type: 'bar',
-    data: {
-      labels: domains.map(d => d.label),
-      datasets: [
-        { label: 'Applicants', data: domains.map(d => d.total), backgroundColor: cssColor('--accent', 0.55), borderRadius: 4 },
-        { label: 'Started', data: domains.map(d => d.started), backgroundColor: cssColor('--info'), borderRadius: 4 },
-        { label: 'Completed', data: domains.map(d => d.completed), backgroundColor: cssColor('--ok'), borderRadius: 4 },
-        { label: 'Paid', data: domains.map(d => d.paid), backgroundColor: cssColor('--violet'), borderRadius: 4 },
-      ],
-    },
-    options: { ...chartBase(), indexAxis: 'y' },
-  });
-}
-
-function renderApplicationsTrendChart(trend) {
-  _drawChart('chart-applications-trend', {
-    type: 'line',
-    data: {
-      labels: trend.map(t => _monthLabel(t.month)),
-      datasets: [{
-        label: 'Applications',
-        data: trend.map(t => t.count),
-        borderColor: cssColor('--accent'),
-        backgroundColor: cssColor('--accent', 0.15),
-        fill: true,
-        tension: 0.35,
-      }],
-    },
-    options: { ...chartBase(), plugins: { legend: { display: false } } },
-  });
-}
-
-function renderDomainTable(domains) {
-  const tbody = document.getElementById('analytics-domain-tbody');
-  if (!tbody) return;
-  if (!domains.length) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--text-secondary);padding:32px;">No students yet.</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = domains.map(d => {
-    const rate = d.completion_rate || 0;
-    const rateCell = d.started
-      ? `<div style="display:flex;align-items:center;gap:8px;">
-           <div style="flex:1;height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden;">
-             <div style="width:${Math.min(rate, 100)}%;height:100%;background:var(--ok);"></div>
-           </div>
-           <span style="font-size:0.78rem;color:var(--text-secondary);min-width:40px;">${rate}%</span>
-         </div>`
-      : `<span style="font-size:0.78rem;color:var(--text-muted);">No one started</span>`;
-    return `
-    <tr>
-      <td><div style="font-weight:600;">${esc(d.label)}</div><div style="font-size:0.7rem;color:var(--text-muted);">${esc(d.domain)}</div></td>
-      <td>${d.total}</td>
-      <td style="color:var(--info);">${d.started}</td>
-      <td style="color:var(--ok);">${d.completed}</td>
-      <td>${d.certified}</td>
-      <td style="color:var(--violet);">${d.paid}</td>
-      <td>${fmtINR(d.revenue_rupees)}</td>
-      <td>${rateCell}</td>
-    </tr>`;
-  }).join('');
-}
-
-function renderGrowth(g, rev) {
-  const grid = document.getElementById('analytics-growth-grid');
-  if (grid) {
-    grid.innerHTML = `
-      ${analyticsCard('🧑', g.unique_people || 0, 'Unique People', `${(g.total_applications || 0).toLocaleString('en-IN')} applications in total`)}
-      ${analyticsCard('🔀', `${g.multi_track_rate || 0}%`, 'Apply to Multiple Tracks', 'extra applications per person')}
-      ${analyticsCard('📆', g.wau || 0, 'Weekly Active People', 'login or task submission, last 7 days')}
-      ${analyticsCard('🗓️', g.mau || 0, 'Monthly Active People', 'last 30 days')}
-      ${analyticsCard('💵', fmtINR(rev.per_applicant_rupees), 'Revenue per Applicant', 'verified revenue ÷ all applicants')}
-    `;
-  }
-  const daily = g.daily_applications || [];
-  _drawChart('chart-daily-apps', {
-    type: 'bar',
-    data: {
-      labels: daily.map(d => new Date(d.day + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })),
-      datasets: [{ label: 'Applications', data: daily.map(d => d.count), backgroundColor: cssColor('--accent'), borderRadius: 3 }],
-    },
-    options: { ...chartBase(), plugins: { legend: { display: false } } },
-  });
-}
-
-// One row per group: name | applicants | started (rate) | paid [| paid %]
-function _funnelRows(rows, emptyText, withPaidRate) {
-  const cols = withPaidRate ? 5 : 4;
-  if (!rows.length) {
-    return `<tr><td colspan="${cols}" style="text-align:center;color:var(--text-secondary);padding:24px;">${emptyText}</td></tr>`;
-  }
-  return rows.map(r => `
-    <tr>
-      <td style="font-weight:500;">${esc(r.label)}</td>
-      <td>${r.total}</td>
-      <td style="color:var(--info);">${r.started} <span style="color:var(--text-muted);font-size:0.72rem;">(${r.started_rate}%)</span></td>
-      <td style="color:var(--violet);">${r.paid}</td>
-      ${withPaidRate ? `<td>${r.paid_rate}%</td>` : ''}
-    </tr>`).join('');
-}
-
-function renderAcquisition(a) {
-  const sources = a.sources || [];
-  const tbody = document.getElementById('analytics-sources-tbody');
-  if (tbody) {
-    tbody.innerHTML = _funnelRows(sources, 'No applicants yet.', true);
-    if (sources.length && sources.every(s => s.label === 'Unknown')) {
-      tbody.insertAdjacentHTML('beforeend', `<tr><td colspan="5" style="color:var(--text-muted);font-size:0.72rem;padding:8px 12px;">Every applicant is "Unknown" — no source has been recorded yet.</td></tr>`);
-    }
-  }
-  const ref = a.referrals || {};
-  const sub = document.getElementById('analytics-referral-subtitle');
-  if (sub) {
-    sub.textContent = ref.clicked
-      ? `Referral program: ${ref.clicked} clicked → ${ref.applied} applied → ${ref.enrolled} enrolled`
-      : 'Which channels bring people who start and pay · no referral activity yet';
-  }
-}
-
-function renderAudience(a) {
-  const tbody = document.getElementById('analytics-colleges-tbody');
-  if (tbody) tbody.innerHTML = _funnelRows(a.colleges || [], 'Not captured yet — no applicant has a college recorded.', false);
-  const years = a.years || [];
-  _drawChart('chart-years', {
-    type: 'bar',
-    data: {
-      labels: years.map(y => y.label),
-      datasets: [
-        { label: 'Applicants', data: years.map(y => y.total), backgroundColor: cssColor('--accent', 0.55), borderRadius: 4 },
-        { label: 'Started', data: years.map(y => y.started), backgroundColor: cssColor('--info'), borderRadius: 4 },
-        { label: 'Paid', data: years.map(y => y.paid), backgroundColor: cssColor('--violet'), borderRadius: 4 },
-      ],
-    },
-    options: chartBase(),
-  });
-}
-
-function renderSpeed(sp, rev) {
-  const el = document.getElementById('analytics-speed-grid');
-  if (!el) return;
-  const chip = (label, value, note, color) => `
-    <div style="padding:10px 14px;border-radius:8px;background:${tint(color,10)};border:1px solid ${tint(color,30)};font-size:0.8rem;min-width:170px;flex:1;">
-      <div style="color:var(--text-secondary);font-size:0.68rem;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">${label}</div>
-      <div style="color:${color};font-weight:700;font-size:1.05rem;">${value}</div>
-      <div style="color:var(--text-muted);font-size:0.72rem;">${note}</div>
-    </div>`;
-  const none = v => v === null || v === undefined;
-  const days = v => none(v) ? '—' : `${v} day${v === 1 ? '' : 's'}`;
-  el.innerHTML = [
-    chip('Apply → first task', days(sp.median_days_to_first_task), 'median', 'var(--info)'),
-    chip('Apply → payment', days(sp.median_days_to_payment), 'median', 'var(--violet)'),
-    chip('Review turnaround', none(sp.avg_review_hours) ? '—' : `${sp.avg_review_hours} h`, 'average, submission to decision', 'var(--ok)'),
-    chip('Review backlog', `${sp.pending_reviews || 0} pending`, none(sp.oldest_pending_days) ? 'nothing waiting' : `oldest waiting ${days(sp.oldest_pending_days)}`, 'var(--warn)'),
-    chip('Eligible but unpaid', `${rev.eligible_unpaid || 0} students`, 'finished 3+ weeks, not paid yet', 'var(--danger)'),
-  ].join('');
-}
-
-function renderQuizOutcomes(rows) {
-  const tbody = document.getElementById('analytics-quiz-tbody');
-  if (!tbody) return;
-  if (!rows.some(r => r.total)) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-secondary);padding:24px;">Not captured yet — no applicant has a quiz score.</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = rows.map(r => `
-    <tr>
-      <td style="font-weight:500;">${esc(r.band)}</td>
-      <td>${r.total}</td>
-      <td style="color:var(--ok);">${r.completion_rate}%</td>
-      <td style="color:var(--violet);">${r.paid_rate}%</td>
-    </tr>`).join('');
-}
-
-// ─── USER EXPERIENCE ───
-function renderUX(ux) {
-  const none = v => v === null || v === undefined;
-  const hours = h => none(h) ? '—' : (h >= 48 ? `${Math.round(h / 24 * 10) / 10}d` : `${h}h`);
-  const ob = ux.onboarding || {}, login = ux.login || {}, tasks = ux.tasks || {};
-  const wait = ux.review_wait || {}, urgent = ux.urgent_requests_30d || {}, co = ux.checkout || {}, mail = ux.email_30d || {};
-
-  const grid = document.getElementById('analytics-ux-grid');
-  if (grid) {
-    grid.innerHTML = `
-      ${analyticsCard('🙈', ob.never_logged_in || 0, 'Enrolled, Never Logged In', `of ${(ob.enrolled || 0).toLocaleString('en-IN')} enrolled — onboarding gap`)}
-      ${analyticsCard('🚦', none(ob.median_days_to_first_task) ? '—' : `${ob.median_days_to_first_task}d`, 'Enroll → First Task', 'median time to get started')}
-      ${analyticsCard('🔑', login.people_requested ? `${login.success_rate}%` : '—', 'Login Success (30 days)', `${login.codes_expired_unused || 0} codes expired unused · ${login.codes_replaced || 0} re-requested`)}
-      ${analyticsCard('🔁', none(tasks.avg_attempts) ? '—' : tasks.avg_attempts, 'Avg Tries per Task', `${tasks.resubmitted || 0} tasks resubmitted after rejection`)}
-      ${analyticsCard('⏱️', hours(wait.median_hours), 'Wait for Review', none(wait.p90_hours) ? 'median, last 90 days' : `median · 90% within ${hours(wait.p90_hours)}`)}
-      ${analyticsCard('⚡', urgent.requests || 0, 'Urgent Requests (30 days)', `${urgent.students || 0} students didn't want to wait`)}
-      ${analyticsCard('🛒', co.started ? `${co.drop_rate}%` : '—', 'Checkout Drop-off', `${co.abandoned || 0} of ${co.started || 0} who opened checkout didn't pay`)}
-      ${analyticsCard('📬', mail.delivered ? `${mail.open_rate}%` : '—', 'Email Open Rate (30 days)', mail.delivered ? `${mail.click_rate}% clicked · ${mail.delivered} delivered` : 'no delivery data yet')}
-    `;
-  }
-
-  const journey = ux.journey || [];
-  _drawChart('chart-journey', {
-    type: 'bar',
-    data: {
-      labels: journey.map(j => j.step),
-      datasets: [{
-        label: 'Students',
-        data: journey.map(j => j.count),
-        backgroundColor: journey.map((j, i) => i === 0 ? cssColor('--accent', 0.55) : j.step === 'Paid' ? cssColor('--violet') : j.step === 'Completed' ? cssColor('--ok') : cssColor('--info')),
-        borderRadius: 4,
-      }],
-    },
-    options: {
-      ...chartBase(),
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: ctx => {
-          const first = journey[0] && journey[0].count;
-          return `${ctx.parsed.y} students${first ? ` · ${Math.round(ctx.parsed.y * 100 / first)}% of enrolled` : ''}`;
-        } } },
-      },
-    },
-  });
-
-  const tbody = document.getElementById('analytics-ux-weeks-tbody');
-  if (!tbody) return;
-  const weeks = ux.weeks || [];
-  if (!weeks.length) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-secondary);padding:24px;">No task submissions yet.</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = weeks.map(w => {
-    const hard = w.avg_attempts >= 1.5;
-    return `
-    <tr>
-      <td style="font-weight:600;white-space:nowrap;">Week ${Number(w.week)}</td>
-      <td>${w.reached}</td>
-      <td style="color:var(--ok);">${w.approved}</td>
-      <td style="color:${w.rejected_now ? 'var(--danger)' : 'var(--text-3)'};">${w.rejected_now}</td>
-      <td style="${hard ? 'color:var(--warn);font-weight:600;' : ''}" title="${hard ? 'Students often need more than one try — check the task brief' : ''}">${w.avg_attempts}${hard ? ' ⚠️' : ''}</td>
-      <td>${none(w.median_days_from_prev_week) ? '—' : `${w.median_days_from_prev_week}d`}</td>
-    </tr>`;
-  }).join('');
 }
 
 // ─── INIT ───

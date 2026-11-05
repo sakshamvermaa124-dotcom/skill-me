@@ -314,6 +314,7 @@ async def client() -> AsyncGenerator[httpx.AsyncClient, None]:
         patch("routes.auth.db", test_db),
         patch("routes.certificates.db", test_db),
         patch("routes.payments.db", test_db),
+        patch("services.payment_service.db", test_db),
         patch("routes.portfolio.db", test_db),
         patch("services.auth_service.db", test_db),
         patch("services.enrollment_service.db", test_db),
@@ -328,6 +329,8 @@ async def client() -> AsyncGenerator[httpx.AsyncClient, None]:
         patch("routes.auth.email_service", mock_email),
         patch("routes.certificates.email_service", mock_email),
         patch("routes.payments.email_service", mock_email),
+        patch("routes.webhooks.db", test_db),
+        patch("routes.webhooks.email_service", mock_email),
         patch("main.scheduler_service", mock_sched),
     ]
 

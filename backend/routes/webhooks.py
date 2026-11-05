@@ -4,13 +4,19 @@ Public endpoints that external services call into. Not protected by X-Admin-Key 
 authenticated instead via a shared secret in the URL (see BREVO_WEBHOOK_SECRET).
 """
 
+import hashlib
+import hmac
+import json
 import logging
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 
 from db.database import db
 from config import settings
+from services import payment_service
+from services.certificate_service import certificate_service
+from services.email_service import email_service
 
 logger = logging.getLogger("skillme.webhooks")
 router = APIRouter(prefix="/api/webhooks", tags=["webhooks"])
@@ -126,3 +132,69 @@ async def brevo_webhook(request: Request, key: str | None = None):
             await _apply_event(payload)
 
     return {"status": "ok", "processed": len(events)}
+
+
+@router.post("/razorpay", summary="Receive Razorpay payment webhooks (authorized/captured/failed)")
+async def razorpay_webhook(request: Request, background_tasks: BackgroundTasks):
+    """
+    Configure in Razorpay Dashboard > Webhooks with events payment.authorized, payment.captured,
+    payment.failed and order.paid, using RAZORPAY_WEBHOOK_SECRET. This confirms payments even when
+    the student closes the tab before the browser calls /payments/verify.
+
+    Authenticated by the X-Razorpay-Signature HMAC over the raw body. Idempotent: each event id
+    (X-Razorpay-Event-Id) is stored once, and a replay, or an event for an already-paid order, is a no-op.
+    """
+    raw = await request.body()
+    secret = settings.razorpay_webhook_secret
+    sig = request.headers.get("X-Razorpay-Signature", "")
+    if not secret or not hmac.compare_digest(hmac.new(secret.encode(), raw, hashlib.sha256).hexdigest(), sig):
+        logger.warning("Rejected Razorpay webhook: bad or unconfigured signature")
+        raise HTTPException(status_code=400, detail="Invalid signature")
+
+    try:
+        body = json.loads(raw)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid JSON")
+
+    event = body.get("event") or ""
+    payload = body.get("payload") or {}
+    entity = (payload.get("payment") or {}).get("entity") or {}
+    order_id = entity.get("order_id") or ((payload.get("order") or {}).get("entity") or {}).get("id")
+    payment_id = entity.get("id")
+    event_id = request.headers.get("X-Razorpay-Event-Id") or f"{event}:{order_id}:{payment_id}"
+
+    seen = await db.fetch_one("SELECT id FROM payment_events WHERE provider_event_id = ?", (event_id,))
+    if seen:
+        return {"status": "duplicate"}
+    await db.execute(
+        """INSERT INTO payment_events (provider_event_id, event_type, razorpay_order_id, razorpay_payment_id, payload)
+           VALUES (?, ?, ?, ?, ?) ON CONFLICT(provider_event_id) DO NOTHING""",
+        (event_id, event, order_id, payment_id, raw.decode("utf-8", "replace")[:20000]),
+    )
+
+    if not order_id:
+        return {"status": "ignored"}
+
+    if event in ("payment.captured", "order.paid"):
+        order, newly_paid = await payment_service.mark_paid(order_id, payment_id, via="webhook")
+        if order and newly_paid:
+            try:
+                cert = await certificate_service.issue_certificate(
+                    order["student_id"], order["batch_id"], suppress_email=True, via="payment", payment_id=order["id"]
+                )
+                student = await db.fetch_one(
+                    "SELECT first_name, last_name, email, domain FROM students WHERE id = ?", (order["student_id"],)
+                )
+                if student:
+                    background_tasks.add_task(
+                        email_service.send_certificate_ready,
+                        first_name=student["first_name"], last_name=student["last_name"],
+                        email=student["email"], domain=student["domain"] or "web-dev", cert_id=cert["cert_id"],
+                    )
+            except ValueError as exc:
+                logger.warning("Webhook paid order %s but certificate not issued: %s", order_id, exc)
+    elif event == "payment.authorized":
+        await payment_service.mark_pending(order_id, payment_id)
+    elif event == "payment.failed":
+        await payment_service.mark_failed(order_id, entity.get("error_code"), entity.get("error_description"))
+    return {"status": "ok"}

@@ -18,6 +18,13 @@ CREATE TABLE IF NOT EXISTS students (
     referred_by TEXT,
     quiz_score INTEGER,                   -- screening quiz result sent with the application
     quiz_total INTEGER,
+    is_test INTEGER DEFAULT 0,            -- 1 = internal/test account, excluded from analytics by default
+    utm_source TEXT, utm_medium TEXT, utm_campaign TEXT, utm_content TEXT,
+    referral_code TEXT,                   -- raw referral code the applicant arrived with
+    landing_page TEXT, referrer TEXT,
+    first_touch_source TEXT, first_touch_at TIMESTAMP,
+    last_touch_source TEXT, last_touch_campaign TEXT, last_touch_at TIMESTAMP,
+    attribution_captured INTEGER DEFAULT 0,  -- 0 = applied before tracking existed (unknown), 1 = tracked
     status TEXT NOT NULL DEFAULT 'applied',  -- applied | shortlisted | enrolled | completed | dropped
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -106,6 +113,8 @@ CREATE TABLE IF NOT EXISTS certificates (
     batch_id INTEGER NOT NULL,
     cert_id TEXT NOT NULL UNIQUE,           -- e.g. SM-A1B2-C3D4-E5F6
     issued_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    issued_via TEXT,                        -- payment | admin | download, NULL = legacy (path unknown)
+    payment_id INTEGER,                     -- payments.id that triggered issuance, if any
     FOREIGN KEY (student_id) REFERENCES students(id),
     FOREIGN KEY (batch_id) REFERENCES batches(id),
     UNIQUE(student_id, batch_id)
@@ -121,9 +130,16 @@ CREATE TABLE IF NOT EXISTS payments (
     razorpay_payment_id TEXT,              -- filled on successful payment
     amount INTEGER NOT NULL,               -- amount in paise (12900 = ₹129)
     currency TEXT DEFAULT 'INR',
-    status TEXT DEFAULT 'pending',         -- pending | paid | failed
+    status TEXT DEFAULT 'pending',         -- created | pending | paid | failed (abandoned is derived, never stored)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_test INTEGER DEFAULT 0,             -- 1 = test transaction, never counted as revenue
+    initiated_at TIMESTAMP,                -- checkout opened (NULL on legacy rows: use created_at)
+    completed_at TIMESTAMP,                -- when payment was confirmed (NULL on legacy rows: use updated_at)
+    failure_code TEXT, failure_reason TEXT,
+    discount_code TEXT,
+    confirmed_via TEXT,                    -- verify | webhook
+    last_touch_source TEXT, last_touch_campaign TEXT,
     FOREIGN KEY (student_id) REFERENCES students(id),
     FOREIGN KEY (batch_id) REFERENCES batches(id)
 );
@@ -169,8 +185,9 @@ CREATE TABLE IF NOT EXISTS otp_tokens (
     email       TEXT NOT NULL,
     otp_hash    TEXT NOT NULL,          -- bcrypt / sha256 hash of the 6-digit OTP
     expires_at  TIMESTAMP NOT NULL,
-    used        INTEGER DEFAULT 0,      -- 0 = unused, 1 = consumed
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    used        INTEGER DEFAULT 0,      -- 0 = unused, 1 = consumed (login), 2 = superseded by a newer code
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    verified_at TIMESTAMP                   -- when the code was entered correctly (NULL on legacy rows)
 );
 CREATE INDEX IF NOT EXISTS idx_otp_email ON otp_tokens(email);
 
@@ -215,3 +232,14 @@ CREATE TABLE IF NOT EXISTS urgent_requests (
 );
 CREATE INDEX IF NOT EXISTS idx_urgent_requests_student ON urgent_requests(student_id);
 CREATE INDEX IF NOT EXISTS idx_urgent_requests_status ON urgent_requests(status);
+
+-- Payment provider events — one row per Razorpay webhook event id, so replays are no-ops
+CREATE TABLE IF NOT EXISTS payment_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    provider_event_id TEXT NOT NULL UNIQUE,
+    event_type TEXT NOT NULL,
+    razorpay_order_id TEXT,
+    razorpay_payment_id TEXT,
+    payload TEXT,
+    received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

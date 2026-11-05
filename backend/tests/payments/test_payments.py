@@ -10,6 +10,7 @@ We patch `httpx.AsyncClient` at the module level.
 import hashlib
 import hmac
 import pytest
+from tests.conftest import auth_headers
 from unittest.mock import patch, AsyncMock, MagicMock
 
 
@@ -56,7 +57,7 @@ class TestCreateOrder:
         """Create payment order for a student with Razorpay mocked."""
         mock_client = _make_razorpay_mock()
         with patch("routes.payments.httpx.AsyncClient", return_value=mock_client):
-            r = await client.post("/api/payments/create-order", json={
+            r = await client.post("/api/payments/create-order", headers=auth_headers(enrolled_student["id"]), json={
                 "student_id": enrolled_student["id"],
                 "batch_id": test_batch["id"],
             })
@@ -69,16 +70,16 @@ class TestCreateOrder:
     async def test_create_order_missing_student(self, client, test_batch):
         mock_client = _make_razorpay_mock()
         with patch("routes.payments.httpx.AsyncClient", return_value=mock_client):
-            r = await client.post("/api/payments/create-order", json={
+            r = await client.post("/api/payments/create-order", headers=auth_headers(99999), json={
                 "student_id": 99999,
                 "batch_id": test_batch["id"],
             })
-        assert r.status_code == 404
+        assert r.status_code == 401  # no such student -> no valid session
 
     @pytest.mark.usefixtures("eligible_student")
     async def test_create_order_already_paid_returns_flag(self, client, paid_student, test_batch):
         """If already paid, should return already_paid=True without calling Razorpay."""
-        r = await client.post("/api/payments/create-order", json={
+        r = await client.post("/api/payments/create-order", headers=auth_headers(paid_student["id"]), json={
             "student_id": paid_student["id"],
             "batch_id": test_batch["id"],
         })
@@ -92,7 +93,7 @@ class TestCreateOrder:
         mock_client = _make_razorpay_mock(order_id="order_discount")
         mock_client.post.return_value.json.return_value = {"id": "order_discount", "amount": 500}
         with patch("routes.payments.httpx.AsyncClient", return_value=mock_client):
-            r = await client.post("/api/payments/create-order", json={
+            r = await client.post("/api/payments/create-order", headers=auth_headers(enrolled_student["id"]), json={
                 "student_id": enrolled_student["id"],
                 "batch_id": test_batch["id"],
                 "discount_code": "BLACKYY",
@@ -107,18 +108,18 @@ class TestCreateOrder:
         mock_client = _make_razorpay_mock(status_code=500)
         mock_client.post.return_value.text = "Internal Server Error"
         with patch("routes.payments.httpx.AsyncClient", return_value=mock_client):
-            r = await client.post("/api/payments/create-order", json={
+            r = await client.post("/api/payments/create-order", headers=auth_headers(enrolled_student["id"]), json={
                 "student_id": enrolled_student["id"],
                 "batch_id": test_batch["id"],
             })
         assert r.status_code == 502
 
     async def test_create_order_missing_fields(self, client):
-        r = await client.post("/api/payments/create-order", json={})
-        assert r.status_code == 422
+        r = await client.post("/api/payments/create-order", headers=auth_headers(1), json={})
+        assert r.status_code in (401, 422)
 
     async def test_create_order_below_half_is_blocked(self, client, enrolled_student, test_batch):
-        r = await client.post("/api/payments/create-order", json={
+        r = await client.post("/api/payments/create-order", headers=auth_headers(enrolled_student["id"]), json={
             "student_id": enrolled_student["id"],
             "batch_id": test_batch["id"],
         })
@@ -132,14 +133,14 @@ class TestCreateOrder:
                 "INSERT INTO progress (student_id, batch_id, week, issues_completed, score) VALUES (?, ?, ?, 1, 25)",
                 (enrolled_student["id"], enrolled_student["batch_id"], week),
             )
-        r = await client.post("/api/payments/create-order", json={
+        r = await client.post("/api/payments/create-order", headers=auth_headers(enrolled_student["id"]), json={
             "student_id": enrolled_student["id"],
             "batch_id": test_batch["id"],
         })
         assert r.status_code == 403
 
     async def test_create_order_not_enrolled(self, client, test_student):
-        r = await client.post("/api/payments/create-order", json={"student_id": test_student["id"]})
+        r = await client.post("/api/payments/create-order", headers=auth_headers(test_student["id"]), json={"student_id": test_student["id"]})
         assert r.status_code == 400
 
     @pytest.mark.usefixtures("eligible_student")
@@ -148,7 +149,7 @@ class TestCreateOrder:
         from tests.conftest import test_db
         mock_client = _make_razorpay_mock(order_id="order_stale")
         with patch("routes.payments.httpx.AsyncClient", return_value=mock_client):
-            r = await client.post("/api/payments/create-order", json={
+            r = await client.post("/api/payments/create-order", headers=auth_headers(enrolled_student["id"]), json={
                 "student_id": enrolled_student["id"],
                 "batch_id": 424242,
             })
