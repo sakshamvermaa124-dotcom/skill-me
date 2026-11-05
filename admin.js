@@ -1326,6 +1326,7 @@ async function loadAnalytics(fresh = false) {
     renderAudience(data.audience || {});
     renderSpeed(data.speed || {}, data.revenue || {});
     renderQuizOutcomes(data.quiz_outcomes || []);
+    renderUX(data.ux || {});
   } catch (e) {
     if (reqId !== _analyticsReq) return;
     grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><div class="empty-state-text">${esc(e.message)}</div></div>`;
@@ -1600,6 +1601,72 @@ function renderQuizOutcomes(rows) {
       <td style="color:var(--ok);">${r.completion_rate}%</td>
       <td style="color:var(--violet);">${r.paid_rate}%</td>
     </tr>`).join('');
+}
+
+// ─── USER EXPERIENCE ───
+function renderUX(ux) {
+  const none = v => v === null || v === undefined;
+  const hours = h => none(h) ? '—' : (h >= 48 ? `${Math.round(h / 24 * 10) / 10}d` : `${h}h`);
+  const ob = ux.onboarding || {}, login = ux.login || {}, tasks = ux.tasks || {};
+  const wait = ux.review_wait || {}, urgent = ux.urgent_requests_30d || {}, co = ux.checkout || {}, mail = ux.email_30d || {};
+
+  const grid = document.getElementById('analytics-ux-grid');
+  if (grid) {
+    grid.innerHTML = `
+      ${analyticsCard('🙈', ob.never_logged_in || 0, 'Enrolled, Never Logged In', `of ${(ob.enrolled || 0).toLocaleString('en-IN')} enrolled — onboarding gap`)}
+      ${analyticsCard('🚦', none(ob.median_days_to_first_task) ? '—' : `${ob.median_days_to_first_task}d`, 'Enroll → First Task', 'median time to get started')}
+      ${analyticsCard('🔑', login.people_requested ? `${login.success_rate}%` : '—', 'Login Success (30 days)', `${login.codes_expired_unused || 0} codes expired unused · ${login.codes_replaced || 0} re-requested`)}
+      ${analyticsCard('🔁', none(tasks.avg_attempts) ? '—' : tasks.avg_attempts, 'Avg Tries per Task', `${tasks.resubmitted || 0} tasks resubmitted after rejection`)}
+      ${analyticsCard('⏱️', hours(wait.median_hours), 'Wait for Review', none(wait.p90_hours) ? 'median, last 90 days' : `median · 90% within ${hours(wait.p90_hours)}`)}
+      ${analyticsCard('⚡', urgent.requests || 0, 'Urgent Requests (30 days)', `${urgent.students || 0} students didn't want to wait`)}
+      ${analyticsCard('🛒', co.started ? `${co.drop_rate}%` : '—', 'Checkout Drop-off', `${co.abandoned || 0} of ${co.started || 0} who opened checkout didn't pay`)}
+      ${analyticsCard('📬', mail.delivered ? `${mail.open_rate}%` : '—', 'Email Open Rate (30 days)', mail.delivered ? `${mail.click_rate}% clicked · ${mail.delivered} delivered` : 'no delivery data yet')}
+    `;
+  }
+
+  const journey = ux.journey || [];
+  _drawChart('chart-journey', {
+    type: 'bar',
+    data: {
+      labels: journey.map(j => j.step),
+      datasets: [{
+        label: 'Students',
+        data: journey.map(j => j.count),
+        backgroundColor: journey.map((j, i) => i === 0 ? cssColor('--accent', 0.55) : j.step === 'Paid' ? cssColor('--violet') : j.step === 'Completed' ? cssColor('--ok') : cssColor('--info')),
+        borderRadius: 4,
+      }],
+    },
+    options: {
+      ...chartBase(),
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => {
+          const first = journey[0] && journey[0].count;
+          return `${ctx.parsed.y} students${first ? ` · ${Math.round(ctx.parsed.y * 100 / first)}% of enrolled` : ''}`;
+        } } },
+      },
+    },
+  });
+
+  const tbody = document.getElementById('analytics-ux-weeks-tbody');
+  if (!tbody) return;
+  const weeks = ux.weeks || [];
+  if (!weeks.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-secondary);padding:24px;">No task submissions yet.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = weeks.map(w => {
+    const hard = w.avg_attempts >= 1.5;
+    return `
+    <tr>
+      <td style="font-weight:600;white-space:nowrap;">Week ${Number(w.week)}</td>
+      <td>${w.reached}</td>
+      <td style="color:var(--ok);">${w.approved}</td>
+      <td style="color:${w.rejected_now ? 'var(--danger)' : 'var(--text-3)'};">${w.rejected_now}</td>
+      <td style="${hard ? 'color:var(--warn);font-weight:600;' : ''}" title="${hard ? 'Students often need more than one try — check the task brief' : ''}">${w.avg_attempts}${hard ? ' ⚠️' : ''}</td>
+      <td>${none(w.median_days_from_prev_week) ? '—' : `${w.median_days_from_prev_week}d`}</td>
+    </tr>`;
+  }).join('');
 }
 
 // ─── INIT ───

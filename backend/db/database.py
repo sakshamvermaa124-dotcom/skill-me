@@ -184,6 +184,8 @@ class Database:
             "CREATE UNIQUE INDEX IF NOT EXISTS ux_students_email_domain ON students(lower(email), domain)",
             # Lets the admin list's "other tracks" lookup (lower(email) = lower(email)) use an index (v11)
             "CREATE INDEX IF NOT EXISTS idx_students_email_lower ON students(lower(email))",
+            # How many tries a weekly task took (v12) — admin UX analytics
+            "ALTER TABLE submissions ADD COLUMN attempts INTEGER DEFAULT 1",
         ]
         return migrations
 

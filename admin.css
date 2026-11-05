@@ -324,3 +324,10 @@ input[type="checkbox"] { accent-color: var(--primary); }
 #pulse-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 @media (max-width: 1100px) { #pulse-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { #pulse-grid { grid-template-columns: 1fr; } }
+
+/* Analytics: section heading + UX cards in whole rows of four */
+.analytics-section-head { margin: 36px 0 14px; padding-top: 24px; border-top: 1px solid var(--line); }
+.analytics-section-head p { margin-top: 6px; font-size: 0.88rem; color: var(--text-2); }
+#analytics-ux-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 1100px) { #analytics-ux-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { #analytics-ux-grid { grid-template-columns: 1fr; } }

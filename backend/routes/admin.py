@@ -915,7 +915,9 @@ async def get_analytics(fresh: bool = False, _: str = Depends(require_admin)):
     from services.email_service import _domain_label
 
     (students, weekly, tiers, excluded_rows, abandoned_rows, revenue_trend, applications_trend,
-     daily_rows, people_rows, active_rows, referral_rows, review_rows) = await db.fetch_batch([
+     daily_rows, people_rows, active_rows, referral_rows, review_rows,
+     journey_rows, enrolled_rows, login_rows, pace_rows, wait_rows, urgent_rows, mail_rows,
+     onboard_rows) = await db.fetch_batch([
         # 0 — per-student rollup
         (f"""SELECT s.id, s.domain, s.referral_source, s.college, s.year_of_study,
                     s.quiz_score, s.quiz_total,
@@ -986,6 +988,53 @@ async def get_analytics(fresh: bool = False, _: str = Depends(require_admin)):
                  FROM submissions WHERE reviewed_at IS NOT NULL AND status IN ('approved', 'rejected')) AS avg_review_hours,
               (SELECT COUNT(*) FROM submissions WHERE status = 'pending') AS pending,
               (SELECT MIN(datetime(submitted_at)) FROM submissions WHERE status = 'pending') AS oldest_pending""", ()),
+        # ── User experience ──
+        # 12 — journey per week: who reached it, who got it approved, how many tries it took
+        ("""SELECT week,
+                  COUNT(DISTINCT student_id) AS reached,
+                  COUNT(DISTINCT CASE WHEN status = 'approved' THEN student_id END) AS approved,
+                  SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) AS rejected_now,
+                  SUM(CASE WHEN status = 'pending'  THEN 1 ELSE 0 END) AS pending_now,
+                  AVG(COALESCE(attempts, 1)) AS avg_attempts,
+                  SUM(CASE WHEN COALESCE(attempts, 1) > 1 THEN 1 ELSE 0 END) AS resubmitted
+           FROM submissions GROUP BY week ORDER BY week""", ()),
+        # 13 — enrolled students, and how many never signed in to the dashboard
+        ("""SELECT COUNT(*) AS enrolled,
+                  SUM(CASE WHEN NOT EXISTS (SELECT 1 FROM otp_tokens o
+                                            WHERE lower(o.email) = lower(s.email) AND o.used = 1)
+                           THEN 1 ELSE 0 END) AS never_logged_in
+           FROM students s
+           WHERE EXISTS (SELECT 1 FROM enrollments e WHERE e.student_id = s.id AND e.status != 'dropped')""", ()),
+        # 14 — login experience, last 30 days, per person
+        ("""SELECT COUNT(DISTINCT lower(email)) AS requesters,
+                  COUNT(DISTINCT CASE WHEN used = 1 THEN lower(email) END) AS succeeded,
+                  COUNT(*) AS codes,
+                  SUM(CASE WHEN used = 2 THEN 1 ELSE 0 END) AS superseded,
+                  SUM(CASE WHEN used = 0 AND datetime(expires_at) < datetime('now') THEN 1 ELSE 0 END) AS expired_unused
+           FROM otp_tokens WHERE datetime(created_at) >= datetime('now', '-30 days')""", ()),
+        # 15 — pace: days between a student's week N and week N+1 submissions
+        ("""SELECT b.week AS week,
+                  julianday(datetime(b.submitted_at)) - julianday(datetime(a.submitted_at)) AS gap_days
+           FROM submissions a
+           JOIN submissions b ON b.student_id = a.student_id AND b.batch_id = a.batch_id AND b.week = a.week + 1""", ()),
+        # 16 — how long students wait for a review (last 90 days)
+        ("""SELECT (julianday(datetime(reviewed_at)) - julianday(datetime(submitted_at))) * 24 AS hours
+           FROM submissions
+           WHERE reviewed_at IS NOT NULL AND status IN ('approved', 'rejected')
+             AND datetime(reviewed_at) >= datetime('now', '-90 days')""", ()),
+        # 17 — students who paid to skip the wait (last 30 days)
+        ("""SELECT COUNT(*) AS requests, COUNT(DISTINCT student_id) AS students
+           FROM urgent_requests WHERE datetime(created_at) >= datetime('now', '-30 days')""", ()),
+        # 18 — lifecycle email engagement (last 30 days)
+        ("""SELECT SUM(CASE WHEN delivered_at IS NOT NULL THEN 1 ELSE 0 END) AS delivered,
+                  SUM(CASE WHEN opened_at    IS NOT NULL THEN 1 ELSE 0 END) AS opened,
+                  SUM(CASE WHEN clicked_at   IS NOT NULL THEN 1 ELSE 0 END) AS clicked
+           FROM email_logs WHERE status = 'sent' AND datetime(sent_at) >= datetime('now', '-30 days')""", ()),
+        # 19 — onboarding: days from enrollment to the first task submission
+        ("""SELECT julianday(MIN(datetime(sub.submitted_at))) - julianday(datetime(e.joined_at)) AS days
+           FROM enrollments e
+           JOIN submissions sub ON sub.student_id = e.student_id AND sub.batch_id = e.batch_id
+           GROUP BY e.id""", ()),
     ])
 
     funnel = {"total": 0, "started": 0, "completed": 0, "certified": 0, "paid": 0}
@@ -1153,7 +1202,105 @@ async def get_analytics(fresh: bool = False, _: str = Depends(require_admin)):
             {**q, "completion_rate": _pct(q["completed"], q["total"]), "paid_rate": _pct(q["paid"], q["total"])}
             for q in quiz.values()
         ],
+        "ux": _ux_block(journey_rows, enrolled_rows, login_rows, pace_rows, wait_rows, urgent_rows,
+                        mail_rows, onboard_rows, funnel, abandoned.get("students") or 0),
     }
     _analytics_cache["at"] = now
     _analytics_cache["data"] = data
     return data
+
+
+def _p90(values: list[float]) -> float | None:
+    values = sorted(v for v in values if v is not None)
+    if not values:
+        return None
+    return round(values[min(len(values) - 1, int(len(values) * 0.9))], 1)
+
+
+def _ux_block(journey_rows, enrolled_rows, login_rows, pace_rows, wait_rows, urgent_rows,
+              mail_rows, onboard_rows, funnel: dict, abandoned_students: int) -> dict:
+    """User-experience signals derived from what students actually do: where they stall,
+    how hard each week is, how logging in goes, how long they wait on us, and where
+    they drop at checkout. (There is no page-view tracking, so this is behaviour-based.)"""
+    enrolled = enrolled_rows[0] if enrolled_rows else {}
+    login = login_rows[0] if login_rows else {}
+    urgent = urgent_rows[0] if urgent_rows else {}
+    mail = mail_rows[0] if mail_rows else {}
+
+    pace: dict[int, list[float]] = {}
+    for r in pace_rows:
+        if r["gap_days"] is not None and r["gap_days"] >= 0:
+            pace.setdefault(r["week"], []).append(r["gap_days"])
+
+    weeks = []
+    total_tasks = total_resubmitted = 0
+    weighted_attempts = 0.0
+    for r in journey_rows:
+        reached = r["reached"] or 0
+        resubmitted = r["resubmitted"] or 0
+        avg_attempts = r["avg_attempts"] or 1
+        total_tasks += reached
+        total_resubmitted += resubmitted
+        weighted_attempts += avg_attempts * reached
+        weeks.append({
+            "week": r["week"],
+            "reached": reached,
+            "approved": r["approved"] or 0,
+            "rejected_now": r["rejected_now"] or 0,
+            "pending_now": r["pending_now"] or 0,
+            "avg_attempts": round(avg_attempts, 2),
+            "resubmitted": resubmitted,
+            "median_days_from_prev_week": _median(pace.get(r["week"], [])),
+        })
+
+    by_week = {w["week"]: w["reached"] for w in weeks}
+    enrolled_n = enrolled.get("enrolled") or 0
+    journey = [{"step": "Enrolled", "count": enrolled_n}]
+    journey += [{"step": f"Week {w}", "count": by_week.get(w, 0)} for w in range(1, TOTAL_WEEKS + 1)]
+    journey += [{"step": "Completed", "count": funnel["completed"]}, {"step": "Paid", "count": funnel["paid"]}]
+
+    waits = [r["hours"] for r in wait_rows if r["hours"] is not None and r["hours"] >= 0]
+    requesters = login.get("requesters") or 0
+    delivered = mail.get("delivered") or 0
+    checkout_starts = abandoned_students + funnel["paid"]
+
+    return {
+        "journey": journey,
+        "weeks": weeks,
+        "onboarding": {
+            "enrolled": enrolled_n,
+            "never_logged_in": enrolled.get("never_logged_in") or 0,
+            "median_days_to_first_task": _median([r["days"] for r in onboard_rows if r["days"] is not None and r["days"] >= 0]),
+        },
+        "login": {
+            "people_requested": requesters,
+            "people_signed_in": login.get("succeeded") or 0,
+            "success_rate": _pct(login.get("succeeded") or 0, requesters),
+            "codes_sent": login.get("codes") or 0,
+            "codes_replaced": login.get("superseded") or 0,
+            "codes_expired_unused": login.get("expired_unused") or 0,
+        },
+        "tasks": {
+            "avg_attempts": round(weighted_attempts / total_tasks, 2) if total_tasks else None,
+            "resubmitted": total_resubmitted,
+        },
+        "review_wait": {
+            "median_hours": _median(waits),
+            "p90_hours": _p90(waits),
+            "reviews": len(waits),
+        },
+        "urgent_requests_30d": {
+            "requests": urgent.get("requests") or 0,
+            "students": urgent.get("students") or 0,
+        },
+        "checkout": {
+            "started": checkout_starts,
+            "abandoned": abandoned_students,
+            "drop_rate": _pct(abandoned_students, checkout_starts),
+        },
+        "email_30d": {
+            "delivered": delivered,
+            "open_rate": _pct(mail.get("opened") or 0, delivered),
+            "click_rate": _pct(mail.get("clicked") or 0, delivered),
+        },
+    }

@@ -64,6 +64,7 @@ CREATE TABLE IF NOT EXISTS submissions (
     status TEXT NOT NULL DEFAULT 'pending',  -- pending | approved | rejected
     admin_note TEXT,
     feedback TEXT,                      -- auto-generated per-task feedback sent on submission
+    attempts INTEGER DEFAULT 1,         -- 1 + number of resubmissions after a rejection
     submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     reviewed_at TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES students(id),

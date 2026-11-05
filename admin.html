@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="theme.css?v=98690fd7ba">
-  <link rel="stylesheet" href="admin.css?v=e3435323ac">
+  <link rel="stylesheet" href="admin.css?v=3390f467c6">
   <script src="theme.js?v=515b2d143f" defer></script>
 </head>
 <body>
@@ -437,6 +437,42 @@
               <table class="students-table">
                 <thead><tr><th>Quiz score</th><th style="width:80px;">Students</th><th style="width:110px;">Completed %</th><th style="width:90px;">Paid %</th></tr></thead>
                 <tbody id="analytics-quiz-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="analytics-section-head">
+        <div class="eyebrow">User experience</div>
+        <p>How students move through the internship, how hard each week is, and where they get stuck or wait on us.</p>
+      </div>
+      <div class="stats-grid" id="analytics-ux-grid"></div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">🧭 Student Journey</div>
+              <div class="panel-subtitle">How many enrolled students reach each step. The biggest drop is where people get stuck</div>
+            </div>
+          </div>
+          <div class="panel-body" style="max-height:none;">
+            <div style="position:relative;height:280px;"><canvas id="chart-journey"></canvas></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">🧩 Week-by-week Experience</div>
+              <div class="panel-subtitle">Tries per task show unclear or hard weeks; days between weeks show pace</div>
+            </div>
+          </div>
+          <div class="panel-body" style="max-height:none;">
+            <div style="overflow-x:auto;">
+              <table class="students-table">
+                <thead><tr><th>Week</th><th>Reached</th><th>Approved</th><th title="Currently rejected, waiting for a resubmission">Rejected</th><th>Avg tries</th><th title="Median days since the previous week was submitted">Gap</th></tr></thead>
+                <tbody id="analytics-ux-weeks-tbody"></tbody>
               </table>
             </div>
           </div>
@@ -882,7 +918,7 @@
 <div id="toast-container"></div>
 
 <script src="config.js?v=b82b38a780" defer></script>
-<script src="admin.js?v=df8db4e5a6" defer></script>
+<script src="admin.js?v=c4ead3a170" defer></script>
 <script src="admin-email.js?v=00d66440ba" defer></script>
 </body>
 </html>

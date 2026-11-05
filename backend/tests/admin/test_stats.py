@@ -276,3 +276,49 @@ class TestBusinessMetrics:
         assert s["approval_rate_30d"] == 80.0
         assert s["completed_total"] == 1
         assert 2.9 <= s["oldest_pending_days"] <= 3.1
+
+    async def test_ux_block_on_empty_db(self, client, admin_headers):
+        ux = (await client.get("/api/admin/analytics", headers=admin_headers)).json()["ux"]
+        assert [j["step"] for j in ux["journey"]] == ["Enrolled", "Week 1", "Week 2", "Week 3", "Week 4", "Completed", "Paid"]
+        assert ux["tasks"]["avg_attempts"] is None
+        assert ux["login"]["success_rate"] == 0.0
+
+    async def test_ux_journey_logins_and_attempts(self, client, admin_headers):
+        from tests.conftest import test_db, seed_batch
+        b = await seed_batch(test_db)
+        a = await self._student("a@x.com")
+        c = await self._student("c@x.com")
+        for sid in (a, c):
+            await test_db.insert("INSERT INTO enrollments (student_id, batch_id, joined_at) VALUES (?, ?, datetime('now', '-10 days'))", (sid, b))
+        # a: week 1 approved after 2 tries, week 2 three days later; c: never logs in, never submits
+        await test_db.insert(
+            "INSERT INTO submissions (student_id, batch_id, week, linkedin_url, status, attempts, submitted_at, reviewed_at)"
+            " VALUES (?, ?, 1, 'u', 'approved', 2, datetime('now', '-8 days'), datetime('now', '-7 days'))", (a, b))
+        await test_db.insert(
+            "INSERT INTO submissions (student_id, batch_id, week, linkedin_url, status, submitted_at)"
+            " VALUES (?, ?, 2, 'u', 'pending', datetime('now', '-5 days'))", (a, b))
+        await test_db.insert("INSERT INTO otp_tokens (email, otp_hash, expires_at, used) VALUES ('a@x.com', 'h', '2099-01-01', 1)")
+        await test_db.insert("INSERT INTO otp_tokens (email, otp_hash, expires_at, used) VALUES ('c@x.com', 'h', '2000-01-01', 0)")
+        ux = (await client.get("/api/admin/analytics", headers=admin_headers)).json()["ux"]
+        steps = {j["step"]: j["count"] for j in ux["journey"]}
+        assert steps["Enrolled"] == 2 and steps["Week 1"] == 1 and steps["Week 2"] == 1 and steps["Week 3"] == 0
+        assert ux["onboarding"]["never_logged_in"] == 1
+        assert ux["onboarding"]["median_days_to_first_task"] == 2.0
+        assert ux["login"]["people_requested"] == 2 and ux["login"]["people_signed_in"] == 1
+        assert ux["login"]["success_rate"] == 50.0 and ux["login"]["codes_expired_unused"] == 1
+        w1 = ux["weeks"][0]
+        assert w1["avg_attempts"] == 2.0 and w1["resubmitted"] == 1
+        assert ux["weeks"][1]["median_days_from_prev_week"] == 3.0
+        assert ux["review_wait"]["median_hours"] == 24.0
+
+    async def test_resubmission_increments_attempts(self, client, admin_headers):
+        from tests.conftest import test_db, seed_batch
+        from services.submission_service import submission_service
+        b = await seed_batch(test_db)
+        sid = await self._student("r@x.com")
+        await test_db.insert("INSERT INTO enrollments (student_id, batch_id) VALUES (?, ?)", (sid, b))
+        sub = await test_db.insert(
+            "INSERT INTO submissions (student_id, batch_id, week, linkedin_url, status) VALUES (?, ?, 1, 'https://www.linkedin.com/posts/x', 'rejected')", (sid, b))
+        await submission_service.submit_linkedin_url(sid, b, 1, "https://www.linkedin.com/posts/y")
+        row = await test_db.fetch_one("SELECT attempts, status FROM submissions WHERE id = ?", (sub,))
+        assert row["status"] == "pending" and row["attempts"] == 2

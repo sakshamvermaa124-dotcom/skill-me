@@ -54,7 +54,8 @@ class SubmissionService:
             await db.execute(
                 """UPDATE submissions
                    SET linkedin_url = ?, status = 'pending', admin_note = NULL,
-                       submitted_at = CURRENT_TIMESTAMP, reviewed_at = NULL
+                       submitted_at = CURRENT_TIMESTAMP, reviewed_at = NULL,
+                       attempts = COALESCE(attempts, 1) + 1
                    WHERE id = ?""",
                 (linkedin_url, existing["id"]),
             )
