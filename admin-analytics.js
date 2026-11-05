@@ -85,6 +85,11 @@ async function loadAnalytics(fresh = false) {
       ensureChartJs(),
     ]);
     if (reqId !== an.req) return;
+    // The frontend (Vercel) and backend (Cloud Run) deploy separately. An older backend returns
+    // the previous response shape, so say that plainly instead of failing on a missing field.
+    if (!data || !data.overview || !data.funnel || !data.funnel.learning) {
+      throw new Error('The backend is still running the previous version. Deploy the latest backend to Cloud Run, then press Refresh.');
+    }
     an.data = data;
     if (fresh === true) { an.quality = null; an.payments = null; }
     const o = data.options || {};
