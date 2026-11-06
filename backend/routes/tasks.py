@@ -13,6 +13,16 @@ from services.enrollment_service import enrollment_service
 
 router = APIRouter(prefix="/api/tasks", tags=["Tasks"])
 
+# Public apply page linked from every student LinkedIn caption. Hardcoded (not settings.frontend_url)
+# because captions are always published publicly, even when the backend runs locally.
+APPLY_URL = "https://www.skill-me-intern.in/apply"
+
+
+def _caption_apply_link(week: int, domain_key: str | None) -> str:
+    """Apply link with UTM tags so analytics can attribute applicants to student posts."""
+    link = f"{APPLY_URL}?utm_source=linkedin&utm_medium=student_post&utm_campaign=week{week}"
+    return f"{link}&utm_content={domain_key}" if domain_key else link
+
 
 async def _load_student_enrollment(student_id: int, batch_id: int | None) -> tuple[dict, dict]:
     """Student + their enrollment row (`batch_id` is validated against the student)."""
@@ -88,6 +98,7 @@ async def get_current_tasks(student_id: int, batch_id: int):
             f"{showcase['caption_did'].format(week=w)}\n"
             f"{bullets}\n\n"
             f"{showcase['caption_demo']}\n\n"
+            f"We're hiring tech interns. Apply now - {_caption_apply_link(w, domain_key)}\n\n"
             f"{hashtags}"
         )
 

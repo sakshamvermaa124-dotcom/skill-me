@@ -185,6 +185,12 @@ class TestLinkedInCaption:
         assert "localhost" not in caption.lower() and "vs code" not in caption.lower()
         assert "#SkillMe" in caption
 
+    async def test_caption_links_to_public_apply_page_with_utm(self, client, admin_headers):
+        caption = await self._caption(client, admin_headers, "python")
+        assert ("https://www.skill-me-intern.in/apply?utm_source=linkedin"
+                "&utm_medium=student_post&utm_campaign=week1") in caption
+        assert "referral_code" not in caption and "ref_code" not in caption
+
     async def test_data_science_caption_is_notebook_worded(self, client, admin_headers):
         caption = await self._caption(client, admin_headers, "Data Science")
         assert "notebook link" in caption and "#DataScience" in caption and "Data Science Virtual Internship" in caption
