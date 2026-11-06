@@ -170,7 +170,7 @@ function anTable(head, rows, empty = 'Nothing to show.') {
 }
 
 const anCanvas = (id, h = 240) => `<div style="position:relative;height:${h}px;"><canvas id="${id}"></canvas></div>`;
-const anGrid = (cols, inner, mt = 20) => `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(${cols}px,1fr));gap:20px;margin-top:${mt}px;">${inner}</div>`;
+const anGrid = (cols, inner, mt = 20) => `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(${cols}px,100%),1fr));gap:20px;margin-top:${mt}px;">${inner}</div>`;
 const anCards = inner => `<div class="stats-grid">${inner}</div>`;
 
 let _anChartQueue = [];
