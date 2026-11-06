@@ -1,0 +1,21 @@
+{% extends "_activation_base.html" %}
+{% block preheader %}Week {{ ms.last_approved }} is approved. Week {{ ms.next_week }} is next: {{ ms.next_title }}.{% endblock %}
+{% block eyebrow %}Next milestone{% endblock %}
+{% block heading_title %}Week {{ ms.last_approved }} is done. Week {{ ms.next_week }} is next{% endblock %}
+{% block cta_label %}Continue with Week {{ ms.next_week }}{% endblock %}
+
+{% block content %}
+{% call ui.p() %}
+  Hi {{ first_name }}, your Week {{ ms.last_approved }} submission was approved. You have {{ ms.remaining }} milestone{{ "s" if ms.remaining != 1 else "" }} left to complete your {{ domain_label }} internship.
+{% endcall %}
+{% call ui.info_table() %}
+  {{ ui.row("Approved so far", ms.last_approved ~ " of 4 weeks") }}
+  {{ ui.row("Up next", "Week " ~ ms.next_week ~ ": " ~ ms.next_title) }}
+  {{ ui.row("Time needed", ms.time_label) }}
+  {{ ui.row("Weeks remaining", ms.remaining, last=true) }}
+{% endcall %}
+{% if ms.deliverables %}
+{{ ui.section("What Week " ~ ms.next_week ~ " asks for") }}
+{% call ui.p(mb=6) %}{% for d in ms.deliverables %}&bull; {{ d }}<br />{% endfor %}{% endcall %}
+{% endif %}
+{% endblock %}

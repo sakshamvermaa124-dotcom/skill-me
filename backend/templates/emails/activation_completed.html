@@ -1,0 +1,11 @@
+{% extends "_activation_base.html" %}
+{% block preheader %}You completed all four weeks of your {{ domain_label }} internship.{% endblock %}
+{% block eyebrow %}Internship complete{% endblock %}
+{% block heading_title %}You finished all four weeks{% endblock %}
+{% block cta_label %}View my dashboard{% endblock %}
+
+{% block content %}
+{% call ui.p() %}
+  Hi {{ first_name }}, congratulations. All four of your {{ domain_label }} milestones are approved. Your dashboard has your credentials section with the next steps and what is available to you.
+{% endcall %}
+{% endblock %}

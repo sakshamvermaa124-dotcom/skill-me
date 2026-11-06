@@ -231,6 +231,63 @@ class Database:
             "CREATE INDEX IF NOT EXISTS idx_submissions_student_status_week ON submissions(student_id, status, week)",
             "CREATE INDEX IF NOT EXISTS idx_students_is_test ON students(is_test)",
             "CREATE INDEX IF NOT EXISTS idx_otp_email_used ON otp_tokens(email, used)",
+            # Activation v14: additive tables only
+            """CREATE TABLE IF NOT EXISTS student_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER NOT NULL,
+    batch_id INTEGER,
+    email TEXT,
+    event_type TEXT NOT NULL,
+    occurred_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    source TEXT DEFAULT 'live',
+    meta TEXT,
+    dedupe_key TEXT NOT NULL UNIQUE
+)""",
+            """CREATE INDEX IF NOT EXISTS idx_student_events_student ON student_events(student_id, event_type)""",
+            """CREATE INDEX IF NOT EXISTS idx_student_events_type_time ON student_events(event_type, occurred_at)""",
+            """CREATE TABLE IF NOT EXISTS engagement_settings (
+    key TEXT PRIMARY KEY,
+    value TEXT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)""",
+            """CREATE TABLE IF NOT EXISTS engagement_reminders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER NOT NULL,
+    batch_id INTEGER,
+    trigger_key TEXT NOT NULL,
+    step INTEGER DEFAULT 1,
+    segment TEXT,
+    status TEXT NOT NULL DEFAULT 'planned',
+    reason TEXT,
+    token TEXT UNIQUE,
+    email_log_id INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    sent_at TIMESTAMP,
+    clicked_at TIMESTAMP,
+    dedupe_key TEXT NOT NULL UNIQUE
+)""",
+            """CREATE INDEX IF NOT EXISTS idx_eng_rem_student ON engagement_reminders(student_id, batch_id)""",
+            """CREATE INDEX IF NOT EXISTS idx_eng_rem_status ON engagement_reminders(status, created_at)""",
+            """CREATE INDEX IF NOT EXISTS idx_eng_rem_trigger ON engagement_reminders(trigger_key, created_at)""",
+            """CREATE TABLE IF NOT EXISTS notification_preferences (
+    email TEXT PRIMARY KEY,
+    reminders_opt_out INTEGER DEFAULT 0,
+    unsubscribed_at TIMESTAMP,
+    source TEXT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)""",
+            """CREATE TABLE IF NOT EXISTS support_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER NOT NULL,
+    batch_id INTEGER,
+    category TEXT,
+    message TEXT,
+    status TEXT NOT NULL DEFAULT 'open',
+    admin_note TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    resolved_at TIMESTAMP
+)""",
+            """CREATE INDEX IF NOT EXISTS idx_support_status ON support_requests(status, created_at)""",
         ]
         return migrations
 

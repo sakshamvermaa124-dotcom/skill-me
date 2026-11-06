@@ -182,6 +182,40 @@ async def _send_and_log(
         logger.warning("Failed to log email to DB: %s", log_exc)
     return success
 
+# ── Activation / engagement emails (additive; never used by transactional flows) ──
+
+_ACTIVATION_TEMPLATES = {
+    "onboarding_no_login": "activation_onboarding.html",
+    "login_no_first_task": "activation_first_task.html",
+    "milestone_stall": "activation_milestone.html",
+    "inactivity": "activation_inactive.html",
+    "internship_completed": "activation_completed.html",
+}
+
+
+def _activation_subject(kind: str, step: int, ctx: dict) -> str:
+    ft, ms, dl = ctx.get("ft") or {}, ctx.get("ms") or {}, ctx.get("domain_label", "")
+    if kind == "onboarding_no_login":
+        return ["Your SkillMe internship is ready: here is how to log in",
+                "Your first SkillMe task is waiting",
+                "Your SkillMe internship window is running"][min(step, 3) - 1]
+    if kind == "login_no_first_task":
+        t = ft.get("title", "your first task")
+        return f"Start your first {dl} task: {t}" if step <= 1 else f"Your first task takes {str(ft.get('time_label', 'a couple of hours')).lower()}"
+    if kind == "milestone_stall":
+        return f"Week {ms.get('last_approved')} approved. Week {ms.get('next_week')} is next"
+    if kind == "inactivity":
+        return f"Pick up where you left off: Week {ms.get('next_week')}"
+    return "You completed your SkillMe internship"
+
+
+def render_activation_email(kind: str, step: int = 1, **ctx) -> tuple[str, str]:
+    """Pure render (no sending, no logging). Returns (subject, html)."""
+    ctx["step"] = step
+    html = _render(_ACTIVATION_TEMPLATES[kind], **ctx)
+    return _activation_subject(kind, step, ctx), html
+
+
 # ── Domain label helper ───────────────────────────────────────────────────────
 
 def _domain_label(domain: str) -> str:
@@ -515,6 +549,13 @@ class EmailService:
         )
 
     # Test utility
+    async def send_activation(self, kind: str, step: int, to_email: str, to_name: str,
+                              student_id: int, batch_id: int | None, **ctx) -> bool:
+        """Send one activation/engagement email. Logged as email_type 'activation_<kind>'."""
+        subject, html = render_activation_email(kind, step, **ctx)
+        return await _send_and_log(to_email, to_name, subject, html,
+                                   email_type=f"activation_{kind}", student_id=student_id, batch_id=batch_id)
+
     async def send_test_email(self, to_email: str) -> bool:
         """Send a test email to verify SMTP configuration."""
         html = _render(

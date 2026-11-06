@@ -698,6 +698,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // "Your next step" card — first pass from submissions; refined once task titles load
     renderNextStep(data, null);
 
+    // Additive guidance card; a no-op unless the admin enabled it (see dashboard-activation.js)
+    if (typeof window.renderActivation === 'function') window.renderActivation(data);
+
     // Submissions (LinkedIn task review history)
     renderSubmissionsList(submissions || []);
 

@@ -151,6 +151,8 @@ async def _enroll_and_notify(student_id: int, background_tasks: BackgroundTasks)
             domain=result["domain"],
             student_id=student_id,
         )
+    from services.activation_events import track_enrollment  # additive, never raises
+    await track_enrollment(student_id, result.get("batch_id"))
     return result
 
 
@@ -440,6 +442,8 @@ async def list_submissions(status: str | None = None, _: str = Depends(require_a
 
 async def _notify_task_approved(background_tasks: BackgroundTasks, submission_id: int, admin_note: str | None) -> None:
     """Look up the submission's student and queue a congratulations email."""
+    from services.activation_events import track_approval  # additive, never raises
+    await track_approval(submission_id)
     info = await db.fetch_one(
         """SELECT sub.week, s.first_name, s.last_name, s.email,
                   COALESCE(b.domain, s.domain) AS domain

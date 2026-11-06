@@ -1,0 +1,15 @@
+{% extends "_activation_base.html" %}
+{% block preheader %}It has been {{ days_inactive }} days. Pick up where you left off in Week {{ ms.next_week }}.{% endblock %}
+{% block eyebrow %}Pick up where you left off{% endblock %}
+{% block heading_title %}Your Week {{ ms.next_week }} task is waiting{% endblock %}
+{% block cta_label %}Open my dashboard{% endblock %}
+
+{% block content %}
+{% call ui.p() %}
+  Hi {{ first_name }}, it has been {{ days_inactive }} days since your last activity. Your progress is saved: {{ ms.last_approved }} of 4 weeks approved.
+{% endcall %}
+{% call ui.info_table() %}
+  {{ ui.row("Up next", "Week " ~ ms.next_week ~ ": " ~ ms.next_title) }}
+  {{ ui.row("Time needed", ms.time_label, last=true) }}
+{% endcall %}
+{% endblock %}

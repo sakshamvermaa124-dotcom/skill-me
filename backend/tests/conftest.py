@@ -236,6 +236,7 @@ def mock_email_service():
     mock.send_certificate_ready = AsyncMock(return_value=True)
     mock.send_submission_feedback = AsyncMock(return_value=True)
     mock.send_test_email = AsyncMock(return_value=True)
+    mock.send_activation = AsyncMock(return_value=True)
     return mock
 
 
@@ -330,6 +331,15 @@ async def client() -> AsyncGenerator[httpx.AsyncClient, None]:
         patch("routes.certificates.email_service", mock_email),
         patch("routes.payments.email_service", mock_email),
         patch("routes.webhooks.db", test_db),
+        patch("services.activation_events.db", test_db),
+        patch("services.activation_service.db", test_db),
+        patch("services.engagement_service.db", test_db),
+        patch("services.activation_backfill.db", test_db),
+        patch("services.activation_report.db", test_db),
+        patch("routes.activation.db", test_db),
+        patch("routes.admin_activation.db", test_db),
+        patch("middleware.student_auth.db", test_db),
+        patch("services.engagement_service.es.email_service", mock_email),
         patch("routes.webhooks.email_service", mock_email),
         patch("main.scheduler_service", mock_sched),
     ]

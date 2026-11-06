@@ -53,6 +53,7 @@ const PAGE_META = {
   submissions: { title: 'Submissions', subtitle: 'Review and approve/reject weekly LinkedIn submissions' },
   'urgent-requests': { title: 'Urgent Requests', subtitle: 'Expedited (24h) certificate/LOR/portfolio processing requests' },
   announcements: { title: 'Announcements', subtitle: 'Send platform-wide update emails to students' },
+  recovery:  { title: 'Student Recovery', subtitle: 'Move students from enrollment to first task and through all four weeks' },
 };
 
 // ─── AUTH ───
@@ -147,10 +148,15 @@ function navigate(page) {
   document.getElementById('topbar-title').textContent = meta.title || page;
   document.getElementById('topbar-subtitle').textContent = meta.subtitle || '';
   currentPage = page;
+  if (window.matchMedia && matchMedia('(max-width: 900px)').matches) {
+    const navEl = document.getElementById('nav-' + page);
+    if (navEl && navEl.scrollIntoView) navEl.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+  }
   if (page === 'overview') loadOverview();
   if (page === 'students') loadStudents();
   if (page === 'alumni') loadAlumni();
   if (page === 'analytics' && window.loadAnalytics) loadAnalytics();
+  if (page === 'recovery' && window.loadRecovery) loadRecovery();
   if (page === 'email') { loadEmailStatus(); loadEmailDirectory(); loadEmailLogs(); loadEmailAggStats(); }
   if (page === 'submissions') loadSubmissions();
   if (page === 'urgent-requests') loadUrgentRequests();

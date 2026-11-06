@@ -1,0 +1,28 @@
+{% extends "_activation_base.html" %}
+{% block preheader %}Your SkillMe internship is ready. Here is how to log in and what happens next.{% endblock %}
+{% block eyebrow %}{% if step == 1 %}Welcome{% elif step == 2 %}Reminder{% else %}Last nudge{% endif %}{% endblock %}
+{% block heading_title %}{% if step == 1 %}Your {{ domain_label }} internship is ready{% elif step == 2 %}You have not logged in yet{% else %}Your internship window is running{% endif %}{% endblock %}
+{% block cta_label %}Log in to my dashboard{% endblock %}
+
+{% block content %}
+{% call ui.p() %}
+  Hi {{ first_name }},
+  {% if step == 1 %}your <strong class="ink" style="color:#0a0a0a;">{{ domain_label }}</strong> internship is live. It takes about two minutes to get started.
+  {% elif step == 2 %}we noticed you have not signed in to your dashboard yet. Your first task is ready and takes {{ ft.time_label|lower }}.
+  {% else %}your four-week internship clock is ticking and your dashboard is still waiting. Logging in takes less than a minute.{% endif %}
+{% endcall %}
+
+{{ ui.section("How to log in") }}
+{% call ui.steps() %}
+  {% call ui.step(1, "Open your dashboard") %}Use the button below, or go to the Dashboard page on the SkillMe site.{% endcall %}
+  {% call ui.step(2, "Enter this email address") %}Use <strong class="ink" style="color:#0a0a0a;">{{ email }}</strong>. There is no password.{% endcall %}
+  {% call ui.step(3, "Type the 6-digit code", last=true) %}We email you a one-time code. It expires in 10 minutes. If it does not arrive, check spam and press Resend.{% endcall %}
+{% endcall %}
+
+{{ ui.section("What happens after you log in") }}
+{% call ui.info_table() %}
+  {{ ui.row("Your project", ft.project_name) }}
+  {{ ui.row("Week 1 task", ft.title) }}
+  {{ ui.row("Time needed", ft.time_label, last=true) }}
+{% endcall %}
+{% endblock %}

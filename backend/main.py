@@ -74,6 +74,23 @@ async def lifespan(app: FastAPI):
         misfire_grace_time=3600,
     )
 
+    # Engagement engine — hourly 09:00-20:00 IST. A no-op unless an admin switched it on,
+    # and it can only send real email when ENGAGEMENT_LIVE_ALLOWED is set on the server.
+    async def engagement_tick():
+        from services.engagement_service import run_tick
+        try:
+            await run_tick()
+        except Exception as exc:  # noqa: BLE001
+            logger.error("engagement tick failed: %s", exc)
+
+    scheduler_service._scheduler.add_job(
+        engagement_tick,
+        trigger=CronTrigger(hour="9-20", minute=15, timezone="Asia/Kolkata"),
+        id="engagement_tick",
+        replace_existing=True,
+        misfire_grace_time=1800,
+    )
+
     yield
 
     # Shutdown
@@ -141,6 +158,13 @@ app.include_router(auth_router)
 app.include_router(portfolio_router)
 app.include_router(tasks_router)
 app.include_router(webhooks_router)
+
+# Student activation & retention layer (additive; every feature is gated by admin settings)
+from routes.activation import router as activation_router, public_router as activation_public_router
+from routes.admin_activation import router as admin_activation_router
+app.include_router(activation_router)
+app.include_router(activation_public_router)
+app.include_router(admin_activation_router)
 
 
 # ──────────────────────────────────────────────

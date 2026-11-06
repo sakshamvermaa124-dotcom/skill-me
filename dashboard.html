@@ -52,6 +52,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="dashboard.css?v=779a09e4fd">
+  <link rel="stylesheet" href="dashboard-activation.css?v=e5d55a6f32">
 
   <script src="config.js?v=b82b38a780" defer></script>
   <script src="attribution.js?v=aeaeb77e33" defer></script>
@@ -259,6 +260,9 @@
 
           <!-- Credential quick-access strip (filled by dashboard.js once paid) -->
           <div class="cred-strip" id="cred-strip"></div>
+
+          <!-- Guided first-task / next-milestone card (additive; filled by dashboard-activation.js, empty when the feature is off) -->
+          <div id="activation-slot" hidden></div>
 
           <!-- Hero: progress + the one thing to do next -->
           <div class="hero-card progress-section" id="progress-section-el">
@@ -612,8 +616,9 @@
   <!-- Lenis smooth scroll -->
   <div id="dash-toast" class="dash-toast" role="status" aria-live="polite"></div>
   <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js" integrity="sha384-tKsJDT6PlUI0pSBt9/sBKJluKgA19/a6mBrDsZaXotLB4ZYfMGM6xt6/WgGpYhTm" crossorigin="anonymous" defer></script>
-  <script src="dashboard.js?v=60b4209460" defer></script>
+  <script src="dashboard.js?v=0c233e7adf" defer></script>
   <script src="dashboard-ui.js?v=e74a8796a3" defer></script>
+  <script src="dashboard-activation.js?v=a197c1d57f" defer></script>
 
   <!-- ══ Modals — siblings of .dash-page, outside the panel system ════════════
        Must NOT be inside #dashboard-view (it starts display:none).

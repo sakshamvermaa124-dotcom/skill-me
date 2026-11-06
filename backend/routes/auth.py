@@ -94,6 +94,9 @@ async def verify_login_otp(req: OTPVerify, response: Response):
         secure=True,  # HTTPS only in production
     )
 
+    from services.activation_events import track_login  # additive, never raises
+    await track_login(req.email)
+
     return {"status": "authenticated", "token": token}
 
 

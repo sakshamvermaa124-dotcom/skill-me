@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     # The public URL of this backend.
     backend_url: str = ""
+    # Safety interlock: the engagement engine can only send real emails when this is true,
+    # no matter what the admin setting says. Keep false in dev/test/staging.
+    engagement_live_allowed: bool = False
 
     # Admin Auth
     admin_api_key: str = "sakshamm"

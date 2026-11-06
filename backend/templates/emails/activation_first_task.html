@@ -1,0 +1,35 @@
+{% extends "_activation_base.html" %}
+{% block preheader %}Your Week 1 {{ domain_label }} task: {{ ft.title }}. {{ ft.time_label }}.{% endblock %}
+{% block eyebrow %}{% if step == 1 %}Your first task{% else %}Still here for you{% endif %}{% endblock %}
+{% block heading_title %}{% if step == 1 %}Start your first {{ domain_label }} task{% else %}Your first task is only {{ ft.time_label|lower }} away{% endif %}{% endblock %}
+{% block cta_label %}Start my first task{% endblock %}
+
+{% block content %}
+{% call ui.p() %}
+  Hi {{ first_name }}, you are logged in, and the next step is your first task. It is a beginner-level task and should take about {{ ft.time_label|lower|replace('about ', '') }}.
+{% endcall %}
+{% call ui.info_table() %}
+  {{ ui.row("Project", ft.project_name) }}
+  {{ ui.row("Week 1", ft.title) }}
+  {{ ui.row("Time needed", ft.time_label) }}
+  {{ ui.row("Level", ft.difficulty, last=true) }}
+{% endcall %}
+
+{{ ui.section("What you will hand in") }}
+{% call ui.p(mb=6) %}
+  {% for d in ft.deliverables %}&bull; {{ d }}<br />{% endfor %}
+{% endcall %}
+
+{{ ui.section("How to submit") }}
+{% call ui.steps() %}
+  {% for s in ft.submit_steps %}
+    {% call ui.step(loop.index, s, last=loop.last) %}{% endcall %}
+  {% endfor %}
+{% endcall %}
+{% endblock %}
+
+{% block after_cta %}
+{% call ui.note(tone="neutral") %}
+  Stuck? Reply to this email or use <strong class="ink" style="color:#0a0a0a;">Need help</strong> on your dashboard and we will get back to you.
+{% endcall %}
+{% endblock %}

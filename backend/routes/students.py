@@ -414,6 +414,9 @@ async def submit_task(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+    from services.activation_events import track_submission  # additive, never raises
+    await track_submission(req.student_id, batch_id, req.week)
+
     student = await db.fetch_one(
         """SELECT s.first_name, s.last_name, s.email, COALESCE(b.domain, s.domain) AS domain
            FROM students s LEFT JOIN batches b ON b.id = ?

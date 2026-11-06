@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui %}
+{#- Shared shell for activation/engagement emails: one clear CTA (click-tracked) and an unsubscribe footer.
+    Child templates fill: eyebrow, heading, intro, details, cta_label. -#}
+
+{% block title %}{% block heading_title %}{% endblock %}{% endblock %}
+
+{% block body %}
+{{ ui.eyebrow(self.eyebrow()) }}
+{{ ui.title(self.heading_title()) }}
+{% block content %}{% endblock %}
+{% call ui.actions(mt=26) %}
+  {{ ui.button(cta_url, self.cta_label()) }}
+{% endcall %}
+{% block after_cta %}{% endblock %}
+{% call ui.p(size=12, mb=0) %}
+  <span style="color:#71717a;">You are getting this because you are enrolled in a SkillMe internship.
+  <a href="{{ unsubscribe_url }}" style="color:#71717a;text-decoration:underline;">Stop these reminders</a>
+  (you will still get essential account emails such as login codes and task reviews).</span>
+{% endcall %}
+{% endblock %}
