@@ -1,0 +1,231 @@
+/* =============================================================
+   legal.css — long-form reading layout for privacy / terms / refunds
+   Loads after theme.css. Tokens only (both themes).
+   ============================================================= */
+
+/* ── Page header ─────────────────────────────────────────────── */
+.legal-hero {
+  position: relative;
+  padding: clamp(48px, 7vw, 88px) 0 clamp(32px, 4vw, 44px);
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-soft);
+  overflow: hidden;
+}
+.legal-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image: radial-gradient(var(--grid-dot) 1px, transparent 1px);
+  background-size: 22px 22px;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 85%);
+          mask-image: linear-gradient(to bottom, #000 0%, transparent 85%);
+  pointer-events: none;
+}
+.legal-hero .container { position: relative; }
+.legal-crumbs {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 0.76rem;
+  color: var(--text-3);
+  margin-bottom: 20px;
+}
+.legal-crumbs a { color: var(--text-2); }
+.legal-crumbs a:hover { color: var(--text); }
+.legal-hero h1 {
+  font-size: clamp(2.1rem, 4.6vw, 3.2rem);
+  letter-spacing: -0.04em;
+  margin-top: 14px;
+  max-width: 18ch;
+}
+.legal-meta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px;
+  margin-top: 18px;
+}
+.legal-meta .updated {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 0.8rem;
+  color: var(--text-2);
+}
+.legal-meta .updated svg { color: var(--accent-text); }
+
+/* Policy switcher */
+.legal-tabs {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-top: 28px;
+}
+.legal-tabs a { height: 34px; padding: 0 14px; font-size: 0.84rem; }
+.legal-tabs a[aria-current="page"] { background: var(--invert); border-color: var(--invert); color: var(--invert-fg); }
+
+/* ── Two-column layout ───────────────────────────────────────── */
+.legal-layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: clamp(32px, 6vw, 80px);
+  align-items: start;
+  padding-top: clamp(36px, 5vw, 56px);
+  padding-bottom: clamp(64px, 8vw, 104px);
+}
+
+/* ── Table of contents ───────────────────────────────────────── */
+.legal-toc {
+  position: sticky;
+  top: calc(var(--nav-h) + 24px);
+}
+.legal-toc details { border: 0; }
+.legal-toc summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  list-style: none;
+  font-family: var(--font-mono); font-size: 0.74rem; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 12px;
+}
+.legal-toc summary::-webkit-details-marker { display: none; }
+.legal-toc summary .chev { display: none; transition: transform 0.25s var(--ease); }
+.legal-toc ol {
+  list-style: none;
+  border-left: 1px solid var(--line);
+}
+.legal-toc li a {
+  position: relative;
+  display: flex; gap: 10px;
+  padding: 7px 0 7px 16px;
+  margin-left: -1px;
+  border-left: 2px solid transparent;
+  font-size: 0.88rem; line-height: 1.4;
+  color: var(--text-2);
+  border-radius: 0;
+  transition: color 0.15s, border-color 0.15s;
+}
+.legal-toc li a:hover { color: var(--text); }
+.legal-toc li a .num { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-3); padding-top: 1px; min-width: 1.4em; }
+.legal-toc li a.is-active { color: var(--text); font-weight: 600; border-left-color: var(--accent); }
+.legal-toc li a.is-active .num { color: var(--accent-text); }
+.legal-toc li a:focus-visible { outline-offset: 0; border-radius: 4px; }
+
+.legal-aside-card {
+  margin-top: 28px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  font-size: 0.85rem;
+  color: var(--text-2);
+}
+.legal-aside-card strong { display: block; color: var(--text); font-size: 0.88rem; margin-bottom: 4px; }
+.legal-aside-card a { color: var(--primary); font-weight: 600; }
+.legal-aside-card a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* ── Reading column ──────────────────────────────────────────── */
+.legal-body {
+  max-width: 39em; /* ~70 characters of Geist prose */
+  font-size: 1.02rem;
+  line-height: 1.75;
+  color: var(--text-2);
+}
+.legal-body > .intro {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--text);
+  padding-bottom: 28px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.legal-body section { padding-top: 32px; }
+.legal-body section + section { margin-top: 8px; }
+.legal-body h2 {
+  position: relative;
+  display: flex; align-items: baseline; gap: 12px;
+  font-size: clamp(1.25rem, 2.2vw, 1.5rem);
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+  font-weight: 650;
+  margin-bottom: 14px;
+  scroll-margin-top: calc(var(--nav-h) + 24px);
+}
+.legal-body h2 .sec-num {
+  flex-shrink: 0;
+  font-family: var(--font-mono); font-size: 0.8em; font-weight: 500;
+  letter-spacing: 0;
+  color: var(--accent-text);
+}
+.legal-body .heading-anchor {
+  flex-shrink: 0;
+  align-self: center;
+  display: inline-grid; place-items: center;
+  width: 28px; height: 28px;
+  border-radius: var(--r-xs);
+  color: var(--text-3);
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s, background-color 0.15s;
+}
+.legal-body h2:hover .heading-anchor,
+.legal-body .heading-anchor:focus-visible { opacity: 1; }
+.legal-body .heading-anchor:hover { color: var(--text); background: var(--surface-2); }
+@media (hover: none) { .legal-body .heading-anchor { opacity: 0.6; } }
+
+.legal-body p { margin-bottom: 16px; }
+.legal-body p:last-child { margin-bottom: 0; }
+.legal-body strong { color: var(--text); font-weight: 600; }
+.legal-body .intro strong { white-space: nowrap; } /* keep the Udyam number on one line */
+.legal-body ul { margin: 4px 0 18px; padding-left: 0; list-style: none; }
+.legal-body li { position: relative; padding-left: 22px; margin-bottom: 10px; }
+.legal-body li::before {
+  content: '';
+  position: absolute; left: 4px; top: 0.72em;
+  width: 6px; height: 6px; border-radius: 2px;
+  background: var(--accent);
+}
+.legal-body a:not(.heading-anchor):not(.btn) {
+  color: var(--primary);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: var(--primary-line);
+  text-underline-offset: 3px;
+}
+.legal-body a:not(.heading-anchor):not(.btn):hover { text-decoration-color: currentColor; }
+
+/* Closing help card */
+.legal-help {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px 24px; flex-wrap: wrap;
+  margin-top: 48px;
+  padding: 22px 24px;
+}
+.legal-help h3 { font-size: 1.02rem; letter-spacing: -0.015em; line-height: 1.3; }
+.legal-help p { margin: 4px 0 0; font-size: 0.9rem; color: var(--text-2); }
+
+/* ── Mobile: TOC collapses into a disclosure ─────────────────── */
+@media (max-width: 960px) {
+  .legal-layout { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .legal-toc {
+    position: static;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    background: var(--surface);
+  }
+  .legal-toc summary {
+    margin: 0;
+    padding: 14px 16px;
+    cursor: pointer;
+    color: var(--text);
+  }
+  .legal-toc summary .chev { display: block; color: var(--text-3); }
+  .legal-toc details[open] summary { border-bottom: 1px solid var(--line); }
+  .legal-toc details[open] summary .chev { transform: rotate(180deg); }
+  .legal-toc nav { padding: 8px 16px 12px; }
+  .legal-toc ol { border-left: 0; }
+  .legal-toc li a { padding: 9px 0; border-left: 0; margin-left: 0; }
+  .legal-toc li a.is-active { border-left: 0; }
+  .legal-aside-card { display: none; }
+  .legal-body { max-width: none; }
+}
+@media (max-width: 640px) {
+  .legal-body { font-size: 1rem; }
+  .legal-body > .intro { font-size: 1.04rem; }
+  .legal-help { padding: 18px; }
+  .legal-help .btn { width: 100%; }
+}
+
+@media print {
+  .legal-toc, .legal-tabs, .legal-help, .heading-anchor { display: none !important; }
+  .legal-layout { display: block; }
+  .legal-hero { background: none; }
+}
