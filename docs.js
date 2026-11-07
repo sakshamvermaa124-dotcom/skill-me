@@ -94,7 +94,7 @@
       btn.dataset.label = btn.innerHTML;
       btn.disabled = true;
       btn.setAttribute('aria-busy', 'true');
-      btn.innerHTML = 'Preparing PDF…';
+      btn.innerHTML = '<span class="spinner" aria-hidden="true"></span>Preparing PDF…';
     } else {
       btn.disabled = false;
       btn.removeAttribute('aria-busy');
@@ -133,6 +133,9 @@
     return new Promise((resolve, reject) => {
       const html = document.documentElement.cloneNode(true);
       html.querySelectorAll('script').forEach(s => s.remove());
+      // The document artwork is theme-independent; render the snapshot in light mode
+      // so nothing from the dark page chrome can leak into the PDF.
+      html.setAttribute('data-theme', 'light');
       const frame = document.createElement('iframe');
       frame.setAttribute('aria-hidden', 'true');
       frame.tabIndex = -1;
@@ -148,7 +151,7 @@
     opts = opts || {};
     const btn = opts.button;
     setBusy(btn, true);
-    let frame = null;
+    let frame = null, probeFix = null;
     try {
       await loadLibs();
       if (document.fonts && document.fonts.ready) await document.fonts.ready;
@@ -196,6 +199,15 @@
           blocks.push([r.top - top0, Math.min(nr.bottom, nr.top + 90) - top0]);
         });
       }
+
+      // html2canvas measures font baselines with a hidden probe <div><span><img> appended to
+      // the *main* page's <body>. Give that probe the plain metrics the documents were designed
+      // with, not the theme.css body ones (line-height 1.6, block images), or text shifts.
+      probeFix = document.createElement('style');
+      probeFix.textContent = 'body>div[style*="visibility: hidden"]{line-height:normal!important;letter-spacing:normal!important;'
+        + 'font-feature-settings:normal!important;text-rendering:auto!important}'
+        + 'body>div[style*="visibility: hidden"] img{display:inline!important;max-width:none!important}';
+      document.head.appendChild(probeFix);
 
       const canvas = await window.html2canvas(target, {
         scale: 2,
@@ -263,6 +275,7 @@
       return false;
     } finally {
       if (frame) frame.remove();
+      if (probeFix) probeFix.remove();
       setBusy(btn, false);
     }
   }
@@ -271,5 +284,82 @@
     return String(s || '').trim().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '') || 'Document';
   }
 
-  window.SkillMeDocs = { DOMAIN_LABELS, toSlug, domainLabel, esc, parseDate, downloadPDF, safeFilePart };
+  // ── Share: copy the current page link ─────────────────────────────────────
+  let toastTimer = null;
+  function toast(msg) {
+    let el = document.getElementById('dc-toast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'dc-toast';
+      el.className = 'toast';
+      el.setAttribute('role', 'status');
+      el.setAttribute('aria-live', 'polite');
+      document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    requestAnimationFrame(() => el.classList.add('is-visible'));
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('is-visible'), 2600);
+  }
+
+  async function copyLink(url) {
+    const link = url || window.location.href;
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(link);
+      } else {
+        const ta = document.createElement('textarea');
+        ta.value = link;
+        ta.setAttribute('readonly', '');
+        ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        ta.remove();
+        if (!ok) throw new Error('copy failed');
+      }
+      toast('Link copied to clipboard');
+      return true;
+    } catch (e) {
+      window.prompt('Copy this link:', link);
+      return false;
+    }
+  }
+
+  // ── Page chrome: status strip + empty/locked states (styles in docs.css) ──
+  const ICONS = {
+    ok: '<path d="M20 6 9 17l-5-5"/>',
+    danger: '<path d="M18 6 6 18M6 6l12 12"/>',
+    warn: '<path d="M12 8v5"/><path d="M12 16.5h.01"/>',
+    lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+    search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+    back: '<path d="m15 18-6-6 6-6"/>',
+  };
+  function icon(name, size) {
+    const s = size || 18;
+    return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
+  }
+
+  /** Fill a .dc-status strip. kind: 'ok' | 'warn' | 'danger'. html is trusted markup (escape inputs first). */
+  function setStatus(el, kind, title, html) {
+    if (!el) return;
+    el.classList.remove('is-ok', 'is-warn', 'is-danger');
+    el.classList.add('is-' + kind);
+    el.innerHTML = `<div class="dc-status-icon">${icon(kind)}</div>
+      <div class="dc-status-text"><strong>${esc(title)}</strong><span>${html}</span></div>`;
+  }
+
+  /** Markup for a centred empty/locked state card. */
+  function stateCard(opts) {
+    const actions = (opts.actions || []).map(a =>
+      `<a class="btn ${a.primary ? 'btn-primary' : 'btn-secondary'}" href="${esc(a.href)}">${a.back ? icon('back', 16) : ''}${esc(a.label)}</a>`).join('');
+    return `<section class="card dc-state" role="status">
+      <div class="dc-state-icon">${icon(opts.icon || 'lock', 26)}</div>
+      <h2>${esc(opts.title)}</h2>
+      <p>${esc(opts.text)}</p>
+      ${actions ? `<div class="dc-state-actions">${actions}</div>` : ''}
+    </section>`;
+  }
+
+  window.SkillMeDocs = { DOMAIN_LABELS, toSlug, domainLabel, esc, parseDate, downloadPDF, safeFilePart, copyLink, toast, icon, setStatus, stateCard };
 })();
