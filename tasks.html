@@ -1,280 +1,424 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light" class="no-js">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Internship Tasks - SkillMe</title>
+    <meta name="theme-color" content="#ffffff">
+    <script>
+      (function () {
+        var t;
+        try { t = localStorage.getItem('skillme-theme'); } catch (e) {}
+        if (t !== 'light' && t !== 'dark') {
+          t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script>
+    <link rel="icon" href="assets/logo.webp" type="image/webp">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css?v=20261011_ds1">
+    <script src="theme.js?v=20261011_ds1" defer></script>
     <!-- Use marked.js for markdown rendering -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
-        
-        :root {
-            --bg: #ffffff;
-            --text-main: #111827;
-            --text-muted: #4b5563;
-            --border: #e5e7eb;
-            --primary: #c99a4e; /* brand gold */
-            --primary-light: rgba(201, 154, 78, 0.1);
-        }
+        /* ── tasks.html page styles (tokens from theme.css) ── */
+        body { background: var(--bg-soft); }
+        .tg-nav .container { max-width: 880px; }
+        .tg-nav .brand-tag { font-family: var(--font-mono); font-size: 0.74rem; letter-spacing: 0.06em; text-transform: uppercase; }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* Light gray behind paper */
-            color: var(--text-main);
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
-        }
+        .tg-wrap { max-width: 880px; margin: 0 auto; padding: clamp(20px, 4vw, 40px) var(--gutter) 72px; }
 
-        .document-container {
-            max-width: 850px;
-            margin: 0 auto;
-            background: var(--bg);
-            padding: 50px 60px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            border-radius: 8px;
-        }
+        /* Loading / error state */
+        .tg-state { max-width: 520px; margin: clamp(40px, 10vh, 96px) auto; padding: 32px 28px; text-align: center; color: var(--text-2); font-size: 0.98rem; line-height: 1.6; }
+        .tg-state::before { content: ''; display: block; width: 26px; height: 26px; margin: 0 auto 16px; border-radius: 50%; border: 2px solid var(--line-strong); border-top-color: var(--accent); animation: tgSpin 0.8s linear infinite; }
+        .tg-state.is-done::before { display: none; }
+        .tg-state a { color: var(--primary); font-weight: 600; }
+        .tg-state a:hover { text-decoration: underline; text-underline-offset: 3px; }
+        @keyframes tgSpin { to { transform: rotate(360deg); } }
 
-        .header {
-            text-align: center;
-            border-bottom: 2px solid var(--primary);
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-        }
-
-        .header img {
-            width: 60px;
-            height: 60px;
-            margin-bottom: 15px;
-            border-radius: 50%;
-        }
-
-        .header h1 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 2rem;
-            margin: 0 0 5px 0;
-            color: var(--primary);
-        }
-
-        .header p {
-            margin: 0;
-            font-size: 1.1rem;
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .student-info {
-            display: flex;
-            justify-content: space-between;
-            background: var(--primary-light);
-            padding: 15px 20px;
-            border-radius: 6px;
-            margin-bottom: 30px;
-            font-size: 0.95rem;
-            border: 1px solid rgba(201, 154, 78, 0.2);
-        }
-
-        .student-info div {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .student-info strong {
-            color: var(--primary);
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 3px;
-        }
-
-        h2 {
-            font-family: 'Outfit', sans-serif;
-            color: var(--primary);
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 8px;
-            margin-top: 35px;
-            font-size: 1.4rem;
-        }
-
-        .overview-section, .perks-section, .instructions-section {
-            margin-bottom: 30px;
-        }
-
-        ul, ol {
-            padding-left: 20px;
-        }
-
-        li {
-            margin-bottom: 8px;
-        }
-
-        .important-note {
-            background-color: #fffbeb;
-            border-left: 4px solid #f59e0b;
-            padding: 15px 20px;
-            margin: 30px 0;
-            border-radius: 0 6px 6px 0;
-        }
-
-        .important-note h3 {
-            margin: 0 0 10px 0;
-            color: #b45309;
-            font-size: 1.1rem;
-        }
-        
-        .important-note p {
-            margin: 0;
-            font-size: 0.95rem;
-            color: #78350f;
-        }
-
-        .task-card {
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 24px;
-            margin-bottom: 20px;
-            page-break-inside: avoid;
-        }
-
-        .task-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 10px;
-        }
-
-        .task-title {
-            margin: 0;
-            font-size: 1.25rem;
-            color: var(--text-main);
-        }
-
-        .task-badge {
-            background: var(--primary-light);
-            color: var(--primary);
-            padding: 4px 10px;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .markdown-content h3 {
-            font-size: 1.1rem;
-            margin-top: 20px;
-            color: var(--text-main);
-        }
-        
-        .markdown-content p, .markdown-content li {
-            font-size: 0.95rem;
-            color: var(--text-muted);
-        }
-
-        .footer {
-            margin-top: 50px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
-            text-align: center;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-
-        .footer p { margin: 5px 0; }
-        .footer a { color: var(--primary); font-weight: 500; }
-
+        /* Document */
+        .document-container { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-xl); box-shadow: var(--shadow-sm); padding: clamp(24px, 5vw, 56px); }
         .hidden { display: none !important; }
 
+        .tg-head { display: flex; gap: 18px; align-items: flex-start; padding-bottom: 28px; border-bottom: 1px solid var(--line); }
+        .tg-head img { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+        .tg-head .eyebrow { margin-bottom: 8px; }
+        .tg-head h1 { font-size: clamp(1.6rem, 4vw, 2.3rem); letter-spacing: -0.035em; }
+        .tg-head .tg-sub { margin-top: 6px; font-size: 0.9rem; color: var(--text-3); }
+
+        .student-info { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 24px 0 8px; border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; background: var(--surface-2); }
+        .student-info > div { padding: 14px 16px; border-right: 1px solid var(--line); min-width: 0; }
+        .student-info > div:last-child { border-right: 0; }
+        .student-info strong { display: block; font-family: var(--font-mono); font-size: 0.68rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); margin-bottom: 4px; }
+        .student-info span { font-weight: 600; font-size: 0.95rem; color: var(--text); overflow-wrap: anywhere; }
+        #student-domain { text-transform: capitalize; }
+
+        .tg-section { margin-top: 36px; }
+        .tg-section > h2, .tg-h2 { font-size: 1.25rem; letter-spacing: -0.025em; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+        .tg-num { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 500; color: var(--accent-text); background: var(--accent-wash); border: 1px solid var(--accent-line); border-radius: var(--r-xs); padding: 2px 7px; letter-spacing: 0.04em; }
+        .tg-section p, .tg-section li { color: var(--text-2); font-size: 0.95rem; }
+        .tg-section strong { color: var(--text); }
+        .tg-section ul, .tg-section ol { padding-left: 20px; display: grid; gap: 6px; }
+        .tg-section li::marker { color: var(--text-3); }
+
+        /* Week overview */
+        .tg-weeks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+        .tg-week-link { display: flex; flex-direction: column; gap: 6px; padding: 14px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); transition: border-color 0.15s, background-color 0.15s; min-width: 0; }
+        .tg-week-link:hover { border-color: var(--line-strong); background: var(--surface-2); }
+        .tg-week-link.is-current { border-color: var(--accent-line); background: var(--accent-wash); }
+        .tg-week-link .wk { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-text); }
+        .tg-week-link .tt { font-size: 0.88rem; font-weight: 600; color: var(--text); line-height: 1.35; }
+        .tg-week-link .mt { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-3); margin-top: auto; }
+
+        .important-note { margin-top: 32px; display: flex; gap: 14px; padding: 18px 20px; border: 1px solid var(--accent-line); background: var(--accent-wash); border-radius: var(--r-md); }
+        .important-note .icon-tile { background: var(--surface); }
+        .important-note h3 { font-size: 1rem; letter-spacing: -0.015em; margin-bottom: 4px; }
+        .important-note p { font-size: 0.92rem; color: var(--text-2); }
+        .important-note strong { color: var(--text); }
+
+        /* Task cards */
+        #tasks-container { display: grid; gap: 20px; }
+        .task-card { border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); scroll-margin-top: calc(var(--nav-h) + 16px); overflow: hidden; }
+        .task-card.is-current { border-color: var(--accent-line); box-shadow: 0 0 0 1px var(--accent-line); }
+        .task-header { padding: 20px 24px; border-bottom: 1px solid var(--line); background: var(--surface-2); }
+        .task-kicker { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+        .task-title { font-size: clamp(1.1rem, 2.4vw, 1.3rem); letter-spacing: -0.025em; line-height: 1.3; }
+        .task-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .task-meta .badge { font-family: var(--font-mono); font-weight: 500; }
+        .task-body { padding: 22px 24px 24px; }
+
+        .tg-deliv { margin-bottom: 20px; padding: 16px 18px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--bg-soft); }
+        .tg-deliv h4 { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); margin-bottom: 10px; }
+        .tg-deliv ul { list-style: none; display: grid; gap: 6px; }
+        .tg-deliv li { position: relative; padding-left: 22px; font-size: 0.92rem; color: var(--text-2); }
+        .tg-deliv li::before { content: ''; position: absolute; left: 2px; top: 0.45em; width: 10px; height: 10px; border-radius: 3px; border: 1.5px solid var(--accent); }
+
+        /* Rendered markdown */
+        .markdown-content { color: var(--text-2); font-size: 0.95rem; line-height: 1.65; }
+        .markdown-content > :first-child { margin-top: 0; }
+        .markdown-content h1, .markdown-content h2, .markdown-content h3, .markdown-content h4 { color: var(--text); font-size: 1.02rem; letter-spacing: -0.015em; line-height: 1.35; margin: 22px 0 8px; }
+        .markdown-content p { margin: 0 0 10px; }
+        .markdown-content ul, .markdown-content ol { padding-left: 22px; margin: 0 0 12px; display: grid; gap: 5px; }
+        .markdown-content li::marker { color: var(--text-3); }
+        .markdown-content li:has(> input[type="checkbox"]) { list-style: none; margin-left: -20px; }
+        .markdown-content input[type="checkbox"] { width: 15px; height: 15px; margin-right: 8px; vertical-align: -2px; accent-color: var(--primary); }
+        .markdown-content strong { color: var(--text); font-weight: 600; }
+        .markdown-content a { color: var(--primary); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+        .markdown-content code { font-family: var(--font-mono); font-size: 0.84em; padding: 1px 6px; border-radius: var(--r-xs); background: var(--surface-2); border: 1px solid var(--line); color: var(--text); overflow-wrap: anywhere; }
+        .markdown-content pre { margin: 0 0 12px; padding: 14px 16px; border-radius: var(--r-md); background: var(--surface-2); border: 1px solid var(--line); overflow-x: auto; }
+        .markdown-content pre code { padding: 0; border: 0; background: none; font-size: 0.84rem; }
+        .markdown-content blockquote { margin: 0 0 12px; padding: 4px 0 4px 14px; border-left: 3px solid var(--accent-line); }
+        .markdown-content hr { border: 0; border-top: 1px solid var(--line); margin: 18px 0; }
+        .markdown-content table { width: 100%; border-collapse: collapse; margin: 0 0 12px; font-size: 0.9rem; }
+        .markdown-content th, .markdown-content td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+
+        /* LinkedIn caption */
+        .tg-caption { margin-top: 22px; border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; }
+        .tg-caption-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px 10px 16px; border-bottom: 1px solid var(--line); background: var(--surface-2); }
+        .tg-caption-head span { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
+        .tg-caption pre { margin: 0; padding: 14px 16px; white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--font-sans); font-size: 0.88rem; line-height: 1.6; color: var(--text-2); background: var(--surface); }
+
+        /* Support box */
+        .footer { margin-top: 40px; padding: 24px 26px; border-radius: var(--r-lg); background: var(--surface-2); border: 1px solid var(--line); }
+        .footer h3 { font-size: 1.05rem; letter-spacing: -0.02em; margin-bottom: 12px; }
+        .footer p, .footer li { font-size: 0.92rem; color: var(--text-2); }
+        .footer p { margin-bottom: 10px; }
+        .footer ul { padding-left: 20px; }
+        .footer strong { color: var(--text); }
+        .footer a { color: var(--primary); font-weight: 600; }
+        .footer a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+        .tg-print-foot { display: none; }
+
+        @media (max-width: 820px) {
+            .student-info { grid-template-columns: 1fr 1fr; }
+            .student-info > div:nth-child(2) { border-right: 0; }
+            .student-info > div:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+            .tg-weeks { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 560px) {
+            .tg-nav .brand-tag, .tg-nav .brand > span:not(.brand-tag) { display: none; }
+            .tg-nav .container { gap: 10px; }
+            .tg-nav .btn-label-long { display: none; }
+            .tg-head { flex-direction: column; gap: 14px; }
+            .tg-wrap { padding-left: 10px; padding-right: 10px; }
+            .document-container { padding: 22px 16px; border-radius: var(--r-lg); }
+            .important-note .icon-tile { display: none; }
+            .task-card { border-radius: var(--r-md); }
+            .task-header, .task-body { padding-left: 18px; padding-right: 18px; }
+            .tg-caption-head { flex-wrap: wrap; }
+        }
+        @media (min-width: 561px) { .tg-nav .btn-label-short { display: none; } }
+
+        /* ── Print / Save as PDF: white paper, black text ── */
+        @page { size: A4; margin: 16mm 14mm 18mm; }
         @media print {
-            body { background: white; padding: 0; }
-            .document-container { box-shadow: none; padding: 0; max-width: 100%; border: none; }
-            .important-note { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-            .task-badge { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-            .student-info { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-            .no-print { display: none !important; }
+            html[data-theme] {
+                --bg: #fff; --bg-soft: #fff; --surface: #fff; --surface-2: #f4f4f5; --surface-3: #f4f4f5;
+                --line: #d4d4d8; --line-strong: #a1a1aa;
+                --text: #000; --text-2: #1f1f1f; --text-3: #52525b;
+                --primary: #000; --accent: #000; --accent-text: #000; --accent-wash: transparent; --accent-line: #a1a1aa;
+                --ok: #000; --ok-wash: transparent; --ok-line: #a1a1aa;
+                --shadow-xs: none; --shadow-sm: none; --shadow-md: none;
+                color-scheme: light;
+            }
+            html, body { background: #fff !important; color: #000; }
+            body { font-size: 10.5pt; line-height: 1.5; }
+            .no-print, .site-nav, .skip-link, .tg-copy, .theme-toggle, #loading { display: none !important; }
+            .tg-wrap { max-width: none; padding: 0; }
+            .document-container { border: 0; border-radius: 0; padding: 0; box-shadow: none; }
+            .tg-head { padding-bottom: 16px; }
+            .tg-head img { width: 40px; height: 40px; }
+            .eyebrow::before { background: #000; }
+            .student-info { background: #fff; break-inside: avoid; }
+            .tg-section { margin-top: 22px; }
+            .tg-section > h2, .tg-h2, .task-title, .markdown-content h3, .markdown-content h4 { break-after: avoid; page-break-after: avoid; }
+            .tg-weeks { grid-template-columns: repeat(4, 1fr); break-inside: avoid; }
+            .tg-week-link { border-color: #a1a1aa; }
+            .important-note, .tg-deliv, .tg-caption, .footer, .markdown-content pre, .markdown-content table, .markdown-content li { break-inside: avoid; page-break-inside: avoid; }
+            .important-note { border: 1px solid #000; }
+            .important-note .icon-tile { display: none; }
+            #tasks-container { display: block; }
+            .task-card { border: 0; border-radius: 0; overflow: visible; box-shadow: none !important; break-before: page; page-break-before: always; }
+            .task-card:first-child { break-before: auto; page-break-before: auto; }
+            .task-header { background: #fff; padding: 0 0 12px; border-bottom: 2px solid #000; }
+            .task-body { padding: 14px 0 0; }
+            .badge { background: #fff !important; border-color: #a1a1aa !important; color: #000 !important; }
+            .badge .dot { display: none; }
+            .tg-caption-head { background: #fff; }
+            .markdown-content a { color: #000; }
+            .markdown-content a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.85em; color: #52525b; text-decoration: none; }
+            .markdown-content input[type="checkbox"] { accent-color: #000; }
+            .footer { background: #fff; break-before: auto; }
+            .footer a { color: #000; }
+            .tg-print-foot { display: block; margin-top: 18px; font-size: 8.5pt; color: #52525b; text-align: center; }
         }
     </style>
 </head>
 <body>
-    <button class="no-print" onclick="window.print()" style="position: fixed; top: 20px; right: 20px; background-color: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-family: 'Outfit', sans-serif; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000; display: flex; align-items: center; gap: 8px; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.15)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 6px rgba(0,0,0,0.1)';">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-        Download PDF
-    </button>
-    <div id="loading" style="text-align:center; padding: 50px; font-family: 'Outfit', sans-serif;">Generating official task document...</div>
-    
-    <div id="content" class="document-container hidden">
-        <div class="header">
-            <img src="assets/logo.png" onerror="this.src='assets/logo.webp'" alt="SkillMe Logo">
-            <h1>SkillMe Internship Program</h1>
-            <p id="project-title">Loading Project...</p>
-        </div>
-
-        <div class="student-info">
-            <div>
-                <strong>Intern Name</strong>
-                <span id="student-name">Loading...</span>
-            </div>
-            <div>
-                <strong>Domain</strong>
-                <span id="student-domain" style="text-transform: capitalize;">Loading...</span>
-            </div>
-            <div>
-                <strong>Duration</strong>
-                <span id="student-duration">4 Weeks · Remote</span>
+    <a class="skip-link no-print" href="#main">Skip to content</a>
+    <header class="site-nav tg-nav no-print">
+        <div class="container">
+            <a href="dashboard.html" class="brand" aria-label="SkillMe dashboard">
+                <img src="assets/logo.webp" alt="" width="32" height="32">
+                <span>SkillMe</span>
+                <span class="brand-tag">Task guide</span>
+            </a>
+            <div class="nav-actions">
+                <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle theme">
+                    <svg class="ti-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+                    <svg class="ti-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </button>
+                <a href="dashboard.html" class="btn btn-ghost btn-sm">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+                    <span class="btn-label-long">Back to dashboard</span><span class="btn-label-short">Dashboard</span>
+                </a>
+                <button type="button" class="btn btn-primary btn-sm no-print" id="print-btn" onclick="window.print()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span class="btn-label-long">Download PDF</span><span class="btn-label-short">PDF</span>
+                </button>
             </div>
         </div>
+    </header>
 
-        <div class="overview-section">
-            <h2>Internship Overview</h2>
-            <p id="project-desc">Welcome to your internship! Over the next 4 weeks, you will build real-world applications and deploy them. This document contains all the necessary instructions and tasks you need to complete.</p>
-        </div>
+    <main id="main" class="tg-wrap">
+        <div id="loading" class="card tg-state" role="status" aria-live="polite">Generating official task document...</div>
 
-        <div class="perks-section">
-            <h2>Internship Perks</h2>
-            <ul>
-                <li><strong>Verified Certificate:</strong> A publicly verifiable certificate with a unique credential ID.</li>
-                <li><strong>Letter of Recommendation (LOR):</strong> A personalized LOR highlighting your domain expertise.</li>
-                <li><strong>Proof of Work Portfolio:</strong> Lifetime hosting of your project portfolio to showcase to recruiters.</li>
-                <li><strong>Industry Experience:</strong> Hands-on experience building and deploying production-ready applications.</li>
-            </ul>
-        </div>
+        <article id="content" class="document-container hidden">
+            <div class="header tg-head">
+                <img src="assets/logo.png" onerror="this.src='assets/logo.webp'" alt="SkillMe Logo">
+                <div>
+                    <span class="eyebrow">SkillMe Internship Program · 4-week task guide</span>
+                    <h1 id="project-title">Loading Project...</h1>
+                    <p class="tg-sub">Your assigned project, week by week.</p>
+                </div>
+            </div>
 
-        <div class="instructions-section">
-            <h2>Instructions for Interns</h2>
-            <ol>
-                <li>Complete the assigned projects for your domain as listed in the Task List below.</li>
-                <li>Once a task is complete, create a post or a short video demonstration on LinkedIn.</li>
-                <li>Tag <strong>@SkillMe</strong> in your LinkedIn post (make sure to select the official page from the dropdown).</li>
-                <li>Copy the URL of your published LinkedIn post.</li>
-                <li>Log in to your <strong>SkillMe Student Dashboard</strong> and submit the URL for the respective week's task.</li>
-            </ol>
-        </div>
+            <div class="student-info">
+                <div>
+                    <strong>Intern Name</strong>
+                    <span id="student-name">Loading...</span>
+                </div>
+                <div>
+                    <strong>Domain</strong>
+                    <span id="student-domain">Loading...</span>
+                </div>
+                <div>
+                    <strong>Duration</strong>
+                    <span id="student-duration">4 Weeks · Remote</span>
+                </div>
+                <div>
+                    <strong>Current week</strong>
+                    <span id="student-week" class="mono">—</span>
+                </div>
+            </div>
 
-        <div class="important-note">
-            <h3>Internship Completion Criteria</h3>
-            <p>To be eligible for the internship certificate and all associated perks, participants must complete a minimum of <strong>two</strong> tasks. Submitting only one task will be considered incomplete and certificates will not be issued.</p>
-        </div>
+            <section class="tg-section overview-section">
+                <h2><span class="tg-num">01</span>Internship Overview</h2>
+                <p id="project-desc">Welcome to your internship! Over the next 4 weeks, you will build real-world applications and deploy them. This document contains all the necessary instructions and tasks you need to complete.</p>
+            </section>
 
-        <h2>Task List</h2>
-        <div id="tasks-container">
-            <!-- Tasks will be injected here -->
-        </div>
+            <section class="tg-section hidden" id="weeks-overview" aria-labelledby="weeks-overview-title">
+                <h2 id="weeks-overview-title"><span class="tg-num">02</span>Your 4 weeks at a glance</h2>
+                <nav class="tg-weeks" id="weeks-nav" aria-label="Weeks"></nav>
+            </section>
 
-        <div class="footer" style="text-align: left; background-color: var(--primary-light); padding: 25px 30px; border-radius: 8px; border: 1px solid rgba(201, 154, 78, 0.2);">
-            <h3 style="color: var(--primary); margin-top: 0; margin-bottom: 15px; font-family: 'Outfit', sans-serif; border: none;">Need Help or Support?</h3>
-            <p style="margin-bottom: 15px; color: var(--text-main);"><strong>Submission Details:</strong> Please submit all task URLs via your dashboard at <a href="https://www.skill-me-intern.in/dashboard">skill-me-intern.in/dashboard</a>.</p>
-            <p style="margin-bottom: 8px; color: var(--text-main);"><strong>Contact Information:</strong> If you face any issues, our team is here to help you succeed:</p>
-            <ul style="margin-top: 0; margin-bottom: 0;">
-                <li style="margin-bottom: 0;"><strong>Email Support:</strong> Send us a detailed message at <a href="mailto:admin@skill-me-intern.in" style="color: var(--primary); font-weight: 500; text-decoration: none;">admin@skill-me-intern.in</a></li>
-            </ul>
-        </div>
-    </div>
+            <section class="tg-section instructions-section">
+                <h2><span class="tg-num">03</span>Instructions for Interns</h2>
+                <ol>
+                    <li>Complete the assigned projects for your domain as listed in the Task List below.</li>
+                    <li>Once a task is complete, create a post or a short video demonstration on LinkedIn.</li>
+                    <li>Tag <strong>@SkillMe</strong> in your LinkedIn post (make sure to select the official page from the dropdown).</li>
+                    <li>Copy the URL of your published LinkedIn post.</li>
+                    <li>Log in to your <strong>SkillMe Student Dashboard</strong> and submit the URL for the respective week's task.</li>
+                </ol>
+            </section>
+
+            <div class="important-note" role="note">
+                <span class="icon-tile" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></span>
+                <div>
+                    <h3>Internship Completion Criteria</h3>
+                    <p>To be eligible for the internship certificate and all associated perks, participants must complete a minimum of <strong>two</strong> tasks. Submitting only one task will be considered incomplete and certificates will not be issued.</p>
+                </div>
+            </div>
+
+            <section class="tg-section perks-section">
+                <h2><span class="tg-num">04</span>Internship Perks</h2>
+                <ul>
+                    <li><strong>Verified Certificate:</strong> A publicly verifiable certificate with a unique credential ID.</li>
+                    <li><strong>Letter of Recommendation (LOR):</strong> A personalized LOR highlighting your domain expertise.</li>
+                    <li><strong>Proof of Work Portfolio:</strong> Lifetime hosting of your project portfolio to showcase to recruiters.</li>
+                    <li><strong>Industry Experience:</strong> Hands-on experience building and deploying production-ready applications.</li>
+                </ul>
+            </section>
+
+            <section class="tg-section" aria-labelledby="task-list-title">
+                <h2 class="tg-h2" id="task-list-title"><span class="tg-num">05</span>Task List</h2>
+                <div id="tasks-container">
+                    <!-- Tasks will be injected here -->
+                </div>
+            </section>
+
+            <div class="footer">
+                <h3>Need Help or Support?</h3>
+                <p><strong>Submission Details:</strong> Please submit all task URLs via your dashboard at <a href="https://www.skill-me-intern.in/dashboard">skill-me-intern.in/dashboard</a>.</p>
+                <p><strong>Contact Information:</strong> If you face any issues, our team is here to help you succeed:</p>
+                <ul>
+                    <li><strong>Email Support:</strong> Send us a detailed message at <a href="mailto:admin@skill-me-intern.in">admin@skill-me-intern.in</a></li>
+                </ul>
+            </div>
+            <p class="tg-print-foot">SkillMe Internship Program · skill-me-intern.in · MSME registered · UDYAM-UP-50-0294192</p>
+        </article>
+    </main>
+
+    <div class="toast" id="tg-toast" role="status" aria-live="polite"></div>
 
     <script src="config.js"></script>
     <script>
         const API = window.SKILLME_API || 'http://localhost:8000';
+
+        function esc(str) {
+            return String(str == null ? '' : str)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function renderMarkdown(md) {
+            const src = md || '';
+            if (window.marked && typeof marked.parse === 'function') return marked.parse(src);
+            // CDN unavailable: show readable plain text rather than failing the whole guide
+            return src.split(/\n{2,}/).map(p => `<p>${esc(p).replace(/\n/g, '<br>')}</p>`).join('');
+        }
+
+        function showState(html) {
+            const el = document.getElementById('loading');
+            el.classList.add('is-done');
+            el.innerHTML = html;
+        }
+
+        function renderTask(task, caption, currentWeek) {
+            const isCurrent = task.is_current || (currentWeek && task.week_number === currentWeek);
+            const deliverables = Array.isArray(task.deliverables) ? task.deliverables : [];
+            const hours = task.est_hours ? `<span class="badge">~${esc(task.est_hours)} hrs</span>` : '';
+            return `
+                <section class="task-card${isCurrent ? ' is-current' : ''}" id="week-${esc(task.week_number)}" aria-labelledby="task-title-${esc(task.week_number)}">
+                    <div class="task-header">
+                        <div class="task-kicker">
+                            <span class="eyebrow">Week ${esc(task.week_number)}</span>
+                            ${isCurrent ? '<span class="badge badge-accent"><span class="dot"></span>Current week</span>' : ''}
+                        </div>
+                        <h3 class="task-title" id="task-title-${esc(task.week_number)}">Task ${esc(task.week_number)}: ${esc(task.title)}</h3>
+                        <div class="task-meta">
+                            ${task.difficulty ? `<span class="badge badge-accent task-badge">${esc(task.difficulty)}</span>` : ''}
+                            ${hours}
+                        </div>
+                    </div>
+                    <div class="task-body">
+                        ${deliverables.length ? `
+                        <div class="tg-deliv">
+                            <h4>Deliverables</h4>
+                            <ul>${deliverables.map(d => `<li>${esc(d)}</li>`).join('')}</ul>
+                        </div>` : ''}
+                        <div class="markdown-content">
+                            ${renderMarkdown(task.description)}
+                        </div>
+                        ${caption ? `
+                        <div class="tg-caption">
+                            <div class="tg-caption-head">
+                                <span>LinkedIn caption · Week ${esc(task.week_number)}</span>
+                                <button type="button" class="btn btn-secondary btn-sm tg-copy" data-copy-week="${esc(task.week_number)}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                    Copy caption
+                                </button>
+                            </div>
+                            <pre id="caption-${esc(task.week_number)}">${esc(caption)}</pre>
+                        </div>` : ''}
+                    </div>
+                </section>`;
+        }
+
+        function renderWeeksNav(tasks, currentWeek) {
+            const nav = document.getElementById('weeks-nav');
+            nav.innerHTML = tasks.map(t => {
+                const cur = t.is_current || (currentWeek && t.week_number === currentWeek);
+                const meta = [t.difficulty, t.est_hours ? `~${t.est_hours} hrs` : ''].filter(Boolean).map(m => `<span class="nowrap">${esc(m)}</span>`).join(' · ');
+                return `<a class="tg-week-link${cur ? ' is-current' : ''}" href="#week-${esc(t.week_number)}"${cur ? ' aria-current="step"' : ''}>
+                    <span class="wk">Week ${esc(t.week_number)}${cur ? ' · now' : ''}</span>
+                    <span class="tt">${esc(t.title)}</span>
+                    ${meta ? `<span class="mt">${meta}</span>` : ''}
+                </a>`;
+            }).join('');
+            document.getElementById('weeks-overview').classList.remove('hidden');
+        }
+
+        function copyText(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                return navigator.clipboard.writeText(text).then(() => true, () => fallbackCopy(text));
+            }
+            return Promise.resolve(fallbackCopy(text));
+        }
+        function fallbackCopy(text) {
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = text; ta.setAttribute('readonly', '');
+                ta.style.position = 'fixed'; ta.style.opacity = '0';
+                document.body.appendChild(ta); ta.select();
+                const ok = document.execCommand('copy');
+                ta.remove();
+                return ok;
+            } catch (e) { return false; }
+        }
+        let toastTimer;
+        function toast(msg) {
+            const el = document.getElementById('tg-toast');
+            el.textContent = msg;
+            el.classList.add('is-visible');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => el.classList.remove('is-visible'), 2200);
+        }
 
         async function fetchTasks() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -290,7 +434,7 @@
                     });
                     if (!authRes.ok) {
                         // Never fall back to someone else's record — ask the student to sign in.
-                        document.getElementById('loading').innerHTML = 'Please <a href="dashboard.html">log in to your dashboard</a> to view your tasks.';
+                        showState('Please <a href="dashboard.html">log in to your dashboard</a> to view your tasks.');
                         return;
                     }
                     const dashData = await authRes.json();
@@ -301,51 +445,55 @@
                 // batch_id is an internal enrollment reference; the backend resolves it (0 = "mine").
                 const res = await fetch(`${API}/api/tasks/current/${studentId}/${batchId || 0}`);
                 if (res.status === 404) {
-                    document.getElementById('loading').innerHTML = 'Your tasks will appear here once you are enrolled. <a href="dashboard.html">Back to dashboard</a>';
+                    showState('Your tasks will appear here once you are enrolled. <a href="dashboard.html">Back to dashboard</a>');
                     return;
                 }
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
-                
+
                 const fullName = `${data.student.first_name} ${data.student.last_name}`.trim();
                 const enrollment = data.enrollment || data.batch || {};
                 const domain = (enrollment.domain || "Web Development").replace(/-/g, ' ');
-                
+                const currentWeek = Number(data.current_week) || null;
+
                 document.getElementById('student-name').textContent = fullName;
                 document.getElementById('student-domain').textContent = domain;
-                
+                document.getElementById('student-week').textContent = currentWeek ? `Week ${currentWeek} of 4` : '—';
+
                 if (data.project) {
                     document.getElementById('project-title').textContent = data.project.name;
                     document.getElementById('project-desc').textContent = data.project.tagline;
+                } else {
+                    document.getElementById('project-title').textContent = 'Your internship tasks';
                 }
+                if (fullName) document.title = `${data.project ? data.project.name + ' · ' : ''}Task Guide · ${fullName} - SkillMe`;
 
+                const captions = data.linkedin_templates || {};
                 const container = document.getElementById('tasks-container');
                 if (!data.tasks || data.tasks.length === 0) {
-                    container.innerHTML = '<p>No assigned tasks found.</p>';
+                    container.innerHTML = '<p class="muted">No assigned tasks found.</p>';
                 } else {
-                    container.innerHTML = data.tasks.map((task) => `
-                        <div class="task-card">
-                            <div class="task-header">
-                                <h3 class="task-title">Task ${task.week_number}: ${task.title}</h3>
-                                <span class="task-badge">${task.difficulty}</span>
-                            </div>
-                            <div class="markdown-content">
-                                ${marked.parse(task.description)}
-                            </div>
-                        </div>
-                    `).join('');
+                    const tasks = data.tasks.slice().sort((a, b) => (a.week_number || 0) - (b.week_number || 0));
+                    renderWeeksNav(tasks, currentWeek);
+                    container.innerHTML = tasks.map(task =>
+                        renderTask(task, captions[task.week_number] || captions[String(task.week_number)] || '', currentWeek)
+                    ).join('');
+                    container.querySelectorAll('[data-copy-week]').forEach(btn => btn.addEventListener('click', () => {
+                        const pre = document.getElementById(`caption-${btn.getAttribute('data-copy-week')}`);
+                        copyText(pre ? pre.textContent : '').then(ok => toast(ok ? 'Caption copied — paste it into LinkedIn' : 'Copy failed — select the text and copy manually'));
+                    }));
                 }
 
                 document.getElementById('loading').classList.add('hidden');
                 document.getElementById('content').classList.remove('hidden');
-                
+
                 // Trigger print dialog after a brief delay for rendering
                 if (urlParams.get('print') === '1') {
                     setTimeout(() => window.print(), 1000);
                 }
-            } catch(e) { 
+            } catch(e) {
                 console.error("Error fetching tasks:", e);
-                document.getElementById('loading').textContent = "Failed to load tasks. Please try again from your dashboard.";
+                showState('Failed to load tasks. Please try again from your dashboard. <a href="dashboard.html">Back to dashboard</a>');
             }
         }
 
