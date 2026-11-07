@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light" class="no-js">
 
 <head>
   <meta charset="UTF-8" />
@@ -16,7 +16,17 @@
   <meta name="language" content="English">
   <meta name="geo.region" content="IN">
   <meta name="geo.placename" content="India">
-  <meta name="theme-color" content="#0c0b0b">
+  <meta name="theme-color" content="#ffffff">
+  <script>
+    (function () {
+      var t;
+      try { t = localStorage.getItem('skillme-theme'); } catch (e) {}
+      if (t !== 'light' && t !== 'dark') {
+        t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
 
   <!-- Canonical URL -->
   <link rel="canonical" href="https://www.skill-me-intern.in/certificate">
@@ -51,7 +61,7 @@
   <!-- Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <script src="config.js"></script>
-  <script src="docs.js?v=1"></script>
+  <script src="docs.js?v=2"></script>
 
   <!-- Structured Data Graph (Breadcrumbs & Credential Portal) -->
   <script type="application/ld+json">
@@ -97,6 +107,11 @@
   }
   </script>
 
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="theme.css?v=20261011_ds1">
+  <link rel="stylesheet" href="docs.css?v=20261011_docs1">
+  <script src="theme.js?v=20261011_ds1" defer></script>
+
   <style>
     :root {
       --gold: #c99a4e;
@@ -121,82 +136,8 @@
       padding: 0;
     }
 
-    body {
-      background: var(--dark-canvas);
-      background-image:
-        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201, 154, 78, 0.12), transparent 70%),
-        radial-gradient(ellipse 60% 40% at 50% 110%, rgba(37, 99, 235, 0.08), transparent 70%);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 36px 16px 60px;
-      font-family: 'Inter', sans-serif;
-      color: #f1f5f9;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* ─── Top Control Bar ─── */
-    .action-bar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 28px;
-      flex-wrap: wrap;
-      justify-content: center;
-      z-index: 10;
-    }
-
-    .badge-id {
-      background: rgba(201, 154, 78, 0.12);
-      border: 1px solid rgba(201, 154, 78, 0.35);
-      color: #f0c97a;
-      padding: 8px 18px;
-      border-radius: 20px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      font-family: 'JetBrains Mono', monospace;
-      letter-spacing: 0.05em;
-    }
-
-    .btn-action {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.88rem;
-      font-weight: 700;
-      padding: 10px 22px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      text-decoration: none;
-      border: none;
-    }
-
-    .btn-download {
-      background: linear-gradient(135deg, #c99a4e 0%, #b5873d 100%);
-      color: #0c0b0b;
-      box-shadow: 0 4px 16px rgba(201, 154, 78, 0.35);
-    }
-
-    .btn-download:hover {
-      box-shadow: 0 6px 22px rgba(201, 154, 78, 0.5);
-      transform: translateY(-1px);
-    }
-
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #e2e8f0;
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.12);
-      border-color: rgba(255, 255, 255, 0.25);
-      color: #fff;
-    }
+    /* Page chrome (header, toolbar, status, states) lives in docs.css. */
+    .dc-shell { --dc-w: 980px; }
 
     #cert-view-wrapper {
       width: 100%;
@@ -700,124 +641,17 @@
       margin-top: 4px;
     }
 
-    /* ─── Live Verification Strip ─── */
-    .verify-strip {
-      margin-top: 24px;
-      width: 100%;
-      max-width: 980px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 14px;
-      padding: 18px 24px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .verify-strip-icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      background: rgba(16, 185, 129, 0.15);
-      color: #10b981;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      flex-shrink: 0;
-    }
-
-    .verify-strip-text {
-      font-size: 0.85rem;
-      line-height: 1.5;
-      color: #cbd5e1;
-    }
-
-    .verify-strip-text strong {
-      color: #ffffff;
-      font-size: 0.92rem;
-      display: block;
-      margin-bottom: 2px;
-    }
-
-    /* ─── Search Mode Container (when no params) ─── */
+    /* ─── Search Mode Container (when no params) — styled in docs.css ─── */
     .verify-page {
       display: none;
-      max-width: 620px;
-      width: 100%;
-      margin: 40px auto;
-      text-align: center;
     }
 
     .verify-page.active {
       display: block;
     }
 
-    .verify-page-icon {
-      width: 68px;
-      height: 68px;
-      border-radius: 18px;
-      background: rgba(201, 154, 78, 0.12);
-      border: 1px solid rgba(201, 154, 78, 0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 30px;
-      margin: 0 auto 20px;
-    }
-
-    .verify-page h1 {
-      font-family: 'Cinzel', serif;
-      font-size: 1.85rem;
-      font-weight: 800;
-      color: #fff;
-      margin-bottom: 8px;
-    }
-
-    .verify-input-group {
-      display: flex;
-      gap: 10px;
-      margin: 24px 0 16px;
-    }
-
-    .verify-input {
-      flex: 1;
-      padding: 14px 18px;
-      font-size: 0.95rem;
-      font-family: 'JetBrains Mono', monospace;
-      color: #fff;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 10px;
-      outline: none;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .verify-input:focus {
-      border-color: #c99a4e;
-      box-shadow: 0 0 16px rgba(201, 154, 78, 0.3);
-    }
-
-    .verify-submit {
-      padding: 14px 28px;
-      background: linear-gradient(135deg, #c99a4e, #b5873d);
-      color: #0c0b0b;
-      font-weight: 800;
-      font-size: 0.92rem;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-
     .verify-result {
       display: none;
-      text-align: left;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 14px;
-      padding: 20px;
-      margin-top: 20px;
     }
 
     .verify-result.active {
@@ -825,17 +659,7 @@
     }
 
     @media (max-width: 640px) {
-      body { padding: 18px 10px 40px; }
-      .action-bar { gap: 8px; margin-bottom: 16px; width: 100%; }
-      .badge-id { width: 100%; text-align: center; font-size: 0.74rem; padding: 7px 12px; overflow-wrap: anywhere; }
-      .btn-action { padding: 9px 14px; font-size: 0.8rem; flex: 1 1 auto; justify-content: center; }
       .certificate { border-radius: 4px; }
-      .verify-strip { margin-top: 16px; padding: 14px 16px; align-items: flex-start; gap: 12px; }
-      .verify-strip-text { font-size: 0.8rem; overflow-wrap: anywhere; }
-      .verify-page { margin: 16px auto; }
-      .verify-page h1 { font-size: 1.4rem; }
-      .verify-input-group { flex-direction: column; }
-      .verify-submit { width: 100%; }
     }
 
     /* ─── Print Styles ─── */
@@ -886,57 +710,84 @@
   </style>
 </head>
 
-<body>
+<body class="dc-body">
 
-  <!-- ═══ VERIFY SEARCH PAGE (Shown when no parameters exist) ═══ -->
-  <div class="verify-page" id="verify-page">
-    <div class="verify-page-icon">🏛️</div>
-    <h1>Verify Certificate Authenticity</h1>
-    <p style="font-size:0.92rem; color:#94a3b8; line-height:1.6; margin-top:8px;">
-      Enter the unique Certificate ID to verify credentials issued under the SkillMe Technical Internship Program.
-    </p>
-
-    <div class="verify-input-group">
-      <input type="text" class="verify-input" id="verify-id-input" placeholder="e.g. SM-A1B2-C3D4-E5F6" maxlength="24"
-        autocomplete="off" spellcheck="false" />
-      <button class="verify-submit" id="verify-submit-btn" onclick="handleVerifySearch()">Verify</button>
-    </div>
-    <div style="font-size:0.78rem; color:#64748b;">Format: SM-XXXX-XXXX-XXXX &bull; Instant Cryptographic Check</div>
-
-    <div class="verify-result" id="verify-result"></div>
-  </div>
-
-  <!-- ═══ CERTIFICATE DISPLAY VIEW ═══ -->
-  <div id="cert-view-wrapper">
-
-    <!-- Top Action Control Bar -->
-    <div class="action-bar" id="action-bar">
-      <div class="badge-id" id="cert-id-badge">Loading Credential...</div>
-      <button class="btn-action btn-download" id="btn-download-pdf" onclick="downloadCertificate(this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="7 10 12 15 17 10" />
-          <line x1="12" y1="15" x2="12" y2="3" />
-        </svg>
-        Download PDF
-      </button>
-      <button class="btn-action btn-secondary" onclick="window.print()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-          <polyline points="6 9 6 2 18 2 18 9" />
-          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
-          <rect x="6" y="14" width="12" height="8" />
-        </svg>
-        Print
-      </button>
-      <a class="btn-action btn-secondary" href="verify.html" id="verify-another-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-          <polyline points="9 12 11 14 15 10" />
-        </svg>
-        Verify Credentials
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-nav is-solid" id="site-nav">
+    <div class="container">
+      <a href="index.html" class="brand" aria-label="SkillMe home">
+        <img src="assets/logo.webp" alt="" width="32" height="32">
+        <span>SkillMe</span>
+        <span class="brand-tag">Certificate</span>
       </a>
+      <div class="nav-actions">
+        <a href="verify.html" class="btn btn-ghost btn-sm nav-hide-sm">Verify a certificate</a>
+        <a href="dashboard.html" class="btn btn-secondary btn-sm"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>Dashboard</a>
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle theme">
+          <svg class="ti-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          <svg class="ti-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
     </div>
+  </header>
 
+  <main id="main" class="dc-main">
+    <div class="container">
+
+      <!-- ═══ VERIFY SEARCH PAGE (Shown when no parameters exist) ═══ -->
+      <section class="verify-page dc-verify" id="verify-page" aria-labelledby="verify-title">
+        <div class="card dc-state">
+          <div class="dc-state-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div>
+          <span class="eyebrow">Credential check</span>
+          <h1 id="verify-title">Verify a certificate</h1>
+          <p>Enter the unique certificate ID to verify credentials issued under the SkillMe Technical Internship Program.</p>
+
+          <div class="dc-verify-form">
+            <label class="sr-only" for="verify-id-input">Certificate ID</label>
+            <input type="text" class="input verify-input" id="verify-id-input" placeholder="e.g. SM-A1B2-C3D4-E5F6" maxlength="24"
+              autocomplete="off" spellcheck="false" aria-describedby="verify-id-help" />
+            <button type="button" class="btn btn-primary verify-submit" id="verify-submit-btn" onclick="handleVerifySearch()">Verify</button>
+          </div>
+          <div class="help" id="verify-id-help">Format: <span class="mono">SM-XXXX-XXXX-XXXX</span> &bull; Instant check against the SkillMe registry</div>
+
+          <div class="verify-result dc-verify-result" id="verify-result" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- ═══ CERTIFICATE DISPLAY VIEW ═══ -->
+      <div id="cert-view-wrapper" class="dc-shell" data-state="loading">
+
+        <!-- Toolbar -->
+        <div class="dc-toolbar" id="action-bar">
+          <div class="dc-toolbar-info">
+            <span class="eyebrow">Certificate of completion</span>
+            <h1 class="dc-title" id="dc-holder">Loading certificate…</h1>
+            <div class="dc-meta">
+              <span>Credential ID</span>
+              <span class="badge badge-accent dc-id" id="cert-id-badge">Loading…</span>
+            </div>
+          </div>
+          <div class="dc-actions">
+            <button type="button" class="btn btn-primary" id="btn-download-pdf" onclick="downloadCertificate(this)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+              Download PDF
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="window.print()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              Print
+            </button>
+            <button type="button" class="btn btn-secondary" id="btn-copy-link" onclick="SkillMeDocs.copyLink()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              Copy link
+            </button>
+            <a class="btn btn-secondary dc-keep" href="verify.html" id="verify-another-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+              Verify
+            </a>
+          </div>
+        </div>
+
+        <div class="dc-frame">
     <!-- Main Certificate Canvas -->
     <div class="cert-wrap">
       <div class="certificate" id="certificate">
@@ -1068,17 +919,32 @@
       </div>
     </div>
 
-    <!-- Live Verification Status Strip -->
-    <div class="verify-strip" id="verify-section">
-      <div class="verify-strip-icon">✓</div>
-      <div class="verify-strip-text">
-        <strong>Credential Authenticity Confirmed</strong>
-        <span>This certificate is officially registered in SkillMe's cryptographic verification registry for <strong
-            id="verify-holder-name" style="display:inline; color:#f0c97a;">Candidate Name</strong>.</span>
+        </div><!-- /dc-frame -->
+        <p class="dc-hint">Preview scaled to fit your screen. Download the PDF for the full-size copy.</p>
+
+        <!-- Live Verification Status Strip -->
+        <div class="dc-status verify-strip" id="verify-section" role="status" aria-live="polite">
+        <div class="dc-status-icon"><span class="dc-spinner" aria-hidden="true"></span></div>
+        <div class="dc-status-text"><strong>Checking credential…</strong><span>Looking this certificate up in the SkillMe verification registry.</span></div>
+        </div>
+
       </div>
     </div>
+  </main>
 
-  </div>
+  <footer class="site-footer dc-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> SkillMe · MSME registered · UDYAM-UP-50-0294192</span>
+        <nav class="dc-footer-links" aria-label="Footer">
+          <a href="verify.html">Verify a certificate</a>
+          <a href="contact.html">Contact</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="terms.html">Terms</a>
+        </nav>
+      </div>
+    </div>
+  </footer>
 
   <script>
     const API = window.SKILLME_API || 'http://localhost:8000';
@@ -1104,26 +970,27 @@
     } else {
       document.getElementById('verify-page').style.display = 'none';
       document.getElementById('cert-view-wrapper').style.display = '';
-      loadCertificate();
+      // Run after this whole script has evaluated: the synchronous preview path calls
+      // populateCertificate(), which uses consts/lets declared further down.
+      Promise.resolve().then(loadCertificate);
     }
 
     function showLocked(reason) {
       const wrapper = document.getElementById('cert-view-wrapper');
       if (!wrapper) return;
       const isPayment = reason === 'payment_required';
-      wrapper.innerHTML = `
-        <div style="padding:80px 24px;text-align:center;">
-          <div style="font-size:2.5rem;margin-bottom:12px;">🔒</div>
-          <div style="font-size:1.2rem;font-weight:700;color:#f0c97a;margin-bottom:8px;">
-            ${isPayment ? 'Certificate Not Yet Unlocked' : 'Certificate Not Found'}
-          </div>
-          <div style="color:#a8a29e;max-width:420px;margin:0 auto;">
-            ${isPayment
-              ? 'Complete payment on your Student Dashboard — or, if you\'re below 50% completion, get your urgent processing request approved — to unlock this certificate.'
-              : 'This link is invalid or the certificate has not been issued yet.'}
-          </div>
-          <a href="dashboard.html" style="display:inline-block;margin-top:20px;color:#93c5fd;font-weight:600;text-decoration:none;">← Return to Dashboard</a>
-        </div>`;
+      wrapper.dataset.state = 'locked';
+      wrapper.innerHTML = SkillMeDocs.stateCard({
+        icon: isPayment ? 'lock' : 'search',
+        title: isPayment ? 'Certificate Not Yet Unlocked' : 'Certificate Not Found',
+        text: isPayment
+          ? 'Complete payment on your Student Dashboard — or, if you’re below 50% completion, get your urgent processing request approved — to unlock this certificate.'
+          : 'This link is invalid or the certificate has not been issued yet.',
+        actions: [
+          { href: 'dashboard.html', label: 'Return to Dashboard', primary: isPayment, back: true },
+          ...(isPayment ? [] : [{ href: 'verify.html', label: 'Verify a certificate' }]),
+        ],
+      });
     }
 
     async function loadCertificate() {
@@ -1276,8 +1143,12 @@
       const docRefEl = document.getElementById('cert-doc-ref');
       if (docRefEl) docRefEl.textContent = `SKM-CERT-${id.replace(/^SM-/, '')}`;
 
-      const verifyHolder = document.getElementById('verify-holder-name');
-      if (verifyHolder) verifyHolder.textContent = name;
+      const holderTitle = document.getElementById('dc-holder');
+      if (holderTitle) holderTitle.textContent = name;
+      SkillMeDocs.setStatus(document.getElementById('verify-section'), 'ok', 'Credential Authenticity Confirmed',
+        `This certificate is officially registered in SkillMe's cryptographic verification registry for <strong id="verify-holder-name">${SkillMeDocs.esc(name)}</strong>.`);
+      const viewWrapper = document.getElementById('cert-view-wrapper');
+      if (viewWrapper) viewWrapper.dataset.state = 'ready';
 
       document.title = `Certificate of Completion — ${name} — SkillMe`;
 
@@ -1296,14 +1167,14 @@
 
     function showError(msg) {
       const el = document.getElementById('verify-section');
-      if (el) {
-        el.innerHTML = `
-        <div class="verify-strip-icon" style="background:rgba(239,68,68,0.15); color:#ef4444;">✕</div>
-        <div class="verify-strip-text">
-          <strong style="color:#ef4444;">Verification Failed</strong>
-          <span>${msg}</span>
-        </div>`;
-      }
+      SkillMeDocs.setStatus(el, 'danger', 'Verification Failed',
+        `${SkillMeDocs.esc(msg)} <a class="btn-link dc-status-more" href="verify.html">Verify another certificate &rarr;</a>`);
+      const wrapper = document.getElementById('cert-view-wrapper');
+      if (wrapper) wrapper.dataset.state = 'error';
+      const holderTitle = document.getElementById('dc-holder');
+      if (holderTitle) holderTitle.textContent = 'Certificate unavailable';
+      const badgeEl = document.getElementById('cert-id-badge');
+      if (badgeEl) badgeEl.textContent = '—';
     }
 
     async function handleVerifySearch() {
@@ -1327,30 +1198,30 @@
         const domainLabel = SkillMeDocs.esc(data.domain_label || SkillMeDocs.domainLabel(data.domain, 'N/A'));
         const certViewUrl = `${window.location.origin}/certificate.html?cert_id=${encodeURIComponent(data.cert_id)}`;
 
-        resultEl.className = 'verify-result active';
+        resultEl.className = 'verify-result dc-verify-result is-ok active';
         resultEl.innerHTML = `
-        <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
-          <span style="font-size:24px;">✅</span>
+        <div class="dc-verify-result-head">
+          <div class="dc-status-icon">${SkillMeDocs.icon('ok')}</div>
           <div>
-            <div style="font-weight:800; font-size:1.05rem; color:#34d399;">Certificate Verified &amp; Authentic</div>
-            <div style="font-size:0.8rem; color:#94a3b8;">Issued by SkillMe Open Source Program</div>
+            <div class="dc-verify-result-title">Certificate Verified &amp; Authentic</div>
+            <div class="help">Issued by SkillMe Open Source Program</div>
           </div>
         </div>
-        <div style="font-size:0.88rem; line-height:1.7; color:#e2e8f0; margin-bottom:16px;">
-          <strong>Candidate:</strong> ${SkillMeDocs.esc(data.holder || 'N/A')}<br>
-          <strong>Domain:</strong> ${domainLabel}<br>
-          <strong>Credential ID:</strong> <span style="font-family:monospace; color:#f0c97a;">${SkillMeDocs.esc(data.cert_id)}</span>
-        </div>
-        <a href="${certViewUrl}" target="_blank" style="display:inline-block; padding:9px 20px; background:#c99a4e; color:#0c0b0b; font-weight:700; border-radius:8px; text-decoration:none; font-size:0.85rem;">View Full Certificate &rarr;</a>
+        <dl class="dc-verify-dl">
+          <dt>Candidate</dt><dd>${SkillMeDocs.esc(data.holder || 'N/A')}</dd>
+          <dt>Domain</dt><dd>${domainLabel}</dd>
+          <dt>Credential ID</dt><dd class="mono">${SkillMeDocs.esc(data.cert_id)}</dd>
+        </dl>
+        <a href="${certViewUrl}" target="_blank" rel="noopener" class="btn btn-primary btn-sm">View Full Certificate &rarr;</a>
       `;
       } catch (e) {
-        resultEl.className = 'verify-result active';
+        resultEl.className = 'verify-result dc-verify-result is-danger active';
         resultEl.innerHTML = `
-        <div style="display:flex; align-items:center; gap:12px;">
-          <span style="font-size:24px;">❌</span>
+        <div class="dc-verify-result-head">
+          <div class="dc-status-icon">${SkillMeDocs.icon('danger')}</div>
           <div>
-            <div style="font-weight:800; font-size:1.05rem; color:#f87171;">Certificate Not Found</div>
-            <div style="font-size:0.8rem; color:#94a3b8;">Please verify the certificate ID and try again.</div>
+            <div class="dc-verify-result-title">Certificate Not Found</div>
+            <div class="help">Please verify the certificate ID and try again.</div>
           </div>
         </div>
       `;
