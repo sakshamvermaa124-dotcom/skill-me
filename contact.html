@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light" class="no-js">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +13,17 @@
   <meta name="language" content="English">
   <meta name="geo.region" content="IN">
   <meta name="geo.placename" content="India">
-  <meta name="theme-color" content="#0c0b0b">
+  <meta name="theme-color" content="#ffffff">
+  <script>
+    (function () {
+      var t;
+      try { t = localStorage.getItem('skillme-theme'); } catch (e) {}
+      if (t !== 'light' && t !== 'dark') {
+        t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
 
   <!-- Canonical URL -->
   <link rel="canonical" href="https://www.skill-me-intern.in/contact">
@@ -41,7 +51,9 @@
   <!-- Fonts & Resource Hints -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="theme.css?v=20261011_ds1">
+  <script src="theme.js?v=20261011_ds1" defer></script>
 
   <!-- ContactPage & Breadcrumb Structured Data -->
   <script type="application/ld+json">
@@ -81,154 +93,270 @@
   }
   </script>
   <style>
-    .legal-page { padding: 140px 24px 80px; max-width: 800px; margin: 0 auto; min-height: calc(100vh - 300px); color: var(--text-secondary); line-height: 1.7; }
-    .legal-page h1 { color: var(--text); font-size: 2.5rem; margin-bottom: 24px; font-weight: 800; letter-spacing: -0.02em; }
-    .legal-page h2 { color: var(--text); font-size: 1.5rem; margin-top: 40px; margin-bottom: 16px; font-weight: 700; }
-    .legal-page p { margin-bottom: 16px; }
-    
-    .contact-card {
-      background: var(--bg-card);
-      border: var(--border-glass);
-      border-radius: var(--radius-lg);
-      padding: 32px;
-      margin-top: 32px;
+    .contact-hero { position: relative; padding: clamp(48px, 7vw, 96px) 0 clamp(64px, 8vw, 112px); }
+    .contact-hero::before {
+      content: ''; position: absolute; inset: 0 0 auto 0; height: 360px; pointer-events: none;
+      background-image: radial-gradient(var(--grid-dot) 1px, transparent 1px); background-size: 22px 22px;
+      -webkit-mask-image: linear-gradient(to bottom, #000, transparent); mask-image: linear-gradient(to bottom, #000, transparent);
     }
-    .contact-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 16px;
-      margin-bottom: 24px;
+    .contact-layout { position: relative; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 64px); align-items: start; }
+    .contact-main .h1 { margin-top: 14px; }
+    .contact-main .lead { margin-top: 16px; max-width: 52ch; }
+
+    .contact-options { display: grid; gap: 14px; margin-top: 36px; }
+    .contact-option { display: flex; gap: 16px; align-items: flex-start; }
+    .contact-option-body { min-width: 0; flex: 1; }
+    .contact-option-title { font-size: 1.05rem; letter-spacing: -0.015em; line-height: 1.3; font-weight: 600; }
+    .contact-option-text { margin-top: 4px; font-size: 0.9rem; color: var(--text-2); }
+    .contact-address {
+      display: inline-block; margin-top: 12px; font-size: 0.95rem; color: var(--text);
+      overflow-wrap: anywhere; border-bottom: 1px solid var(--line-strong);
+      transition: border-color 0.15s, color 0.15s;
     }
-    .contact-item:last-child { margin-bottom: 0; }
-    .contact-icon {
-      background: rgba(99, 102, 241, 0.1);
-      color: var(--accent-indigo);
-      width: 40px; height: 40px;
-      display: flex; align-items: center; justify-content: center;
-      border-radius: 8px;
-      flex-shrink: 0;
+    .contact-address:hover { color: var(--primary); border-color: var(--primary); }
+    .contact-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+
+    .contact-shortcuts { margin-top: 40px; }
+    .contact-shortcuts .eyebrow { color: var(--text-3); margin-bottom: 10px; }
+    .contact-shortcuts ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; border-top: 1px solid var(--line); }
+    .contact-shortcuts a {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 13px 2px; border-bottom: 1px solid var(--line);
+      font-size: 0.92rem; font-weight: 500; color: var(--text-2);
+      transition: color 0.15s;
     }
-    .contact-label {
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 4px;
-      display: block;
+    .contact-shortcuts a svg { color: var(--text-3); transition: transform 0.2s var(--ease), color 0.15s; }
+    .contact-shortcuts a:hover { color: var(--text); }
+    .contact-shortcuts a:hover svg { color: var(--primary); transform: translateX(3px); }
+
+    .contact-details { position: sticky; top: calc(var(--nav-h) + 24px); overflow: hidden; }
+    .contact-details-head { padding: 18px 24px; border-bottom: 1px solid var(--line); background: var(--surface-2); }
+    .contact-details dl { padding: 8px 24px; }
+    .detail-row { display: flex; gap: 14px; padding: 16px 0; }
+    .detail-row + .detail-row { border-top: 1px solid var(--line); }
+    .detail-icon { width: 36px; height: 36px; flex-shrink: 0; display: grid; place-items: center; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line); color: var(--text-2); }
+    .contact-details dt { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
+    .contact-details dd { margin-top: 4px; font-size: 0.95rem; color: var(--text); line-height: 1.5; }
+    .contact-details dd strong { font-weight: 600; font-size: 0.9rem; white-space: nowrap; }
+    .contact-details .detail-note { font-size: 0.84rem; color: var(--text-2); }
+    .contact-details-foot { display: flex; gap: 18px; padding: 14px 24px; border-top: 1px solid var(--line); font-size: 0.84rem; }
+    .contact-details-foot a { color: var(--text-2); }
+    .contact-details-foot a:hover { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+
+    @media (max-width: 900px) {
+      .contact-layout { grid-template-columns: minmax(0, 1fr); }
+      .contact-details { position: static; }
     }
-    .contact-value {
-      color: var(--text-secondary);
+    @media (max-width: 520px) {
+      .contact-option { flex-direction: column; gap: 14px; }
+      .contact-actions .btn { flex: 1 1 auto; }
+      .contact-shortcuts ul { grid-template-columns: minmax(0, 1fr); }
+      .contact-details dl, .contact-details-head, .contact-details-foot { padding-left: 18px; padding-right: 18px; }
     }
   </style>
-  <style>.brand-logo-img, .logo img, .nav-logo img, .cert-company-logo, .lh-logo { width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important; flex-shrink: 0 !important; }</style>
 </head>
-<body style="background: var(--bg-primary);">
-  <!-- Navbar -->
-    <nav class="navbar scrolled" id="navbar">
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-nav" id="site-nav">
     <div class="container">
-    <div class="nav-left">
-      <a href="index.html" class="nav-logo" id="nav-logo">
-        <img src="assets/logo.webp" alt="SkillMe Logo" class="brand-logo-img" width="36" height="36" style="width: 36px !important; height: 36px !important; max-width: 36px !important; max-height: 36px !important; object-fit: cover !important; border-radius: 50% !important;">
+      <a href="index.html" class="brand" aria-label="SkillMe home">
+        <img src="assets/logo.webp" alt="" width="32" height="32">
         <span>SkillMe</span>
       </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="index.html#how-it-works">How it works</a>
+        <a href="index.html#domains">Domains</a>
+        <a href="index.html#benefits">Benefits</a>
+        <a href="verify.html">Verify</a>
+        <a href="index.html#faq">FAQ</a>
+      </nav>
+      <div class="nav-actions">
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle theme">
+          <svg class="ti-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          <svg class="ti-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <a href="dashboard.html" class="btn btn-ghost btn-sm nav-hide-sm">Student login</a>
+        <a href="quiz.html" class="btn btn-primary btn-sm nav-hide-sm">Apply now</a>
+        <button type="button" class="nav-menu-btn" data-nav-toggle aria-label="Open menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
     </div>
-    <div class="nav-links-center" id="nav-links-center" data-lenis-prevent>
-      <a href="index.html#how-it-works">How It Works</a>
-      <a href="index.html#domains">Domains</a>
-      <a href="index.html#benefits">Benefits</a>
-      <a href="index.html#faq">FAQ</a>
-    </div>
-    <div class="nav-actions-right">
-      <a href="dashboard.html" class="nav-link-dashboard" id="nav-dashboard-btn">Student Dashboard &rarr;</a>
-      <a href="quiz.html" class="nav-cta" id="nav-apply-btn">Apply Now &rarr;</a>
-      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-    </div>
+  </header>
+  <div class="nav-drawer" id="nav-drawer">
+    <a href="index.html#how-it-works">How it works</a>
+    <a href="index.html#domains">Domains</a>
+    <a href="index.html#benefits">Benefits</a>
+    <a href="verify.html">Verify a certificate</a>
+    <a href="index.html#faq">FAQ</a>
+    <a href="dashboard.html">Student login</a>
+    <a href="quiz.html" class="btn btn-primary">Apply now</a>
   </div>
-  </nav>
 
-  <main class="legal-page">
-    <h1>Contact Us</h1>
-    <p>If you have any questions, concerns, or need assistance, our support team is here to help.</p>
+  <main id="main">
+    <section class="contact-hero">
+      <div class="container contact-layout">
+        <div class="contact-main">
+          <span class="eyebrow">Support</span>
+          <h1 class="h1">Contact Us</h1>
+          <p class="lead">If you have any questions, concerns, or need assistance, our support team is here to help.</p>
 
-    <div class="contact-card">
-      <div class="contact-item">
-        <div class="contact-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        </div>
-        <div>
-          <span class="contact-label">Business Name</span>
-          <span class="contact-value">SkillMe</span>
-        </div>
-      </div>
+          <div class="contact-options">
+            <article class="card card-pad contact-option">
+              <div class="icon-tile" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              </div>
+              <div class="contact-option-body">
+                <h2 class="contact-option-title">Email Support</h2>
+                <p class="contact-option-text">For questions about the internship, enrollment and certificate verification.</p>
+                <a class="contact-address mono" href="mailto:sakshamverma124@gmail.com">sakshamverma124@gmail.com</a>
+                <div class="contact-actions">
+                  <a href="mailto:sakshamverma124@gmail.com" class="btn btn-primary btn-sm">
+                    Send an email
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                  </a>
+                  <button type="button" class="btn btn-secondary btn-sm" data-copy="sakshamverma124@gmail.com">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    Copy address
+                  </button>
+                </div>
+              </div>
+            </article>
 
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-bottom: 24px;">
-        <div class="contact-item" style="margin-bottom: 0;">
-          <div class="contact-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <article class="card card-pad contact-option">
+              <div class="icon-tile" aria-hidden="true">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>
+              </div>
+              <div class="contact-option-body">
+                <h2 class="contact-option-title">LinkedIn</h2>
+                <p class="contact-option-text">The official SkillMe company page.</p>
+                <div class="contact-actions">
+                  <a href="https://www.linkedin.com/company/skill-me-intern/" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm">
+                    Open company page
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>
+                  </a>
+                </div>
+              </div>
+            </article>
           </div>
-          <div>
-            <span class="contact-label">Email Support</span>
-            <span class="contact-value"><a href="mailto:sakshamverma124@gmail.com" style="color: var(--accent-blue); text-decoration: none;">sakshamverma124@gmail.com</a></span>
+
+          <div class="contact-shortcuts">
+            <h2 class="eyebrow no-dot">Looking for something else?</h2>
+            <ul role="list">
+              <li><a href="verify.html"><span>Verify a certificate</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+              <li><a href="dashboard.html"><span>Student dashboard</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+              <li><a href="refunds.html"><span>Cancellation &amp; refunds</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+              <li><a href="index.html#faq"><span>FAQ</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></li>
+            </ul>
           </div>
         </div>
-      </div>
 
-      <div class="contact-item">
-        <div class="contact-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        </div>
-        <div>
-          <span class="contact-label">Enterprise Registration</span>
-          <span class="contact-value">Udyam Registered Enterprise &bull; Reg. No. <strong>UDYAM-UP-50-0294192</strong><br><span style="font-size:0.85rem; color:var(--text-muted);">Ministry of Micro, Small &amp; Medium Enterprises (Govt. of India)</span></span>
-        </div>
+        <aside class="card contact-details" aria-labelledby="business-details-title">
+          <div class="contact-details-head">
+            <h2 id="business-details-title" class="eyebrow">Business details</h2>
+          </div>
+          <dl>
+            <div class="detail-row">
+              <div class="detail-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              </div>
+              <div>
+                <dt>Business Name</dt>
+                <dd>SkillMe</dd>
+              </div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+              <div>
+                <dt>Enterprise Registration</dt>
+                <dd>Udyam Registered Enterprise &bull; Reg. No. <strong class="mono">UDYAM-UP-50-0294192</strong></dd>
+                <dd class="detail-note">Ministry of Micro, Small &amp; Medium Enterprises (Govt. of India)</dd>
+              </div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              </div>
+              <div>
+                <dt>Registered Location</dt>
+                <dd>Kalyanpur, Lucknow, Uttar Pradesh, India</dd>
+              </div>
+            </div>
+          </dl>
+          <div class="contact-details-foot">
+            <a href="privacy.html">Privacy policy</a>
+            <a href="terms.html">Terms of service</a>
+          </div>
+        </aside>
       </div>
-
-      <div class="contact-item">
-        <div class="contact-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        </div>
-        <div>
-          <span class="contact-label">Registered Location</span>
-          <span class="contact-value">Kalyanpur, Lucknow, Uttar Pradesh, India</span>
-        </div>
-      </div>
-    </div>
+    </section>
   </main>
 
-  <!-- Footer -->
-  <footer class="footer" id="footer" style="margin-top: auto; padding-top: 20px; padding-bottom: 20px;">
+  <footer class="site-footer">
     <div class="container">
-      <div class="footer-bottom" style="border-top: none; padding-top: 0; margin-top: 0;">
-        <p>© 2026 SkillMe. All rights reserved. &bull; Govt. of India Udyam Reg. UDYAM-UP-50-0294192</p>
+      <div class="footer-grid">
+        <div>
+          <a href="index.html" class="brand"><img src="assets/logo.webp" alt="" width="32" height="32"><span>SkillMe</span></a>
+          <p class="footer-about">Remote internships with real weekly projects, human review and verifiable credentials.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Program</h4>
+          <a href="index.html#how-it-works">How it works</a>
+          <a href="index.html#domains">Domains</a>
+          <a href="quiz.html">Apply now</a>
+          <a href="index.html#faq">FAQ</a>
+        </div>
+        <div class="footer-col">
+          <h4>Students</h4>
+          <a href="dashboard.html">Student dashboard</a>
+          <a href="verify.html">Verify a certificate</a>
+          <a href="https://www.linkedin.com/company/skill-me-intern/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          <a href="https://github.com/sakshamvermaa124-dotcom/skill-me" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="contact.html" aria-current="page">Contact us</a>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <a href="privacy.html">Privacy policy</a>
+          <a href="terms.html">Terms of service</a>
+          <a href="refunds.html">Cancellation &amp; refunds</a>
+          <a href="/llms.txt">Agent instructions</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> SkillMe · MSME registered · UDYAM-UP-50-0294192</span>
+        <span>Made for students, reviewed by people.</span>
       </div>
     </div>
   </footer>
-<script>
-  // Mobile nav toggle
-  (function() {
-    var t = document.getElementById('nav-toggle');
-    var n = document.getElementById('nav-links-center');
-    if (!t || !n) return;
-    t.addEventListener('click', function() {
-      var o = n.classList.toggle('open');
-      t.classList.toggle('active', o);
-      document.body.style.overflow = o ? 'hidden' : '';
-    });
-    n.querySelectorAll('a').forEach(function(l) {
-      l.addEventListener('click', function() {
-        n.classList.remove('open'); t.classList.remove('active');
-        document.body.style.overflow = '';
-      });
-    });
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && n.classList.contains('open')) {
-        n.classList.remove('open'); t.classList.remove('active');
-        document.body.style.overflow = '';
+  <script>
+    // Copy-email button (progressive enhancement; the mailto links work without it)
+    (function () {
+      var toastEl, timer;
+      function toast(msg) {
+        if (!toastEl) {
+          toastEl = document.createElement('div');
+          toastEl.className = 'toast';
+          toastEl.setAttribute('role', 'status');
+          toastEl.setAttribute('aria-live', 'polite');
+          document.body.appendChild(toastEl);
+        }
+        toastEl.textContent = msg;
+        requestAnimationFrame(function () { toastEl.classList.add('is-visible'); });
+        clearTimeout(timer);
+        timer = setTimeout(function () { toastEl.classList.remove('is-visible'); }, 1800);
       }
-    });
-  })();
-</script></body>
+      document.querySelectorAll('[data-copy]').forEach(function (btn) {
+        if (!navigator.clipboard || !navigator.clipboard.writeText) { btn.hidden = true; return; }
+        btn.addEventListener('click', function () {
+          navigator.clipboard.writeText(btn.getAttribute('data-copy')).then(
+            function () { toast('Email address copied'); },
+            function () { toast('Copy failed - select the address instead'); }
+          );
+        });
+      });
+    })();
+  </script>
+</body>
 </html>
-
