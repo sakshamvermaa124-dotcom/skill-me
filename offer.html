@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light" class="no-js">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +8,17 @@
   <meta name="description" content="Official Internship Offer Letter and College HOD / TPO NOC Compliance Verification Pack — SkillMe Open Source Program.">
   <meta name="robots" content="noindex, follow">
   <meta name="language" content="English">
-  <meta name="theme-color" content="#0c0b0b">
+  <meta name="theme-color" content="#ffffff">
+  <script>
+    (function () {
+      var t;
+      try { t = localStorage.getItem('skillme-theme'); } catch (e) {}
+      if (t !== 'light' && t !== 'dark') {
+        t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
   <link rel="canonical" href="https://www.skill-me-intern.in/offer">
 
   <!-- Open Graph -->
@@ -27,7 +37,12 @@
 
   <!-- QR Code Generator -->
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
-  <script src="docs.js?v=1"></script>
+  <script src="docs.js?v=2"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="theme.css?v=20261011_ds1">
+  <link rel="stylesheet" href="docs.css?v=20261011_docs1">
+  <script src="theme.js?v=20261011_ds1" defer></script>
 
   <style>
     :root {
@@ -45,97 +60,8 @@
 
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background-color: var(--bg-canvas);
-      background-image: radial-gradient(ellipse 80% 40% at 50% -5%, rgba(201, 154, 78, 0.08), transparent 70%);
-      color: var(--dark-text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 30px 16px 60px;
-    }
-
-    /* Actions Bar */
-    .actions-bar {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 28px;
-      max-width: 860px;
-      width: 100%;
-    }
-
-    .doc-switcher {
-      display: flex;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      padding: 4px;
-      border-radius: 9999px;
-      gap: 4px;
-    }
-
-    .doc-tab-btn {
-      padding: 8px 18px;
-      border-radius: 9999px;
-      background: transparent;
-      border: none;
-      color: rgba(255, 255, 255, 0.65);
-      font-size: 0.84rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s ease;
-      font-family: 'DM Sans', sans-serif;
-    }
-
-    .doc-tab-btn:hover {
-      color: #fff;
-    }
-
-    .doc-tab-btn.active {
-      background: linear-gradient(135deg, rgba(201, 154, 78, 0.25), rgba(201, 154, 78, 0.15));
-      border: 1px solid rgba(201, 154, 78, 0.4);
-      color: #f0c97a;
-    }
-
-    .btn-action {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 9px 20px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(235, 230, 224, 0.16);
-      border-radius: 9999px;
-      color: #eae6e1;
-      font-size: 0.86rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.2s ease;
-    }
-
-    .btn-action:hover {
-      background: rgba(201, 154, 78, 0.15);
-      border-color: rgba(201, 154, 78, 0.4);
-      color: #fff;
-      transform: translateY(-1px);
-    }
-
-    .btn-action.btn-primary {
-      background: linear-gradient(135deg, #c99a4e 0%, #b5873d 100%);
-      color: #0c0b0b;
-      border: none;
-    }
-
-    .btn-action.btn-primary:hover {
-      box-shadow: 0 4px 16px rgba(201, 154, 78, 0.3);
-    }
+    /* Page chrome (header, toolbar, document tabs) lives in docs.css. */
+    .dc-shell { --dc-w: 860px; }
 
     /* Paper Document Container */
     .offer-paper {
@@ -546,9 +472,6 @@
     }
 
     @media (max-width: 640px) {
-      body { padding: 16px 10px 40px; }
-      .actions-bar { gap: 8px; margin-bottom: 16px; }
-      .btn-action { padding: 9px 16px; font-size: 0.82rem; }
       .offer-paper { padding: 26px 18px; border-radius: 10px; }
       .watermark { font-size: 4.5rem; }
       .letterhead { flex-direction: column; gap: 12px; align-items: flex-start; }
@@ -563,8 +486,6 @@
       .signature-row { flex-direction: column; gap: 20px; align-items: stretch; }
       .qr-box { width: 100%; }
       .qr-info { min-width: 0; overflow-wrap: anywhere; }
-      .doc-switcher { width: 100%; }
-      .doc-tab-btn { flex: 1 1 0; justify-content: center; text-align: center; padding: 7px 10px; font-size: 0.76rem; }
       /* Tables → stacked cards; labels come from data-label (filled in from the <th>s). */
       .compliance-table, .compliance-table tbody, .compliance-table tr, .compliance-table td { display: block; width: 100% !important; }
       .compliance-table thead { display: none; }
@@ -584,27 +505,68 @@
     }
   </style>
 </head>
-<body>
+<body class="dc-body">
 
-  <!-- Actions Bar with Document Switcher -->
-  <div class="actions-bar">
-    <a href="dashboard.html" class="btn-action">← Return to Dashboard</a>
-
-    <div class="doc-switcher">
-      <button class="doc-tab-btn active" id="tab-btn-offer" onclick="switchDocument('offer')">
-        📄 Standard Offer Letter
-      </button>
-      <button class="doc-tab-btn" id="tab-btn-hod" onclick="switchDocument('hod')">
-        🏛️ HOD Verification &amp; NOC Pack
-      </button>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-nav is-solid" id="site-nav">
+    <div class="container">
+      <a href="index.html" class="brand" aria-label="SkillMe home">
+        <img src="assets/logo.webp" alt="" width="32" height="32">
+        <span>SkillMe</span>
+        <span class="brand-tag">Offer letter</span>
+      </a>
+      <div class="nav-actions">
+        <a href="verify.html" class="btn btn-ghost btn-sm nav-hide-sm">Verify a certificate</a>
+        <a href="dashboard.html" class="btn btn-secondary btn-sm"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>Dashboard</a>
+        <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle theme">
+          <svg class="ti-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+          <svg class="ti-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
     </div>
+  </header>
 
-    <button class="btn-action btn-primary" id="btn-download-pdf" onclick="downloadOffer(this)">
-      ⬇️ Download PDF
-    </button>
-    <button class="btn-action" onclick="window.print()">🖨️ Print</button>
-  </div>
+  <main id="main" class="dc-main">
+    <div class="container">
+      <div class="dc-shell" id="offer-view">
 
+        <!-- Toolbar with Document Switcher -->
+        <div class="dc-toolbar" id="action-bar">
+          <div class="dc-toolbar-info">
+            <span class="eyebrow">Official internship documents</span>
+            <p class="dc-title" id="dc-doc-title">Internship offer letter</p>
+            <div class="dc-meta">
+              <span>Prepared for <strong class="student-name-text">Candidate Name</strong></span>
+            </div>
+          </div>
+          <div class="dc-actions">
+            <button type="button" class="btn btn-primary" id="btn-download-pdf" onclick="downloadOffer(this)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+              Download PDF
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="window.print()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              Print
+            </button>
+            <button type="button" class="btn btn-secondary" id="btn-copy-link" onclick="SkillMeDocs.copyLink(offerShareUrl())">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              Copy link
+            </button>
+          </div>
+        </div>
+
+        <div class="dc-tabs doc-switcher" role="group" aria-label="Choose document">
+          <button type="button" class="dc-tab doc-tab-btn active" id="tab-btn-offer" aria-pressed="true" onclick="switchDocument('offer')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>
+            Standard Offer Letter
+          </button>
+          <button type="button" class="dc-tab doc-tab-btn" id="tab-btn-hod" aria-pressed="false" onclick="switchDocument('hod')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/></svg>
+            HOD Verification &amp; NOC Pack
+          </button>
+        </div>
+
+        <div class="dc-frame">
   <!-- Main Document Container -->
   <div class="offer-paper" id="offer-document">
     <div class="watermark">SKILLME</div>
@@ -848,6 +810,25 @@
 
   </div>
 
+        </div><!-- /dc-frame -->
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer dc-footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> SkillMe · MSME registered · UDYAM-UP-50-0294192</span>
+        <nav class="dc-footer-links" aria-label="Footer">
+          <a href="verify.html">Verify a certificate</a>
+          <a href="contact.html">Contact</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="terms.html">Terms</a>
+        </nav>
+      </div>
+    </div>
+  </footer>
+
   <script src="config.js"></script>
   <script>
     // Extract query parameters
@@ -960,6 +941,10 @@
       const displayName = studentName || "Intern Candidate";
 
       currentView = view;
+      tabOffer.setAttribute('aria-pressed', String(view !== 'hod'));
+      tabHod.setAttribute('aria-pressed', String(view === 'hod'));
+      const dcTitle = document.getElementById('dc-doc-title');
+      if (dcTitle) dcTitle.textContent = view === 'hod' ? 'HOD verification & NOC pack' : 'Internship offer letter';
       if (view === 'hod') {
         offerView.classList.remove('active');
         hodView.classList.add('active');
@@ -980,6 +965,13 @@
     // Set initial view
     if (initialView === 'hod') {
       switchDocument('hod');
+    }
+
+    // Share link opens the document that is currently shown.
+    function offerShareUrl() {
+      const u = new URL(window.location.href);
+      if (currentView === 'hod') u.searchParams.set('view', 'hod'); else u.searchParams.delete('view');
+      return u.toString();
     }
 
     function downloadOffer(btn) {
