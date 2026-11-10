@@ -295,4 +295,87 @@ document.addEventListener('DOMContentLoaded', () => {
       if (ctaApplyBtn) ctaApplyBtn.href = `quiz.html?domain=${domain}`;
     });
   });
+
+  // ── Week explorer: accessible tabs (click + arrow keys) ──
+  (function initWeekTabs() {
+    const tabs = Array.from(document.querySelectorAll('.weeks-tab'));
+    const bar = document.getElementById('weeks-bar');
+    if (!tabs.length) return;
+
+    function select(index, focus) {
+      tabs.forEach((tab, i) => {
+        const on = i === index;
+        tab.setAttribute('aria-selected', String(on));
+        tab.tabIndex = on ? 0 : -1;
+        const panel = document.getElementById(tab.getAttribute('aria-controls'));
+        if (panel) panel.hidden = !on;
+      });
+      if (bar) bar.style.width = `${((index + 1) / tabs.length) * 100}%`;
+      if (focus) tabs[index].focus();
+    }
+
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => select(i, false));
+      tab.addEventListener('keydown', (e) => {
+        let next = null;
+        if (e.key === 'ArrowRight') next = (i + 1) % tabs.length;
+        else if (e.key === 'ArrowLeft') next = (i - 1 + tabs.length) % tabs.length;
+        else if (e.key === 'Home') next = 0;
+        else if (e.key === 'End') next = tabs.length - 1;
+        if (next === null) return;
+        e.preventDefault();
+        select(next, true);
+      });
+    });
+  })();
+
+  // ── Nav scroll-spy: highlight the section in view ──
+  (function initScrollSpy() {
+    if (!('IntersectionObserver' in window)) return;
+    const links = Array.from(document.querySelectorAll('.nav-links a[href^="index.html#"]'));
+    const byId = new Map();
+    links.forEach(a => {
+      const section = document.getElementById(a.getAttribute('href').split('#')[1]);
+      if (section) byId.set(section.id, a);
+    });
+    if (!byId.size) return;
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        const link = byId.get(entry.target.id);
+        if (!link) return;
+        if (entry.isIntersecting) {
+          links.forEach(l => l.classList.remove('is-active'));
+          link.classList.add('is-active');
+        } else {
+          link.classList.remove('is-active');
+        }
+      });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    byId.forEach((_, id) => io.observe(document.getElementById(id)));
+  })();
+
+  // ── Mobile sticky CTA: visible after the hero, hidden again at the final CTA ──
+  (function initStickyCta() {
+    const bar = document.getElementById('sticky-cta');
+    const hero = document.getElementById('hero');
+    const finalCta = document.getElementById('apply');
+    if (!bar || !hero || !('IntersectionObserver' in window)) return;
+    bar.hidden = false;
+    let pastHero = false;
+    let atFinal = false;
+    const update = () => {
+      const show = pastHero && !atFinal;
+      bar.classList.toggle('is-visible', show);
+      bar.setAttribute('aria-hidden', String(!show));
+      bar.querySelectorAll('a').forEach(a => { a.tabIndex = show ? 0 : -1; });
+    };
+    new IntersectionObserver(([entry]) => {
+      pastHero = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+      update();
+    }).observe(hero);
+    if (finalCta) {
+      new IntersectionObserver(([entry]) => { atFinal = entry.isIntersecting; update(); }).observe(finalCta);
+    }
+    update();
+  })();
 });
