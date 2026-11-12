@@ -1,110 +1,91 @@
 {% extends "base.html" %}
+{% import "_ui.html" as ui %}
 
-{% block title %}🚀 Official Internship Offer Letter — SkillMe{% endblock %}
+{% set offer_url = "https://skill-me-intern.in/offer.html?name=" ~ (first_name|urlencode) ~ "+" ~ (last_name|urlencode) ~ "&domain=" ~ (domain_label|urlencode) %}
+{% set hod_url = "https://skill-me-intern.in/offer.html?view=hod&name=" ~ (first_name|urlencode) ~ "+" ~ (last_name|urlencode) ~ "&domain=" ~ (domain_label|urlencode) %}
+
+{% block title %}Your internship offer letter — SkillMe{% endblock %}
+{% block preheader %}Your SkillMe {{ domain_label }} internship is confirmed. View your verified offer letter and get started.{% endblock %}
 
 {% block body %}
-<p class="greeting">Dear {{ first_name }},</p>
-<p class="lead">
-  We are pleased to formally offer you an internship position at <strong>SkillMe</strong> under the 
-  <strong>{{ domain_label }}</strong> technical internship.
-</p>
+{{ ui.eyebrow("Offer letter") }}
+{{ ui.title("Your internship offer is here") }}
+{% call ui.p(mb=10) %}Dear {{ first_name }},{% endcall %}
+{% call ui.p() %}
+  We're pleased to offer you an internship at <strong class="ink" style="color:#0a0a0a;">SkillMe</strong> in the
+  <strong class="ink" style="color:#0a0a0a;">{{ domain_label }}</strong> track.
+{% endcall %}
 
-<div class="divider"></div>
+{{ ui.section("Offer details") }}
+{% call ui.info_table() %}
+  {{ ui.row("Name", first_name ~ " " ~ last_name) }}
+  {{ ui.row("Track", domain_label) }}
+  {{ ui.row("Joining date", joining_date) }}
+  {{ ui.row("Duration", "4 weeks · Remote") }}
+  {{ ui.row("Status", ui.badge("Confirmed & enrolled", "ok"), last=true) }}
+{% endcall %}
 
-<p class="section-label">📋 Internship Offer Details</p>
-<div class="info-table">
-  <div class="info-row">
-    <span class="info-label">Candidate Name</span>
-    <span class="info-value">{{ first_name }} {{ last_name }}</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">Assigned Track</span>
-    <span class="info-value">{{ domain_label }}</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">Date of Joining</span>
-    <span class="info-value">{{ joining_date }}</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">Internship Duration</span>
-    <span class="info-value">4 Weeks (Remote / Async)</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">Appointment Status</span>
-    <span class="info-value"><span class="badge badge-green">Confirmed &amp; Enrolled</span></span>
-  </div>
-</div>
+<!-- Offer letter document -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:26px 0 0;border-collapse:separate;">
+  <tr>
+    <td bgcolor="#0a0a0a" style="padding:28px 26px;border-radius:14px;background:#0a0a0a;text-align:center;" align="center">
+      <span style="display:inline-block;padding:4px 12px;border-radius:999px;background:#2a1408;border:1px solid #7a3510;font-family:'Geist Mono', 'SFMono-Regular', Menlo, Consolas, monospace;font-size:10.5px;line-height:16px;font-weight:600;letter-spacing:1.2px;color:#ff9a5c;">OFFICIAL APPOINTMENT DOCUMENT</span>
+      <p style="margin:14px 0 6px;font-family:'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;font-size:20px;line-height:26px;font-weight:700;letter-spacing:-0.4px;color:#ffffff;">Your verified offer letter is ready</p>
+      <p style="margin:0 0 20px;font-family:'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;font-size:13.5px;line-height:21px;color:#a1a1aa;">View it online, save a single-page PDF, or download your HOD verification pack.</p>
+      {{ ui.button(offer_url, "Open offer letter →") }}
+    </td>
+  </tr>
+</table>
 
-<!-- 👑 UNMISSABLE HERO CARD: OFFICIAL OFFER LETTER ONLINE -->
-<div class="offer-hero-cta-card">
-  <span class="offer-hero-badge">👑 OFFICIAL APPOINTMENT DOCUMENT</span>
-  <div class="offer-hero-title">Your Digital Verified Offer Letter is Ready</div>
-  <div class="offer-hero-sub">
-    Click below to view your official digital letterhead, verify cryptographic signatures, print single-page PDF, or download your HOD verification pack.
-  </div>
-  <a href="https://skill-me-intern.in/offer.html?name={{ first_name }}+{{ last_name }}&domain={{ domain_label }}" target="_blank" class="btn-offer-hero">
-    📄 Open Official Offer Letter Online &rarr;
-  </a>
-</div>
+{{ ui.section("Need College NOC / HOD Verification?") }}
+{% call ui.p(size=14, mb=12) %}
+  If your college needs department approval, an attendance exemption or academic-credit validation, your institutional verification pack is ready:
+{% endcall %}
+{% call ui.info_table() %}
+  <tr><td class="text line" style="padding:12px 16px;border-bottom:1px solid #f0f0f2;font-family:'Geist', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;font-size:13.5px;line-height:21px;color:#3f3f46;"><strong class="ink" style="color:#0a0a0a;">Official HOD Acceptance Letter</strong> — addressed to your Head of Department or TPO.</td></tr>
+  <tr><td class="text line" style="padding:12px 16px;border-bottom:1px solid #f0f0f2;font-family:'Geist', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;font-size:13.5px;line-height:21px;color:#3f3f46;"><strong class="ink" style="color:#0a0a0a;">4-Week Structured Work Syllabus</strong> — a week-by-week breakdown, 25% per sprint.</td></tr>
+  <tr><td class="text line" style="padding:12px 16px;border-bottom:1px solid #f0f0f2;font-family:'Geist', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;font-size:13.5px;line-height:21px;color:#3f3f46;"><strong class="ink" style="color:#0a0a0a;">Academic Evaluation Rubric</strong> — milestone completion, submission quality and admin review.</td></tr>
+  <tr><td class="text" style="padding:12px 16px;font-family:'Geist', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;font-size:13.5px;line-height:21px;color:#3f3f46;"><strong class="ink" style="color:#0a0a0a;">Live verification QR code</strong> — faculty can scan it to verify instantly.</td></tr>
+{% endcall %}
+{% call ui.p(size=13.5, mb=0) %}
+  Download it from your {{ ui.link(hod_url, "online offer letter") }} or your {{ ui.link("https://skill-me-intern.in/dashboard.html", "student dashboard") }}.
+{% endcall %}
 
-<!-- 🏛️ PROMINENT INSTITUTIONAL NOC & HOD VERIFICATION FEATURE -->
-<div class="noc-feature-box">
-  <div class="noc-feature-header">
-    <div class="noc-feature-title">🏛️ Need College NOC / HOD Verification?</div>
-    <div class="noc-feature-desc">
-      If you require college department approval, attendance exemption, or academic credit validation, an <strong>Auto-Generated Institutional Verification Pack</strong> is ready:
-    </div>
-  </div>
-  <ul class="noc-feature-list">
-    <li><strong>Official HOD Acceptance Letter:</strong> Formal document addressed to your Head of Department / TPO.</li>
-    <li><strong>4-Week Structured Work Syllabus:</strong> Module-by-module breakdown with 25% sprint weightages.</li>
-    <li><strong>Academic Evaluation Rubric:</strong> Transparent grading standards (Milestone Completion, Submission Quality, Admin Review).</li>
-    <li><strong>Live Cryptographic QR Code:</strong> Scannable authentication for instant smartphone verification by college faculty.</li>
-  </ul>
-  <div style="font-size: 13px; color: #1e3a8a; font-weight: 700; background: rgba(37,99,235,0.08); padding: 8px 12px; border-radius: 6px; margin-top: 10px;">
-    👉 Downloadable inside your <strong><a href="https://skill-me-intern.in/offer.html?view=hod&name={{ first_name }}+{{ last_name }}&domain={{ domain_label }}" target="_blank" style="color:#2563eb; text-decoration:underline;">Online Offer Letter</a></strong> and <strong><a href="https://skill-me-intern.in/dashboard.html" target="_blank" style="color:#2563eb; text-decoration:underline;">Student Dashboard</a></strong>.
-  </div>
-</div>
+{{ ui.section("Share your selection") }}
+{% call ui.p(size=14, mb=14) %}Celebrate with your network — each link includes your verified offer letter.{% endcall %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td class="stack-cell" width="50%" style="padding:0 5px 10px 0;" valign="top">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;"><tr>
+        <td align="center" bgcolor="#0a66c2" style="border-radius:10px;background:#0a66c2;">
+          <a href="https://www.linkedin.com/feed/?shareActive=true&text=Excited%20to%20announce%20that%20I%20have%20received%20my%20official%20Offer%20Letter%20for%20the%20{{ domain_label|urlencode }}%20internship%20at%20SkillMe!%0A%0A%F0%9F%93%84%20View%20my%20verified%20Offer%20Letter%3A%0A%F0%9F%91%89%20https%3A%2F%2Fskill-me-intern.in%2Foffer.html%3Fname%3D{{ first_name|urlencode }}%2B{{ last_name|urlencode }}%26domain%3D{{ domain_label|urlencode }}%0A%0A%F0%9F%8F%A2%20Follow%20SkillMe%20on%20LinkedIn%3A%20https%3A%2F%2Fwww.linkedin.com%2Fcompany%2Fskill-me-intern%2F%0A%0A%23SkillMe%20%23Internship%20%23ProofOfWork" target="_blank" class="btn-email-linkedin" style="display:block;padding:12px 14px;font-family:'Geist', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;font-size:14px;line-height:18px;font-weight:600;color:#ffffff;text-decoration:none;text-align:center;">Share on LinkedIn</a>
+        </td>
+      </tr></table>
+    </td>
+    <td class="stack-cell" width="50%" style="padding:0 0 10px 5px;" valign="top">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;"><tr>
+        <td align="center" bgcolor="#1fa855" style="border-radius:10px;background:#1fa855;">
+          <a href="https://api.whatsapp.com/send?text=Hey!%20I%20just%20received%20my%20official%20Offer%20Letter%20for%20the%20SkillMe%20{{ domain_label|urlencode }}%20internship!%20Check%20out%20my%20verified%20offer%20letter%3A%20https%3A%2F%2Fskill-me-intern.in%2Foffer.html%3Fname%3D{{ first_name|urlencode }}%2B{{ last_name|urlencode }}%26domain%3D{{ domain_label|urlencode }}" target="_blank" class="btn-email-whatsapp" style="display:block;padding:12px 14px;font-family:'Geist', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;font-size:14px;line-height:18px;font-weight:600;color:#ffffff;text-decoration:none;text-align:center;">Share on WhatsApp</a>
+        </td>
+      </tr></table>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" class="stack-cell">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;"><tr>
+        <td align="center" class="btn-secondary" style="border-radius:10px;background:#ffffff;border:1px solid #d4d4d8;">
+          <a href="https://www.linkedin.com/company/skill-me-intern/" target="_blank" class="btn-email-follow-company ink" style="display:block;padding:12px 14px;font-family:'Geist', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;font-size:14px;line-height:18px;font-weight:600;color:#0a0a0a;text-decoration:none;text-align:center;">Follow the SkillMe company page →</a>
+        </td>
+      </tr></table>
+    </td>
+  </tr>
+</table>
 
-<!-- 🚀 1-CLICK MILESTONE SHARE CARD (LINKEDIN & WHATSAPP) -->
-<div class="share-milestone-card">
-  <div class="share-milestone-title">
-    <span>🎉</span> Share Your Selection Milestone
-  </div>
-  <div class="share-milestone-desc">
-    Celebrate your official appointment with your network on LinkedIn and invite friends on WhatsApp with your verified Offer Letter attached:
-  </div>
-  
-  <table class="share-btns-table" cellpadding="0" cellspacing="0">
-    <tr>
-      <td style="width: 50%; text-align: center; vertical-align: middle;">
-        <a href="https://www.linkedin.com/feed/?shareActive=true&text=Excited%20to%20announce%20that%20I%20have%20received%20my%20official%20Offer%20Letter%20for%20the%20Software%20Engineering%20Internship%20at%20SkillMe%20under%20the%20{{ domain_label|urlencode }}%20track!%0A%0A%F0%9F%93%84%20View%20my%20verified%20Offer%20Letter%3A%0A%F0%9F%91%89%20https%3A%2F%2Fskill-me-intern.in%2Foffer.html%3Fname%3D{{ first_name|urlencode }}%2B{{ last_name|urlencode }}%26domain%3D{{ domain_label|urlencode }}%0A%0A%F0%9F%8F%A2%20Follow%20SkillMe%20on%20LinkedIn%3A%20https%3A%2F%2Fwww.linkedin.com%2Fcompany%2Fskill-me-intern%2F%0A%0A%23SkillMe%20%23Internship%20%23SoftwareEngineering%20%23ProofOfWork" target="_blank" class="btn-email-linkedin">
-          <span style="font-size:14px; vertical-align:middle; margin-right:4px;">in</span> Share on LinkedIn
-        </a>
-      </td>
-      <td style="width: 50%; text-align: center; vertical-align: middle;">
-        <a href="https://api.whatsapp.com/send?text=Hey!%20I%20just%20received%20my%20official%20Offer%20Letter%20for%20the%20SkillMe%20{{ domain_label|urlencode }}%20internship!%20Check%20out%20my%20verified%20offer%20letter%3A%20https%3A%2F%2Fskill-me-intern.in%2Foffer.html%3Fname%3D{{ first_name|urlencode }}%2B{{ last_name|urlencode }}%26domain%3D{{ domain_label|urlencode }}" target="_blank" class="btn-email-whatsapp">
-          <span style="font-size:14px; vertical-align:middle; margin-right:4px;">💬</span> Share on WhatsApp
-        </a>
-      </td>
-    </tr>
-  </table>
+{% call ui.actions(mt=28) %}
+  {{ ui.button("https://skill-me-intern.in/dashboard.html", "Log in to student dashboard", "dark") }}
+{% endcall %}
 
-  <!-- 🏢 DEDICATED 1-CLICK BUTTON FOR SKILLME COMPANY PAGE -->
-  <div style="margin-top: 14px;">
-    <a href="https://www.linkedin.com/company/skill-me-intern/" target="_blank" class="btn-email-follow-company">
-      🏢 Follow SkillMe Company Page on LinkedIn &rarr;
-    </a>
-  </div>
-</div>
-
-<div class="divider"></div>
-
-<div class="cta-wrap">
-  <a href="https://skill-me-intern.in/dashboard.html" target="_blank" class="cta-btn">Log In to Student Dashboard &rarr;</a>
-</div>
-
-<div class="note" style="margin-top: 20px;">
-  💡 <strong>Next Step:</strong> Log in to your <a href="https://skill-me-intern.in/dashboard.html" target="_blank" style="color:#2563eb; font-weight:700;">Student Dashboard</a> to view your Week 1 milestone project and get started.
-</div>
+{% call ui.note("accent", mt=12) %}
+  <strong class="ink" style="color:#0a0a0a;">Next step:</strong> log in to your dashboard to see your Week 1 milestone project and get started.
+{% endcall %}
 {% endblock %}
