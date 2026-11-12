@@ -1,61 +1,34 @@
 {% extends "base.html" %}
+{% import "_ui.html" as ui %}
 
-{% block title %}Application Confirmed — SkillMe{% endblock %}
+{% block title %}Application received — SkillMe{% endblock %}
+{% block preheader %}We've received your application for the {{ domain_label }} internship. Here's what happens next.{% endblock %}
 
 {% block body %}
-<p class="greeting">Hello {{ first_name }},</p>
-<p class="lead">
-  We have officially received your application for the <strong>{{ domain_label }}</strong> internship at <strong>SkillMe</strong>.
-  Our engineering review committee is currently screening your profile.
-</p>
+{{ ui.eyebrow("Application received") }}
+{{ ui.title("Thanks for applying, " ~ first_name) }}
+{% call ui.p() %}
+  We've received your application for the <strong class="ink" style="color:#0a0a0a;">{{ domain_label }}</strong> internship at SkillMe.
+  Our team is reviewing your profile now — you'll hear from us by email.
+{% endcall %}
 
-<div class="divider"></div>
+{{ ui.section("Application summary") }}
+{% call ui.info_table() %}
+  {{ ui.row("Name", first_name ~ " " ~ last_name) }}
+  {{ ui.row("Email", email) }}
+  {{ ui.row("Track", domain_label) }}
+  {{ ui.row("Status", ui.badge("Under review", "warn"), last=true) }}
+{% endcall %}
 
-<p class="section-label">📌 Application Summary</p>
-<div class="info-table">
-  <div class="info-row">
-    <span class="info-label">Candidate Name</span>
-    <span class="info-value">{{ first_name }} {{ last_name }}</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">Registered Email</span>
-    <span class="info-value">{{ email }}</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">Selected Track</span>
-    <span class="info-value">{{ domain_label }}</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">Application Status</span>
-    <span class="info-value"><span class="badge badge-amber">Under Active Review</span></span>
-  </div>
-</div>
+{{ ui.section("What happens next") }}
+{% call ui.steps() %}
+  {% call ui.step(1, "Review") %}We check your track preference and readiness against current internship capacity.{% endcall %}
+  {% call ui.step(2, "Shortlist & offer letter") %}If you're selected, you'll get a shortlist email followed by your formal offer letter.{% endcall %}
+  {% call ui.step(3, "Start your 4-week project", last=true) %}You'll get your weekly project guide and submit a LinkedIn post each week for review.{% endcall %}
+{% endcall %}
 
-<div class="divider"></div>
-
-<p class="section-label">🗺️ What Happens Next</p>
-
-<div class="steps">
-  <div class="step">
-    <div class="step-num">1</div>
-    <div class="step-text"><strong>Technical Screening</strong><br />Our mentors evaluate your track preference and technical readiness based on internship capacity.</div>
-  </div>
-  <div class="step">
-    <div class="step-num">2</div>
-    <div class="step-text"><strong>Shortlist Notification &amp; Track Enrollment</strong><br />If selected, you'll receive a shortlist notice followed by your formal Offer Letter.</div>
-  </div>
-  <div class="step">
-    <div class="step-num">3</div>
-    <div class="step-text"><strong>Project Sprint Kickoff</strong><br />You'll get your 4-week milestone project guide and submit weekly LinkedIn posts for admin review.</div>
-  </div>
-</div>
-
-<div class="note">
-  💡 <strong>Pro Tip:</strong> Keep your profile details up to date during the screening phase.
-</div>
-
-<div class="cta-wrap">
-  <a href="https://skill-me-intern.in" target="_blank" class="cta-btn">Visit SkillMe Portal &rarr;</a><br />
-  <a href="https://www.linkedin.com/company/skill-me-intern/" target="_blank" class="cta-btn-secondary">Follow SkillMe on LinkedIn ↗</a>
-</div>
+{% call ui.actions() %}
+  {{ ui.button("https://skill-me-intern.in/apply.html?view=status", "Check application status") }}
+  {{ ui.button("https://www.linkedin.com/company/skill-me-intern/", "Follow SkillMe on LinkedIn", "secondary") }}
+{% endcall %}
 {% endblock %}
