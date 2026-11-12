@@ -1,39 +1,29 @@
 {% extends "base.html" %}
+{% import "_ui.html" as ui %}
 
-{% block title %}🎉 You've Been Shortlisted — SkillMe{% endblock %}
+{% block title %}You've been shortlisted — SkillMe{% endblock %}
+{% block preheader %}Your {{ domain_label }} application passed our initial review. Your offer letter is on its way.{% endblock %}
 
 {% block body %}
-<p class="greeting">Congratulations, {{ first_name }}! 🎉</p>
-<p class="lead">
-  We are thrilled to inform you that your application has been <strong>shortlisted</strong> for the 
-  <strong>{{ domain_label }}</strong> internship at <strong>SkillMe</strong>.
-</p>
+{{ ui.eyebrow("Shortlisted") }}
+{{ ui.title("You're shortlisted, " ~ first_name) }}
+{% call ui.p() %}
+  Good news — your application for the <strong class="ink" style="color:#0a0a0a;">{{ domain_label }}</strong> internship at SkillMe has been <strong class="ink" style="color:#0a0a0a;">shortlisted</strong>.
+{% endcall %}
 
-<div class="divider"></div>
+{{ ui.section("Your next steps") }}
+{% call ui.steps() %}
+  {% call ui.step(1, "Application shortlisted", done=true) %}Your profile passed our initial review and eligibility check.{% endcall %}
+  {% call ui.step(2, "Offer letter") %}Your formal digital offer letter, with your joining date, arrives in your inbox shortly.{% endcall %}
+  {% call ui.step(3, "4-week project sprint", last=true) %}Complete each week's milestone project and submit a LinkedIn post for review to build verifiable Proof of Work.{% endcall %}
+{% endcall %}
 
-<p class="section-label">⚡ Next Milestone</p>
+{% call ui.note("accent") %}
+  <strong class="ink" style="color:#0a0a0a;">Keep an eye on your inbox.</strong> If you don't see the offer letter, check your spam or Promotions folder.
+{% endcall %}
 
-<div class="steps">
-  <div class="step" style="border-left: 4px solid #10b981; background: #f0fdf4;">
-    <div class="step-num" style="background:#10b981;">&check;</div>
-    <div class="step-text"><strong style="color:#15803d;">Application Shortlisted</strong><br />Your profile successfully passed initial technical review and internship eligibility.</div>
-  </div>
-  <div class="step">
-    <div class="step-num">2</div>
-    <div class="step-text"><strong>Official Offer Letter</strong><br />You will receive your formal digital Offer Letter in your inbox shortly.</div>
-  </div>
-  <div class="step">
-    <div class="step-num">3</div>
-    <div class="step-text"><strong>4-Week Project Sprint</strong><br />Complete each week's milestone project and submit a LinkedIn post for admin review to earn verifiable Proof of Work.</div>
-  </div>
-</div>
-
-<div class="note">
-  📩 <strong>Please check your inbox:</strong> Your official offer letter will be dispatched with your internship schedule and joining date.
-</div>
-
-<div class="cta-wrap">
-  <a href="https://skill-me-intern.in/dashboard.html" target="_blank" class="cta-btn">Access Student Dashboard &rarr;</a><br />
-  <a href="https://www.linkedin.com/company/skill-me-intern/" target="_blank" class="cta-btn-secondary">Join the SkillMe Network on LinkedIn ↗</a>
-</div>
+{% call ui.actions() %}
+  {{ ui.button("https://skill-me-intern.in/dashboard.html", "Open student dashboard") }}
+  {{ ui.button("https://www.linkedin.com/company/skill-me-intern/", "Join SkillMe on LinkedIn", "secondary") }}
+{% endcall %}
 {% endblock %}
