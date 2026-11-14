@@ -43,7 +43,11 @@ def stamp(match):
 def main():
     check = '--check' in sys.argv
     stale = []
-    for page in sorted(f for f in os.listdir(ROOT) if f.endswith('.html')):
+    pages = [f for f in os.listdir(ROOT) if f.endswith('.html')]
+    sub = os.path.join(ROOT, 'internships')  # generated track pages (tools/build_internship_pages.py)
+    if os.path.isdir(sub):
+        pages += ['internships/' + f for f in os.listdir(sub) if f.endswith('.html')]
+    for page in sorted(pages):
         path = os.path.join(ROOT, page)
         with open(path, encoding='utf-8', newline='') as f:
             content = f.read()

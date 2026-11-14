@@ -9,7 +9,7 @@ Run with:
 import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -198,6 +198,17 @@ for _slug, _filename in _PAGES.items():
         # Serve both /slug and /slug.html
         app.get(f"/{_slug}", tags=["pages"], include_in_schema=False)(_make_handler(_filepath))
         app.get(f"/{_filename}", tags=["pages"], include_in_schema=False)(_make_handler(_filepath))
+
+@app.get("/internships", tags=["pages"], include_in_schema=False)
+@app.get("/internships/{slug}", tags=["pages"], include_in_schema=False)
+async def serve_internship_page(slug: str = "index"):
+    """Clean URLs for the generated track pages (Vercel does this with cleanUrls in production)."""
+    name = slug[:-5] if slug.endswith(".html") else slug
+    page = FRONTEND_DIR / "internships" / f"{name}.html"
+    if not name.replace("-", "").isalnum() or not page.is_file():
+        raise HTTPException(status_code=404, detail="Not found")
+    return FileResponse(page)
+
 
 @app.get("/p/{username}", tags=["pages"], include_in_schema=False)
 async def serve_portfolio(username: str):

@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     engagement_live_allowed: bool = False
 
     # Admin Auth
-    admin_api_key: str = "sakshamm"
+    admin_api_key: str = ""  # set ADMIN_API_KEY in the environment; empty = admin API locked
 
     # Database — Turso (LibSQL)
     # In production: set TURSO_DB_URL and TURSO_AUTH_TOKEN in Render env vars

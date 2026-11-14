@@ -24,6 +24,8 @@ class TestPagesLoad:
         "/privacy",
         "/terms",
         "/refunds",
+        "/internships",
+        "/internships/python",
     ])
     async def test_page_returns_200(self, client, path):
         r = await client.get(path)
@@ -44,6 +46,10 @@ class TestPagesLoad:
         """Portfolio page route /p/{username} should return 200."""
         r = await client.get("/p/anyuser")
         assert r.status_code == 200
+
+    async def test_unknown_internship_page_returns_404(self, client):
+        r = await client.get("/internships/no-such-track")
+        assert r.status_code == 404
 
     async def test_unknown_route_returns_4xx_or_200(self, client):
         """A completely unknown route should not crash the server (returns 404 or index fallback)."""
