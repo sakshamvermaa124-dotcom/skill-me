@@ -12,6 +12,7 @@ Writes:
     internships/index.html            hub listing every track
     internships/<slug>.html           one page per track  ->  /internships/<slug> (vercel cleanUrls)
 and refreshes the generated blocks (between BEGIN/END markers) in:
+    index.html      the internship cards in the homepage grid
     sitemap.xml     one <url> per page
     llms.txt        link list for AI answer engines
     llms-full.txt   per-track detail for AI answer engines
@@ -56,6 +57,14 @@ TRACKS = [
     ('fde', 'fde', 'Forward Deployed Engineer', 'Forward Deployed Engineer', 'forward-deployed-engineer', 'API Integration · Client Tools · Docs'),
     ('qa', 'qa', 'Software Quality', 'Software Testing and QA', 'software-testing-qa', 'Test Automation · Selenium · Bug Reports'),
 ]
+
+# Homepage filter category for each track (quiz key -> category id used by the filter chips).
+CATEGORY = {
+    'webdev': 'fullstack', 'react': 'fullstack', 'node': 'fullstack', 'uiux': 'fullstack',
+    'python': 'ai', 'ai-engineer': 'ai', 'genai': 'ai', 'ml': 'ai', 'datascience': 'ai', 'ai-pm': 'ai',
+    'cloud': 'mobile', 'flutter': 'mobile',
+}
+CATEGORY_LABEL = {'fullstack': 'Web & design', 'ai': 'AI, data & Python', 'systems': 'Systems & core', 'mobile': 'Mobile & cloud'}
 
 
 # ── helpers ──────────────────────────────────────────────────────────────────
@@ -188,7 +197,6 @@ def head(title, description, canonical, graph):
       <nav class="nav-links" aria-label="Primary">
         <a href="/#how-it-works">How it works</a>
         <a href="/internships">Internships</a>
-        <a href="/#trust">Is it legit?</a>
         <a href="/#faq">FAQ</a>
         <a href="/verify">Verify</a>
       </nav>
@@ -198,7 +206,7 @@ def head(title, description, canonical, graph):
           <svg class="ti-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
         <a href="/dashboard" class="btn btn-ghost btn-sm nav-hide-sm">Log in</a>
-        <a href="/quiz" class="btn btn-primary btn-sm nav-hide-sm">Apply now</a>
+        <a href="/internships" class="btn btn-primary btn-sm nav-hide-sm">Apply now</a>
         <button type="button" class="nav-menu-btn" data-nav-toggle aria-label="Open menu">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
         </button>
@@ -208,11 +216,10 @@ def head(title, description, canonical, graph):
   <div class="nav-drawer" id="nav-drawer">
     <a href="/#how-it-works">How it works</a>
     <a href="/internships">Internships</a>
-    <a href="/#trust">Is it legit?</a>
     <a href="/#faq">FAQ</a>
     <a href="/verify">Verify a certificate</a>
     <a href="/dashboard">Student login</a>
-    <a href="/quiz" class="btn btn-primary">Apply now</a>
+    <a href="/internships" class="btn btn-primary">Apply now</a>
   </div>
 """
 
@@ -229,7 +236,7 @@ FOOTER = """
           <h4>Program</h4>
           <a href="/#how-it-works">How it works</a>
           <a href="/internships">All internships</a>
-          <a href="/quiz">Apply now</a>
+          <a href="/internships">Apply now</a>
           <a href="/#faq">FAQ</a>
         </div>
         <div class="footer-col">
@@ -513,6 +520,59 @@ def render_track(t, projects, all_tracks):
 
 # ── hub page ─────────────────────────────────────────────────────────────────
 
+CATEGORY_ORDER = ['fullstack', 'ai', 'systems', 'mobile']
+CATEGORY_BLURB = {
+    'fullstack': 'Build what people see and use: websites, interfaces, APIs and product design.',
+    'ai': 'Work with data, models and LLMs, from analysis to agents.',
+    'systems': 'The engineering core: languages, algorithms, databases, testing, security and delivery.',
+    'mobile': 'Ship apps to phones and services to the cloud.',
+}
+
+HUB_SCRIPT = """
+  <script>
+    // Category filter + search for the internship list. Without JS every internship is simply shown.
+    (function () {
+      var chips = document.querySelectorAll('.ih-chip');
+      var groups = document.querySelectorAll('.ih-group');
+      var cards = document.querySelectorAll('.ih-card');
+      var search = document.getElementById('ih-search');
+      var empty = document.getElementById('ih-empty');
+      var count = document.getElementById('ih-count');
+      var cat = 'all', q = '';
+      function update() {
+        var shown = 0;
+        groups.forEach(function (g) {
+          var inCat = cat === 'all' || g.getAttribute('data-category') === cat;
+          var any = false;
+          g.querySelectorAll('.ih-card').forEach(function (c) {
+            var ok = inCat && (!q || c.getAttribute('data-search').indexOf(q) !== -1);
+            c.hidden = !ok;
+            if (ok) { any = true; shown++; }
+          });
+          g.hidden = !any;
+        });
+        empty.hidden = shown > 0;
+        count.textContent = shown + (shown === 1 ? ' internship' : ' internships');
+      }
+      chips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          chips.forEach(function (c) { c.setAttribute('aria-pressed', 'false'); });
+          chip.setAttribute('aria-pressed', 'true');
+          cat = chip.getAttribute('data-category');
+          update();
+        });
+      });
+      search.addEventListener('input', function () { q = search.value.trim().toLowerCase(); update(); });
+      document.getElementById('ih-reset').addEventListener('click', function () {
+        search.value = ''; q = ''; chips[0].click(); search.focus();
+      });
+      document.querySelector('.ih-toolbar').hidden = false;
+      update();
+    })();
+  </script>
+"""
+
+
 def render_hub(tracks, curriculum):
     canonical = url_for()
     title = 'Remote Internships with Stipend for Top Performers | SkillMe'
@@ -531,41 +591,80 @@ def render_hub(tracks, curriculum):
             ],
         },
     ]
+    by_cat = {c: [t for t in tracks if CATEGORY.get(t['quiz'], 'systems') == c] for c in CATEGORY_ORDER}
+    chips = f'<button type="button" class="chip ih-chip" data-category="all" aria-pressed="true">All <span class="ih-chip-n mono">{len(tracks)}</span></button>'
+    chips += ''.join(
+        f'<button type="button" class="chip ih-chip" data-category="{c}" aria-pressed="false"><span class="ih-dot" data-cat="{c}" aria-hidden="true"></span>'
+        f'{esc(CATEGORY_LABEL[c])} <span class="ih-chip-n mono">{len(by_cat[c])}</span></button>'
+        for c in CATEGORY_ORDER)
+
     p = [head(title, description, canonical, graph)]
     p.append(f"""
   <main id="main">
-    <section class="ip-hero">
+    <section class="ip-hero ih-hero">
       <div class="container">
         <nav class="ip-crumbs" aria-label="Breadcrumb"><a href="/">SkillMe</a><span aria-hidden="true">/</span><span aria-current="page">Internships</span></nav>
-        <span class="eyebrow">{len(tracks)} tracks · 4 weeks each · open worldwide</span>
-        <h1 class="h1 ip-title">Remote internships with stipend</h1>
-        <p class="lead ip-lead">Pick a track, build one real project over four weekly milestones, and have every submission reviewed by engineers who work at {REVIEWERS}. Top performers earn a stipend of {STIPEND}.</p>
-        <div class="ip-actions">
-          <a href="/quiz" class="btn btn-primary btn-lg">Apply now {ARROW}</a>
-        </div>
+        <span class="eyebrow">{len(tracks)} internships · 4 weeks each · open worldwide</span>
+        <h1 class="h1 ip-title">Choose your internship and apply</h1>
+        <p class="lead ip-lead">Remote internships with a stipend of {STIPEND} for top performers. Pick one below, take a 5-minute quiz, and a person reads your application.</p>
+        <ol class="ih-steps" role="list">
+          <li><span class="ih-step-n mono">1</span><span><strong>Choose an internship</strong>Each one has its own real project</span></li>
+          <li><span class="ih-step-n mono">2</span><span><strong>Take the 5-minute quiz</strong>Eight questions on the basics</span></li>
+          <li><span class="ih-step-n mono">3</span><span><strong>Hear back in 48 hours</strong>Shortlisted applicants get an offer letter</span></li>
+        </ol>
       </div>
     </section>
 
-    <section class="section section-soft ip-section" aria-labelledby="all-title">
+    <section class="section section-soft ip-section ih-list" aria-labelledby="all-title">
       <div class="container">
-        <h2 class="h2" id="all-title">All internships</h2>
-        <div class="ip-hub">""")
-    for t in tracks:
-        first = curriculum[t['cur']][0]
-        p.append(f"""
-          <a class="card card-pad card-hover ip-hub-card" href="/internships/{t['slug']}">
-            <h3 class="h3">{esc(t['noun'])} internship</h3>
-            <span class="ip-hub-tech mono">{esc(t['tech'])}</span>
-            <p>{inline(first['tagline'])}</p>
-            <span class="ip-hub-cta">View internship &rarr;</span>
-          </a>""")
-    p.append("""
+        <h2 class="sr-only" id="all-title">All internships</h2>
+        <div class="ih-toolbar" hidden>
+          <div class="ih-chips" role="group" aria-label="Filter internships by category">{chips}</div>
+          <div class="ih-search">
+            <label for="ih-search" class="sr-only">Search internships</label>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input type="search" class="input" id="ih-search" placeholder="Search, e.g. React, AWS, AI" autocomplete="off">
+          </div>
         </div>
+        <p class="sr-only" id="ih-count" aria-live="polite"></p>
+        <p class="ih-empty" id="ih-empty" hidden>No internship matches that. <button type="button" class="btn-link" id="ih-reset">Clear filters</button></p>
+""")
+    for c in CATEGORY_ORDER:
+        p.append(f"""
+        <section class="ih-group" data-category="{c}" aria-labelledby="ih-{c}">
+          <div class="ih-group-head">
+            <h3 class="h3" id="ih-{c}"><span class="ih-dot" data-cat="{c}" aria-hidden="true"></span>{esc(CATEGORY_LABEL[c])}</h3>
+            <p>{esc(CATEGORY_BLURB[c])}</p>
+          </div>
+          <div class="ih-grid">""")
+        for t in by_cat[c]:
+            projects = curriculum[t['cur']]
+            first = projects[0]
+            more = f' <span class="ih-more">+{len(projects) - 1} more</span>' if len(projects) > 1 else ''
+            tech = ''.join(f'<li>{esc(x)}</li>' for x in t['tech'].split(' · '))
+            search = ' '.join([t['label'], t['noun'], t['tech'], CATEGORY_LABEL[c]] + [plain(x['project_name']) for x in projects]).lower()
+            p.append(f"""
+            <article class="card ih-card" data-search="{esc(search)}">
+              <h4 class="ih-card-title"><a href="/internships/{t['slug']}">{esc(t['label'])}</a></h4>
+              <p class="ih-build"><span class="ih-label mono">You build</span>{inline(first['project_name'])}{more}</p>
+              <ul class="ih-tech" role="list" aria-label="Tech stack">{tech}</ul>
+              <ul class="ih-meta" role="list">
+                <li>4 weeks</li><li>{esc(first['weeks']['1']['est_hours'])} hrs/week</li><li>Starts at {esc(first['weeks']['1']['difficulty'].lower())}</li>
+              </ul>
+              <div class="ih-actions">
+                <a href="/quiz?domain={t['quiz']}" class="btn btn-primary" aria-label="Apply for the {esc(t['noun'])} internship">Apply {ARROW}</a>
+                <a href="/internships/{t['slug']}" class="btn btn-ghost" aria-label="View details of the {esc(t['noun'])} internship">View details</a>
+              </div>
+            </article>""")
+        p.append("""
+          </div>
+        </section>""")
+    p.append("""
         <p class="ip-note">Reviewers take part in a personal capacity. Company names belong to their owners and do not imply a partnership or endorsement.</p>
       </div>
     </section>
 """ + TRUST + """  </main>
-""")
+""" + HUB_SCRIPT)
     p.append(FOOTER)
     return ''.join(p)
 
@@ -590,6 +689,38 @@ def replace_block(path, begin, end, body, anchor, before=True):
 
 def build_blocks(tracks, curriculum, lastmod):
     out = []
+
+    cards = []
+    for t in tracks:
+        projects = curriculum[t['cur']]
+        cat = CATEGORY.get(t['quiz'], 'systems')
+        more = f' <span class="domain-build-more">+{len(projects) - 1} more</span>' if len(projects) > 1 else ''
+        cards.append(
+            f'          <a href="/internships/{t["slug"]}" class="domain-card" id="domain-{t["quiz"]}" data-category="{cat}">'
+            f'<span class="domain-cat"><span class="cat-dot" aria-hidden="true"></span>{esc(CATEGORY_LABEL[cat])}</span>'
+            f'<h3>{esc(t["label"])}</h3>'
+            f'<p class="domain-build"><span class="domain-build-label mono">You build</span>{inline(projects[0]["project_name"])}{more}</p>'
+            f'<span class="domain-tech mono">{esc(t["tech"])}</span>'
+            f'<span class="domain-foot"><span class="domain-cta">4 weeks · Remote</span>'
+            f'<span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>')
+    out.append(replace_block(
+        os.path.join(ROOT, 'index.html'),
+        '          <!-- BEGIN internship cards (generated by tools/build_internship_pages.py) -->',
+        '          <!-- END internship cards -->',
+        '\n'.join(cards),
+        '          <!-- internship cards -->', before=True))
+
+    def run(hidden):
+        attrs = ' aria-hidden="true"' if hidden else ''
+        tab = ' tabindex="-1"' if hidden else ''
+        items = ''.join(f'<li><a href="/internships/{t["slug"]}"{tab}>{esc(t["label"])}</a></li>' for t in tracks)
+        return f'          <ul class="marquee-run" role="list"{attrs}>{items}</ul>'
+    out.append(replace_block(
+        os.path.join(ROOT, 'index.html'),
+        '          <!-- BEGIN internship marquee (generated by tools/build_internship_pages.py) -->',
+        '          <!-- END internship marquee -->',
+        run(False) + '\n' + run(True),
+        '          <!-- internship marquee -->', before=True))
 
     urls = [f'  <url>\n    <loc>{url_for()}</loc>\n    <lastmod>{lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.90</priority>\n  </url>']
     urls += [f'  <url>\n    <loc>{url_for(t["slug"])}</loc>\n    <lastmod>{lastmod}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.80</priority>\n  </url>' for t in tracks]

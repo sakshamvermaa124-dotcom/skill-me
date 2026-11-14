@@ -51,7 +51,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="dashboard.css?v=779a09e4fd">
+  <link rel="stylesheet" href="dashboard.css?v=069e22cffe">
   <link rel="stylesheet" href="dashboard-activation.css?v=e5d55a6f32">
 
   <script src="config.js?v=b82b38a780" defer></script>
@@ -350,6 +350,18 @@
             <div class="milestone-tooltip" id="milestone-tooltip"></div>
           </div>
 
+          <!-- Top-performer stipend -->
+          <div class="perf-card">
+            <div class="perf-figure" aria-hidden="true"><span class="perf-upto">Up to</span><span class="perf-amount">$100</span><span class="perf-per">a month</span></div>
+            <div class="perf-copy">
+              <h2>Top performer stipend</h2>
+              <p>The stipend and job offers from our hiring partners or SkillMe go to top performers. Every submission you make is reviewed, so make each one count.</p>
+              <button type="button" class="perf-btn" onclick="dashShowPanel('panel-work')">Open this week's task
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </button>
+            </div>
+          </div>
+
           <!-- Shortcuts -->
           <div class="shortcut-row">
             <button type="button" class="shortcut-card" onclick="dashShowPanel('panel-credentials')">
@@ -616,7 +628,7 @@
   <!-- Lenis smooth scroll -->
   <div id="dash-toast" class="dash-toast" role="status" aria-live="polite"></div>
   <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js" integrity="sha384-tKsJDT6PlUI0pSBt9/sBKJluKgA19/a6mBrDsZaXotLB4ZYfMGM6xt6/WgGpYhTm" crossorigin="anonymous" defer></script>
-  <script src="dashboard.js?v=0c233e7adf" defer></script>
+  <script src="dashboard.js?v=9677229e2f" defer></script>
   <script src="dashboard-ui.js?v=e74a8796a3" defer></script>
   <script src="dashboard-activation.js?v=a197c1d57f" defer></script>
 

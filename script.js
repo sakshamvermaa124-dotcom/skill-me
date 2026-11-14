@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const match = targetUrl.match(/[?&]domain=([^&#]+)/);
     window.location.href = applyTarget(match ? decodeURIComponent(match[1]) : null);
   };
-  document.querySelectorAll('#nav-apply-btn, #hero-apply-btn, #cta-apply-btn, [data-apply]').forEach(btn => {
+  document.querySelectorAll('#cta-apply-btn, [data-apply]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       // Let modified clicks (new tab, etc.) behave like a normal link
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
@@ -239,7 +239,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const id = card.id.replace('domain-', '');
     const title = card.querySelector('h3') ? card.querySelector('h3').textContent : '';
     const tech = card.querySelector('.domain-tech') ? card.querySelector('.domain-tech').textContent : '';
-    searchText.set(card, `${title} ${tech} ${categoryLabel(card.getAttribute('data-category'))} ${TRACK_KEYWORDS[id] || ''}`.toLowerCase());
+    const build = card.querySelector('.domain-build') ? card.querySelector('.domain-build').textContent : '';
+    searchText.set(card, `${title} ${tech} ${build} ${categoryLabel(card.getAttribute('data-category'))} ${TRACK_KEYWORDS[id] || ''}`.toLowerCase());
   });
 
   // Empty results: say what's filtering them out, and offer one click to reset.
@@ -255,20 +256,34 @@ document.addEventListener('DOMContentLoaded', () => {
     el.append(btn);
   }
 
+  // With no filter or search, show the first few internships and a "show all" button
+  // (a wall of 20 cards is hard to scan). Any filter or search shows every match.
+  const domainMoreBtn = document.getElementById('domain-more-btn');
+  const twoColumns = window.matchMedia ? window.matchMedia('(max-width: 1080px)') : null;
+  let domainsExpanded = false;
+
   function updateDomainVisibility() {
     let shown = 0;
-    domainCards.forEach(card => {
+    const filtering = activeDomainCategory !== 'all' || !!domainQuery;
+    const limit = twoColumns && twoColumns.matches ? 8 : 9;   // keeps the last row full in 2 or 3 columns
+    const collapsed = !!domainMoreBtn && !filtering && !domainsExpanded;
+    domainCards.forEach((card, i) => {
       const matchesCat = activeDomainCategory === 'all' || card.getAttribute('data-category') === activeDomainCategory;
       const matchesSearch = !domainQuery || searchText.get(card).includes(domainQuery);
-      const visible = matchesCat && matchesSearch;
+      const visible = matchesCat && matchesSearch && (!collapsed || i < limit);
       card.hidden = !visible;
       if (visible) shown++;
     });
+    if (domainMoreBtn) {
+      domainMoreBtn.hidden = filtering || domainCards.length <= limit;
+      domainMoreBtn.textContent = domainsExpanded ? 'Show fewer' : `Show all ${domainCards.length} internships`;
+      domainMoreBtn.setAttribute('aria-expanded', String(domainsExpanded));
+    }
     if (domainEmpty) {
       domainEmpty.hidden = shown > 0;
-      if (!shown) renderEmpty(domainEmpty, 'tracks', domainQuery, categoryLabel(activeDomainCategory) && activeDomainCategory !== 'all' ? categoryLabel(activeDomainCategory) : 'all', resetDomainFilters);
+      if (!shown) renderEmpty(domainEmpty, 'internships', domainQuery, categoryLabel(activeDomainCategory) && activeDomainCategory !== 'all' ? categoryLabel(activeDomainCategory) : 'all', resetDomainFilters);
     }
-    if (domainCount) domainCount.textContent = `Showing ${shown} track${shown === 1 ? '' : 's'}`;
+    if (domainCount) domainCount.textContent = `Showing ${shown} internship${shown === 1 ? '' : 's'}`;
   }
 
   function resetDomainFilters() {
@@ -297,6 +312,16 @@ document.addEventListener('DOMContentLoaded', () => {
       domainQuery = e.target.value.trim().toLowerCase();
       updateDomainVisibility();
     });
+  }
+
+  if (domainMoreBtn) {
+    domainMoreBtn.addEventListener('click', () => {
+      domainsExpanded = !domainsExpanded;
+      updateDomainVisibility();
+      if (!domainsExpanded) document.getElementById('domains').scrollIntoView({ block: 'start' });
+    });
+    if (twoColumns && twoColumns.addEventListener) twoColumns.addEventListener('change', updateDomainVisibility);
+    updateDomainVisibility();
   }
 
   // Domain cards: quiz first, or straight to the application once the quiz is done
@@ -411,6 +436,31 @@ document.addEventListener('DOMContentLoaded', () => {
       next.focus();
     });
   });
+
+  // ── Count-up numbers ([data-countup]): run once when scrolled into view ──
+  (function initCountUp() {
+    const els = document.querySelectorAll('[data-countup]');
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!els.length || reduce || !('IntersectionObserver' in window)) return;
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        io.unobserve(entry.target);
+        const el = entry.target;
+        const end = parseInt(el.getAttribute('data-countup'), 10) || 0;
+        const prefix = el.getAttribute('data-prefix') || '';
+        const started = performance.now();
+        const duration = 1400;
+        (function tick(now) {
+          const t = Math.min(1, (now - started) / duration);
+          const eased = 1 - Math.pow(1 - t, 3);
+          el.textContent = prefix + Math.round(end * eased);
+          if (t < 1) requestAnimationFrame(tick);
+        })(started);
+      });
+    }, { threshold: 0.6 });
+    els.forEach(el => io.observe(el));
+  })();
 
   // ── Week explorer: accessible tabs (click + arrow keys) ──
   (function initWeekTabs() {

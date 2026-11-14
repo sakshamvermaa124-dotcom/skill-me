@@ -1898,3 +1898,180 @@ main.dash-page:focus { outline: none; }
   font: 500 0.86rem var(--font-ui);
 }
 #unenrolled-view .app-switcher { margin: 0 0 16px; }
+
+/* ════════════════════════════════════════════════════════════════
+   Home refresh: dark progress hero, clearer weekly journey, stipend card.
+   Appended last on purpose: it restyles existing markup and keeps every id and hook.
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── Progress hero: one dark card in both themes ── */
+.hero-card.progress-section {
+  border-color: rgba(255, 255, 255, 0.08);
+  border-radius: 22px;
+  background:
+    radial-gradient(70% 110% at 0% 0%, rgba(229, 50, 45, 0.36), transparent 58%),
+    radial-gradient(60% 110% at 100% 100%, rgba(242, 106, 27, 0.28), transparent 60%),
+    #0b0b0c;
+  box-shadow: 0 30px 70px -28px rgba(10, 10, 10, 0.5);
+  color: #fff;
+}
+.hero-card.progress-section::before { background: none; }
+.hero-card.progress-section .hero-main { padding: 34px 36px; gap: 36px; }
+.hero-card.progress-section .ring-track { stroke: rgba(255, 255, 255, 0.13); }
+.hero-card.progress-section .ring-fill { stroke: #ffa34d; }
+.hero-card.progress-section .ring-head { fill: #0b0b0c; stroke: #ffa34d; }
+.hero-card.progress-section .progress-ring-pct { color: #fff; }
+.hero-card.progress-section .progress-ring-pct-sign,
+.hero-card.progress-section .progress-ring-sub { color: rgba(255, 255, 255, 0.6); }
+.hero-card.progress-section .next-step-label { color: #ffa34d; }
+.hero-card.progress-section .next-step[data-tone="review"] .next-step-label { color: #9cc0ff; }
+.hero-card.progress-section .next-step[data-tone="danger"] .next-step-label { color: #ff9a90; }
+.hero-card.progress-section .next-step[data-tone="ok"] .next-step-label { color: #7fe0a4; }
+.hero-card.progress-section .next-step-title { color: #fff; font-size: clamp(1.3rem, 2.4vw, 1.7rem); }
+.hero-card.progress-section .next-step-desc { color: rgba(255, 255, 255, 0.74); }
+.hero-card.progress-section .cert-btn:not(.cert-btn-primary) {
+  background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2); color: #fff;
+}
+.hero-card.progress-section .hero-facts { border-top-color: rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.04); }
+.hero-card.progress-section .hero-fact { padding: 16px 22px; }
+.hero-card.progress-section .hero-fact + .hero-fact { border-left-color: rgba(255, 255, 255, 0.1); }
+.hero-card.progress-section .hero-fact dt { color: rgba(255, 255, 255, 0.58); }
+.hero-card.progress-section .hero-fact dd { color: #fff; }
+.hero-card.progress-section .stat-unit { color: rgba(255, 255, 255, 0.5); }
+.hero-card.progress-section .fact-ok { color: #7fe0a4; }
+@media (max-width: 760px) { .hero-card.progress-section .hero-main { padding: 26px 22px; gap: 22px; } }
+@media (max-width: 560px) {
+  .hero-card.progress-section .hero-fact:nth-child(n+3) { border-top-color: rgba(255, 255, 255, 0.1); }
+  .hero-card.progress-section .hero-fact { padding: 14px 18px; }
+}
+
+/* ── Weekly journey: a status bar on top of each week ── */
+.sprint-milestone-step { overflow: hidden; border-radius: 18px; padding-top: 18px; }
+.sprint-milestone-step::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 0; height: 4px;
+  background: var(--track);
+}
+.sprint-milestone-step.completed::before { background: var(--ok); }
+.sprint-milestone-step.review::before { background: var(--info); }
+.sprint-milestone-step.rejected::before { background: var(--danger); }
+.sprint-milestone-step.active::before { background: linear-gradient(90deg, var(--cta, var(--accent)), var(--accent)); }
+.milestone-name { font-size: 1rem; }
+
+/* ── Top-performer stipend card ── */
+.perf-card {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: clamp(20px, 4vw, 44px);
+  margin-bottom: 32px; padding: clamp(22px, 3vw, 30px) clamp(22px, 3.4vw, 36px);
+  border: 1px solid var(--border); border-radius: 22px;
+  background:
+    radial-gradient(60% 140% at 0% 50%, var(--accent-wash), transparent 70%),
+    var(--surface-1);
+  box-shadow: var(--shadow-sm);
+}
+.perf-figure { display: flex; flex-direction: column; gap: 2px; }
+.perf-upto, .perf-per { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+.perf-amount {
+  font-size: clamp(3rem, 7vw, 4.6rem); font-weight: 700; letter-spacing: -0.05em; line-height: 0.95;
+  background: linear-gradient(100deg, #e5322d 5%, #f26a1b 95%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  padding-bottom: 0.04em;
+}
+.perf-copy h2 { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-strong); }
+.perf-copy p { margin-top: 6px; max-width: 60ch; font-size: 0.9rem; color: var(--text-muted); }
+.perf-btn {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; padding: 0;
+  border: 0; background: none; cursor: pointer;
+  font: 600 0.88rem/1.2 var(--font-ui); color: var(--accent-text);
+}
+.perf-btn:hover { text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 560px) { .perf-card { grid-template-columns: minmax(0, 1fr); } }
+
+/* ── Shortcuts: match the larger radius ── */
+.shortcut-card { border-radius: 18px; }
+
+
+/* ════════════════════════════════════════════════════════════════
+   Tasks + Credentials refresh. Appended last; restyles existing markup only.
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── Week tabs: status bar on top, and all four always visible on phones ── */
+.week-tab { overflow: hidden; border-radius: 16px; padding-top: 15px; }
+.week-tab::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--track); }
+.week-tab.is-approved::before { background: var(--ok); }
+.week-tab.is-pending::before { background: var(--info); }
+.week-tab.is-rejected::before { background: var(--danger); }
+.week-tab.is-next::before { background: var(--accent); }
+@media (max-width: 760px) {
+  .week-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; overflow: visible; margin: 0 0 14px; padding: 0; }
+  .week-tab { flex: none; padding: 13px 8px 10px; }
+  .week-tab-title { display: none; }
+  .week-tab-num { font-size: 0.62rem; }
+  .week-tab-state { font-size: 0.68rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
+
+/* ── Task card ── */
+.task-card { overflow: clip; border-radius: 20px; }
+.task-head { padding-top: 20px; padding-bottom: 20px; }
+.task-head .sub-title { font-size: 1.2rem; letter-spacing: -0.02em; }
+
+/* The brief reads like a document, not a grey box */
+.task-step-content { margin-top: 14px; padding: 0; border: 0; border-radius: 0; background: none; }
+.task-step-content.dash-markdown { font-size: 0.94rem; line-height: 1.7; }
+.task-step-content.dash-markdown h1, .task-step-content.dash-markdown h2,
+.task-step-content.dash-markdown h3, .task-step-content.dash-markdown h4 {
+  margin: 24px 0 10px; padding-top: 22px; border-top: 1px solid var(--border);
+  font-size: 1.02rem; letter-spacing: -0.01em;
+}
+.task-step-content.dash-markdown > :first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.task-step-content.dash-markdown p { margin-bottom: 10px; }
+.task-step-content.dash-markdown li { margin-bottom: 7px; }
+.task-step-content.dash-markdown ol { padding-left: 22px; }
+.task-step-content.dash-markdown code {
+  background: var(--surface-2); font-size: 0.84em;
+  white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word;
+}
+.task-step-content.dash-markdown li:has(> input[type="checkbox"]) { list-style: none; margin-left: -20px; padding-left: 0; }
+.task-step-content.dash-markdown input[type="checkbox"] { margin-right: 8px; accent-color: var(--accent); }
+
+/* Share + submit sit in their own cards */
+.task-step:nth-child(n+2) .task-step-main { min-width: 0; }
+.task-caption-box { background: var(--surface-2); border-radius: 14px; }
+.task-step:last-child {
+  margin-top: 16px; padding: 18px;
+  border: 1px solid var(--accent-border); border-radius: 18px;
+  background: radial-gradient(90% 120% at 100% 0%, var(--accent-wash), transparent 70%), var(--surface-1);
+  box-shadow: var(--shadow-md);
+}
+.task-step:nth-child(2)::before { display: none; }
+
+/* Wide screens: brief on the left, share + submit on the right, submit stays in view */
+@media (min-width: 1180px) {
+  .task-steps {
+    display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); grid-template-rows: auto 1fr;
+    column-gap: 32px; align-items: start; padding: 12px 26px 26px;
+  }
+  .task-step:nth-child(1) { grid-column: 1; grid-row: 1 / span 2; }
+  .task-step:nth-child(2) { grid-column: 2; grid-row: 1; }
+  .task-step:nth-child(3) { grid-column: 2; grid-row: 2; position: sticky; top: 20px; }
+  .task-step::before { display: none; }
+  .task-steps .task-submit { flex-direction: column; }
+  .task-steps .task-submit .login-input-wrap { min-width: 0; width: 100%; }
+  .task-steps .task-submit .cert-btn { width: 100%; }
+  .task-steps .task-pre { max-height: 220px; }
+}
+
+/* ── Credentials: the lock card matches the Home hero ── */
+.unlock-card {
+  border-color: rgba(255, 255, 255, 0.08); border-radius: 22px; padding: 28px 30px;
+  background:
+    radial-gradient(70% 120% at 0% 0%, rgba(229, 50, 45, 0.36), transparent 58%),
+    radial-gradient(60% 120% at 100% 100%, rgba(242, 106, 27, 0.28), transparent 60%),
+    #0b0b0c;
+  box-shadow: 0 30px 70px -28px rgba(10, 10, 10, 0.5);
+}
+.unlock-card .unlock-icon { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.16); color: #ffa34d; }
+.unlock-card .unlock-title { font-size: clamp(1.2rem, 2.2vw, 1.5rem); color: #fff; }
+.unlock-card .unlock-title strong { color: #ffa34d; }
+.unlock-card .unlock-sub { color: rgba(255, 255, 255, 0.72); }
+.unlock-card .unlock-meter { background: rgba(255, 255, 255, 0.14); }
+.unlock-card .unlock-meter-fill { background: linear-gradient(90deg, #ff6a5e, #ffa34d); }
+.unlock-card .unlock-foot, .unlock-card .unlock-foot span { color: rgba(255, 255, 255, 0.78); }

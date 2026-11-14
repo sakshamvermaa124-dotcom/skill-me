@@ -64,7 +64,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="theme.css?v=98690fd7ba">
-  <link rel="stylesheet" href="home.css?v=bc7d594e87">
+  <link rel="stylesheet" href="home.css?v=84450df839">
   <script src="theme.js?v=515b2d143f" defer></script>
   <script src="config.js?v=b82b38a780" defer></script>
   <script src="attribution.js?v=45426916eb" defer></script>
@@ -250,7 +250,6 @@
       <nav class="nav-links" aria-label="Primary">
         <a href="/#how-it-works">How it works</a>
         <a href="/internships">Internships</a>
-        <a href="/#trust">Is it legit?</a>
         <a href="/#faq">FAQ</a>
         <a href="/verify">Verify</a>
       </nav>
@@ -260,7 +259,7 @@
           <svg class="ti-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
         <a href="/dashboard" class="btn btn-ghost btn-sm nav-hide-sm" id="nav-dashboard-btn">Log in</a>
-        <a href="/quiz" class="btn btn-primary btn-sm nav-hide-sm" id="nav-apply-btn" data-apply>Apply now</a>
+        <a href="/internships" class="btn btn-primary btn-sm nav-hide-sm" id="nav-apply-btn">Apply now</a>
         <button type="button" class="nav-menu-btn" data-nav-toggle aria-label="Open menu">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
         </button>
@@ -270,11 +269,10 @@
   <div class="nav-drawer" id="nav-drawer">
     <a href="/#how-it-works">How it works</a>
     <a href="/internships">Internships</a>
-    <a href="/#trust">Is it legit?</a>
     <a href="/#faq">FAQ</a>
     <a href="/verify">Verify a certificate</a>
     <a href="/dashboard">Student login</a>
-    <a href="/quiz" class="btn btn-primary" data-apply>Apply now</a>
+    <a href="/internships" class="btn btn-primary">Apply now</a>
   </div>
 
   <main id="main">
@@ -285,11 +283,11 @@
       <div class="container hero-grid">
         <div class="hero-copy">
           <span class="hero-badge"><span class="live-dot" aria-hidden="true"></span>Internships open<span class="hero-badge-sep" aria-hidden="true"></span><span class="hero-badge-note">Every internship request read by a person</span></span>
-          <h1 class="display hero-title" id="hero-title">Remote internship with stipend.<br><span class="hero-hl">Up to $100/month for top performers.</span></h1>
-          <p class="lead hero-lead">Do a real 4-week internship from anywhere in the world, one milestone at a time. Engineers who work at Walmart, Google and LinkedIn review your submissions, and you finish with work recruiters can see and a QR-verified certificate.</p>
+          <h1 class="display hero-title" id="hero-title">Remote internship<br><span class="hero-hl">with stipend.</span><span class="hero-stipend">Up to $100/month for top performers</span></h1>
+          <p class="lead hero-lead">A real 4-week internship from anywhere in the world. Your work is reviewed by engineers who work at Walmart, Google and LinkedIn.</p>
 
           <div class="hero-actions">
-            <a href="/quiz" class="btn btn-primary btn-lg" id="hero-apply-btn" data-apply>
+            <a href="/internships" class="btn btn-primary btn-lg" id="hero-apply-btn">
               Apply now
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
@@ -304,59 +302,38 @@
         </div>
 
         <div class="hero-visual">
-          <div class="hero-stage" role="img" aria-label="Example of a SkillMe internship in progress: two of four weekly milestones approved, the third in review">
-            <!-- Floating: offer letter -->
-            <div class="float-card float-offer" aria-hidden="true">
-              <span class="float-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg></span>
-              <span class="float-text"><strong>Offer letter issued</strong><small>Full Stack Engineer</small></span>
-            </div>
-
-            <!-- Milestone tracker -->
-            <div class="tracker card" aria-hidden="true">
-              <div class="tracker-head">
-                <div>
-                  <span class="tracker-kicker mono">Your internship</span>
-                  <span class="tracker-title">4 weekly milestones</span>
-                </div>
-                <span class="badge mono">Example</span>
-              </div>
-              <ol class="tracker-list" role="list">
-                <li class="tracker-row is-done">
-                  <span class="tracker-week mono">W1</span>
-                  <span class="tracker-name">Setup &amp; first task</span>
-                  <span class="badge badge-ok">Approved</span>
-                </li>
-                <li class="tracker-row is-done">
-                  <span class="tracker-week mono">W2</span>
-                  <span class="tracker-name">Core feature</span>
-                  <span class="badge badge-ok">Approved</span>
-                </li>
-                <li class="tracker-row is-active">
-                  <span class="tracker-week mono">W3</span>
-                  <span class="tracker-name">Integration &amp; polish</span>
-                  <span class="badge badge-accent">In review</span>
-                </li>
-                <li class="tracker-row">
-                  <span class="tracker-week mono">W4</span>
-                  <span class="tracker-name">Final review</span>
-                  <span class="badge">Up next</span>
-                </li>
-              </ol>
-              <div class="tracker-progress">
-                <div class="tracker-progress-top">
-                  <span>Milestones approved</span>
-                  <span class="mono">2 / 4</span>
-                </div>
-                <div class="progress"><span style="width: 50%"></span></div>
-                <p class="tracker-foot">One more approval unlocks the certificate + LOR.</p>
-              </div>
-            </div>
-
-            <!-- Floating: certificate -->
-            <div class="float-card float-cert" aria-hidden="true">
-              <span class="float-qr"><span></span><span></span><span></span><span></span></span>
-              <span class="float-text"><strong>Certificate verified</strong><small class="mono">SKM-XXXX-XXXX</small></span>
+          <div class="hero-stage" role="img" aria-label="Example of where a SkillMe internship takes you: an offer letter in your name, two of four weekly milestones approved by a working engineer, and a stipend for top performers">
+            <!-- Floating: review -->
+            <div class="float-card float-review" aria-hidden="true">
               <span class="float-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+              <span class="float-text"><strong>Week 2 approved</strong><small>Reviewed by a working engineer</small></span>
+            </div>
+
+            <!-- Offer letter -->
+            <div class="offer-card" aria-hidden="true">
+              <div class="offer-top">
+                <span class="offer-brand"><img src="assets/logo-96.webp" alt="" width="22" height="22">SkillMe</span>
+                <span class="offer-example mono">Example</span>
+              </div>
+              <span class="offer-kicker mono">Internship offer letter</span>
+              <span class="offer-name">Your Name</span>
+              <span class="offer-role">Full Stack Engineer Intern</span>
+              <ul class="offer-meta" role="list">
+                <li><b>4 weeks</b><span>Duration</span></li>
+                <li><b>Remote</b><span>Worldwide</span></li>
+                <li><b>2–3 hrs</b><span>A week</span></li>
+              </ul>
+              <div class="offer-progress">
+                <div class="offer-progress-top"><span>Milestones approved</span><span class="mono">2 / 4</span></div>
+                <div class="offer-bars"><span class="is-done"></span><span class="is-done"></span><span class="is-active"></span><span></span></div>
+                <div class="offer-weeks mono"><span>W1</span><span>W2</span><span>W3</span><span>W4</span></div>
+              </div>
+            </div>
+
+            <!-- Floating: stipend -->
+            <div class="float-card float-stipend" aria-hidden="true">
+              <span class="float-amount">$100</span>
+              <span class="float-text"><strong>Stipend, a month</strong><small>For top performers</small></span>
             </div>
           </div>
 
@@ -399,39 +376,40 @@
             <li><img src="assets/reviewers/google.svg" alt="Google" width="71" height="24" loading="lazy" decoding="async"></li>
             <li><img src="assets/reviewers/linkedin.svg" alt="LinkedIn" width="88" height="24" loading="lazy" decoding="async"></li>
           </ul>
-          <p class="reviewers-note">Working engineers read what you submit, so submit mindfully. Reviewers take part in a personal capacity. Company names and logos belong to their owners and do not imply a partnership or endorsement.</p>
+          <p class="reviewers-note">Reviewers take part in a personal capacity. Logos belong to their owners and do not imply a partnership or endorsement.</p>
         </div>
       </div>
     </section>
 
-    <!-- ========== WHY: contrast ========== -->
-    <section class="section" id="why" aria-labelledby="why-title">
-      <div class="container">
-        <div class="section-head center reveal">
-          <span class="eyebrow">Why SkillMe</span>
-          <h2 class="h2" id="why-title">Every resume says “knows React”.<br><span class="text-soft">Yours will prove it.</span></h2>
-          <p class="lead">Thousands of students finish the same courses and list the same skills. What makes you stand out is work someone can actually open, check and verify.</p>
-        </div>
+    <!-- ========== MARQUEE: every internship, moving ========== -->
+    <div class="marquee" aria-label="All internships">
+      <div class="marquee-track">
+          <!-- BEGIN internship marquee (generated by tools/build_internship_pages.py) -->
+          <ul class="marquee-run" role="list"><li><a href="/internships/full-stack-web-development">Full Stack Engineer</a></li><li><a href="/internships/python">Python Engineering</a></li><li><a href="/internships/react-frontend">Frontend Engineer</a></li><li><a href="/internships/nodejs-backend">Backend Engineer</a></li><li><a href="/internships/ai-engineer">AI Engineer</a></li><li><a href="/internships/generative-ai">Generative AI</a></li><li><a href="/internships/machine-learning">Machine Learning</a></li><li><a href="/internships/data-science">Data Science</a></li><li><a href="/internships/software-engineering">SDE / SWE</a></li><li><a href="/internships/java-spring-boot">Java / Spring Boot</a></li><li><a href="/internships/cpp-dsa">C++ / Algorithms</a></li><li><a href="/internships/devops">DevOps / CI-CD</a></li><li><a href="/internships/cloud-aws">Cloud / AWS</a></li><li><a href="/internships/flutter-app-development">App Developer</a></li><li><a href="/internships/cybersecurity">Cybersecurity</a></li><li><a href="/internships/sql-databases">SQL / Databases</a></li><li><a href="/internships/ui-ux-design">UI/UX Design</a></li><li><a href="/internships/ai-product-management">AI Product Management</a></li><li><a href="/internships/forward-deployed-engineer">Forward Deployed Engineer</a></li><li><a href="/internships/software-testing-qa">Software Quality</a></li></ul>
+          <ul class="marquee-run" role="list" aria-hidden="true"><li><a href="/internships/full-stack-web-development" tabindex="-1">Full Stack Engineer</a></li><li><a href="/internships/python" tabindex="-1">Python Engineering</a></li><li><a href="/internships/react-frontend" tabindex="-1">Frontend Engineer</a></li><li><a href="/internships/nodejs-backend" tabindex="-1">Backend Engineer</a></li><li><a href="/internships/ai-engineer" tabindex="-1">AI Engineer</a></li><li><a href="/internships/generative-ai" tabindex="-1">Generative AI</a></li><li><a href="/internships/machine-learning" tabindex="-1">Machine Learning</a></li><li><a href="/internships/data-science" tabindex="-1">Data Science</a></li><li><a href="/internships/software-engineering" tabindex="-1">SDE / SWE</a></li><li><a href="/internships/java-spring-boot" tabindex="-1">Java / Spring Boot</a></li><li><a href="/internships/cpp-dsa" tabindex="-1">C++ / Algorithms</a></li><li><a href="/internships/devops" tabindex="-1">DevOps / CI-CD</a></li><li><a href="/internships/cloud-aws" tabindex="-1">Cloud / AWS</a></li><li><a href="/internships/flutter-app-development" tabindex="-1">App Developer</a></li><li><a href="/internships/cybersecurity" tabindex="-1">Cybersecurity</a></li><li><a href="/internships/sql-databases" tabindex="-1">SQL / Databases</a></li><li><a href="/internships/ui-ux-design" tabindex="-1">UI/UX Design</a></li><li><a href="/internships/ai-product-management" tabindex="-1">AI Product Management</a></li><li><a href="/internships/forward-deployed-engineer" tabindex="-1">Forward Deployed Engineer</a></li><li><a href="/internships/software-testing-qa" tabindex="-1">Software Quality</a></li></ul>
+          <!-- END internship marquee -->
+          <!-- internship marquee -->
+      </div>
+    </div>
 
-        <div class="compare reveal">
-          <div class="compare-col compare-old">
-            <span class="compare-label mono">The usual way</span>
-            <ul role="list">
-              <li><span class="cx" aria-hidden="true"></span>Hours of tutorials, nothing you built yourself</li>
-              <li><span class="cx" aria-hidden="true"></span>A certificate just for watching the videos</li>
-              <li><span class="cx" aria-hidden="true"></span>Nobody ever reviews your work</li>
-              <li><span class="cx" aria-hidden="true"></span>Nothing to show when an interviewer asks</li>
-            </ul>
+    <!-- ========== STIPEND ========== -->
+    <section class="section" id="stipend" aria-labelledby="stipend-title">
+      <div class="container">
+        <div class="stipend-band reveal">
+          <div class="stipend-figure" aria-hidden="true">
+            <span class="stipend-upto mono">Up to</span>
+            <span class="stipend-amount" data-countup="100" data-prefix="$">$100</span>
+            <span class="stipend-per mono">a month</span>
           </div>
-          <div class="compare-vs mono" aria-hidden="true">vs</div>
-          <div class="compare-col compare-new">
-            <span class="compare-label mono">The SkillMe way</span>
-            <ul role="list">
-              <li><span class="ck" aria-hidden="true"></span>One real internship, completed milestone by milestone</li>
-              <li><span class="ck" aria-hidden="true"></span>A certificate backed by approved work</li>
-              <li><span class="ck" aria-hidden="true"></span>Working engineers review every submission</li>
-              <li><span class="ck" aria-hidden="true"></span>Public posts and a portfolio link you can share</li>
+          <div class="stipend-copy">
+            <span class="eyebrow">Stipend</span>
+            <h2 class="h2" id="stipend-title">Top performers get paid.</h2>
+            <p>The stipend is earned through reviewed work. It is not paid to every intern.</p>
+            <ul class="stipend-points" role="list">
+              <li>A stipend of up to $100 a month</li>
+              <li>Job offers from our hiring partners or SkillMe</li>
             </ul>
+            <a href="/internships" class="btn btn-primary">Apply now &rarr;</a>
           </div>
         </div>
       </div>
@@ -443,7 +421,7 @@
         <div class="section-head reveal">
           <span class="eyebrow">How it works</span>
           <h2 class="h2" id="how-title">Five minutes to start.<br>Four weeks to stand out.</h2>
-          <p class="lead">No long forms and no waiting weeks to hear back. Apply with a short quiz and tell us why you want in. A real person reads every request, and if you're shortlisted you'll hear from us within 48 hours.</p>
+          <p class="lead">Apply with a short quiz. A person reads every application, and shortlisted applicants hear back within 48 hours.</p>
         </div>
 
         <ol class="steps" role="list">
@@ -473,132 +451,68 @@
           </li>
         </ol>
 
-        <!-- Interactive week explorer -->
-        <div class="weeks card reveal">
-          <div class="weeks-head">
-            <div>
-              <span class="eyebrow no-dot">Inside the 4 weeks</span>
-              <h3 class="h3 weeks-title">See what each week looks like</h3>
-            </div>
-            <div class="weeks-tabs" role="tablist" aria-label="Internship weeks">
-              <button type="button" class="weeks-tab" role="tab" id="wtab-1" aria-controls="wpanel-1" aria-selected="true"><span class="mono">W1</span> Setup</button>
-              <button type="button" class="weeks-tab" role="tab" id="wtab-2" aria-controls="wpanel-2" aria-selected="false" tabindex="-1"><span class="mono">W2</span> Core</button>
-              <button type="button" class="weeks-tab" role="tab" id="wtab-3" aria-controls="wpanel-3" aria-selected="false" tabindex="-1"><span class="mono">W3</span> Integrate</button>
-              <button type="button" class="weeks-tab" role="tab" id="wtab-4" aria-controls="wpanel-4" aria-selected="false" tabindex="-1"><span class="mono">W4</span> Certify</button>
-            </div>
-          </div>
-
-          <div class="weeks-progress" aria-hidden="true"><span id="weeks-bar" style="width: 25%"></span></div>
-
-          <div class="week-panel" role="tabpanel" id="wpanel-1" aria-labelledby="wtab-1" tabindex="0">
-            <div class="week-main">
-              <span class="week-kicker mono">Week 1 of 4</span>
-              <h4 class="week-name">Setup &amp; first task</h4>
-              <p>Set up your environment, finish your first real task and tell your network what you're building. Week one is about momentum.</p>
-            </div>
-            <ul class="week-list" role="list">
-              <li>Configure your local dev environment</li>
-              <li>Complete the first task against clear acceptance criteria</li>
-              <li>Post your progress on LinkedIn and submit the link</li>
-            </ul>
-            <div class="week-win"><span class="mono">You walk away with</span><strong>Your first approved milestone</strong></div>
-          </div>
-          <div class="week-panel" role="tabpanel" id="wpanel-2" aria-labelledby="wtab-2" tabindex="0" hidden>
-            <div class="week-main">
-              <span class="week-kicker mono">Week 2 of 4</span>
-              <h4 class="week-name">Core feature</h4>
-              <p>Build the heart of your internship work, whether that's APIs, components, models or algorithms. This is the part you'll talk about in interviews.</p>
-            </div>
-            <ul class="week-list" role="list">
-              <li>Build the core feature of your internship</li>
-              <li>Meet the milestone's acceptance criteria</li>
-              <li>Act on review feedback, like a real team</li>
-            </ul>
-            <div class="week-win"><span class="mono">You walk away with</span><strong>A working core you can demo</strong></div>
-          </div>
-          <div class="week-panel" role="tabpanel" id="wpanel-3" aria-labelledby="wtab-3" tabindex="0" hidden>
-            <div class="week-main">
-              <span class="week-kicker mono">Week 3 of 4</span>
-              <h4 class="week-name">Integration &amp; polish</h4>
-              <p>Refactor, optimise and wire everything into one deliverable that works end to end. This is where it stops being a tutorial.</p>
-            </div>
-            <ul class="week-list" role="list">
-              <li>Integrate your features into one internship deliverable</li>
-              <li>Refactor and improve performance</li>
-              <li>Share the progress publicly</li>
-            </ul>
-            <div class="week-win"><span class="mono">You walk away with</span><strong>A complete internship, not a toy demo</strong></div>
-          </div>
-          <div class="week-panel" role="tabpanel" id="wpanel-4" aria-labelledby="wtab-4" tabindex="0" hidden>
-            <div class="week-main">
-              <span class="week-kicker mono">Week 4 of 4</span>
-              <h4 class="week-name">Final review &amp; certification</h4>
-              <p>Pass the final review, post your wrap-up and collect everything you earned. Three approved milestones unlock your certificate.</p>
-            </div>
-            <ul class="week-list" role="list">
-              <li>Submit your final milestone for review</li>
-              <li>Post your internship wrap-up on LinkedIn</li>
-              <li>Unlock your QR certificate + LOR</li>
-            </ul>
-            <div class="week-win"><span class="mono">You walk away with</span><strong>Certificate, LOR and a shot at referrals</strong></div>
-          </div>
-        </div>
       </div>
     </section>
 
     <!-- ========== TRACKS ========== -->
     <section class="section" id="domains" aria-labelledby="domains-title">
       <div class="container">
-        <div class="section-split reveal">
-          <div class="section-head">
-            <span class="eyebrow">Tracks</span>
-            <h2 class="h2" id="domains-title">Pick the track for the job you want</h2>
-            <p class="lead">20 tracks. Each one is its own 4-week internship with its own milestones and certificate. Open any track to see the project and the full week-by-week plan before you apply. <a href="/internships" class="btn-link">See all internships &rarr;</a></p>
+        <div class="section-head reveal">
+          <span class="eyebrow">Internships</span>
+          <h2 class="h2" id="domains-title">Pick the internship for the job you want</h2>
+          <p class="lead">Every internship has its own real project. Open one to see exactly what you build each week, before you apply.</p>
+        </div>
+
+        <div class="domain-toolbar">
+          <div class="domain-filters" role="group" aria-label="Filter internships by category">
+            <button type="button" class="chip filter-tab active" data-category="all" aria-pressed="true">All <span class="chip-count mono">20</span></button>
+            <button type="button" class="chip filter-tab" data-category="fullstack" aria-pressed="false"><span class="cat-dot" data-cat="fullstack" aria-hidden="true"></span>Web &amp; design</button>
+            <button type="button" class="chip filter-tab" data-category="ai" aria-pressed="false"><span class="cat-dot" data-cat="ai" aria-hidden="true"></span>AI, data &amp; Python</button>
+            <button type="button" class="chip filter-tab" data-category="systems" aria-pressed="false"><span class="cat-dot" data-cat="systems" aria-hidden="true"></span>Systems &amp; core</button>
+            <button type="button" class="chip filter-tab" data-category="mobile" aria-pressed="false"><span class="cat-dot" data-cat="mobile" aria-hidden="true"></span>Mobile &amp; cloud</button>
           </div>
           <div class="domain-search">
-            <label for="domain-search-input" class="sr-only">Search tracks</label>
+            <label for="domain-search-input" class="sr-only">Search internships</label>
             <svg class="domain-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
             <input type="search" class="input" id="domain-search-input" placeholder="Search, e.g. React, AWS, AI" autocomplete="off">
           </div>
         </div>
-
-        <div class="domain-filters" role="group" aria-label="Filter tracks by category">
-          <button type="button" class="chip filter-tab active" data-category="all" aria-pressed="true">All tracks <span class="chip-count mono">20</span></button>
-          <button type="button" class="chip filter-tab" data-category="fullstack" aria-pressed="false"><span class="cat-dot" data-cat="fullstack" aria-hidden="true"></span>Web &amp; design</button>
-          <button type="button" class="chip filter-tab" data-category="ai" aria-pressed="false"><span class="cat-dot" data-cat="ai" aria-hidden="true"></span>AI, data &amp; Python</button>
-          <button type="button" class="chip filter-tab" data-category="systems" aria-pressed="false"><span class="cat-dot" data-cat="systems" aria-hidden="true"></span>Systems &amp; core</button>
-          <button type="button" class="chip filter-tab" data-category="mobile" aria-pressed="false"><span class="cat-dot" data-cat="mobile" aria-hidden="true"></span>Mobile &amp; cloud</button>
-        </div>
         <p class="sr-only" id="domain-count" aria-live="polite"></p>
 
-        <div class="domains-grid">
-          <a href="/internships/full-stack-web-development" class="domain-card" id="domain-webdev" data-category="fullstack"><div class="domain-body"><h3>Full Stack Engineer</h3><span class="domain-tech mono">HTML5 · CSS3 · JavaScript</span></div><span class="domain-foot"><span class="domain-cta">View internship</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="/internships/python" class="domain-card" id="domain-python" data-category="ai"><div class="domain-body"><h3>Python Engineering</h3><span class="domain-tech mono">Python 3 · OOP · APIs</span></div><span class="domain-foot"><span class="domain-cta">View internship</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="/internships/react-frontend" class="domain-card" id="domain-react" data-category="fullstack"><div class="domain-body"><h3>Frontend Engineer</h3><span class="domain-tech mono">React 18 · Next.js · TypeScript</span></div><span class="domain-foot"><span class="domain-cta">View internship</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="/internships/nodejs-backend" class="domain-card" id="domain-node" data-category="fullstack"><div class="domain-body"><h3>Backend Engineer</h3><span class="domain-tech mono">Node · Express · REST APIs</span></div><span class="domain-foot"><span class="domain-cta">View internship</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="/internships/ai-engineer" class="domain-card" id="domain-ai-engineer" data-category="ai"><div class="domain-body"><h3>AI Engineer</h3><span class="domain-tech mono">LLM APIs · RAG · Agents</span></div><span class="domain-foot"><span class="domain-cta">View internship</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="/internships/generative-ai" class="domain-card" id="domain-genai" data-category="ai"><div class="domain-body"><h3>Generative AI</h3><span class="domain-tech mono">LLM APIs · Prompting · RAG</span></div><span class="domain-foot"><span class="domain-cta">View internship</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="/internships/machine-learning" class="domain-card" id="domain-ml" data-category="ai"><div class="domain-body"><h3>Machine Learning</h3><span class="domain-tech mono">PyTorch · Scikit-Learn · Pandas</span></div><span class="domain-foot"><span class="domain-cta">View internship</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="/internships/data-science" class="domain-card" id="domain-datascience" data-category="ai"><div class="domain-body"><h3>Data Science</h3><span class="domain-tech mono">Python · SQL · Data Viz</span></div><span class="domain-foot"><span class="domain-cta">View internship</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="/internships/software-engineering" class="domain-card" id="domain-sde" data-category="systems"><div class="domain-body"><h3>SDE / SWE</h3><span class="domain-tech mono">Data Structures · System Design · Testing</span></div><span class="domain-foot"><span class="domain-cta">View internship</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="/internships/java-spring-boot" class="domain-card" id="domain-java" data-category="systems"><div class="domain-body"><h3>Java / Spring Boot</h3><span class="domain-tech mono">Java 17 · Spring Boot · Maven</span></div><span class="domain-foot"><span class="domain-cta">View internship</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="/internships/cpp-dsa" class="domain-card" id="domain-cpp" data-category="systems"><div class="domain-body"><h3>C++ / Algorithms</h3><span class="domain-tech mono">C++20 · DSA · Problem Solving</span></div><span class="domain-foot"><span class="domain-cta">View internship</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="/internships/devops" class="domain-card" id="domain-devops" data-category="systems"><div class="domain-body"><h3>DevOps / CI-CD</h3><span class="domain-tech mono">Docker · GitHub Actions · CI/CD</span></div><span class="domain-foot"><span class="domain-cta">View internship</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="/internships/cloud-aws" class="domain-card" id="domain-cloud" data-category="mobile"><div class="domain-body"><h3>Cloud / AWS</h3><span class="domain-tech mono">AWS · Serverless · Storage</span></div><span class="domain-foot"><span class="domain-cta">View internship</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="/internships/flutter-app-development" class="domain-card" id="domain-flutter" data-category="mobile"><div class="domain-body"><h3>App Developer</h3><span class="domain-tech mono">Dart · Flutter · Cross-Platform</span></div><span class="domain-foot"><span class="domain-cta">View internship</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="/internships/cybersecurity" class="domain-card" id="domain-cyber" data-category="systems"><div class="domain-body"><h3>Cybersecurity</h3><span class="domain-tech mono">Web Security · Python · OWASP</span></div><span class="domain-foot"><span class="domain-cta">View internship</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="/internships/sql-databases" class="domain-card" id="domain-sql" data-category="systems"><div class="domain-body"><h3>SQL / Databases</h3><span class="domain-tech mono">SQL · PostgreSQL · Data Modeling</span></div><span class="domain-foot"><span class="domain-cta">View internship</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="/internships/ui-ux-design" class="domain-card" id="domain-uiux" data-category="fullstack"><div class="domain-body"><h3>UI/UX Design</h3><span class="domain-tech mono">Figma · Research · Prototyping</span></div><span class="domain-foot"><span class="domain-cta">View internship</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="/internships/ai-product-management" class="domain-card" id="domain-ai-pm" data-category="ai"><div class="domain-body"><h3>AI Product Management</h3><span class="domain-tech mono">PRDs · AI Evals · Roadmapping</span></div><span class="domain-foot"><span class="domain-cta">View internship</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="/internships/forward-deployed-engineer" class="domain-card" id="domain-fde" data-category="systems"><div class="domain-body"><h3>Forward Deployed Engineer</h3><span class="domain-tech mono">API Integration · Client Tools · Docs</span></div><span class="domain-foot"><span class="domain-cta">View internship</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="/internships/software-testing-qa" class="domain-card" id="domain-qa" data-category="systems"><div class="domain-body"><h3>Software Quality</h3><span class="domain-tech mono">Test Automation · Selenium · Bug Reports</span></div><span class="domain-foot"><span class="domain-cta">View internship</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="/quiz" class="domain-help" id="domain-help" data-apply>
-            <span class="domain-help-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg></span>
-            <strong>Not sure which one?</strong>
-            <span>Start the quiz and pick your track there. You can look through them all before you begin.</span>
-          </a>
+        <div class="domains-grid" id="domains-grid">
+          <!-- BEGIN internship cards (generated by tools/build_internship_pages.py) -->
+          <a href="/internships/full-stack-web-development" class="domain-card" id="domain-webdev" data-category="fullstack"><span class="domain-cat"><span class="cat-dot" aria-hidden="true"></span>Web &amp; design</span><h3>Full Stack Engineer</h3><p class="domain-build"><span class="domain-build-label mono">You build</span>Modern Interactive Portfolio &amp; DevStudio <span class="domain-build-more">+2 more</span></p><span class="domain-tech mono">HTML5 · CSS3 · JavaScript</span><span class="domain-foot"><span class="domain-cta">4 weeks · Remote</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="/internships/python" class="domain-card" id="domain-python" data-category="ai"><span class="domain-cat"><span class="cat-dot" aria-hidden="true"></span>AI, data &amp; Python</span><h3>Python Engineering</h3><p class="domain-build"><span class="domain-build-label mono">You build</span>PyAnalytics: Local Automation &amp; Data Processing Hub <span class="domain-build-more">+2 more</span></p><span class="domain-tech mono">Python 3 · OOP · APIs</span><span class="domain-foot"><span class="domain-cta">4 weeks · Remote</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="/internships/react-frontend" class="domain-card" id="domain-react" data-category="fullstack"><span class="domain-cat"><span class="cat-dot" aria-hidden="true"></span>Web &amp; design</span><h3>Frontend Engineer</h3><p class="domain-build"><span class="domain-build-label mono">You build</span>OmniStore: Modern Next.js E-Commerce &amp; SaaS Marketplace <span class="domain-build-more">+2 more</span></p><span class="domain-tech mono">React 18 · Next.js · TypeScript</span><span class="domain-foot"><span class="domain-cta">4 weeks · Remote</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="/internships/nodejs-backend" class="domain-card" id="domain-node" data-category="fullstack"><span class="domain-cat"><span class="cat-dot" aria-hidden="true"></span>Web &amp; design</span><h3>Backend Engineer</h3><p class="domain-build"><span class="domain-build-label mono">You build</span>CloudVault: RESTful Secure API &amp; Resource Management Hub <span class="domain-build-more">+2 more</span></p><span class="domain-tech mono">Node · Express · REST APIs</span><span class="domain-foot"><span class="domain-cta">4 weeks · Remote</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="/internships/ai-engineer" class="domain-card" id="domain-ai-engineer" data-category="ai"><span class="domain-cat"><span class="cat-dot" aria-hidden="true"></span>AI, data &amp; Python</span><h3>AI Engineer</h3><p class="domain-build"><span class="domain-build-label mono">You build</span>TicketPilot: Support Ticket Triage Agent</p><span class="domain-tech mono">LLM APIs · RAG · Agents</span><span class="domain-foot"><span class="domain-cta">4 weeks · Remote</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="/internships/generative-ai" class="domain-card" id="domain-genai" data-category="ai"><span class="domain-cat"><span class="cat-dot" aria-hidden="true"></span>AI, data &amp; Python</span><h3>Generative AI</h3><p class="domain-build"><span class="domain-build-label mono">You build</span>StudyBuddy: AI Study Assistant &amp; Chatbot <span class="domain-build-more">+2 more</span></p><span class="domain-tech mono">LLM APIs · Prompting · RAG</span><span class="domain-foot"><span class="domain-cta">4 weeks · Remote</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="/internships/machine-learning" class="domain-card" id="domain-ml" data-category="ai"><span class="domain-cat"><span class="cat-dot" aria-hidden="true"></span>AI, data &amp; Python</span><h3>Machine Learning</h3><p class="domain-build"><span class="domain-build-label mono">You build</span>VisionAI: Local Computer Vision &amp; Multi-Modal Intelligence Studio <span class="domain-build-more">+2 more</span></p><span class="domain-tech mono">PyTorch · Scikit-Learn · Pandas</span><span class="domain-foot"><span class="domain-cta">4 weeks · Remote</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="/internships/data-science" class="domain-card" id="domain-datascience" data-category="ai"><span class="domain-cat"><span class="cat-dot" aria-hidden="true"></span>AI, data &amp; Python</span><h3>Data Science</h3><p class="domain-build"><span class="domain-build-label mono">You build</span>InsightHub: Interactive Data Intelligence &amp; ML Dashboard <span class="domain-build-more">+2 more</span></p><span class="domain-tech mono">Python · SQL · Data Viz</span><span class="domain-foot"><span class="domain-cta">4 weeks · Remote</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="/internships/software-engineering" class="domain-card" id="domain-sde" data-category="systems"><span class="domain-cat"><span class="cat-dot" aria-hidden="true"></span>Systems &amp; core</span><h3>SDE / SWE</h3><p class="domain-build"><span class="domain-build-label mono">You build</span>ShelfSpace: Library Lending Service</p><span class="domain-tech mono">Data Structures · System Design · Testing</span><span class="domain-foot"><span class="domain-cta">4 weeks · Remote</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="/internships/java-spring-boot" class="domain-card" id="domain-java" data-category="systems"><span class="domain-cat"><span class="cat-dot" aria-hidden="true"></span>Systems &amp; core</span><h3>Java / Spring Boot</h3><p class="domain-build"><span class="domain-build-label mono">You build</span>BankPulse: Enterprise Banking &amp; Transaction Management System <span class="domain-build-more">+2 more</span></p><span class="domain-tech mono">Java 17 · Spring Boot · Maven</span><span class="domain-foot"><span class="domain-cta">4 weeks · Remote</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="/internships/cpp-dsa" class="domain-card" id="domain-cpp" data-category="systems"><span class="domain-cat"><span class="cat-dot" aria-hidden="true"></span>Systems &amp; core</span><h3>C++ / Algorithms</h3><p class="domain-build"><span class="domain-build-label mono">You build</span>AlgoCore: A Command-Line Data Toolkit <span class="domain-build-more">+2 more</span></p><span class="domain-tech mono">C++20 · DSA · Problem Solving</span><span class="domain-foot"><span class="domain-cta">4 weeks · Remote</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="/internships/devops" class="domain-card" id="domain-devops" data-category="systems"><span class="domain-cat"><span class="cat-dot" aria-hidden="true"></span>Systems &amp; core</span><h3>DevOps / CI-CD</h3><p class="domain-build"><span class="domain-build-label mono">You build</span>DevDeploy: Automated Multi-Stage Docker &amp; CI/CD Pipeline Hub <span class="domain-build-more">+2 more</span></p><span class="domain-tech mono">Docker · GitHub Actions · CI/CD</span><span class="domain-foot"><span class="domain-cta">4 weeks · Remote</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="/internships/cloud-aws" class="domain-card" id="domain-cloud" data-category="mobile"><span class="domain-cat"><span class="cat-dot" aria-hidden="true"></span>Mobile &amp; cloud</span><h3>Cloud / AWS</h3><p class="domain-build"><span class="domain-build-label mono">You build</span>CloudFolio: Serverless Portfolio Site with Contact Form <span class="domain-build-more">+2 more</span></p><span class="domain-tech mono">AWS · Serverless · Storage</span><span class="domain-foot"><span class="domain-cta">4 weeks · Remote</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="/internships/flutter-app-development" class="domain-card" id="domain-flutter" data-category="mobile"><span class="domain-cat"><span class="cat-dot" aria-hidden="true"></span>Mobile &amp; cloud</span><h3>App Developer</h3><p class="domain-build"><span class="domain-build-label mono">You build</span>FitPulse: Modern Mobile Fitness &amp; Workout Companion <span class="domain-build-more">+2 more</span></p><span class="domain-tech mono">Dart · Flutter · Cross-Platform</span><span class="domain-foot"><span class="domain-cta">4 weeks · Remote</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="/internships/cybersecurity" class="domain-card" id="domain-cyber" data-category="systems"><span class="domain-cat"><span class="cat-dot" aria-hidden="true"></span>Systems &amp; core</span><h3>Cybersecurity</h3><p class="domain-build"><span class="domain-build-label mono">You build</span>PassGuard: Password Strength &amp; Breach Checker <span class="domain-build-more">+2 more</span></p><span class="domain-tech mono">Web Security · Python · OWASP</span><span class="domain-foot"><span class="domain-cta">4 weeks · Remote</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="/internships/sql-databases" class="domain-card" id="domain-sql" data-category="systems"><span class="domain-cat"><span class="cat-dot" aria-hidden="true"></span>Systems &amp; core</span><h3>SQL / Databases</h3><p class="domain-build"><span class="domain-build-label mono">You build</span>ShelfWise: Library Management Database <span class="domain-build-more">+2 more</span></p><span class="domain-tech mono">SQL · PostgreSQL · Data Modeling</span><span class="domain-foot"><span class="domain-cta">4 weeks · Remote</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="/internships/ui-ux-design" class="domain-card" id="domain-uiux" data-category="fullstack"><span class="domain-cat"><span class="cat-dot" aria-hidden="true"></span>Web &amp; design</span><h3>UI/UX Design</h3><p class="domain-build"><span class="domain-build-label mono">You build</span>CanteenQ: Campus Canteen Pre-order App <span class="domain-build-more">+2 more</span></p><span class="domain-tech mono">Figma · Research · Prototyping</span><span class="domain-foot"><span class="domain-cta">4 weeks · Remote</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="/internships/ai-product-management" class="domain-card" id="domain-ai-pm" data-category="ai"><span class="domain-cat"><span class="cat-dot" aria-hidden="true"></span>AI, data &amp; Python</span><h3>AI Product Management</h3><p class="domain-build"><span class="domain-build-label mono">You build</span>SmartRecap: AI Meeting Notes Feature</p><span class="domain-tech mono">PRDs · AI Evals · Roadmapping</span><span class="domain-foot"><span class="domain-cta">4 weeks · Remote</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="/internships/forward-deployed-engineer" class="domain-card" id="domain-fde" data-category="systems"><span class="domain-cat"><span class="cat-dot" aria-hidden="true"></span>Systems &amp; core</span><h3>Forward Deployed Engineer</h3><p class="domain-build"><span class="domain-build-label mono">You build</span>ClientBridge: Third-Party API Integration Dashboard</p><span class="domain-tech mono">API Integration · Client Tools · Docs</span><span class="domain-foot"><span class="domain-cta">4 weeks · Remote</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="/internships/software-testing-qa" class="domain-card" id="domain-qa" data-category="systems"><span class="domain-cat"><span class="cat-dot" aria-hidden="true"></span>Systems &amp; core</span><h3>Software Quality</h3><p class="domain-build"><span class="domain-build-label mono">You build</span>QuestGuard: Test Plan, Bugs and Automation Suite for a Real App</p><span class="domain-tech mono">Test Automation · Selenium · Bug Reports</span><span class="domain-foot"><span class="domain-cta">4 weeks · Remote</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <!-- END internship cards -->
+          <!-- internship cards -->
         </div>
-        <p class="domain-empty" id="domain-empty" hidden>No track matches that search. Try a broader word like “web”, “data” or “cloud”.</p>
+        <p class="domain-empty" id="domain-empty" hidden>No internship matches that search. Try a broader word like “web”, “data” or “cloud”.</p>
+        <div class="domain-more">
+          <button type="button" class="btn btn-secondary" id="domain-more-btn" aria-expanded="false" aria-controls="domains-grid" hidden>Show all internships</button>
+        </div>
+        <a href="/quiz" class="domain-help" id="domain-help" data-apply>
+          <span class="domain-help-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg></span>
+          <strong>Not sure which one?</strong>
+          <span>Start the quiz and pick your track there. You can look through them all before you begin.</span>
+        </a>
       </div>
     </section>
 
@@ -617,7 +531,7 @@
             <div class="bento-copy">
               <span class="icon-tile" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
               <h3 class="h3">A certificate recruiters can actually check</h3>
-              <p>This is the real thing, not a mock-up. Every certificate carries a unique ID, a QR code and our MSME registration, and anyone can verify it in seconds.</p>
+              <p>A unique ID, a QR code and our MSME registration. Anyone can verify it in seconds.</p>
               <ul class="cert-points" role="list">
                 <li>Unique ID + QR code</li>
                 <li>Backed by your approved milestones</li>
@@ -635,7 +549,7 @@
             <div class="bento-copy">
               <span class="icon-tile" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg></span>
               <h3 class="h3">Public proof of work</h3>
-              <p>Four public LinkedIn posts and a portfolio page with every approved milestone, all in one link you can put on your resume.</p>
+              <p>Four public LinkedIn posts and a portfolio page, in one link for your resume.</p>
             </div>
             <div class="post-mock" aria-hidden="true">
               <div class="post-row"><span class="post-av mono">YN</span><span class="post-line"><b>Week 1 approved</b><i></i></span><span class="post-state is-ok">✓</span></div>
@@ -647,19 +561,19 @@
           <article class="bento-tile bento-dark reveal" id="benefit-placement">
             <span class="icon-tile" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
             <h3 class="h3">Referrals for top performers</h3>
-            <p>Our team refers top interns directly to openings at startups and product companies in our hiring partner network.</p>
+            <p>Top interns are referred to openings in our hiring partner network.</p>
           </article>
 
           <article class="bento-tile reveal" id="benefit-stipend">
             <span class="icon-tile" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
             <h3 class="h3">Stipend for top performers</h3>
-            <p>Up to $100 a month for the interns whose reviewed work stands out in their cohort. It's earned, not handed out, so submit work you're proud of.</p>
+            <p>Up to $100 a month for interns whose reviewed work stands out.</p>
           </article>
 
           <article class="bento-tile reveal" id="benefit-offer">
             <span class="icon-tile" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg></span>
             <h3 class="h3">Offer letter on day one</h3>
-            <p>A proper internship offer letter with your track and joining date, ready for your resume and college records.</p>
+            <p>With your track and joining date, ready for your resume and college records.</p>
           </article>
 
           <article class="bento-tile reveal" id="benefit-lor">
@@ -677,82 +591,58 @@
         <div class="section-head center reveal">
           <span class="eyebrow">Is it legit?</span>
           <h2 class="h2" id="trust-title">Don't take our word for it.<br><span class="text-soft">Check us yourself.</span></h2>
-          <p class="lead">You should be careful with any online internship. Here is everything you can verify about SkillMe before you spend five minutes on the quiz.</p>
+          <p class="lead">Be careful with any online internship. Here is what you can verify about SkillMe before you apply.</p>
         </div>
 
         <div class="trust-grid">
           <article class="trust-card reveal">
             <span class="trust-num mono">01</span>
             <h3 class="h3">A registered business</h3>
-            <p>SkillMe is registered with the Ministry of MSME, Government of India. Our Udyam number is <strong class="mono">UDYAM-UP-50-0294192</strong>, and our registered location is Lucknow, Uttar Pradesh.</p>
+            <p>Registered with the Ministry of MSME, Government of India. Udyam number <strong class="mono">UDYAM-UP-50-0294192</strong>.</p>
             <a href="/contact" class="btn-link">Business details &rarr;</a>
           </article>
           <article class="trust-card reveal">
             <span class="trust-num mono">02</span>
             <h3 class="h3">Certificates anyone can verify</h3>
-            <p>Every certificate has a unique ID and QR code. A recruiter or college can check it on our verification page in seconds, without asking us.</p>
+            <p>Each has a unique ID and QR code that a recruiter can check in seconds.</p>
             <a href="/verify" class="btn-link">Verify a certificate &rarr;</a>
           </article>
           <article class="trust-card reveal">
             <span class="trust-num mono">03</span>
             <h3 class="h3">Interns' work is public</h3>
-            <p>Interns post every milestone on their own LinkedIn. You can open those posts, see the work, and message the interns directly.</p>
+            <p>Every milestone is posted on the intern's own LinkedIn. Open the posts and see.</p>
             <a href="https://www.linkedin.com/company/skill-me-intern/" target="_blank" rel="noopener noreferrer" class="btn-link">SkillMe on LinkedIn &rarr;</a>
           </article>
           <article class="trust-card reveal">
             <span class="trust-num mono">04</span>
             <h3 class="h3">The full plan, before you apply</h3>
-            <p>Every internship has its own page with the project you build and what each of the four weeks covers. Nothing is hidden behind a signup.</p>
+            <p>Every internship page shows the project and all four weeks.</p>
             <a href="/internships" class="btn-link">See all internships &rarr;</a>
           </article>
           <article class="trust-card reveal">
             <span class="trust-num mono">05</span>
             <h3 class="h3">Honest about what we promise</h3>
-            <p>Not everyone who applies is selected. The stipend goes to top performers only, and so do job offers, which come from our hiring partners or from SkillMe itself.</p>
+            <p>Not everyone is selected. The stipend and job offers go to top performers only.</p>
             <a href="/#faq" class="btn-link">Read the FAQ &rarr;</a>
           </article>
           <article class="trust-card reveal">
             <span class="trust-num mono">06</span>
             <h3 class="h3">Real people you can reach</h3>
-            <p>Write to <a href="mailto:admin@skill-me-intern.in">admin@skill-me-intern.in</a> with any question before you apply. Our terms, privacy and refund policies are published in full.</p>
+            <p>Email <a href="mailto:admin@skill-me-intern.in">admin@skill-me-intern.in</a> with any question before you apply.</p>
             <a href="/terms" class="btn-link">Terms of service &rarr;</a>
           </article>
         </div>
       </div>
     </section>
 
-    <!-- ========== WHO IT'S FOR ========== -->
+    <!-- ========== SELECTIVE ========== -->
     <section class="section" id="who" aria-labelledby="who-title">
       <div class="container">
-        <div class="section-head center reveal">
-          <span class="eyebrow">Who it's for</span>
-          <h2 class="h2" id="who-title">For students who are done waiting for “experience”</h2>
-          <p class="lead">You don't need an internship to get an internship. You need proof. Here's where SkillMe fits in.</p>
-        </div>
-
-        <div class="audience">
-          <article class="audience-card reveal">
-            <span class="audience-tag mono">1st &amp; 2nd year</span>
-            <h3 class="h3">Get ahead early</h3>
-            <p>Land your first real internship while others are still picking a course. Walk into internship season with work to show.</p>
-          </article>
-          <article class="audience-card audience-card-hl reveal">
-            <span class="audience-tag mono">3rd &amp; final year</span>
-            <h3 class="h3">Be placement-ready</h3>
-            <p>Turn “familiar with” into “built and shipped”. Give interviewers an internship, a portfolio link and a certificate they can verify.</p>
-          </article>
-          <article class="audience-card reveal">
-            <span class="audience-tag mono">Switching tracks</span>
-            <h3 class="h3">Prove a new skill fast</h3>
-            <p>Moving from web to AI, or from theory to practice? Four weeks gets you a reviewed internship in your new field.</p>
-          </article>
-        </div>
-
         <div class="selective reveal">
           <div class="selective-main">
             <span class="eyebrow no-dot">Selective by design</span>
-            <h3 class="h3 selective-title">We'd rather take students who finish than fill seats.</h3>
-            <p>Every submission here is reviewed by a real person, and that takes time. So we read every internship request and shortlist the students we think will see all four weeks through. Anyone can apply, and we encourage you to, whatever your country, college or year.</p>
+            <h2 class="h3 selective-title" id="who-title">We'd rather take students who finish than fill seats.</h2>
+            <p>We read every application and shortlist the students we think will finish. Anyone can apply, whatever your country, college or year.</p>
             <ul class="selective-rules" role="list">
               <li><strong>Internship requests are read by hand.</strong> Nobody is auto-accepted.</li>
               <li><strong>Work that misses the bar comes back.</strong> With notes on what to fix.</li>
@@ -768,7 +658,7 @@
               <li>you'd rather watch another tutorial than ship something</li>
             </ul>
             <p class="not-for-yes">Still here? Good. That's exactly who we're looking for.</p>
-            <a href="/quiz" class="btn btn-primary" data-apply>I'm in, apply now &rarr;</a>
+            <a href="/internships" class="btn btn-primary">I'm in, apply now &rarr;</a>
           </div>
         </div>
       </div>
@@ -909,7 +799,7 @@
   <!-- Mobile sticky CTA: script.js shows it between the hero and the final CTA -->
   <div class="sticky-cta" id="sticky-cta" hidden>
     <div class="sticky-cta-text"><strong>Remote internship with stipend</strong><span>Up to $100/month for top performers</span></div>
-    <a href="/quiz" class="btn btn-primary btn-sm" data-apply>Apply now</a>
+    <a href="/internships" class="btn btn-primary btn-sm">Apply now</a>
   </div>
 
   <footer class="site-footer">
@@ -923,7 +813,7 @@
           <h4>Program</h4>
           <a href="/#how-it-works">How it works</a>
           <a href="/internships">Internships</a>
-          <a href="/quiz">Apply now</a>
+          <a href="/internships">Apply now</a>
           <a href="/#faq">FAQ</a>
         </div>
         <div class="footer-col">
@@ -948,6 +838,6 @@
     </div>
   </footer>
 
-  <script src="script.js?v=ca8cb83e62" defer></script>
+  <script src="script.js?v=024a881bb6" defer></script>
 </body>
 </html>
