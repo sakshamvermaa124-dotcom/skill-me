@@ -286,6 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Task view state — declared before checkExistingSession(): preview mode renders synchronously.
   let lastTasks = null;     // most recent task list from /api/tasks/current
+  let credPayState = null;  // 'paid' | 'unpaid' | 'unknown' once the payment check has run
   let selectedWeek = null;  // week currently open in the Tasks panel
 
   // Check on load
@@ -584,7 +585,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       const tasksForUnlock = Math.ceil((totalAssigned || 4) * PAYMENT_UNLOCK_PCT / 100);
       const tasksRemaining = Math.max(1, tasksForUnlock - totalCompleted);
-      const taskWord = tasksRemaining === 1 ? 'task' : 'tasks';
+      const taskWord = tasksRemaining === 1 ? 'week' : 'weeks';
       const nudgeBanner = document.getElementById('cred-nudge-banner');
       if (nudgeBanner) {
         nudgeBanner.style.display = 'inline-flex';
@@ -654,6 +655,8 @@ document.addEventListener('DOMContentLoaded', () => {
       async function renderCredentials() {
         const eligible = pct >= PAYMENT_UNLOCK_PCT || paymentUnlocked;
         const payState = await fetchPayState();
+        credPayState = payState;
+        renderJourney(data, lastTasks); // refresh the locked / unlocked labels
         if (payState === 'paid') {
           renderCertReady(certSection, student, data);
           hideCredHints();
@@ -771,11 +774,26 @@ document.addEventListener('DOMContentLoaded', () => {
     if (countEl) countEl.textContent = `${done} of ${needed}`;
     const remaining = Math.max(0, needed - approved);
     const factEl = document.getElementById('fact-unlock');
-    if (factEl) factEl.innerHTML = unlocked
-      ? '<span class="fact-ok">Unlocked</span>'
-      : `${remaining}<span class="stat-unit"> more approval${remaining === 1 ? '' : 's'}</span>`;
+    // "Locked" is only ever shown once the student is eligible (3 approved weeks, or an
+    // admin unlock) and hasn't paid. Before that the copy is about completing the weeks.
+    const weeksLeft = `${remaining} more week${remaining === 1 ? '' : 's'}`;
+    let factHtml, credText;
+    if (!unlocked) {
+      factHtml = `${remaining}<span class="stat-unit"> more week${remaining === 1 ? '' : 's'}</span>`;
+      credText = `Complete ${weeksLeft} to get your credentials`;
+    } else if (credPayState === 'paid') {
+      factHtml = '<span class="fact-ok">Unlocked</span>';
+      credText = 'Unlocked — ready to view';
+    } else if (credPayState === 'unpaid') {
+      factHtml = 'Locked';
+      credText = 'Locked — unlock in Credentials';
+    } else {
+      factHtml = '<span class="fact-ok">Eligible</span>';
+      credText = 'Open Credentials';
+    }
+    if (factEl) factEl.innerHTML = factHtml;
     const homeCred = document.getElementById('home-cred-status');
-    if (homeCred) homeCred.textContent = unlocked ? 'Unlocked — ready to claim' : `Unlocks after ${remaining} more approval${remaining === 1 ? '' : 's'}`;
+    if (homeCred) homeCred.textContent = credText;
 
     // Sidebar badge: how many tasks still need action
     const badge = document.getElementById('nav-work-badge');
@@ -846,7 +864,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (rejected) {
       s = { tone: 'danger', label: 'Action needed', title: `Resubmit Week ${rejected}: ${titleOf(rejected)}`, desc: 'Your post was rejected. Read the admin note on the task, fix your post and paste the new link.', cta: 'Fix & resubmit', panel: 'panel-work', week: rejected };
     } else if (pct >= PAYMENT_UNLOCK_PCT) {
-      s = { tone: 'ok', label: 'Credentials unlocked', title: 'Your certificate is ready to claim', desc: todo ? `You can still finish Week ${todo} to complete all ${total} tasks.` : 'Open the Credentials tab to view or claim them.', cta: 'Open Credentials', panel: 'panel-credentials' };
+      s = { tone: 'ok', label: '3 weeks approved', title: 'Your certificate is ready to claim', desc: todo ? `You can still finish Week ${todo} to complete all ${total} tasks.` : 'Open the Credentials tab to view or claim them.', cta: 'Open Credentials', panel: 'panel-credentials' };
     } else if (todo) {
       s = { tone: 'accent', label: 'Your next step', title: `Week ${todo}: ${titleOf(todo)}`, desc: pending.length ? `${weeksLabel(pending)} is under review. Meanwhile, complete this task and submit your LinkedIn post.` : 'Complete the task, share it on LinkedIn and submit the post link for review.', cta: 'Open task', panel: 'panel-work', week: todo };
     } else if (pending.length) {
@@ -1372,11 +1390,11 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="cert-banner" id="payment-banner">
         <div class="cert-banner-glow"></div>
         <div class="cert-banner-content">
-          <div class="cert-banner-icon">✨</div>
+          <div class="cert-banner-icon">🔒</div>
           <div class="cert-banner-text">
-            <div class="cert-banner-title">Your credentials are unlocked</div>
+            <div class="cert-banner-title">Your certificate is locked</div>
             <div class="cert-banner-sub">
-              A one-time ${CERT_PRICE} covers your verified certificate, personalized LOR and lifetime hosting for your Proof of Work portfolio.
+              You've earned your completion credentials. A one-time ${CERT_PRICE} covers your verified certificate, personalized LOR and lifetime hosting for your Proof of Work portfolio.
             </div>
           </div>
           <div class="cert-banner-actions" style="width: 100%;">
@@ -1398,6 +1416,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderCertReady(certSection, student, data) {
+    if (credPayState !== 'paid') { credPayState = 'paid'; renderJourney(data, lastTasks); }
     const domain = (data.progress[0] && data.progress[0].domain) || 'web-dev';
     const certUrl = `${FRONTEND}/certificate.html?student_id=${student.id}&batch_id=${data._batch_id}&name=${encodeURIComponent(student.name)}&domain=${encodeURIComponent(domain)}`;
     const lorUrl  = `${FRONTEND}/lor.html?student_id=${student.id}&batch_id=${data._batch_id}&name=${encodeURIComponent(student.name)}&domain=${encodeURIComponent(domain)}`;
