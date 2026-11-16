@@ -6,9 +6,11 @@
    - Same-page anchor scrolling
    - Live activity ticker   GET /api/students/public-activity
    - Wall of work           GET /api/students/wall?limit=12
-   - Domain category filter + domain card links
+   - Track search + category filter + track card links
+   - Week explorer tabs (W1–W4)
    - FAQ search, category filter, single-open accordion
    - Final CTA track pills (label + link)
+   - Nav scroll-spy and the mobile sticky CTA
    ============================================================= */
 document.addEventListener('DOMContentLoaded', () => {
   'use strict';
@@ -22,7 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e && e.preventDefault) e.preventDefault();
     const targetUrl = (e && e.currentTarget && e.currentTarget.getAttribute('href')) || '';
     if (quizDone()) {
-      window.location.href = 'apply.html';
+      // Keep a pre-selected track (quiz.html?domain=x → apply.html?domain=x)
+      const query = targetUrl.startsWith('quiz.html?') ? targetUrl.slice('quiz.html'.length) : '';
+      window.location.href = 'apply.html' + query;
     } else if (targetUrl && targetUrl.startsWith('quiz.html')) {
       window.location.href = targetUrl;
     } else {
@@ -175,10 +179,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   })();
 
-  // ── Domain category filter ──
+  // ── Tracks: category filter + search ──
   const filterTabs = document.querySelectorAll('.filter-tab');
   const domainCards = document.querySelectorAll('.domain-card');
   const domainCount = document.getElementById('domain-count');
+  const domainSearch = document.getElementById('domain-search-input');
+  const domainEmpty = document.getElementById('domain-empty');
+  let activeDomainCategory = 'all';
+  let domainQuery = '';
 
   // Show a count on each category chip
   filterTabs.forEach(tab => {
@@ -192,6 +200,19 @@ document.addEventListener('DOMContentLoaded', () => {
     tab.appendChild(badge);
   });
 
+  function updateDomainVisibility() {
+    let shown = 0;
+    domainCards.forEach(card => {
+      const matchesCat = activeDomainCategory === 'all' || card.getAttribute('data-category') === activeDomainCategory;
+      const matchesSearch = !domainQuery || card.textContent.toLowerCase().includes(domainQuery);
+      const visible = matchesCat && matchesSearch;
+      card.hidden = !visible;
+      if (visible) shown++;
+    });
+    if (domainEmpty) domainEmpty.hidden = shown > 0;
+    if (domainCount) domainCount.textContent = `Showing ${shown} track${shown === 1 ? '' : 's'}`;
+  }
+
   filterTabs.forEach(tab => {
     tab.addEventListener('click', () => {
       filterTabs.forEach(t => {
@@ -200,18 +221,17 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       tab.classList.add('active');
       tab.setAttribute('aria-pressed', 'true');
-
-      const selectedCat = tab.getAttribute('data-category');
-      let shown = 0;
-      domainCards.forEach(card => {
-        const match = selectedCat === 'all' || card.getAttribute('data-category') === selectedCat;
-        card.hidden = !match;
-        card.classList.toggle('hidden', !match);
-        if (match) shown++;
-      });
-      if (domainCount) domainCount.textContent = `Showing ${shown} domain${shown === 1 ? '' : 's'}`;
+      activeDomainCategory = tab.getAttribute('data-category');
+      updateDomainVisibility();
     });
   });
+
+  if (domainSearch) {
+    domainSearch.addEventListener('input', (e) => {
+      domainQuery = e.target.value.trim().toLowerCase();
+      updateDomainVisibility();
+    });
+  }
 
   // Domain cards: quiz first, or straight to the application once the quiz is done
   domainCards.forEach(card => {
@@ -231,6 +251,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const faqCount = document.getElementById('faq-count');
   let activeFaqCategory = 'all';
   let faqSearchQuery = '';
+
+  const faqAllCount = document.querySelector('.faq-filter-pill[data-category="all"] .chip-count');
+  if (faqAllCount) faqAllCount.textContent = faqItems.length;
 
   faqItems.forEach(item => {
     item.addEventListener('toggle', () => {
@@ -291,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const domain = pill.getAttribute('data-domain');
       const name = pill.getAttribute('data-name');
-      if (ctaBtnLabel) ctaBtnLabel.textContent = `Start screening for ${name}`;
+      if (ctaBtnLabel) ctaBtnLabel.textContent = `Start my ${name} application`;
       if (ctaApplyBtn) ctaApplyBtn.href = `quiz.html?domain=${domain}`;
     });
   });
