@@ -524,41 +524,116 @@
       <div class="container">
         <div class="section-split reveal">
           <div class="section-head">
-            <span class="eyebrow">Domains</span>
-            <h2 class="h2" id="domains-title">Choose your track</h2>
-            <p class="lead">20 domains across the tech landscape. Pick the one that matches your interest and skill level.</p>
+            <span class="eyebrow">Tracks</span>
+            <h2 class="h2" id="domains-title">Pick the track for the job you want</h2>
+            <p class="lead">20 tracks. Each one is its own 4-week internship with its own project and certificate.</p>
           </div>
-          <div class="domain-filters" role="group" aria-label="Filter domains by category">
-            <button type="button" class="chip filter-tab active" data-category="all" aria-pressed="true">All tracks <span class="chip-count mono">20</span></button>
-            <button type="button" class="chip filter-tab" data-category="fullstack" aria-pressed="false">Web &amp; full stack</button>
-            <button type="button" class="chip filter-tab" data-category="ai" aria-pressed="false">AI &amp; Python</button>
-            <button type="button" class="chip filter-tab" data-category="systems" aria-pressed="false">DevOps &amp; core</button>
-            <button type="button" class="chip filter-tab" data-category="mobile" aria-pressed="false">Mobile &amp; cloud</button>
+          <div class="domain-search">
+            <label for="domain-search-input" class="sr-only">Search tracks</label>
+            <svg class="domain-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input type="search" class="input" id="domain-search-input" placeholder="Search, e.g. React, AWS, AI" autocomplete="off">
           </div>
+        </div>
+
+        <div class="domain-filters" role="group" aria-label="Filter tracks by category">
+          <button type="button" class="chip filter-tab active" data-category="all" aria-pressed="true">All tracks <span class="chip-count mono">20</span></button>
+          <button type="button" class="chip filter-tab" data-category="fullstack" aria-pressed="false"><span class="cat-dot" data-cat="fullstack" aria-hidden="true"></span>Web &amp; design</button>
+          <button type="button" class="chip filter-tab" data-category="ai" aria-pressed="false"><span class="cat-dot" data-cat="ai" aria-hidden="true"></span>AI, data &amp; Python</button>
+          <button type="button" class="chip filter-tab" data-category="systems" aria-pressed="false"><span class="cat-dot" data-cat="systems" aria-hidden="true"></span>Systems &amp; core</button>
+          <button type="button" class="chip filter-tab" data-category="mobile" aria-pressed="false"><span class="cat-dot" data-cat="mobile" aria-hidden="true"></span>Mobile &amp; cloud</button>
         </div>
         <p class="sr-only" id="domain-count" aria-live="polite"></p>
 
         <div class="domains-grid">
-          <a href="quiz.html?domain=webdev" class="domain-card" id="domain-webdev" data-category="fullstack"><div class="domain-body"><h3>Full Stack Engineer</h3><span class="domain-tech mono">HTML5 · CSS3 · JavaScript</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="quiz.html?domain=python" class="domain-card" id="domain-python" data-category="ai"><div class="domain-body"><h3>Python Engineering</h3><span class="domain-tech mono">Python 3 · OOP · APIs</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="quiz.html?domain=react" class="domain-card" id="domain-react" data-category="fullstack"><div class="domain-body"><h3>Frontend Engineer</h3><span class="domain-tech mono">React 18 · Next.js · TypeScript</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="quiz.html?domain=node" class="domain-card" id="domain-node" data-category="fullstack"><div class="domain-body"><h3>Backend Engineer</h3><span class="domain-tech mono">Node · Express · REST APIs</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="quiz.html?domain=java" class="domain-card" id="domain-java" data-category="systems"><div class="domain-body"><h3>Java / Spring Boot</h3><span class="domain-tech mono">Java 17 · Spring Boot · Maven</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="quiz.html?domain=ml" class="domain-card" id="domain-ml" data-category="ai"><div class="domain-body"><h3>Machine Learning</h3><span class="domain-tech mono">PyTorch · Scikit-Learn · Pandas</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="quiz.html?domain=datascience" class="domain-card" id="domain-datascience" data-category="ai"><div class="domain-body"><h3>Data Science</h3><span class="domain-tech mono">Python · SQL · Data Viz</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="quiz.html?domain=flutter" class="domain-card" id="domain-flutter" data-category="mobile"><div class="domain-body"><h3>App Developer</h3><span class="domain-tech mono">Dart · Flutter · Cross-Platform</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="quiz.html?domain=devops" class="domain-card" id="domain-devops" data-category="systems"><div class="domain-body"><h3>DevOps / CI-CD</h3><span class="domain-tech mono">Docker · GitHub Actions · CI/CD</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="quiz.html?domain=cpp" class="domain-card" id="domain-cpp" data-category="systems"><div class="domain-body"><h3>C++ / Algorithms</h3><span class="domain-tech mono">C++20 · DSA · Problem Solving</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="quiz.html?domain=cloud" class="domain-card" id="domain-cloud" data-category="mobile"><div class="domain-body"><h3>Cloud / AWS</h3><span class="domain-tech mono">AWS · Serverless · Storage</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="quiz.html?domain=cyber" class="domain-card" id="domain-cyber" data-category="systems"><div class="domain-body"><h3>Cybersecurity</h3><span class="domain-tech mono">Web Security · Python · OWASP</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="quiz.html?domain=uiux" class="domain-card" id="domain-uiux" data-category="fullstack"><div class="domain-body"><h3>UI/UX Design</h3><span class="domain-tech mono">Figma · Research · Prototyping</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="quiz.html?domain=genai" class="domain-card" id="domain-genai" data-category="ai"><div class="domain-body"><h3>Generative AI</h3><span class="domain-tech mono">LLM APIs · Prompting · RAG</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="quiz.html?domain=sql" class="domain-card" id="domain-sql" data-category="systems"><div class="domain-body"><h3>SQL / Databases</h3><span class="domain-tech mono">SQL · PostgreSQL · Data Modeling</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="quiz.html?domain=ai-engineer" class="domain-card" id="domain-ai-engineer" data-category="ai"><div class="domain-body"><h3>AI Engineer</h3><span class="domain-tech mono">LLM APIs · RAG · Agents</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="quiz.html?domain=fde" class="domain-card" id="domain-fde" data-category="systems"><div class="domain-body"><h3>Forward Deployed Engineer</h3><span class="domain-tech mono">API Integration · Client Tools · Docs</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="quiz.html?domain=sde" class="domain-card" id="domain-sde" data-category="systems"><div class="domain-body"><h3>SDE / SWE</h3><span class="domain-tech mono">Data Structures · System Design · Testing</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="quiz.html?domain=ai-pm" class="domain-card" id="domain-ai-pm" data-category="ai"><div class="domain-body"><h3>AI Product Management</h3><span class="domain-tech mono">PRDs · AI Evals · Roadmapping</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
-          <a href="quiz.html?domain=qa" class="domain-card" id="domain-qa" data-category="systems"><div class="domain-body"><h3>Software Quality</h3><span class="domain-tech mono">Test Automation · Selenium · Bug Reports</span></div><span class="domain-foot"><span class="badge badge-ok">Open</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=webdev" class="domain-card" id="domain-webdev" data-category="fullstack"><div class="domain-body"><h3>Full Stack Engineer</h3><span class="domain-tech mono">HTML5 · CSS3 · JavaScript</span></div><span class="domain-foot"><span class="domain-cta">Start</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=python" class="domain-card" id="domain-python" data-category="ai"><div class="domain-body"><h3>Python Engineering</h3><span class="domain-tech mono">Python 3 · OOP · APIs</span></div><span class="domain-foot"><span class="domain-cta">Start</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=react" class="domain-card" id="domain-react" data-category="fullstack"><div class="domain-body"><h3>Frontend Engineer</h3><span class="domain-tech mono">React 18 · Next.js · TypeScript</span></div><span class="domain-foot"><span class="domain-cta">Start</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=node" class="domain-card" id="domain-node" data-category="fullstack"><div class="domain-body"><h3>Backend Engineer</h3><span class="domain-tech mono">Node · Express · REST APIs</span></div><span class="domain-foot"><span class="domain-cta">Start</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=ai-engineer" class="domain-card" id="domain-ai-engineer" data-category="ai"><div class="domain-body"><h3>AI Engineer</h3><span class="domain-tech mono">LLM APIs · RAG · Agents</span></div><span class="domain-foot"><span class="domain-cta">Start</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=genai" class="domain-card" id="domain-genai" data-category="ai"><div class="domain-body"><h3>Generative AI</h3><span class="domain-tech mono">LLM APIs · Prompting · RAG</span></div><span class="domain-foot"><span class="domain-cta">Start</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=ml" class="domain-card" id="domain-ml" data-category="ai"><div class="domain-body"><h3>Machine Learning</h3><span class="domain-tech mono">PyTorch · Scikit-Learn · Pandas</span></div><span class="domain-foot"><span class="domain-cta">Start</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=datascience" class="domain-card" id="domain-datascience" data-category="ai"><div class="domain-body"><h3>Data Science</h3><span class="domain-tech mono">Python · SQL · Data Viz</span></div><span class="domain-foot"><span class="domain-cta">Start</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=sde" class="domain-card" id="domain-sde" data-category="systems"><div class="domain-body"><h3>SDE / SWE</h3><span class="domain-tech mono">Data Structures · System Design · Testing</span></div><span class="domain-foot"><span class="domain-cta">Start</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=java" class="domain-card" id="domain-java" data-category="systems"><div class="domain-body"><h3>Java / Spring Boot</h3><span class="domain-tech mono">Java 17 · Spring Boot · Maven</span></div><span class="domain-foot"><span class="domain-cta">Start</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=cpp" class="domain-card" id="domain-cpp" data-category="systems"><div class="domain-body"><h3>C++ / Algorithms</h3><span class="domain-tech mono">C++20 · DSA · Problem Solving</span></div><span class="domain-foot"><span class="domain-cta">Start</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=devops" class="domain-card" id="domain-devops" data-category="systems"><div class="domain-body"><h3>DevOps / CI-CD</h3><span class="domain-tech mono">Docker · GitHub Actions · CI/CD</span></div><span class="domain-foot"><span class="domain-cta">Start</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=cloud" class="domain-card" id="domain-cloud" data-category="mobile"><div class="domain-body"><h3>Cloud / AWS</h3><span class="domain-tech mono">AWS · Serverless · Storage</span></div><span class="domain-foot"><span class="domain-cta">Start</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=flutter" class="domain-card" id="domain-flutter" data-category="mobile"><div class="domain-body"><h3>App Developer</h3><span class="domain-tech mono">Dart · Flutter · Cross-Platform</span></div><span class="domain-foot"><span class="domain-cta">Start</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=cyber" class="domain-card" id="domain-cyber" data-category="systems"><div class="domain-body"><h3>Cybersecurity</h3><span class="domain-tech mono">Web Security · Python · OWASP</span></div><span class="domain-foot"><span class="domain-cta">Start</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=sql" class="domain-card" id="domain-sql" data-category="systems"><div class="domain-body"><h3>SQL / Databases</h3><span class="domain-tech mono">SQL · PostgreSQL · Data Modeling</span></div><span class="domain-foot"><span class="domain-cta">Start</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=uiux" class="domain-card" id="domain-uiux" data-category="fullstack"><div class="domain-body"><h3>UI/UX Design</h3><span class="domain-tech mono">Figma · Research · Prototyping</span></div><span class="domain-foot"><span class="domain-cta">Start</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=ai-pm" class="domain-card" id="domain-ai-pm" data-category="ai"><div class="domain-body"><h3>AI Product Management</h3><span class="domain-tech mono">PRDs · AI Evals · Roadmapping</span></div><span class="domain-foot"><span class="domain-cta">Start</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=fde" class="domain-card" id="domain-fde" data-category="systems"><div class="domain-body"><h3>Forward Deployed Engineer</h3><span class="domain-tech mono">API Integration · Client Tools · Docs</span></div><span class="domain-foot"><span class="domain-cta">Start</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html?domain=qa" class="domain-card" id="domain-qa" data-category="systems"><div class="domain-body"><h3>Software Quality</h3><span class="domain-tech mono">Test Automation · Selenium · Bug Reports</span></div><span class="domain-foot"><span class="domain-cta">Start</span><span class="domain-arrow" aria-hidden="true">&rarr;</span></span></a>
+          <a href="quiz.html" class="domain-help" id="domain-help" data-apply>
+            <span class="domain-help-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg></span>
+            <strong>Not sure which one?</strong>
+            <span>Start the quiz and pick your track there. You can look through them all before you begin.</span>
+          </a>
+        </div>
+        <p class="domain-empty" id="domain-empty" hidden>No track matches that search. Try a broader word like “web”, “data” or “cloud”.</p>
+      </div>
+    </section>
+
+    <!-- ========== WHAT YOU GET (bento) ========== -->
+    <section class="section section-soft" id="benefits" aria-labelledby="benefits-title">
+      <div class="container">
+        <div class="section-head center reveal">
+          <span class="eyebrow">What you get</span>
+          <h2 class="h2" id="benefits-title">Things you can actually put on a resume</h2>
+          <p class="lead">Not a participation trophy. Every item here is backed by work you did and someone reviewed.</p>
+        </div>
+
+        <div class="bento">
+          <!-- Certificate: the real certificate design (certificate.html preview mode) -->
+          <article class="bento-tile bento-cert reveal" id="benefit-certificate">
+            <div class="bento-copy">
+              <span class="icon-tile" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
+              <h3 class="h3">A certificate recruiters can actually check</h3>
+              <p>This is the real thing, not a mock-up. Every certificate carries a unique ID, a QR code and our MSME registration, and anyone can verify it in seconds.</p>
+              <ul class="cert-points" role="list">
+                <li>Unique ID + QR code</li>
+                <li>Backed by your approved milestones</li>
+                <li>Add to LinkedIn in one click</li>
+              </ul>
+              <a href="verify.html" class="btn btn-secondary btn-sm">Verify a certificate &rarr;</a>
+            </div>
+            <figure class="cert-real">
+              <img src="assets/certificate-sample.webp?v=2" width="1400" height="987" loading="lazy" decoding="async" alt="Sample SkillMe Certificate of Achievement for a Full Stack Engineering internship, with the MSME registration, signature, stamp and a QR code for verification">
+              <figcaption class="mono">Sample certificate</figcaption>
+            </figure>
+          </article>
+
+          <article class="bento-tile bento-wide reveal" id="benefit-proof">
+            <div class="bento-copy">
+              <span class="icon-tile" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></svg></span>
+              <h3 class="h3">Public proof of work</h3>
+              <p>Four public LinkedIn posts and a portfolio page with every approved milestone, all in one link you can put on your resume.</p>
+            </div>
+            <div class="post-mock" aria-hidden="true">
+              <div class="post-row"><span class="post-av mono">YN</span><span class="post-line"><b>Week 1 approved</b><i></i></span><span class="post-state is-ok">✓</span></div>
+              <div class="post-row"><span class="post-av mono">YN</span><span class="post-line"><b>Week 2 approved</b><i></i></span><span class="post-state is-ok">✓</span></div>
+              <div class="post-row is-dim"><span class="post-av mono">YN</span><span class="post-line"><b>Week 3 in review</b><i></i></span><span class="post-state">…</span></div>
+            </div>
+          </article>
+
+          <article class="bento-tile bento-dark reveal" id="benefit-placement">
+            <span class="icon-tile" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
+            <h3 class="h3">Referrals for top performers</h3>
+            <p>Our team refers top interns directly to openings at startups and product companies in our hiring partner network.</p>
+          </article>
+
+          <article class="bento-tile bento-half reveal" id="benefit-offer">
+            <span class="icon-tile" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg></span>
+            <h3 class="h3">Offer letter on day one</h3>
+            <p>A proper internship offer letter with your track and joining date, ready for your resume and college records.</p>
+          </article>
+
+          <article class="bento-tile bento-half reveal" id="benefit-lor">
+            <span class="icon-tile" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
+            <h3 class="h3">Letter of Recommendation</h3>
+            <p>A personalised LOR based on your approved work, not a template.</p>
+          </article>
         </div>
       </div>
     </section>
