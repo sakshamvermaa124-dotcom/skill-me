@@ -1,45 +1,33 @@
 {% extends "base.html" %}
+{% import "_ui.html" as ui %}
 
-{% block title %}🎓 Certificate &amp; LOR Issued — SkillMe{% endblock %}
+{% block title %}Certificate &amp; LOR issued — SkillMe{% endblock %}
+{% block preheader %}Your {{ domain_label }} Certificate of Completion and Letter of Recommendation are ready. Credential ID {{ cert_id }}.{% endblock %}
 
 {% block body %}
-<p class="greeting">Congratulations, {{ first_name }}! 🎓</p>
-<p class="lead">
-  You have successfully completed the 4-week <strong>{{ domain_label }}</strong> internship at <strong>SkillMe</strong>.
-  Your official, cryptographically verified Certificate of Completion and Letter of Recommendation (LOR) have been generated and published.
-</p>
+{{ ui.eyebrow("Certificate issued") }}
+{{ ui.title("Congratulations, " ~ first_name ~ " — you did it") }}
+{% call ui.p() %}
+  You've completed the 4-week <strong class="ink" style="color:#0a0a0a;">{{ domain_label }}</strong> internship at SkillMe.
+  Your Certificate of Completion and Letter of Recommendation are issued and ready to share.
+{% endcall %}
 
-<div class="cert-id-box">
-  <div class="cert-id-label">Official Credential ID</div>
-  <div class="cert-id-value">{{ cert_id }}</div>
-</div>
+{{ ui.code_box("Credential ID", cert_id) }}
 
-<p class="section-label">📜 Credential Summary</p>
-<div class="info-table">
-  <div class="info-row">
-    <span class="info-label">Candidate Name</span>
-    <span class="info-value">{{ first_name }} {{ last_name }}</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">Internship Track</span>
-    <span class="info-value">{{ domain_label }}</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">Date of Issuance</span>
-    <span class="info-value">{{ issued_date }}</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">Verification Status</span>
-    <span class="info-value"><span class="badge badge-green">Cryptographically Verified</span></span>
-  </div>
-</div>
+{% call ui.info_table() %}
+  {{ ui.row("Name", first_name ~ " " ~ last_name) }}
+  {{ ui.row("Track", domain_label) }}
+  {{ ui.row("Issued on", issued_date) }}
+  {{ ui.row("Status", ui.badge("Verified", "ok"), last=true) }}
+{% endcall %}
 
-<div class="cta-wrap">
-  <a href="{{ certificate_url }}" target="_blank" class="cta-btn">View Official Certificate &rarr;</a><br />
-  {% if lor_url %}
-  <a href="{{ lor_url }}" target="_blank" class="cta-btn-secondary" style="margin-top:10px;">View Letter of Recommendation ↗</a><br />
-  {% endif %}
-  <a href="{{ verify_url }}" target="_blank" class="cta-btn-secondary" style="margin-top:8px;">Open Public Verification Page ↗</a>
-</div>
+{% call ui.actions() %}
+  {{ ui.button(certificate_url, "View certificate") }}
+  {% if lor_url %}{{ ui.button(lor_url, "View recommendation letter", "secondary") }}{% endif %}
+{% endcall %}
 
+{% call ui.note("accent") %}
+  <strong class="ink" style="color:#0a0a0a;">Make it count:</strong> add the credential ID to LinkedIn under <em>Licenses &amp; certifications</em>.
+  Anyone can confirm it on the {{ ui.link(verify_url, "public verification page") }}.
+{% endcall %}
 {% endblock %}
