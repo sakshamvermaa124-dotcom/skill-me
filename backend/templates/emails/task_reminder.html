@@ -1,59 +1,42 @@
 {% extends "base.html" %}
+{% import "_ui.html" as ui %}
 
-{% block title %}⏰ Week {{ week_due }} Task Overdue{% endblock %}
+{% block title %}Your Week {{ week_due }} task is waiting{% endblock %}
+{% block preheader %}You haven't submitted your Week {{ week_due }} task yet. Keep your momentum going.{% endblock %}
 
 {% block body %}
-<p class="greeting">Hi {{ first_name }},</p>
+{{ ui.eyebrow("Reminder") }}
+{{ ui.title("Your Week " ~ week_due ~ " task is waiting") }}
+{% call ui.p() %}
+  Hi {{ first_name }}, you haven't submitted your <strong class="ink" style="color:#0a0a0a;">Week {{ week_due }}</strong> {{ domain_label }} task yet.
+  It's been <strong class="ink" style="color:#0a0a0a;">{{ days_inactive }} days</strong> since your last activity — your internship window is limited, so let's get you back on track.
+{% endcall %}
 
-<p class="lead">
-  We noticed you haven't submitted your <strong>Week {{ week_due }}</strong> {{ domain_label }} task yet.
-  It's been <strong>{{ days_inactive }} days</strong> since your last activity on SkillMe &mdash;
-  your internship window is limited, and staying on track is essential.
-</p>
+{% call ui.info_table() %}
+  {{ ui.row("Track", domain_label) }}
+  {{ ui.row("Current week", "Week " ~ week_due ~ " of 4") }}
+  {{ ui.row("Days since last activity", days_inactive ~ " days", value_color="#c81e1e") }}
+  {{ ui.row("Tasks completed", completed_tasks ~ "/4", last=true) }}
+{% endcall %}
 
-<div class="divider"></div>
+{{ ui.section("What to do now") }}
+{% call ui.steps() %}
+  {% call ui.step(1, "Complete the milestone") %}
+    Finish your Week {{ week_due }} project (code, design or cloud setup) using the task guide on your dashboard.
+  {% endcall %}
+  {% call ui.step(2, "Post it on LinkedIn") %}
+    Share a demo or summary of your work and tag <strong class="ink" style="color:#0a0a0a;">@SkillMe</strong>.
+  {% endcall %}
+  {% call ui.step(3, "Submit the post link", last=true) %}
+    Paste the LinkedIn post URL into your dashboard for review.
+  {% endcall %}
+{% endcall %}
 
-<div class="info-table">
-  <div class="info-row">
-    <span class="info-label">Track</span>
-    <span class="info-value">{{ domain_label }}</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">Current Week</span>
-    <span class="info-value">Week {{ week_due }} of 4</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">Days Since Last Activity</span>
-    <span class="info-value" style="color:#ef4444;font-weight:800;">{{ days_inactive }} days</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">Tasks Completed</span>
-    <span class="info-value">{{ completed_tasks }}/4</span>
-  </div>
-</div>
+{% call ui.actions(mt=26) %}
+  {{ ui.button(dashboard_url, "Submit your task") }}
+{% endcall %}
 
-<div class="section-label">📋 What You Need To Do</div>
-<div class="steps">
-  <div class="step">
-    <div class="step-num">1</div>
-    <div class="step-text"><strong>Complete</strong> your Week {{ week_due }} milestone (code, design or cloud setup) following the task guide on your dashboard.</div>
-  </div>
-  <div class="step">
-    <div class="step-num">2</div>
-    <div class="step-text"><strong>Post</strong> a demo or summary of your work on LinkedIn &mdash; tag <strong>@SkillMe</strong>.</div>
-  </div>
-  <div class="step">
-    <div class="step-num">3</div>
-    <div class="step-text"><strong>Submit</strong> the LinkedIn post URL on your SkillMe dashboard for review.</div>
-  </div>
-</div>
-
-<div class="cta-wrap">
-  <a href="{{ dashboard_url }}" target="_blank" class="cta-btn">Submit Your Task Now &rarr;</a>
-</div>
-
-<div class="note">
-  <strong>⏰ Don't delay:</strong> Your internship window is limited &mdash; the sooner you complete your milestones,
-  the sooner you earn your <strong>certificate</strong> and <strong>letter of recommendation</strong>. Make it count.
-</div>
+{% call ui.note(tone="warn") %}
+  The sooner you complete your milestones, the sooner you earn your <strong class="ink" style="color:#0a0a0a;">certificate</strong> and <strong class="ink" style="color:#0a0a0a;">letter of recommendation</strong>.
+{% endcall %}
 {% endblock %}
