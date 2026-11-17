@@ -1,42 +1,27 @@
 {% extends "base.html" %}
+{% import "_ui.html" as ui %}
 
-{% block title %}🎉 Week {{ week }} Task Approved!{% endblock %}
+{% block title %}Week {{ week }} task approved — SkillMe{% endblock %}
+{% block preheader %}Nice work — your Week {{ week }} {{ domain_label }} task was approved. +{{ score }} points.{% endblock %}
 
 {% block body %}
-<p class="greeting">Congratulations, {{ first_name }}! 🎉</p>
-<p class="lead">
-  Your <strong>Week {{ week }}</strong> {{ domain_label }} task has been <strong>approved</strong> by our review team.
-  Great work — keep up the momentum!
-</p>
+{{ ui.eyebrow("Task approved") }}
+{{ ui.title("Week " ~ week ~ " approved — nice work, " ~ first_name) }}
+{% call ui.p() %}
+  Your <strong class="ink" style="color:#0a0a0a;">Week {{ week }}</strong> {{ domain_label }} task has been
+  <strong class="ink" style="color:#0a0a0a;">approved</strong> by the SkillMe review team. Keep the momentum going.
+{% endcall %}
 
-<div class="divider"></div>
+{% call ui.info_table() %}
+  {{ ui.row("Week", "Week " ~ week) }}
+  {{ ui.row("Track", domain_label) }}
+  {{ ui.row("Score earned", "+" ~ score ~ " points", last=not admin_note, value_color="#15803d") }}
+  {% if admin_note %}{{ ui.row("Reviewer note", admin_note, last=true) }}{% endif %}
+{% endcall %}
 
-<div class="info-table">
-  <div class="info-row">
-    <span class="info-label">Week</span>
-    <span class="info-value">Week {{ week }}</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">Track</span>
-    <span class="info-value">{{ domain_label }}</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">Score Earned</span>
-    <span class="info-value">+{{ score }} points</span>
-  </div>
-  {% if admin_note %}
-  <div class="info-row">
-    <span class="info-label">Reviewer Note</span>
-    <span class="info-value">{{ admin_note }}</span>
-  </div>
-  {% endif %}
-</div>
+{% call ui.p(size=14, mb=0) %}Check your updated progress and see what's next on your roadmap.{% endcall %}
 
-<p class="lead" style="margin-bottom: 20px;">
-  Head over to your dashboard to check your updated progress and see what's next on your roadmap.
-</p>
-
-<div class="cta-wrap">
-  <a href="{{ dashboard_url }}" target="_blank" class="cta-btn">View My Progress &rarr;</a>
-</div>
+{% call ui.actions(mt=22) %}
+  {{ ui.button(dashboard_url, "View my progress") }}
+{% endcall %}
 {% endblock %}
