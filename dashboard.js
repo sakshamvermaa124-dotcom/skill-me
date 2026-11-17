@@ -1051,7 +1051,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnLabel = { approved: 'Approved ✓', pending: 'Under Review', rejected: 'Resubmit' }[subStatus] || 'Submit for Review';
         const guidance = {
           approved: { tone: 'ok', text: 'Approved — this task counts toward your progress. Nothing more to do here.' },
-          pending: { tone: 'warn', text: "Your post is being reviewed. You'll be able to submit a new link only if it's rejected." },
+          pending: { tone: 'warn', text: 'Your post is being reviewed. Pasted the wrong link? Use <strong>Edit link</strong> to fix it until the review is done.' },
           rejected: { tone: 'danger', text: 'This submission was rejected. Read the admin note, fix your LinkedIn post, then submit the new link below.' },
         }[subStatus];
         const dateStr = sub && sub.submitted_at ? new Date(sub.submitted_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '';
@@ -1113,10 +1113,15 @@ document.addEventListener('DOMContentLoaded', () => {
                   <div class="login-input-wrap">
                     <input type="url" id="${inputId}" placeholder="https://www.linkedin.com/posts/…" aria-label="LinkedIn post URL for week ${week}" aria-describedby="${inputId}-error" value="${sub && sub.linkedin_url ? esc(sub.linkedin_url) : ''}" ${isLocked ? 'disabled' : ''}>
                   </div>
+                  ${subStatus === 'pending' ? `
+                  <button type="button" id="${btnId}-edit" class="cert-btn cert-btn-secondary" onclick="window.toggleTaskLinkEdit(${week}, true)">Edit link</button>
+                  <button type="button" id="${btnId}" class="cert-btn cert-btn-primary" hidden
+                    onclick="window.submitTaskForReview(${ctx ? ctx.studentId : 'null'}, ${ctx ? ctx.batchId : 'null'}, ${week}, this, true)">Save link</button>
+                  <button type="button" id="${btnId}-cancel" class="cert-btn cert-btn-secondary" hidden onclick="window.toggleTaskLinkEdit(${week}, false)">Cancel</button>` : `
                   <button id="${btnId}" class="cert-btn cert-btn-primary" ${isLocked ? 'disabled' : ''}
                     onclick="window.submitTaskForReview(${ctx ? ctx.studentId : 'null'}, ${ctx ? ctx.batchId : 'null'}, ${week}, this)">
                     ${btnLabel}
-                  </button>
+                  </button>`}
                 </div>
                 <p class="task-submit-error" id="${inputId}-error" role="alert" hidden></p>
                 ${isLocked
@@ -1174,8 +1179,30 @@ document.addEventListener('DOMContentLoaded', () => {
     return null;
   }
 
-  // --- Submit a week's LinkedIn post URL for admin review ---
-  window.submitTaskForReview = async function(studentId, batchId, week, btn) {
+  // --- Fix the link on a submission that's still pending review ---
+  window.toggleTaskLinkEdit = function(week, editing) {
+    const input = document.getElementById(`sub-url-input-w${week}`);
+    const editBtn = document.getElementById(`sub-submit-btn-w${week}-edit`);
+    const saveBtn = document.getElementById(`sub-submit-btn-w${week}`);
+    const cancelBtn = document.getElementById(`sub-submit-btn-w${week}-cancel`);
+    const errEl = document.getElementById(`sub-url-input-w${week}-error`);
+    if (!input || !editBtn || !saveBtn || !cancelBtn) return;
+    if (!editing) {
+      input.value = input.dataset.original ?? input.value;
+      input.removeAttribute('aria-invalid');
+      if (errEl) { errEl.textContent = ''; errEl.hidden = true; }
+    } else {
+      input.dataset.original = input.value;
+    }
+    input.disabled = !editing;
+    editBtn.hidden = editing;
+    saveBtn.hidden = !editing;
+    cancelBtn.hidden = !editing;
+    if (editing) { input.focus(); input.select(); }
+  };
+
+  // --- Submit a week's LinkedIn post URL for admin review (or fix a pending one) ---
+  window.submitTaskForReview = async function(studentId, batchId, week, btn, isUpdate = false) {
     const input = document.getElementById(`sub-url-input-w${week}`);
     const errEl = document.getElementById(`sub-url-input-w${week}-error`);
     // Problems with the link show right under the field, not in a pop-up.
@@ -1195,6 +1222,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     const url = input ? input.value.trim() : '';
+    if (isUpdate && input && url === (input.dataset.original || '').trim()) {
+      showFieldError("That's the same link you already submitted.");
+      return;
+    }
     if (!url) {
       showFieldError('Paste your LinkedIn post link first.');
       return;
@@ -1208,11 +1239,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const originalText = btn.textContent;
     btn.disabled = true;
-    btn.textContent = 'Submitting...';
+    btn.textContent = isUpdate ? 'Saving...' : 'Submitting...';
+    const cancelBtn = isUpdate ? document.getElementById(`sub-submit-btn-w${week}-cancel`) : null;
+    if (cancelBtn) cancelBtn.disabled = true;
+    const restore = () => {
+      btn.disabled = false;
+      btn.textContent = originalText;
+      if (cancelBtn) cancelBtn.disabled = false;
+    };
 
     try {
       const res = await fetch(`${API}/api/students/submit-task`, {
-        method: 'POST',
+        method: isUpdate ? 'PUT' : 'POST',
         headers: authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ student_id: studentId, batch_id: batchId, week, linkedin_url: url })
       });
@@ -1220,9 +1258,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!res.ok) {
         if (res.status === 401) return sessionExpired();
-        showFieldError(resData.detail || 'Could not submit for review. Please try again.');
-        btn.disabled = false;
-        btn.textContent = originalText;
+        showFieldError(resData.detail || (isUpdate ? 'Could not update the link. Please try again.' : 'Could not submit for review. Please try again.'));
+        restore();
+        return;
+      }
+      if (isUpdate) {
+        dashToast(`Week ${week} link updated. It's still in the review queue.`);
+        const existing = window._dashData && (window._dashData.submissions || []).find(s => Number(s.week) === Number(week));
+        if (existing) {
+          existing.linkedin_url = url;
+          renderSubmissionsList(window._dashData.submissions);
+          loadAndRenderTasks(window._dashData);
+        } else {
+          if (input) input.dataset.original = url;
+          window.toggleTaskLinkEdit(week, false);
+        }
         return;
       }
       dashToast(`Week ${week} submitted. We'll review it and email you.`);
@@ -1249,8 +1299,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } catch (e) {
       showFieldError("We couldn't reach SkillMe. Check your connection and try again.");
-      btn.disabled = false;
-      btn.textContent = originalText;
+      restore();
     }
   };
 

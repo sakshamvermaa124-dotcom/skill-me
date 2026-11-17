@@ -85,6 +85,43 @@ class SubmissionService:
             "feedback_text": feedback_text,
         }
 
+    async def update_pending_url(
+        self, student_id: int, batch_id: int, week: int, linkedin_url: str
+    ) -> dict:
+        """Swap the link on a submission that is still waiting for review (e.g. the intern pasted
+        the wrong post). Once an admin approves or rejects it, the link is frozen."""
+        if not _is_linkedin_url(linkedin_url):
+            raise ValueError("Please submit a valid linkedin.com URL.")
+
+        existing = await db.fetch_one(
+            "SELECT id, status, linkedin_url FROM submissions WHERE student_id = ? AND batch_id = ? AND week = ?",
+            (student_id, batch_id, week),
+        )
+        if not existing:
+            raise ValueError("There's no submission for this week yet.")
+        if existing["status"] != "pending":
+            raise ValueError("This submission has already been reviewed, so its link can't be changed.")
+        if existing["linkedin_url"] == linkedin_url:
+            raise ValueError("That's the same link you already submitted.")
+
+        # Guard on status in the UPDATE itself so a review landing between the read above and
+        # this write is never overwritten. The queue position (submitted_at) is kept.
+        await db.execute(
+            "UPDATE submissions SET linkedin_url = ? WHERE id = ? AND status = 'pending'",
+            (linkedin_url, existing["id"]),
+        )
+        after = await db.fetch_one(
+            "SELECT status, linkedin_url FROM submissions WHERE id = ?", (existing["id"],)
+        )
+        if not after or after["status"] != "pending" or after["linkedin_url"] != linkedin_url:
+            raise ValueError("This submission was just reviewed, so its link can't be changed.")
+
+        logger.info(
+            f"Student {student_id} updated week {week} link for batch {batch_id}: "
+            f"{existing['linkedin_url']} -> {linkedin_url}"
+        )
+        return {"submission_id": existing["id"], "status": "pending", "linkedin_url": linkedin_url}
+
     async def _sync_completion(self, student_id: int, batch_id: int) -> None:
         """Keep enrollments.status/completed_at in line with the approvals: completed exactly when
         all TOTAL_WEEKS distinct weeks are approved (derived from submissions, the source of truth)."""

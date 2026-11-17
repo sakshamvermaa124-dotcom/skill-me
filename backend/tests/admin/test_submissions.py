@@ -107,6 +107,71 @@ class TestSubmitTask:
 
 
 @pytest.mark.admin
+class TestUpdatePendingLink:
+    def _payload(self, student, url, week=1):
+        return {"student_id": student["id"], "batch_id": student["batch_id"], "week": week, "linkedin_url": url}
+
+    async def test_update_link_while_pending(self, client, enrolled_student):
+        import routes.students as students_route
+        h = auth_headers(enrolled_student["id"])
+        first = await client.post("/api/students/submit-task", json=self._payload(enrolled_student, "https://www.linkedin.com/posts/wrong"), headers=h)
+        sid = first.json()["submission_id"]
+        before = await test_db.fetch_one("SELECT submitted_at, attempts FROM submissions WHERE id = ?", (sid,))
+        emails_before = students_route.email_service.send_submission_feedback.call_count
+
+        r = await client.put("/api/students/submit-task", json=self._payload(enrolled_student, "https://www.linkedin.com/posts/right"), headers=h)
+        assert r.status_code == 200
+        assert r.json() == {"submission_id": sid, "status": "pending", "linkedin_url": "https://www.linkedin.com/posts/right"}
+
+        row = await test_db.fetch_one("SELECT linkedin_url, status, submitted_at, attempts FROM submissions WHERE id = ?", (sid,))
+        assert row["linkedin_url"] == "https://www.linkedin.com/posts/right"
+        assert row["status"] == "pending"
+        # Keeps its queue position, isn't counted as a new attempt, and doesn't re-email feedback
+        assert row["submitted_at"] == before["submitted_at"]
+        assert row["attempts"] == before["attempts"]
+        assert students_route.email_service.send_submission_feedback.call_count == emails_before
+
+    async def test_update_link_blocked_after_review(self, client, admin_headers, enrolled_student):
+        h = auth_headers(enrolled_student["id"])
+        sub = await client.post("/api/students/submit-task", json=self._payload(enrolled_student, "https://www.linkedin.com/posts/a"), headers=h)
+        sid = sub.json()["submission_id"]
+        await client.post(f"/api/admin/submissions/{sid}/approve", json={}, headers=admin_headers)
+
+        r = await client.put("/api/students/submit-task", json=self._payload(enrolled_student, "https://www.linkedin.com/posts/b"), headers=h)
+        assert r.status_code == 400
+        row = await test_db.fetch_one("SELECT linkedin_url FROM submissions WHERE id = ?", (sid,))
+        assert row["linkedin_url"] == "https://www.linkedin.com/posts/a"
+
+    async def test_update_link_blocked_after_rejection(self, client, admin_headers, enrolled_student):
+        h = auth_headers(enrolled_student["id"])
+        sub = await client.post("/api/students/submit-task", json=self._payload(enrolled_student, "https://www.linkedin.com/posts/a"), headers=h)
+        await client.post(f"/api/admin/submissions/{sub.json()['submission_id']}/reject", json={"admin_note": "x"}, headers=admin_headers)
+        r = await client.put("/api/students/submit-task", json=self._payload(enrolled_student, "https://www.linkedin.com/posts/b"), headers=h)
+        assert r.status_code == 400
+
+    async def test_update_link_validation(self, client, enrolled_student):
+        h = auth_headers(enrolled_student["id"])
+        # Nothing submitted yet
+        r = await client.put("/api/students/submit-task", json=self._payload(enrolled_student, "https://www.linkedin.com/posts/a"), headers=h)
+        assert r.status_code == 400
+        await client.post("/api/students/submit-task", json=self._payload(enrolled_student, "https://www.linkedin.com/posts/a"), headers=h)
+        # Not a LinkedIn link
+        r = await client.put("/api/students/submit-task", json=self._payload(enrolled_student, "https://github.com/x"), headers=h)
+        assert r.status_code == 400
+        # Same link
+        r = await client.put("/api/students/submit-task", json=self._payload(enrolled_student, "https://www.linkedin.com/posts/a"), headers=h)
+        assert r.status_code == 400
+
+    async def test_update_link_needs_own_session(self, client, enrolled_student):
+        from tests.conftest import seed_student
+        await client.post("/api/students/submit-task", json=self._payload(enrolled_student, "https://www.linkedin.com/posts/a"), headers=auth_headers(enrolled_student["id"]))
+        payload = self._payload(enrolled_student, "https://www.linkedin.com/posts/b")
+        assert (await client.put("/api/students/submit-task", json=payload)).status_code == 401
+        other = await seed_student(test_db, email="intruder2@example.com")
+        assert (await client.put("/api/students/submit-task", json=payload, headers=auth_headers(other))).status_code == 403
+
+
+@pytest.mark.admin
 class TestSubmissionReviewQueue:
     async def test_list_pending_submissions(self, client, admin_headers, enrolled_student):
         await client.post(

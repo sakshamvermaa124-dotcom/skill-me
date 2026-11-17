@@ -438,6 +438,27 @@ async def submit_task(
     return result
 
 
+@router.put("/submit-task", summary="Change the LinkedIn link on a submission still pending review")
+async def update_task_link(req: SubmitTaskRequest, me: dict = Depends(require_student)):
+    """
+    Lets a student fix a wrong link before an admin has approved or rejected the submission.
+    Keeps the submission's place in the review queue and doesn't re-send the feedback email.
+    """
+    await _assert_owns(me, req.student_id)
+    batch_id = await enrollment_service.resolve_batch_id(req.student_id, req.batch_id)
+    if not batch_id:
+        raise HTTPException(status_code=400, detail="You are not enrolled in an internship yet.")
+    try:
+        return await submission_service.update_pending_url(
+            student_id=req.student_id,
+            batch_id=batch_id,
+            week=req.week,
+            linkedin_url=req.linkedin_url,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 @router.post("/urgent-request", summary="Request 24h expedited certificate/LOR/portfolio processing")
 async def create_urgent_request(req: UrgentRequestRequest, me: dict = Depends(require_student)):
     """

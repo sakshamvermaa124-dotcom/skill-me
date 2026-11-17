@@ -1217,6 +1217,7 @@ textarea.dash-input { resize: vertical; min-height: 84px; }
 .task-submit { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
 .task-submit .login-input-wrap { flex: 1; min-width: 220px; margin-bottom: 0; }
 .task-submit .cert-btn { flex-shrink: 0; }
+.task-submit .cert-btn[hidden] { display: none; }
 .task-hint { margin-top: 8px; font-size: 0.76rem; color: var(--text-faint); }
 .task-hint strong { color: var(--text-muted); }
 .task-view-post { display: inline-block; margin-top: 8px; font-size: 0.82rem; font-weight: 600; color: var(--accent-text); }
