@@ -223,8 +223,10 @@ async def root_page():
     return {"service": "SkillMe API", "status": "running"}
 
 
-@app.get("/health", tags=["health"])
-@app.get("/api/health", tags=["health"])
+# HEAD too: uptime monitors (UptimeRobot free) probe with HEAD, which otherwise falls through
+# to the static mount below and 404s.
+@app.api_route("/health", methods=["GET", "HEAD"], tags=["health"])
+@app.api_route("/api/health", methods=["GET", "HEAD"], tags=["health"])
 async def health():
     """Detailed health check."""
     db_ok = False
