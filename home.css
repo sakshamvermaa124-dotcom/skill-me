@@ -509,9 +509,7 @@
 .faq-side { position: sticky; top: calc(var(--nav-h) + 24px); display: flex; flex-direction: column; align-items: flex-start; }
 .faq-side .eyebrow { margin-bottom: 14px; }
 .faq-side .lead { margin-top: 14px; }
-.faq-search { position: relative; width: 100%; margin-top: 28px; }
-.faq-search .input { padding-left: 42px; }
-.faq-search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-3); pointer-events: none; }
+.faq-search { margin-top: 28px; }
 .support { width: 100%; margin-top: 16px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; background: var(--surface-2); box-shadow: none; }
 .support p { font-size: 0.9rem; margin-bottom: 6px; }
 .faq-filters { margin-bottom: 18px; }
@@ -523,8 +521,17 @@
 .faq-answer { padding-left: 44px !important; }
 .faq-answer p { font-size: 0.95rem; }
 .faq-empty { padding: 24px 2px; color: var(--text-2); font-size: 0.92rem; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.tags span {
+  padding: 2px 8px;
+  border-radius: var(--r-xs);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-2);
+}
 
 /* ── Final CTA ───────────────────────────────────────────────── */
+.cta-section { padding-top: 0; }
 .cta-card {
   --cta-fg: var(--invert-fg);
   --cta-fg-2: color-mix(in srgb, var(--invert-fg) 68%, transparent);
@@ -540,7 +547,9 @@
 }
 .cta-card::before {
   content: ''; position: absolute; inset: 0;
-  background: radial-gradient(60% 80% at 50% 0%, var(--primary-wash), transparent 70%);
+  background:
+    radial-gradient(50% 70% at 20% 0%, var(--primary-wash), transparent 70%),
+    radial-gradient(50% 70% at 80% 0%, var(--accent-wash), transparent 70%);
   pointer-events: none;
 }
 .cta-card > * { position: relative; }
@@ -560,8 +569,8 @@
   color: var(--accent);
 }
 .cta-badge .live-dot { color: var(--accent); box-shadow: 0 0 0 3px var(--accent-wash); }
-.cta-title { color: var(--cta-fg); max-width: 18ch; margin-top: 20px; }
-.cta-lead { max-width: 58ch; margin-top: 16px; color: var(--cta-fg-2); font-size: clamp(1rem, 1.5vw, 1.1rem); }
+.cta-title { color: var(--cta-fg); max-width: 20ch; margin-top: 20px; }
+.cta-lead { max-width: 52ch; margin-top: 16px; color: var(--cta-fg-2); font-size: clamp(1rem, 1.5vw, 1.12rem); }
 .cta-tracks { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; margin-top: 32px; }
 .cta-tracks-label { width: 100%; margin-bottom: 4px; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cta-fg-2); }
 .cta-track-pill {
@@ -576,9 +585,9 @@
 .cta-track-pill:hover { color: var(--cta-fg); border-color: var(--cta-fg-2); }
 .cta-track-pill.active, .cta-track-pill[aria-pressed="true"] { background: var(--cta-fg); border-color: var(--cta-fg); color: var(--invert); }
 .cta-track-pill:focus-visible { outline-color: var(--accent); }
+.cta-track-more { padding: 0 8px; font-size: 0.86rem; font-weight: 600; color: var(--accent); }
+.cta-track-more:hover { text-decoration: underline; text-underline-offset: 3px; }
 .cta-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 24px; }
-.cta-secondary { background: transparent; color: var(--cta-fg); border-color: var(--cta-line); }
-.cta-secondary:hover { border-color: var(--cta-fg-2); background: color-mix(in srgb, var(--invert-fg) 6%, transparent); }
 .cta-points {
   list-style: none;
   width: 100%;
