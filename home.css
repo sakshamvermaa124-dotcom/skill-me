@@ -451,14 +451,24 @@
 .selective {
   display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
   margin-top: 24px;
+  border: 1px solid var(--line);
   border-radius: var(--r-xl);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
 }
-.cert-visual {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
-  padding: clamp(28px, 4vw, 48px);
-  background: var(--surface-2);
-  border-right: 1px solid var(--line);
+.selective-main { padding: clamp(24px, 3.4vw, 40px); }
+.selective-title { margin-top: 10px; font-size: clamp(1.3rem, 2.4vw, 1.7rem); letter-spacing: -0.03em; line-height: 1.2; text-wrap: balance; }
+.selective-main > p { margin-top: 12px; color: var(--text-2); font-size: 0.95rem; max-width: 56ch; }
+.selective-rules { display: flex; flex-direction: column; gap: 12px; margin-top: 22px; }
+.selective-rules li { position: relative; padding-left: 30px; font-size: 0.93rem; color: var(--text-2); }
+.selective-rules li strong { color: var(--text); font-weight: 600; }
+.selective-rules li::before { content: ''; position: absolute; left: 0; top: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--ok-wash); }
+.selective-rules li::after { content: ''; position: absolute; left: 7px; top: 6px; width: 5px; height: 9px; border: solid var(--ok); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.not-for {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 14px;
+  padding: clamp(24px, 3.4vw, 40px);
+  background: var(--invert); color: var(--invert-fg);
 }
 .cert-mock {
   width: 100%; max-width: 420px;
