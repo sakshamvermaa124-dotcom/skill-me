@@ -2,11 +2,11 @@
  * SkillMe — Global API Configuration
  * Auto-detects whether we're running locally or on production.
  * 
- * Production points to Google Cloud Run.
+ * Production points to Render.
  */
 
 (function() {
-  const PROD_API_URL = 'https://skill-me-855405842571.asia-south2.run.app';  // Live GCP
+  const PROD_API_URL = 'https://skill-me-yi2p.onrender.com';  // Live Render
   const LOCAL_URL  = 'http://' + window.location.hostname + ':8000';
 
   const isLocal = (
