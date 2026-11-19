@@ -323,6 +323,7 @@ async def client() -> AsyncGenerator[httpx.AsyncClient, None]:
         patch("routes.tasks.db", test_db),
         patch("services.submission_service.db", test_db),
         patch("services.certificate_service.db", test_db),
+        patch("services.name_change_service.db", test_db),
         patch("middleware.student_auth.db", test_db),
         patch("services.email_service.email_service", mock_email),
         patch("routes.admin.email_service", mock_email),

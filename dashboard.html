@@ -50,8 +50,8 @@
   <link rel="stylesheet" href="style.css?v=f405dfefe7">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="dashboard.css?v=281972c878">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css?v=83d7749ac8">
   <link rel="stylesheet" href="dashboard-activation.css?v=e5d55a6f32">
 
   <script src="config.js?v=a6d0001538" defer></script>
@@ -462,6 +462,88 @@
             <div class="unlock-foot"><span id="unlock-count">0 of 3</span> approved</div>
           </div>
 
+          <!-- Name on your credentials — dashboard.js (renderNameCard) fills and reveals it.
+               Three states share the card: view → edit → review & confirm. -->
+          <section class="name-card" id="name-card" aria-labelledby="name-card-title" hidden>
+            <div class="name-card-head">
+              <span class="name-card-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2.2"/><path d="M5.8 16.2a3.5 3.5 0 0 1 6.4 0"/><path d="M15 9h3"/><path d="M15 13h3"/></svg>
+              </span>
+              <div class="name-card-heading">
+                <h3 class="name-card-title" id="name-card-title">Name on your credentials</h3>
+                <p class="name-card-sub">Printed on your offer letter, certificate and letter of recommendation, and used in every email we send you.</p>
+              </div>
+            </div>
+
+            <!-- 1. View -->
+            <div class="name-card-step" id="name-card-view">
+              <div class="name-plate" id="name-plate">
+                <span class="name-plate-label">Current name</span>
+                <span class="name-plate-value" id="name-card-current">—</span>
+              </div>
+              <div class="name-card-foot">
+                <div class="name-quota" id="name-card-quota">
+                  <span class="name-quota-dots" id="name-card-dots" aria-hidden="true"></span>
+                  <span id="name-card-quota-text">2 of 2 changes left</span>
+                </div>
+                <button type="button" class="cert-btn cert-btn-secondary name-card-edit" id="name-card-edit-btn" onclick="nameCardEdit()">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                  Edit name
+                </button>
+              </div>
+              <div class="name-card-lock" id="name-card-lock" hidden>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                <p><span id="name-card-lock-text"></span> <a id="name-card-support" href="mailto:admin@skill-me-intern.in">Email support</a></p>
+              </div>
+            </div>
+
+            <!-- 2. Edit -->
+            <form class="name-card-step" id="name-card-form" hidden novalidate onsubmit="nameCardReview(event)">
+              <div class="name-fields">
+                <label class="name-field">
+                  <span>First name</span>
+                  <input type="text" class="dash-input" id="name-input-first" autocomplete="given-name" autocapitalize="words" spellcheck="false" maxlength="50" required oninput="nameCardInput()">
+                </label>
+                <label class="name-field">
+                  <span>Last name</span>
+                  <input type="text" class="dash-input" id="name-input-last" autocomplete="family-name" autocapitalize="words" spellcheck="false" maxlength="50" required oninput="nameCardInput()">
+                </label>
+              </div>
+              <div class="name-preview" aria-live="polite">
+                <span class="name-preview-label">Will be printed as</span>
+                <span class="name-preview-value" id="name-preview-value">—</span>
+              </div>
+              <button type="button" class="name-suggest" id="name-suggest" hidden onclick="nameCardApplySuggestion()"></button>
+              <p class="name-card-error" id="name-card-error" role="alert"></p>
+              <p class="name-impact" id="name-impact"></p>
+              <div class="name-card-actions">
+                <button type="button" class="cert-btn cert-btn-secondary" onclick="nameCardCancel()">Cancel</button>
+                <button type="submit" class="cert-btn cert-btn-primary" id="name-review-btn" disabled>Review change</button>
+              </div>
+            </form>
+
+            <!-- 3. Review & confirm -->
+            <div class="name-card-step" id="name-card-confirm" hidden>
+              <div class="name-diff">
+                <div class="name-diff-row">
+                  <span class="name-diff-label">From</span>
+                  <span class="name-diff-old" id="name-diff-old">—</span>
+                </div>
+                <svg class="name-diff-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+                <div class="name-diff-row">
+                  <span class="name-diff-label">To</span>
+                  <span class="name-diff-new" id="name-diff-new">—</span>
+                </div>
+              </div>
+              <p class="name-impact" id="name-confirm-impact"></p>
+              <p class="name-card-error" id="name-confirm-error" role="alert"></p>
+              <div class="name-card-actions">
+                <button type="button" class="cert-btn cert-btn-secondary" id="name-back-btn" onclick="nameCardBack()">Back</button>
+                <button type="button" class="cert-btn cert-btn-primary" id="name-confirm-btn" onclick="nameCardConfirm()">Confirm change</button>
+              </div>
+            </div>
+          </section>
+
           <!-- Payment / certificate-ready banner — dashboard.js reveals it -->
           <div id="cert-section" style="display:none;"></div>
 
@@ -628,7 +710,7 @@
   <!-- Lenis smooth scroll -->
   <div id="dash-toast" class="dash-toast" role="status" aria-live="polite"></div>
   <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js" integrity="sha384-tKsJDT6PlUI0pSBt9/sBKJluKgA19/a6mBrDsZaXotLB4ZYfMGM6xt6/WgGpYhTm" crossorigin="anonymous" defer></script>
-  <script src="dashboard.js?v=08db0f6bb5" defer></script>
+  <script src="dashboard.js?v=5dc63ed872" defer></script>
   <script src="dashboard-ui.js?v=e74a8796a3" defer></script>
   <script src="dashboard-activation.js?v=a197c1d57f" defer></script>
 

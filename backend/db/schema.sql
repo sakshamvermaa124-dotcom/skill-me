@@ -305,4 +305,22 @@ CREATE TABLE IF NOT EXISTS support_requests (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     resolved_at TIMESTAMP
 );
-CREATE INDEX IF NOT EXISTS idx_support_status ON support_requests(status, created_at)
+CREATE INDEX IF NOT EXISTS idx_support_status ON support_requests(status, created_at);
+
+-- Name corrections a student made to the name printed on their documents.
+-- The limit (2 per person) is per email, so it holds across every track they applied to.
+-- The unique (email, change_number) pair stops two simultaneous requests both
+-- taking the "last" change.
+CREATE TABLE IF NOT EXISTS name_changes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL,                 -- lowercased
+    student_id INTEGER NOT NULL,         -- application the change was made from
+    change_number INTEGER NOT NULL,      -- 1, 2, ...
+    old_first_name TEXT NOT NULL,
+    old_last_name TEXT NOT NULL,
+    new_first_name TEXT NOT NULL,
+    new_last_name TEXT NOT NULL,
+    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_name_changes_email_number ON name_changes(email, change_number);
+CREATE INDEX IF NOT EXISTS idx_name_changes_changed_at ON name_changes(changed_at)

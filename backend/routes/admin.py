@@ -195,6 +195,21 @@ _CURRENT_BATCH_ID_SUBQUERY = """(
 )"""
 
 
+@router.get("/name-changes", summary="History of students changing their name")
+async def list_name_changes(
+    q: str | None = None,
+    page: int = 1,
+    limit: int = STUDENTS_PAGE_SIZE,
+    _: str = Depends(require_admin),
+):
+    """Every name change, newest first: old → new name, which change it was (of 2),
+    the person's current name and whether their name is now locked by a payment.
+    `q` searches email and old/new names."""
+    from services.name_change_service import list_changes
+    limit = max(1, min(limit, STUDENTS_MAX_PAGE_SIZE))
+    return await list_changes((q or "").strip() or None, max(1, page), limit)
+
+
 @router.get("/students", summary="List students (server-side paginated)")
 async def list_students(
     status: str | None = None,
@@ -412,6 +427,11 @@ async def delete_student(student_id: int, force: bool = False, _: str = Depends(
             pass
 
         await db.execute("DELETE FROM students WHERE id = ?", (student_id,))
+        # Name-change history is per person (email): drop it once their last application is gone.
+        await db.execute(
+            "DELETE FROM name_changes WHERE email = LOWER(?) AND NOT EXISTS (SELECT 1 FROM students WHERE LOWER(email) = LOWER(?))",
+            (email, email),
+        )
 
         _invalidate_analytics()
         logger.info(f"Admin permanently deleted student #{student_id} ({student['first_name']} {student['last_name']} - {email})")

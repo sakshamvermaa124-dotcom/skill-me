@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="theme.css?v=98690fd7ba">
-  <link rel="stylesheet" href="admin.css?v=2bd10f5787">
+  <link rel="stylesheet" href="admin.css?v=8587dce7c2">
   <script src="theme.js?v=515b2d143f" defer></script>
 </head>
 <body>
@@ -138,6 +138,12 @@
         </svg>
         Urgent Requests
         <span class="nav-badge is-warn" id="urgent-requests-badge" style="display:none">0</span>
+      </div>
+      <div class="nav-item" id="nav-name-changes" onclick="navigate('name-changes')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M6 16a3.2 3.2 0 0 1 6 0"/><path d="M15 9h3"/><path d="M15 13h3"/>
+        </svg>
+        Name Changes
       </div>
       <div class="nav-item" id="nav-announcements" onclick="navigate('announcements')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -597,6 +603,38 @@
     </section>
 
     <!-- ─── ANNOUNCEMENTS PAGE ─── -->
+    <!-- ─── NAME CHANGES PAGE ─── -->
+    <section class="page" id="page-name-changes">
+      <div class="stats-grid" id="nc-stats"></div>
+      <div class="filter-row" style="margin-top:16px;">
+        <input type="text" class="search-input" id="nc-search" aria-label="Search name changes" placeholder="Search by email, old name or new name..." oninput="filterNameChanges()" />
+        <button class="btn btn-ghost btn-sm" onclick="loadNameChanges()" aria-label="Refresh name changes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+        </button>
+      </div>
+      <div class="panel">
+        <div class="table-wrap">
+          <table id="nc-table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Change</th>
+                <th>Attempt</th>
+                <th>Changed</th>
+                <th>Certificate</th>
+              </tr>
+            </thead>
+            <tbody id="nc-tbody">
+              <tr><td colspan="5"><div class="loading-overlay"><div class="spinner"></div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="nc-pagination" class="list-pagination"></div>
+      </div>
+    </section>
+
     <section class="page" id="page-announcements">
       <div class="panel">
         <div class="panel-header">
@@ -754,7 +792,7 @@
 </div>
 
 <script src="config.js?v=a6d0001538" defer></script>
-<script src="admin.js?v=bc2016f6c6" defer></script>
+<script src="admin.js?v=0a1a3afb56" defer></script>
 <script src="admin-email.js?v=00d66440ba" defer></script>
 <script src="admin-recovery.js?v=f85f90e16f" defer></script>
 <script src="admin-analytics.js?v=ebc40a1f6f" defer></script>

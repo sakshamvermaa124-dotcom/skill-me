@@ -45,6 +45,340 @@ function modalClosed() {
   modalReturnFocus = null;
 }
 
+// ─────────────────────────────────────────────────────────────
+// Name on your credentials (Credentials tab)
+// The backend (PUT /api/students/name) owns the rules: 2 changes per person, locked once a
+// certificate is paid for or issued. The checks here only give instant feedback.
+// ─────────────────────────────────────────────────────────────
+const NAME_MAX = 50;
+const NAME_ALLOWED = /^[\p{L}\p{M} .'’-]+$/u;
+const SUPPORT_EMAIL = 'admin@skill-me-intern.in';
+const nameEdit = { first: '', last: '', busy: false };
+
+// The student's name appears in the header, sidebar, offer/HOD links and the name card.
+// Rendered from one place so a name change updates all of them at once.
+function applyStudentName(student) {
+  const name = String(student.name || '').trim();
+  const firstName = name.split(' ')[0];
+  const dashNameEl = document.getElementById('dash-name');
+  if (dashNameEl) dashNameEl.textContent = `Welcome back, ${firstName}`;
+  const sidebarNameEl = document.getElementById('dash-sidebar-name');
+  if (sidebarNameEl) sidebarNameEl.textContent = name;
+  const mobileHeaderNameEl = document.getElementById('mobile-header-name');
+  if (mobileHeaderNameEl) mobileHeaderNameEl.textContent = name;
+  const avatarEl = document.getElementById('dash-avatar');
+  if (avatarEl) {
+    const initials = name.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+    avatarEl.textContent = initials || '·';
+  }
+
+  const hodUrl = `/offer?view=hod&student_id=${student.id || ''}&ref=${encodeURIComponent(student.offer_ref || '')}&name=${encodeURIComponent(name)}&domain=${encodeURIComponent(student.domain || '')}&college=${encodeURIComponent(student.college || '')}`;
+  const hodQuickLink = document.getElementById('dash-quick-hod');
+  if (hodQuickLink) hodQuickLink.href = hodUrl;
+  const hodBannerBtn = document.getElementById('dash-banner-hod-btn');
+  if (hodBannerBtn) hodBannerBtn.href = hodUrl;
+
+  renderNameCard(student);
+}
+
+function nameStatusOf(student) {
+  // Older backends don't send the status yet: show the card as editable.
+  return Object.assign({ limit: 2, used: 0, remaining: 2, can_edit: true, locked_reason: null }, student.name_change || {});
+}
+
+function cleanNamePart(v) { return String(v || '').replace(/\s+/g, ' ').trim(); }
+
+function nameError(value, label) {
+  if (!value) return `Please enter your ${label}.`;
+  if (value.length > NAME_MAX) return `Your ${label} can be at most ${NAME_MAX} characters.`;
+  if (!NAME_ALLOWED.test(value)) return `Your ${label} can only contain letters, spaces, hyphens, apostrophes and full stops.`;
+  if (!/\p{L}/u.test(value)) return `Your ${label} must contain at least one letter.`;
+  return '';
+}
+
+// "saksham verma" / "SAKSHAM VERMA" → "Saksham Verma". Only suggested when the whole
+// name is one case, so deliberate styles ("de la Cruz", "McDonald") are left alone.
+function titleCaseName(v) {
+  return v.toLowerCase().replace(/(^|[\s'’-])(\p{L})/gu, (_, sep, ch) => sep + ch.toUpperCase());
+}
+function needsCasingFix(full) {
+  const letters = full.replace(/[^\p{L}]/gu, '');
+  if (letters.length < 2 || letters.toLowerCase() === letters.toUpperCase()) return false;
+  return letters === letters.toLowerCase() || letters === letters.toUpperCase();
+}
+
+function nameCardShow(step) {
+  ['view', 'form', 'confirm'].forEach(s => {
+    const el = document.getElementById(`name-card-${s}`);
+    if (el) el.hidden = s !== step;
+  });
+  const card = document.getElementById('name-card');
+  if (card) card.dataset.step = step;
+}
+
+function renderNameCard(student) {
+  const card = document.getElementById('name-card');
+  if (!card || !student) return;
+  const st = nameStatusOf(student);
+  card.hidden = false;
+  // Switching to another application (track) closes any half-finished edit.
+  if (card.dataset.sid !== String(student.id)) { card.dataset.sid = String(student.id); nameCardShow('view'); }
+  card.dataset.state = st.can_edit ? 'editable' : 'locked';
+
+  const current = document.getElementById('name-card-current');
+  if (current) current.textContent = String(student.name || '').trim() || '—';
+
+  // Remaining changes as dots: filled = still available.
+  const dots = document.getElementById('name-card-dots');
+  if (dots) {
+    dots.innerHTML = '';
+    for (let i = 0; i < st.limit; i++) {
+      const dot = document.createElement('i');
+      if (i < st.remaining && st.locked_reason !== 'certificate_issued') dot.className = 'is-on';
+      dots.appendChild(dot);
+    }
+  }
+  const quotaText = document.getElementById('name-card-quota-text');
+  const quota = document.getElementById('name-card-quota');
+  const editBtn = document.getElementById('name-card-edit-btn');
+  const lock = document.getElementById('name-card-lock');
+  const lockText = document.getElementById('name-card-lock-text');
+  const support = document.getElementById('name-card-support');
+
+  if (quotaText) {
+    quotaText.textContent = st.locked_reason === 'certificate_issued'
+      ? 'Locked'
+      : `${st.remaining} of ${st.limit} ${st.limit === 1 ? 'change' : 'changes'} left`;
+  }
+  if (quota) quota.dataset.tone = st.can_edit ? (st.remaining === 1 ? 'warn' : 'ok') : 'muted';
+  if (editBtn) editBtn.hidden = !st.can_edit;
+  if (lock) lock.hidden = st.can_edit;
+  if (lockText) {
+    lockText.textContent = st.locked_reason === 'certificate_issued'
+      ? 'Your certificate has been issued with this name, so it can no longer be changed. Spotted a mistake?'
+      : `You've used both name changes, so this name is now final. Still not right?`;
+  }
+  if (support) {
+    const body = `Student ID: ${student.id || ''}\nName on record: ${student.name || ''}\nCorrect name: `;
+    support.href = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent('Name correction request')}&body=${encodeURIComponent(body)}`;
+  }
+  if (!st.can_edit && card.dataset.step !== 'view') nameCardShow('view');
+}
+
+function nameImpactText(st) {
+  const left = st.remaining - 1;
+  if (left <= 0) {
+    return { tone: 'warn', html: '<strong>This is your last change.</strong> After this your name is final and can only be corrected by support.' };
+  }
+  return { tone: 'info', html: `This uses 1 of your ${st.limit} changes. You'll have ${left} left, until you claim your certificate.` };
+}
+
+window.nameCardEdit = function () {
+  const student = window._dashStudent;
+  if (!student || !nameStatusOf(student).can_edit) return;
+  const parts = String(student.name || '').trim().split(/\s+/);
+  nameEdit.first = cleanNamePart(student.first_name != null ? student.first_name : parts[0]);
+  nameEdit.last = cleanNamePart(student.last_name != null ? student.last_name : parts.slice(1).join(' '));
+  const first = document.getElementById('name-input-first');
+  const last = document.getElementById('name-input-last');
+  first.value = nameEdit.first;
+  last.value = nameEdit.last;
+  const impact = document.getElementById('name-impact');
+  const msg = nameImpactText(nameStatusOf(student));
+  impact.innerHTML = msg.html;
+  impact.dataset.tone = msg.tone;
+  nameCardShow('form');
+  nameCardInput();
+  first.focus();
+  first.select();
+};
+
+window.nameCardInput = function () {
+  const first = cleanNamePart(document.getElementById('name-input-first').value);
+  const last = cleanNamePart(document.getElementById('name-input-last').value);
+  const full = cleanNamePart(`${first} ${last}`);
+  const preview = document.getElementById('name-preview-value');
+  preview.textContent = full || 'Your name';
+  preview.classList.toggle('is-empty', !full);
+
+  const suggest = document.getElementById('name-suggest');
+  const showSuggest = !!(first && last) && needsCasingFix(full);
+  suggest.hidden = !showSuggest;
+  if (showSuggest) suggest.textContent = `Fix capitalisation → ${titleCaseName(full)}`;
+
+  document.getElementById('name-card-error').textContent = '';
+  document.querySelectorAll('#name-card-form input').forEach(i => i.removeAttribute('aria-invalid'));
+  const unchanged = first === nameEdit.first && last === nameEdit.last;
+  document.getElementById('name-review-btn').disabled = unchanged || !first || !last;
+};
+
+window.nameCardApplySuggestion = function () {
+  ['name-input-first', 'name-input-last'].forEach(id => {
+    const el = document.getElementById(id);
+    el.value = titleCaseName(cleanNamePart(el.value));
+  });
+  nameCardInput();
+  document.getElementById('name-review-btn').focus();
+};
+
+window.nameCardCancel = function () {
+  nameCardShow('view');
+  const btn = document.getElementById('name-card-edit-btn');
+  if (btn) btn.focus();
+};
+
+window.nameCardReview = function (e) {
+  if (e) e.preventDefault();
+  const firstEl = document.getElementById('name-input-first');
+  const lastEl = document.getElementById('name-input-last');
+  const first = cleanNamePart(firstEl.value);
+  const last = cleanNamePart(lastEl.value);
+  const errFirst = nameError(first, 'first name');
+  const errLast = nameError(last, 'last name');
+  const errEl = document.getElementById('name-card-error');
+  if (errFirst || errLast) {
+    errEl.textContent = errFirst || errLast;
+    const bad = errFirst ? firstEl : lastEl;
+    bad.setAttribute('aria-invalid', 'true');
+    bad.focus();
+    return;
+  }
+  if (first === nameEdit.first && last === nameEdit.last) {
+    errEl.textContent = 'This is already the name on your documents.';
+    return;
+  }
+  firstEl.value = first;
+  lastEl.value = last;
+  const student = window._dashStudent || {};
+  document.getElementById('name-diff-old').textContent = String(student.name || '').trim() || '—';
+  document.getElementById('name-diff-new').textContent = `${first} ${last}`;
+  const impact = document.getElementById('name-confirm-impact');
+  const msg = nameImpactText(nameStatusOf(student));
+  impact.innerHTML = msg.html;
+  impact.dataset.tone = msg.tone;
+  document.getElementById('name-confirm-error').textContent = '';
+  nameCardShow('confirm');
+  document.getElementById('name-confirm-btn').focus();
+};
+
+window.nameCardBack = function () {
+  if (nameEdit.busy) return;
+  nameCardShow('form');
+  nameCardInput();
+  document.getElementById('name-input-first').focus();
+};
+
+function nameCardSaved(student, data) {
+  student.first_name = data.first_name;
+  student.last_name = data.last_name;
+  student.name = data.name;
+  if (data.name_change) student.name_change = data.name_change;
+  try { localStorage.setItem('student_name', data.name); } catch (e) { /* storage off */ }
+  nameCardShow('view');
+  applyStudentName(student);
+  const plate = document.getElementById('name-plate');
+  if (plate) {
+    plate.classList.remove('is-updated');
+    void plate.offsetWidth;  // restart the highlight
+    plate.classList.add('is-updated');
+  }
+  const btn = document.getElementById('name-card-edit-btn');
+  (btn && !btn.hidden ? btn : document.getElementById('name-card-title')).focus({ preventScroll: true });
+  dashToast('Name updated. Your offer letter, certificate and emails now use it.', 'ok');
+}
+
+window.nameCardConfirm = async function () {
+  const student = window._dashStudent;
+  if (!student || nameEdit.busy) return;
+  const first = cleanNamePart(document.getElementById('name-input-first').value);
+  const last = cleanNamePart(document.getElementById('name-input-last').value);
+  const confirmBtn = document.getElementById('name-confirm-btn');
+  const backBtn = document.getElementById('name-back-btn');
+  const errEl = document.getElementById('name-confirm-error');
+
+  // Developer preview (?preview=…) has no session: simulate the change locally.
+  if (new URLSearchParams(window.location.search).get('preview')) {
+    const st = nameStatusOf(student);
+    const used = st.used + 1;
+    return nameCardSaved(student, {
+      first_name: first, last_name: last, name: `${first} ${last}`,
+      name_change: { ...st, used, remaining: st.limit - used, can_edit: used < st.limit,
+                     locked_reason: used < st.limit ? null : 'limit_reached' },
+    });
+  }
+
+  nameEdit.busy = true;
+  confirmBtn.disabled = true;
+  backBtn.disabled = true;
+  confirmBtn.textContent = 'Saving…';
+  errEl.textContent = '';
+  try {
+    const res = await fetch(`${API}/api/students/name`, {
+      method: 'PUT',
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ student_id: student.id, first_name: first, last_name: last }),
+    });
+    const data = await res.json().catch(() => ({}));
+    const detail = typeof data.detail === 'string' ? data.detail : '';
+    if (res.ok) {
+      nameEdit.busy = false;
+      nameCardSaved(student, data);
+      return;
+    }
+    if (res.status === 409) {
+      // Locked or out of changes (possibly from another tab): reload the real state.
+      await refreshNameStatus(student);
+      nameEdit.busy = false;
+      nameCardShow('view');
+      renderNameCard(student);
+      dashToast(detail || 'Your name can no longer be changed.', 'error');
+      return;
+    }
+    if (res.status === 401) {
+      errEl.textContent = 'Your session has expired. Sign in again to change your name.';
+    } else if (res.status === 400) {
+      // Validation: send them back to the fields with the message.
+      nameEdit.busy = false;
+      nameCardShow('form');
+      document.getElementById('name-card-error').textContent = detail || 'Please check your name and try again.';
+      document.getElementById('name-input-first').focus();
+      return;
+    } else {
+      errEl.textContent = (res.status < 500 && detail) || 'We couldn’t save your name just now. Please try again in a minute.';
+    }
+  } catch (e) {
+    errEl.textContent = 'You seem to be offline. Check your connection and try again.';
+  } finally {
+    nameEdit.busy = false;
+    confirmBtn.disabled = false;
+    backBtn.disabled = false;
+    confirmBtn.textContent = 'Confirm change';
+  }
+};
+
+async function refreshNameStatus(student) {
+  try {
+    const res = await fetch(`${API}/api/students/progress/id/${encodeURIComponent(student.id)}`, { headers: authHeaders() });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data.student) return;
+    Object.assign(student, {
+      first_name: data.student.first_name, last_name: data.student.last_name,
+      name: data.student.name, name_change: data.student.name_change,
+    });
+    applyStudentName(student);
+  } catch (e) { /* keep what we have */ }
+}
+
+// Escape steps back out of the edit / review states.
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  const card = document.getElementById('name-card');
+  if (!card || card.hidden || !card.contains(document.activeElement)) return;
+  if (card.dataset.step === 'confirm') window.nameCardBack();
+  else if (card.dataset.step === 'form') window.nameCardCancel();
+});
+
 // One email can hold several applications (one per track). The dashboard opens the one
 // picked last time on this device, else the backend's default (an active internship).
 const APP_KEY = 'skillme_student_id';
@@ -485,26 +819,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (signoutBtn) signoutBtn.style.display = 'inline-flex';
 
-    // Header
-    const firstName = student.name.split(' ')[0];
-    const dashNameEl = document.getElementById('dash-name');
-    if (dashNameEl) dashNameEl.textContent = `Welcome back, ${firstName}`;
-    const sidebarNameEl = document.getElementById('dash-sidebar-name');
-    if (sidebarNameEl) sidebarNameEl.textContent = student.name;
-    const mobileHeaderNameEl = document.getElementById('mobile-header-name');
-    if (mobileHeaderNameEl) mobileHeaderNameEl.textContent = student.name;
-    const avatarEl = document.getElementById('dash-avatar');
-    if (avatarEl) {
-      const initials = String(student.name || '').trim().split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
-      avatarEl.textContent = initials || '·';
-    }
-
-    const hodUrl = `/offer?view=hod&student_id=${student.id || ''}&ref=${encodeURIComponent(student.offer_ref || '')}&name=${encodeURIComponent(student.name || '')}&domain=${encodeURIComponent(student.domain || '')}&college=${encodeURIComponent(student.college || '')}`;
-    const hodQuickLink = document.getElementById('dash-quick-hod');
-    if (hodQuickLink) hodQuickLink.href = hodUrl;
-
-    const hodBannerBtn = document.getElementById('dash-banner-hod-btn');
-    if (hodBannerBtn) hodBannerBtn.href = hodUrl;
+    // Header, sidebar, document links and the "Name on your credentials" card.
+    applyStudentName(student);
 
     // Progress
     let totalAssigned = (data.summary && data.summary.total_tasks) || 4;

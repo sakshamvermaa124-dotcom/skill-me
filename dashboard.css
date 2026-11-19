@@ -1495,6 +1495,129 @@ textarea.dash-input { resize: vertical; min-height: 84px; }
 @media (max-width: 600px) { .dash-hod-btn { width: 100%; justify-content: center; } }
 
 /* ══════════════════════════════════════════════════════════════
+   NAME ON YOUR CREDENTIALS (Credentials tab) — dashboard.js renderNameCard()
+   view → edit → review & confirm, all inside one card
+   ══════════════════════════════════════════════════════════════ */
+.name-card {
+  margin-bottom: 20px;
+  padding: 22px 24px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+}
+.name-card-head { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 18px; }
+.name-card-icon {
+  width: 42px; height: 42px; flex-shrink: 0;
+  display: grid; place-items: center;
+  border-radius: 12px;
+  background: var(--accent-wash); border: 1px solid var(--accent-border); color: var(--accent-text);
+}
+.name-card-heading { min-width: 0; }
+.name-card-title { margin: 0; font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; color: var(--text-strong); }
+.name-card-sub { margin: 3px 0 0; font-size: 0.84rem; line-height: 1.5; color: var(--text-muted); }
+
+/* The name, set the way it is printed on the certificate */
+.name-plate {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 16px 18px;
+  border: 1px dashed var(--border-strong); border-radius: var(--r-md);
+  background: var(--surface-sunken);
+  transition: border-color 0.3s, background 0.3s;
+}
+[data-theme="light"] .name-plate { background: var(--surface-2); }
+.name-plate-label, .name-preview-label, .name-diff-label {
+  font: 600 0.68rem/1.2 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-faint);
+}
+.name-plate-value, .name-preview-value, .name-diff-new {
+  overflow-wrap: anywhere;
+  font: 600 1.45rem/1.25 'Playfair Display', Georgia, 'Times New Roman', serif;
+  color: var(--text-strong);
+}
+.name-plate.is-updated { animation: name-updated 2.4s ease-out; }
+@keyframes name-updated {
+  0%   { transform: scale(0.985); border-color: var(--ok-border); background: var(--ok-wash); }
+  15%  { transform: scale(1); }
+  60%  { border-color: var(--ok-border); background: var(--ok-wash); }
+}
+
+.name-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+.name-quota { display: inline-flex; align-items: center; gap: 9px; font-size: 0.82rem; font-weight: 500; color: var(--text-muted); }
+.name-quota-dots { display: inline-flex; gap: 4px; }
+.name-quota-dots i { width: 8px; height: 8px; border-radius: 999px; background: var(--border-strong); }
+.name-quota[data-tone="ok"] .name-quota-dots i.is-on { background: var(--ok); }
+.name-quota[data-tone="warn"] .name-quota-dots i.is-on { background: var(--warn); }
+.name-quota[data-tone="warn"] { color: var(--warn); }
+.name-card-edit[hidden] { display: none; }
+
+.name-card-lock {
+  display: flex; align-items: flex-start; gap: 10px;
+  margin-top: 14px; padding: 12px 14px;
+  border-radius: var(--r-md); background: var(--surface-2); color: var(--text-muted);
+}
+.name-card-lock[hidden] { display: none; }
+.name-card-lock svg { flex-shrink: 0; margin-top: 2px; }
+.name-card-lock p { margin: 0; font-size: 0.84rem; line-height: 1.5; }
+.name-card-lock a { color: var(--text-strong); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+
+/* Edit */
+.name-card-step[hidden] { display: none; }
+.name-card-step:not([hidden]) { animation: name-step-in 0.2s ease-out; }
+@keyframes name-step-in { from { opacity: 0; transform: translateY(4px); } }
+.name-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.name-field { display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem; font-weight: 600; color: var(--text-strong); }
+.name-field .dash-input[aria-invalid="true"] { border-color: var(--danger); }
+.name-preview {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  margin-top: 14px; padding: 16px;
+  border: 1px dashed var(--border-strong); border-radius: var(--r-md);
+  background: var(--surface-sunken); text-align: center;
+}
+[data-theme="light"] .name-preview { background: var(--surface-2); }
+.name-preview-value.is-empty { color: var(--text-faint); font-style: italic; }
+.name-suggest {
+  margin-top: 10px; padding: 6px 12px;
+  border: 1px solid var(--border-strong); border-radius: 999px;
+  background: transparent; color: var(--text-strong);
+  font: 500 0.8rem/1.2 var(--font-ui); cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.name-suggest:hover { border-color: var(--accent-border); color: var(--accent-text); }
+.name-suggest[hidden] { display: none; }
+.name-card-error { margin: 10px 0 0; font-size: 0.82rem; color: var(--danger); }
+.name-card-error:empty { display: none; }
+.name-impact {
+  margin: 14px 0 0; padding: 10px 12px;
+  border-radius: 10px; font-size: 0.82rem; line-height: 1.5;
+  background: var(--info-wash); color: var(--text-default);
+}
+.name-impact[data-tone="warn"] { background: var(--warn-wash); }
+.name-impact strong { color: var(--text-strong); }
+.name-impact[data-tone="warn"] strong { color: var(--warn); }
+.name-card-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+.name-card-actions .cert-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Review & confirm */
+.name-diff {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+  padding: 16px 18px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--surface-sunken);
+}
+[data-theme="light"] .name-diff { background: var(--surface-2); }
+.name-diff-row { display: flex; flex-direction: column; gap: 3px; }
+.name-diff-old { font-size: 0.98rem; color: var(--text-muted); text-decoration: line-through; text-decoration-color: var(--danger); overflow-wrap: anywhere; }
+.name-diff-arrow { color: var(--text-faint); margin-left: 2px; }
+
+@media (max-width: 600px) {
+  .name-card { padding: 18px; }
+  .name-fields { grid-template-columns: 1fr; }
+  .name-card-foot .cert-btn, .name-card-actions .cert-btn { flex: 1; }
+  .name-plate-value, .name-preview-value, .name-diff-new { font-size: 1.25rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .name-plate.is-updated, .name-card-step:not([hidden]) { animation: none; }
+}
+
+/* ══════════════════════════════════════════════════════════════
    GUIDE + PRIORITY (both use .guide-card)
    ══════════════════════════════════════════════════════════════ */
 .guide-card { padding: 24px; }

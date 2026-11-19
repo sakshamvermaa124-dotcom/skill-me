@@ -15,6 +15,7 @@ from services.email_service import email_service, _domain_label
 from services.submission_service import submission_service
 from services.urgent_request_service import urgent_request_service
 from services.enrollment_service import enrollment_service
+from services.name_change_service import NameChangeError, change_name, name_status
 
 logger = logging.getLogger("skillme.students")
 router = APIRouter(prefix="/api/students", tags=["students"])
@@ -66,6 +67,12 @@ class SubmitTaskRequest(BaseModel):
     batch_id: int | None = None  # internal enrollment reference, validated server-side
     week: int = Field(..., ge=1, le=4)
     linkedin_url: str = Field(..., max_length=500)
+
+
+class UpdateNameRequest(BaseModel):
+    student_id: int
+    first_name: str = Field(..., max_length=200)
+    last_name: str = Field(..., max_length=200)
 
 
 class UrgentRequestRequest(BaseModel):
@@ -331,6 +338,8 @@ async def _progress_for_student(student: dict) -> dict:
             "domain": primary_domain,
             "college": student.get("college"),
             "offer_ref": offer_ref(student["id"]),
+            # Whether / how often the name printed on their documents can still be changed.
+            "name_change": await name_status(student["email"]),
         },
         "progress": [dict(p) for p in progress],
         "submissions": [dict(s) for s in submissions],
@@ -389,6 +398,21 @@ async def verify_offer(student_id: int, ref: str):
         "enrollment_status": enrollment["status"],
         "start_date": enrollment["start_date"],
     }
+
+
+@router.put("/name", summary="Change the name printed on the student's documents")
+async def update_name(req: UpdateNameRequest, me: dict = Depends(require_student)):
+    """
+    Corrects the name on the offer letter, certificate, LOR, portfolio and every email sent
+    from now on (they all read the name at render/send time). Allowed twice per person, and
+    only until a certificate is paid for or issued.
+    """
+    await _assert_owns(me, req.student_id)
+    try:
+        result = await change_name(req.student_id, req.first_name, req.last_name)
+    except NameChangeError as e:
+        raise HTTPException(status_code=e.status, detail=e.message)
+    return {k: result[k] for k in ("first_name", "last_name", "name", "previous_name", "name_change")}
 
 
 @router.post("/submit-task", summary="Submit a LinkedIn post URL for a week's task")

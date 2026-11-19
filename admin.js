@@ -52,6 +52,7 @@ const PAGE_META = {
   email:     { title: 'Email Settings', subtitle: 'Brevo SMTP relay — test and monitor email delivery' },
   submissions: { title: 'Submissions', subtitle: 'Review and approve/reject weekly LinkedIn submissions' },
   'urgent-requests': { title: 'Urgent Requests', subtitle: 'Expedited (24h) certificate/LOR/portfolio processing requests' },
+  'name-changes': { title: 'Name Changes', subtitle: 'Every time a student changed the name printed on their documents (max 2 each)' },
   announcements: { title: 'Announcements', subtitle: 'Send platform-wide update emails to students' },
   recovery:  { title: 'Student Recovery', subtitle: 'Move students from enrollment to first task and through all four weeks' },
 };
@@ -160,6 +161,7 @@ function navigate(page) {
   if (page === 'email') { loadEmailStatus(); loadEmailDirectory(); loadEmailLogs(); loadEmailAggStats(); }
   if (page === 'submissions') loadSubmissions();
   if (page === 'urgent-requests') loadUrgentRequests();
+  if (page === 'name-changes') loadNameChanges();
   if (page === 'announcements') previewAnnouncement();
   if (page === 'reminders') loadInactiveStudents();
 }
@@ -571,6 +573,108 @@ function renderAlumni(alumni) {
           <button class="btn btn-sm btn-tone-danger" onclick="deleteStudent(${s.id}, ${name}, ${jsArg(s.email)})" title="Permanently delete entire record from database">🗑️ Delete</button>
         </div>
       </td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── NAME CHANGES ───
+const nameChangeState = { page: 1, q: '', total: 0, totalPages: 1 };
+let _nameChangeReq = 0;
+
+// SQLite timestamps are UTC without a zone ("2026-11-20 09:30:00").
+function fmtUtcDateTime(ts) {
+  if (!ts) return { date: '—', time: '' };
+  const d = new Date(/[zZ]|[+-]\d\d:?\d\d$/.test(ts) ? ts : String(ts).replace(' ', 'T') + 'Z');
+  if (isNaN(d)) return { date: esc(ts), time: '' };
+  return {
+    date: d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
+    time: d.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' }),
+  };
+}
+
+async function loadNameChanges() {
+  const tbody = document.getElementById('nc-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = `<tr><td colspan="5"><div class="loading-overlay"><div class="spinner"></div></div></td></tr>`;
+  const reqId = ++_nameChangeReq;
+  const params = new URLSearchParams({ page: nameChangeState.page, limit: STUDENTS_PAGE_SIZE });
+  if (nameChangeState.q) params.set('q', nameChangeState.q);
+  try {
+    const data = await api(`/api/admin/name-changes?${params}`);
+    if (reqId !== _nameChangeReq) return;
+    nameChangeState.total = data.total || 0;
+    nameChangeState.totalPages = data.total_pages || 1;
+    if (!data.changes.length && nameChangeState.page > 1 && nameChangeState.total) {
+      nameChangeState.page = nameChangeState.totalPages;
+      return loadNameChanges();
+    }
+    renderNameChangeStats(data.stats || {}, data.limit || 2);
+    renderNameChanges(data.changes || [], data.limit || 2);
+    renderPager('nc-pagination', nameChangeState, 'goToNameChangePage');
+  } catch (e) {
+    if (reqId !== _nameChangeReq) return;
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-state-text">${esc(e.message)}</div></div></td></tr>`;
+  }
+}
+
+function goToNameChangePage(page) {
+  nameChangeState.page = Math.max(1, Math.min(page, nameChangeState.totalPages || 1));
+  loadNameChanges();
+}
+
+const _debouncedNameChangeSearch = debounce(() => loadNameChanges(), 300);
+function filterNameChanges() {
+  nameChangeState.q = (document.getElementById('nc-search')?.value || '').trim();
+  nameChangeState.page = 1;
+  _debouncedNameChangeSearch();
+}
+
+function renderNameChangeStats(stats, limit) {
+  const el = document.getElementById('nc-stats');
+  if (!el) return;
+  const i = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">${d}</svg>`;
+  el.innerHTML = [
+    statCard(i('<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>'), stats.changes, 'Total changes'),
+    statCard(i('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>'), stats.people, 'Students who changed'),
+    statCard(i('<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>'), stats.maxed_out, `Used all ${limit} changes`),
+    statCard(i('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'), stats.last_7_days, 'Last 7 days'),
+  ].join('');
+}
+
+function renderNameChanges(changes, limit) {
+  const tbody = document.getElementById('nc-tbody');
+  if (!tbody) return;
+  if (!changes.length) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div class="empty-state-icon">🪪</div><div class="empty-state-text">${nameChangeState.q ? 'No name changes match your search' : 'No student has changed their name yet'}</div></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = changes.map(c => {
+    const current = c.current_name || c.new_name || '';
+    const when = fmtUtcDateTime(c.changed_at);
+    const last = Number(c.change_number) >= Number(limit);
+    return `
+    <tr>
+      <td>
+        <div class="nc-student">
+          <div class="avatar">${esc((current[0] || '?').toUpperCase())}</div>
+          <div class="nc-student-text">
+            <div class="nc-student-name">${esc(current || '—')}</div>
+            <div class="nc-student-meta">${esc(c.email)}${c.domain ? ` · ${esc(c.domain)}` : ''}</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div class="nc-diff">
+          <span class="nc-old" title="Before">${esc(c.old_name || '—')}</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" role="img" aria-label="changed to"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          <span class="nc-new" title="After">${esc(c.new_name)}</span>
+        </div>
+      </td>
+      <td><span class="nc-attempt${last ? ' is-last' : ''}">${Number(c.change_number)} of ${Number(limit)}</span></td>
+      <td><div class="nc-when">${when.date}</div><div class="nc-when-time">${when.time}</div></td>
+      <td>${c.paid
+        ? '<span class="badge badge-approved">Paid · name locked</span>'
+        : '<span class="badge nc-badge-open">Not paid yet</span>'}</td>
     </tr>`;
   }).join('');
 }

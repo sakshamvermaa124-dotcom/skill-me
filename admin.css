@@ -520,3 +520,21 @@ tr.an-click:hover td { background: var(--surface-2); }
 @media (hover: none) {
   .stat-card:hover, .rc-stage:hover { transform: none; }
 }
+
+/* ─── Name changes ─── */
+.nc-student { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.nc-student-text { min-width: 0; }
+.nc-student-name { font-weight: 500; }
+.nc-student-meta { font-size: 0.74rem; color: var(--text-muted); overflow-wrap: anywhere; }
+.nc-diff { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; color: var(--text-muted); }
+.nc-old { color: var(--text-muted); text-decoration: line-through; text-decoration-color: var(--danger-line); }
+.nc-new { font-weight: 600; color: var(--text); }
+.nc-attempt {
+  display: inline-flex; padding: 3px 10px; border-radius: 999px;
+  font-size: 0.72rem; font-weight: 600; white-space: nowrap;
+  background: var(--info-wash); border: 1px solid var(--info-line); color: var(--info);
+}
+.nc-attempt.is-last { background: var(--warn-wash); border-color: var(--warn-line); color: var(--warn); }
+.nc-when { font-size: 0.82rem; white-space: nowrap; }
+.nc-when-time { font-size: 0.72rem; color: var(--text-muted); }
+.nc-badge-open { background: var(--bg-soft); border-color: var(--line-strong); color: var(--text-muted); }
