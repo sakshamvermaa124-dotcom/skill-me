@@ -213,6 +213,7 @@ class Database:
             "ALTER TABLE certificates ADD COLUMN issued_via TEXT",
             "ALTER TABLE certificates ADD COLUMN payment_id INTEGER",
             "ALTER TABLE otp_tokens ADD COLUMN verified_at TIMESTAMP",
+            "ALTER TABLE otp_tokens ADD COLUMN attempts INTEGER DEFAULT 0",
             """CREATE TABLE IF NOT EXISTS payment_events (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 provider_event_id TEXT NOT NULL UNIQUE,

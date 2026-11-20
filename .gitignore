@@ -62,3 +62,7 @@ ml-template/
 
 # Third-party agent skill packs (local tooling, not app code)
 .agents/skills/*/
+
+# Local-only notes and generated diagrams
+interview-prep/
+.archify/

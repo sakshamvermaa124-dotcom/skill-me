@@ -152,3 +152,91 @@ class TestOTPVerify:
         """Missing fields should return 422."""
         r = await client.post("/api/auth/verify-otp", json={"email": "x@x.com"})
         assert r.status_code == 422
+
+
+@pytest.mark.auth
+class TestOTPAbuseLimits:
+    async def test_code_locks_after_max_wrong_guesses(self, client, test_student):
+        """5 wrong guesses lock the code: even the right code then fails with 429."""
+        from config import settings
+        email = test_student["email"]
+        await seed_otp(test_db, email, otp="246810")
+
+        codes = []
+        for _ in range(settings.otp_max_attempts):
+            r = await client.post("/api/auth/verify-otp", json={"email": email, "otp": "000000"})
+            codes.append(r.status_code)
+        assert codes == [401] * (settings.otp_max_attempts - 1) + [429]
+
+        r = await client.post("/api/auth/verify-otp", json={"email": email, "otp": "246810"})
+        assert r.status_code == 429
+        assert "new code" in r.json()["detail"]
+
+    async def test_new_code_after_lockout_works(self, client, test_student):
+        """Locking is per code: requesting a fresh code lets the student in again."""
+        from config import settings
+        email = test_student["email"]
+        await seed_otp(test_db, email, otp="135790")
+        for _ in range(settings.otp_max_attempts):
+            await client.post("/api/auth/verify-otp", json={"email": email, "otp": "000000"})
+
+        await test_db.execute("UPDATE otp_tokens SET used = 2 WHERE email = ? AND used = 0", (email,))
+        await seed_otp(test_db, email, otp="112233")
+        r = await client.post("/api/auth/verify-otp", json={"email": email, "otp": "112233"})
+        assert r.status_code == 200
+
+    async def test_right_code_after_a_few_wrong_guesses_still_works(self, client, test_student):
+        email = test_student["email"]
+        await seed_otp(test_db, email, otp="908070")
+        for _ in range(2):
+            r = await client.post("/api/auth/verify-otp", json={"email": email, "otp": "000000"})
+            assert r.status_code == 401
+        r = await client.post("/api/auth/verify-otp", json={"email": email, "otp": "908070"})
+        assert r.status_code == 200
+
+    async def test_per_email_request_limit(self, client, test_student):
+        """An email gets otp_max_requests codes per window, even from different IPs."""
+        from config import settings
+        from routes.auth import limiter
+        email = test_student["email"]
+        statuses = []
+        for _ in range(settings.otp_max_requests + 1):
+            limiter.reset()  # simulate IP rotation: the per-IP limit alone would allow this
+            r = await client.post("/api/auth/request-otp", json={"email": email})
+            statuses.append(r.status_code)
+        assert statuses == [200] * settings.otp_max_requests + [429]
+        assert "wait" in r.json()["detail"].lower()
+
+    async def test_old_codes_outside_window_do_not_count(self, client, test_student):
+        from config import settings
+        email = test_student["email"]
+        for _ in range(settings.otp_max_requests):
+            await test_db.insert(
+                "INSERT INTO otp_tokens (email, otp_hash, expires_at, used, created_at) "
+                "VALUES (?, 'h', '2000-01-01 00:00:00', 2, '2000-01-01 00:00:00')",
+                (email,),
+            )
+        r = await client.post("/api/auth/request-otp", json={"email": email})
+        assert r.status_code == 200
+
+    async def test_stored_hash_is_keyed_not_plain_sha256(self, client, test_student):
+        """A leaked table must not be reversible by hashing all 1M codes without the server key."""
+        import hashlib
+        from services.auth_service import _hash_otp
+        h = _hash_otp(test_student["email"], "123456")
+        assert h != hashlib.sha256(b"123456").hexdigest()
+        assert h != _hash_otp("someone.else@example.com", "123456")
+
+    async def test_generated_codes_are_six_digits(self):
+        from services.auth_service import _generate_otp
+        codes = {_generate_otp() for _ in range(200)}
+        assert all(len(c) == 6 and c.isdigit() for c in codes)
+        assert len(codes) > 150
+
+    async def test_ip_rate_limit_returns_detail(self, client, test_student):
+        """The frontend shows `detail`; slowapi's default 429 body had none."""
+        r = None
+        for _ in range(11):
+            r = await client.post("/api/auth/verify-otp", json={"email": test_student["email"], "otp": "000000"})
+        assert r.status_code == 429
+        assert r.json().get("detail")

@@ -137,7 +137,21 @@ async def add_cache_control_header(request: Request, call_next):
 
 # Rate limiting
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    # slowapi's default body is {"error": ...}; the frontend shows `detail`, so add it
+    # (otherwise a rate-limited student sees a misleading "check your email" message).
+    base = _rate_limit_exceeded_handler(request, exc)
+    response = JSONResponse(
+        status_code=429,
+        content={"detail": "Too many requests. Please wait a minute and try again.", "error": f"Rate limit exceeded: {exc.detail}"},
+    )
+    for key in ("Retry-After", "X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset"):
+        if key in base.headers:
+            response.headers[key] = base.headers[key]
+    return response
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):

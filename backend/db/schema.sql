@@ -183,11 +183,12 @@ CREATE INDEX IF NOT EXISTS idx_email_logs_sent_at   ON email_logs(sent_at);
 CREATE TABLE IF NOT EXISTS otp_tokens (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     email       TEXT NOT NULL,
-    otp_hash    TEXT NOT NULL,          -- bcrypt / sha256 hash of the 6-digit OTP
+    otp_hash    TEXT NOT NULL,          -- HMAC-SHA256 of email + 6-digit OTP, keyed with the server secret
     expires_at  TIMESTAMP NOT NULL,
     used        INTEGER DEFAULT 0,      -- 0 = unused, 1 = consumed (login), 2 = superseded by a newer code
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    verified_at TIMESTAMP                   -- when the code was entered correctly (NULL on legacy rows)
+    verified_at TIMESTAMP,                  -- when the code was entered correctly (NULL on legacy rows)
+    attempts    INTEGER DEFAULT 0       -- verify attempts (code locked at settings.otp_max_attempts)
 );
 CREATE INDEX IF NOT EXISTS idx_otp_email ON otp_tokens(email);
 

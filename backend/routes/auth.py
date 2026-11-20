@@ -8,7 +8,7 @@ from fastapi import APIRouter, HTTPException, Response, Cookie, BackgroundTasks
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 
-from services.auth_service import request_otp, verify_otp, decode_jwt
+from services.auth_service import request_otp, verify_otp, decode_jwt, OTPRateLimited, OTPLocked
 from services.email_service import email_service, _send_and_log
 from services.enrollment_service import enrollment_service
 from middleware.student_auth import require_student
@@ -42,6 +42,8 @@ async def request_login_otp(request: Request, req: OTPRequest, background_tasks:
     """
     try:
         result = await request_otp(req.email)
+    except OTPRateLimited as e:
+        raise HTTPException(status_code=429, detail=str(e))
     except ValueError as e:
         # Don't reveal if email exists or not (security)
         raise HTTPException(status_code=404, detail=str(e))
@@ -75,12 +77,20 @@ async def request_login_otp(request: Request, req: OTPRequest, background_tasks:
 
 
 @router.post("/verify-otp", summary="Verify OTP and get session token")
-async def verify_login_otp(req: OTPVerify, response: Response):
+@limiter.limit("10/minute")
+async def verify_login_otp(request: Request, req: OTPVerify, response: Response):
     """
     Verify the OTP and issue a 30-day JWT session.
     Sets an httpOnly cookie AND returns the token in the response body.
+    Each code allows settings.otp_max_attempts guesses, then the student must request a new one.
     """
-    token = await verify_otp(req.email, req.otp)
+    try:
+        token = await verify_otp(req.email, req.otp)
+    except OTPLocked:
+        raise HTTPException(
+            status_code=429,
+            detail="Too many wrong codes. Request a new code and try again.",
+        )
     if not token:
         raise HTTPException(status_code=401, detail="Invalid or expired OTP. Please try again.")
 

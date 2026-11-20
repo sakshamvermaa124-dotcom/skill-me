@@ -58,6 +58,9 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expire_days: int = 30
     otp_expiry_minutes: int = 10
+    otp_max_attempts: int = 5            # wrong guesses before a code is locked
+    otp_max_requests: int = 3            # codes one email can request per window
+    otp_request_window_minutes: int = 15
 
     @property
     def db_path(self) -> str:

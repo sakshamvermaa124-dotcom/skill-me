@@ -203,7 +203,8 @@ async def seed_otp(
     otp: str = "123456",
     expired: bool = False,
 ) -> None:
-    otp_hash = hashlib.sha256(otp.encode()).hexdigest()
+    from services.auth_service import _hash_otp
+    otp_hash = _hash_otp(email, otp)
     if expired:
         expires_at = (datetime.utcnow() - timedelta(minutes=1)).strftime("%Y-%m-%d %H:%M:%S")
     else:
