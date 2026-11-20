@@ -16,6 +16,9 @@ logger = logging.getLogger("skillme.submission")
 SCORE_PER_APPROVAL = 25
 TOTAL_WEEKS = 4
 
+# Used when an admin rejects without writing a note (keep in sync with admin.js)
+DEFAULT_REJECT_NOTE = "Please update the link, it's broken or unreachable."
+
 
 def _is_linkedin_url(url: str) -> bool:
     try:
@@ -191,6 +194,8 @@ class SubmissionService:
             raise ValueError(f"Submission {submission_id} not found")
 
         was_approved = submission["status"] == "approved"
+        was_rejected = submission["status"] == "rejected"
+        admin_note = (admin_note or "").strip() or DEFAULT_REJECT_NOTE
 
         now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")  # same format as CURRENT_TIMESTAMP columns
         await db.execute(
@@ -213,7 +218,10 @@ class SubmissionService:
             await self._sync_completion(submission["student_id"], submission["batch_id"])
 
         logger.info(f"Rejected submission {submission_id}: {admin_note or ''}")
-        return {"submission_id": submission_id, "status": "rejected"}
+        result = {"submission_id": submission_id, "status": "rejected", "admin_note": admin_note}
+        if was_rejected:
+            result["already"] = True
+        return result
 
     async def bulk_approve(self, submission_ids: list[int]) -> list[dict]:
         results = []

@@ -11,7 +11,8 @@ const EMAIL_TYPE_LABELS = {
   github_invite_reminder:   { label: 'Invite Reminder',     color: 'var(--warn)', bg: 'var(--warn-wash)'  },
   test:                     { label: 'Test',                color: 'var(--text-3)', bg: 'var(--neutral-wash)' },
   task_approved:             { label: 'Task Approved',       color: 'var(--ok)', bg: 'var(--ok-wash)' },
-  task_reminder:             { label: 'Task Reminder',       color: 'var(--warn)', bg: 'var(--warn-wash)' },
+  task_rejected:             { label: 'Task Rejected',       color: 'var(--danger)', bg: 'var(--danger-wash)' },
+  task_reminder:            { label: 'Task Reminder',       color: 'var(--warn)', bg: 'var(--warn-wash)' },
   submission_flow_update:    { label: 'Flow Update',         color: 'var(--violet)', bg: 'var(--violet-wash)' },
   urgent_request_fulfilled:  { label: 'Urgent Fulfilled',    color: 'var(--primary)', bg: 'var(--primary-wash)' },
 };

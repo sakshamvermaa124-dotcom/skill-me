@@ -503,16 +503,44 @@ async def approve_submission(
     return result
 
 
+async def _notify_task_rejected(background_tasks: BackgroundTasks, submission_id: int, admin_note: str | None) -> None:
+    """Look up the submission's student and queue a 'changes needed, please resubmit' email."""
+    info = await db.fetch_one(
+        """SELECT sub.week, s.first_name, s.last_name, s.email,
+                  COALESCE(b.domain, s.domain) AS domain
+           FROM submissions sub
+           JOIN students s ON sub.student_id = s.id
+           LEFT JOIN batches b ON sub.batch_id = b.id
+           WHERE sub.id = ?""",
+        (submission_id,),
+    )
+    if not info:
+        return
+    background_tasks.add_task(
+        email_service.send_task_rejected,
+        first_name=info["first_name"],
+        last_name=info["last_name"],
+        email=info["email"],
+        domain=info["domain"],
+        week=info["week"],
+        admin_note=admin_note,
+    )
+
+
 @router.post("/submissions/{submission_id}/reject", summary="Reject a submission")
 async def reject_submission(
     submission_id: int, req: ReviewSubmissionRequest = ReviewSubmissionRequest(),
+    background_tasks: BackgroundTasks = None,
     _: str = Depends(require_admin),
 ):
-    """Reject a LinkedIn submission — the student can resubmit for this week."""
+    """Reject a LinkedIn submission — the student can resubmit for this week, and is emailed why."""
     try:
-        return await submission_service.reject_submission(submission_id, req.admin_note)
+        result = await submission_service.reject_submission(submission_id, req.admin_note)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    if not result.get("already"):
+        await _notify_task_rejected(background_tasks, submission_id, result["admin_note"])
+    return result
 
 
 @router.post("/submissions/bulk-approve", summary="Approve multiple submissions at once")
@@ -528,9 +556,14 @@ async def bulk_approve_submissions(
 
 
 @router.post("/submissions/bulk-reject", summary="Reject multiple submissions at once")
-async def bulk_reject_submissions(req: BulkSubmissionRequest, _: str = Depends(require_admin)):
+async def bulk_reject_submissions(
+    req: BulkSubmissionRequest, background_tasks: BackgroundTasks, _: str = Depends(require_admin)
+):
     """Reject multiple submissions in one call — powers the review queue's select-all/bulk-reject action."""
     results = await submission_service.bulk_reject(req.submission_ids, req.admin_note)
+    for r in results:
+        if r.get("status") == "rejected" and not r.get("already"):
+            await _notify_task_rejected(background_tasks, r["submission_id"], r["admin_note"])
     return {"status": "done", "results": results}
 
 

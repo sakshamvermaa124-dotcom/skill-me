@@ -462,6 +462,32 @@ class EmailService:
             email_type="task_approved",
         )
 
+    # Weekly task rejected — student can fix and resubmit
+    async def send_task_rejected(
+        self,
+        first_name: str,
+        last_name: str,
+        email: str,
+        domain: str,
+        week: int,
+        admin_note: str | None = None,
+    ) -> bool:
+        html = _render(
+            "task_rejected.html",
+            first_name=first_name,
+            last_name=last_name,
+            domain_label=_domain_label(domain),
+            week=week,
+            admin_note=admin_note,
+        )
+        return await _send_and_log(
+            email,
+            f"{first_name} {last_name}",
+            f"Week {week} Task Needs Changes — Please Resubmit",
+            html,
+            email_type="task_rejected",
+        )
+
     # Weekly task submitted — automatic per-task feedback (see feedback_service)
     async def send_submission_feedback(
         self,

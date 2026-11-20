@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui %}
+
+{% block title %}Week {{ week }} task needs changes — SkillMe{% endblock %}
+{% block preheader %}Your Week {{ week }} {{ domain_label }} submission needs a few changes. You can resubmit from your dashboard.{% endblock %}
+
+{% block body %}
+{{ ui.eyebrow("Changes needed") }}
+{{ ui.title("Week " ~ week ~ " needs another look, " ~ first_name) }}
+{% call ui.p() %}
+  The SkillMe review team checked your <strong class="ink" style="color:#0a0a0a;">Week {{ week }}</strong> {{ domain_label }} submission
+  and it <strong class="ink" style="color:#0a0a0a;">wasn't approved</strong> this time. No worries — you can fix it and resubmit for the same week.
+{% endcall %}
+
+{% call ui.info_table() %}
+  {{ ui.row("Week", "Week " ~ week) }}
+  {{ ui.row("Track", domain_label, last=not admin_note) }}
+  {% if admin_note %}{{ ui.row("Reviewer note", admin_note, last=true, value_color="#c2500d") }}{% endif %}
+{% endcall %}
+
+{% call ui.p(size=14, mb=0) %}Address the {% if admin_note %}reviewer's note{% else %}task checklist{% endif %}, update your LinkedIn post, and submit the new link from your dashboard.{% endcall %}
+
+{% call ui.actions(mt=22) %}
+  {{ ui.button(dashboard_url, "Resubmit my task") }}
+{% endcall %}
+{% endblock %}

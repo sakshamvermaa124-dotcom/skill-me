@@ -236,6 +236,8 @@ def mock_email_service():
     mock.send_offer_letter = AsyncMock(return_value=True)
     mock.send_certificate_ready = AsyncMock(return_value=True)
     mock.send_submission_feedback = AsyncMock(return_value=True)
+    mock.send_task_approved = AsyncMock(return_value=True)
+    mock.send_task_rejected = AsyncMock(return_value=True)
     mock.send_test_email = AsyncMock(return_value=True)
     mock.send_activation = AsyncMock(return_value=True)
     return mock

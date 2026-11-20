@@ -43,6 +43,7 @@ templates = {
         ],
     },
     "task_approved.html": {"week": 2, "score": 100, "admin_note": "Clean UI and a clear demo — great job."},
+    "task_rejected.html": {"week": 2, "admin_note": "Please tag @SkillMe and add your project link to the post."},
     "task_reminder.html": {"week_due": 3, "days_inactive": 6, "completed_tasks": 2},
     "urgent_request_fulfilled.html": {"request_type": "certificate"},
     "submission_flow_update.html": {},

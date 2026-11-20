@@ -1075,10 +1075,21 @@ async function approveSubmission(id) {
   }
 }
 
+// Pre-filled reject reason — keep in sync with DEFAULT_REJECT_NOTE in backend/services/submission_service.py
+const DEFAULT_REJECT_NOTE = "Please update the link, it's broken or unreachable.";
+
+// Ask for the note shown to the student (pre-filled). Returns null if the admin cancels.
+function promptRejectNote(what) {
+  const note = prompt(`Reject ${what}? Note for the student (edit if needed):`, DEFAULT_REJECT_NOTE);
+  if (note === null) return null;
+  return note.trim() || DEFAULT_REJECT_NOTE;
+}
+
 async function rejectSubmission(id) {
-  if (!confirm('Are you sure you want to reject this submission?')) return;
+  const adminNote = promptRejectNote('this submission');
+  if (adminNote === null) return;
   try {
-    await api(`/api/admin/submissions/${id}/reject`, { method: 'POST', body: JSON.stringify({}) });
+    await api(`/api/admin/submissions/${id}/reject`, { method: 'POST', body: JSON.stringify({ admin_note: adminNote }) });
     toast('Submission rejected');
     loadSubmissions();
     loadStats(true);
@@ -1107,11 +1118,12 @@ async function bulkApproveSubmissions() {
 async function bulkRejectSubmissions() {
   const ids = Array.from(selectedSubmissionIds);
   if (!ids.length) return;
-  if (!confirm(`Reject ${ids.length} selected submission${ids.length !== 1 ? 's' : ''}?`)) return;
+  const adminNote = promptRejectNote(`${ids.length} selected submission${ids.length !== 1 ? 's' : ''}`);
+  if (adminNote === null) return;
   try {
     await api('/api/admin/submissions/bulk-reject', {
       method: 'POST',
-      body: JSON.stringify({ submission_ids: ids })
+      body: JSON.stringify({ submission_ids: ids, admin_note: adminNote })
     });
     toast(`Rejected ${ids.length} submission${ids.length !== 1 ? 's' : ''}`);
     loadSubmissions();

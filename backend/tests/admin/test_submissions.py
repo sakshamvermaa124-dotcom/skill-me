@@ -235,10 +235,42 @@ class TestSubmissionReviewQueue:
         assert r.status_code == 200
         assert r.json()["status"] == "rejected"
 
+        import routes.admin as admin_route
+        send = admin_route.email_service.send_task_rejected
+        assert send.call_count == 1
+        assert send.call_args.kwargs["week"] == 1
+        assert send.call_args.kwargs["email"] == enrolled_student["email"]
+        assert send.call_args.kwargs["admin_note"] == "Please tag @SkillMe"
+
+        # Rejecting again doesn't send a duplicate email
+        await client.post(f"/api/admin/submissions/{submission_id}/reject", json={"admin_note": "x"}, headers=admin_headers)
+        assert send.call_count == 1
+
         # Resubmission should now succeed
         r2 = await client.post("/api/students/submit-task", json=payload, headers=auth_headers(enrolled_student["id"]))
         assert r2.status_code == 200
         assert r2.json()["status"] == "pending"
+
+    async def test_reject_without_note_uses_default_and_new_link_resubmits(self, client, admin_headers, enrolled_student):
+        import routes.admin as admin_route
+        from services.submission_service import DEFAULT_REJECT_NOTE
+        h = auth_headers(enrolled_student["id"])
+        payload = {"student_id": enrolled_student["id"], "batch_id": enrolled_student["batch_id"],
+                   "week": 3, "linkedin_url": "https://www.linkedin.com/posts/broken"}
+        sid = (await client.post("/api/students/submit-task", json=payload, headers=h)).json()["submission_id"]
+
+        r = await client.post(f"/api/admin/submissions/{sid}/reject", json={"admin_note": "  "}, headers=admin_headers)
+        assert r.json()["admin_note"] == DEFAULT_REJECT_NOTE
+        row = await test_db.fetch_one("SELECT admin_note FROM submissions WHERE id = ?", (sid,))
+        assert row["admin_note"] == DEFAULT_REJECT_NOTE
+        assert admin_route.email_service.send_task_rejected.call_args.kwargs["admin_note"] == DEFAULT_REJECT_NOTE
+
+        # Rejected student submits a fixed link → back to pending with the new URL
+        payload["linkedin_url"] = "https://www.linkedin.com/posts/fixed"
+        r2 = await client.post("/api/students/submit-task", json=payload, headers=h)
+        assert r2.status_code == 200 and r2.json()["status"] == "pending"
+        row = await test_db.fetch_one("SELECT linkedin_url, status FROM submissions WHERE id = ?", (sid,))
+        assert (row["linkedin_url"], row["status"]) == ("https://www.linkedin.com/posts/fixed", "pending")
 
     async def test_approved_blocks_resubmit_and_shows_on_dashboard(self, client, admin_headers, enrolled_student):
         payload = {
@@ -340,3 +372,9 @@ class TestSubmissionReviewQueue:
         assert r.status_code == 200
         results = r.json()["results"]
         assert all(res["status"] == "rejected" for res in results)
+
+        import routes.admin as admin_route
+        send = admin_route.email_service.send_task_rejected
+        assert send.call_count == 2
+        assert {c.kwargs["email"] for c in send.call_args_list} == {"bulkreject0@example.com", "bulkreject1@example.com"}
+        assert all(c.kwargs["admin_note"] == "Missing @SkillMe tag" for c in send.call_args_list)
