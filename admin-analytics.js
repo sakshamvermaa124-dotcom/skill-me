@@ -6,14 +6,14 @@
 
 const an = {
   tab: 'overview',
-  f: { range: 'all', from: '', to: '', domain: '', source: '', campaign: '', test: false },
+  f: { range: 'all', from: '', to: '', domain: '', source: '', campaign: '', country: '', test: false },
   data: null, quality: null, payments: null,
   inactiveDays: 7, payStatus: '', payPage: 1, payQ: '',
   drill: { stage: '', title: '', page: 1, q: '' },
   req: 0,
 };
 
-const AN_TABS = ['overview', 'funnel', 'acquisition', 'domains', 'payments', 'engagement', 'quality'];
+const AN_TABS = ['overview', 'funnel', 'acquisition', 'geography', 'domains', 'payments', 'engagement', 'quality'];
 const num = n => Number(n || 0).toLocaleString('en-IN');
 const pctTxt = v => (v === null || v === undefined) ? '—' : `${v}%`;
 const dayTxt = v => (v === null || v === undefined) ? '—' : `${v}d`;
@@ -32,6 +32,7 @@ function anReadFilters() {
   an.f.domain = v('an-domain');
   an.f.source = v('an-source');
   an.f.campaign = v('an-campaign');
+  an.f.country = v('an-country');
   an.f.test = !!(document.getElementById('an-test') || {}).checked;
   if (an.f.range === 'custom') { an.f.from = v('an-from'); an.f.to = v('an-to'); }
   else if (an.f.range === 'all') { an.f.from = ''; an.f.to = ''; }
@@ -45,6 +46,7 @@ function anQuery(extra = {}) {
   if (an.f.domain) p.set('domain', an.f.domain);
   if (an.f.source) p.set('source', an.f.source);
   if (an.f.campaign) p.set('campaign', an.f.campaign);
+  if (an.f.country) p.set('country', an.f.country);
   if (an.f.test) p.set('include_test', 'true');
   Object.entries(extra).forEach(([k, v]) => { if (v !== '' && v !== null && v !== undefined) p.set(k, v); });
   return p.toString();
@@ -59,7 +61,7 @@ function anApplyFilters() { anReadFilters(); an.quality = null; loadAnalytics();
 
 function anSetFilter(key, value) {
   // Row click in Acquisition/Domains narrows the whole page to that slice.
-  const el = document.getElementById({ domain: 'an-domain', source: 'an-source', campaign: 'an-campaign' }[key]);
+  const el = document.getElementById({ domain: 'an-domain', source: 'an-source', campaign: 'an-campaign', country: 'an-country' }[key]);
   if (el) el.value = value;
   anApplyFilters();
 }
@@ -96,6 +98,7 @@ async function loadAnalytics(fresh = false) {
     anFillSelect('an-domain', (o.domains || []).map(([k, l]) => [k, l]), 'All tracks');
     anFillSelect('an-source', (o.sources || []).map(s => [s, s]), 'All sources');
     anFillSelect('an-campaign', (o.campaigns || []).map(s => [s, s]), 'All campaigns');
+    anFillSelect('an-country', (o.countries || []).map(([k, l]) => [k, l]), 'All countries');
     anScopeNote();
     anQualityBadge();
     anRender();
@@ -109,7 +112,7 @@ function anScopeNote() {
   const d = an.data, f = d.filters || {};
   const range = f.date_from || f.date_to ? `applied ${esc(f.date_from || '…')} to ${esc(f.date_to || 'today')} (IST)` : 'all applications';
   const bits = [range, f.domain && `track: ${esc(f.domain)}`, f.source && `source: ${esc(f.source)}`,
-    f.campaign && `campaign: ${esc(f.campaign)}`, f.include_test ? 'INCLUDING test data' : 'test accounts and test payments excluded'].filter(Boolean);
+    f.campaign && `campaign: ${esc(f.campaign)}`, f.country && `country: ${esc(f.country)}`, f.include_test ? 'INCLUDING test data' : 'test accounts and test payments excluded'].filter(Boolean);
   document.getElementById('an-scope-note').innerHTML =
     `Cohort: ${bits.join(' · ')} · ${num(d.overview.applicants)} applicants · updated ${esc(f.generated_at || '')}. ` +
     `The date range filters by <b>application date</b> and applies to every tab.`;
@@ -138,7 +141,7 @@ async function anRender() {
   const body = document.getElementById('an-body');
   const d = an.data;
   const views = {
-    overview: anOverview, funnel: anFunnel, acquisition: anAcquisition, domains: anDomains,
+    overview: anOverview, funnel: anFunnel, acquisition: anAcquisition, geography: (x) => window.anGeography(x), domains: anDomains,
     payments: anPayments, engagement: anEngagement, quality: anQuality,
   };
   body.innerHTML = '';

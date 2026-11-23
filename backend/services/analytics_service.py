@@ -23,6 +23,8 @@ import statistics
 from collections import defaultdict
 from datetime import datetime, timedelta
 
+from services.countries import country_name, normalize_iso
+
 TOTAL_WEEKS = 4
 ELIGIBLE_WEEKS = 3             # approvals needed before the certificate can be bought
 FIRST_STEP_ABANDON_MIN = 60    # an unpaid 'created' order older than this is abandoned
@@ -107,6 +109,7 @@ def timing(values: list[float], start: str, end: str) -> dict:
 
 STUDENT_SQL = """
 SELECT s.id, s.first_name, s.last_name, s.email, s.domain, s.status AS student_status, s.college,
+       s.country, s.country_source,
        s.referral_source, s.year_of_study, s.quiz_score, s.quiz_total, COALESCE(s.is_test, 0) AS is_test, datetime(s.created_at) AS applied_at,
        s.utm_source, s.utm_medium, s.utm_campaign, s.referral_code, s.landing_page, s.referrer,
        s.first_touch_source, s.last_touch_source, s.last_touch_campaign,
@@ -271,6 +274,9 @@ def build_students(raw: dict, now: datetime | None = None) -> list[dict]:
             s["source_key"] = "unknown (pre-tracking)"
             s["source_tracked"] = False
         s["campaign_key"] = (s["utm_campaign"] or "").strip().lower() or "(none)"
+        iso = normalize_iso(s.get("country"))
+        s["country_key"] = iso or "unknown"
+        s["country_label"] = country_name(iso) if iso else "Unknown"
         s["self_reported"] = (s["referral_source"] or "").strip() or "Not answered"
         out.append(s)
     return out
@@ -281,7 +287,7 @@ def build_students(raw: dict, now: datetime | None = None) -> list[dict]:
 # ──────────────────────────────────────────────
 
 def apply_filters(students: list[dict], *, date_from=None, date_to=None, domain=None,
-                  source=None, campaign=None, include_test=False) -> list[dict]:
+                  source=None, campaign=None, include_test=False, country=None) -> list[dict]:
     start, end = ist_date_to_utc(date_from), ist_date_to_utc(date_to, end=True)
     out = []
     for s in students:
@@ -296,6 +302,8 @@ def apply_filters(students: list[dict], *, date_from=None, date_to=None, domain=
         if source and s["source_key"] != source.lower():
             continue
         if campaign and s["campaign_key"] != campaign.lower():
+            continue
+        if country and s["country_key"] != country.upper():
             continue
         out.append(s)
     return out
@@ -394,6 +402,77 @@ def overview(students, now) -> dict:
         "paying_students": sum(s["has_paid"] for s in students),
         "revenue_rupees": sum(s["paid_amount"] for s in students) / 100,
         "eligible_unpaid": sum(1 for s in students if s["is_eligible"] and not s["has_paid"]),
+        # Revenue by payment date (not cohort), for the "last 30 days vs the 30 before" trend.
+        "revenue_30d_rupees": _revenue_between(students, now - timedelta(days=30), now),
+        "revenue_prev_30d_rupees": _revenue_between(students, now - timedelta(days=60), now - timedelta(days=30)),
+        "paying_30d": sum(1 for s in students if s["paid_ts"] and s["paid_ts"] >= now - timedelta(days=30)),
+    }
+
+
+def _revenue_between(students, start, end) -> float:
+    total = 0
+    for s in students:
+        for o in s["orders"]:
+            if o["status"] != "paid":
+                continue
+            t = parse_ts(o.get("completed_at") or o.get("updated_at"))
+            if t and start <= t < end:
+                total += o["amount"] or 0
+    return total / 100
+
+
+def geography_section(students, now) -> dict:
+    """Where applicants come from, and how each market converts and pays.
+
+    India is split out from everyone else because pricing, payment methods and acquisition
+    differ; `new_30d` lists countries whose first applicant arrived in the last 30 days.
+    """
+    groups = _group(students, lambda s: s["country_key"], lambda s: s["country_label"])
+    total = len(students)
+    first_seen: dict[str, datetime] = {}
+    for s in students:
+        t = s["applied_ts"]
+        if t and (s["country_key"] not in first_seen or t < first_seen[s["country_key"]]):
+            first_seen[s["country_key"]] = t
+    for g in groups.values():
+        g["share"] = pct(g["applications"], total)
+        g["enroll_rate"] = pct(g["enrolled"], g["applications"])
+        g["revenue_rupees"] = round(g["revenue_rupees"], 2)
+        g["first_applied"] = first_seen[g["key"]].strftime("%Y-%m-%d") if g["key"] in first_seen else None
+    known = sorted((g for k, g in groups.items() if k != "unknown"),
+                   key=lambda g: (g["applications"], g["paid"], g["revenue_rupees"]), reverse=True)
+    revenue_all = sum(s["paid_amount"] for s in students) / 100
+    paid_all = sum(s["has_paid"] for s in students)
+
+    def market(rows):
+        n = len(rows)
+        enrolled = sum(s["is_enrolled"] for s in rows)
+        completed = sum(s["is_completed"] for s in rows)
+        paid = sum(s["has_paid"] for s in rows)
+        revenue = sum(s["paid_amount"] for s in rows) / 100
+        return {
+            "applications": n, "enrolled": enrolled, "completed": completed, "paid": paid,
+            "revenue_rupees": round(revenue, 2),
+            "share_applications": pct(n, total), "share_paid": pct(paid, paid_all),
+            "share_revenue": pct(revenue, revenue_all),
+            "enroll_rate": pct(enrolled, n), "completion_rate": pct(completed, enrolled),
+            "paid_rate": pct(paid, n),
+            "revenue_per_applicant": round(revenue / n, 2) if n else 0.0,
+        }
+
+    cutoff = now - timedelta(days=30)
+    new_30d = sorted(
+        ({"key": k, "label": groups[k]["label"], "first_applied": t.strftime("%Y-%m-%d"),
+          "applications": groups[k]["applications"]}
+         for k, t in first_seen.items() if k != "unknown" and t >= cutoff),
+        key=lambda r: r["first_applied"], reverse=True)
+    return {
+        "country_count": len(known),
+        "countries": known,
+        "unknown": groups["unknown"]["applications"] if "unknown" in groups else 0,
+        "india": market([s for s in students if s["country_key"] == "IN"]),
+        "international": market([s for s in students if s["country_key"] not in ("IN", "unknown")]),
+        "new_30d": new_30d,
     }
 
 
@@ -682,6 +761,7 @@ def compute(raw: dict, students_all: list[dict], flt: dict, now: datetime | None
         "acquisition": {**acquisition_section(students), "referrals": _referrals(raw)},
         "growth": growth_section(students, now),
         "audience": audience_section(students),
+        "geography": geography_section(students, now),
         "payments": payments,
         "engagement": engagement_section(students, raw, now, inactive_days),
         "validation": validation_warnings(students, funnel, rev_funnel, domains),
@@ -689,6 +769,8 @@ def compute(raw: dict, students_all: list[dict], flt: dict, now: datetime | None
             "domains": sorted({(s["domain_key"], s["domain_label"]) for s in students_all}),
             "sources": sorted({s["source_key"] for s in students_all}),
             "campaigns": sorted({s["campaign_key"] for s in students_all if s["campaign_key"] != "(none)"}),
+            "countries": sorted({(s["country_key"], s["country_label"]) for s in students_all
+                                 if s["country_key"] != "unknown"}, key=lambda c: c[1]),
         },
     }
 

@@ -9,10 +9,11 @@ but never propagate to crash the calling API endpoint.
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import smtplib
 import ssl
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
@@ -42,14 +43,82 @@ def _render(template_name: str, **ctx) -> str:
 
 # ── SMTP sender (sync, called inside asyncio.to_thread) ─────────────────────
 
-def _send_sync(to_email: str, to_name: str, subject: str, html_body: str, tag: str | None = None) -> None:
+def _accounts() -> list[tuple[str, str]]:
+    """All configured Brevo SMTP accounts as (login, smtp_key), primary first."""
+    accounts: list[tuple[str, str]] = []
+    if settings.smtp_user and settings.smtp_password:
+        accounts.append((settings.smtp_user, settings.smtp_password))
+    raw = (settings.smtp_extra_accounts or "").strip()
+    if raw:
+        try:
+            for item in json.loads(raw):
+                user, pwd = item.get("user"), item.get("password")
+                if user and pwd and all(user != a[0] for a in accounts):
+                    accounts.append((user, pwd))
+        except Exception as exc:
+            logger.error("SMTP_EXTRA_ACCOUNTS is not valid JSON, ignoring it: %s", exc)
+    return accounts
+
+
+def _quota_day_start_utc() -> str:
+    """Start of the current Brevo quota day, as a UTC 'YYYY-MM-DD HH:MM:SS' string (matches sent_at)."""
+    offset = timedelta(hours=settings.smtp_quota_reset_utc_offset)
+    now = datetime.now(timezone.utc)
+    local_midnight = (now + offset).replace(hour=0, minute=0, second=0, microsecond=0)
+    return (local_midnight - offset).strftime("%Y-%m-%d %H:%M:%S")
+
+
+async def get_quota_usage() -> list[dict]:
+    """Emails sent today per configured account (for account selection and the admin view)."""
+    from db.database import db
+    since = _quota_day_start_utc()
+    usage = []
+    for user, _ in _accounts():
+        try:
+            row = await db.fetch_one(
+                "SELECT COUNT(*) AS n FROM email_logs WHERE smtp_account = ? AND status = 'sent' AND sent_at >= ?",
+                (user, since),
+            )
+            used = int((row or {}).get("n", 0) or 0)
+        except Exception as exc:
+            logger.warning("Quota lookup failed for %s: %s", user, exc)
+            used = 0
+        usage.append({"account": user, "used_today": used, "limit": settings.smtp_daily_limit})
+    return usage
+
+
+# Accounts Brevo refused today (e.g. daily quota hit, including sends we never logged),
+# keyed by login -> quota-day start. They're tried last until Brevo's daily reset.
+_refused_today: dict[str, str] = {}
+
+
+def _is_refused_today(login: str) -> bool:
+    return _refused_today.get(login) == _quota_day_start_utc()
+
+
+async def _ordered_accounts() -> list[tuple[str, str]]:
+    """Accounts to try, in order: those under today's cap first (config order), then the rest by least used."""
+    accounts = _accounts()
+    if len(accounts) <= 1:
+        return accounts
+    used = {u["account"]: u["used_today"] for u in await get_quota_usage()}
+    under = [a for a in accounts
+             if used.get(a[0], 0) < settings.smtp_daily_limit and not _is_refused_today(a[0])]
+    over = sorted((a for a in accounts if a not in under), key=lambda a: used.get(a[0], 0))
+    return under + over
+
+
+def _send_sync(to_email: str, to_name: str, subject: str, html_body: str, tag: str | None = None,
+               account: tuple[str, str] | None = None) -> None:
     """
     Low-level SMTP send via Brevo relay with strict timeouts and port fallback.
     Runs synchronously — always call via asyncio.to_thread().
 
     `tag` is echoed back by Brevo on every webhook event (delivered/opened/clicked/
     bounced/...) for this message, which is how we match events back to email_logs rows.
+    `account` is the (login, smtp_key) to send with; defaults to the primary account.
     """
+    smtp_user, smtp_password = account or (settings.smtp_user, settings.smtp_password)
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"] = f"{settings.smtp_from_name} <{settings.smtp_from_email}>"
@@ -73,16 +142,24 @@ def _send_sync(to_email: str, to_name: str, subject: str, html_body: str, tag: s
         try:
             if port == 465:
                 with smtplib.SMTP_SSL(settings.smtp_host, port, context=ctx, timeout=10) as server:
-                    server.login(settings.smtp_user, settings.smtp_password)
+                    server.login(smtp_user, smtp_password)
                     server.sendmail(settings.smtp_from_email, [to_email], msg.as_string())
             else:
                 with smtplib.SMTP(settings.smtp_host, port, timeout=10) as server:
                     server.ehlo()
                     server.starttls(context=ctx)
-                    server.login(settings.smtp_user, settings.smtp_password)
+                    server.login(smtp_user, smtp_password)
                     server.sendmail(settings.smtp_from_email, [to_email], msg.as_string())
-            logger.info("Email sent to %s via port %s | subject: %s", to_email, port, subject)
+            logger.info("Email sent to %s via port %s (account %s) | subject: %s", to_email, port, smtp_user, subject)
             return
+        except smtplib.SMTPResponseException as e:
+            if isinstance(e, smtplib.SMTPConnectError):
+                logger.warning("SMTP connect failed on port %s: %s", port, e)
+                last_err = e
+                continue
+            # Auth failure / quota exceeded / rejected message: another port won't help
+            logger.warning("SMTP rejected by account %s: %s", smtp_user, e)
+            raise
         except Exception as e:
             logger.warning("SMTP connect failed on port %s: %s", port, e)
             last_err = e
@@ -92,23 +169,41 @@ def _send_sync(to_email: str, to_name: str, subject: str, html_body: str, tag: s
 
 
 
-async def _send(to_email: str, to_name: str, subject: str, html_body: str, tag: str | None = None) -> bool:
+async def _send_ex(to_email: str, to_name: str, subject: str, html_body: str,
+                   tag: str | None = None) -> tuple[bool, str | None]:
     """
-    Async wrapper around _send_sync.
-    Returns True on success, False on failure (never raises).
+    Async wrapper around _send_sync with multi-account failover.
+    Returns (success, login of the account that sent it). Never raises.
     """
     if not settings.email_enabled:
         logger.info("[Email disabled] Would send '%s' to %s", subject, to_email)
-        return True
-    if not settings.smtp_user or not settings.smtp_password:
+        return True, None
+    accounts = await _ordered_accounts()
+    if not accounts:
         logger.warning("SMTP credentials not configured — skipping email to %s", to_email)
-        return False
-    try:
-        await asyncio.to_thread(_send_sync, to_email, to_name, subject, html_body, tag)
-        return True
-    except Exception as exc:
-        logger.error("Failed to send email to %s: %s", to_email, exc)
-        return False
+        return False, None
+    for account in accounts:
+        try:
+            await asyncio.to_thread(_send_sync, to_email, to_name, subject, html_body, tag, account)
+            return True, account[0]
+        except smtplib.SMTPRecipientsRefused as exc:
+            # This recipient is the problem, not the account — another account won't help
+            logger.error("Recipient %s refused via account %s: %s", to_email, account[0], exc)
+            return False, None
+        except smtplib.SMTPResponseException as exc:
+            if not isinstance(exc, smtplib.SMTPConnectError):
+                # Brevo refused this account (quota hit / bad key) — deprioritise it until the daily reset
+                _refused_today[account[0]] = _quota_day_start_utc()
+            logger.error("Failed to send email to %s via account %s: %s", to_email, account[0], exc)
+        except Exception as exc:
+            logger.error("Failed to send email to %s via account %s: %s", to_email, account[0], exc)
+    return False, None
+
+
+async def _send(to_email: str, to_name: str, subject: str, html_body: str, tag: str | None = None) -> bool:
+    """Returns True on success, False on failure (never raises)."""
+    ok, _ = await _send_ex(to_email, to_name, subject, html_body, tag)
+    return ok
 
 
 async def _send_and_log(
@@ -161,22 +256,22 @@ async def _send_and_log(
         logger.warning("Failed to pre-log email to DB: %s", log_exc)
 
     tag = f"log{log_id}" if log_id else None
-    success = await _send(to_email, to_name, subject, html_body, tag)
+    success, account = await _send_ex(to_email, to_name, subject, html_body, tag)
 
     try:
         if log_id:
             await db.execute(
-                "UPDATE email_logs SET status = ?, message_tag = ? WHERE id = ?",
-                ("sent" if success else "failed", tag, log_id),
+                "UPDATE email_logs SET status = ?, message_tag = ?, smtp_account = ? WHERE id = ?",
+                ("sent" if success else "failed", tag, account, log_id),
             )
         else:
             # Pre-log insert failed — fall back to a single post-send insert (no tracking tag)
             await db.insert(
                 """INSERT INTO email_logs
-                   (recipient_email, recipient_name, email_type, subject, student_id, batch_id, status, body)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                   (recipient_email, recipient_name, email_type, subject, student_id, batch_id, status, body, smtp_account)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (to_email, to_name, email_type, subject, student_id, batch_id,
-                 "sent" if success else "failed", html_body),
+                 "sent" if success else "failed", html_body, account),
             )
     except Exception as log_exc:
         logger.warning("Failed to log email to DB: %s", log_exc)

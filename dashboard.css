@@ -1457,6 +1457,80 @@ textarea.dash-input { resize: vertical; min-height: 84px; }
 .cert-pay-row .dash-input { width: 200px; flex: 0 1 200px; }
 .cert-pay-row .cert-btn { flex: 1; }
 .secure-note { margin-top: 10px; font-size: 0.72rem; color: var(--text-faint); text-align: center; width: 100%; }
+
+/* Payment region picker — two radio cards: India (all methods) vs outside India (cards only) */
+.pay-region { width: 100%; margin-bottom: 14px; text-align: left; }
+.pay-region-label {
+  margin-bottom: 8px;
+  font-size: 0.78rem; font-weight: 600; color: var(--text-default);
+}
+.pay-region-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pay-region-opt {
+  position: relative;
+  display: flex; align-items: flex-start; gap: 11px;
+  padding: 13px 14px;
+  border: 1px solid var(--border-strong); border-radius: 12px;
+  background: var(--surface-1);
+  color: var(--text-default); font: inherit; text-align: left;
+  cursor: pointer;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+.pay-region-opt:hover { border-color: var(--accent-border); transform: translateY(-1px); }
+.pay-region-opt[aria-checked="true"] {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, var(--accent-wash), transparent 140%), var(--surface-1);
+  box-shadow: 0 0 0 3px var(--accent-wash), 0 8px 20px -14px rgba(0,0,0,0.5);
+}
+.pay-region-opt:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.pay-region-radio {
+  flex-shrink: 0; margin-top: 2px;
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 1.5px solid var(--border-strong);
+  background: var(--surface-1);
+  display: grid; place-items: center;
+  transition: border-color 0.18s ease;
+}
+.pay-region-radio::after {
+  content: ""; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent);
+  transform: scale(0); transition: transform 0.2s cubic-bezier(.3,1.6,.6,1);
+}
+.pay-region-opt[aria-checked="true"] .pay-region-radio { border-color: var(--accent); }
+.pay-region-opt[aria-checked="true"] .pay-region-radio::after { transform: scale(1); }
+.pay-region-body { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.pay-region-title { font-size: 0.92rem; font-weight: 650; letter-spacing: -0.01em; color: var(--text-strong); line-height: 1.2; }
+.pay-region-logos { display: flex; flex-wrap: wrap; gap: 5px; }
+.pay-logo {
+  display: inline-grid; place-items: center;
+  width: 40px; height: 26px; border-radius: 6px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+}
+.pay-logo svg { width: 36px; height: 22px; display: block; }
+.pay-region-sub { font-size: 0.74rem; color: var(--text-muted); line-height: 1.35; }
+/* Note only for "Outside India": collapses smoothly instead of jumping */
+.pay-region-note {
+  display: grid; grid-template-rows: 0fr; opacity: 0;
+  transition: grid-template-rows 0.25s ease, opacity 0.2s ease, margin-top 0.25s ease;
+}
+.pay-region-note[aria-hidden="false"] { grid-template-rows: 1fr; opacity: 1; margin-top: 10px; }
+.pay-region-note-inner {
+  overflow: hidden;
+  display: flex; align-items: flex-start; gap: 9px;
+  font-size: 0.78rem; line-height: 1.5; color: var(--text-muted);
+}
+.pay-region-note[aria-hidden="false"] .pay-region-note-inner {
+  padding: 10px 12px; border-radius: 10px;
+  background: var(--surface-sunken); border: 1px solid var(--border);
+}
+.pay-region-note-inner svg { flex-shrink: 0; margin-top: 2px; color: var(--accent-text); }
+.pay-region-note-inner strong { color: var(--text-strong); font-weight: 650; }
+@media (max-width: 420px) { .pay-region-options { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) {
+  .pay-region-opt, .pay-region-radio, .pay-region-radio::after, .pay-region-note { transition: none; }
+  .pay-region-opt:hover { transform: none; }
+}
 @media (max-width: 600px) {
   .cert-banner-content { padding: 18px; }
   .cert-banner-actions, .cert-banner-actions .cert-btn { width: 100%; }

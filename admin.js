@@ -41,11 +41,11 @@ let appStarted = false;
 
 const STUDENTS_PAGE_SIZE = 15;
 // Server-side paginated lists — only one page (15 rows) is ever in memory/DOM.
-const studentsState = { page: 1, q: '', status: '', total: 0, totalPages: 1 };
+const studentsState = { page: 1, q: '', status: '', country: '', total: 0, totalPages: 1 };
 const alumniState   = { page: 1, q: '', total: 0, totalPages: 1 };
 
 const PAGE_META = {
-  overview:  { title: 'Overview',  subtitle: 'Platform summary and recent activity' },
+  overview:  { title: 'Overview',  subtitle: 'What needs you today, how the business is doing, and where students come from' },
   students:  { title: 'Students',  subtitle: 'Shortlist and enroll applicants' },
   alumni:    { title: 'Alumni',    subtitle: 'Students who completed their internship' },
   analytics: { title: 'Analytics', subtitle: 'One set of definitions: funnel, acquisition, payments, engagement and data quality' },
@@ -53,7 +53,6 @@ const PAGE_META = {
   submissions: { title: 'Submissions', subtitle: 'Review and approve/reject weekly LinkedIn submissions' },
   'urgent-requests': { title: 'Urgent Requests', subtitle: 'Expedited (24h) certificate/LOR/portfolio processing requests' },
   'name-changes': { title: 'Name Changes', subtitle: 'Every time a student changed the name printed on their documents (max 2 each)' },
-  announcements: { title: 'Announcements', subtitle: 'Send platform-wide update emails to students' },
   recovery:  { title: 'Student Recovery', subtitle: 'Move students from enrollment to first task and through all four weeks' },
 };
 
@@ -162,7 +161,6 @@ function navigate(page) {
   if (page === 'submissions') loadSubmissions();
   if (page === 'urgent-requests') loadUrgentRequests();
   if (page === 'name-changes') loadNameChanges();
-  if (page === 'announcements') previewAnnouncement();
   if (page === 'reminders') loadInactiveStudents();
 }
 
@@ -262,39 +260,108 @@ async function loadStats(prefetched) {
   }
 }
 
-function pctChange(now, prev) {
-  if (!prev) return now ? 'new this week' : '—';
+// "▲ 12%" / "▼ 80%" against a previous period; empty when there is nothing to compare.
+function deltaChip(now, prev) {
+  if (!prev) return now ? `<span class="kpi-delta is-up">new</span>` : '';
   const c = Math.round((now - prev) * 100 / prev);
-  return `${c >= 0 ? '▲' : '▼'} ${Math.abs(c)}% vs previous 7 days`;
+  if (c === 0) return `<span class="kpi-delta">0%</span>`;
+  return `<span class="kpi-delta ${c > 0 ? 'is-up' : 'is-down'}">${c > 0 ? '▲' : '▼'} ${Math.abs(c)}%</span>`;
 }
 
+// One tile in the "Needs you today" row. Zero means nothing to do, shown calm.
+function actionTile({ count, label, meta, onclick, tone = 'accent', money }) {
+  const clear = !count;
+  return `<button type="button" class="act-tile${clear ? ' is-clear' : ` is-${tone}`}" onclick="${onclick}">
+    <span class="act-num">${clear ? '✓' : Number(count).toLocaleString('en-IN')}</span>
+    <span class="act-text"><span class="act-label">${esc(label)}</span>
+      <span class="act-meta">${clear ? 'All clear' : meta}</span></span>
+    ${money && !clear ? `<span class="act-money">${money}</span>` : ''}
+    <svg class="act-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+  </button>`;
+}
+
+function kpiCard({ label, value, delta = '', sub, hint }) {
+  return `<div class="kpi-card"${hint ? ` title="${esc(hint)}"` : ''}>
+    <div class="kpi-label">${esc(label)}</div>
+    <div class="kpi-value-row"><span class="kpi-value">${value}</span>${delta}</div>
+    <div class="kpi-sub">${sub}</div>
+  </div>`;
+}
+
+const intIN = v => Number(v || 0).toLocaleString('en-IN');
+
 function renderStats(data) {
-  const grid = document.getElementById('stats-grid');
-  grid.innerHTML = `
-    ${statCard('👥', data.total_students, 'Total Students', 'var(--accent-wash)', 'var(--accent-text)')}
-    ${statCard('📋', data.pending_applications, 'Pending Applications', 'var(--accent-wash)', 'var(--accent-text)')}
-    ${statCard('🟢', data.enrolled_students, 'Enrolled Students', 'var(--ok-wash)', 'var(--ok)')}
-    ${statCard('📝', data.pending_submissions, 'Pending Submissions', 'var(--accent-wash)', 'var(--accent-text)')}
-  `;
-  const pulse = document.getElementById('pulse-grid');
-  if (pulse && data.apps_7d !== undefined) {
-    const reviewed = (data.approved_30d || 0) + (data.rejected_30d || 0);
-    const oldest = data.oldest_pending_days;
-    pulse.innerHTML = `
-      ${analyticsCard('🆕', data.apps_7d || 0, 'Applications (7 days)', `${data.apps_today || 0} today · ${pctChange(data.apps_7d || 0, data.apps_prev_7d || 0)}`)}
-      ${analyticsCard('⚡', data.active_7d || 0, 'Active People (7 days)', 'logged in or submitted a task')}
-      ${analyticsCard('📤', data.subs_7d || 0, 'Task Submissions (7 days)', pctChange(data.subs_7d || 0, data.subs_prev_7d || 0))}
-      ${analyticsCard('🤝', data.enrolled_7d || 0, 'New Enrollments (7 days)', `${(data.shortlisted_students || 0).toLocaleString('en-IN')} shortlisted, waiting to enroll`)}
-      ${analyticsCard('✅', reviewed ? `${data.approval_rate_30d}%` : '—', 'Approval Rate (30 days)', `${data.approved_30d || 0} approved · ${data.rejected_30d || 0} rejected`)}
-      ${analyticsCard('⏳', oldest === null || oldest === undefined ? '—' : `${oldest}d`, 'Oldest Pending Review', `${data.pending_submissions || 0} submissions waiting`)}
-      ${analyticsCard('🏁', data.completed_total || 0, 'Completed All 4 Weeks', 'students with every week approved')}
-      ${analyticsCard('🎯', data.eligible_unpaid || 0, 'Eligible but Unpaid', 'finished 3+ weeks, no payment yet — nudge them')}
-    `;
+  const actions = document.getElementById('stats-grid');
+  const oldest = data.oldest_pending_days;
+  // What the eligible-but-unpaid students would bring at today's average ticket.
+  const avgTicket = data.total_alumni ? (data.revenue_rupees || 0) / data.total_alumni : 0;
+  const atStake = Math.round((data.eligible_unpaid || 0) * avgTicket);
+  actions.innerHTML = `
+    <div class="ov-section-label">Needs you today</div>
+    <div class="act-grid">
+      ${actionTile({ count: data.pending_applications, label: 'Applications to review', tone: 'accent',
+        meta: `${intIN(data.apps_today)} new today`, onclick: "showStudentsWithStatus('applied')" })}
+      ${actionTile({ count: data.shortlisted_students, label: 'Ready to enroll', tone: 'info',
+        meta: 'shortlisted, waiting on you', onclick: "showStudentsWithStatus('shortlisted')" })}
+      ${actionTile({ count: data.pending_submissions, label: 'Submissions to review', tone: oldest > 2 ? 'danger' : 'warn',
+        meta: oldest === null || oldest === undefined ? 'waiting for review' : `oldest waiting ${oldest < 1 ? 'under 1' : Math.round(oldest)} day${Math.round(oldest) === 1 ? '' : 's'}`,
+        onclick: "navigate('submissions')" })}
+      ${actionTile({ count: data.eligible_unpaid, label: 'Eligible, not paid', tone: 'ok',
+        meta: '3+ weeks approved, no payment yet', money: atStake ? `≈ ${fmtINR(atStake)}` : '',
+        onclick: "navigate('analytics');anTab('payments')" })}
+      ${data.pending_urgent_requests ? actionTile({ count: data.pending_urgent_requests, label: 'Urgent requests', tone: 'danger',
+        meta: 'paid for 24-hour processing', onclick: "navigate('urgent-requests')" }) : ''}
+    </div>`;
+
+  const kpis = document.getElementById('pulse-grid');
+  if (kpis && data.revenue_rupees !== undefined) {
+    const enrolled = data.enrolled_total || 0;
+    kpis.innerHTML = `
+      <div class="ov-section-label">Business</div>
+      <div class="kpi-grid">
+        ${kpiCard({ label: 'Revenue', value: fmtINR(data.revenue_rupees),
+          delta: deltaChip(data.revenue_30d_rupees || 0, data.revenue_prev_30d_rupees || 0),
+          sub: `${fmtINR(data.revenue_30d_rupees)} last 30 days · ${fmtINR(data.revenue_prev_30d_rupees)} the 30 before`,
+          hint: 'Real payments only; test payments excluded. The trend compares payment dates.' })}
+        ${kpiCard({ label: 'Paying students', value: intIN(data.total_alumni),
+          sub: `${data.paid_rate_of_enrolled || 0}% of ${intIN(enrolled)} enrolled · ${intIN(data.paying_30d)} in the last 30 days` })}
+        ${kpiCard({ label: 'Completion rate', value: `${data.completion_rate || 0}%`,
+          sub: `${intIN(data.completed_total)} of ${intIN(enrolled)} enrolled finished all 4 weeks`,
+          hint: 'Completion leads to certificates and payments. This is the number to move.' })}
+        ${kpiCard({ label: 'Applications · 7 days', value: intIN(data.apps_7d),
+          delta: deltaChip(data.apps_7d || 0, data.apps_prev_7d || 0),
+          sub: `${intIN(data.apps_prev_7d)} the week before · ${intIN(data.applicants)} all time` })}
+      </div>`;
   }
+  if (data.geo) {
+    if (window.renderGlobalReach) renderGlobalReach(data.geo);
+    fillCountryFilter(data.geo.countries || []);
+  }
+
   setNavBadge('pending-badge', data.pending_applications);
   setNavBadge('submissions-badge', data.pending_submissions);
   setNavBadge('alumni-badge', data.total_alumni);
   updateUrgentRequestsBadge(data.pending_urgent_requests || 0);
+}
+
+// Students page country dropdown, from the countries we actually have.
+function fillCountryFilter(countries) {
+  const sel = document.getElementById('country-filter');
+  if (!sel) return;
+  const keep = studentsState.country || sel.value;
+  const sorted = countries.slice().sort((a, b) => a.label.localeCompare(b.label));
+  sel.innerHTML = `<option value="">All countries</option>` +
+    sorted.map(c => `<option value="${esc(c.key)}">${esc(c.label)} (${c.applications})</option>`).join('');
+  if (keep) {
+    if (![...sel.options].some(o => o.value === keep)) sel.add(new Option(keep, keep));
+    sel.value = keep;
+  }
+}
+
+// Country flag + code for tables; a quiet dash when unknown.
+function countryCell(iso) {
+  if (!iso) return '<span style="color:var(--text-3);">—</span>';
+  return `<span class="geo-cell">${window.geoFlag ? geoFlag(iso, 18) : ''}<span class="geo-code">${esc(iso)}</span></span>`;
 }
 
 function setNavBadge(id, count) {
@@ -348,7 +415,7 @@ function compactStudentTable(students, emptyIcon, emptyText) {
         ${students.map(s => `
           <tr>
             <td>
-              <div style="font-weight:500;">${esc(s.first_name)} ${esc(s.last_name)}</div>
+              <div style="font-weight:500;display:flex;align-items:center;gap:7px;">${s.country && window.geoFlag ? geoFlag(s.country, 16) : ''}${esc(s.first_name)} ${esc(s.last_name)}</div>
               <div style="font-size:0.75rem;color:var(--text-muted);">${esc(s.email)}</div>
             </td>
             <td>${esc(s.domain || '—')}</td>
@@ -426,12 +493,13 @@ async function loadStudents(silent = false) {
   const tbody = document.getElementById('students-tbody');
   if (!tbody) return;
   if (!silent) {
-    tbody.innerHTML = `<tr><td colspan="6"><div class="loading-overlay"><div class="spinner"></div></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7"><div class="loading-overlay"><div class="spinner"></div></div></td></tr>`;
   }
   const reqId = ++_studentsReq;
   const params = new URLSearchParams({ page: studentsState.page, limit: STUDENTS_PAGE_SIZE, paid: 'false' });
   if (studentsState.status) params.set('status', studentsState.status);
   if (studentsState.q) params.set('q', studentsState.q);
+  if (studentsState.country) params.set('country', studentsState.country);
   try {
     const data = await api(`/api/admin/students?${params}`);
     if (reqId !== _studentsReq) return; // a newer search/page request superseded this one
@@ -448,7 +516,7 @@ async function loadStudents(silent = false) {
   } catch(e) {
     if (reqId !== _studentsReq) return;
     if (!silent) {
-      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-text">${esc(e.message)}</div></div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-state-text">${esc(e.message)}</div></div></td></tr>`;
     }
   }
 }
@@ -462,22 +530,27 @@ const _debouncedStudentSearch = debounce(() => loadStudents(), 300);
 function filterStudents() {
   studentsState.q = (document.getElementById('student-search')?.value || '').trim();
   studentsState.status = document.getElementById('status-filter')?.value || '';
+  studentsState.country = document.getElementById('country-filter')?.value || '';
   studentsState.page = 1;
   _debouncedStudentSearch();
 }
 
-function showApplicationsToReview() {
+function showStudentsWithStatus(status) {
   const sel = document.getElementById('status-filter');
-  if (sel) sel.value = 'applied';
-  studentsState.status = 'applied';
+  if (sel) sel.value = status;
+  const cf = document.getElementById('country-filter');
+  if (cf) cf.value = '';
+  studentsState.status = status;
+  studentsState.country = '';
   studentsState.page = 1;
   navigate('students');
 }
+function showApplicationsToReview() { showStudentsWithStatus('applied'); }
 
 function renderStudents(students) {
   const tbody = document.getElementById('students-tbody');
   if (!students.length) {
-    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div class="empty-state-icon">🔍</div><div class="empty-state-text">No students found</div></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-state-icon">🔍</div><div class="empty-state-text">No students found</div></div></td></tr>`;
     return;
   }
   tbody.innerHTML = students.map(s => `
@@ -492,6 +565,7 @@ function renderStudents(students) {
         </div>
       </td>
       <td style="color:var(--text-secondary);font-size:0.82rem;">${esc(s.email)}</td>
+      <td>${countryCell(s.country)}</td>
       <td>${esc(s.domain || '—')}${s.other_domains ? `<div style="font-size:0.72rem;color:var(--text-muted);" title="Same email, other tracks">Also applied: ${esc(s.other_domains)}</div>` : ''}${s.quiz_total ? `<div style="font-size:0.72rem;color:var(--text-muted);" title="Screening quiz score">Quiz ${esc(s.quiz_score)}/${esc(s.quiz_total)}</div>` : ''}</td>
       <td>${statusBadge(s.status)}</td>
       <td style="color:var(--text-muted);font-size:0.82rem;">${fmtDate(s.created_at)}</td>
@@ -1212,71 +1286,6 @@ async function rejectUrgentRequest(id) {
     loadUrgentRequests();
     loadStats(true);
   } catch(e) {
-    toast(e.message, 'error');
-  }
-}
-
-// ─── ANNOUNCEMENTS ───
-const ANNOUNCEMENT_KEY = 'submission-flow-update';
-let announcementPreviewCache = [];
-
-async function previewAnnouncement() {
-  const el = document.getElementById('announcement-preview');
-  const status = document.getElementById('announcement-status-filter').value;
-  el.innerHTML = `<div class="loading-overlay"><div class="spinner"></div> Loading recipients...</div>`;
-  try {
-    const data = await api(`/api/admin/announcements/${ANNOUNCEMENT_KEY}/preview?status=${encodeURIComponent(status)}`);
-    announcementPreviewCache = data.students || [];
-    if (!announcementPreviewCache.length) {
-      el.innerHTML = `<div class="empty-state"><div class="empty-state-text">No students with status "${status}" found.</div></div>`;
-      return;
-    }
-    el.innerHTML = `
-      <div style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:10px;">
-        <strong style="color:var(--text-primary);">${announcementPreviewCache.length}</strong> student(s) will receive this email:
-      </div>
-      <div class="table-wrap" style="max-height:280px;overflow-y:auto;">
-        <table>
-          <thead><tr><th>Name</th><th>Email</th><th>Domain</th></tr></thead>
-          <tbody>
-            ${announcementPreviewCache.map(s => `
-              <tr>
-                <td>${esc(s.first_name)} ${esc(s.last_name)}</td>
-                <td>${esc(s.email)}</td>
-                <td>${esc(s.domain || '-')}</td>
-              </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>`;
-  } catch (e) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-state-text">${e.message}</div></div>`;
-  }
-}
-
-function confirmSendAnnouncement() {
-  if (!announcementPreviewCache.length) {
-    toast('No recipients to send to — refresh the preview first.', 'error');
-    return;
-  }
-  document.getElementById('announcement-confirm-text').textContent =
-    `This will send the "Submission Flow Update" email to ${announcementPreviewCache.length} student(s) right now. This cannot be undone. Continue?`;
-  openModal('announcement-confirm-modal');
-}
-
-async function sendAnnouncementNow() {
-  const status = document.getElementById('announcement-status-filter').value;
-  try {
-    const data = await api(`/api/admin/announcements/${ANNOUNCEMENT_KEY}/send`, {
-      method: 'POST',
-      body: JSON.stringify({ status })
-    });
-    closeModal('announcement-confirm-modal');
-    if (data.status === 'no_targets') {
-      toast('No matching students found.', 'error');
-      return;
-    }
-    toast(`Sending to ${data.sent_to.length} student(s)...`);
-  } catch (e) {
     toast(e.message, 'error');
   }
 }

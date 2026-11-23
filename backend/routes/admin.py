@@ -121,8 +121,19 @@ async def get_stats(_: str = Depends(require_admin)):
     # Completed / eligible-unpaid / paying students come from the shared per-student rollup so the
     # Overview page and the Analytics page can never show different numbers for the same metric.
     _, students = await _dataset()
-    ov = analytics_service.overview(analytics_service.apply_filters(students), datetime.utcnow())
+    now = datetime.utcnow()
+    real = analytics_service.apply_filters(students)
+    ov = analytics_service.overview(real, now)
     out["completed_total"] = ov["completed"]
+    out["applicants"] = ov["applicants"]
+    out["enrolled_total"] = ov["enrolled"]
+    out["revenue_rupees"] = ov["revenue_rupees"]
+    out["revenue_30d_rupees"] = ov["revenue_30d_rupees"]
+    out["revenue_prev_30d_rupees"] = ov["revenue_prev_30d_rupees"]
+    out["paying_30d"] = ov["paying_30d"]
+    out["completion_rate"] = _pct(ov["completed"], ov["enrolled"])
+    out["paid_rate_of_enrolled"] = _pct(ov["paying_students"], ov["enrolled"])
+    out["geo"] = analytics_service.geography_section(real, now)
     out["eligible_unpaid"] = ov["eligible_unpaid"]
     out["total_alumni"] = ov["paying_students"]
     reviewed = out["approved_30d"] + out["rejected_30d"]
@@ -215,6 +226,7 @@ async def list_students(
     status: str | None = None,
     q: str | None = None,
     paid: bool | None = None,
+    country: str | None = None,
     page: int | None = None,
     limit: int = STUDENTS_PAGE_SIZE,
     offset: int = 0,
@@ -237,6 +249,9 @@ async def list_students(
     if status:
         conditions.append("s.status = ?")
         params.append(status)
+    if country:
+        conditions.append("s.country = ?")
+        params.append(country.strip().upper())
     if q and q.strip():
         like = f"%{q.strip().lower()}%"
         conditions.append(
@@ -252,7 +267,7 @@ async def list_students(
     where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
 
     students, count_rows = await db.fetch_batch([(
-        f"""SELECT s.id, s.first_name, s.last_name, s.email, s.phone, s.github_username,
+        f"""SELECT s.id, s.first_name, s.last_name, s.email, s.phone, s.country, s.github_username,
                    s.linkedin_url, s.college, s.year_of_study, s.domain, s.status,
                    s.quiz_score, s.quiz_total, s.created_at, s.updated_at,
                    (SELECT group_concat(o.domain, ', ') FROM students o
@@ -726,6 +741,11 @@ async def send_test_email(req: TestEmailRequest, _: str = Depends(require_admin)
     return {"status": "failed", "message": "Email send failed — check SMTP credentials in .env"}
 
 
+@router.get("/email/quota", summary="Emails sent today per Brevo account")
+async def get_email_quota(_: str = Depends(require_admin)):
+    return {"accounts": await email_service.get_quota_usage()}
+
+
 EMAIL_LOGS_PAGE_SIZE = 50
 EMAIL_LOGS_MAX_PAGE_SIZE = 200
 
@@ -965,9 +985,10 @@ def _invalidate_analytics() -> None:
     _analytics_cache.update(at=0.0, data=None)
 
 
-def _filters(date_from, date_to, domain, source, campaign, include_test) -> dict:
+def _filters(date_from, date_to, domain, source, campaign, include_test, country=None) -> dict:
     return {"date_from": date_from or None, "date_to": date_to or None, "domain": domain or None,
-            "source": source or None, "campaign": campaign or None, "include_test": include_test}
+            "source": source or None, "campaign": campaign or None, "include_test": include_test,
+            "country": country or None}
 
 
 @router.get("/analytics", summary="Aggregated platform analytics for the admin dashboard")
@@ -979,6 +1000,7 @@ async def get_analytics(
     source: str | None = None,
     campaign: str | None = None,
     include_test: bool = False,
+    country: str | None = Query(None, description="ISO 3166-1 alpha-2, e.g. IN"),
     inactive_days: int = 7,
     _: str = Depends(require_admin),
 ):
@@ -989,7 +1011,7 @@ async def get_analytics(
     """
     raw, students = await _dataset(fresh)
     return analytics_service.compute(
-        raw, students, _filters(date_from, date_to, domain, source, campaign, include_test),
+        raw, students, _filters(date_from, date_to, domain, source, campaign, include_test, country),
         inactive_days=max(1, min(inactive_days, 90)))
 
 
@@ -1002,6 +1024,7 @@ async def analytics_students(
     source: str | None = None,
     campaign: str | None = None,
     include_test: bool = False,
+    country: str | None = None,
     q: str | None = None,
     page: int = 1,
     limit: int = 25,
@@ -1011,7 +1034,7 @@ async def analytics_students(
     _, students = await _dataset()
     try:
         return analytics_service.drilldown(
-            students, _filters(date_from, date_to, domain, source, campaign, include_test), stage, page, limit, q)
+            students, _filters(date_from, date_to, domain, source, campaign, include_test, country), stage, page, limit, q)
     except KeyError:
         raise HTTPException(status_code=400, detail=f"Unknown stage '{stage}'")
 

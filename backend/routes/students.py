@@ -16,6 +16,8 @@ from services.submission_service import submission_service
 from services.urgent_request_service import urgent_request_service
 from services.enrollment_service import enrollment_service
 from services.name_change_service import NameChangeError, change_name, name_status
+from services.payment_service import phone_pay_region
+from services.countries import infer_country, normalize_iso
 
 logger = logging.getLogger("skillme.students")
 router = APIRouter(prefix="/api/students", tags=["students"])
@@ -51,6 +53,7 @@ class ApplicationRequest(BaseModel):
     last_name: str = Field(..., min_length=1, max_length=100)
     email: str = Field(..., min_length=5, max_length=200)
     phone: str | None = Field(None, max_length=20)
+    country: str | None = Field(None, max_length=2, description="ISO 3166-1 alpha-2 picked with the phone code")
     linkedin_url: str | None = Field(None, max_length=300)
     college: str | None = Field(None, max_length=200)
     year_of_study: str | None = Field(None, max_length=50)
@@ -164,6 +167,13 @@ async def apply(req: ApplicationRequest, background_tasks: BackgroundTasks):
                 "current_status": existing["status"],
             }
 
+        # The country picked with the phone code; an older cached form that doesn't send one
+        # falls back to a guess from the phone number / college, marked as such.
+        country = normalize_iso(req.country)
+        country_source = "selected" if country else None
+        if not country:
+            country, country_source = infer_country(req.phone, req.college)
+
         a = req.attribution
         # attribution_captured separates "applied before tracking existed" (0, unknown) from
         # "tracked, and the visitor really had no campaign/referrer" (1, direct).
@@ -179,19 +189,21 @@ async def apply(req: ApplicationRequest, background_tasks: BackgroundTasks):
         try:
             student_id = await db.insert(
                 """INSERT INTO students
-                   (first_name, last_name, email, phone, linkedin_url,
+                   (first_name, last_name, email, phone, country, country_source, linkedin_url,
                     college, year_of_study, domain, motivation, referral_source,
                     quiz_score, quiz_total, status,
                     utm_source, utm_medium, utm_campaign, utm_content, referral_code,
                     landing_page, referrer, first_touch_source, first_touch_at,
                     last_touch_source, last_touch_campaign, last_touch_at, attribution_captured)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'applied',
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'applied',
                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     req.first_name,
                     req.last_name,
                     req.email,
                     req.phone,
+                    country,
+                    country_source,
                     req.linkedin_url,
                     req.college,
                     req.year_of_study,
@@ -294,6 +306,14 @@ async def get_progress(email: str, me: dict = Depends(require_student)):
     return await _progress_for_student(student)
 
 
+def _pay_region(student: dict) -> str | None:
+    """'in' | 'intl' | None. The stored country wins; the phone number is the fallback."""
+    country = normalize_iso(student.get("country"))
+    if country:
+        return "in" if country == "IN" else "intl"
+    return phone_pay_region(student.get("phone"))
+
+
 async def _progress_for_student(student: dict) -> dict:
     # Everything on the dashboard is scoped to the student's single current enrollment,
     # so stale rows from an old/dropped enrollment can never leak in.
@@ -340,6 +360,8 @@ async def _progress_for_student(student: dict) -> dict:
             "offer_ref": offer_ref(student["id"]),
             # Whether / how often the name printed on their documents can still be changed.
             "name_change": await name_status(student["email"]),
+            # 'in' | 'intl' | None — picks the default payment options (cards only abroad).
+            "pay_region": _pay_region(student),
         },
         "progress": [dict(p) for p in progress],
         "submissions": [dict(s) for s in submissions],

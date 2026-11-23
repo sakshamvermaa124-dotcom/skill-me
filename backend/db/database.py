@@ -169,6 +169,9 @@ class Database:
             "ALTER TABLE email_logs ADD COLUMN last_event TEXT",
             "ALTER TABLE email_logs ADD COLUMN last_event_at TIMESTAMP",
             "CREATE INDEX IF NOT EXISTS idx_email_logs_tag ON email_logs(message_tag)",
+            # Which Brevo account (SMTP login) delivered this email — drives per-account daily quota (v9)
+            "ALTER TABLE email_logs ADD COLUMN smtp_account TEXT",
+            "CREATE INDEX IF NOT EXISTS idx_email_logs_smtp_account ON email_logs(smtp_account, sent_at)",
             # Auto-generated feedback emailed to the student when they submit a week's task (v7)
             "ALTER TABLE submissions ADD COLUMN feedback TEXT",
             # Indexes for the admin analytics dashboard (v8) — without these, revenue/domain
@@ -214,6 +217,9 @@ class Database:
             "ALTER TABLE certificates ADD COLUMN payment_id INTEGER",
             "ALTER TABLE otp_tokens ADD COLUMN verified_at TIMESTAMP",
             "ALTER TABLE otp_tokens ADD COLUMN attempts INTEGER DEFAULT 0",
+            "ALTER TABLE students ADD COLUMN country TEXT",
+            "ALTER TABLE students ADD COLUMN country_source TEXT",
+            "CREATE INDEX IF NOT EXISTS idx_students_country ON students(country)",
             """CREATE TABLE IF NOT EXISTS payment_events (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 provider_event_id TEXT NOT NULL UNIQUE,

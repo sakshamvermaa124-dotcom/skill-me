@@ -9,6 +9,117 @@ const API = window.SKILLME_API || '${API}';
 const PAYMENT_UNLOCK_PCT = 75;
 // The certificate price is only ever shown here, to students who have reached PAYMENT_UNLOCK_PCT.
 const CERT_PRICE = '₹129';
+// Rough USD equivalent shown to students paying from abroad (their bank does the real conversion).
+const CERT_PRICE_USD_APPROX = 'US$1.50';
+
+// ── Payment region ──────────────────────────────────────────────────────────
+// UPI, netbanking and Indian wallets only work with Indian bank accounts, and students abroad
+// kept picking them and failing. 'intl' opens Razorpay with cards only. The default comes from
+// the student's own choice (remembered), else their signup phone number, else the browser timezone.
+const PAY_REGION_KEY = 'skillme_pay_region';
+const PAY_REGION_COPY = {
+  in:   { secure: 'UPI / Card / NetBanking' },
+  intl: { secure: 'International Visa / Mastercard' },
+};
+let payRegion = null;
+
+// Small payment-network badges (simplified brand marks) for the region cards.
+const PAY_LOGOS = {
+  upi: `<svg viewBox="0 0 40 24" role="img" aria-label="UPI"><text x="4" y="16.5" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="800" font-style="italic" fill="#5f6368">UPI</text><path d="M29 6l5 6-5 6z" fill="#f47920"/><path d="M33 6l5 6-5 6z" fill="#0f9d58"/></svg>`,
+  rupay: `<svg viewBox="0 0 40 24" role="img" aria-label="RuPay"><text x="3" y="16" font-family="Arial, Helvetica, sans-serif" font-size="9.5" font-weight="800" font-style="italic" fill="#1b3a7a">RuPay</text><path d="M32 7l4 5-4 5z" fill="#f47920"/><path d="M34.5 7l4 5-4 5z" fill="#0f9d58"/></svg>`,
+  visa: `<svg viewBox="0 0 40 24" role="img" aria-label="Visa"><text x="20" y="16.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="900" font-style="italic" letter-spacing="0.5" fill="#1a1f71">VISA</text></svg>`,
+  mastercard: `<svg viewBox="0 0 40 24" role="img" aria-label="Mastercard"><circle cx="16" cy="12" r="7" fill="#eb001b"/><circle cx="24" cy="12" r="7" fill="#f79e1b"/><path d="M20 6.26a7 7 0 0 1 0 11.48 7 7 0 0 1 0-11.48z" fill="#ff5f00"/></svg>`,
+};
+const payLogos = keys => keys.map(k => `<span class="pay-logo">${PAY_LOGOS[k]}</span>`).join('');
+
+
+function detectPayRegion(student) {
+  try {
+    const saved = localStorage.getItem(PAY_REGION_KEY);
+    if (saved === 'in' || saved === 'intl') return saved;
+  } catch (e) { /* storage blocked */ }
+  if (student && (student.pay_region === 'in' || student.pay_region === 'intl')) return student.pay_region;
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    // UTC/Etc zones usually mean an unset clock, not a location: keep every option open.
+    if (tz && !/^(UTC|Etc\/)/.test(tz)) return /^Asia\/(Kolkata|Calcutta)$/.test(tz) ? 'in' : 'intl';
+  } catch (e) { /* no Intl */ }
+  return 'in';
+}
+
+function getPayRegion() {
+  if (!payRegion) payRegion = detectPayRegion(window._dashStudent);
+  return payRegion;
+}
+
+function payRegionPickerHtml() {
+  return `
+    <div class="pay-region" data-pay-region>
+      <div class="pay-region-label" aria-hidden="true">Where are you paying from?</div>
+      <div class="pay-region-options" role="radiogroup" aria-label="Where are you paying from?">
+        <button type="button" class="pay-region-opt" role="radio" data-region="in">
+          <span class="pay-region-radio" aria-hidden="true"></span>
+          <span class="pay-region-body">
+            <span class="pay-region-title">India</span>
+            <span class="pay-region-logos">${payLogos(['upi', 'rupay', 'visa', 'mastercard'])}</span>
+            <span class="pay-region-sub">UPI, cards &amp; netbanking</span>
+          </span>
+        </button>
+        <button type="button" class="pay-region-opt" role="radio" data-region="intl">
+          <span class="pay-region-radio" aria-hidden="true"></span>
+          <span class="pay-region-body">
+            <span class="pay-region-title">Outside India</span>
+            <span class="pay-region-logos">${payLogos(['visa', 'mastercard'])}</span>
+            <span class="pay-region-sub">International debit &amp; credit cards</span>
+          </span>
+        </button>
+      </div>
+      <div class="pay-region-note" data-pay-region-note aria-live="polite">
+        <div class="pay-region-note-inner">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <span><strong>${CERT_PRICE} ≈ ${CERT_PRICE_USD_APPROX}</strong>, converted by your bank. Use a regular debit or credit card; prepaid and virtual cards are sometimes declined.</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+function syncPayRegionUI() {
+  const region = getPayRegion();
+  const copy = PAY_REGION_COPY[region];
+  document.querySelectorAll('[data-pay-region]').forEach(picker => {
+    picker.dataset.active = region;
+    picker.querySelectorAll('.pay-region-opt').forEach(opt => {
+      const on = opt.dataset.region === region;
+      opt.setAttribute('aria-checked', on ? 'true' : 'false');
+      opt.tabIndex = on ? 0 : -1;
+    });
+    const note = picker.querySelector('[data-pay-region-note]');
+    if (note) note.setAttribute('aria-hidden', region === 'intl' ? 'false' : 'true');
+  });
+  document.querySelectorAll('[data-pay-secure]').forEach(el => {
+    el.textContent = `🔒 Secured by Razorpay · ${copy.secure} · Every certificate is independently verifiable`;
+  });
+}
+
+function setPayRegion(region, focus) {
+  if (region !== 'in' && region !== 'intl') return;
+  payRegion = region;
+  try { localStorage.setItem(PAY_REGION_KEY, region); } catch (e) { /* storage blocked */ }
+  syncPayRegionUI();
+  if (focus) focus.closest('[data-pay-region]').querySelector(`[data-region="${region}"]`).focus();
+}
+
+// One listener serves every picker (banner + modal), including ones rendered later.
+document.addEventListener('click', e => {
+  const opt = e.target.closest && e.target.closest('.pay-region-opt');
+  if (opt) setPayRegion(opt.dataset.region);
+});
+document.addEventListener('keydown', e => {
+  const opt = e.target.closest && e.target.closest('.pay-region-opt');
+  if (!opt || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return;
+  e.preventDefault();
+  setPayRegion(opt.dataset.region === 'in' ? 'intl' : 'in', opt);
+});
 const FRONTEND = window.SKILLME_FRONTEND || '${FRONTEND}';
 
 // Task guides are markdown from the curriculum; render them sanitized, or as plain text
@@ -959,6 +1070,8 @@ document.addEventListener('DOMContentLoaded', () => {
       async function fetchPayState() {
         if (!student.id || !data._batch_id) return 'unpaid';
         if (urlParams.get('preview') === 'paid') return 'paid';
+        // Preview uses a mock student the backend doesn't know: show the pay banner without asking.
+        if (urlParams.get('preview')) return 'unpaid';
         try {
           const payStatus = await fetch(`${API}/api/payments/status/${student.id}/${data._batch_id}`);
           if (!payStatus.ok) return 'unknown';
@@ -1738,6 +1851,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (payBtn) {
           payBtn.onclick = () => window.initiatePayment(student.id, data._batch_id);
         }
+        const regionSlot = document.getElementById('modal-pay-region');
+        if (regionSlot && !regionSlot.firstElementChild) regionSlot.innerHTML = payRegionPickerHtml();
+        syncPayRegionUI();
         modal.style.display = 'flex';
         // Force reflow
         void modal.offsetWidth;
@@ -1763,6 +1879,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </div>
           <div class="cert-banner-actions" style="width: 100%;">
+            ${payRegionPickerHtml()}
             <div class="cert-pay-row">
               <input type="text" id="discount-code" class="dash-input" placeholder="Have a discount code?">
               <button id="pay-btn" class="cert-btn cert-btn-primary" onclick="initiatePayment(${student.id}, ${data._batch_id})">
@@ -1772,12 +1889,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 Unlock My Certificate — ${CERT_PRICE}
               </button>
             </div>
-            <div class="secure-note">
-              🔒 Secured by Razorpay · UPI / Card / NetBanking · Every certificate is independently verifiable
-            </div>
+            <div class="secure-note" data-pay-secure></div>
           </div>
         </div>
       </div>`;
+    syncPayRegionUI();
   }
 
   function renderCertReady(certSection, student, data) {
@@ -2033,14 +2149,22 @@ document.addEventListener('DOMContentLoaded', () => {
       if (modalBtn) { modalBtn.disabled = true; modalBtn.textContent = 'Creating order...'; }
 
     try {
+      // Preview only (?preview=1&rzp_key=rzp_test_…): open the real Razorpay TEST checkout with no
+      // backend order, so the checkout UI can be checked for both regions. Never a live key.
+      const qs = new URLSearchParams(window.location.search);
+      const previewKey = qs.get('preview') && /^rzp_test_\w+$/.test(qs.get('rzp_key') || '') ? qs.get('rzp_key') : null;
+
       // 1. Create Razorpay order on backend
-      const orderRes = await fetch(`${API}/api/payments/create-order`, {
+      const orderRes = previewKey ? { ok: true } : await fetch(`${API}/api/payments/create-order`, {
         method: 'POST',
         headers: authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ student_id: studentId, batch_id: batchId, discount_code: discountCode,
+          payer_region: getPayRegion(),
           ...(window.SkillMeAttribution ? window.SkillMeAttribution.lastTouch() : {}) })
       });
-      const orderData = await orderRes.json().catch(() => ({}));
+      const orderData = previewKey
+        ? { key_id: previewKey, amount: 12900, currency: 'INR', student_name: (window._dashStudent || {}).name }
+        : await orderRes.json().catch(() => ({}));
 
       if (!orderRes.ok) {
         dashToast(orderData.detail || 'Could not start the payment. Please try again.', 'error');
@@ -2067,12 +2191,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
 
-      // 3. Open Razorpay checkout modal
+      // 3. Open Razorpay checkout modal. Abroad, show cards only: UPI, netbanking and Indian
+      // wallets need an Indian bank account and can never succeed there.
+      const cardsOnly = getPayRegion() === 'intl';
       const options = {
+        ...(cardsOnly ? {
+          config: {
+            display: {
+              blocks: {
+                intl_cards: { name: 'Pay with Visa or Mastercard', instruments: [{ method: 'card' }] },
+              },
+              sequence: ['block.intl_cards'],
+              preferences: { show_default_blocks: false },
+            },
+          },
+        } : {}),
         key: orderData.key_id,
         amount: orderData.amount,
         currency: orderData.currency,
         name: "SkillMe Internship",
+        image: `${FRONTEND}/logo.png`,
         description: "Verified Certificate & Portfolio Activation",
         order_id: orderData.order_id,
         prefill: {
@@ -2089,6 +2227,12 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         },
         handler: async function (response) {
+          if (previewKey) {
+            window.closePaymentModal();
+            resetPayButtons();
+            dashToast(`Test payment succeeded (preview): ${response.razorpay_payment_id}`);
+            return;
+          }
           // 4. Verify payment on backend
           if (btn) { btn.textContent = 'Verifying...'; }
           if (modalBtn) { modalBtn.textContent = 'Verifying...'; }
@@ -2124,6 +2268,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // an unpaid order that goes quiet is counted as abandoned by the server.
       rzp.on('payment.failed', function (resp) {
         const err = (resp && resp.error) || {};
+        if (previewKey) return;
         fetch(`${API}/api/payments/failed`, {
           method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify({ razorpay_order_id: orderData.order_id, razorpay_payment_id: err.metadata && err.metadata.payment_id || null,

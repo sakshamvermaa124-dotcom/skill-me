@@ -9,12 +9,37 @@ these helpers, so a payment confirmed twice (or by both paths) is applied once.
 """
 
 import logging
+import re
 
 from db.database import db
 
 logger = logging.getLogger("skillme.payments")
 
 ABANDON_AFTER_MINUTES = 60
+
+
+def phone_pay_region(phone: str | None) -> str | None:
+    """Guess where a student pays from, from the phone number typed at signup.
+
+    'in' = India (UPI, netbanking, wallets and cards all work), 'intl' = outside India
+    (only international cards can work). None = can't tell; the dashboard then falls back
+    to the browser's timezone. The phone field is free text, so only clear cases count:
+    a +/00 country code, or a bare Indian mobile number (10 digits starting 6-9).
+    Local numbers like Nigeria's 0813… or Kenya's 0740… stay None rather than guessed.
+    """
+    raw = (phone or "").strip()
+    digits = re.sub(r"\D", "", raw)
+    if not digits:
+        return None
+    if raw.startswith("+") or raw.startswith("00"):
+        if raw.startswith("00"):
+            digits = digits[2:]
+        if not digits:
+            return None
+        return "in" if digits.startswith("91") else "intl"
+    if re.fullmatch(r"[6-9]\d{9}", digits) or re.fullmatch(r"91[6-9]\d{9}", digits):
+        return "in"
+    return None
 
 
 async def get_order(order_id: str) -> dict | None:

@@ -12,6 +12,7 @@ import base64
 import hashlib
 import hmac
 import logging
+from typing import Literal
 
 import httpx
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
@@ -42,6 +43,9 @@ class CreateOrderRequest(BaseModel):
     discount_code: str | None = Field(None, description="Optional discount code")
     last_touch_source: str | None = Field(None, max_length=100)
     last_touch_campaign: str | None = Field(None, max_length=150)
+    # Where the student said they're paying from ('in' | 'intl'); recorded on the order
+    # so failed international attempts are easy to spot in the Razorpay dashboard.
+    payer_region: Literal["in", "intl"] | None = None
 
 
 class PaymentFailedRequest(BaseModel):
@@ -191,6 +195,7 @@ async def create_order(req: CreateOrderRequest, me: dict = Depends(require_stude
                     "batch_id": str(batch_id),
                     "student_name": f"{student['first_name']} {student['last_name']}",
                     "email": student["email"],
+                    "payer_region": req.payer_region or "unknown",
                 },
             },
         )

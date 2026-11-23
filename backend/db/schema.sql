@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS students (
     last_name TEXT NOT NULL,
     email TEXT NOT NULL,                  -- one row per (email, domain): a student can apply to several tracks
     phone TEXT,
+    country TEXT,                         -- ISO 3166-1 alpha-2, e.g. 'IN'
+    country_source TEXT,                  -- selected (picked on the apply form) | phone | college (backfilled guess)
     github_username TEXT,
     linkedin_url TEXT,
     college TEXT,

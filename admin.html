@@ -22,7 +22,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="theme.css?v=98690fd7ba">
-  <link rel="stylesheet" href="admin.css?v=8587dce7c2">
+  <link rel="stylesheet" href="admin.css?v=37f5304048">
   <script src="theme.js?v=515b2d143f" defer></script>
 </head>
 <body>
@@ -70,7 +70,7 @@
       <span class="sidebar-brand-badge">Admin</span>
     </a>
     <nav class="sidebar-nav">
-      <div class="nav-section-label">Platform</div>
+      <div class="nav-section-label">Daily</div>
       <div class="nav-item active" id="nav-overview" onclick="navigate('overview')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
@@ -86,45 +86,6 @@
         Students
         <span class="nav-badge" id="pending-badge" style="display:none">0</span>
       </div>
-      <div class="nav-item" id="nav-alumni" onclick="navigate('alumni')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 3 3 6 3s6-1 6-3v-5"/>
-        </svg>
-        Alumni
-        <span class="nav-badge is-ok" id="alumni-badge" style="display:none">0</span>
-      </div>
-      <div class="nav-item" id="nav-analytics" onclick="navigate('analytics')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
-        </svg>
-        Analytics
-      </div>
-      <div class="nav-item" id="nav-recovery" onclick="navigate('recovery')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11l-3 3-2-2"/>
-        </svg>
-        Student Recovery
-        <span class="nav-badge is-warn" id="recovery-badge" style="display:none">0</span>
-      </div>
-      <div class="nav-section-label" style="margin-top:12px;">Actions</div>
-      <div class="nav-item" onclick="showApplicationsToReview()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-        </svg>
-        Review Applications
-      </div>
-      <div class="nav-item" id="nav-email" onclick="navigate('email')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
-        </svg>
-        Email Settings
-      </div>
-      <div class="nav-item" id="nav-reminders" onclick="navigate('reminders')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-        </svg>
-        Reminders
-      </div>
       <div class="nav-item" id="nav-submissions" onclick="navigate('submissions')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/>
@@ -139,17 +100,45 @@
         Urgent Requests
         <span class="nav-badge is-warn" id="urgent-requests-badge" style="display:none">0</span>
       </div>
+      <div class="nav-section-label" style="margin-top:12px;">Growth</div>
+      <div class="nav-item" id="nav-analytics" onclick="navigate('analytics')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+        Analytics
+      </div>
+      <div class="nav-item" id="nav-recovery" onclick="navigate('recovery')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11l-3 3-2-2"/>
+        </svg>
+        Recovery
+        <span class="nav-badge is-warn" id="recovery-badge" style="display:none">0</span>
+      </div>
+      <div class="nav-item" id="nav-reminders" onclick="navigate('reminders')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        Reminders
+      </div>
+      <div class="nav-section-label" style="margin-top:12px;">Records</div>
+      <div class="nav-item" id="nav-alumni" onclick="navigate('alumni')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 3 3 6 3s6-1 6-3v-5"/>
+        </svg>
+        Alumni
+        <span class="nav-badge is-ok" id="alumni-badge" style="display:none">0</span>
+      </div>
       <div class="nav-item" id="nav-name-changes" onclick="navigate('name-changes')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M6 16a3.2 3.2 0 0 1 6 0"/><path d="M15 9h3"/><path d="M15 13h3"/>
         </svg>
         Name Changes
       </div>
-      <div class="nav-item" id="nav-announcements" onclick="navigate('announcements')">
+      <div class="nav-item" id="nav-email" onclick="navigate('email')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
         </svg>
-        Announcements
+        Email
       </div>
     </nav>
 
@@ -200,18 +189,21 @@
 
     <!-- ─── OVERVIEW PAGE ─── -->
     <section class="page active" id="page-overview">
-      <div class="stats-grid" id="stats-grid">
-        <div class="loading-overlay"><div class="spinner"></div> Loading stats...</div>
+      <div class="ov-block" id="stats-grid">
+        <div class="loading-overlay"><div class="spinner"></div> Loading…</div>
       </div>
-      <div class="stats-grid" id="pulse-grid" style="margin-top:16px;"></div>
+      <div class="ov-block" id="pulse-grid"></div>
+      <div class="ov-section-label">Global reach</div>
+      <div class="panel geo-panel" id="global-reach"><div class="geo-map-skeleton" style="margin:18px;"></div></div>
+      <div class="ov-section-label">Queues</div>
       <div class="grid-2">
         <div class="panel">
           <div class="panel-header">
             <div>
-              <div class="panel-title">Recent Applications</div>
-              <div class="panel-subtitle">Latest student submissions</div>
+              <div class="panel-title">Newest applications</div>
+              <div class="panel-subtitle">Waiting for your review</div>
             </div>
-            <button class="btn btn-ghost btn-sm" onclick="navigate('students')">View All</button>
+            <button class="btn btn-ghost btn-sm" onclick="showStudentsWithStatus('applied')">Review all</button>
           </div>
           <div class="table-wrap" id="recent-applications">
             <div class="loading-overlay"><div class="spinner"></div></div>
@@ -220,7 +212,7 @@
         <div class="panel">
           <div class="panel-header">
             <div>
-              <div class="panel-title">Shortlisted — Ready to Enroll</div>
+              <div class="panel-title">Ready to enroll</div>
               <div class="panel-subtitle" id="overview-shortlisted-count">Ready to enroll</div>
             </div>
           </div>
@@ -243,6 +235,9 @@
           <option value="completed">Completed</option>
           <option value="dropped">Dropped</option>
         </select>
+        <select class="filter-select" id="country-filter" aria-label="Filter by country" onchange="filterStudents()">
+          <option value="">All countries</option>
+        </select>
         <button class="btn btn-ghost btn-sm" onclick="loadStudents()" aria-label="Refresh students">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
             <polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
@@ -256,6 +251,7 @@
               <tr>
                 <th>Student</th>
                 <th>Email</th>
+                <th>Country</th>
                 <th>Domain</th>
                 <th>Status</th>
                 <th>Applied</th>
@@ -263,7 +259,7 @@
               </tr>
             </thead>
             <tbody id="students-tbody">
-              <tr><td colspan="6"><div class="loading-overlay"><div class="spinner"></div></div></td></tr>
+              <tr><td colspan="7"><div class="loading-overlay"><div class="spinner"></div></div></td></tr>
             </tbody>
           </table>
         </div>
@@ -323,6 +319,7 @@
         </span>
         <label class="an-field"><span>Track</span><select class="filter-select" id="an-domain" onchange="anApplyFilters()"><option value="">All tracks</option></select></label>
         <label class="an-field"><span>Source</span><select class="filter-select" id="an-source" onchange="anApplyFilters()"><option value="">All sources</option></select></label>
+        <label class="an-field"><span>Country</span><select class="filter-select" id="an-country" onchange="anApplyFilters()"><option value="">All countries</option></select></label>
         <label class="an-field"><span>Campaign</span><select class="filter-select" id="an-campaign" onchange="anApplyFilters()"><option value="">All campaigns</option></select></label>
         <label class="an-check"><input type="checkbox" id="an-test" onchange="anApplyFilters()"> Include test data</label>
         <button class="btn btn-secondary" onclick="loadAnalytics(true)" style="font-size:0.8rem;padding:6px 14px;margin-left:auto;">↻ Refresh</button>
@@ -332,6 +329,7 @@
         <button class="an-tab active" role="tab" data-tab="overview" onclick="anTab('overview')">Overview</button>
         <button class="an-tab" role="tab" data-tab="funnel" onclick="anTab('funnel')">Funnel</button>
         <button class="an-tab" role="tab" data-tab="acquisition" onclick="anTab('acquisition')">Acquisition</button>
+        <button class="an-tab" role="tab" data-tab="geography" onclick="anTab('geography')">Geography</button>
         <button class="an-tab" role="tab" data-tab="domains" onclick="anTab('domains')">Domains</button>
         <button class="an-tab" role="tab" data-tab="payments" onclick="anTab('payments')">Payments</button>
         <button class="an-tab" role="tab" data-tab="engagement" onclick="anTab('engagement')">Engagement</button>
@@ -635,38 +633,6 @@
       </div>
     </section>
 
-    <section class="page" id="page-announcements">
-      <div class="panel">
-        <div class="panel-header">
-          <div>
-            <div class="panel-title">📢 Submission Flow Update</div>
-            <div style="font-size:0.8rem;color:var(--text-secondary);margin-top:2px;">
-              Notifies students that task submission moved from GitHub Pull Requests to LinkedIn posts + admin review.
-            </div>
-          </div>
-        </div>
-        <div class="panel-body">
-          <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px;">
-            <label style="font-size:0.82rem;color:var(--text-secondary);">Send to students with status:</label>
-            <select class="filter-select" id="announcement-status-filter" aria-label="Announcement audience" onchange="previewAnnouncement()">
-              <option value="enrolled" selected>Enrolled</option>
-              <option value="shortlisted">Shortlisted</option>
-              <option value="applied">Applied</option>
-            </select>
-            <button class="btn btn-ghost btn-sm" onclick="previewAnnouncement()">Refresh Preview</button>
-          </div>
-
-          <div id="announcement-preview" style="margin-bottom:16px;">
-            <div class="loading-overlay"><div class="spinner"></div> Loading recipients...</div>
-          </div>
-
-          <button class="btn btn-tone-accent" onclick="confirmSendAnnouncement()">
-            📨 Send Submission Flow Update
-          </button>
-        </div>
-      </div>
-    </section>
-
   <section class="page" id="page-reminders">
       <div class="panel">
         <div class="panel-header">
@@ -721,21 +687,6 @@
 </div>
 
 <!-- ─── ANNOUNCEMENT SEND CONFIRMATION MODAL ─── -->
-<div class="modal-overlay" id="announcement-confirm-modal">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">Confirm Send</div>
-      <button class="modal-close" onclick="closeModal('announcement-confirm-modal')">&times;</button>
-    </div>
-    <div class="modal-body">
-      <p id="announcement-confirm-text" style="font-size:0.9rem;color:var(--text-secondary);line-height:1.6;"></p>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('announcement-confirm-modal')">Cancel</button>
-      <button class="btn btn-tone-accent" onclick="sendAnnouncementNow()">Yes, Send Now</button>
-    </div>
-  </div>
-</div>
 
 <!-- ——— REMINDER SEND CONFIRMATION MODAL ——— -->
 <div class="modal-overlay" id="reminder-confirm-modal">
@@ -792,10 +743,11 @@
 </div>
 
 <script src="config.js?v=a6d0001538" defer></script>
-<script src="admin.js?v=0a1a3afb56" defer></script>
-<script src="admin-email.js?v=00d66440ba" defer></script>
+<script src="admin.js?v=6b37c23eee" defer></script>
+<script src="admin-email.js?v=e9a39d2443" defer></script>
 <script src="admin-recovery.js?v=f85f90e16f" defer></script>
-<script src="admin-analytics.js?v=ebc40a1f6f" defer></script>
+<script src="admin-geo.js?v=ad65a779fe" defer></script>
+<script src="admin-analytics.js?v=14c40b3e3d" defer></script>
 </body>
 </html>
 
