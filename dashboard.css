@@ -1825,7 +1825,7 @@ textarea.dash-input { resize: vertical; min-height: 84px; }
 .payment-modal-list svg { flex-shrink: 0; margin-top: 1px; color: var(--ok); }
 .payment-modal-price { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.03em; color: var(--text-strong); margin-bottom: 14px; }
 /* The headline price stays big; only the caption under it is small. */
-.payment-modal-price .payment-modal-price-sub { display: block; margin-top: 2px; font-size: 0.74rem; font-weight: 500; letter-spacing: 0; color: var(--text-faint); }
+.payment-modal-price .payment-modal-price-sub { display: block; font-family: var(--font-body); margin-top: 2px; font-size: 0.74rem; font-weight: 500; letter-spacing: 0; color: var(--text-faint); }
 .payment-modal-content .dash-input { margin-bottom: 10px; }
 
 .milestone-modal-badge {

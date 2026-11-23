@@ -68,7 +68,7 @@ function payMethodsHtml() {
 // Caption under the big price in the payment modal.
 function certPriceSub() {
   return getPayRegion() === 'intl'
-    ? 'One-time, in US dollars · covers verification &amp; lifetime hosting'
+    ? 'One-time, in US dollars · includes verification &amp; lifetime hosting'
     : 'One-time · covers verification &amp; lifetime hosting';
 }
 
