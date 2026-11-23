@@ -743,7 +743,8 @@ async def send_test_email(req: TestEmailRequest, _: str = Depends(require_admin)
 
 @router.get("/email/quota", summary="Emails sent today per Brevo account")
 async def get_email_quota(_: str = Depends(require_admin)):
-    return {"accounts": await email_service.get_quota_usage()}
+    from services.email_service import get_quota_usage
+    return {"accounts": await get_quota_usage()}
 
 
 EMAIL_LOGS_PAGE_SIZE = 50
