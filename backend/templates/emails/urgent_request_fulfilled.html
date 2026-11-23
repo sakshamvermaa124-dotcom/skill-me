@@ -1,36 +1,26 @@
 {% extends "base.html" %}
+{% import "_ui.html" as ui %}
 
-{% block title %}🚀 Your Urgent Request Has Been Fulfilled{% endblock %}
+{% block title %}Your priority request is ready — SkillMe{% endblock %}
+{% block preheader %}Your priority {{ request_type }} request for {{ domain_label }} has been fulfilled.{% endblock %}
 
 {% block body %}
-<p class="greeting">Good news, {{ first_name }}! 🚀</p>
-<p class="lead">
-  Your urgent processing request for the <strong>{{ domain_label }}</strong> track has been
-  <strong>fulfilled</strong> by our team. Everything you asked to be expedited is now ready.
-</p>
+{{ ui.eyebrow("Priority request") }}
+{{ ui.title("Your request is ready, " ~ first_name) }}
+{% call ui.p() %}
+  Your priority processing request for the <strong class="ink" style="color:#0a0a0a;">{{ domain_label }}</strong> track has been
+  <strong class="ink" style="color:#0a0a0a;">fulfilled</strong>. Everything you asked us to expedite is now ready.
+{% endcall %}
 
-<div class="divider"></div>
+{% call ui.info_table() %}
+  {{ ui.row("Track", domain_label) }}
+  {{ ui.row("Request type", request_type) }}
+  {{ ui.row("Status", ui.badge("Fulfilled", "ok"), last=true) }}
+{% endcall %}
 
-<div class="info-table">
-  <div class="info-row">
-    <span class="info-label">Track</span>
-    <span class="info-value">{{ domain_label }}</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">Request Type</span>
-    <span class="info-value">{{ request_type }}</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">Status</span>
-    <span class="info-value">Fulfilled</span>
-  </div>
-</div>
+{% call ui.p(size=14, mb=0) %}Open your dashboard to claim your certificate, LOR and portfolio.{% endcall %}
 
-<p class="lead" style="margin-bottom: 20px;">
-  Head over to your dashboard to download your certificate, LOR, or view your portfolio.
-</p>
-
-<div class="cta-wrap">
-  <a href="{{ dashboard_url }}" target="_blank" class="cta-btn">Go to My Dashboard &rarr;</a>
-</div>
+{% call ui.actions(mt=22) %}
+  {{ ui.button(dashboard_url, "Go to my dashboard") }}
+{% endcall %}
 {% endblock %}
