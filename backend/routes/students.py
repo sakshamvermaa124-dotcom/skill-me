@@ -17,6 +17,7 @@ from services.urgent_request_service import urgent_request_service
 from services.enrollment_service import enrollment_service
 from services.name_change_service import NameChangeError, change_name, name_status
 from services.payment_service import phone_pay_region
+from services import pricing
 from services.countries import infer_country, normalize_iso
 
 logger = logging.getLogger("skillme.students")
@@ -362,6 +363,11 @@ async def _progress_for_student(student: dict) -> dict:
             "name_change": await name_status(student["email"]),
             # 'in' | 'intl' | None — picks the default payment options (cards only abroad).
             "pay_region": _pay_region(student),
+            # The one certificate price this student sees and pays ({currency, amount, label}).
+            # None when we can't tell their country: the dashboard then picks from
+            # cert_price_options by the browser's timezone, and create-order does the same.
+            "cert_price": (cert_price := pricing.price_for_student(student)),
+            "cert_price_options": pricing.price_options() if cert_price is None else None,
         },
         "progress": [dict(p) for p in progress],
         "submissions": [dict(s) for s in submissions],

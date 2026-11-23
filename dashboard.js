@@ -8,22 +8,37 @@ const API = window.SKILLME_API || '${API}';
 // Certificate payment is asked for at the end — 3 of 4 approved tasks (see backend PAYMENT_UNLOCK_TASKS)
 const PAYMENT_UNLOCK_PCT = 75;
 // The certificate price is only ever shown here, to students who have reached PAYMENT_UNLOCK_PCT.
-const CERT_PRICE = '₹129';
-// Rough USD equivalent shown to students paying from abroad (their bank does the real conversion).
-const CERT_PRICE_USD_APPROX = 'US$1.50';
+// ── Certificate price ───────────────────────────────────────────────────────
+// The server decides the one price each student pays from their country (India ₹129, abroad
+// US$4, lower-income countries US$2; see backend/services/pricing.py). Students only ever see
+// their own price. When the country is unknown the server sends both India / abroad options and
+// the browser's timezone picks; create-order uses the same hint, so shown and charged match.
+const DEFAULT_CERT_PRICE = { currency: 'INR', amount: 12900, label: '₹129' };
 
-// ── Payment region ──────────────────────────────────────────────────────────
-// UPI, netbanking and Indian wallets only work with Indian bank accounts, and students abroad
-// kept picking them and failing. 'intl' opens Razorpay with cards only. The default comes from
-// the student's own choice (remembered), else their signup phone number, else the browser timezone.
-const PAY_REGION_KEY = 'skillme_pay_region';
-const PAY_REGION_COPY = {
-  in:   { secure: 'UPI / Card / NetBanking' },
-  intl: { secure: 'International Visa / Mastercard' },
-};
-let payRegion = null;
+function tzPayRegion() {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    // UTC/Etc zones usually mean an unset clock, not a location.
+    if (tz && !/^(UTC|Etc\/)/.test(tz)) return /^Asia\/(Kolkata|Calcutta)$/.test(tz) ? 'in' : 'intl';
+  } catch (e) { /* no Intl */ }
+  return 'in';
+}
 
-// Small payment-network badges (simplified brand marks) for the region cards.
+function certPrice() {
+  const s = window._dashStudent || {};
+  if (s.cert_price) return s.cert_price;
+  if (s.cert_price_options) return s.cert_price_options[tzPayRegion()] || s.cert_price_options.in;
+  return DEFAULT_CERT_PRICE;
+}
+const certPriceLabel = () => certPrice().label;
+
+// 'in' = Indian rupees (UPI, netbanking, wallets, cards). 'intl' = US dollars, cards only:
+// UPI, netbanking and Indian wallets need an Indian bank account and can never succeed abroad.
+function getPayRegion() {
+  return certPrice().currency === 'INR' ? 'in' : 'intl';
+}
+
+// Small payment-network badges (simplified brand marks).
 const PAY_LOGOS = {
   upi: `<svg viewBox="0 0 40 24" role="img" aria-label="UPI"><text x="4" y="16.5" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="800" font-style="italic" fill="#5f6368">UPI</text><path d="M29 6l5 6-5 6z" fill="#f47920"/><path d="M33 6l5 6-5 6z" fill="#0f9d58"/></svg>`,
   rupay: `<svg viewBox="0 0 40 24" role="img" aria-label="RuPay"><text x="3" y="16" font-family="Arial, Helvetica, sans-serif" font-size="9.5" font-weight="800" font-style="italic" fill="#1b3a7a">RuPay</text><path d="M32 7l4 5-4 5z" fill="#f47920"/><path d="M34.5 7l4 5-4 5z" fill="#0f9d58"/></svg>`,
@@ -32,94 +47,29 @@ const PAY_LOGOS = {
 };
 const payLogos = keys => keys.map(k => `<span class="pay-logo">${PAY_LOGOS[k]}</span>`).join('');
 
-
-function detectPayRegion(student) {
-  try {
-    const saved = localStorage.getItem(PAY_REGION_KEY);
-    if (saved === 'in' || saved === 'intl') return saved;
-  } catch (e) { /* storage blocked */ }
-  if (student && (student.pay_region === 'in' || student.pay_region === 'intl')) return student.pay_region;
-  try {
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-    // UTC/Etc zones usually mean an unset clock, not a location: keep every option open.
-    if (tz && !/^(UTC|Etc\/)/.test(tz)) return /^Asia\/(Kolkata|Calcutta)$/.test(tz) ? 'in' : 'intl';
-  } catch (e) { /* no Intl */ }
-  return 'in';
-}
-
-function getPayRegion() {
-  if (!payRegion) payRegion = detectPayRegion(window._dashStudent);
-  return payRegion;
-}
-
-function payRegionPickerHtml() {
+// Accepted payment methods for this student's price. Informational only, nothing to pick.
+function payMethodsHtml() {
+  const intl = getPayRegion() === 'intl';
   return `
-    <div class="pay-region" data-pay-region>
-      <div class="pay-region-label" aria-hidden="true">Where are you paying from?</div>
-      <div class="pay-region-options" role="radiogroup" aria-label="Where are you paying from?">
-        <button type="button" class="pay-region-opt" role="radio" data-region="in">
-          <span class="pay-region-radio" aria-hidden="true"></span>
-          <span class="pay-region-body">
-            <span class="pay-region-title">India</span>
-            <span class="pay-region-logos">${payLogos(['upi', 'rupay', 'visa', 'mastercard'])}</span>
-            <span class="pay-region-sub">UPI, cards &amp; netbanking</span>
-          </span>
-        </button>
-        <button type="button" class="pay-region-opt" role="radio" data-region="intl">
-          <span class="pay-region-radio" aria-hidden="true"></span>
-          <span class="pay-region-body">
-            <span class="pay-region-title">Outside India</span>
-            <span class="pay-region-logos">${payLogos(['visa', 'mastercard'])}</span>
-            <span class="pay-region-sub">International debit &amp; credit cards</span>
-          </span>
-        </button>
-      </div>
-      <div class="pay-region-note" data-pay-region-note aria-live="polite">
+    <div class="pay-region pay-methods">
+      <div class="pay-region-logos">${payLogos(intl ? ['visa', 'mastercard'] : ['upi', 'rupay', 'visa', 'mastercard'])}</div>
+      <div class="pay-region-sub">${intl ? 'International debit &amp; credit cards' : 'UPI, cards &amp; netbanking'}</div>
+      ${intl ? `
+      <div class="pay-region-note" aria-hidden="false">
         <div class="pay-region-note-inner">
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-          <span><strong>${CERT_PRICE} ≈ ${CERT_PRICE_USD_APPROX}</strong>, converted by your bank. Use a regular debit or credit card; prepaid and virtual cards are sometimes declined.</span>
+          <span>Charged in US dollars. Use a regular debit or credit card; prepaid and virtual cards are sometimes declined.</span>
         </div>
-      </div>
+      </div>` : ''}
     </div>`;
 }
 
 function syncPayRegionUI() {
-  const region = getPayRegion();
-  const copy = PAY_REGION_COPY[region];
-  document.querySelectorAll('[data-pay-region]').forEach(picker => {
-    picker.dataset.active = region;
-    picker.querySelectorAll('.pay-region-opt').forEach(opt => {
-      const on = opt.dataset.region === region;
-      opt.setAttribute('aria-checked', on ? 'true' : 'false');
-      opt.tabIndex = on ? 0 : -1;
-    });
-    const note = picker.querySelector('[data-pay-region-note]');
-    if (note) note.setAttribute('aria-hidden', region === 'intl' ? 'false' : 'true');
-  });
+  const secure = getPayRegion() === 'intl' ? 'International Visa / Mastercard' : 'UPI / Card / NetBanking';
   document.querySelectorAll('[data-pay-secure]').forEach(el => {
-    el.textContent = `🔒 Secured by Razorpay · ${copy.secure} · Every certificate is independently verifiable`;
+    el.textContent = `🔒 Secured by Razorpay · ${secure} · Every certificate is independently verifiable`;
   });
 }
-
-function setPayRegion(region, focus) {
-  if (region !== 'in' && region !== 'intl') return;
-  payRegion = region;
-  try { localStorage.setItem(PAY_REGION_KEY, region); } catch (e) { /* storage blocked */ }
-  syncPayRegionUI();
-  if (focus) focus.closest('[data-pay-region]').querySelector(`[data-region="${region}"]`).focus();
-}
-
-// One listener serves every picker (banner + modal), including ones rendered later.
-document.addEventListener('click', e => {
-  const opt = e.target.closest && e.target.closest('.pay-region-opt');
-  if (opt) setPayRegion(opt.dataset.region);
-});
-document.addEventListener('keydown', e => {
-  const opt = e.target.closest && e.target.closest('.pay-region-opt');
-  if (!opt || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return;
-  e.preventDefault();
-  setPayRegion(opt.dataset.region === 'in' ? 'intl' : 'in', opt);
-});
 const FRONTEND = window.SKILLME_FRONTEND || '${FRONTEND}';
 
 // Task guides are markdown from the curriculum; render them sanitized, or as plain text
@@ -613,7 +563,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const isProgress = urlParams.get('preview') === 'progress' || urlParams.get('preview') === 'milestone';
         const completedCount = isProgress ? 1 : 4;
         const mockData = {
-            student: { id: 999, first_name: "Saksham", last_name: "Verma", name: "Saksham Verma", email: "test@example.com", domain: "Web Development", college: "Test College" },
+            student: { id: 999, first_name: "Saksham", last_name: "Verma", name: "Saksham Verma", email: "test@example.com", domain: "Web Development", college: "Test College",
+              // &price=usd4 | usd2 previews the price a student abroad sees (default: India)
+              cert_price: ({ usd4: { currency: 'USD', amount: 400, label: 'US$4' }, usd2: { currency: 'USD', amount: 200, label: 'US$2' } })[urlParams.get('price')] || DEFAULT_CERT_PRICE },
             progress: [{ week: isProgress ? 1 : 4, issues_completed: completedCount, score: isProgress ? 100 : 300, domain: "web-dev", batch_id: 1, start_date: new Date().toISOString() }],
             submissions: [
               { id: 1, week: 1, linkedin_url: "https://www.linkedin.com/posts/example", status: "approved", admin_note: null, submitted_at: new Date().toISOString(), reviewed_at: new Date().toISOString(), domain: "web-dev" }
@@ -1845,14 +1797,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const eligible = (summary.completion_pct || 0) >= PAYMENT_UNLOCK_PCT || summary.payment_unlocked || urlParams.get('preview');
       if (!eligible) return;
       if (modal) {
-        modal.querySelectorAll('.js-cert-price').forEach(el => { el.textContent = CERT_PRICE; });
+        modal.querySelectorAll('.js-cert-price').forEach(el => { el.textContent = certPriceLabel(); });
         // Wire up the pay button dynamically
         const payBtn = document.getElementById('modal-pay-btn');
         if (payBtn) {
           payBtn.onclick = () => window.initiatePayment(student.id, data._batch_id);
         }
         const regionSlot = document.getElementById('modal-pay-region');
-        if (regionSlot && !regionSlot.firstElementChild) regionSlot.innerHTML = payRegionPickerHtml();
+        if (regionSlot) regionSlot.innerHTML = payMethodsHtml();
         syncPayRegionUI();
         modal.style.display = 'flex';
         // Force reflow
@@ -1875,18 +1827,18 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="cert-banner-text">
             <div class="cert-banner-title">Your certificate is locked</div>
             <div class="cert-banner-sub">
-              You've earned your completion credentials. A one-time ${CERT_PRICE} covers your verified certificate, personalized LOR and lifetime hosting for your Proof of Work portfolio.
+              You've earned your completion credentials. A one-time ${certPriceLabel()} covers your verified certificate, personalized LOR and lifetime hosting for your Proof of Work portfolio.
             </div>
           </div>
           <div class="cert-banner-actions" style="width: 100%;">
-            ${payRegionPickerHtml()}
+            ${payMethodsHtml()}
             <div class="cert-pay-row">
               <input type="text" id="discount-code" class="dash-input" placeholder="Have a discount code?">
               <button id="pay-btn" class="cert-btn cert-btn-primary" onclick="initiatePayment(${student.id}, ${data._batch_id})">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
                   <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
                 </svg>
-                Unlock My Certificate — ${CERT_PRICE}
+                Unlock My Certificate — ${certPriceLabel()}
               </button>
             </div>
             <div class="secure-note" data-pay-secure></div>
@@ -2127,7 +2079,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const discountInputMilestone = document.getElementById('discount-code-milestone');
       const discountCode = (discountInputBanner && discountInputBanner.value.trim()) || (discountInputMilestone && discountInputMilestone.value.trim()) || null;
       
-      const PAY_LABEL = `Unlock My Certificate — ${CERT_PRICE}`;
+      const PAY_LABEL = `Unlock My Certificate — ${certPriceLabel()}`;
       const resetPayButtons = () => {
         if (btn) { btn.disabled = false; btn.textContent = PAY_LABEL; }
         if (modalBtn) { modalBtn.disabled = false; modalBtn.textContent = PAY_LABEL; }
@@ -2159,11 +2111,11 @@ document.addEventListener('DOMContentLoaded', () => {
         method: 'POST',
         headers: authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ student_id: studentId, batch_id: batchId, discount_code: discountCode,
-          payer_region: getPayRegion(),
+          payer_region: tzPayRegion(),
           ...(window.SkillMeAttribution ? window.SkillMeAttribution.lastTouch() : {}) })
       });
       const orderData = previewKey
-        ? { key_id: previewKey, amount: 12900, currency: 'INR', student_name: (window._dashStudent || {}).name }
+        ? { key_id: previewKey, amount: certPrice().amount, currency: certPrice().currency, student_name: (window._dashStudent || {}).name }
         : await orderRes.json().catch(() => ({}));
 
       if (!orderRes.ok) {
@@ -2391,8 +2343,8 @@ function showCompletionPopup(student, data, pct) {
         // Not paid — show pay CTA
         credArea.innerHTML = `
           <div class="completion-pay">
-            <p>One-time ${CERT_PRICE} unlocks your Certificate, LOR &amp; Portfolio — verified, downloadable, and yours for life</p>
-            <button class="cert-btn cert-btn-primary cert-btn-block" onclick="document.getElementById('completion-overlay').remove();setTimeout(()=>showPaymentModal(window._dashStudent,window._dashData),200);">Unlock My Certificate — ${CERT_PRICE}</button>
+            <p>One-time ${certPriceLabel()} unlocks your Certificate, LOR &amp; Portfolio — verified, downloadable, and yours for life</p>
+            <button class="cert-btn cert-btn-primary cert-btn-block" onclick="document.getElementById('completion-overlay').remove();setTimeout(()=>showPaymentModal(window._dashStudent,window._dashData),200);">Unlock My Certificate — ${certPriceLabel()}</button>
           </div>`;
       }
     } catch(e) {

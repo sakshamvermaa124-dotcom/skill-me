@@ -1089,6 +1089,7 @@ async def list_payments(
     from datetime import datetime, timedelta
     rows = await db.fetch_all(
         """SELECT p.id, p.student_id, p.razorpay_order_id, p.razorpay_payment_id, p.amount, p.status,
+                  COALESCE(p.currency, 'INR') AS currency, COALESCE(p.amount_inr, p.amount) AS amount_inr,
                   COALESCE(p.is_test, 0) AS is_test, p.created_at, p.initiated_at, p.completed_at, p.updated_at,
                   p.failure_code, p.failure_reason, p.discount_code, p.confirmed_via,
                   s.first_name || ' ' || s.last_name AS student_name, s.email, s.domain

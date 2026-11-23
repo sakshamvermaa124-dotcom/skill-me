@@ -213,6 +213,8 @@ class Database:
             "ALTER TABLE payments ADD COLUMN confirmed_via TEXT",
             "ALTER TABLE payments ADD COLUMN last_touch_source TEXT",
             "ALTER TABLE payments ADD COLUMN last_touch_campaign TEXT",
+            # INR-equivalent (paise) of the order; equals amount for INR orders. NULL on legacy (all INR) rows.
+            "ALTER TABLE payments ADD COLUMN amount_inr INTEGER",
             "ALTER TABLE certificates ADD COLUMN issued_via TEXT",
             "ALTER TABLE certificates ADD COLUMN payment_id INTEGER",
             "ALTER TABLE otp_tokens ADD COLUMN verified_at TIMESTAMP",

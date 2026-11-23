@@ -56,7 +56,13 @@ class Settings(BaseSettings):
     razorpay_key_secret: str = ""
     # Webhook secret from Razorpay Dashboard > Webhooks (NOT the API key secret). Blank = webhook rejected.
     razorpay_webhook_secret: str = ""
-    certificate_price_paise: int = 12900  # ₹129 in paise
+    certificate_price_paise: int = 12900  # ₹129 in paise (students in India)
+    # Students abroad pay in USD (Razorpay won't settle foreign cards on a ₹129 ticket).
+    # See services/pricing.py for which countries get the reduced price.
+    certificate_price_usd_cents: int = 400           # US$4
+    certificate_price_usd_reduced_cents: int = 200   # US$2, lower-income countries
+    # Only for analytics: USD orders are counted in revenue at this rate (Razorpay settles in INR).
+    usd_inr_rate: float = 88.0
 
     # ── Student Auth (OTP + JWT) ─────────────────
     jwt_secret_key: str = "changeme-set-a-strong-secret-in-render"

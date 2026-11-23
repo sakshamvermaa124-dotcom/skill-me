@@ -1526,6 +1526,8 @@ textarea.dash-input { resize: vertical; min-height: 84px; }
 }
 .pay-region-note-inner svg { flex-shrink: 0; margin-top: 2px; color: var(--accent-text); }
 .pay-region-note-inner strong { color: var(--text-strong); font-weight: 650; }
+/* Accepted methods for the student's own price (no picker): logos, one line, card note abroad */
+.pay-methods { display: flex; flex-direction: column; gap: 6px; }
 @media (max-width: 420px) { .pay-region-options { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) {
   .pay-region-opt, .pay-region-radio, .pay-region-radio::after, .pay-region-note { transition: none; }

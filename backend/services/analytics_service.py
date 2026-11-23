@@ -53,6 +53,13 @@ DEFINITIONS = {
 # Small helpers
 # ──────────────────────────────────────────────
 
+
+def _charged(p: dict) -> str:
+    """What the student was actually charged, in their currency."""
+    minor = p.get("charged_amount") if p.get("charged_amount") is not None else p.get("amount") or 0
+    return f"US${minor / 100:g}" if p.get("currency") == "USD" else f"₹{minor / 100:g}"
+
+
 def parse_ts(v) -> datetime | None:
     """Parse the SQLite / ISO timestamps found in this DB (naive UTC)."""
     if not v:
@@ -140,7 +147,9 @@ SELECT student_id, batch_id, week, status, COALESCE(attempts, 1) AS attempts,
 FROM submissions"""
 
 PAYMENT_SQL = """
-SELECT id, student_id, batch_id, razorpay_order_id, razorpay_payment_id, amount, status,
+SELECT id, student_id, batch_id, razorpay_order_id, razorpay_payment_id,
+       -- amount here is always INR paise (USD orders converted at order time) so revenue sums in one currency
+       COALESCE(amount_inr, amount) AS amount, amount AS charged_amount, COALESCE(currency, 'INR') AS currency, status,
        CASE WHEN COALESCE(is_test, 0) = 1 OR COALESCE(razorpay_payment_id, '') LIKE 'pay_test%'
                  OR COALESCE(razorpay_payment_id, '') LIKE 'pay_mock%' THEN 1 ELSE 0 END AS is_test,
        datetime(created_at) AS created_at, datetime(initiated_at) AS initiated_at, datetime(completed_at) AS completed_at,
@@ -520,10 +529,13 @@ def payments_section(students, raw_payments, now) -> dict:
             if s["pay_state"] == "abandoned" and s["pay_legacy"]:
                 legacy_abandoned += 1
     paid_rows = [p for s in students for p in s["orders"] if p["status"] == "paid"]
-    tiers: dict[int, int] = defaultdict(int)
+    # Tiers are grouped by what was charged (₹129, US$4, US$2...); revenue stays in INR.
+    tiers: dict[tuple, list] = {}
     monthly: dict[str, dict] = {}
     for p in paid_rows:
-        tiers[p["amount"] or 0] += 1
+        tier = tiers.setdefault((p.get("currency") or "INR", p.get("charged_amount") or p["amount"] or 0), [0, 0])
+        tier[0] += 1
+        tier[1] += p["amount"] or 0
         t = parse_ts(p["completed_at"] or p["updated_at"])
         if t:
             m = monthly.setdefault(t.strftime("%Y-%m"), {"month": t.strftime("%Y-%m"), "orders": 0, "revenue_rupees": 0.0})
@@ -564,8 +576,9 @@ def payments_section(students, raw_payments, now) -> dict:
         "revenue": {
             "total_rupees": total, "paid_orders": len(paid_rows), "paying_students": state["paid"],
             "avg_order_rupees": round(total / len(paid_rows), 2) if paid_rows else 0,
-            "tiers": [{"price_rupees": a / 100, "orders": n, "revenue_rupees": a * n / 100}
-                      for a, n in sorted(tiers.items(), reverse=True)],
+            "tiers": [{"price_rupees": inr / n / 100, "orders": n, "revenue_rupees": inr / 100,
+                       "label": _charged({"currency": cur, "charged_amount": minor})}
+                      for (cur, minor), (n, inr) in sorted(tiers.items(), key=lambda kv: -kv[1][1])],
             "trend": sorted(monthly.values(), key=lambda m: m["month"]),
             "paid_date_note": "Month = payment confirmation date. Orders before lifecycle tracking use their last-update time.",
         },
@@ -905,7 +918,7 @@ async def journey(db, student_id: int) -> dict | None:
     for p in pays:
         flag = " [TEST]" if p.get("is_test") else ""
         ev.append({"at": p.get("initiated_at") or p["created_at"], "type": "checkout",
-                   "label": f"Checkout started: order {p['razorpay_order_id']} ₹{(p['amount'] or 0) / 100:g}{flag}"})
+                   "label": f"Checkout started: order {p['razorpay_order_id']} {_charged(p)}{flag}"})
         if p["status"] == "paid":
             ev.append({"at": p.get("completed_at") or p["updated_at"], "type": "paid",
                        "label": f"Paid {p['razorpay_payment_id']}{flag}"})

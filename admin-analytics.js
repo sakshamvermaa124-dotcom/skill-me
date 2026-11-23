@@ -315,7 +315,7 @@ async function anPayments(d) {
     datasets: [{ data: [l.eligible, l.checkout_initiated, l.pending, l.paid, l.failed, l.abandoned],
       backgroundColor: [C().info, C().violet, C().warn, C().ok, C().danger, C().muted], borderRadius: 4 }] },
     options: anBarOpts({ plugins: { legend: { display: false } } }) });
-  const tiers = r.tiers.map(t => `<span class="chip-stat"><b>${fmtINR(t.price_rupees)}</b> × ${t.orders} = ${fmtINR(t.revenue_rupees)}</span>`).join('') || '<span class="an-bar-meta">No paid orders.</span>';
+  const tiers = r.tiers.map(t => `<span class="chip-stat"><b>${t.label ? esc(t.label) : fmtINR(t.price_rupees)}</b> × ${t.orders} = ${fmtINR(t.revenue_rupees)}</span>`).join('') || '<span class="an-bar-meta">No paid orders.</span>';
   const tx = await anLoadPayments();
   return anCards(
       anCard('🎯', l.eligible, 'Eligible for payment', '3+ weeks approved or unlocked', 'eligible', 'eligible') +
@@ -347,7 +347,7 @@ async function anLoadPayments() {
   const rows = res.payments.map(x => `<tr>
     <td>${x.id}</td><td><b>${esc(x.student_name || '—')}</b><br><span class="an-bar-meta">${esc(x.email || '')}</span></td>
     <td class="an-bar-meta">${esc(x.razorpay_order_id || '')}<br>${esc(x.razorpay_payment_id || '—')}</td>
-    <td>${fmtINR((x.amount || 0) / 100)}${x.discount_code ? `<br><span class="an-bar-meta">${esc(x.discount_code)}</span>` : ''}</td>
+    <td>${x.currency === 'USD' ? `US$${(x.amount || 0) / 100}<br><span class="an-bar-meta">≈ ${fmtINR((x.amount_inr || 0) / 100)}</span>` : fmtINR((x.amount || 0) / 100)}${x.discount_code ? `<br><span class="an-bar-meta">${esc(x.discount_code)}</span>` : ''}</td>
     <td><span class="badge badge-${x.lifecycle === 'paid' ? 'approved' : x.lifecycle === 'failed' ? 'rejected' : 'pending'}">${esc(x.lifecycle)}</span>${x.is_test ? ' <span class="an-sev an-sev-info">test</span>' : ''}${x.legacy ? ' <span class="an-bar-meta">legacy</span>' : ''}</td>
     <td class="an-bar-meta">${esc((x.initiated_at || x.created_at || '').slice(0, 16))}<br>${esc((x.paid_at || '').slice(0, 16) || '—')}</td>
     <td style="font-size:0.78rem;">${esc(x.failure_reason || '')}${x.confirmed_via ? `<span class="an-bar-meta">via ${esc(x.confirmed_via)}</span>` : ''}</td>

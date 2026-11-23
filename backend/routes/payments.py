@@ -23,7 +23,7 @@ from db.database import db
 from services.certificate_service import certificate_service
 from services.enrollment_service import enrollment_service
 from services.email_service import email_service
-from services import payment_service
+from services import payment_service, pricing
 from middleware.student_auth import require_student
 
 logger = logging.getLogger("skillme.payments")
@@ -43,8 +43,8 @@ class CreateOrderRequest(BaseModel):
     discount_code: str | None = Field(None, description="Optional discount code")
     last_touch_source: str | None = Field(None, max_length=100)
     last_touch_campaign: str | None = Field(None, max_length=150)
-    # Where the student said they're paying from ('in' | 'intl'); recorded on the order
-    # so failed international attempts are easy to spot in the Razorpay dashboard.
+    # Where the browser thinks the student is ('in' | 'intl', from its timezone). Only used to
+    # pick the price when the student's country is unknown; also noted on the Razorpay order.
     payer_region: Literal["in", "intl"] | None = None
 
 
@@ -107,7 +107,7 @@ async def create_order(req: CreateOrderRequest, me: dict = Depends(require_stude
 
     # Validate student exists
     student = await db.fetch_one(
-        "SELECT id, first_name, last_name, email FROM students WHERE id = ?",
+        "SELECT id, first_name, last_name, email, phone, country FROM students WHERE id = ?",
         (req.student_id,)
     )
     if not student:
@@ -152,27 +152,29 @@ async def create_order(req: CreateOrderRequest, me: dict = Depends(require_stude
             "message": "Certificate already purchased. Download it below.",
         }
 
-    amount = settings.certificate_price_paise
+    # The price is decided here from the student's country, never taken from the browser.
+    price = pricing.price_for_student(dict(student), req.payer_region) or pricing.price_options()["in"]
+    amount, currency = price["amount"], price["currency"]
 
     # Handle special discount code for 5 INR (500 paise)
     if req.discount_code and req.discount_code.strip().upper() == "BLACKYY":
-        amount = 500
+        amount, currency = 500, "INR"
 
     # Reuse a recent unpaid order for the same enrollment and price instead of creating one
     # per click — keeps "checkout initiated" meaning one attempt, not one button press.
     open_order = await db.fetch_one(
         """SELECT razorpay_order_id FROM payments
            WHERE student_id = ? AND batch_id = ? AND status IN ('created', 'pending')
-             AND amount = ? AND razorpay_order_id IS NOT NULL
+             AND amount = ? AND COALESCE(currency, 'INR') = ? AND razorpay_order_id IS NOT NULL
              AND datetime(COALESCE(initiated_at, created_at)) >= datetime('now', '-30 minutes')
            ORDER BY id DESC LIMIT 1""",
-        (req.student_id, batch_id, amount),
+        (req.student_id, batch_id, amount, currency),
     )
     if open_order:
         return {
             "order_id": open_order["razorpay_order_id"],
             "amount": amount,
-            "currency": "INR",
+            "currency": currency,
             "key_id": settings.razorpay_key_id,
             "student_name": f"{student['first_name']} {student['last_name']}",
             "student_email": student["email"],
@@ -188,7 +190,7 @@ async def create_order(req: CreateOrderRequest, me: dict = Depends(require_stude
             },
             json={
                 "amount": amount,
-                "currency": "INR",
+                "currency": currency,
                 "receipt": f"sm_{req.student_id}_{batch_id}",
                 "notes": {
                     "student_id": str(req.student_id),
@@ -211,11 +213,11 @@ async def create_order(req: CreateOrderRequest, me: dict = Depends(require_stude
     is_test = 1 if (settings.razorpay_key_id or "").startswith("rzp_test") else 0
     code = (req.discount_code or "").strip().upper()[:50] or None
     await db.execute(
-        """INSERT INTO payments (student_id, batch_id, razorpay_order_id, amount, status, is_test,
-                                 initiated_at, discount_code, last_touch_source, last_touch_campaign)
-           VALUES (?, ?, ?, ?, 'created', ?, CURRENT_TIMESTAMP, ?, ?, ?)
+        """INSERT INTO payments (student_id, batch_id, razorpay_order_id, amount, currency, amount_inr, status,
+                                 is_test, initiated_at, discount_code, last_touch_source, last_touch_campaign)
+           VALUES (?, ?, ?, ?, ?, ?, 'created', ?, CURRENT_TIMESTAMP, ?, ?, ?)
            ON CONFLICT(razorpay_order_id) DO NOTHING""",
-        (req.student_id, batch_id, order["id"], amount, is_test, code,
+        (req.student_id, batch_id, order["id"], amount, currency, pricing.to_inr_paise(amount, currency), is_test, code,
          (req.last_touch_source or "").strip() or None, (req.last_touch_campaign or "").strip() or None),
     )
 
@@ -223,7 +225,7 @@ async def create_order(req: CreateOrderRequest, me: dict = Depends(require_stude
     return {
         "order_id": order["id"],
         "amount": amount,
-        "currency": "INR",
+        "currency": currency,
         "key_id": settings.razorpay_key_id,
         "student_name": f"{student['first_name']} {student['last_name']}",
         "student_email": student["email"],
@@ -317,7 +319,7 @@ async def payment_status(student_id: int, batch_id: int):
     if not resolved:
         return {"status": "not_paid"}
     payment = await db.fetch_one(
-        """SELECT status, razorpay_payment_id, amount, created_at
+        """SELECT status, razorpay_payment_id, amount, COALESCE(currency, 'INR') AS currency, created_at
            FROM payments WHERE student_id = ? AND batch_id = ?
            ORDER BY CASE WHEN status = 'paid' THEN 0 ELSE 1 END, created_at DESC, id DESC
            LIMIT 1""",
@@ -329,4 +331,5 @@ async def payment_status(student_id: int, batch_id: int):
         "status": payment["status"],
         "amount_paise": payment["amount"],
         "amount_rupees": float(payment["amount"]) / 100 if payment["amount"] else 0,
+        "currency": payment["currency"],
     }

@@ -130,8 +130,9 @@ CREATE TABLE IF NOT EXISTS payments (
     batch_id INTEGER NOT NULL,
     razorpay_order_id TEXT UNIQUE,         -- rzp order id from Razorpay
     razorpay_payment_id TEXT,              -- filled on successful payment
-    amount INTEGER NOT NULL,               -- amount in paise (12900 = ₹129)
-    currency TEXT DEFAULT 'INR',
+    amount INTEGER NOT NULL,               -- in the currency's minor unit: paise (12900 = ₹129) or cents (400 = US$4)
+    currency TEXT DEFAULT 'INR',           -- INR | USD
+    amount_inr INTEGER,                    -- INR-equivalent in paise, for revenue (NULL on legacy rows = amount)
     status TEXT DEFAULT 'pending',         -- created | pending | paid | failed (abandoned is derived, never stored)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
