@@ -38,10 +38,8 @@ class Settings(BaseSettings):
     # Extra Brevo accounts used when the primary hits its daily cap. JSON list, e.g.
     # [{"user": "b@example.com", "password": "xsmtpsib-..."}]
     smtp_extra_accounts: str = ""
-    # Switch to the next account once an account has sent this many emails today (Brevo free cap is 300)
+    # Switch to the next account once an account has sent this many emails in the last 24h (Brevo free cap is 300)
     smtp_daily_limit: int = 295
-    # Brevo's daily quota resets at midnight in this UTC offset (hours). 1 = CET.
-    smtp_quota_reset_utc_offset: float = 1.0
     smtp_from_name: str = "SkillMe Team"
     smtp_from_email: str = ""
     frontend_url: str = "https://skill-me-intern.in"

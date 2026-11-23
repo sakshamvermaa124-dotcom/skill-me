@@ -60,18 +60,23 @@ def _accounts() -> list[tuple[str, str]]:
     return accounts
 
 
-def _quota_day_start_utc() -> str:
-    """Start of the current Brevo quota day, as a UTC 'YYYY-MM-DD HH:MM:SS' string (matches sent_at)."""
-    offset = timedelta(hours=settings.smtp_quota_reset_utc_offset)
-    now = datetime.now(timezone.utc)
-    local_midnight = (now + offset).replace(hour=0, minute=0, second=0, microsecond=0)
-    return (local_midnight - offset).strftime("%Y-%m-%d %H:%M:%S")
+_QUOTA_WINDOW = timedelta(hours=24)
+
+
+def _quota_window_start_utc() -> str:
+    """
+    Start of the quota window as a UTC 'YYYY-MM-DD HH:MM:SS' string (matches sent_at).
+    A rolling 24h window: Brevo's free-plan cap behaved as rolling in production (331 sent in
+    the last 24h with 0 left, vs only 241-279 since any midnight), and a rolling count is never
+    lower than a since-midnight count, so it can't under-count whichever rule Brevo uses.
+    """
+    return (datetime.now(timezone.utc) - _QUOTA_WINDOW).strftime("%Y-%m-%d %H:%M:%S")
 
 
 async def get_quota_usage() -> list[dict]:
-    """Emails sent today per configured account (for account selection and the admin view)."""
+    """Emails sent in the last 24h per configured account (for account selection and the admin view)."""
     from db.database import db
-    since = _quota_day_start_utc()
+    since = _quota_window_start_utc()
     usage = []
     for i, (user, _) in enumerate(_accounts()):
         # Brevo accepts over-quota mail over SMTP and then silently doesn't deliver it, so this
@@ -91,13 +96,14 @@ async def get_quota_usage() -> list[dict]:
     return usage
 
 
-# Accounts Brevo refused today (e.g. daily quota hit, including sends we never logged),
-# keyed by login -> quota-day start. They're tried last until Brevo's daily reset.
-_refused_today: dict[str, str] = {}
+# Accounts Brevo refused over SMTP (bad key, or a quota refusal if Brevo ever sends one),
+# keyed by login -> time of refusal. They're tried last for the next 24h.
+_refused_today: dict[str, datetime] = {}
 
 
 def _is_refused_today(login: str) -> bool:
-    return _refused_today.get(login) == _quota_day_start_utc()
+    at = _refused_today.get(login)
+    return at is not None and datetime.now(timezone.utc) - at < _QUOTA_WINDOW
 
 
 async def _ordered_accounts() -> list[tuple[str, str]]:
@@ -197,7 +203,7 @@ async def _send_ex(to_email: str, to_name: str, subject: str, html_body: str,
         except smtplib.SMTPResponseException as exc:
             if not isinstance(exc, smtplib.SMTPConnectError):
                 # Brevo refused this account (quota hit / bad key) — deprioritise it until the daily reset
-                _refused_today[account[0]] = _quota_day_start_utc()
+                _refused_today[account[0]] = datetime.now(timezone.utc)
             logger.error("Failed to send email to %s via account %s: %s", to_email, account[0], exc)
         except Exception as exc:
             logger.error("Failed to send email to %s via account %s: %s", to_email, account[0], exc)
