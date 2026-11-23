@@ -73,10 +73,14 @@ async def get_quota_usage() -> list[dict]:
     from db.database import db
     since = _quota_day_start_utc()
     usage = []
-    for user, _ in _accounts():
+    for i, (user, _) in enumerate(_accounts()):
+        # Brevo accepts over-quota mail over SMTP and then silently doesn't deliver it, so this
+        # count is the only real guard. Rows with no smtp_account were sent before multi-account
+        # support existed, when the primary was the only account — count them against it.
+        account_match = "(smtp_account = ? OR smtp_account IS NULL)" if i == 0 else "smtp_account = ?"
         try:
             row = await db.fetch_one(
-                "SELECT COUNT(*) AS n FROM email_logs WHERE smtp_account = ? AND status = 'sent' AND sent_at >= ?",
+                f"SELECT COUNT(*) AS n FROM email_logs WHERE {account_match} AND status = 'sent' AND sent_at >= ?",
                 (user, since),
             )
             used = int((row or {}).get("n", 0) or 0)
