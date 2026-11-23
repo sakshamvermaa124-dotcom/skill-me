@@ -48,20 +48,28 @@ const PAY_LOGOS = {
 const payLogos = keys => keys.map(k => `<span class="pay-logo">${PAY_LOGOS[k]}</span>`).join('');
 
 // Accepted payment methods for this student's price. Informational only, nothing to pick.
+// The logos are decorative (aria-hidden): the caption next to them says the same in words.
 function payMethodsHtml() {
   const intl = getPayRegion() === 'intl';
   return `
-    <div class="pay-region pay-methods">
-      <div class="pay-region-logos">${payLogos(intl ? ['visa', 'mastercard'] : ['upi', 'rupay', 'visa', 'mastercard'])}</div>
-      <div class="pay-region-sub">${intl ? 'International debit &amp; credit cards' : 'UPI, cards &amp; netbanking'}</div>
+    <div class="pay-methods">
+      <div class="pay-methods-row">
+        <span class="pay-methods-logos" aria-hidden="true">${payLogos(intl ? ['visa', 'mastercard'] : ['upi', 'rupay', 'visa', 'mastercard'])}</span>
+        <span class="pay-methods-caption">${intl ? 'Visa &amp; Mastercard debit or credit cards' : 'UPI, cards &amp; netbanking'}</span>
+      </div>
       ${intl ? `
-      <div class="pay-region-note" aria-hidden="false">
-        <div class="pay-region-note-inner">
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-          <span>Charged in US dollars. Use a regular debit or credit card; prepaid and virtual cards are sometimes declined.</span>
-        </div>
-      </div>` : ''}
+      <p class="pay-methods-tip">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>Use a regular debit or credit card. Prepaid and virtual cards are sometimes declined.</span>
+      </p>` : ''}
     </div>`;
+}
+
+// Caption under the big price in the payment modal.
+function certPriceSub() {
+  return getPayRegion() === 'intl'
+    ? 'One-time, in US dollars · covers verification &amp; lifetime hosting'
+    : 'One-time · covers verification &amp; lifetime hosting';
 }
 
 function syncPayRegionUI() {
@@ -1798,6 +1806,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!eligible) return;
       if (modal) {
         modal.querySelectorAll('.js-cert-price').forEach(el => { el.textContent = certPriceLabel(); });
+        modal.querySelectorAll('.js-cert-price-sub').forEach(el => { el.innerHTML = certPriceSub(); });
         // Wire up the pay button dynamically
         const payBtn = document.getElementById('modal-pay-btn');
         if (payBtn) {

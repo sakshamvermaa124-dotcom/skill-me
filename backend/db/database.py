@@ -213,6 +213,8 @@ class Database:
             "ALTER TABLE payments ADD COLUMN confirmed_via TEXT",
             "ALTER TABLE payments ADD COLUMN last_touch_source TEXT",
             "ALTER TABLE payments ADD COLUMN last_touch_campaign TEXT",
+            # No-op where it already exists (it is in schema.sql); insurance for very old tables.
+            "ALTER TABLE payments ADD COLUMN currency TEXT DEFAULT 'INR'",
             # INR-equivalent (paise) of the order; equals amount for INR orders. NULL on legacy (all INR) rows.
             "ALTER TABLE payments ADD COLUMN amount_inr INTEGER",
             "ALTER TABLE certificates ADD COLUMN issued_via TEXT",

@@ -80,7 +80,7 @@ async def main():
     line("Certificates issued", o["certificates"], (await q("SELECT COUNT(DISTINCT student_id) n FROM certificates"))["n"])
     line("Paying students (real payments)", o["paying_students"], (await q(
         "SELECT COUNT(DISTINCT student_id) n FROM payments WHERE status='paid'"))["n"])
-    line("Revenue (Rs, real)", o["revenue_rupees"], (await q("SELECT SUM(amount)/100.0 n FROM payments WHERE status='paid'"))["n"])
+    line("Revenue (Rs, real)", o["revenue_rupees"], (await q("SELECT SUM(COALESCE(amount_inr, amount))/100.0 n FROM payments WHERE status='paid'"))["n"])
     line("Eligible but unpaid", o["eligible_unpaid"])
     t = d["engagement"]["task_level"]
     line("Approved SUBMISSIONS (task-level, not students)", t["approved_submissions"],

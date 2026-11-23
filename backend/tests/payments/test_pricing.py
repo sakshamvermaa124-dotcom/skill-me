@@ -74,3 +74,27 @@ async def test_create_order_charges_country_price(client, enrolled_student, test
                                   (f"order_{country}",))
     assert (row["currency"], row["amount"]) == (currency, amount)
     assert row["amount_inr"] == pricing.to_inr_paise(amount, currency)
+
+
+@pytest.mark.admin
+async def test_usd_sale_counts_in_inr_revenue(client, admin_headers):
+    """A US$4 sale shows as US$4 in the tiers, but adds its INR equivalent to revenue."""
+    from tests.conftest import seed_batch
+    sid = await test_db.insert(
+        "INSERT INTO students (first_name, last_name, email, domain, country) VALUES ('U', 'S', 'us@x.com', 'web-dev', 'US')")
+    b = await seed_batch(test_db, batch_number=77)
+    await test_db.insert("INSERT INTO enrollments (student_id, batch_id) VALUES (?, ?)", (sid, b))
+    inr = pricing.to_inr_paise(400, "USD")
+    await test_db.insert(
+        "INSERT INTO payments (student_id, batch_id, razorpay_order_id, razorpay_payment_id, amount, currency, amount_inr,"
+        " status, initiated_at, completed_at) VALUES (?, ?, 'order_us', 'pay_live_us', 400, 'USD', ?, 'paid',"
+        " datetime('now'), datetime('now'))", (sid, b, inr))
+    r = await client.get("/api/admin/analytics?fresh=true", headers=admin_headers)
+    assert r.status_code == 200
+    rev = r.json()["payments"]["revenue"]
+    assert rev["total_rupees"] == inr / 100
+    assert [(t["label"], t["orders"]) for t in rev["tiers"]] == [("US$4", 1)]
+
+    r = await client.get("/api/admin/payments", headers=admin_headers)
+    row = r.json()["payments"][0]
+    assert (row["currency"], row["amount"], row["amount_inr"]) == ("USD", 400, inr)
