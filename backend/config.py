@@ -54,6 +54,12 @@ class Settings(BaseSettings):
     # API keys of the other Brevo accounts (the ones in SMTP_EXTRA_ACCOUNTS), comma-separated.
     # Each key is matched to its SMTP login automatically, so order doesn't matter.
     brevo_extra_api_keys: str = ""
+    # Daily send allowance per Brevo account (free plan: 300)
+    brevo_daily_credits: int = 300
+    # Email this address once per account per day when an account has used this share of its
+    # daily credits. Empty disables the alert.
+    quota_alert_email: str = "sakshamverma124@gmail.com"
+    quota_alert_threshold: float = 0.9
     # Comma-separated list of allowed CORS origins.
     allowed_origins: str = "*"
 

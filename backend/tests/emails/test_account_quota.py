@@ -136,6 +136,91 @@ async def test_stale_credits_fall_back_to_local_count(monkeypatch):
     assert await es._ordered_accounts() == [PRIMARY, EXTRA]
 
 
+def _capture_alerts(monkeypatch):
+    sent = []
+
+    async def fake_send_and_log(to, name, subject, html, email_type="other", **kw):
+        sent.append((to, subject, email_type))
+        return True
+
+    monkeypatch.setattr(es, "_send_and_log", fake_send_and_log)
+    monkeypatch.setattr(es.settings, "quota_alert_email", "owner@example.com")
+    es._alerted.clear()
+    return sent
+
+
+@pytest.mark.asyncio
+async def test_alert_sent_once_when_account_reaches_90_percent(monkeypatch):
+    async def no_prior(query, params):
+        return None if "quota_alert" in query else {"n": 0}
+
+    from db.database import db
+    monkeypatch.setattr(db, "fetch_one", no_prior)
+    monkeypatch.setattr(es, "_refresh_credits", _no_refresh)
+    sent = _capture_alerts(monkeypatch)
+    _set_credits(PRIMARY[0], 30)   # 270/300 used = 90%
+    _set_credits(EXTRA[0], 200)
+
+    await es._maybe_send_quota_alerts()
+    await es._maybe_send_quota_alerts()
+
+    assert len(sent) == 1
+    to, subject, email_type = sent[0]
+    assert to == "owner@example.com" and email_type == "quota_alert"
+    assert PRIMARY[0] in subject and "90%" in subject
+
+
+@pytest.mark.asyncio
+async def test_no_alert_below_90_percent(monkeypatch):
+    async def no_prior(query, params):
+        return None if "quota_alert" in query else {"n": 0}
+
+    from db.database import db
+    monkeypatch.setattr(db, "fetch_one", no_prior)
+    monkeypatch.setattr(es, "_refresh_credits", _no_refresh)
+    sent = _capture_alerts(monkeypatch)
+    _set_credits(PRIMARY[0], 31)
+    _set_credits(EXTRA[0], 300)
+
+    await es._maybe_send_quota_alerts()
+
+    assert sent == []
+
+
+@pytest.mark.asyncio
+async def test_alert_skipped_if_already_sent_today_before_restart(monkeypatch):
+    async def prior_exists(query, params):
+        return {"id": 1} if "quota_alert" in query else {"n": 0}
+
+    from db.database import db
+    monkeypatch.setattr(db, "fetch_one", prior_exists)
+    monkeypatch.setattr(es, "_refresh_credits", _no_refresh)
+    sent = _capture_alerts(monkeypatch)
+    _set_credits(PRIMARY[0], 5)
+    _set_credits(EXTRA[0], 300)
+
+    await es._maybe_send_quota_alerts()
+
+    assert sent == []
+
+
+@pytest.mark.asyncio
+async def test_alert_uses_local_estimate_without_api_key(monkeypatch):
+    async def usage(query, params):
+        if "quota_alert" in query:
+            return None
+        return {"n": 280 if params[0] == PRIMARY[0] else 0}
+
+    from db.database import db
+    monkeypatch.setattr(db, "fetch_one", usage)
+    monkeypatch.setattr(es, "_refresh_credits", _no_refresh)
+    sent = _capture_alerts(monkeypatch)
+
+    await es._maybe_send_quota_alerts()
+
+    assert len(sent) == 1 and PRIMARY[0] in sent[0][1]
+
+
 @pytest.mark.asyncio
 async def test_fetch_credits_maps_api_key_to_smtp_login():
     class Resp:

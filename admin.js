@@ -157,7 +157,7 @@ function navigate(page) {
   if (page === 'alumni') loadAlumni();
   if (page === 'analytics' && window.loadAnalytics) loadAnalytics();
   if (page === 'recovery' && window.loadRecovery) loadRecovery();
-  if (page === 'email') { loadEmailStatus(); loadEmailDirectory(); loadEmailLogs(); loadEmailAggStats(); }
+  if (page === 'email') { loadEmailStatus(); loadEmailQuota(); loadEmailDirectory(); loadEmailLogs(); loadEmailAggStats(); }
   if (page === 'submissions') loadSubmissions();
   if (page === 'urgent-requests') loadUrgentRequests();
   if (page === 'name-changes') loadNameChanges();

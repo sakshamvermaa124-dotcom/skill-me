@@ -162,6 +162,42 @@ async function loadEmailAggStats() {
   }
 }
 
+// Per-account Brevo credits left today (Brevo's own counter when its API key works, else our estimate)
+async function loadEmailQuota() {
+  const el = document.getElementById('email-quota-accounts');
+  if (!el) return;
+  try {
+    const data = await api('/api/admin/email/quota');
+    const accounts = data.accounts || [];
+    if (!accounts.length) {
+      el.innerHTML = '<div style="font-size:0.8rem;color:var(--text-secondary);">No Brevo accounts configured.</div>';
+      return;
+    }
+    el.innerHTML = accounts.map((a, i) => {
+      const cap = a.daily_credits || 300;
+      const left = Math.max(0, a.credits_left ?? 0);
+      const pctLeft = Math.round(left / cap * 100);
+      const color = a.exhausted || pctLeft <= 0 ? 'var(--danger)' : pctLeft <= 10 ? 'var(--warn)' : 'var(--ok)';
+      const source = a.credits_source === 'brevo'
+        ? 'live from Brevo'
+        : `estimated from our logs (${a.used_today} sent today) — Brevo API key not working`;
+      return `<div style="background:var(--bg-card-hover);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+        <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:8px;">
+          <div style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;">${esc(a.account)}</div>
+          <div style="font-size:0.7rem;color:var(--text-secondary);flex-shrink:0;">${i === 0 ? 'Primary' : 'Backup'}</div>
+        </div>
+        <div style="font-size:1.25rem;font-weight:700;color:${color};">${left} <span style="font-size:0.8rem;font-weight:500;color:var(--text-secondary);">/ ${cap} left${a.exhausted ? ' · OUT' : ''}</span></div>
+        <div style="height:6px;border-radius:3px;background:var(--border);margin:8px 0 6px;overflow:hidden;">
+          <div style="height:100%;width:${pctLeft}%;background:${color};"></div>
+        </div>
+        <div style="font-size:0.72rem;color:var(--text-secondary);">${source}</div>
+      </div>`;
+    }).join('');
+  } catch (err) {
+    el.innerHTML = `<div style="font-size:0.8rem;color:var(--danger);">Failed to load quota: ${esc(err.message)}</div>`;
+  }
+}
+
 // Auto-load email logs when navigating to the email page
 const _origNavigate = typeof navigate === 'function' ? navigate : null;
 if (_origNavigate) {

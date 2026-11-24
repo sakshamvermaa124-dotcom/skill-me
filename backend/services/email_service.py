@@ -168,10 +168,84 @@ async def get_quota_usage() -> list[dict]:
             "account": user,
             "used_today": used,
             "limit": settings.smtp_daily_limit,
+            "daily_credits": settings.brevo_daily_credits,
             "brevo_credits_left": credits,
+            # Best estimate of credits left: Brevo's number, else our own count against the daily cap
+            "credits_left": credits if credits is not None else max(0, settings.brevo_daily_credits - used),
+            "credits_source": "brevo" if credits is not None else "estimate",
             "exhausted": exhausted,
         })
     return usage
+
+
+# ── Low-quota alert ──────────────────────────────────────────────────────────
+# Once per account per quota day (00:00 UTC), email the owner when an account has used 90%+ of
+# its daily credits. Triggered in the background after successful sends.
+
+_alerted: set[tuple[str, str]] = set()  # (login, quota day) already alerted in this process
+_alert_running = False
+_background: set[asyncio.Task] = set()
+
+
+def _schedule_quota_alert_check() -> None:
+    if not settings.quota_alert_email or _alert_running:
+        return
+    try:
+        task = asyncio.get_running_loop().create_task(_maybe_send_quota_alerts())
+    except RuntimeError:
+        return
+    _background.add(task)
+    task.add_done_callback(_background.discard)
+
+
+async def _maybe_send_quota_alerts() -> None:
+    global _alert_running
+    to = (settings.quota_alert_email or "").strip()
+    if not to or _alert_running:
+        return
+    _alert_running = True
+    try:
+        from db.database import db
+        day = _quota_day_start_utc()
+        cap = settings.brevo_daily_credits
+        usage = await get_quota_usage()
+        for u in usage:
+            login = u["account"]
+            if (login, day) in _alerted or cap - u["credits_left"] < settings.quota_alert_threshold * cap:
+                continue
+            _alerted.add((login, day))
+            # Survive restarts: skip if an alert for this account already went out this quota day
+            try:
+                prior = await db.fetch_one(
+                    "SELECT id FROM email_logs WHERE email_type = 'quota_alert' AND status = 'sent' "
+                    "AND subject LIKE ? AND sent_at >= ? LIMIT 1",
+                    (f"%{login}%", day),
+                )
+                if prior:
+                    continue
+            except Exception as exc:
+                logger.warning("Quota alert dedup check failed: %s", exc)
+            used_pct = round((cap - u["credits_left"]) / cap * 100)
+            rows = "".join(
+                f"<tr><td style='padding:4px 12px 4px 0;font-family:monospace'>{a['account']}</td>"
+                f"<td style='padding:4px 12px 4px 0'><b>{a['credits_left']}</b> / {cap} left</td>"
+                f"<td style='padding:4px 0;color:#666'>{'from Brevo' if a['credits_source'] == 'brevo' else 'estimated'}"
+                f"{' — OUT' if a['exhausted'] else ''}</td></tr>"
+                for a in usage
+            )
+            html = (
+                f"<p>Brevo account <b>{login}</b> has used <b>{used_pct}%</b> of today's {cap} emails "
+                f"(<b>{u['credits_left']}</b> left).</p>"
+                f"<p>All accounts right now:</p><table>{rows}</table>"
+                f"<p>Quota resets at 05:30 IST (00:00 UTC). When an account runs out, sending moves to the "
+                f"next account; if every account is out, emails are logged as failed until the reset.</p>"
+            )
+            await _send_and_log(to, "", f"⚠️ Brevo {login}: {used_pct}% of daily emails used",
+                                html, email_type="quota_alert")
+    except Exception as exc:
+        logger.warning("Quota alert check failed: %s", exc)
+    finally:
+        _alert_running = False
 
 
 # Accounts Brevo refused over SMTP (bad key, or a quota refusal if Brevo ever sends one),
@@ -284,6 +358,7 @@ async def _send_ex(to_email: str, to_name: str, subject: str, html_body: str,
         _adjust_credits(login, -1)
         try:
             await asyncio.to_thread(_send_sync, to_email, to_name, subject, html_body, tag, account)
+            _schedule_quota_alert_check()
             return True, login
         except smtplib.SMTPRecipientsRefused as exc:
             _adjust_credits(login, +1)

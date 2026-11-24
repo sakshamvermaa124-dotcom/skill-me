@@ -364,6 +364,16 @@
             </div>
           </div>
 
+          <div style="margin-bottom:24px;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;gap:12px;flex-wrap:wrap;">
+              <div style="font-size:0.85rem;font-weight:600;color:var(--text-primary);">Brevo accounts — credits left today</div>
+              <div style="font-size:0.75rem;color:var(--text-secondary);">Resets 05:30 IST (00:00 UTC) · <a href="#" onclick="loadEmailQuota();return false;">Refresh</a></div>
+            </div>
+            <div id="email-quota-accounts" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;">
+              <div style="font-size:0.8rem;color:var(--text-secondary);">Loading...</div>
+            </div>
+          </div>
+
           <div style="margin-bottom:20px;">
             <div style="font-size:0.85rem;font-weight:600;color:var(--text-primary);margin-bottom:12px;">Send a test email</div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
@@ -743,8 +753,8 @@
 </div>
 
 <script src="config.js?v=a6d0001538" defer></script>
-<script src="admin.js?v=6b37c23eee" defer></script>
-<script src="admin-email.js?v=e9a39d2443" defer></script>
+<script src="admin.js?v=b1f0c5925f" defer></script>
+<script src="admin-email.js?v=c4bdcb65e3" defer></script>
 <script src="admin-recovery.js?v=f85f90e16f" defer></script>
 <script src="admin-geo.js?v=ad65a779fe" defer></script>
 <script src="admin-analytics.js?v=2a950ed252" defer></script>
