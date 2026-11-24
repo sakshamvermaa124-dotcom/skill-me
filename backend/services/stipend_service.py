@@ -2,8 +2,9 @@
 SkillMe — Top-performer stipend entries
 
 Only students who finished the internship and hold an issued certificate (paid for, or
-issued by an admin) can enter the stipend round. They confirm their seat by typing the
-certificate ID printed on their own certificate.
+issued by an admin) can enter the stipend round. They confirm their seat in one click:
+the seat is tied to their own certificate, looked up from the signed-in account. (A typed
+certificate ID is still accepted, for older clients.)
 
 Anti-spam rules, enforced here and by UNIQUE constraints on stipend_entries:
   * one entry per person (email), across every track they applied to
@@ -59,20 +60,35 @@ async def _entry_for(email: str) -> dict | None:
     )
 
 
-async def stipend_status(email: str) -> dict:
-    """What the dashboard needs: is this person eligible, and have they claimed their seat."""
-    key = _norm_email(email)
-    entry = await _entry_for(key)
-    has_cert = await db.fetch_one(
-        """SELECT 1 AS ok FROM certificates c JOIN students s ON s.id = c.student_id
-           WHERE lower(s.email) = ? LIMIT 1""",
+async def _own_certificate(key: str) -> dict | None:
+    """The person's first issued certificate: the one their seat is tied to."""
+    return await db.fetch_one(
+        """SELECT c.cert_id, c.student_id, c.batch_id, s.email, s.first_name, s.last_name,
+                  COALESCE(b.domain, s.domain) AS domain
+           FROM certificates c
+           JOIN students s ON s.id = c.student_id
+           LEFT JOIN batches b ON b.id = c.batch_id
+           WHERE lower(s.email) = ?
+           ORDER BY c.issued_at, c.id LIMIT 1""",
         (key,),
     )
-    return {"eligible": bool(has_cert), "entered": bool(entry), "entry": _entry_out(entry)}
 
 
-async def enter_stipend(email: str, raw_cert_id: str | None) -> dict:
+async def stipend_status(email: str) -> dict:
+    """What the dashboard needs: is this person eligible, have they claimed their seat, and
+    which of their certificates the seat is tied to (only ever their own)."""
+    key = _norm_email(email)
+    entry = await _entry_for(key)
+    cert = await _own_certificate(key)
+    return {
+        "eligible": bool(cert), "entered": bool(entry), "entry": _entry_out(entry),
+        "certificate": {"cert_id": cert["cert_id"], "domain": cert["domain"]} if cert else None,
+    }
+
+
+async def enter_stipend(email: str, raw_cert_id: str | None = None) -> dict:
     """Claim the person's one stipend seat with a certificate issued to them.
+    Without a certificate ID, their own certificate is used (the one-click path).
 
     Returns {"entry": {...}, "student": {...}} where student holds what the confirmation email needs.
     Raises StipendError with a message that can be shown to the student as-is.
@@ -86,6 +102,15 @@ async def enter_stipend(email: str, raw_cert_id: str | None) -> dict:
             "Your seat is already confirmed. Each student can enter the stipend round once.",
             entry=_entry_out(existing),
         )
+
+    if not (raw_cert_id or "").strip():
+        cert = await _own_certificate(key)
+        if not cert:
+            raise StipendError(
+                403, "not_certified",
+                "Seats are for interns who hold a SkillMe certificate. Issue yours from the Credentials tab first.",
+            )
+        return await _insert_entry(key, cert)
 
     cert_id = normalize_cert_id(raw_cert_id)
     if not cert_id:
@@ -114,7 +139,11 @@ async def enter_stipend(email: str, raw_cert_id: str | None) -> dict:
             403, "not_yours",
             "This certificate was issued to someone else. Enter the ID from your own certificate.",
         )
+    return await _insert_entry(key, cert)
 
+
+async def _insert_entry(key: str, cert: dict) -> dict:
+    cert_id = cert["cert_id"]
     try:
         await db.insert(
             "INSERT INTO stipend_entries (email, student_id, batch_id, cert_id) VALUES (?, ?, ?, ?)",

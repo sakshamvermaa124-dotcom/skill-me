@@ -83,7 +83,8 @@ class UpdateNameRequest(BaseModel):
 
 
 class StipendEntryRequest(BaseModel):
-    cert_id: str = Field(..., max_length=40)
+    # Optional: without it the seat is tied to the student's own certificate (one click)
+    cert_id: str | None = Field(None, max_length=40)
 
 
 class FunnelStepRequest(BaseModel):
@@ -464,15 +465,17 @@ async def get_stipend(me: dict = Depends(require_student)):
     return await stipend_status(me["email"])
 
 
-@router.post("/stipend/enter", summary="Confirm a stipend seat with the student's own certificate ID")
+@router.post("/stipend/enter", summary="Confirm a stipend seat with the student's own certificate")
 async def enter_stipend_round(
-    req: StipendEntryRequest, background_tasks: BackgroundTasks, me: dict = Depends(require_student)
+    background_tasks: BackgroundTasks, req: StipendEntryRequest | None = None,
+    me: dict = Depends(require_student),
 ):
     """
-    Claims the person's one seat in the top-performer stipend round. The certificate must
-    be issued to the signed-in person, each person can enter once, and each certificate can
-    claim one seat. Sends an "entry confirmed" email.
+    Claims the person's one seat in the top-performer stipend round, tied to their own
+    certificate (or to `cert_id`, which must also be theirs). Each person can enter once and
+    each certificate can claim one seat. Sends an "entry confirmed" email.
     """
+    req = req or StipendEntryRequest()
     try:
         result = await enter_stipend(me["email"], req.cert_id)
     except StipendError as e:

@@ -2053,7 +2053,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>` : ''}
         <div class="issued-next">
           <strong>Last step: take your stipend seat</strong>
-          <p>${id ? 'Copy the ID above and use it to' : 'Use the ID on your certificate to'} enter the stipend of up to $100 a month. 8–10 interns are picked on ${escHtml(nextStipendDate())}.</p>
+          <p>Your certificate makes you eligible for the stipend of up to $100 a month. Confirm your seat in one click. 8–10 interns are picked on ${escHtml(nextStipendDate())}.</p>
         </div>
         <button type="button" class="cert-btn cert-btn-primary cert-btn-block checkout-cta" onclick="issuedToStipend()">Confirm my stipend seat</button>
         <div class="issued-links">
@@ -2304,9 +2304,12 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     const form = document.getElementById('stipend-form');
-    const input = document.getElementById('stipend-cert-input');
-    const link = document.getElementById('stipend-cert-link');
-    if (link && student.id && data._batch_id) link.href = credentialUrls(student, data).cert;
+    const cert = st.certificate || {};
+    const domain = cert.domain || (data.progress && data.progress[0] && data.progress[0].domain) || student.domain;
+    document.getElementById('stipend-linked-name').textContent = student.name || 'Your certificate';
+    document.getElementById('stipend-linked-meta').textContent = `${describeDomain(domain).label} Internship`;
+    document.getElementById('stipend-linked-id').textContent =
+      cert.cert_id || (urlParams.get('preview') ? 'SM-A1B2-C3D4-E5F6' : 'Certificate linked');
     modal.style.display = 'flex';
     void modal.offsetWidth;
     modal.classList.add('active');
@@ -2318,13 +2321,8 @@ document.addEventListener('DOMContentLoaded', () => {
     trackCred('stipend_form_opened');
     form.hidden = false;
     document.getElementById('stipend-done').hidden = true;
-    input.value = '';
-    input.removeAttribute('aria-invalid');
     document.getElementById('stipend-error').textContent = '';
-    document.getElementById('stipend-submit-btn').disabled = true;
-    const paste = document.getElementById('stipend-paste-btn');
-    if (paste) paste.hidden = !(navigator.clipboard && navigator.clipboard.readText);
-    setTimeout(() => input.focus({ preventScroll: true }), 60);
+    document.getElementById('stipend-submit-btn').disabled = false;
   };
 
   window.closeStipendModal = function() {
@@ -2334,32 +2332,6 @@ document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => modal.style.display = 'none', 400);
       modalClosed();
     }
-  };
-
-  // Shapes whatever is typed or pasted into SM-XXXX-XXXX-XXXX.
-  window.stipendInput = function(el) {
-    let raw = el.value.replace(/[^0-9a-z]/gi, '').toUpperCase();
-    if (raw === 'S' || raw === 'SM') {
-      el.value = raw;
-    } else {
-      if (raw.startsWith('SM')) raw = raw.slice(2);
-      raw = raw.slice(0, 12);
-      el.value = raw ? 'SM-' + raw.match(/.{1,4}/g).join('-') : '';
-    }
-    const complete = /^SM-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}$/.test(el.value);
-    document.getElementById('stipend-submit-btn').disabled = !complete;
-    document.getElementById('stipend-error').textContent = '';
-    el.removeAttribute('aria-invalid');
-  };
-
-  // One tap instead of long-pressing a small field on a phone. Hidden where the browser can't read the clipboard.
-  window.stipendPaste = async function() {
-    const input = document.getElementById('stipend-cert-input');
-    try {
-      input.value = await navigator.clipboard.readText();
-      window.stipendInput(input);
-    } catch (e) { /* permission refused: they can still paste by hand */ }
-    input.focus({ preventScroll: true });
   };
 
   function showStipendDone(entry, already) {
@@ -2388,21 +2360,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.submitStipendEntry = async function(e) {
     if (e) e.preventDefault();
-    const input = document.getElementById('stipend-cert-input');
     const btn = document.getElementById('stipend-submit-btn');
     const err = document.getElementById('stipend-error');
-    if (!input || btn.disabled) return;
+    if (!btn || btn.disabled) return;
     btn.disabled = true;
     btn.textContent = 'Confirming…';
+    err.textContent = '';
     const fail = (msg) => {
       err.textContent = msg;
-      input.setAttribute('aria-invalid', 'true');
       btn.disabled = false;
       btn.textContent = 'Confirm my seat';
-      input.focus({ preventScroll: true });
     };
     if (urlParams.get('preview')) { // mock student: show the success state without the backend
-      const entry = { cert_id: input.value, entered_at: new Date().toISOString() };
+      const entry = { cert_id: 'SM-A1B2-C3D4-E5F6', entered_at: new Date().toISOString() };
       stipendEntered(entry);
       showStipendDone(entry, false);
       btn.textContent = 'Confirm my seat';
@@ -2412,7 +2382,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const res = await fetch(`${API}/api/students/stipend/enter`, {
         method: 'POST',
         headers: authHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({ cert_id: input.value }),
+        body: '{}',
       });
       const body = await res.json().catch(() => ({}));
       if (res.status === 401) return sessionExpired();
@@ -2709,6 +2679,8 @@ document.addEventListener('DOMContentLoaded', () => {
               // 5. Issued: update the page behind, and turn the checkout into the success screen
               const certSection = document.getElementById('cert-section');
               renderCertReady(certSection, window._dashStudent, window._dashData);
+              const st = window._dashStudent && window._dashStudent.stipend;
+              if (st && verifyData.cert_id && !st.certificate) st.certificate = { cert_id: verifyData.cert_id };
               showPaymentIssued(verifyData.cert_id);
             } else {
               showPaymentProblem("We couldn't confirm your payment yet.", response.razorpay_payment_id);

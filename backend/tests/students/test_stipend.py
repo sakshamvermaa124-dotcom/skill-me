@@ -51,7 +51,7 @@ class TestNormalizeCertId:
 @pytest.mark.students
 class TestStipendStatus:
     async def test_without_certificate_not_eligible(self, client, enrolled_student):
-        assert await _status(client, enrolled_student["id"]) == {"eligible": False, "entered": False, "entry": None}
+        assert await _status(client, enrolled_student["id"]) == {"eligible": False, "entered": False, "entry": None, "certificate": None}
 
     async def test_paid_and_certified_is_eligible(self, client, enrolled_student):
         sid = await _certified(enrolled_student)
@@ -131,6 +131,36 @@ class TestStipendEntry:
     async def test_requires_login(self, client):
         r = await client.post("/api/students/stipend/enter", json={"cert_id": CERT})
         assert r.status_code == 401
+
+
+@pytest.mark.students
+class TestOneClickEntry:
+    """The dashboard sends no ID: the seat is tied to the signed-in person's own certificate."""
+
+    async def test_status_names_own_certificate(self, client, enrolled_student):
+        sid = await _certified(enrolled_student)
+        assert (await _status(client, sid))["certificate"]["cert_id"] == CERT
+
+    @pytest.mark.parametrize("body", [{}, {"cert_id": None}, {"cert_id": "  "}, None])
+    async def test_enter_without_typing_an_id(self, client, enrolled_student, body):
+        sid = await _certified(enrolled_student)
+        kw = {"json": body} if body is not None else {}
+        r = await client.post("/api/students/stipend/enter", headers=auth_headers(sid), **kw)
+        assert r.status_code == 200, r.text
+        assert r.json()["entry"]["cert_id"] == CERT
+        assert await _entry_count() == 1
+
+    async def test_second_click_is_already_entered(self, client, enrolled_student):
+        sid = await _certified(enrolled_student)
+        await client.post("/api/students/stipend/enter", json={}, headers=auth_headers(sid))
+        r = await client.post("/api/students/stipend/enter", json={}, headers=auth_headers(sid))
+        assert r.status_code == 409 and r.json()["entry"]["cert_id"] == CERT
+        assert await _entry_count() == 1
+
+    async def test_without_certificate_is_refused(self, client, enrolled_student):
+        r = await client.post("/api/students/stipend/enter", json={}, headers=auth_headers(enrolled_student["id"]))
+        assert r.status_code == 403
+        assert await _entry_count() == 0
 
 
 @pytest.mark.students

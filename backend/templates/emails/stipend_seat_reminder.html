@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% import "_ui.html" as ui %}
 {#- Sent at most 3 times, a week apart, to certificate holders without a stipend seat.
-    Carries their certificate ID so confirming takes one paste. No deadline. -#}
+    Their certificate is already linked, so confirming is one click. No deadline. -#}
 
 {% block title %}Your stipend seat is open — SkillMe{% endblock %}
-{% block preheader %}{% if last %}This is the last email we'll send about it. Your seat stays open in your dashboard.{% else %}Your certificate makes you eligible for the top-performer stipend of up to $100 a month. Confirming takes a few seconds.{% endif %}{% endblock %}
+{% block preheader %}{% if last %}This is the last email we'll send about it. Your seat stays open in your dashboard.{% else %}Your certificate makes you eligible for the top-performer stipend of up to $100 a month. Confirming takes one click.{% endif %}{% endblock %}
 
 {% block body %}
 {% if step == 1 %}
@@ -12,7 +12,7 @@
 {{ ui.title(first_name ~ ", take your stipend seat") }}
 {% call ui.p() %}
   Your certificate makes you eligible for the SkillMe <strong class="ink" style="color:#0a0a0a;">top-performer stipend</strong> of up to $100 a month,
-  but your seat isn't confirmed yet. It takes a few seconds.
+  but your seat isn't confirmed yet. It takes one click.
 {% endcall %}
 {% elif not last %}
 {{ ui.eyebrow("Your seat is waiting") }}
@@ -26,16 +26,14 @@
 {{ ui.title("Your seat stays open, " ~ first_name) }}
 {% call ui.p() %}
   This is the last email we'll send about it. Your seat in the <strong class="ink" style="color:#0a0a0a;">top-performer stipend</strong>
-  stays open in your dashboard, and your certificate ID is below whenever you want it.
+  stays open in your dashboard, one click away whenever you want it.
 {% endcall %}
 {% endif %}
 
-{{ ui.code_box("Your certificate ID", cert_id) }}
-
 {{ ui.section("How to confirm it") }}
 {% call ui.steps() %}
-  {% call ui.step(1, "Open your seat form") %}The button below opens it in your dashboard.{% endcall %}
-  {% call ui.step(2, "Paste the ID above") %}Your seat is tied to your certificate. Each intern can enter once.{% endcall %}
+  {% call ui.step(1, "Open your seat") %}The button below opens it in your dashboard.{% endcall %}
+  {% call ui.step(2, "Press Confirm my seat") %}Your certificate ({{ cert_id }}) is already linked, so there's nothing to type. Each intern can enter once.{% endcall %}
   {% call ui.step(3, "Winners are picked on the 3rd", last=true) %}Every month, 8–10 interns are picked on the quality of their work. If you're one of them, we'll email you.{% endcall %}
 {% endcall %}
 

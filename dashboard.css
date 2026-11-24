@@ -2342,21 +2342,18 @@ main.dash-page:focus { outline: none; }
 .stipend-step[hidden] { display: none; }
 .stipend-title { margin-top: 4px; font-size: 1.35rem; font-weight: 700; letter-spacing: -0.025em; color: var(--text-strong); outline: none; }
 .stipend-sub { margin-top: 6px; font-size: 0.88rem; line-height: 1.55; color: var(--text-muted); }
-.stipend-field { width: 100%; margin-top: 20px; }
-.stipend-label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-.stipend-label { font-size: 0.8rem; font-weight: 600; color: var(--text-default); }
-.stipend-paste { padding: 2px; font-size: 0.8rem; }
-.stipend-paste[hidden] { display: none; }
-.stipend-input {
-  width: 100%; padding-top: 13px; padding-bottom: 13px;
-  font-family: var(--font-mono); font-size: 1.1rem; font-weight: 600; letter-spacing: 0.06em;
-  text-align: center; text-transform: uppercase;
+.stipend-linked {
+  display: flex; align-items: center; gap: 12px; margin-top: 18px; padding: 12px 14px;
+  border: 1px solid var(--border); border-radius: 12px; background: var(--surface-1);
 }
-.stipend-input[aria-invalid="true"] { border-color: var(--danger-border); }
-.stipend-help { margin-top: 8px; font-size: 0.78rem; line-height: 1.5; color: var(--text-faint); }
-.stipend-help a { color: var(--accent-text); font-weight: 600; text-decoration: none; white-space: nowrap; }
-.stipend-help a:hover { text-decoration: underline; text-underline-offset: 2px; }
-.stipend-error { min-height: 1.2em; margin: 8px 0 6px; font-size: 0.8rem; color: var(--danger); }
+.stipend-linked-tick {
+  flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%; background: var(--ok-wash); color: var(--ok);
+}
+.stipend-linked strong { display: block; font-size: 0.92rem; font-weight: 600; color: var(--text-strong); }
+.stipend-linked span:not(.stipend-linked-tick) { display: block; margin-top: 1px; font-size: 0.8rem; color: var(--text-muted); }
+.stipend-linked code { display: block; margin-top: 3px; font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.03em; color: var(--text-default); }
+.stipend-error { min-height: 1.2em; margin: 8px 0 4px; font-size: 0.8rem; color: var(--danger); }
 .stipend-rules { list-style: none; margin: 16px 0 0; padding: 0; }
 .stipend-rules li { position: relative; padding-left: 14px; font-size: 0.78rem; line-height: 1.5; color: var(--text-muted); }
 .stipend-rules li + li { margin-top: 5px; }

@@ -51,7 +51,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="dashboard.css?v=bbcd9ff9c8">
+  <link rel="stylesheet" href="dashboard.css?v=6f681e4553">
   <link rel="stylesheet" href="dashboard-activation.css?v=e5d55a6f32">
 
   <script src="config.js?v=a6d0001538" defer></script>
@@ -723,7 +723,7 @@
   <!-- Lenis smooth scroll -->
   <div id="dash-toast" class="dash-toast" role="status" aria-live="polite"></div>
   <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js" integrity="sha384-tKsJDT6PlUI0pSBt9/sBKJluKgA19/a6mBrDsZaXotLB4ZYfMGM6xt6/WgGpYhTm" crossorigin="anonymous" defer></script>
-  <script src="dashboard.js?v=d1212281b1" defer></script>
+  <script src="dashboard.js?v=e5eedb41e0" defer></script>
   <script src="dashboard-ui.js?v=fa148024bd" defer></script>
   <script src="dashboard-activation.js?v=a197c1d57f" defer></script>
 
@@ -799,32 +799,26 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
 
-      <!-- 1. Enter certificate ID -->
+      <!-- 1. Confirm: the seat is tied to their own certificate, nothing to type -->
       <form class="stipend-step" id="stipend-form" novalidate onsubmit="submitStipendEntry(event)">
         <p class="checkout-eyebrow">Top-performer stipend · up to $100 a month</p>
-        <h2 class="stipend-title" id="stipend-modal-title">Confirm your seat</h2>
-        <p class="stipend-sub">Seats are reserved for interns who finished the internship and hold a verified certificate. Enter the ID from your certificate to lock yours in.</p>
+        <h2 class="stipend-title" id="stipend-modal-title" tabindex="-1">Confirm your seat</h2>
+        <p class="stipend-sub">Seats are only for interns who finished the internship and hold a verified certificate. Yours is linked, so it takes one click.</p>
         <p class="fair-note"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg><span><strong>Only genuine interns compete.</strong> The nominal certificate fee keeps out fake accounts and duplicate entries. One seat per verified intern.</span></p>
 
-        <div class="stipend-field">
-          <div class="stipend-label-row">
-            <label class="stipend-label" for="stipend-cert-input">Certificate ID</label>
-            <button type="button" class="link-btn stipend-paste" id="stipend-paste-btn" onclick="stipendPaste()" hidden>Paste</button>
+        <div class="stipend-linked" aria-label="Your certificate">
+          <span class="stipend-linked-tick" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          <div>
+            <strong id="stipend-linked-name">Your certificate</strong>
+            <span id="stipend-linked-meta">Linked to your account</span>
+            <code id="stipend-linked-id"></code>
           </div>
-          <input type="text" id="stipend-cert-input" class="dash-input stipend-input" placeholder="SM-XXXX-XXXX-XXXX"
-                 autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="24"
-                 aria-describedby="stipend-help stipend-error" oninput="stipendInput(this)">
         </div>
-        <p class="stipend-help" id="stipend-help">
-          It's printed at the bottom of your certificate and in your "certificate issued" email.
-          <a href="#" id="stipend-cert-link" target="_blank" rel="noopener">Open my certificate ↗</a>
-        </p>
         <p class="stipend-error" id="stipend-error" role="alert"></p>
 
-        <button type="submit" class="cert-btn cert-btn-primary cert-btn-block" id="stipend-submit-btn" disabled>Confirm my seat</button>
+        <button type="submit" class="cert-btn cert-btn-primary cert-btn-block" id="stipend-submit-btn">Confirm my seat</button>
         <ul class="stipend-rules">
-          <li>One seat per intern. It's tied to your certificate.</li>
-          <li>Only your own certificate can claim your seat.</li>
+          <li>One seat per intern, tied to your certificate.</li>
           <li>You'll get a confirmation email right away.</li>
         </ul>
         <details class="stipend-how">
