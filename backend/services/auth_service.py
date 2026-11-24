@@ -53,8 +53,28 @@ def offer_ref(student_id: int) -> str:
     return digest.hexdigest()[:16]
 
 
+# How much of the signed reference the printed Offer ID carries. 48 bits per student is
+# far beyond guessing, and short enough to type off a printed letter.
+OFFER_CODE_HEX = 12
+
+
+def offer_code(student_id: int) -> str:
+    """The typeable Offer ID printed on the letter, e.g. OF-0812-A1B2-C3D4-E5F6.
+    Anyone can enter it at /verify; it carries part of the signed reference, so ids
+    still can't be enumerated."""
+    r = offer_ref(student_id)[:OFFER_CODE_HEX].upper()
+    return f"OF-{int(student_id):04d}-{r[0:4]}-{r[4:8]}-{r[8:12]}"
+
+
 def offer_ref_valid(student_id: int, ref: str) -> bool:
-    return hmac.compare_digest(offer_ref(student_id), (ref or "").strip().lower())
+    """Accepts the full signed reference (QR links) or the short one in the Offer ID."""
+    given = (ref or "").strip().lower().replace("-", "")
+    full = offer_ref(student_id)
+    if len(given) == len(full):
+        return hmac.compare_digest(full, given)
+    if len(given) == OFFER_CODE_HEX:
+        return hmac.compare_digest(full[:OFFER_CODE_HEX], given)
+    return False
 
 
 def _create_jwt(student_id: int, email: str) -> str:

@@ -2,6 +2,8 @@
 Student Tests — Status Checks
 Tests GET /api/students/status/{email}.
 """
+import re
+
 import pytest
 from tests.conftest import test_db, seed_student, seed_batch, seed_enrollment, auth_headers
 
@@ -191,4 +193,35 @@ class TestOfferVerification:
     async def test_offer_needs_an_enrollment(self, client, test_student):
         from services.auth_service import offer_ref
         r = await client.get(f"/api/students/offer/{test_student['id']}/{offer_ref(test_student['id'])}")
+        assert r.status_code == 404
+
+    async def test_offer_returns_printed_offer_id(self, client, enrolled_student):
+        from services.auth_service import offer_code, offer_ref
+        sid = enrolled_student["id"]
+        data = (await client.get(f"/api/students/offer/{sid}/{offer_ref(sid)}")).json()
+        assert data["offer_code"] == offer_code(sid)
+        assert re.fullmatch(r"OF-\d{4,}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}", data["offer_code"])
+
+    async def test_offer_verifies_with_typed_offer_id(self, client, enrolled_student):
+        """What /verify sends when someone types the Offer ID off a printed letter."""
+        from services.auth_service import offer_code
+        sid = enrolled_student["id"]
+        short_ref = "".join(offer_code(sid).split("-")[2:]).lower()
+        assert len(short_ref) == 12
+        r = await client.get(f"/api/students/offer/{sid}/{short_ref}")
+        assert r.status_code == 200
+        assert r.json()["name"] == "Test Student"
+
+    async def test_offer_rejects_wrong_or_partial_short_ref(self, client, enrolled_student):
+        from services.auth_service import offer_ref
+        sid = enrolled_student["id"]
+        assert (await client.get(f"/api/students/offer/{sid}/000000000000")).status_code == 404
+        # Anything shorter than the printed code is not enough.
+        assert (await client.get(f"/api/students/offer/{sid}/{offer_ref(sid)[:8]}")).status_code == 404
+
+    async def test_offer_id_is_bound_to_its_student(self, client, enrolled_student):
+        from services.auth_service import offer_code
+        sid = enrolled_student["id"]
+        short_ref = "".join(offer_code(sid).split("-")[2:]).lower()
+        r = await client.get(f"/api/students/offer/{sid + 1}/{short_ref}")
         assert r.status_code == 404

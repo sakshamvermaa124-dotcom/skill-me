@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Primary SEO Meta Tags -->
-  <title>Verify Certificate &amp; Credentials — SkillMe</title>
-  <meta name="description" content="Verify the authenticity of a SkillMe internship certificate instantly using the unique Certificate ID or QR code.">
+  <title>Verify a Certificate or Offer Letter — SkillMe</title>
+  <meta name="description" content="Check that a SkillMe internship certificate or offer letter is genuine. Enter the Certificate ID or Offer ID printed on the document, or scan its QR code.">
   <meta name="robots" content="index, follow">
   <meta name="theme-color" content="#ffffff">
   <script>
@@ -31,15 +31,15 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="SkillMe">
   <meta property="og:url" content="https://www.skill-me-intern.in/verify">
-  <meta property="og:title" content="Verify Certificate &amp; Credentials — SkillMe">
-  <meta property="og:description" content="Validate authentic SkillMe internship completion certificates and tamper-proof student credentials online.">
+  <meta property="og:title" content="Verify a Certificate or Offer Letter — SkillMe">
+  <meta property="og:description" content="Check that a SkillMe internship certificate or offer letter is genuine, straight from SkillMe's records.">
   <meta property="og:image" content="https://www.skill-me-intern.in/assets/og-image.png">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:domain" content="skill-me-intern.in">
-  <meta name="twitter:title" content="Verify Certificate &amp; Credentials — SkillMe">
-  <meta name="twitter:description" content="Instant verification for SkillMe internship certificates.">
+  <meta name="twitter:title" content="Verify a Certificate or Offer Letter — SkillMe">
+  <meta name="twitter:description" content="Instant verification for SkillMe internship certificates and offer letters.">
   <meta name="twitter:image" content="https://www.skill-me-intern.in/assets/og-image.png">
 
   <!-- Favicon & App Icons -->
@@ -72,7 +72,7 @@
           {
             "@type": "ListItem",
             "position": 2,
-            "name": "Verify Certificate",
+            "name": "Verify a document",
             "item": "https://www.skill-me-intern.in/verify"
           }
         ]
@@ -80,11 +80,11 @@
       {
         "@type": "WebApplication",
         "@id": "https://www.skill-me-intern.in/verify#app",
-        "name": "SkillMe Credential & Certificate Verification Portal",
+        "name": "SkillMe Document Verification",
         "url": "https://www.skill-me-intern.in/verify",
         "applicationCategory": "EducationalApplication",
         "operatingSystem": "All",
-        "description": "Public verification for SkillMe internship certificates and Letters of Recommendation (LOR).",
+        "description": "Public verification for SkillMe internship certificates, Letters of Recommendation (LOR) and internship offer letters.",
         "provider": {
           "@type": "EducationalOrganization",
           "name": "SkillMe",
@@ -105,15 +105,32 @@
     .vf-hero { padding: clamp(40px, 7vw, 80px) 0 clamp(28px, 4vw, 44px); border-bottom: 1px solid var(--line); }
     .vf-hero .container { display: flex; flex-direction: column; align-items: center; text-align: center; }
     .vf-hero .eyebrow { margin-bottom: 16px; }
-    .vf-hero .h1 { max-width: 640px; }
-    .vf-hero .lead { max-width: 540px; margin-top: 14px; }
+    .vf-hero .h1 { max-width: 680px; }
+    .vf-hero .lead { max-width: 560px; margin-top: 14px; }
 
     .vf-main { padding: clamp(28px, 5vw, 48px) 0 clamp(56px, 8vw, 96px); }
     .vf-stack { display: flex; flex-direction: column; gap: 20px; }
 
     /* Search card */
-    .vf-search { width: 100%; margin-top: 32px; padding: 24px; text-align: left; box-shadow: var(--shadow-md); }
+    .vf-search { width: 100%; margin-top: 32px; padding: 20px 24px 22px; text-align: left; box-shadow: var(--shadow-md); }
     .vf-search .label { display: block; margin-bottom: 8px; }
+
+    /* Document-type switch (radio group styled as a segmented control) */
+    .vf-seg {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin-bottom: 18px;
+      background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-md);
+    }
+    .vf-seg-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px; height: 42px; padding: 0 12px;
+      border: 1px solid transparent; border-radius: calc(var(--r-md) - 4px); background: transparent;
+      font: inherit; font-size: 0.9rem; font-weight: 600; color: var(--text-2); cursor: pointer;
+      transition: background 0.18s var(--ease), color 0.18s var(--ease), box-shadow 0.18s var(--ease);
+    }
+    .vf-seg-btn:hover { color: var(--text); }
+    .vf-seg-btn[aria-checked="true"] { background: var(--surface); color: var(--text); border-color: var(--line); box-shadow: var(--shadow-sm); }
+    .vf-seg-btn[aria-checked="true"] svg { color: var(--accent); }
+    .vf-seg-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
     .vf-row { display: flex; gap: 10px; }
     .vf-input-wrap { position: relative; flex: 1; min-width: 0; }
     .vf-input-wrap svg { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-3); pointer-events: none; }
@@ -128,12 +145,25 @@
     .vf-code {
       display: inline-flex; align-items: center; height: 24px; padding: 0 8px;
       border-radius: var(--r-xs); border: 1px solid var(--accent-line); background: var(--accent-wash);
-      font-family: var(--font-mono); font-size: 0.78rem; color: var(--accent-text); letter-spacing: 0.03em;
+      font-family: var(--font-mono); font-size: 0.78rem; color: var(--accent-text); letter-spacing: 0.03em; white-space: nowrap;
     }
     .vf-field-error { margin-top: 8px; }
+    .vf-qr-tip { display: flex; gap: 10px; align-items: center; margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line); font-size: 0.82rem; color: var(--text-2); }
+    .vf-qr-tip svg { flex-shrink: 0; color: var(--text-3); }
+
+    /* Results mode: once a check starts the hero steps aside, so the answer lands right
+       under the search box instead of below the fold. Deliberately not animated: the
+       scroll to the result is measured right after this, so the layout must be final. */
+    body.vf-checking .vf-hero { padding: 20px 0 24px; }
+    body.vf-checking .vf-hero .eyebrow,
+    body.vf-checking .vf-hero .lead { display: none; }
+    body.vf-checking .vf-hero .h1 { font-size: clamp(1.35rem, 3vw, 1.75rem); }
+    body.vf-checking .vf-search { margin-top: 16px; }
+    body.vf-checking .vf-main { padding-top: 20px; }
 
     /* Result area */
     #result-area:empty { display: none; }
+    .vf-status-title:focus { outline: none; }
     .vf-anim { animation: vfUp 0.35s var(--ease); }
     @keyframes vfUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
@@ -142,7 +172,7 @@
     @keyframes vfSpin { to { transform: rotate(360deg); } }
     .vf-loading strong { font-family: var(--font-mono); font-weight: 500; color: var(--text); }
 
-    /* Valid credential */
+    /* Result card */
     .vf-result { overflow: hidden; }
     .vf-result-head { display: flex; align-items: center; gap: 14px; padding: 18px 24px; border-bottom: 1px solid var(--line); }
     .vf-result.is-ok .vf-result-head { background: var(--ok-wash); border-bottom-color: var(--ok-line); }
@@ -152,25 +182,35 @@
     .is-ok .vf-status-icon { color: var(--ok); border-color: var(--ok-line); }
     .is-bad .vf-status-icon { color: var(--danger); border-color: var(--danger-line); }
     .is-warn .vf-status-icon { color: var(--warn); border-color: var(--warn-line); }
+    .vf-status-kicker { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); margin-bottom: 2px; }
     .vf-status-title { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text); line-height: 1.3; }
     .vf-status-sub { font-size: 0.86rem; color: var(--text-2); }
     .vf-result-head > div:nth-child(2) { flex: 1 1 0; min-width: 0; }
-    .vf-result-head .badge { margin-left: auto; }
+    .vf-result-head .badge { margin-left: auto; white-space: nowrap; }
 
     .vf-body { padding: 24px; }
     .vf-holder-label { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
     .vf-holder { font-size: clamp(1.6rem, 4vw, 2.1rem); font-weight: 700; letter-spacing: -0.035em; line-height: 1.15; margin-top: 6px; overflow-wrap: anywhere; }
     .vf-holder-domain { margin-top: 6px; color: var(--text-2); }
 
-    .vf-details { margin-top: 22px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; }
-    .vf-detail { padding: 14px 16px; border-bottom: 1px solid var(--line); background: var(--surface); }
-    .vf-detail:nth-child(odd) { border-right: 1px solid var(--line); }
-    .vf-detail.full { grid-column: 1 / -1; border-right: 0; border-bottom: 0; background: var(--surface-2); }
+    /* 1px gaps over a line-coloured background draw the dividers, whatever rows are present. */
+    .vf-details { margin-top: 22px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; }
+    .vf-detail { padding: 14px 16px; background: var(--surface); }
+    .vf-detail.wide, .vf-detail.full { grid-column: 1 / -1; }
+    .vf-detail.full { background: var(--surface-2); }
     .vf-detail dt { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); margin-bottom: 4px; }
     .vf-detail dd { font-weight: 600; font-size: 0.95rem; color: var(--text); overflow-wrap: anywhere; }
     .vf-detail dd.mono { font-weight: 500; letter-spacing: 0.04em; }
     .vf-id-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
     .vf-id-row dd { font-size: 1.02rem; }
+
+    .vf-note { display: flex; gap: 12px; align-items: flex-start; margin-top: 16px; padding: 14px 16px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--surface-2); font-size: 0.88rem; color: var(--text-2); }
+    .vf-note svg { flex-shrink: 0; margin-top: 2px; color: var(--text-3); }
+    .vf-note.is-warn { background: var(--warn-wash); border-color: var(--warn-line); }
+    .vf-note.is-warn svg { color: var(--warn); }
+    .vf-note strong { color: var(--text); }
+    .vf-link-btn { background: none; border: 0; padding: 0; font: inherit; font-weight: 600; color: var(--primary); cursor: pointer; }
+    .vf-link-btn:hover { text-decoration: underline; text-underline-offset: 3px; }
 
     .vf-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
     .vf-foot { display: flex; gap: 10px; align-items: flex-start; padding: 14px 24px; border-top: 1px solid var(--line); background: var(--bg-soft); font-size: 0.8rem; color: var(--text-2); line-height: 1.55; }
@@ -179,24 +219,63 @@
     /* Error states */
     .vf-err-body { padding: 20px 24px 24px; color: var(--text-2); font-size: 0.92rem; }
     .vf-err-body p + p { margin-top: 10px; }
-    .vf-err-body strong.mono { color: var(--text); font-weight: 600; }
+    .vf-err-body strong.mono { color: var(--text); font-weight: 600; overflow-wrap: anywhere; }
     .vf-err-body a { color: var(--primary); font-weight: 600; }
     .vf-err-body a:hover { text-decoration: underline; text-underline-offset: 3px; }
-    .vf-checklist { margin: 12px 0 0 18px; display: grid; gap: 4px; }
+    .vf-checklist { margin: 12px 0 0 18px; display: grid; gap: 6px; }
 
-    /* How it works */
+    /* Where to find the ID */
     .vf-how { margin-top: clamp(40px, 6vw, 64px); }
     .vf-how-head { text-align: center; margin-bottom: 20px; }
-    .vf-step { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-    .vf-step-num { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: var(--accent-wash); color: var(--accent-text); font-family: var(--font-mono); font-size: 0.82rem; font-weight: 600; }
-    .vf-step p { font-size: 0.9rem; color: var(--text-2); }
-    .vf-step strong { display: block; color: var(--text); font-size: 0.95rem; margin-bottom: 2px; }
+    .vf-how-head p { margin-top: 8px; color: var(--text-2); font-size: 0.92rem; }
+    .vf-where { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .vf-where-card {
+      display: flex; flex-direction: column; gap: 14px; padding: 16px; text-align: left;
+      font: inherit; color: inherit; cursor: pointer;
+      transition: border-color 0.18s var(--ease), box-shadow 0.18s var(--ease), transform 0.18s var(--ease);
+    }
+    .vf-where-card:hover { border-color: var(--line-strong); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .vf-where-card[aria-pressed="true"] { border-color: var(--accent-line); box-shadow: 0 0 0 3px var(--accent-wash); }
+    .vf-where-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .vf-where-card strong { display: block; font-size: 0.98rem; color: var(--text); }
+    .vf-where-card p { margin-top: 2px; font-size: 0.86rem; color: var(--text-2); line-height: 1.55; }
+
+    /* Mini document illustrations */
+    .vf-doc {
+      position: relative; aspect-ratio: 16 / 10; border-radius: var(--r-sm); overflow: hidden;
+      background: var(--surface-2); border: 1px solid var(--line);
+    }
+    .vf-doc i { position: absolute; display: block; border-radius: 3px; background: var(--line-strong); opacity: 0.7; }
+    .vf-doc .frame { inset: 7px; border: 1.5px solid var(--line-strong); background: transparent; border-radius: 4px; opacity: 0.8; }
+    .vf-doc .qr {
+      width: 15%; aspect-ratio: 1; opacity: 0.55; border-radius: 2px;
+      background: repeating-conic-gradient(var(--text) 0 25%, transparent 0 50%) 0 0 / 5px 5px;
+    }
+    .vf-doc .seal { width: 13%; aspect-ratio: 1; border-radius: 50%; background: var(--accent-wash); border: 1.5px solid var(--accent-line); opacity: 1; }
+    .vf-mark {
+      position: absolute; display: inline-flex; align-items: center; height: 18px; padding: 0 6px;
+      border-radius: 4px; background: var(--surface); border: 1px solid var(--accent); color: var(--accent-text);
+      font-family: var(--font-mono); font-size: 9px; font-weight: 600; letter-spacing: 0.03em; white-space: nowrap;
+      box-shadow: 0 0 0 4px var(--accent-wash);
+      animation: vfPulse 2.4s var(--ease) infinite;
+    }
+    @keyframes vfPulse { 0%, 100% { box-shadow: 0 0 0 3px var(--accent-wash); } 50% { box-shadow: 0 0 0 7px var(--accent-wash); } }
+
+    /* Trust strip */
+    .vf-trust { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 24px; }
+    .vf-trust-item { display: flex; gap: 12px; align-items: flex-start; font-size: 0.86rem; color: var(--text-2); line-height: 1.5; }
+    .vf-trust-item svg { flex-shrink: 0; width: 34px; height: 34px; padding: 8px; border-radius: 10px; background: var(--accent-wash); color: var(--accent-text); }
+    .vf-trust-item strong { display: block; color: var(--text); font-size: 0.9rem; }
 
     /* theme.css: `.nav-links + .nav-actions` keeps margin 0 even when nav-links is hidden */
     @media (max-width: 880px) { .site-nav .nav-actions { margin-left: auto; } }
 
+    @media (max-width: 720px) {
+      .vf-where, .vf-trust { grid-template-columns: 1fr; }
+    }
+
     @media (max-width: 640px) {
-      .vf-search { padding: 18px; }
+      .vf-search { padding: 16px 18px 18px; }
       .vf-row { flex-direction: column; }
       .vf-row .btn { width: 100%; }
       .vf-result-head { padding: 16px 18px; flex-wrap: wrap; }
@@ -204,12 +283,16 @@
       .vf-body, .vf-err-body { padding: 18px; }
       .vf-foot { padding: 14px 18px; }
       .vf-details { grid-template-columns: 1fr; }
-      .vf-detail:nth-child(odd) { border-right: 0; }
       .vf-actions .btn { flex: 1 1 calc(50% - 5px); }
     }
 
+    @media (prefers-reduced-motion: reduce) {
+      .vf-anim, .vf-mark { animation: none; }
+      .vf-where-card:hover { transform: none; }
+    }
+
     @media print {
-      .vf-search, .vf-how, .vf-actions, .skip-link { display: none !important; }
+      .vf-search, .vf-how, .vf-actions, .vf-note .vf-link-btn, .skip-link { display: none !important; }
       .vf-hero { padding: 0 0 16px; }
     }
   </style>
@@ -244,7 +327,7 @@
   <div class="nav-drawer" id="nav-drawer">
     <a href="/#how-it-works">How it works</a>
     <a href="/internships">Internships</a>
-    <a href="/verify" aria-current="page">Verify a certificate</a>
+    <a href="/verify" aria-current="page">Verify a document</a>
     <a href="/#faq">FAQ</a>
     <a href="/dashboard">Student login</a>
     <a href="/internships" class="btn btn-primary">Apply now</a>
@@ -254,37 +337,53 @@
     <!-- HERO -->
     <section class="vf-hero bg-grid">
       <div class="container container-sm">
-        <span class="eyebrow">Certificate verification</span>
-        <h1 class="h1"><span class="sr-only">SkillMe </span>Verify a certificate</h1>
-        <p class="lead">Enter the Certificate ID printed on the document to confirm it's genuine and see the intern's details from our records.</p>
+        <span class="eyebrow">Document verification</span>
+        <h1 class="h1"><span class="sr-only">SkillMe: </span>Verify a certificate or offer letter</h1>
+        <p class="lead">Enter the ID printed on the document to confirm it's genuine and see the intern's details from SkillMe's records.</p>
+
         <!-- SEARCH -->
-        <form class="card vf-search" id="verify-form" novalidate onsubmit="event.preventDefault(); verifyCertificate();">
-          <label class="label" for="cert-id-input">Certificate ID</label>
+        <form class="card vf-search" id="verify-form" data-type="cert" novalidate>
+          <div class="vf-seg" role="radiogroup" aria-label="Document type">
+            <button type="button" class="vf-seg-btn" role="radio" aria-checked="true" tabindex="0" data-type="cert">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="m8.5 14.2-1.5 7.8 5-3 5 3-1.5-7.8"/></svg>
+              Certificate
+            </button>
+            <button type="button" class="vf-seg-btn" role="radio" aria-checked="false" tabindex="-1" data-type="offer">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>
+              Offer letter
+            </button>
+          </div>
+
+          <label class="label" for="doc-id-input" id="doc-id-label">Certificate ID</label>
           <div class="vf-row">
             <div class="vf-input-wrap">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
               <input
                 type="text"
-                id="cert-id-input"
+                id="doc-id-input"
                 class="input vf-input"
                 placeholder="SM-A1B2-C3D4-E5F6"
                 autocomplete="off"
                 autocapitalize="characters"
                 spellcheck="false"
-                maxlength="40"
-                aria-describedby="cert-id-hint cert-id-error"
+                maxlength="300"
+                aria-describedby="doc-id-hint doc-id-error"
               />
             </div>
-            <button type="button" class="btn btn-primary btn-lg" id="verify-btn" onclick="verifyCertificate()">
+            <button type="submit" class="btn btn-primary btn-lg" id="verify-btn">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16" aria-hidden="true">
                 <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
               </svg>
               <span>Verify</span>
             </button>
           </div>
-          <p class="error-text vf-field-error" id="cert-id-error" role="alert" hidden>Enter a Certificate ID to verify.</p>
-          <p class="vf-hint" id="cert-id-hint">
-            Format<span class="vf-code">SM-XXXX-XXXX-XXXX</span>· printed at the bottom-left of the certificate. Case doesn't matter.
+          <p class="error-text vf-field-error" id="doc-id-error" role="alert" hidden>Enter a Certificate ID to verify.</p>
+          <p class="vf-hint" id="doc-id-hint">
+            Format<span class="vf-code" id="doc-id-format">SM-XXXX-XXXX-XXXX</span>· <span id="doc-id-where">printed at the bottom-left of the certificate.</span> Case doesn't matter.
+          </p>
+          <p class="vf-qr-tip">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg>
+            <span>Have the document in hand? Scan its QR code with your phone camera to open the result here, or paste the verification link into the box above.</span>
           </p>
         </form>
       </div>
@@ -296,23 +395,59 @@
         <!-- RESULT AREA (filled by JS) -->
         <div id="result-area" aria-live="polite" aria-atomic="true"></div>
 
-        <!-- HOW IT WORKS -->
+        <!-- WHERE TO FIND THE ID -->
         <section class="vf-how" aria-labelledby="how-title">
           <div class="vf-how-head">
-            <span class="eyebrow" id="how-title">How verification works</span>
+            <span class="eyebrow" id="how-title">Where to find the ID</span>
+            <p>Every SkillMe document carries its own ID and QR code. Pick the one you have.</p>
           </div>
-          <div class="grid grid-3">
-            <div class="card vf-step">
-              <span class="vf-step-num">01</span>
-              <p><strong>Find the ID</strong>It's printed at the bottom-left of the certificate.</p>
+          <div class="vf-where">
+            <button type="button" class="card vf-where-card" data-type="cert" aria-pressed="true">
+              <div class="vf-doc" aria-hidden="true">
+                <i class="frame"></i>
+                <i class="seal" style="top:16%; left:43.5%;"></i>
+                <i style="top:42%; left:30%; width:40%; height:5%;"></i>
+                <i style="top:53%; left:22%; width:56%; height:8%; opacity:.9;"></i>
+                <i style="top:66%; left:32%; width:36%; height:4%;"></i>
+                <i class="qr" style="bottom:12%; right:9%;"></i>
+                <span class="vf-mark" style="bottom:12%; left:8%;">SM-A1B2-…</span>
+              </div>
+              <div>
+                <strong>Certificate</strong>
+                <p>The Certificate ID (<span class="mono">SM-…</span>) is at the bottom-left, next to the QR code. Letters of Recommendation use the same ID.</p>
+              </div>
+            </button>
+            <button type="button" class="card vf-where-card" data-type="offer" aria-pressed="false">
+              <div class="vf-doc" aria-hidden="true">
+                <i style="top:9%; left:7%; width:9%; height:11%; background:var(--accent-wash); border:1px solid var(--accent-line); opacity:1;"></i>
+                <i style="top:12%; left:19%; width:24%; height:5%;"></i>
+                <span class="vf-mark" style="top:27%; left:7%;">Offer ID: OF-0812-…</span>
+                <i style="top:47%; left:7%; width:70%; height:4%;"></i>
+                <i style="top:56%; left:7%; width:62%; height:4%;"></i>
+                <i style="top:65%; left:7%; width:66%; height:4%;"></i>
+                <i style="top:84%; left:7%; width:22%; height:2.5%;"></i>
+                <i class="qr" style="bottom:20%; right:9%;"></i>
+                <span class="vf-mark" style="bottom:6%; right:5%;">OF-0812-…</span>
+              </div>
+              <div>
+                <strong>Offer letter</strong>
+                <p>The Offer ID (<span class="mono">OF-…</span>) is in the header strip at the top and again under the QR code. It also covers the HOD / NOC pack.</p>
+              </div>
+            </button>
+          </div>
+
+          <div class="vf-trust">
+            <div class="vf-trust-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+              <span><strong>Checked live</strong>Every check reads SkillMe's own records at that moment.</span>
             </div>
-            <div class="card vf-step">
-              <span class="vf-step-num">02</span>
-              <p><strong>Enter it above</strong>Type or paste the ID and press Verify.</p>
+            <div class="vf-trust-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span><strong>Private by design</strong>Only the name, programme and dates are shown. Never an email or phone number.</span>
             </div>
-            <div class="card vf-step">
-              <span class="vf-step-num">03</span>
-              <p><strong>See the record</strong>Instantly see the intern's verified details from our records.</p>
+            <div class="vf-trust-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              <span><strong>Free, no sign-up</strong>Colleges and employers can check any document in seconds.</span>
             </div>
           </div>
         </section>
@@ -337,7 +472,7 @@
         <div class="footer-col">
           <h4>Students</h4>
           <a href="/dashboard">Student dashboard</a>
-          <a href="/verify">Verify a certificate</a>
+          <a href="/verify">Verify a document</a>
           <a href="https://www.linkedin.com/company/skill-me-intern/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
           <a href="/contact">Contact us</a>
         </div>
@@ -362,7 +497,26 @@
   <script>
     const API = window.SKILLME_API || 'http://localhost:8000';
     const CERT_ID_RE = /^SM-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}$/;
-    let verifySeq = 0;
+    const SUPPORT = 'admin@skill-me-intern.in';
+    const ISSUER = 'SkillMe Technologies, Govt. of India Udyam Reg. UDYAM-UP-50-0294192';
+
+    // Per-document wording for the search box.
+    const TYPES = {
+      cert: {
+        idLabel: 'Certificate ID',
+        placeholder: 'SM-A1B2-C3D4-E5F6',
+        format: 'SM-XXXX-XXXX-XXXX',
+        where: 'printed at the bottom-left of the certificate.',
+        empty: 'Enter a Certificate ID to verify.',
+      },
+      offer: {
+        idLabel: 'Offer ID',
+        placeholder: 'OF-0812-A1B2-C3D4-E5F6',
+        format: 'OF-XXXX-XXXX-XXXX-XXXX',
+        where: 'printed at the top of the offer letter and under its QR code.',
+        empty: 'Enter an Offer ID to verify.',
+      },
+    };
 
     const ICON = {
       ok: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>',
@@ -372,115 +526,170 @@
       link: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
       share: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>',
       again: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>',
-      clock: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+      clock: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+      info: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
     };
 
-    const certInput = document.getElementById('cert-id-input');
-    const certError = document.getElementById('cert-id-error');
+    const form = document.getElementById('verify-form');
+    const input = document.getElementById('doc-id-input');
+    const errorEl = document.getElementById('doc-id-error');
+    const area = document.getElementById('result-area');
+    const segBtns = [...document.querySelectorAll('.vf-seg-btn')];
+    const whereCards = [...document.querySelectorAll('.vf-where-card')];
+
+    let docType = 'cert';
+    let verifySeq = 0;
+    let lastRun = null;   // re-runs the last check (the "Try again" button)
+
+    // ─── Document type ───────────────────────────────────────────────
+
+    function setType(type, opts) {
+      opts = opts || {};
+      if (!TYPES[type]) return;
+      const changed = type !== docType;
+      docType = type;
+      const t = TYPES[type];
+      segBtns.forEach(b => {
+        const on = b.dataset.type === type;
+        b.setAttribute('aria-checked', String(on));
+        b.tabIndex = on ? 0 : -1;
+      });
+      whereCards.forEach(c => c.setAttribute('aria-pressed', String(c.dataset.type === type)));
+      document.getElementById('doc-id-label').textContent = t.idLabel;
+      document.getElementById('doc-id-format').textContent = t.format;
+      document.getElementById('doc-id-where').textContent = t.where;
+      input.placeholder = t.placeholder;
+      errorEl.textContent = t.empty;
+      form.dataset.type = type;
+
+      if (opts.fromUser) {
+        // Switching by hand: drop an ID that belongs to the other document type.
+        const v = input.value.trim();
+        if (changed && v && detectType(v) && detectType(v) !== type) input.value = '';
+        setFieldError(false);
+        if (opts.focus) input.focus({ preventScroll: !!opts.preventScroll });
+      }
+    }
+
+    segBtns.forEach(b => {
+      b.addEventListener('click', () => setType(b.dataset.type, { fromUser: true, focus: true }));
+      b.addEventListener('keydown', e => {
+        if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return;
+        e.preventDefault();
+        const next = docType === 'cert' ? 'offer' : 'cert';
+        setType(next, { fromUser: true });
+        segBtns.find(x => x.dataset.type === next).focus();
+      });
+    });
+
+    whereCards.forEach(c => c.addEventListener('click', () => {
+      setType(c.dataset.type, { fromUser: true });
+      form.scrollIntoView({ behavior: scrollBehavior(), block: 'center' });
+      input.focus({ preventScroll: true });
+    }));
+
+    // ─── Reading what was typed / pasted ─────────────────────────────
+
+    // Which document an ID (or pasted link) belongs to, or null if it can't tell yet.
+    function detectType(raw) {
+      const up = String(raw || '').trim().toUpperCase();
+      if (/[?&](OFFER|REF)=/.test(up) || /^OF/.test(up) || /^SKM-(OFFER|NOC)/.test(up)) return 'offer';
+      if (/[?&](CERT_ID|ID)=/.test(up) || /^SM/.test(up)) return 'cert';
+      return null;
+    }
+
+    // Turns the box's contents into what to check:
+    //   {type:'cert', certId} | {type:'offer', studentId, ref, code?}
+    //   | {type:'offer', legacy|invalid, raw}
+    function parseQuery(raw) {
+      let s = String(raw || '').trim();
+
+      // A pasted verification link, e.g. the one inside a QR code.
+      if (/[?&](offer|ref|cert_id|id)=/i.test(s)) {
+        try {
+          const p = new URL(s, window.location.origin).searchParams;
+          const offer = (p.get('offer') || '').trim();
+          const ref = (p.get('ref') || '').trim();
+          if (offer && ref) return { type: 'offer', studentId: offer, ref };
+          const c = (p.get('cert_id') || p.get('id') || '').trim();
+          if (c) s = c;
+        } catch (e) { /* not a link after all */ }
+      }
+
+      const up = s.toUpperCase().replace(/\s+/g, '');
+
+      // The old printed reference (SKM-OFFER-2026-0812) isn't secret, so it can't prove anything.
+      if (/^SKM-(OFFER|NOC)-/.test(up)) return { type: 'offer', legacy: true, raw: up };
+
+      if (/^OF/.test(up)) {
+        // The code part is hex, so O/I/L can only be typos for 0/1.
+        const body = up.slice(2).replace(/O/g, '0').replace(/[IL]/g, '1');
+        const m = body.match(/^-?(\d{1,9})-?([0-9A-F]{4})-?([0-9A-F]{4})-?([0-9A-F]{4})$/);
+        if (!m) return { type: 'offer', invalid: true, raw: up };
+        return {
+          type: 'offer',
+          studentId: String(parseInt(m[1], 10)),
+          ref: (m[2] + m[3] + m[4]).toLowerCase(),
+          code: `OF-${m[1].padStart(4, '0')}-${m[2]}-${m[3]}-${m[4]}`,
+        };
+      }
+
+      const c = up.match(/^SM-?([0-9A-Z]{4})-?([0-9A-Z]{4})-?([0-9A-Z]{4})$/);
+      if (c) return { type: 'cert', certId: `SM-${c[1]}-${c[2]}-${c[3]}` };
+
+      return docType === 'offer'
+        ? { type: 'offer', invalid: true, raw: up }
+        : { type: 'cert', certId: up };
+    }
 
     function setFieldError(show) {
-      certError.hidden = !show;
-      if (show) certInput.setAttribute('aria-invalid', 'true');
-      else certInput.removeAttribute('aria-invalid');
+      errorEl.hidden = !show;
+      if (show) input.setAttribute('aria-invalid', 'true');
+      else input.removeAttribute('aria-invalid');
     }
 
-    // Auto-fill from URL param ?cert_id=... (also accepts ?id= when it is a certificate ID)
-    const params = new URLSearchParams(window.location.search);
-    const idParam = (params.get('id') || '').trim();
-    const paramCertId = params.get('cert_id') || (CERT_ID_RE.test(idParam.toUpperCase()) ? idParam : '');
-    if (paramCertId) {
-      certInput.value = paramCertId.trim().toUpperCase();
-      verifyCertificate();
-    }
-
-    // Offer letter / HOD pack QR: ?offer=<student id>&ref=<signed reference>
-    const offerParam = (params.get('offer') || '').trim();
-    const offerRefParam = (params.get('ref') || '').trim();
-    if (offerParam && offerRefParam) verifyOffer(offerParam, offerRefParam);
-
-    async function verifyOffer(studentId, ref) {
-      const area = document.getElementById('result-area');
-      area.innerHTML = `
-        <div class="card vf-loading vf-anim" role="status">
-          <div class="vf-spinner" aria-hidden="true"></div>
-          <span>Checking this offer letter against SkillMe's records…</span>
-        </div>`;
-      let res;
-      try {
-        res = await fetch(`${API}/api/students/offer/${encodeURIComponent(studentId)}/${encodeURIComponent(ref)}`);
-      } catch (e) {
-        showError('offer letter', 'Unable to connect to the verification server. Please try again.', 'network');
-        return;
+    // Auto uppercase as the user types (but leave pasted links alone), and follow the ID's type.
+    input.addEventListener('input', e => {
+      const v = e.target.value;
+      if (!/[?&=/]/.test(v)) {
+        const pos = e.target.selectionStart;
+        e.target.value = v.toUpperCase();
+        e.target.setSelectionRange(pos, pos);
       }
-      if (!res.ok) {
-        area.innerHTML = `
-          <article class="card vf-result is-bad vf-anim" aria-labelledby="vf-result-title">
-            <div class="vf-result-head">
-              <div class="vf-status-icon">${ICON.bad}</div>
-              <div>
-                <h2 class="vf-status-title" id="vf-result-title">${res.status >= 500 ? 'Verification is temporarily unavailable' : 'Offer letter not verified'}</h2>
-                <p class="vf-status-sub">${res.status >= 500 ? 'Please try again in a minute.' : 'This QR code or link does not match an offer issued by SkillMe.'}</p>
-              </div>
-            </div>
-            <div class="vf-err-body">
-              <p>If you believe this is an error, contact <a href="mailto:admin@skill-me-intern.in">admin@skill-me-intern.in</a>.</p>
-            </div>
-          </article>`;
-        return;
-      }
-      const d = await res.json();
-      const status = { active: 'Active intern', completed: 'Completed', dropped: 'No longer active' }[d.enrollment_status] || 'Enrolled';
-      const ok = d.enrollment_status !== 'dropped';
-      area.innerHTML = `
-        <article class="card vf-result ${ok ? 'is-ok' : 'is-warn'} vf-anim" aria-labelledby="vf-result-title">
-          <div class="vf-result-head">
-            <div class="vf-status-icon">${ok ? ICON.ok : ICON.warn}</div>
-            <div>
-              <h2 class="vf-status-title" id="vf-result-title">Offer letter verified</h2>
-              <p class="vf-status-sub">This offer was issued by SkillMe.</p>
-            </div>
-            <span class="badge ${ok ? 'badge-ok' : 'badge-warn'}"><span class="dot"></span>${escapeHtml(status)}</span>
-          </div>
-          <div class="vf-body">
-            <div class="vf-holder-label">Issued to</div>
-            <div class="vf-holder">${escapeHtml(d.name || '—')}</div>
-            <div class="vf-holder-domain">${escapeHtml(d.domain_label || titleCase(d.domain || 'Internship'))} Internship</div>
-            <dl class="vf-details">
-              ${d.college ? `<div class="vf-detail full"><dt>College</dt><dd>${escapeHtml(d.college)}</dd></div>` : ''}
-              <div class="vf-detail"><dt>Start date</dt><dd>${escapeHtml(formatDate(d.start_date))}</dd></div>
-              <div class="vf-detail"><dt>Duration</dt><dd>4 Weeks · Remote</dd></div>
-            </dl>
-          </div>
-          <div class="vf-foot">
-            ${ICON.clock}
-            <span>Checked against SkillMe's records on ${escapeHtml(new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }))}. SkillMe Technologies, Govt. of India Udyam Reg. UDYAM-UP-50-0294192.</span>
-          </div>
-        </article>`;
-    }
-
-    // Enter key support
-    certInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter') { e.preventDefault(); verifyCertificate(); }
+      if (v.trim()) setFieldError(false);
+      const t = detectType(v);
+      if (t && t !== docType) setType(t);
     });
 
-    // Auto uppercase as user types
-    certInput.addEventListener('input', e => {
-      const pos = e.target.selectionStart;
-      e.target.value = e.target.value.toUpperCase();
-      e.target.setSelectionRange(pos, pos);
-      if (e.target.value.trim()) setFieldError(false);
-    });
+    form.addEventListener('submit', e => { e.preventDefault(); runVerify(); });
 
-    function shareUrl(certId) {
-      return `${window.location.origin}${window.location.pathname}?cert_id=${encodeURIComponent(certId)}`;
+    // ─── Running a check ─────────────────────────────────────────────
+
+    function runVerify() {
+      const raw = input.value;
+      if (!raw.trim()) {
+        setFieldError(true);
+        input.focus();
+        return;
+      }
+      setFieldError(false);
+      const q = parseQuery(raw);
+      if (q.type !== docType) setType(q.type);
+
+      if (q.type === 'offer') {
+        if (q.legacy) { cancelPending(); showLegacyRef(q.raw); return; }
+        if (q.invalid) { cancelPending(); showNotFound('offer', q.raw, { badFormat: true }); return; }
+        input.value = q.code || '';
+        verifyOffer(q.studentId, q.ref, q.code);
+        return;
+      }
+      input.value = q.certId;
+      verifyCertificate(q.certId);
     }
 
-    function syncUrl(certId) {
-      try {
-        const u = new URL(window.location.href);
-        u.searchParams.set('cert_id', certId);
-        history.replaceState(null, '', u.toString());
-      } catch (e) {}
+    function cancelPending() {
+      verifySeq++;
+      setBusy(false);
     }
 
     function setBusy(busy) {
@@ -490,54 +699,381 @@
       btn.querySelector('span').textContent = busy ? 'Verifying…' : 'Verify';
     }
 
-    async function verifyCertificate() {
-      const input = certInput;
-      const area  = document.getElementById('result-area');
-      const certId = input.value.trim().toUpperCase();
-
-      if (!certId) {
-        setFieldError(true);
-        input.focus();
-        return;
-      }
-      setFieldError(false);
-
-      const seq = ++verifySeq;
-      setBusy(true);
+    function showLoading(html) {
       area.innerHTML = `
         <div class="card vf-loading vf-anim" role="status">
           <div class="vf-spinner" aria-hidden="true"></div>
-          <span>Checking <strong>${escapeHtml(certId)}</strong> against the SkillMe certificate registry…</span>
+          <span>${html}</span>
         </div>`;
+      revealResult();
+    }
+
+    // ─── Keeping the answer in view ──────────────────────────────────
+    // The result renders below the search box, often below the fold. Bring it into view
+    // the moment a check starts (the loading card), so people never click Verify and
+    // see nothing happen. The final card replaces it in place, so there's no second jump.
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const scrollBehavior = () => (reduceMotion.matches ? 'auto' : 'smooth');
+
+    function revealResult(opts) {
+      opts = opts || {};
+      document.body.classList.add('vf-checking');
+      // Drops the on-screen keyboard on phones, which would otherwise cover the result.
+      if (document.activeElement === input) input.blur();
+      requestAnimationFrame(() => {
+        const card = area.firstElementChild;
+        if (!card) return;
+        const top = card.getBoundingClientRect().top;
+        const navBottom = (document.getElementById('site-nav') || {}).offsetHeight || 64;
+        const alreadyInView = top >= navBottom && top < window.innerHeight * 0.45;
+        if (!alreadyInView) card.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
+        if (opts.focus) {
+          // Screen-reader and keyboard users land on the verdict.
+          const title = area.querySelector('#vf-result-title');
+          if (title) { title.tabIndex = -1; title.focus({ preventScroll: true }); }
+        }
+      });
+    }
+
+    function backToSearch() {
+      document.body.classList.remove('vf-checking');
+      window.scrollTo({ top: 0, behavior: scrollBehavior() });
+      input.focus({ preventScroll: true });
+    }
+
+    async function verifyCertificate(certId) {
+      lastRun = () => verifyCertificate(certId);
+      const seq = ++verifySeq;
+      setBusy(true);
+      showLoading(`Checking <strong>${escapeHtml(certId)}</strong> against the SkillMe certificate registry…`);
 
       try {
         const res = await fetch(`${API}/api/certificates/verify/${encodeURIComponent(certId)}`);
         if (seq !== verifySeq) return;
 
         if (!res.ok) {
-          const errData = await res.json().catch(() => ({ detail: 'Certificate not found.' }));
+          const errData = await res.json().catch(() => ({}));
           if (seq !== verifySeq) return;
-          const detail = (errData && typeof errData.detail === 'string') ? errData.detail : '';
-          showError(certId, detail || 'No certificate found for this ID.', res.status === 404 ? 'not_found' : 'server', res.status);
+          if (res.status === 404) showNotFound('cert', certId);
+          else showServerError('cert', certId, res.status, errData && typeof errData.detail === 'string' ? errData.detail : '');
           return;
         }
 
         const data = await res.json();
         if (seq !== verifySeq) return;
-        if (data && data.valid === false) {
-          showError(certId, data.detail || 'No certificate found for this ID.', 'not_found', 200);
-          return;
-        }
-        syncUrl(data.cert_id || certId);
-        showVerified(data);
-
+        if (data && data.valid === false) { showNotFound('cert', certId); return; }
+        syncUrl({ cert_id: data.cert_id || certId });
+        showCertVerified(data);
       } catch (e) {
         if (seq !== verifySeq) return;
-        showError(certId, 'Unable to connect to the verification server. Please try again.', 'network');
+        showNetworkError('cert');
       } finally {
         if (seq === verifySeq) setBusy(false);
       }
     }
+
+    async function verifyOffer(studentId, ref, code) {
+      lastRun = () => verifyOffer(studentId, ref, code);
+      const seq = ++verifySeq;
+      setBusy(true);
+      showLoading(code
+        ? `Checking <strong>${escapeHtml(code)}</strong> against SkillMe's offer records…`
+        : `Checking this offer letter against SkillMe's records…`);
+
+      try {
+        const res = await fetch(`${API}/api/students/offer/${encodeURIComponent(studentId)}/${encodeURIComponent(ref)}`);
+        if (seq !== verifySeq) return;
+
+        if (!res.ok) {
+          // 422 = the id part wasn't a number: same answer as an unknown ID.
+          if (res.status === 404 || res.status === 422) showNotFound('offer', code || '');
+          else showServerError('offer', code || '', res.status, '');
+          return;
+        }
+
+        const d = await res.json();
+        if (seq !== verifySeq) return;
+        const offerCode = d.offer_code || code || '';
+        if (offerCode) input.value = offerCode;
+        syncUrl({ offer: studentId, ref });
+        showOfferVerified(d, { offerCode, shareLink: buildUrl({ offer: studentId, ref }) });
+      } catch (e) {
+        if (seq !== verifySeq) return;
+        showNetworkError('offer');
+      } finally {
+        if (seq === verifySeq) setBusy(false);
+      }
+    }
+
+    // ─── URLs ────────────────────────────────────────────────────────
+
+    function buildUrl(params) {
+      const u = new URL(window.location.pathname, window.location.origin);
+      Object.keys(params).forEach(k => u.searchParams.set(k, params[k]));
+      return u.toString();
+    }
+
+    function syncUrl(params) {
+      try { history.replaceState(null, '', params ? buildUrl(params) : window.location.pathname); } catch (e) {}
+    }
+
+    // ─── Results ─────────────────────────────────────────────────────
+
+    const today = () => new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    function resultCard({ tone, icon, kicker, title, sub, badge, body, foot }) {
+      return `
+        <article class="card vf-result ${tone} vf-anim" aria-labelledby="vf-result-title">
+          <div class="vf-result-head">
+            <div class="vf-status-icon">${icon}</div>
+            <div>
+              ${kicker ? `<p class="vf-status-kicker">${kicker}</p>` : ''}
+              <h2 class="vf-status-title" id="vf-result-title">${title}</h2>
+              <p class="vf-status-sub">${sub}</p>
+            </div>
+            ${badge || ''}
+          </div>
+          ${body}
+          ${foot ? `<div class="vf-foot">${ICON.clock}<span>${foot}</span></div>` : ''}
+        </article>`;
+    }
+
+    function idRow(label, id, copyLabel) {
+      return `
+        <div class="vf-detail full">
+          <dt>${label}</dt>
+          <div class="vf-id-row">
+            <dd class="mono">${escapeHtml(id)}</dd>
+            <button type="button" class="btn btn-ghost btn-sm" data-copy="id">${ICON.copy}${copyLabel}</button>
+          </div>
+        </div>`;
+    }
+
+    function resultActions(canShare) {
+      return `
+        <div class="vf-actions">
+          <button type="button" class="btn btn-secondary" data-copy="link">${ICON.link}Copy verification link</button>
+          ${canShare ? `<button type="button" class="btn btn-secondary" data-share>${ICON.share}Share</button>` : ''}
+          <button type="button" class="btn btn-ghost" data-again>${ICON.again}Verify another</button>
+        </div>`;
+    }
+
+    function showCertVerified(data) {
+      const name = data.holder || '—';
+      const domain = data.domain_label || titleCase(data.domain || 'Internship');
+      const certId = data.cert_id || '—';
+      const canShare = typeof navigator.share === 'function';
+
+      area.innerHTML = resultCard({
+        tone: 'is-ok', icon: ICON.ok, kicker: 'Certificate',
+        title: 'Certificate verified',
+        sub: 'This is a genuine SkillMe internship certificate.',
+        badge: '<span class="badge badge-ok"><span class="dot"></span>Valid</span>',
+        body: `
+          <div class="vf-body">
+            <div class="vf-holder-label">Issued to</div>
+            <div class="vf-holder">${escapeHtml(name)}</div>
+            <div class="vf-holder-domain">${escapeHtml(domain)} Internship</div>
+            <dl class="vf-details">
+              <div class="vf-detail"><dt>Domain</dt><dd>${escapeHtml(domain)}</dd></div>
+              <div class="vf-detail"><dt>Status</dt><dd>Completed</dd></div>
+              <div class="vf-detail"><dt>Date of issue</dt><dd>${escapeHtml(formatDate(data.issued_at))}</dd></div>
+              <div class="vf-detail"><dt>Duration</dt><dd>4 Weeks · Remote</dd></div>
+              ${idRow('Certificate ID', certId, 'Copy ID')}
+            </dl>
+            ${resultActions(canShare)}
+          </div>`,
+        foot: `Verified against SkillMe's certificate registry on ${escapeHtml(today())}. Issued by <strong>SkillMe</strong> (${ISSUER}).`,
+      });
+
+      bindResultActions({
+        copyId: certId, copiedMsg: 'Certificate ID copied',
+        link: buildUrl({ cert_id: certId }),
+        shareTitle: 'SkillMe certificate verification',
+        shareText: `${name} — verified SkillMe ${domain} Internship certificate (${certId})`,
+      });
+    }
+
+    function showOfferVerified(d, info) {
+      const name = d.name || '—';
+      const domain = d.domain_label || titleCase(d.domain || 'Internship');
+      const status = d.enrollment_status;
+      const dropped = status === 'dropped';
+      const statusText = { active: 'Internship in progress', completed: 'Internship completed', dropped: 'No longer active' }[status] || 'Enrolled';
+      const canShare = typeof navigator.share === 'function';
+
+      let note = '';
+      if (status === 'completed') {
+        note = `
+          <div class="vf-note">
+            ${ICON.info}
+            <span><strong>This intern finished the programme.</strong> Their completion certificate has its own ID (<span class="mono">SM-…</span>).
+            <button type="button" class="vf-link-btn" data-switch="cert">Verify a certificate</button></span>
+          </div>`;
+      } else if (dropped) {
+        note = `
+          <div class="vf-note is-warn">
+            ${ICON.warn.replace('width="22" height="22"', 'width="16" height="16"')}
+            <span><strong>The offer is genuine, but this intern is no longer in the programme.</strong> It does not show that the internship was completed.</span>
+          </div>`;
+      }
+
+      area.innerHTML = resultCard({
+        tone: dropped ? 'is-warn' : 'is-ok',
+        icon: dropped ? ICON.warn : ICON.ok,
+        kicker: 'Offer letter',
+        title: 'Offer letter verified',
+        sub: 'This internship offer was issued by SkillMe.',
+        badge: `<span class="badge ${dropped ? 'badge-warn' : 'badge-ok'}"><span class="dot"></span>${escapeHtml(statusText)}</span>`,
+        body: `
+          <div class="vf-body">
+            <div class="vf-holder-label">Issued to</div>
+            <div class="vf-holder">${escapeHtml(name)}</div>
+            <div class="vf-holder-domain">${escapeHtml(domain)} Internship</div>
+            <dl class="vf-details">
+              ${d.college ? `<div class="vf-detail wide"><dt>College</dt><dd>${escapeHtml(d.college)}</dd></div>` : ''}
+              <div class="vf-detail"><dt>Date of joining</dt><dd>${escapeHtml(formatDate(d.start_date))}</dd></div>
+              <div class="vf-detail"><dt>Duration</dt><dd>4 Weeks · Remote</dd></div>
+              <div class="vf-detail"><dt>Track</dt><dd>${escapeHtml(domain)}</dd></div>
+              <div class="vf-detail"><dt>Status</dt><dd>${escapeHtml(statusText)}</dd></div>
+              ${info.offerCode ? idRow('Offer ID', info.offerCode, 'Copy ID') : ''}
+            </dl>
+            ${note}
+            ${resultActions(canShare)}
+          </div>`,
+        foot: `Checked against SkillMe's records on ${escapeHtml(today())}. Issued by <strong>SkillMe</strong> (${ISSUER}).`,
+      });
+
+      bindResultActions({
+        copyId: info.offerCode, copiedMsg: 'Offer ID copied',
+        link: info.shareLink,
+        shareTitle: 'SkillMe offer letter verification',
+        shareText: `${name} — verified SkillMe ${domain} Internship offer letter${info.offerCode ? ` (${info.offerCode})` : ''}`,
+      });
+    }
+
+    function showNotFound(kind, id, opts) {
+      opts = opts || {};
+      const isOffer = kind === 'offer';
+      const looksValid = isOffer ? !opts.badFormat : CERT_ID_RE.test(id);
+      const what = isOffer ? 'offer letter' : 'certificate';
+      const shown = id
+        ? ` for ID <strong class="mono">${escapeHtml(id)}</strong>`
+        : ' for this QR code or link';
+
+      const tips = [];
+      if (!looksValid) tips.push(`The ID should look like <span class="vf-code">${TYPES[kind].format}</span>.`);
+      tips.push(isOffer
+        ? 'Double-check the Offer ID. It\'s at the top of the letter and under the QR code.'
+        : 'Double-check the ID on the document. <span class="mono">0</span>/<span class="mono">O</span> and <span class="mono">1</span>/<span class="mono">I</span> are easy to mix up.');
+      if (isOffer) tips.push('Scanning the QR code on the letter is the most reliable check.');
+      else tips.push('Checking an offer letter instead? <button type="button" class="vf-link-btn" data-switch="offer">Switch to offer letters</button>.');
+      tips.push(`If you believe this is an error, contact <a href="mailto:${SUPPORT}">${SUPPORT}</a>.`);
+
+      area.innerHTML = resultCard({
+        tone: 'is-bad', icon: ICON.bad, kicker: isOffer ? 'Offer letter' : 'Certificate',
+        title: `${isOffer ? 'Offer letter' : 'Certificate'} not found`,
+        sub: `No matching ${what} in SkillMe's records.`,
+        badge: '<span class="badge badge-danger">Not found</span>',
+        body: `
+          <div class="vf-err-body">
+            <p>No ${what} was found${shown}.</p>
+            <ul class="vf-checklist">${tips.map(t => `<li>${t}</li>`).join('')}</ul>
+            <div class="vf-actions">
+              <button type="button" class="btn btn-secondary" data-again>${ICON.again}Try another ID</button>
+            </div>
+          </div>`,
+      });
+      bindResultActions({});
+    }
+
+    function showLegacyRef(raw) {
+      area.innerHTML = resultCard({
+        tone: 'is-warn', icon: ICON.warn, kicker: 'Offer letter',
+        title: 'That\'s a document reference, not an Offer ID',
+        sub: 'It can\'t prove a letter is genuine on its own.',
+        badge: '<span class="badge badge-warn">Can\'t check</span>',
+        body: `
+          <div class="vf-err-body">
+            <p>References like <strong class="mono">${escapeHtml(raw)}</strong> label the document but aren't secret, so anyone could print one. To verify this letter:</p>
+            <ul class="vf-checklist">
+              <li><strong>Scan the QR code</strong> on the letter with your phone camera. It opens this page with the result.</li>
+              <li>Or ask the intern to reopen their offer letter from the SkillMe dashboard. It now shows an Offer ID (<span class="mono">OF-…</span>) you can enter here.</li>
+              <li>Or email <a href="mailto:${SUPPORT}">${SUPPORT}</a> with a copy of the letter.</li>
+            </ul>
+            <div class="vf-actions">
+              <button type="button" class="btn btn-secondary" data-again>${ICON.again}Enter an Offer ID</button>
+            </div>
+          </div>`,
+      });
+      bindResultActions({ keepType: true });
+    }
+
+    function showServerError(kind, id, status, message) {
+      area.innerHTML = resultCard({
+        tone: 'is-warn', icon: ICON.warn,
+        title: 'Verification is temporarily unavailable',
+        sub: `We couldn't complete the check${id ? ' for this ID' : ''}. This does not mean the document is invalid.`,
+        badge: `<span class="badge badge-warn">Error${status ? ' ' + escapeHtml(status) : ''}</span>`,
+        body: `
+          <div class="vf-err-body">
+            ${id ? `<p>We couldn't verify <strong class="mono">${escapeHtml(id)}</strong> right now.</p>` : ''}
+            ${message ? `<p>${escapeHtml(message)}</p>` : '<p>Please try again in a minute.</p>'}
+            <div class="vf-actions">
+              <button type="button" class="btn btn-primary" data-retry>${ICON.again}Try again</button>
+            </div>
+          </div>`,
+      });
+      bindResultActions({});
+    }
+
+    function showNetworkError(kind) {
+      area.innerHTML = resultCard({
+        tone: 'is-warn', icon: ICON.warn,
+        title: 'Couldn\'t reach the verification server',
+        sub: `This does not mean the ${kind === 'offer' ? 'offer letter' : 'certificate'} is invalid.`,
+        badge: '<span class="badge badge-warn">Connection error</span>',
+        body: `
+          <div class="vf-err-body">
+            <p>Check your internet connection and try again in a moment.</p>
+            <div class="vf-actions">
+              <button type="button" class="btn btn-primary" data-retry>${ICON.again}Try again</button>
+            </div>
+          </div>`,
+      });
+      bindResultActions({});
+    }
+
+    function bindResultActions(info) {
+      revealResult({ focus: true });
+      area.querySelectorAll('[data-copy]').forEach(btn => btn.addEventListener('click', () => {
+        const isId = btn.getAttribute('data-copy') === 'id';
+        copyText(isId ? info.copyId : info.link).then(ok => toast(ok
+          ? (isId ? info.copiedMsg : 'Verification link copied')
+          : 'Copy failed. Select and copy it manually.'));
+      }));
+      const share = area.querySelector('[data-share]');
+      if (share) share.addEventListener('click', () => {
+        navigator.share({ title: info.shareTitle, text: info.shareText, url: info.link }).catch(() => {});
+      });
+      const again = area.querySelector('[data-again]');
+      if (again) again.addEventListener('click', () => {
+        input.value = '';
+        area.innerHTML = '';
+        syncUrl(null);
+        if (info.keepType) setType('offer');
+        backToSearch();
+      });
+      area.querySelectorAll('[data-switch]').forEach(btn => btn.addEventListener('click', () => {
+        input.value = '';
+        setType(btn.getAttribute('data-switch'), { fromUser: true });
+        backToSearch();
+      }));
+      const retry = area.querySelector('[data-retry]');
+      if (retry && lastRun) retry.addEventListener('click', () => lastRun());
+    }
+
+    // ─── Helpers ─────────────────────────────────────────────────────
 
     function formatDate(raw) {
       if (!raw) return '—';
@@ -551,141 +1087,8 @@
       return String(s).replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     }
 
-    function showVerified(data) {
-      const area = document.getElementById('result-area');
-      const name = data.holder || '—';
-      const domain = data.domain_label || titleCase(data.domain || 'Internship');
-      const certId = data.cert_id || '—';
-      const issuedDate = formatDate(data.issued_at);
-      const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
-      const canShare = typeof navigator.share === 'function';
-
-      area.innerHTML = `
-        <article class="card vf-result is-ok vf-anim" aria-labelledby="vf-result-title">
-          <div class="vf-result-head">
-            <div class="vf-status-icon">${ICON.ok}</div>
-            <div>
-              <h2 class="vf-status-title" id="vf-result-title">Certificate verified</h2>
-              <p class="vf-status-sub">This is a genuine SkillMe internship certificate.</p>
-            </div>
-            <span class="badge badge-ok"><span class="dot"></span>Valid</span>
-          </div>
-
-          <div class="vf-body">
-            <div class="vf-holder-label">Issued to</div>
-            <div class="vf-holder" id="vf-holder">${escapeHtml(name)}</div>
-            <div class="vf-holder-domain">${escapeHtml(domain)} Internship</div>
-
-            <dl class="vf-details">
-              <div class="vf-detail"><dt>Domain</dt><dd>${escapeHtml(domain)}</dd></div>
-              <div class="vf-detail"><dt>Status</dt><dd>Completed</dd></div>
-              <div class="vf-detail"><dt>Date of issue</dt><dd>${escapeHtml(issuedDate)}</dd></div>
-              <div class="vf-detail"><dt>Duration</dt><dd>4 Weeks · Remote</dd></div>
-              <div class="vf-detail full">
-                <dt>Certificate ID</dt>
-                <div class="vf-id-row">
-                  <dd class="mono" id="vf-cert-id">${escapeHtml(certId)}</dd>
-                  <button type="button" class="btn btn-ghost btn-sm" data-copy="id">${ICON.copy}Copy ID</button>
-                </div>
-              </div>
-            </dl>
-
-            <div class="vf-actions">
-              <button type="button" class="btn btn-secondary" data-copy="link">${ICON.link}Copy verification link</button>
-              ${canShare ? `<button type="button" class="btn btn-secondary" data-share>${ICON.share}Share</button>` : ''}
-              <button type="button" class="btn btn-ghost" data-again>${ICON.again}Verify another</button>
-            </div>
-          </div>
-
-          <div class="vf-foot">
-            ${ICON.clock}
-            <span>Verified against SkillMe's internal certificate registry on ${escapeHtml(today)}. Issued by <strong>SkillMe</strong> (SkillMe Technologies, Govt. of India Udyam Reg. UDYAM-UP-50-0294192).</span>
-          </div>
-        </article>`;
-
-      bindResultActions(area, { certId, name, domain, issuedDate });
-    }
-
-    function showError(certId, message, kind, status) {
-      const area = document.getElementById('result-area');
-      kind = kind || 'not_found';
-      const looksValid = CERT_ID_RE.test(certId);
-      let title, sub, badge, tone, icon, body;
-
-      if (kind === 'network') {
-        tone = 'is-warn'; icon = ICON.warn; badge = '<span class="badge badge-warn">Connection error</span>';
-        title = "Couldn't reach the verification server";
-        sub = 'This does not mean the certificate is invalid.';
-        body = `<p>${escapeHtml(message)}</p>
-                <p>Check your internet connection and try again in a moment.</p>`;
-      } else if (kind === 'server') {
-        tone = 'is-warn'; icon = ICON.warn; badge = `<span class="badge badge-warn">Error${status ? ' ' + escapeHtml(status) : ''}</span>`;
-        title = 'Verification is temporarily unavailable';
-        sub = 'We could not complete the check for this ID.';
-        body = `<p>We couldn't verify <strong class="mono">${escapeHtml(certId)}</strong> right now.</p>
-                <p>${escapeHtml(message)}</p>`;
-      } else {
-        tone = 'is-bad'; icon = ICON.bad; badge = '<span class="badge badge-danger">Not found</span>';
-        title = 'Certificate not found';
-        sub = 'No matching record in the SkillMe registry.';
-        body = `<p>No certificate was found for ID <strong class="mono">${escapeHtml(certId)}</strong>.${/not found/i.test(message) ? '' : ' ' + escapeHtml(message)}</p>
-                <ul class="vf-checklist">
-                  ${looksValid ? '' : '<li>The ID should look like <span class="vf-code">SM-XXXX-XXXX-XXXX</span>.</li>'}
-                  <li>Double-check the ID on the document — <span class="mono">0</span>/<span class="mono">O</span> and <span class="mono">1</span>/<span class="mono">I</span> are easy to mix up.</li>
-                  <li>If you believe this is an error, contact <a href="mailto:admin@skill-me-intern.in">admin@skill-me-intern.in</a>.</li>
-                </ul>`;
-      }
-
-      area.innerHTML = `
-        <article class="card vf-result ${tone} vf-anim" aria-labelledby="vf-result-title">
-          <div class="vf-result-head">
-            <div class="vf-status-icon">${icon}</div>
-            <div>
-              <h2 class="vf-status-title" id="vf-result-title">${title}</h2>
-              <p class="vf-status-sub">${sub}</p>
-            </div>
-            ${badge}
-          </div>
-          <div class="vf-err-body">
-            ${body}
-            <div class="vf-actions">
-              ${kind === 'not_found'
-                ? `<button type="button" class="btn btn-secondary" data-again>${ICON.again}Try another ID</button>`
-                : `<button type="button" class="btn btn-primary" data-retry>${ICON.again}Try again</button>`}
-            </div>
-          </div>
-        </article>`;
-
-      bindResultActions(area, { certId });
-    }
-
-    function bindResultActions(area, info) {
-      area.querySelectorAll('[data-copy]').forEach(btn => btn.addEventListener('click', () => {
-        const what = btn.getAttribute('data-copy');
-        const text = what === 'id' ? info.certId : shareUrl(info.certId);
-        copyText(text).then(ok => toast(ok
-          ? (what === 'id' ? 'Certificate ID copied' : 'Verification link copied')
-          : 'Copy failed — select and copy manually'));
-      }));
-      const share = area.querySelector('[data-share]');
-      if (share) share.addEventListener('click', () => {
-        navigator.share({
-          title: 'SkillMe certificate verification',
-          text: `${info.name} — verified SkillMe ${info.domain} Internship certificate (${info.certId})`,
-          url: shareUrl(info.certId)
-        }).catch(() => {});
-      });
-      const again = area.querySelector('[data-again]');
-      if (again) again.addEventListener('click', () => {
-        certInput.value = '';
-        area.innerHTML = '';
-        certInput.focus();
-      });
-      const retry = area.querySelector('[data-retry]');
-      if (retry) retry.addEventListener('click', () => verifyCertificate());
-    }
-
     function copyText(text) {
+      if (!text) return Promise.resolve(false);
       if (navigator.clipboard && window.isSecureContext) {
         return navigator.clipboard.writeText(text).then(() => true, () => fallbackCopy(text));
       }
@@ -719,6 +1122,33 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
     }
+
+    // ─── Deep links ──────────────────────────────────────────────────
+    //   ?cert_id=SM-…           certificate (also ?id= when it is a certificate ID)
+    //   ?offer=<id>&ref=<ref>   offer letter / HOD pack QR code
+    //   ?offer_id=OF-…          offer letter by its printed Offer ID
+    //   ?type=offer             open with the offer-letter tab selected
+    (function initFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const offer = (params.get('offer') || '').trim();
+      const ref = (params.get('ref') || '').trim();
+      const offerId = (params.get('offer_id') || '').trim();
+      const idParam = (params.get('id') || '').trim();
+      const certId = (params.get('cert_id') || (CERT_ID_RE.test(idParam.toUpperCase()) ? idParam : '')).trim();
+
+      if (offer && ref) {
+        setType('offer');
+        verifyOffer(offer, ref, '');
+      } else if (offerId) {
+        input.value = offerId.toUpperCase();
+        runVerify();
+      } else if (certId) {
+        input.value = certId.toUpperCase();
+        runVerify();
+      } else if (params.get('type') === 'offer') {
+        setType('offer');
+      }
+    })();
   </script>
 </body>
 </html>

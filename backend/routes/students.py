@@ -10,7 +10,7 @@ from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
 from pydantic import BaseModel, Field
 from db.database import db
 from middleware.student_auth import require_student
-from services.auth_service import offer_ref, offer_ref_valid
+from services.auth_service import offer_code, offer_ref, offer_ref_valid
 from services.email_service import email_service, _domain_label
 from services.submission_service import submission_service
 from services.urgent_request_service import urgent_request_service
@@ -419,6 +419,7 @@ async def verify_offer(student_id: int, ref: str):
         raise HTTPException(status_code=404, detail="No offer has been issued for this reference.")
     return {
         "valid": True,
+        "offer_code": offer_code(student_id),
         "name": f"{student['first_name']} {student['last_name']}",
         "college": student["college"],
         "domain": enrollment["domain"] or student["domain"],

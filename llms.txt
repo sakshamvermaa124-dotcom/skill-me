@@ -52,7 +52,7 @@ Each track has its own page with the weekly milestones, the project built, and a
 
 ## Verification & Trust
 
-- [Certificate Verifier](https://www.skill-me-intern.in/verify): Instant real-time verification of any SkillMe Certificate or LOR ID.
+- [Document Verifier](https://www.skill-me-intern.in/verify): Instant real-time verification of any SkillMe Certificate / LOR ID (SM-…) or internship Offer ID (OF-…).
 - [Student Portfolios](https://www.skill-me-intern.in/portfolio): Public showcase of student achievements and approved project milestones.
 
 ## Essential URLs
