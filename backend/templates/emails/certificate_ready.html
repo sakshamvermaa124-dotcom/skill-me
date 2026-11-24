@@ -26,6 +26,11 @@
   {% if lor_url %}{{ ui.button(lor_url, "View recommendation letter", "secondary") }}{% endif %}
 {% endcall %}
 
+{% call ui.note("ok") %}
+  <strong class="ink" style="color:#0a0a0a;">One more step: claim your stipend seat.</strong> Your certificate makes you eligible for the top-performer stipend of up to $100 a month.
+  Open the <em>Credentials</em> tab on your {{ ui.link(dashboard_url, "dashboard") }} and enter the credential ID above to confirm your seat.
+{% endcall %}
+
 {% call ui.note("accent") %}
   <strong class="ink" style="color:#0a0a0a;">Make it count:</strong> add the credential ID to LinkedIn under <em>Licenses &amp; certifications</em>.
   Anyone can confirm it on the {{ ui.link(verify_url, "public verification page") }}.

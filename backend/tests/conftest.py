@@ -238,6 +238,9 @@ def mock_email_service():
     mock.send_submission_feedback = AsyncMock(return_value=True)
     mock.send_task_approved = AsyncMock(return_value=True)
     mock.send_task_rejected = AsyncMock(return_value=True)
+    mock.send_stipend_entry_confirmed = AsyncMock(return_value=True)
+    mock.send_credentials_waiting = AsyncMock(return_value=True)
+    mock.send_stipend_seat_reminder = AsyncMock(return_value=True)
     mock.send_test_email = AsyncMock(return_value=True)
     mock.send_activation = AsyncMock(return_value=True)
     return mock
@@ -327,6 +330,9 @@ async def client() -> AsyncGenerator[httpx.AsyncClient, None]:
         patch("services.submission_service.db", test_db),
         patch("services.certificate_service.db", test_db),
         patch("services.name_change_service.db", test_db),
+        patch("services.stipend_service.db", test_db),
+        patch("services.credential_reminder_service.db", test_db),
+        patch("services.credential_reminder_service.email_service", mock_email),
         patch("middleware.student_auth.db", test_db),
         patch("services.email_service.email_service", mock_email),
         patch("routes.admin.email_service", mock_email),

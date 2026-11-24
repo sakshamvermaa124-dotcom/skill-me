@@ -7,6 +7,7 @@ import logging
 import re
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Depends
+from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field
 from db.database import db
 from middleware.student_auth import require_student
@@ -16,6 +17,8 @@ from services.submission_service import submission_service
 from services.urgent_request_service import urgent_request_service
 from services.enrollment_service import enrollment_service
 from services.name_change_service import NameChangeError, change_name, name_status
+from services.stipend_service import StipendError, enter_stipend, stipend_status
+from services import credential_reminder_service as cred_funnel
 from services.payment_service import phone_pay_region
 from services import pricing
 from services.countries import infer_country, normalize_iso
@@ -77,6 +80,16 @@ class UpdateNameRequest(BaseModel):
     student_id: int
     first_name: str = Field(..., max_length=200)
     last_name: str = Field(..., max_length=200)
+
+
+class StipendEntryRequest(BaseModel):
+    cert_id: str = Field(..., max_length=40)
+
+
+class FunnelStepRequest(BaseModel):
+    step: str = Field(..., max_length=40)
+    student_id: int
+    batch_id: int | None = None
 
 
 class UrgentRequestRequest(BaseModel):
@@ -361,6 +374,8 @@ async def _progress_for_student(student: dict) -> dict:
             "offer_ref": offer_ref(student["id"]),
             # Whether / how often the name printed on their documents can still be changed.
             "name_change": await name_status(student["email"]),
+            # Top-performer stipend: {eligible, entered, entry}. One seat per person.
+            "stipend": await stipend_status(student["email"]),
             # 'in' | 'intl' | None — picks the default payment options (cards only abroad).
             "pay_region": _pay_region(student),
             # The one certificate price this student sees and pays ({currency, amount, label}).
@@ -442,6 +457,57 @@ async def update_name(req: UpdateNameRequest, me: dict = Depends(require_student
     except NameChangeError as e:
         raise HTTPException(status_code=e.status, detail=e.message)
     return {k: result[k] for k in ("first_name", "last_name", "name", "previous_name", "name_change")}
+
+
+@router.get("/stipend", summary="The signed-in student's stipend eligibility and seat")
+async def get_stipend(me: dict = Depends(require_student)):
+    return await stipend_status(me["email"])
+
+
+@router.post("/stipend/enter", summary="Confirm a stipend seat with the student's own certificate ID")
+async def enter_stipend_round(
+    req: StipendEntryRequest, background_tasks: BackgroundTasks, me: dict = Depends(require_student)
+):
+    """
+    Claims the person's one seat in the top-performer stipend round. The certificate must
+    be issued to the signed-in person, each person can enter once, and each certificate can
+    claim one seat. Sends an "entry confirmed" email.
+    """
+    try:
+        result = await enter_stipend(me["email"], req.cert_id)
+    except StipendError as e:
+        if e.code == "already_entered":
+            return JSONResponse(
+                status_code=409,
+                content={"detail": e.message, "code": e.code, "entry": e.entry},
+            )
+        raise HTTPException(status_code=e.status, detail=e.message)
+
+    s = result["student"]
+    background_tasks.add_task(
+        email_service.send_stipend_entry_confirmed,
+        first_name=s["first_name"],
+        last_name=s["last_name"],
+        email=s["email"],
+        domain=s["domain"] or "",
+        cert_id=result["entry"]["cert_id"],
+    )
+    return {"entered": True, "entry": result["entry"]}
+
+
+@router.post("/funnel", status_code=204, summary="Record a credential-funnel step (once per enrollment)")
+async def record_funnel_step(req: FunnelStepRequest, me: dict = Depends(require_student)):
+    """
+    The dashboard reports where a student is on the way to paying and taking a stipend seat
+    (saw the offer, opened checkout, pressed pay, opened the seat form, came from an email).
+    Each step is stored once per enrollment, so repeats and refreshes never inflate it.
+    """
+    if req.step not in cred_funnel.FUNNEL_STEPS:
+        raise HTTPException(status_code=400, detail="Unknown step.")
+    await _assert_owns(me, req.student_id)
+    batch_id = await enrollment_service.resolve_batch_id(req.student_id, req.batch_id)
+    await cred_funnel.track_step({"id": req.student_id, "email": me["email"]}, req.step, batch_id)
+    return Response(status_code=204)
 
 
 @router.post("/submit-task", summary="Submit a LinkedIn post URL for a week's task")

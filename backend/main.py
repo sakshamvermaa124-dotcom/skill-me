@@ -74,6 +74,24 @@ async def lifespan(app: FastAPI):
         misfire_grace_time=3600,
     )
 
+    # Credential follow-ups — 11:00 AM IST: "your credentials are waiting" (unlocked, unpaid)
+    # and "your stipend seat is open" (certified, no seat). At most 3 each, a week apart.
+    async def daily_credential_reminders():
+        from services.credential_reminder_service import send_credential_reminders
+        try:
+            result = await send_credential_reminders()
+            logger.info("Daily credential reminders: %s", result)
+        except Exception as exc:  # noqa: BLE001
+            logger.error("credential reminders failed: %s", exc)
+
+    scheduler_service._scheduler.add_job(
+        daily_credential_reminders,
+        trigger=CronTrigger(hour=11, minute=0, timezone="Asia/Kolkata"),
+        id="daily_credential_reminders",
+        replace_existing=True,
+        misfire_grace_time=3600,
+    )
+
     # Engagement engine — hourly 09:00-20:00 IST. A no-op unless an admin switched it on,
     # and it can only send real email when ENGAGEMENT_LIVE_ALLOWED is set on the server.
     async def engagement_tick():

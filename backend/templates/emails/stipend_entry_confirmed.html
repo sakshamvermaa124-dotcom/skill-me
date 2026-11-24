@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui %}
+
+{% block title %}Your stipend seat is confirmed — SkillMe{% endblock %}
+{% block preheader %}You're in the running for the top-performer stipend of up to $100 a month. Winners are confirmed on the 3rd of every month.{% endblock %}
+
+{% block body %}
+{{ ui.eyebrow("Seat confirmed") }}
+{{ ui.title("You're in the running, " ~ first_name) }}
+{% call ui.p() %}
+  Your seat in the SkillMe <strong class="ink" style="color:#0a0a0a;">top-performer stipend</strong> (up to $100 a month) is confirmed.
+  Only interns who finished the internship and earned a verified certificate can enter, and you're one of them.
+{% endcall %}
+
+{% call ui.info_table() %}
+  {{ ui.row("Name", first_name ~ " " ~ last_name) }}
+  {{ ui.row("Track", domain_label) }}
+  {{ ui.row("Certificate ID", cert_id) }}
+  {{ ui.row("Entered on", entered_date) }}
+  {{ ui.row("Status", ui.badge("Confirmed", "ok"), last=true) }}
+{% endcall %}
+
+{{ ui.section("What happens next") }}
+{% call ui.steps() %}
+  {% call ui.step(1, "Your seat is locked in", done=true) %}Your entry is tied to your certificate. There's nothing else to submit, and each intern can enter once.{% endcall %}
+  {% call ui.step(2, "We review your work") %}The team looks at the quality of your approved weekly submissions across the internship.{% endcall %}
+  {% call ui.step(3, "Winners are confirmed on the 3rd", last=true) %}Every month, only 8–10 interns are picked. If you're one of them, we'll email you at this address with the stipend details.{% endcall %}
+{% endcall %}
+
+{% call ui.actions(mt=22) %}
+  {{ ui.button(dashboard_url, "Open my dashboard") }}
+{% endcall %}
+
+{% call ui.note("accent") %}
+  <strong class="ink" style="color:#0a0a0a;">Put it to work:</strong> add your certificate to LinkedIn under <em>Licenses &amp; certifications</em> and share your portfolio link,
+  so recruiters can verify your work in one click.
+{% endcall %}
+{% endblock %}

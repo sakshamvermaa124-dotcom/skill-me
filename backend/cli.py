@@ -150,5 +150,66 @@ def list_pending_submissions():
     run_async(_run())
 
 
+# ==============================================
+# Credentials: funnel and follow-up reminders
+# ==============================================
+
+@cli.command("credential-funnel")
+@click.option("--days", "-d", type=int, default=None, help="Only students unlocked in the last N days")
+def credential_funnel(days):
+    """Where unlocked students drop off: offer seen -> checkout -> pay -> paid -> stipend seat."""
+    async def _run():
+        await _init()
+        from services.credential_reminder_service import funnel_report
+
+        rep = await funnel_report(days)
+        title = f"Credential funnel (last {days} days)" if days else "Credential funnel (all time)"
+        table = Table(title=title, box=box.ROUNDED)
+        table.add_column("Step", style="bold")
+        table.add_column("Students", justify="right", style="cyan")
+        table.add_column("% of unlocked", justify="right")
+        table.add_column("% of previous", justify="right")
+        for s in rep["steps"]:
+            table.add_row(s["step"], str(s["count"]), f"{s['pct_of_unlocked']}%", f"{s['pct_of_previous']}%")
+        console.print(table)
+        r = rep["reminders"]
+        console.print(
+            f"Reminders: credentials_waiting {r['credentials_waiting']['emails']} emails "
+            f"to {r['credentials_waiting']['people']} people, {r['came_back_from_credentials_email']} came back · "
+            f"stipend_seat_reminder {r['stipend_seat_reminder']['emails']} emails "
+            f"to {r['stipend_seat_reminder']['people']} people, {r['came_back_from_stipend_email']} came back"
+        )
+        since = rep["tracking_since"] or "not yet (no browser events recorded)"
+        console.print(f"[dim]Browser steps tracked since: {since}. {rep['note']}[/dim]")
+
+    run_async(_run())
+
+
+@cli.command("credential-reminders")
+@click.option("--dry-run/--send", default=True, help="List who is due (default) or actually send")
+def credential_reminders(dry_run):
+    """Who gets a 'credentials waiting' or 'stipend seat open' email today (the daily job sends them)."""
+    async def _run():
+        await _init()
+        from services.credential_reminder_service import get_candidates, send_credential_reminders
+
+        if not dry_run:
+            console.print(await send_credential_reminders())
+            return
+        due = await get_candidates()
+        if not due:
+            console.print("[yellow]Nobody is due a credential reminder today.[/yellow]")
+            return
+        table = Table(title="Due today (dry run, nothing sent)", box=box.ROUNDED)
+        table.add_column("Email")
+        table.add_column("Reminder")
+        table.add_column("#", justify="center")
+        for c in due:
+            table.add_row(c["email"], c["kind"], str(c["step"]))
+        console.print(table)
+
+    run_async(_run())
+
+
 if __name__ == "__main__":
     cli()

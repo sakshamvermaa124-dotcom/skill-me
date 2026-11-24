@@ -327,4 +327,17 @@ CREATE TABLE IF NOT EXISTS name_changes (
     changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE UNIQUE INDEX IF NOT EXISTS ux_name_changes_email_number ON name_changes(email, change_number);
-CREATE INDEX IF NOT EXISTS idx_name_changes_changed_at ON name_changes(changed_at)
+CREATE INDEX IF NOT EXISTS idx_name_changes_changed_at ON name_changes(changed_at);
+
+-- Top-performer stipend entries. A student confirms their seat by submitting the ID of a
+-- certificate issued to them. One seat per person (email), across every track they applied to,
+-- and a certificate can claim only one seat.
+CREATE TABLE IF NOT EXISTS stipend_entries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL UNIQUE,          -- lowercased
+    student_id INTEGER NOT NULL,         -- application the certificate belongs to
+    batch_id INTEGER NOT NULL,
+    cert_id TEXT NOT NULL UNIQUE,
+    entered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_stipend_entries_entered_at ON stipend_entries(entered_at)

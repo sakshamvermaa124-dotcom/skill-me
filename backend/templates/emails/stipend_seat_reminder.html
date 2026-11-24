@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui %}
+{#- Sent at most 3 times, a week apart, to certificate holders without a stipend seat.
+    Carries their certificate ID so confirming takes one paste. No deadline. -#}
+
+{% block title %}Your stipend seat is open — SkillMe{% endblock %}
+{% block preheader %}{% if last %}This is the last email we'll send about it. Your seat stays open in your dashboard.{% else %}Your certificate makes you eligible for the top-performer stipend of up to $100 a month. Confirming takes a few seconds.{% endif %}{% endblock %}
+
+{% block body %}
+{% if step == 1 %}
+{{ ui.eyebrow("Stipend seat open") }}
+{{ ui.title(first_name ~ ", take your stipend seat") }}
+{% call ui.p() %}
+  Your certificate makes you eligible for the SkillMe <strong class="ink" style="color:#0a0a0a;">top-performer stipend</strong> of up to $100 a month,
+  but your seat isn't confirmed yet. It takes a few seconds.
+{% endcall %}
+{% elif not last %}
+{{ ui.eyebrow("Your seat is waiting") }}
+{{ ui.title("Your stipend seat is still open, " ~ first_name) }}
+{% call ui.p() %}
+  You finished the internship and earned a verified certificate, which puts you among the few interns who can enter
+  the <strong class="ink" style="color:#0a0a0a;">top-performer stipend</strong>. Your seat is still unclaimed.
+{% endcall %}
+{% else %}
+{{ ui.eyebrow("A last note") }}
+{{ ui.title("Your seat stays open, " ~ first_name) }}
+{% call ui.p() %}
+  This is the last email we'll send about it. Your seat in the <strong class="ink" style="color:#0a0a0a;">top-performer stipend</strong>
+  stays open in your dashboard, and your certificate ID is below whenever you want it.
+{% endcall %}
+{% endif %}
+
+{{ ui.code_box("Your certificate ID", cert_id) }}
+
+{{ ui.section("How to confirm it") }}
+{% call ui.steps() %}
+  {% call ui.step(1, "Open your seat form") %}The button below opens it in your dashboard.{% endcall %}
+  {% call ui.step(2, "Paste the ID above") %}Your seat is tied to your certificate. Each intern can enter once.{% endcall %}
+  {% call ui.step(3, "Winners are picked on the 3rd", last=true) %}Every month, 8–10 interns are picked on the quality of their work. If you're one of them, we'll email you.{% endcall %}
+{% endcall %}
+
+{% call ui.actions(mt=22) %}
+  {{ ui.button(cta_url, "Confirm my seat") }}
+{% endcall %}
+
+{% call ui.note("ok") %}
+  <strong class="ink" style="color:#0a0a0a;">Only genuine interns compete.</strong>
+  Every seat belongs to a verified certificate holder, one per intern, so no fake or duplicate entries.
+{% endcall %}
+
+<div style="height:24px;line-height:24px;font-size:1px;">&nbsp;</div>
+{{ ui.divider() }}
+<div style="height:14px;line-height:14px;font-size:1px;">&nbsp;</div>
+{% call ui.p(size=12, mb=0) %}
+  <span style="color:#71717a;">You're getting this because you hold a SkillMe certificate.
+  <a href="{{ unsubscribe_url }}" style="color:#71717a;text-decoration:underline;">Stop these reminders</a>
+  (you'll still get essential account emails such as login codes and task reviews).</span>
+{% endcall %}
+{% endblock %}

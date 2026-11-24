@@ -18,11 +18,16 @@ EVENT_TYPES = {
     "enrollment_created", "first_verified_login", "first_task_viewed",
     "first_task_submitted", "first_task_approved", "week_approved",
     "internship_completed", "reminder_sent", "reminder_clicked", "support_requested",
+    # Credential funnel, reported by the dashboard (credential_reminder_service.FUNNEL_STEPS)
+    "cred_offer_seen", "cred_checkout_opened", "cred_pay_clicked", "stipend_form_opened",
+    "cred_email_clicked", "stipend_email_clicked",
 }
 # One occurrence per enrollment; week_approved is keyed per week.
 _ONCE_PER_ENROLLMENT = {
     "enrollment_created", "first_verified_login", "first_task_viewed",
     "first_task_submitted", "first_task_approved", "internship_completed",
+    "cred_offer_seen", "cred_checkout_opened", "cred_pay_clicked", "stipend_form_opened",
+    "cred_email_clicked", "stipend_email_clicked",
 }
 
 
