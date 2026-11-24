@@ -60,28 +60,97 @@ def _accounts() -> list[tuple[str, str]]:
     return accounts
 
 
-_QUOTA_WINDOW = timedelta(hours=24)
+# Brevo accepts over-quota mail over SMTP and then silently never delivers it, so we must never
+# hand mail to an account that is out of quota. Two sources, best first:
+#   1. Brevo's own remaining-credits counter (v3 /account), for every account whose REST API key
+#      is configured. This is the truth: it includes sends we don't log (other apps, local runs).
+#   2. Our email_logs count since 00:00 UTC, when Brevo's free-plan daily cap resets. A rolling 24h
+#      count was tried and leaked: as yesterday's sends aged out it reported free slots while Brevo
+#      still said 0, and ~70 mails went to an exhausted account and were dropped.
+
+_REFUSAL_TTL = timedelta(hours=24)
+_CREDITS_TTL = timedelta(seconds=60)          # re-ask Brevo at most once a minute per key
+_CREDITS_STALE_AFTER = timedelta(minutes=10)  # keep using a last-known value through API blips
+_BREVO_ACCOUNT_URL = "https://api.brevo.com/v3/account"
 
 
-def _quota_window_start_utc() -> str:
-    """
-    Start of the quota window as a UTC 'YYYY-MM-DD HH:MM:SS' string (matches sent_at).
-    A rolling 24h window: Brevo's free-plan cap behaved as rolling in production (331 sent in
-    the last 24h with 0 left, vs only 241-279 since any midnight), and a rolling count is never
-    lower than a since-midnight count, so it can't under-count whichever rule Brevo uses.
-    """
-    return (datetime.now(timezone.utc) - _QUOTA_WINDOW).strftime("%Y-%m-%d %H:%M:%S")
+def _quota_day_start_utc() -> str:
+    """Start of Brevo's current quota day (00:00 UTC) as a 'YYYY-MM-DD HH:MM:SS' string (matches sent_at)."""
+    now = datetime.now(timezone.utc)
+    return now.replace(hour=0, minute=0, second=0, microsecond=0).strftime("%Y-%m-%d %H:%M:%S")
+
+
+def _api_keys() -> list[str]:
+    """Brevo REST API keys (one per Brevo account; order doesn't matter — each is matched to its SMTP login)."""
+    keys = [settings.brevo_api_key] + (settings.brevo_extra_api_keys or "").split(",")
+    seen: list[str] = []
+    for k in keys:
+        k = (k or "").strip()
+        if k and k not in seen:
+            seen.append(k)
+    return seen
+
+
+# SMTP login -> (credits left, when fetched). Decremented locally on each send between refreshes.
+_credits: dict[str, tuple[int, datetime]] = {}
+# API key -> when it was last fetched (so a key whose account has no sendLimit plan isn't re-fetched every send)
+_key_fetched_at: dict[str, datetime] = {}
+_credits_lock = asyncio.Lock()
+
+
+async def _fetch_credits(client, key: str) -> None:
+    resp = await client.get(_BREVO_ACCOUNT_URL, headers={"api-key": key, "accept": "application/json"})
+    resp.raise_for_status()
+    data = resp.json()
+    login = (((data.get("relay") or {}).get("data") or {}).get("userName") or "").strip()
+    credits = next((p.get("credits") for p in data.get("plan") or []
+                    if p.get("creditsType") == "sendLimit" and p.get("credits") is not None), None)
+    if login and credits is not None:
+        _credits[login] = (int(credits), datetime.now(timezone.utc))
+
+
+async def _refresh_credits() -> None:
+    """Refresh Brevo's remaining credits for every configured API key whose cached value is older than a minute."""
+    keys = _api_keys()
+    if not keys:
+        return
+    async with _credits_lock:
+        now = datetime.now(timezone.utc)
+        due = [k for k in keys if now - _key_fetched_at.get(k, datetime.min.replace(tzinfo=timezone.utc)) >= _CREDITS_TTL]
+        if not due:
+            return
+        import httpx
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            results = await asyncio.gather(*(_fetch_credits(client, k) for k in due), return_exceptions=True)
+        for k, res in zip(due, results):
+            _key_fetched_at[k] = now
+            if isinstance(res, Exception):
+                logger.warning("Brevo credits lookup failed for key ...%s: %s", k[-6:], res)
+
+
+def _credits_left(login: str) -> int | None:
+    """Brevo's remaining sends for this account, or None if unknown (no API key, or API unreachable for 10+ min)."""
+    entry = _credits.get(login)
+    if entry is None or datetime.now(timezone.utc) - entry[1] > _CREDITS_STALE_AFTER:
+        return None
+    return entry[0]
+
+
+def _adjust_credits(login: str, delta: int) -> None:
+    entry = _credits.get(login)
+    if entry is not None:
+        _credits[login] = (entry[0] + delta, entry[1])
 
 
 async def get_quota_usage() -> list[dict]:
-    """Emails sent in the last 24h per configured account (for account selection and the admin view)."""
+    """Per-account quota state (for account selection and the admin view)."""
     from db.database import db
-    since = _quota_window_start_utc()
+    await _refresh_credits()
+    since = _quota_day_start_utc()
     usage = []
     for i, (user, _) in enumerate(_accounts()):
-        # Brevo accepts over-quota mail over SMTP and then silently doesn't deliver it, so this
-        # count is the only real guard. Rows with no smtp_account were sent before multi-account
-        # support existed, when the primary was the only account — count them against it.
+        # Rows with no smtp_account were sent before multi-account support existed, when the
+        # primary was the only account — count them against it.
         account_match = "(smtp_account = ? OR smtp_account IS NULL)" if i == 0 else "smtp_account = ?"
         try:
             row = await db.fetch_one(
@@ -92,7 +161,16 @@ async def get_quota_usage() -> list[dict]:
         except Exception as exc:
             logger.warning("Quota lookup failed for %s: %s", user, exc)
             used = 0
-        usage.append({"account": user, "used_today": used, "limit": settings.smtp_daily_limit})
+        credits = _credits_left(user)
+        # Brevo's counter wins when we have it; our own count is only the fallback.
+        exhausted = credits <= 0 if credits is not None else used >= settings.smtp_daily_limit
+        usage.append({
+            "account": user,
+            "used_today": used,
+            "limit": settings.smtp_daily_limit,
+            "brevo_credits_left": credits,
+            "exhausted": exhausted,
+        })
     return usage
 
 
@@ -103,19 +181,22 @@ _refused_today: dict[str, datetime] = {}
 
 def _is_refused_today(login: str) -> bool:
     at = _refused_today.get(login)
-    return at is not None and datetime.now(timezone.utc) - at < _QUOTA_WINDOW
+    return at is not None and datetime.now(timezone.utc) - at < _REFUSAL_TTL
 
 
 async def _ordered_accounts() -> list[tuple[str, str]]:
-    """Accounts to try, in order: those under today's cap first (config order), then the rest by least used."""
+    """
+    Accounts that still have quota, in config order (accounts Brevo recently refused go last).
+    Exhausted accounts are left out entirely: mail sent through them is accepted and then dropped,
+    so failing the send (logged as 'failed', visible, retryable) is strictly better.
+    """
     accounts = _accounts()
-    if len(accounts) <= 1:
-        return accounts
-    used = {u["account"]: u["used_today"] for u in await get_quota_usage()}
-    under = [a for a in accounts
-             if used.get(a[0], 0) < settings.smtp_daily_limit and not _is_refused_today(a[0])]
-    over = sorted((a for a in accounts if a not in under), key=lambda a: used.get(a[0], 0))
-    return under + over
+    if not accounts:
+        return []
+    exhausted = {u["account"] for u in await get_quota_usage() if u["exhausted"]}
+    usable = [a for a in accounts if a[0] not in exhausted]
+    return ([a for a in usable if not _is_refused_today(a[0])]
+            + [a for a in usable if _is_refused_today(a[0])])
 
 
 def _send_sync(to_email: str, to_name: str, subject: str, html_body: str, tag: str | None = None,
@@ -188,25 +269,39 @@ async def _send_ex(to_email: str, to_name: str, subject: str, html_body: str,
     if not settings.email_enabled:
         logger.info("[Email disabled] Would send '%s' to %s", subject, to_email)
         return True, None
-    accounts = await _ordered_accounts()
-    if not accounts:
+    if not _accounts():
         logger.warning("SMTP credentials not configured — skipping email to %s", to_email)
         return False, None
-    for account in accounts:
+    attempted = False
+    for account in await _ordered_accounts():
+        login = account[0]
+        # Re-check and reserve a credit with no await in between, so concurrent sends can't all
+        # spend the same last credit.
+        left = _credits_left(login)
+        if left is not None and left <= 0:
+            continue
+        attempted = True
+        _adjust_credits(login, -1)
         try:
             await asyncio.to_thread(_send_sync, to_email, to_name, subject, html_body, tag, account)
-            return True, account[0]
+            return True, login
         except smtplib.SMTPRecipientsRefused as exc:
+            _adjust_credits(login, +1)
             # This recipient is the problem, not the account — another account won't help
-            logger.error("Recipient %s refused via account %s: %s", to_email, account[0], exc)
+            logger.error("Recipient %s refused via account %s: %s", to_email, login, exc)
             return False, None
         except smtplib.SMTPResponseException as exc:
+            _adjust_credits(login, +1)
             if not isinstance(exc, smtplib.SMTPConnectError):
                 # Brevo refused this account (quota hit / bad key) — deprioritise it until the daily reset
-                _refused_today[account[0]] = datetime.now(timezone.utc)
-            logger.error("Failed to send email to %s via account %s: %s", to_email, account[0], exc)
+                _refused_today[login] = datetime.now(timezone.utc)
+            logger.error("Failed to send email to %s via account %s: %s", to_email, login, exc)
         except Exception as exc:
-            logger.error("Failed to send email to %s via account %s: %s", to_email, account[0], exc)
+            _adjust_credits(login, +1)
+            logger.error("Failed to send email to %s via account %s: %s", to_email, login, exc)
+    if not attempted:
+        logger.error("Not sending email to %s: every Brevo account is out of today's quota "
+                     "(resets 00:00 UTC). Logged as failed so it can be resent.", to_email)
     return False, None
 
 

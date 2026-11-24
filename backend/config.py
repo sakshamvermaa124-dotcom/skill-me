@@ -38,16 +38,22 @@ class Settings(BaseSettings):
     # Extra Brevo accounts used when the primary hits its daily cap. JSON list, e.g.
     # [{"user": "b@example.com", "password": "xsmtpsib-..."}]
     smtp_extra_accounts: str = ""
-    # Switch to the next account once an account has sent this many emails in the last 24h (Brevo free cap is 300)
+    # Fallback cap for accounts without a Brevo API key: stop using an account once it has sent this
+    # many emails since 00:00 UTC (Brevo free cap is 300/day). Accounts with an API key use Brevo's
+    # own remaining-credits counter instead.
     smtp_daily_limit: int = 295
     smtp_from_name: str = "SkillMe Team"
     smtp_from_email: str = ""
     frontend_url: str = "https://skill-me-intern.in"
     # Shared secret appended as ?key=... to the Brevo webhook URL to authenticate inbound event callbacks
     brevo_webhook_secret: str = ""
-    # Brevo v3 REST API key (Settings → SMTP & API → API Keys — NOT the SMTP key) — used only
-    # by the one-off engagement backfill script to pull historical open/click/bounce events.
+    # Brevo v3 REST API key (Settings → SMTP & API → API Keys — NOT the SMTP key). Used to read each
+    # account's remaining daily credits so mail is never sent through an exhausted account, and by
+    # the engagement backfill script.
     brevo_api_key: str = ""
+    # API keys of the other Brevo accounts (the ones in SMTP_EXTRA_ACCOUNTS), comma-separated.
+    # Each key is matched to its SMTP login automatically, so order doesn't matter.
+    brevo_extra_api_keys: str = ""
     # Comma-separated list of allowed CORS origins.
     allowed_origins: str = "*"
 
