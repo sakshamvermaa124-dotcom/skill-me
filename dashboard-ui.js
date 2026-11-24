@@ -189,6 +189,8 @@
     if (ms && ms.classList.contains('active') && typeof window.closeMilestoneModal === 'function') { window.closeMilestoneModal(); return; }
     var pm = document.getElementById('payment-modal');
     if (pm && pm.classList.contains('active') && typeof window.closePaymentModal === 'function') { window.closePaymentModal(); return; }
+    var sm = document.getElementById('stipend-modal');
+    if (sm && sm.classList.contains('active') && typeof window.closeStipendModal === 'function') { window.closeStipendModal(); return; }
     var co = document.getElementById('completion-overlay');
     if (co) co.remove();
   });

@@ -57,6 +57,12 @@ const JS_CREATED_IDS = new Set([
   'btn-view-offer',       // js:1484-1494 — createElement, id assigned on creation
   'urgent-request-note',        // rendered by renderUrgentRequestState()
   'urgent-request-submit-btn',  // rendered by renderUrgentRequestState()
+  'modal-pay-btn',              // rendered by renderPaymentModal()
+  'discount-code-milestone',    // rendered by renderPaymentModal()
+  'discount-toggle',            // rendered by renderPaymentModal()
+  'stipend-card-slot',          // rendered by renderCertReady()
+  'issued-cert-id',             // rendered by showPaymentIssued()
+  'payment-modal-title', 'recruiter-view',        // rendered by renderPaymentModal() / showPaymentIssued()
 ]);
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -82,6 +88,8 @@ const JS_CREATED_CLASSES = new Set([
   'cert-banner', 'cert-banner-icon', 'cert-banner-text', 'cert-banner-actions',
   'completion-overlay', 'confetti-canvas', 'completion-cred-area',
   'milestone-pill', 'pay-btn', 'stat-fill', 'week-tab', 'visible',
+  'issued', // showPaymentIssued()
+  'completion-close', 'completion-cta', 'completion-dismiss', // showCompletionPopup()
 ]);
 
 // ─────────────────────────────────────────────────────────────────────────────

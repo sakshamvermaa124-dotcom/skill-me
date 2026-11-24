@@ -425,8 +425,9 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
 @keyframes panelIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
 .dash-eyebrow {
-  font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--accent-text);
+  font-family: var(--font-ui);
+  font-size: 0.84rem; font-weight: 500;
+  color: var(--text-muted);
   margin-bottom: 6px;
 }
 .dash-panel-title {
@@ -729,12 +730,7 @@ textarea.dash-input { resize: vertical; min-height: 84px; }
   overflow: hidden;
   margin-bottom: 32px;
 }
-.hero-card::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: radial-gradient(ellipse 50% 90% at 0% 0%, var(--accent-wash), transparent 70%);
-  pointer-events: none;
-}
+.hero-card::before { content: none; }
 .hero-main {
   position: relative;
   display: flex; align-items: center; gap: 32px;
@@ -771,7 +767,8 @@ textarea.dash-input { resize: vertical; min-height: 84px; }
 .progress-ring-pct-sign { font-size: 1rem; font-weight: 600; color: var(--text-muted); margin-left: 1px; }
 .progress-ring-sub {
   margin-top: 6px;
-  font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  font-family: var(--font-ui);
+  font-size: 0.74rem; font-weight: 500;
   color: var(--text-faint);
 }
 .progress-ring-wrap.pop svg { animation: ringPop 0.5s var(--ease); }
@@ -780,8 +777,9 @@ textarea.dash-input { resize: vertical; min-height: 84px; }
 .next-step { flex: 1; min-width: 0; }
 .next-step-label {
   display: inline-flex; align-items: center; gap: 6px;
-  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--accent-text);
+  font-family: var(--font-ui);
+  font-size: 0.82rem; font-weight: 500;
+  color: var(--text-muted);
 }
 .next-step-title {
   margin-top: 8px;
@@ -811,7 +809,7 @@ textarea.dash-input { resize: vertical; min-height: 84px; }
   font-variant-numeric: tabular-nums;
 }
 .stat-unit { font-size: 0.82rem; font-weight: 500; color: var(--text-faint); letter-spacing: 0; }
-.fact-ok { color: var(--ok); }
+.fact-ok { color: var(--ok); font-family: var(--font-ui); font-size: 1rem; }
 
 @media (max-width: 760px) {
   .hero-main { gap: 20px; padding: 22px 20px; }
@@ -1358,18 +1356,15 @@ textarea.dash-input { resize: vertical; min-height: 84px; }
   padding: 22px 24px;
   margin-bottom: 28px;
   overflow: hidden;
-  background:
-    radial-gradient(ellipse 60% 120% at 100% 0%, var(--accent-wash), transparent 70%),
-    var(--surface-1);
+  background: var(--surface-1);
 }
 .unlock-top { display: flex; align-items: flex-start; gap: 14px; }
 .unlock-icon {
   width: 42px; height: 42px; flex-shrink: 0;
   display: grid; place-items: center;
   border-radius: 12px;
-  background: var(--accent-wash);
-  border: 1px solid var(--accent-border);
-  color: var(--accent-text);
+  background: var(--surface-2);
+  color: var(--text-muted);
 }
 .unlock-title { font-size: 1.1rem; font-weight: 600; letter-spacing: -0.015em; color: var(--text-strong); }
 .unlock-title strong { color: var(--accent-text); font-weight: 700; }
@@ -1397,10 +1392,12 @@ textarea.dash-input { resize: vertical; min-height: 84px; }
 }
 .cred-locked-strip {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 12px;
   margin-bottom: 12px;
 }
+@media (max-width: 1180px) { .cred-locked-strip { grid-template-columns: repeat(2, 1fr); } }
+
 .cred-locked-pill {
   display: flex; flex-direction: column; gap: 14px;
   padding: 18px;
@@ -2053,46 +2050,13 @@ main.dash-page:focus { outline: none; }
    Appended last on purpose: it restyles existing markup and keeps every id and hook.
    ════════════════════════════════════════════════════════════════ */
 
-/* ── Progress hero: one dark card in both themes ── */
-.hero-card.progress-section {
-  border-color: rgba(255, 255, 255, 0.08);
-  border-radius: 22px;
-  background:
-    radial-gradient(70% 110% at 0% 0%, rgba(229, 50, 45, 0.36), transparent 58%),
-    radial-gradient(60% 110% at 100% 100%, rgba(242, 106, 27, 0.28), transparent 60%),
-    #0b0b0c;
-  box-shadow: 0 30px 70px -28px rgba(10, 10, 10, 0.5);
-  color: #fff;
-}
-.hero-card.progress-section::before { background: none; }
-.hero-card.progress-section .hero-main { padding: 34px 36px; gap: 36px; }
-.hero-card.progress-section .ring-track { stroke: rgba(255, 255, 255, 0.13); }
-.hero-card.progress-section .ring-fill { stroke: #ffa34d; }
-.hero-card.progress-section .ring-head { fill: #0b0b0c; stroke: #ffa34d; }
-.hero-card.progress-section .progress-ring-pct { color: #fff; }
-.hero-card.progress-section .progress-ring-pct-sign,
-.hero-card.progress-section .progress-ring-sub { color: rgba(255, 255, 255, 0.6); }
-.hero-card.progress-section .next-step-label { color: #ffa34d; }
-.hero-card.progress-section .next-step[data-tone="review"] .next-step-label { color: #9cc0ff; }
-.hero-card.progress-section .next-step[data-tone="danger"] .next-step-label { color: #ff9a90; }
-.hero-card.progress-section .next-step[data-tone="ok"] .next-step-label { color: #7fe0a4; }
-.hero-card.progress-section .next-step-title { color: #fff; font-size: clamp(1.3rem, 2.4vw, 1.7rem); }
-.hero-card.progress-section .next-step-desc { color: rgba(255, 255, 255, 0.74); }
-.hero-card.progress-section .cert-btn:not(.cert-btn-primary) {
-  background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2); color: #fff;
-}
-.hero-card.progress-section .hero-facts { border-top-color: rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.04); }
+/* ── Progress hero: the same plain surface as every other card, in both themes ── */
+.hero-card.progress-section { border-radius: var(--r-xl); box-shadow: var(--shadow-sm); }
+.hero-card.progress-section .hero-main { padding: 32px 34px; gap: 34px; }
+.hero-card.progress-section .next-step-title { font-size: clamp(1.25rem, 2.2vw, 1.55rem); }
 .hero-card.progress-section .hero-fact { padding: 16px 22px; }
-.hero-card.progress-section .hero-fact + .hero-fact { border-left-color: rgba(255, 255, 255, 0.1); }
-.hero-card.progress-section .hero-fact dt { color: rgba(255, 255, 255, 0.58); }
-.hero-card.progress-section .hero-fact dd { color: #fff; }
-.hero-card.progress-section .stat-unit { color: rgba(255, 255, 255, 0.5); }
-.hero-card.progress-section .fact-ok { color: #7fe0a4; }
-@media (max-width: 760px) { .hero-card.progress-section .hero-main { padding: 26px 22px; gap: 22px; } }
-@media (max-width: 560px) {
-  .hero-card.progress-section .hero-fact:nth-child(n+3) { border-top-color: rgba(255, 255, 255, 0.1); }
-  .hero-card.progress-section .hero-fact { padding: 14px 18px; }
-}
+@media (max-width: 760px) { .hero-card.progress-section .hero-main { padding: 24px 20px; gap: 22px; } }
+@media (max-width: 560px) { .hero-card.progress-section .hero-fact { padding: 14px 18px; } }
 
 /* ── Weekly journey: a status bar on top of each week ── */
 .sprint-milestone-step { overflow: hidden; border-radius: 18px; padding-top: 18px; }
@@ -2111,18 +2075,14 @@ main.dash-page:focus { outline: none; }
   display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: clamp(20px, 4vw, 44px);
   margin-bottom: 32px; padding: clamp(22px, 3vw, 30px) clamp(22px, 3.4vw, 36px);
   border: 1px solid var(--border); border-radius: 22px;
-  background:
-    radial-gradient(60% 140% at 0% 50%, var(--accent-wash), transparent 70%),
-    var(--surface-1);
+  background: var(--surface-1);
   box-shadow: var(--shadow-sm);
 }
 .perf-figure { display: flex; flex-direction: column; gap: 2px; }
-.perf-upto, .perf-per { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+.perf-upto, .perf-per { font-size: 0.8rem; color: var(--text-muted); }
 .perf-amount {
   font-size: clamp(3rem, 7vw, 4.6rem); font-weight: 700; letter-spacing: -0.05em; line-height: 0.95;
-  background: linear-gradient(100deg, #e5322d 5%, #f26a1b 95%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-  padding-bottom: 0.04em;
+  color: var(--text-strong);
 }
 .perf-copy h2 { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-strong); }
 .perf-copy p { margin-top: 6px; max-width: 60ch; font-size: 0.9rem; color: var(--text-muted); }
@@ -2209,18 +2169,289 @@ main.dash-page:focus { outline: none; }
 }
 
 /* ── Credentials: the lock card matches the Home hero ── */
-.unlock-card {
-  border-color: rgba(255, 255, 255, 0.08); border-radius: 22px; padding: 28px 30px;
-  background:
-    radial-gradient(70% 120% at 0% 0%, rgba(229, 50, 45, 0.36), transparent 58%),
-    radial-gradient(60% 120% at 100% 100%, rgba(242, 106, 27, 0.28), transparent 60%),
-    #0b0b0c;
-  box-shadow: 0 30px 70px -28px rgba(10, 10, 10, 0.5);
+.unlock-card { border-radius: var(--r-xl); padding: 24px 26px; box-shadow: var(--shadow-sm); }
+
+
+/* ══════════════════════════════════════════════════════════════
+   CREDENTIAL CHECKOUT, CLAIM CARD, STIPEND SEAT, UNLOCK POPUP
+   Rendered by dashboard.js. Deliberately plain: neutral surfaces, the accent only on the
+   primary action, no glows, gradients, pulsing dots, pills or icons in tinted squares.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Shared line icons (credIcon) ── */
+.cred-pill-icon { color: var(--text-muted); background: var(--surface-2); }
+.cred-pill-icon.tone-info, .cred-pill-icon.tone-ok { background: var(--surface-2); color: var(--text-muted); }
+.cert-banner-icon { color: var(--text-strong); background: var(--surface-2); border-color: var(--border); }
+.guide-header-icon { color: var(--text-muted); background: var(--surface-2); }
+.guide-header-icon.tone-ok { color: var(--ok); }
+.guide-header-icon.tone-danger { color: var(--danger); }
+.secure-note svg { display: inline-block; vertical-align: -2px; margin-right: 5px; }
+.secure-note:empty { display: none; }
+
+/* Credentials menu: a small dot while there's something to do there */
+.dash-nav-dot { margin-left: auto; width: 8px; height: 8px; border-radius: 50%; background: var(--cta); flex-shrink: 0; }
+.dash-nav-dot[hidden] { display: none; }
+.dash-tab { position: relative; }
+.dash-tab-dot { position: absolute; top: 6px; right: calc(50% - 18px); margin: 0; }
+
+/* ── Checkout modal ── */
+.payment-modal-card.checkout-card { max-width: 480px; padding: 0; text-align: left; overflow-x: hidden; }
+.checkout-card .payment-modal-close { top: 12px; right: 12px; }
+
+.checkout-hero { padding: 32px 28px 16px; background: var(--surface-sunken); border-bottom: 1px solid var(--border); }
+.cert-preview {
+  max-width: 340px; margin: 0 auto; padding: 18px 20px 14px;
+  border-radius: 10px; border: 1px solid #e7e5e4;
+  background: #fffdf9; color: #1c1917; text-align: center;
+  box-shadow: 0 12px 28px -20px rgba(0,0,0,0.7);
 }
-.unlock-card .unlock-icon { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.16); color: #ffa34d; }
-.unlock-card .unlock-title { font-size: clamp(1.2rem, 2.2vw, 1.5rem); color: #fff; }
-.unlock-card .unlock-title strong { color: #ffa34d; }
-.unlock-card .unlock-sub { color: rgba(255, 255, 255, 0.72); }
-.unlock-card .unlock-meter { background: rgba(255, 255, 255, 0.14); }
-.unlock-card .unlock-meter-fill { background: linear-gradient(90deg, #ff6a5e, #ffa34d); }
-.unlock-card .unlock-foot, .unlock-card .unlock-foot span { color: rgba(255, 255, 255, 0.78); }
+.cert-preview-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.cert-preview-brand { font: 700 0.78rem/1 var(--font-ui); color: #e5322d; }
+.cert-preview-seal { display: inline-flex; align-items: center; gap: 4px; font: 600 0.7rem/1 var(--font-ui); color: #15803d; }
+.cert-preview-seal svg { width: 12px; height: 12px; }
+.cert-preview-kicker { font: 600 0.62rem/1 var(--font-ui); letter-spacing: 0.12em; text-transform: uppercase; color: #78716c; }
+.cert-preview-name {
+  margin: 8px 0 4px;
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.25rem, 4.6vw, 1.5rem); font-weight: 700; line-height: 1.15;
+  color: #0c0a09; overflow-wrap: anywhere;
+}
+.cert-preview-track { font-size: 0.78rem; color: #57534e; }
+.cert-preview-foot {
+  display: flex; justify-content: space-between; gap: 8px;
+  margin-top: 12px; padding-top: 8px; border-top: 1px dashed #e7e5e4;
+  font: 500 0.62rem/1.2 var(--font-mono); color: #a8a29e;
+}
+.checkout-name-check { margin-top: 14px; text-align: center; font-size: 0.78rem; color: var(--text-muted); }
+.checkout-name-check .link-btn { padding: 2px; font-size: 0.78rem; }
+
+.checkout-main { padding: 22px 28px 4px; }
+.checkout-eyebrow { font-size: 0.8rem; font-weight: 500; color: var(--text-muted); }
+.checkout-eyebrow.tone-ok { color: var(--ok); }
+.checkout-title { margin-top: 4px; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.025em; line-height: 1.25; color: var(--text-strong); }
+.checkout-sub { margin-top: 8px; font-size: 0.9rem; line-height: 1.55; color: var(--text-muted); }
+
+.checkout-includes { list-style: none; margin: 18px 0 8px; padding: 0; display: grid; gap: 14px; }
+.checkout-includes li { display: flex; align-items: flex-start; gap: 10px; }
+.checkout-tick { flex-shrink: 0; display: inline-flex; margin-top: 2px; color: var(--ok); }
+.checkout-includes li.is-stipend .checkout-tick { color: var(--text-strong); }
+.checkout-includes li.is-fair { margin-top: 2px; padding-top: 14px; border-top: 1px solid var(--border); }
+.checkout-includes li.is-fair .checkout-tick { color: var(--ok); }
+.checkout-includes li > div { flex: 1; min-width: 0; }
+.checkout-includes strong { display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-strong); }
+.checkout-includes span:not(.checkout-tick) { display: block; margin-top: 1px; font-size: 0.82rem; line-height: 1.45; color: var(--text-muted); }
+.checkout-proof { color: var(--accent-text); font-weight: 600; text-decoration: none; white-space: nowrap; }
+.checkout-proof:hover { text-decoration: underline; text-underline-offset: 2px; }
+
+/* The pay button stays in reach while the student reads */
+.checkout-footer { position: sticky; bottom: 0; z-index: 1; padding: 14px 28px 12px; background: var(--surface-1); border-top: 1px solid var(--border); text-align: center; }
+.checkout-cta { min-height: 48px; font-size: 0.96rem; }
+.checkout-once { margin-top: 8px; font-size: 0.78rem; color: var(--text-muted); }
+.checkout-footer .pay-methods { margin: 10px 0 0; }
+.checkout-footer .pay-methods-row { justify-content: center; }
+.checkout-after { padding: 0 28px 20px; text-align: center; }
+.checkout-discount [hidden] { display: none; }
+.checkout-discount .dash-input { margin-top: 6px; }
+.checkout-after .secure-note { margin-top: 6px; }
+.checkout-legal { margin-top: 8px; font-size: 0.72rem; line-height: 1.5; color: var(--text-faint); }
+.checkout-legal a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+
+@media (max-width: 520px) {
+  .checkout-hero { padding: 54px 18px 14px; }
+  .checkout-main { padding: 18px 18px 4px; }
+  .checkout-footer { padding: 12px 18px 10px; }
+  .checkout-after { padding: 0 18px 16px; }
+  .checkout-title { font-size: 1.28rem; }
+}
+
+/* ── Post-payment screen ── */
+.issued { display: flex; flex-direction: column; align-items: center; padding: 40px 28px 24px; text-align: center; }
+.issued .checkout-title { outline: none; }
+.issued-id {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 12px;
+  width: 100%; margin-top: 20px; padding: 14px 16px;
+  border-radius: 12px; background: var(--surface-2);
+  text-align: left;
+}
+.issued-id-label { grid-column: 1 / -1; font-size: 0.78rem; font-weight: 500; color: var(--text-muted); }
+.issued-id code { font-family: var(--font-mono); font-size: 1.1rem; font-weight: 600; letter-spacing: 0.04em; color: var(--text-strong); overflow-wrap: anywhere; user-select: all; }
+.issued-copy { min-height: 36px; padding: 0 16px; }
+.issued-next { width: 100%; margin: 18px 0 14px; text-align: left; }
+.issued-next strong { display: block; font-size: 0.92rem; color: var(--text-strong); }
+.issued-next p { margin-top: 3px; font-size: 0.84rem; line-height: 1.5; color: var(--text-muted); }
+.issued-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 18px; margin-top: 14px; }
+.issued-links a { font-size: 0.82rem; font-weight: 600; color: var(--text-muted); text-decoration: none; }
+.issued-links a:hover { color: var(--text-strong); }
+@media (max-width: 520px) { .issued { padding: 52px 18px 18px; } }
+
+/* ── Claim card (Credentials tab, eligible but unpaid) ── */
+.claim-card {
+  display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 28px; align-items: center;
+  padding: 24px; border: 1px solid var(--border); border-radius: var(--r-xl);
+  background: var(--surface-1); box-shadow: var(--shadow-sm);
+}
+.claim-kicker { font-size: 0.8rem; font-weight: 500; color: var(--ok); }
+.claim-title { margin-top: 4px; font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-strong); }
+.claim-sub { margin-top: 6px; max-width: 62ch; font-size: 0.88rem; line-height: 1.55; color: var(--text-muted); }
+.claim-list { list-style: none; display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 14px 0 0; padding: 0; }
+.claim-list li { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 500; color: var(--text-default); }
+.claim-list li svg { width: 14px; height: 14px; color: var(--ok); }
+.claim-list li.is-stipend svg { color: var(--text-strong); }
+.claim-side { text-align: center; padding-left: 28px; border-left: 1px solid var(--border); }
+.claim-price { font-size: 1.9rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; color: var(--text-strong); font-variant-numeric: tabular-nums; }
+.claim-price-sub { margin: 2px 0 12px; font-size: 0.76rem; color: var(--text-faint); }
+.claim-why { margin-top: 6px; font-size: 0.8rem; }
+@media (max-width: 760px) {
+  .claim-card { grid-template-columns: minmax(0, 1fr); padding: 20px; gap: 18px; }
+  .claim-side { padding: 18px 0 0; border-left: 0; border-top: 1px solid var(--border); }
+}
+
+/* ── Stipend card (Credentials tab, after payment) ── */
+.stipend-card {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 24px;
+  margin-top: 14px; padding: 20px 24px;
+  border: 1px solid var(--border); border-radius: var(--r-xl);
+  background: var(--surface-1); box-shadow: var(--shadow-sm);
+}
+.stipend-card[data-state="entered"] { grid-template-columns: auto minmax(0, 1fr); }
+.stipend-card-figure { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding-right: 24px; border-right: 1px solid var(--border); }
+.stipend-card-figure span { font-size: 0.74rem; color: var(--text-muted); }
+.stipend-card-figure strong { font-size: 2.1rem; font-weight: 700; letter-spacing: -0.04em; line-height: 1; color: var(--text-strong); }
+.stipend-card-status { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 500; color: var(--accent-text); }
+.stipend-card-status.tone-ok { color: var(--ok); }
+.stipend-card-status svg { width: 14px; height: 14px; }
+.stipend-card-copy h3 { margin-top: 4px; font-size: 1.08rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text-strong); }
+.stipend-card-copy p:not(.stipend-card-status) { margin-top: 4px; font-size: 0.86rem; line-height: 1.55; color: var(--text-muted); }
+.stipend-card-copy p.stipend-card-fair { margin-top: 8px; font-size: 0.8rem; color: var(--text-faint); }
+.stipend-card-copy code { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-default); }
+@media (max-width: 760px) {
+  .stipend-card, .stipend-card[data-state="entered"] { grid-template-columns: minmax(0, 1fr); gap: 14px; padding: 20px; }
+  .stipend-card-figure { flex-direction: row; align-items: baseline; gap: 6px; padding: 0; border: 0; }
+  .stipend-card-btn { width: 100%; }
+}
+
+/* ── Overview stipend card states ── */
+.perf-status { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 6px; font-size: 0.8rem; font-weight: 500; color: var(--text-muted); }
+.perf-card[data-state="payable"] .perf-status,
+.perf-card[data-state="open"] .perf-status { color: var(--accent-text); }
+.perf-card[data-state="entered"] .perf-status { color: var(--ok); }
+
+/* ── Stipend seat modal ── */
+.payment-modal-card.stipend-modal-card { max-width: 440px; padding: 32px 28px 24px; text-align: left; }
+.stipend-step { display: flex; flex-direction: column; align-items: stretch; }
+.stipend-step[hidden] { display: none; }
+.stipend-title { margin-top: 4px; font-size: 1.35rem; font-weight: 700; letter-spacing: -0.025em; color: var(--text-strong); outline: none; }
+.stipend-sub { margin-top: 6px; font-size: 0.88rem; line-height: 1.55; color: var(--text-muted); }
+.stipend-field { width: 100%; margin-top: 20px; }
+.stipend-label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.stipend-label { font-size: 0.8rem; font-weight: 600; color: var(--text-default); }
+.stipend-paste { padding: 2px; font-size: 0.8rem; }
+.stipend-paste[hidden] { display: none; }
+.stipend-input {
+  width: 100%; padding-top: 13px; padding-bottom: 13px;
+  font-family: var(--font-mono); font-size: 1.1rem; font-weight: 600; letter-spacing: 0.06em;
+  text-align: center; text-transform: uppercase;
+}
+.stipend-input[aria-invalid="true"] { border-color: var(--danger-border); }
+.stipend-help { margin-top: 8px; font-size: 0.78rem; line-height: 1.5; color: var(--text-faint); }
+.stipend-help a { color: var(--accent-text); font-weight: 600; text-decoration: none; white-space: nowrap; }
+.stipend-help a:hover { text-decoration: underline; text-underline-offset: 2px; }
+.stipend-error { min-height: 1.2em; margin: 8px 0 6px; font-size: 0.8rem; color: var(--danger); }
+.stipend-rules { list-style: none; margin: 16px 0 0; padding: 0; }
+.stipend-rules li { position: relative; padding-left: 14px; font-size: 0.78rem; line-height: 1.5; color: var(--text-muted); }
+.stipend-rules li + li { margin-top: 5px; }
+.stipend-rules li::before { content: ""; position: absolute; left: 2px; top: 0.62em; width: 4px; height: 4px; border-radius: 50%; background: var(--text-faint); }
+.stipend-rules strong { color: var(--text-strong); font-weight: 600; }
+.stipend-how { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); }
+.stipend-how summary { cursor: pointer; padding: 4px 0; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+.stipend-how summary:hover { color: var(--text-strong); }
+.stipend-how ul { margin: 6px 0 0; padding-left: 18px; }
+.stipend-how li { font-size: 0.78rem; line-height: 1.55; color: var(--text-muted); }
+.stipend-how li + li { margin-top: 4px; }
+
+/* Shared "done" check (stipend confirmed, payment issued) */
+.stipend-check {
+  width: 52px; height: 52px; margin-bottom: 14px;
+  display: grid; place-items: center; border-radius: 50%;
+  background: var(--ok-wash); color: var(--ok);
+}
+.stipend-done { align-items: flex-start; }
+.stipend-done.is-celebrating .stipend-check svg polyline,
+.issued.is-celebrating .issued-check svg polyline { stroke-dasharray: 24; stroke-dashoffset: 24; animation: stipend-draw 0.4s ease-out 0.1s forwards; }
+@keyframes stipend-draw { to { stroke-dashoffset: 0; } }
+.stipend-next { width: 100%; list-style: none; margin: 18px 0; padding: 0; }
+.stipend-next li { display: flex; gap: 12px; padding: 10px 0; }
+.stipend-next li + li { border-top: 1px solid var(--border); }
+.stipend-next li > span {
+  flex-shrink: 0; width: 22px; height: 22px; display: grid; place-items: center;
+  border-radius: 50%; border: 1px solid var(--border-strong);
+  font-size: 0.72rem; font-weight: 600; color: var(--text-muted);
+}
+.stipend-next li.is-done > span { background: var(--ok); border-color: var(--ok); color: #052e16; }
+.stipend-next strong { display: block; font-size: 0.86rem; color: var(--text-strong); }
+.stipend-next p { margin-top: 2px; font-size: 0.8rem; line-height: 1.5; color: var(--text-muted); }
+.stipend-next code { font-family: var(--font-mono); font-size: 0.76rem; color: var(--text-default); }
+
+/* ── Credentials unlocked popup (3 of 4 weeks approved) ── */
+.completion-card { max-width: 460px; padding: 32px 28px 22px; border-color: var(--border); box-shadow: var(--shadow-lg); text-align: left; }
+.completion-close { top: 12px; right: 12px; }
+.completion-kicker { font-size: 0.8rem; font-weight: 500; color: var(--ok); }
+.completion-title { margin: 4px 0 0; font-size: 1.4rem; line-height: 1.25; }
+.completion-text { margin: 8px 0 0; font-size: 0.9rem; }
+.completion-cred-area { margin: 0; }
+.completion-loading { padding: 16px 0; font-size: 0.84rem; color: var(--text-faint); }
+.completion-list { list-style: none; margin: 14px 0 18px; padding: 0; }
+.completion-list li { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; }
+.completion-list li + li { border-top: 1px solid var(--border); }
+.completion-list li > svg { flex-shrink: 0; margin-top: 1px; color: var(--text-muted); }
+.completion-list strong { display: block; font-size: 0.9rem; font-weight: 600; color: var(--text-strong); }
+.completion-list span { display: block; margin-top: 2px; font-size: 0.8rem; line-height: 1.5; color: var(--text-muted); }
+.completion-cta { min-height: 48px; }
+.completion-links { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 6px; }
+.completion-links .cert-btn { gap: 8px; }
+.completion-dismiss { display: block; margin: 8px auto 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .stipend-done.is-celebrating .stipend-check svg polyline,
+  .issued.is-celebrating .issued-check svg polyline { animation: none; stroke-dashoffset: 0; }
+}
+
+/* "Credentials ready" banner: same flat card as the rest of the credentials screens */
+.cert-banner { border-color: var(--border); box-shadow: var(--shadow-sm); }
+.cert-banner-glow { display: none; }
+
+/* "Only genuine interns compete": the reason for the fee, always readable at a glance */
+.fair-note {
+  display: flex; align-items: flex-start; gap: 10px;
+  margin: 14px 0 0; padding: 12px 14px;
+  border-radius: 12px; background: var(--surface-2);
+  font-size: 0.86rem; line-height: 1.5; color: var(--text-default);
+  text-align: left;
+}
+.fair-note svg { flex-shrink: 0; margin-top: 1px; color: var(--ok); }
+.fair-note strong { color: var(--text-strong); font-weight: 600; }
+.completion-list + .fair-note { margin: 0 0 16px; }
+.stipend-sub + .fair-note { margin-top: 14px; }
+.claim-list + .fair-note { max-width: 62ch; }
+
+/* Dialog headings take focus on open, so the close button isn't the first thing highlighted */
+[role="dialog"] h2[tabindex="-1"]:focus { outline: none; }
+
+/* "See how": what a recruiter sees when they check the certificate ID */
+.checkout-includes .checkout-proof { display: inline; padding: 0; font: inherit; font-weight: 600; line-height: inherit; }
+.recruiter-view { margin-top: 10px; }
+.recruiter-view[hidden] { display: none; }
+.checkout-includes .recruiter-view-label { margin: 0 0 6px; font-size: 0.74rem; color: var(--text-faint); }
+.recruiter-view-card { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--surface-1); }
+.recruiter-view-head { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-bottom: 1px solid var(--border); background: var(--surface-2); color: var(--ok); }
+.checkout-includes .recruiter-view-head strong { display: inline; font-size: 0.84rem; color: var(--text-strong); }
+.checkout-includes .recruiter-view-head span { margin: 0 0 0 auto; font-size: 0.74rem; font-weight: 600; color: var(--ok); }
+.recruiter-view-card dl { margin: 0; padding: 4px 12px 6px; }
+.recruiter-view-card dl > div { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; font-size: 0.8rem; }
+.recruiter-view-card dl > div + div { border-top: 1px solid var(--border); }
+.recruiter-view-card dt { color: var(--text-muted); }
+.recruiter-view-card dd { margin: 0; color: var(--text-strong); font-weight: 500; text-align: right; }
+.checkout-includes .recruiter-view-foot { margin-top: 6px; font-size: 0.74rem; color: var(--text-faint); }
+
+/* The card tip sits under the sticky pay bar, so on a phone the bar stays short */
+.checkout-after .pay-methods-tip { margin: 0 0 12px; text-align: left; }

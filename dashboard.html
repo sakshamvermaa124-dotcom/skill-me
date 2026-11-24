@@ -51,7 +51,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="dashboard.css?v=20187b2ab7">
+  <link rel="stylesheet" href="dashboard.css?v=bbcd9ff9c8">
   <link rel="stylesheet" href="dashboard-activation.css?v=e5d55a6f32">
 
   <script src="config.js?v=a6d0001538" defer></script>
@@ -110,6 +110,7 @@
       <button class="dash-nav-item" id="nav-credentials" onclick="dashShowPanel('panel-credentials')" title="Credentials">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.48 12.89 17 22l-5-3-5 3 1.52-9.11"/></svg>
         <span class="dash-nav-label">Credentials</span>
+        <span class="dash-nav-dot" id="nav-cred-badge" hidden><span class="sr-only">Action needed</span></span>
       </button>
       <button class="dash-nav-item" id="nav-guide" onclick="dashShowPanel('panel-guide')" title="Help">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
@@ -152,6 +153,7 @@
     <button class="dash-tab" id="tab-credentials" onclick="dashShowPanel('panel-credentials')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.48 12.89 17 22l-5-3-5 3 1.52-9.11"/></svg>
       <span>Credentials</span>
+      <span class="dash-nav-dot dash-tab-dot" id="tab-cred-badge" hidden><span class="sr-only">Action needed</span></span>
     </button>
     <button class="dash-tab" id="tab-guide" onclick="dashShowPanel('panel-guide')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
@@ -351,12 +353,14 @@
           </div>
 
           <!-- Top-performer stipend -->
-          <div class="perf-card">
+          <!-- dashboard.js (renderStipendHome) sets data-state: locked | open | entered -->
+          <div class="perf-card" id="perf-card" data-state="locked">
             <div class="perf-figure" aria-hidden="true"><span class="perf-upto">Up to</span><span class="perf-amount">$100</span><span class="perf-per">a month</span></div>
             <div class="perf-copy">
+              <span class="perf-status" id="perf-status">Seat unlocks with your certificate</span>
               <h2>Top performer stipend</h2>
-              <p>The stipend and job offers from our hiring partners or SkillMe go to top performers. Every submission you make is reviewed, so make each one count.</p>
-              <button type="button" class="perf-btn" onclick="dashShowPanel('panel-work')">Open this week's task
+              <p id="perf-text">The stipend and job offers from our hiring partners or SkillMe go to top performers. Finish the internship, earn your verified certificate, then confirm your seat with its ID. Every submission is reviewed, so make each one count.</p>
+              <button type="button" class="perf-btn" id="perf-btn" onclick="dashShowPanel('panel-work')"><span id="perf-btn-label">Open this week's task</span>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
               </button>
             </div>
@@ -455,7 +459,7 @@
               </span>
               <div>
                 <div class="unlock-title">Complete <strong>3 more weeks</strong> to get your completion credentials</div>
-                <div class="unlock-sub">We'll evaluate your performance across your weekly tasks, and your stipend is based on that performance.</div>
+                <div class="unlock-sub">Your certificate also unlocks your seat in the top-performer stipend, judged on the quality of your weekly tasks.</div>
               </div>
             </div>
             <div class="unlock-meter" aria-hidden="true"><div class="unlock-meter-fill" id="unlock-meter-fill"></div></div>
@@ -565,7 +569,7 @@
               </div>
               <div class="cred-locked-text">
                 <div class="cred-locked-label">Letter of Recommendation</div>
-                <div class="cred-locked-name">Personalized to the work you did</div>
+                <div class="cred-locked-name">Tailored to your track and the skills it covers</div>
               </div>
             </div>
             <div class="cred-locked-pill">
@@ -575,6 +579,15 @@
               <div class="cred-locked-text">
                 <div class="cred-locked-label">Proof of Work portfolio</div>
                 <div class="cred-locked-name">A public link to your projects, hosted for life</div>
+              </div>
+            </div>
+            <div class="cred-locked-pill cred-locked-pill--stipend">
+              <div class="cred-locked-icon">
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+              </div>
+              <div class="cred-locked-text">
+                <div class="cred-locked-label">Stipend seat</div>
+                <div class="cred-locked-name">Your entry to the up-to-$100/month top-performer stipend</div>
               </div>
             </div>
           </div>
@@ -676,7 +689,7 @@
               </div>
               <div class="guide-tip">
                 <div class="guide-tip-title">3 approved weeks earn your credentials</div>
-                <p>Complete 3 of your 4 weeks to get your completion credentials (Certificate, LOR and Portfolio) under <strong>Credentials</strong>. We evaluate your performance along the way, and your stipend is based on it.</p>
+                <p>Complete 3 of your 4 weeks to get your completion credentials (Certificate, LOR and Portfolio) under <strong>Credentials</strong>. Your certificate is also your ticket to the top-performer stipend: confirm your seat with its ID, and we pick top performers based on your reviewed work.</p>
               </div>
             </div>
 
@@ -710,8 +723,8 @@
   <!-- Lenis smooth scroll -->
   <div id="dash-toast" class="dash-toast" role="status" aria-live="polite"></div>
   <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js" integrity="sha384-tKsJDT6PlUI0pSBt9/sBKJluKgA19/a6mBrDsZaXotLB4ZYfMGM6xt6/WgGpYhTm" crossorigin="anonymous" defer></script>
-  <script src="dashboard.js?v=eb31ae49d7" defer></script>
-  <script src="dashboard-ui.js?v=e74a8796a3" defer></script>
+  <script src="dashboard.js?v=d1212281b1" defer></script>
+  <script src="dashboard-ui.js?v=fa148024bd" defer></script>
   <script src="dashboard-activation.js?v=a197c1d57f" defer></script>
 
   <!-- ══ Modals — siblings of .dash-page, outside the panel system ════════════
@@ -767,32 +780,76 @@
     </div>
   </div>
 
-  <!-- Payment Modal -->
+  <!-- Payment Modal — "issue your credentials" checkout. dashboard.js (renderPaymentModal) fills
+       #payment-modal-body with the student's name, certificate preview and price breakdown. -->
   <div class="payment-modal-overlay" id="payment-modal">
-    <div class="payment-modal-card" role="dialog" aria-modal="true" aria-labelledby="payment-modal-title">
+    <div class="payment-modal-card checkout-card" role="dialog" aria-modal="true" aria-labelledby="payment-modal-title">
       <button type="button" class="payment-modal-close" onclick="closePaymentModal()" aria-label="Close">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       </button>
-      <div class="payment-modal-glow"></div>
-      <div class="payment-modal-content">
-        <div class="payment-modal-icon">🏆</div>
-        <div class="payment-modal-title" id="payment-modal-title">You did it — now claim it</div>
-        <div class="payment-modal-desc">Your approved work has unlocked your credentials. Here's what you get the moment you activate your profile:</div>
-        <ul class="payment-modal-list">
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span><strong>Verified Certificate</strong> with unique ID</span></li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span><strong>Public Proof of Work Portfolio</strong> (lifetime hosting)</span></li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg><span><strong>Letter of Recommendation</strong> for your domain</span></li>
-        </ul>
-        <div class="payment-modal-price"><span class="js-cert-price"></span> <span class="payment-modal-price-sub js-cert-price-sub">One-time · covers verification &amp; lifetime hosting</span></div>
-        <div id="modal-pay-region"></div>
-        <input type="text" id="discount-code-milestone" aria-label="Discount code" class="dash-input dash-input--center" placeholder="Have a discount code?">
-        <button id="modal-pay-btn" class="cert-btn cert-btn-primary cert-btn-block">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-          Unlock My Certificate — <span class="js-cert-price"></span>
-        </button>
-        <div class="secure-note" data-pay-secure>
-          🔒 Secured by Razorpay · UPI / Card / NetBanking · Every certificate is independently verifiable
+      <div id="payment-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Stipend seat modal — the student confirms their seat with their own certificate ID.
+       Two states: form -> confirmed. dashboard.js drives it (openStipendModal / submitStipendEntry). -->
+  <div class="payment-modal-overlay" id="stipend-modal">
+    <div class="payment-modal-card stipend-modal-card" role="dialog" aria-modal="true" aria-labelledby="stipend-modal-title">
+      <button type="button" class="payment-modal-close" onclick="closeStipendModal()" aria-label="Close">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+
+      <!-- 1. Enter certificate ID -->
+      <form class="stipend-step" id="stipend-form" novalidate onsubmit="submitStipendEntry(event)">
+        <p class="checkout-eyebrow">Top-performer stipend · up to $100 a month</p>
+        <h2 class="stipend-title" id="stipend-modal-title">Confirm your seat</h2>
+        <p class="stipend-sub">Seats are reserved for interns who finished the internship and hold a verified certificate. Enter the ID from your certificate to lock yours in.</p>
+        <p class="fair-note"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg><span><strong>Only genuine interns compete.</strong> The nominal certificate fee keeps out fake accounts and duplicate entries. One seat per verified intern.</span></p>
+
+        <div class="stipend-field">
+          <div class="stipend-label-row">
+            <label class="stipend-label" for="stipend-cert-input">Certificate ID</label>
+            <button type="button" class="link-btn stipend-paste" id="stipend-paste-btn" onclick="stipendPaste()" hidden>Paste</button>
+          </div>
+          <input type="text" id="stipend-cert-input" class="dash-input stipend-input" placeholder="SM-XXXX-XXXX-XXXX"
+                 autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="24"
+                 aria-describedby="stipend-help stipend-error" oninput="stipendInput(this)">
         </div>
+        <p class="stipend-help" id="stipend-help">
+          It's printed at the bottom of your certificate and in your "certificate issued" email.
+          <a href="#" id="stipend-cert-link" target="_blank" rel="noopener">Open my certificate ↗</a>
+        </p>
+        <p class="stipend-error" id="stipend-error" role="alert"></p>
+
+        <button type="submit" class="cert-btn cert-btn-primary cert-btn-block" id="stipend-submit-btn" disabled>Confirm my seat</button>
+        <ul class="stipend-rules">
+          <li>One seat per intern. It's tied to your certificate.</li>
+          <li>Only your own certificate can claim your seat.</li>
+          <li>You'll get a confirmation email right away.</li>
+        </ul>
+        <details class="stipend-how">
+          <summary>How is the stipend kept fair?</summary>
+          <ul>
+            <li>On merit, not luck: we look at the quality of your approved weekly submissions.</li>
+            <li>Why a fee? Free entries attract fake accounts and repeat sign-ups that crowd out real interns. The nominal certificate fee keeps them out, and it covers your credentials too, so there's nothing extra to pay to enter.</li>
+            <li>Winners are confirmed on the 3rd of every month. Only 8–10 interns are picked, and each one gets an email from SkillMe.</li>
+          </ul>
+        </details>
+      </form>
+
+      <!-- 2. Confirmed -->
+      <div class="stipend-step stipend-done" id="stipend-done" hidden>
+        <div class="stipend-check" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h2 class="stipend-title" tabindex="-1" id="stipend-done-title">You're in the running</h2>
+        <p class="stipend-sub" id="stipend-done-sub">We've sent a confirmation to your email.</p>
+        <ol class="stipend-next">
+          <li class="is-done"><span>1</span><div><strong>Seat locked in</strong><p>Tied to certificate <code id="stipend-done-cert">—</code>. Nothing else to submit.</p></div></li>
+          <li><span>2</span><div><strong>We review your work</strong><p>The team looks at the quality of your approved weekly submissions.</p></div></li>
+          <li><span>3</span><div><strong>Winners confirmed on the 3rd</strong><p>Every month, 8–10 interns are picked. If you're one of them, we'll email you the stipend details.</p></div></li>
+        </ol>
+        <button type="button" class="cert-btn cert-btn-primary cert-btn-block" onclick="closeStipendModal()">Done</button>
       </div>
     </div>
   </div>

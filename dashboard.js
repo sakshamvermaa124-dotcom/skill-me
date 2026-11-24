@@ -49,7 +49,15 @@ const payLogos = keys => keys.map(k => `<span class="pay-logo">${PAY_LOGOS[k]}</
 
 // Accepted payment methods for this student's price. Informational only, nothing to pick.
 // The logos are decorative (aria-hidden): the caption next to them says the same in words.
-function payMethodsHtml() {
+function payTipHtml() {
+  return getPayRegion() === 'intl' ? `
+      <p class="pay-methods-tip">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>Use a regular debit or credit card. Prepaid and virtual cards are sometimes declined.</span>
+      </p>` : '';
+}
+
+function payMethodsHtml(withTip = true) {
   const intl = getPayRegion() === 'intl';
   return `
     <div class="pay-methods">
@@ -57,11 +65,7 @@ function payMethodsHtml() {
         <span class="pay-methods-logos" aria-hidden="true">${payLogos(intl ? ['visa', 'mastercard'] : ['upi', 'rupay', 'visa', 'mastercard'])}</span>
         <span class="pay-methods-caption">${intl ? 'Visa &amp; Mastercard debit or credit cards' : 'UPI, cards &amp; netbanking'}</span>
       </div>
-      ${intl ? `
-      <p class="pay-methods-tip">
-        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        <span>Use a regular debit or credit card. Prepaid and virtual cards are sometimes declined.</span>
-      </p>` : ''}
+      ${withTip ? payTipHtml() : ''}
     </div>`;
 }
 
@@ -72,10 +76,51 @@ function certPriceSub() {
     : 'One-time · covers verification &amp; lifetime hosting';
 }
 
+// Line icons for the credentials and payment screens. One stroke style everywhere, instead of
+// emoji, which render differently on every OS and clash with the rest of the dashboard.
+const svgIcon = (size, paths, sw = 1.8) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+const CRED_ICON_PATHS = {
+  award: '<circle cx="12" cy="8" r="6"/><path d="M15.48 12.89 17 22l-5-3-5 3 1.52-9.11"/>',
+  file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+  globe: '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
+  trophy: '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>',
+  lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  check: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+  clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  x: '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
+  shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+};
+const credIcon = (name, size = 20) => svgIcon(size, CRED_ICON_PATHS[name]);
+
+// Why the certificate fee gates the stipend. Shown as its own line (never buried in a paragraph)
+// wherever a student decides whether to pay or enter.
+const FAIR_NOTE_TEXT = 'The nominal fee keeps out fake accounts and duplicate entries. One seat per verified intern.';
+function fairNoteHtml(text = FAIR_NOTE_TEXT, lead = 'Only genuine interns compete.') {
+  return `<p class="fair-note">${credIcon('shield', 18)}<span><strong>${lead}</strong> ${text}</span></p>`;
+}
+
+// Credential funnel: where students stop between "unlocked" and "paid" / "seat taken".
+// Each step is sent once per page load and stored once per enrollment by the backend
+// (see `python cli.py credential-funnel`). Best-effort and silent; preview mode never reports.
+const credFunnelSent = new Set();
+function trackCred(step) {
+  const s = window._dashStudent, d = window._dashData;
+  if (credFunnelSent.has(step) || !s || !s.id || new URLSearchParams(window.location.search).get('preview')) return;
+  credFunnelSent.add(step);
+  try {
+    fetch(`${API}/api/students/funnel`, {
+      method: 'POST',
+      keepalive: true,
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ step, student_id: s.id, batch_id: (d && d._batch_id) || null }),
+    }).catch(() => {});
+  } catch (e) { /* tracking must never break the page */ }
+}
+
 function syncPayRegionUI() {
   const secure = getPayRegion() === 'intl' ? 'International Visa / Mastercard' : 'UPI / Card / NetBanking';
   document.querySelectorAll('[data-pay-secure]').forEach(el => {
-    el.textContent = `🔒 Secured by Razorpay · ${secure} · Every certificate is independently verifiable`;
+    el.innerHTML = `${credIcon('lock', 12)}<span>Secured by Razorpay · ${secure} · Every certificate is independently verifiable</span>`;
   });
 }
 const FRONTEND = window.SKILLME_FRONTEND || '${FRONTEND}';
@@ -106,7 +151,8 @@ function dashToast(msg, tone) {
 let modalReturnFocus = null;
 function modalOpened(modal) {
   modalReturnFocus = document.activeElement;
-  const first = modal.querySelector('.payment-modal-close, .milestone-modal-close') || modal.querySelector('button, [href], input');
+  const first = modal.querySelector('h2[tabindex="-1"]')
+    || modal.querySelector('.payment-modal-close, .milestone-modal-close') || modal.querySelector('button, [href], input');
   if (first) first.focus({ preventScroll: true });
 }
 function modalClosed() {
@@ -954,9 +1000,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const descEl = document.getElementById('progress-desc');
     if (pct >= PAYMENT_UNLOCK_PCT) {
       if (pct < 100) {
-        descEl.textContent = `Impressive progress! ${totalCompleted} of ${totalAssigned} tasks done. You have met the minimum requirements to claim your certificate!`;
+        descEl.textContent = `${totalCompleted} of ${totalAssigned} weeks approved. Your credentials are unlocked and ready to issue.`;
       } else {
-        descEl.textContent = `Outstanding! You've completed all ${totalAssigned} assigned tasks. You're a star intern!`;
+        descEl.textContent = `All ${totalAssigned} weeks approved. You've completed the internship.`;
       }
       // Show once per student per completion bracket (75/100), not on every dashboard load.
       const eligibilitySeenKey = `skillme_eligibility_seen_s${student && student.id ? student.id : 'guest'}_pct${pct}`;
@@ -1046,6 +1092,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const payState = await fetchPayState();
         credPayState = payState;
         renderJourney(data, lastTasks); // refresh the locked / unlocked labels
+        renderNextStep(data, lastTasks);
         if (payState === 'paid') {
           renderCertReady(certSection, student, data);
           hideCredHints();
@@ -1059,7 +1106,9 @@ document.addEventListener('DOMContentLoaded', () => {
           hideCredHints();
         } else if (eligible) {
           renderPaymentBanner(certSection, student, data);
+          renderStipendHome(student, 'payable');
           hideCredHints();
+          trackCred('cred_offer_seen');
         } else {
           certSection.style.display = 'none';
           certSection.innerHTML = '';
@@ -1067,6 +1116,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
       if (certSection) await renderCredentials();
+
+      // Reminder emails link to dashboard.html?from=…#checkout / #stipend: open that step directly.
+      const cameFrom = urlParams.get('from');
+      if (cameFrom === 'cred_email') trackCred('cred_email_clicked');
+      if (cameFrom === 'stipend_email') trackCred('stipend_email_clicked');
+      const jump = window.location.hash;
+      if (jump === '#checkout' || jump === '#stipend') {
+        const qs = new URLSearchParams(window.location.search);
+        qs.delete('from');
+        history.replaceState(null, '', window.location.pathname + (qs.toString() ? `?${qs}` : ''));
+        const popup = document.getElementById('completion-overlay');
+        if (popup) popup.remove();
+        if (jump === '#checkout') window.showPaymentModal(student, data); // routes paid students to their documents
+        else window.openStipendModal(); // routes students without a certificate to Credentials
+      }
 
       // ─── Urgent (24h) Processing Request Panel ───
       loadUrgentRequestPanel(student, data, pct, paymentUnlocked);
@@ -1171,11 +1235,11 @@ document.addEventListener('DOMContentLoaded', () => {
       factHtml = `${remaining}<span class="stat-unit"> more week${remaining === 1 ? '' : 's'}</span>`;
       credText = `Complete ${weeksLeft} to get your credentials`;
     } else if (credPayState === 'paid') {
-      factHtml = '<span class="fact-ok">Unlocked</span>';
-      credText = 'Unlocked — ready to view';
+      factHtml = '<span class="fact-ok">Issued</span>';
+      credText = 'Issued. View, download or share';
     } else if (credPayState === 'unpaid') {
-      factHtml = 'Locked';
-      credText = 'Locked — unlock in Credentials';
+      factHtml = '<span class="fact-ok">Ready to issue</span>';
+      credText = 'Ready to issue';
     } else {
       factHtml = '<span class="fact-ok">Eligible</span>';
       credText = 'Open Credentials';
@@ -1183,6 +1247,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (factEl) factEl.innerHTML = factHtml;
     const homeCred = document.getElementById('home-cred-status');
     if (homeCred) homeCred.textContent = credText;
+
+    // Credentials menu: a dot while there's something to do there (issue, or claim the seat)
+    const stipendSt = (window._dashStudent && window._dashStudent.stipend) || {};
+    const credTodo = unlocked && (credPayState === 'unpaid' || (credPayState === 'paid' && !stipendSt.entered));
+    ['nav-cred-badge', 'tab-cred-badge'].forEach(id => {
+      const b = document.getElementById(id);
+      if (b) b.hidden = !credTodo;
+    });
 
     // Sidebar badge: how many tasks still need action
     const badge = document.getElementById('nav-work-badge');
@@ -1248,8 +1320,18 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     let s;
-    if (pct >= 100) {
-      s = { tone: 'ok', label: 'All tasks complete', title: "You've finished the internship 🎉", desc: 'Your Certificate, LOR and Portfolio are waiting in the Credentials tab.', cta: 'Open Credentials', panel: 'panel-credentials' };
+    const eligible = pct >= PAYMENT_UNLOCK_PCT || !!summary.payment_unlocked;
+    const stipend = (window._dashStudent && window._dashStudent.stipend) || {};
+    if (eligible && credPayState === 'unpaid' && !rejected) {
+      s = { tone: 'ok', label: `${summary.completed_tasks || approved} of ${total} weeks approved`, title: 'Your credentials are unlocked',
+            desc: `Issue your certificate, LOR and portfolio, and take your seat in the stipend round. Next winners are picked on ${nextStipendDate()}.`,
+            cta: `Issue my credentials · ${certPriceLabel()}`, action: () => window.showPaymentModal(window._dashStudent, window._dashData) };
+    } else if (eligible && credPayState === 'paid' && !stipend.entered) {
+      s = { tone: 'ok', label: 'Credentials issued', title: 'Confirm your stipend seat',
+            desc: `Use your certificate ID to enter. 8–10 interns are picked on the 3rd of every month; the next round is on ${nextStipendDate()}.`,
+            cta: 'Confirm my seat', action: () => window.openStipendModal() };
+    } else if (pct >= 100) {
+      s = { tone: 'ok', label: 'All weeks approved', title: "You've finished the internship", desc: 'Your Certificate, LOR and Portfolio are in the Credentials tab.', cta: 'Open Credentials', panel: 'panel-credentials' };
     } else if (rejected) {
       s = { tone: 'danger', label: 'Action needed', title: `Resubmit Week ${rejected}: ${titleOf(rejected)}`, desc: 'Your post was rejected. Read the admin note on the task, fix your post and paste the new link.', cta: 'Fix & resubmit', panel: 'panel-work', week: rejected };
     } else if (pct >= PAYMENT_UNLOCK_PCT) {
@@ -1272,7 +1354,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
         </button>
       </div>`;
-    el.querySelector('button').addEventListener('click', () => goToTask(s.panel, s.week));
+    el.querySelector('button').addEventListener('click', () => (s.action ? s.action() : goToTask(s.panel, s.week)));
   }
 
   function renderSubmissionsList(submissions) {
@@ -1788,81 +1870,281 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ─────────────────────────────────────────────────────────────
-    // 🏆🏆🏆 Payment Modal Helpers 🏆🏆🏆
-    window.closePaymentModal = function() {
-      const modal = document.getElementById('payment-modal');
-      if (modal && modal.classList.contains('active')) {
-        modal.classList.remove('active');
-        setTimeout(() => modal.style.display = 'none', 400); // match transition duration
-        modalClosed();
-      }
-    };
-    
-    window.showPaymentModal = function(student, data) {
-      const modal = document.getElementById('payment-modal');
-      // Only students who have unlocked their credentials ever see the payment step (and price).
-      const summary = (data && data.summary) || {};
-      const eligible = (summary.completion_pct || 0) >= PAYMENT_UNLOCK_PCT || summary.payment_unlocked || urlParams.get('preview');
-      if (!eligible) return;
-      if (modal) {
-        modal.querySelectorAll('.js-cert-price').forEach(el => { el.textContent = certPriceLabel(); });
-        modal.querySelectorAll('.js-cert-price-sub').forEach(el => { el.innerHTML = certPriceSub(); });
-        // Wire up the pay button dynamically
-        const payBtn = document.getElementById('modal-pay-btn');
-        if (payBtn) {
-          payBtn.onclick = () => window.initiatePayment(student.id, data._batch_id);
-        }
-        const regionSlot = document.getElementById('modal-pay-region');
-        if (regionSlot) regionSlot.innerHTML = payMethodsHtml();
-        syncPayRegionUI();
-        modal.style.display = 'flex';
-        // Force reflow
-        void modal.offsetWidth;
-        modal.classList.add('active');
-        modalOpened(modal);
-      }
-    };
-
-    // 🏆🏆🏆 Razorpay Payment Helpers 🏆🏆🏆─────────────────────────────────
+  // Credential checkout
+  // The modal answers, in order, what a student weighs before paying: is this really mine
+  // (their name on a certificate preview), what do I get, is it fair (the fee keeps out fakes,
+  // listed right with what they get), then the button with the price. Few words on purpose:
+  // every extra line is one more reason to hesitate.
   // ─────────────────────────────────────────────────────────────
+  const ICON_CHECK = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>';
+  const ICON_TROPHY = svgIcon(16, CRED_ICON_PATHS.trophy, 2);
+  const CREDENTIAL_ITEMS = [
+    ['Verified certificate', 'Recruiters can check it in seconds'],
+    ['Letter of recommendation', 'For your track'],
+    ['Proof-of-Work portfolio', 'Hosted for life'],
+  ];
 
-  function renderPaymentBanner(certSection, student, data) {
-    certSection.style.display = 'block';
-    certSection.innerHTML = `
-      <div class="cert-banner" id="payment-banner">
-        <div class="cert-banner-glow"></div>
-        <div class="cert-banner-content">
-          <div class="cert-banner-icon">🔒</div>
-          <div class="cert-banner-text">
-            <div class="cert-banner-title">Your certificate is locked</div>
-            <div class="cert-banner-sub">
-              You've earned your completion credentials. A one-time ${certPriceLabel()} covers your verified certificate, personalized LOR and lifetime hosting for your Proof of Work portfolio.
-            </div>
+  function firstNameOf(s) {
+    return String((s && (s.first_name || String(s.name || '').split(' ')[0])) || '').trim();
+  }
+
+  function credentialUrls(student, data) {
+    const domain = (data && data.progress && data.progress[0] && data.progress[0].domain) || 'web-dev';
+    const q = `student_id=${student.id}&batch_id=${data._batch_id}&name=${encodeURIComponent(student.name)}&domain=${encodeURIComponent(domain)}`;
+    return {
+      cert: `${FRONTEND}/certificate.html?${q}`,
+      lor: `${FRONTEND}/lor.html?${q}`,
+      portfolio: student.id ? `${FRONTEND}/portfolio.html?student_id=${student.id}` : '#',
+    };
+  }
+
+  function renderPaymentModal(student, data) {
+    const body = document.getElementById('payment-modal-body');
+    if (!body) return;
+    const s = student || {};
+    const summary = (data && data.summary) || {};
+    const done = summary.completed_tasks || 0;
+    const total = summary.total_tasks || 4;
+    const completed = done >= 3;
+    const first = escHtml(firstNameOf(s) || 'You');
+    const track = describeDomain((data.progress && data.progress[0] && data.progress[0].domain) || s.domain).label;
+    const canFixName = !!(s.name_change && s.name_change.can_edit);
+    const price = certPriceLabel();
+
+    body.innerHTML = `
+      <div class="checkout-hero">
+        <div class="cert-preview" role="img" aria-label="Preview of your certificate, issued to ${escHtml(s.name || '')}">
+          <div class="cert-preview-top">
+            <span class="cert-preview-brand">SkillMe</span>
+            <span class="cert-preview-seal">${ICON_CHECK}Verified</span>
           </div>
-          <div class="cert-banner-actions" style="width: 100%;">
-            ${payMethodsHtml()}
-            <div class="cert-pay-row">
-              <input type="text" id="discount-code" class="dash-input" placeholder="Have a discount code?">
-              <button id="pay-btn" class="cert-btn cert-btn-primary" onclick="initiatePayment(${student.id}, ${data._batch_id})">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15">
-                  <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
-                </svg>
-                Unlock My Certificate — ${certPriceLabel()}
-              </button>
-            </div>
-            <div class="secure-note" data-pay-secure></div>
-          </div>
+          <div class="cert-preview-kicker">Certificate of Completion</div>
+          <div class="cert-preview-name">${escHtml(s.name || '')}</div>
+          <div class="cert-preview-track">${escHtml(track)} Internship</div>
+          <div class="cert-preview-foot"><span>ID&nbsp;SM-••••-••••-••••</span><span>Issued on payment</span></div>
+        </div>
+        <p class="checkout-name-check">Your name will be printed exactly like this.${canFixName ? ' <button type="button" class="link-btn" onclick="checkoutFixName()">Not right? Fix it first</button>' : ''}</p>
+      </div>
+
+      <div class="checkout-main">
+        <p class="checkout-eyebrow">${completed ? `${done} of ${total} weeks approved` : 'Priority request approved'}</p>
+        <h2 class="checkout-title" id="payment-modal-title" tabindex="-1">${completed ? `${first}, you've earned this.` : `${first}, your credentials are ready.`}</h2>
+        <p class="checkout-sub">You never paid to take part. You pay once, now that you've finished.</p>
+
+        <ul class="checkout-includes">
+          ${CREDENTIAL_ITEMS.map(([t, d], i) => `<li><span class="checkout-tick">${ICON_CHECK}</span><div><strong>${t}</strong><span>${d}${i === 0 ? ' · <button type="button" class="link-btn checkout-proof" aria-expanded="false" aria-controls="recruiter-view" onclick="toggleRecruiterView(this)">See how</button>' : ''}</span>${i === 0 ? recruiterViewHtml(s.name, track) : ''}</div></li>`).join('')}
+          <li class="is-stipend"><span class="checkout-tick">${ICON_TROPHY}</span><div><strong>Stipend seat</strong><span>Up to $100 a month · 8–10 interns picked monthly</span></div></li>
+          <li class="is-fair"><span class="checkout-tick">${credIcon('shield', 16)}</span><div><strong>Only genuine interns compete</strong><span>The fee keeps out fake accounts and duplicate entries</span></div></li>
+        </ul>
+      </div>
+
+      <div class="checkout-footer">
+        <button id="modal-pay-btn" class="cert-btn cert-btn-primary cert-btn-block checkout-cta">Issue my credentials · ${escHtml(price)}</button>
+        <p class="checkout-once">One-time · no subscription · yours for life</p>
+        ${payMethodsHtml(false)}
+      </div>
+      <div class="checkout-after">
+        ${payTipHtml()}
+        <div class="checkout-discount">
+          <button type="button" class="link-btn" id="discount-toggle" aria-expanded="false" aria-controls="discount-code-milestone">Have a discount code?</button>
+          <input type="text" id="discount-code-milestone" aria-label="Discount code" class="dash-input dash-input--center" placeholder="Enter your discount code" hidden>
+        </div>
+        <div class="secure-note" data-pay-secure></div>
+        <p class="checkout-legal">Issued the moment you pay, so it's <a href="/refunds" target="_blank" rel="noopener">non-refundable</a>. Check your name above.</p>
+      </div>`;
+
+    const toggle = document.getElementById('discount-toggle');
+    const code = document.getElementById('discount-code-milestone');
+    if (toggle && code) toggle.onclick = () => {
+      code.hidden = false;
+      toggle.hidden = true;
+      toggle.setAttribute("aria-expanded", "true");
+      code.focus();
+    };
+    const payBtn = document.getElementById('modal-pay-btn');
+    if (payBtn) payBtn.onclick = () => {
+      trackCred('cred_pay_clicked');
+      window.initiatePayment(s.id, data._batch_id);
+    };
+    syncPayRegionUI();
+  }
+
+  // "See how": what a recruiter will see when they check the ID, with the student's own name.
+  // A labelled preview inside the dashboard. The public verify page only ever shows real certificates.
+  function recruiterViewHtml(name, track) {
+    return `
+      <div class="recruiter-view" id="recruiter-view" hidden>
+        <p class="recruiter-view-label">Preview: what a recruiter sees when they check your ID</p>
+        <div class="recruiter-view-card">
+          <div class="recruiter-view-head">${credIcon('check', 16)}<strong>Certificate verified</strong><span>Valid</span></div>
+          <dl>
+            <div><dt>Issued to</dt><dd>${escHtml(name || '')}</dd></div>
+            <div><dt>Track</dt><dd>${escHtml(track)} Internship</dd></div>
+            <div><dt>Status</dt><dd>Completed · 4 weeks</dd></div>
+            <div><dt>Certificate ID</dt><dd>Assigned when issued</dd></div>
+          </dl>
+        </div>
+        <p class="recruiter-view-foot">They open the SkillMe verify page, type your ID, and see this. No calls, no emails, for life.</p>
+      </div>`;
+  }
+
+  window.toggleRecruiterView = function(btn) {
+    const panel = document.getElementById('recruiter-view');
+    if (!panel) return;
+    const open = panel.hidden;
+    panel.hidden = !open;
+    btn.setAttribute('aria-expanded', String(open));
+    btn.textContent = open ? 'Hide preview' : 'See how';
+  };
+
+  window.closePaymentModal = function() {
+    const modal = document.getElementById('payment-modal');
+    if (modal && modal.classList.contains('active')) {
+      modal.classList.remove('active');
+      setTimeout(() => modal.style.display = 'none', 400); // match transition duration
+      modalClosed();
+    }
+  };
+
+  window.showPaymentModal = function(student, data) {
+    const modal = document.getElementById('payment-modal');
+    // Only students who have unlocked their credentials ever see the payment step (and price).
+    const summary = (data && data.summary) || {};
+    const eligible = (summary.completion_pct || 0) >= PAYMENT_UNLOCK_PCT || summary.payment_unlocked || urlParams.get('preview');
+    if (!eligible || !modal) return;
+    if (credPayState === 'paid') { // already issued: take them to their documents instead
+      if (typeof window.dashShowPanel === 'function') window.dashShowPanel('panel-credentials');
+      return;
+    }
+    renderPaymentModal(student, data);
+    modal.style.display = 'flex';
+    void modal.offsetWidth; // force reflow so the transition runs
+    modal.classList.add('active');
+    const card = modal.querySelector('.payment-modal-card');
+    if (card) card.scrollTop = 0;
+    modalOpened(modal);
+    trackCred('cred_checkout_opened');
+  };
+
+  // After payment the checkout turns into a celebration that hands the student straight to the
+  // stipend seat, with the certificate ID they need right there to copy. The moment they're
+  // happiest is the moment they're most likely to take the next step.
+  function showPaymentIssued(certId) {
+    const modal = document.getElementById('payment-modal');
+    const body = document.getElementById('payment-modal-body');
+    const student = window._dashStudent || {}, data = window._dashData || {};
+    if (!modal || !body) { dashToast('Payment confirmed. Your certificate is ready.'); return; }
+    const urls = credentialUrls(student, data);
+    const first = escHtml(firstNameOf(student));
+    const id = escHtml(certId || '');
+    body.innerHTML = `
+      <div class="issued">
+        <div class="stipend-check issued-check" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <p class="checkout-eyebrow tone-ok">Payment confirmed</p>
+        <h2 class="checkout-title" id="payment-modal-title" tabindex="-1">Your credentials are issued${first ? `, ${first}` : ''}</h2>
+        <p class="checkout-sub">Your certificate, letter of recommendation and portfolio are issued and on record. Anyone can verify them with your certificate ID.</p>
+        ${id ? `
+        <div class="issued-id">
+          <span class="issued-id-label">Your certificate ID</span>
+          <code id="issued-cert-id">${id}</code>
+          <button type="button" class="cert-btn cert-btn-secondary issued-copy" onclick="copyIssuedId(this)">Copy</button>
+        </div>` : ''}
+        <div class="issued-next">
+          <strong>Last step: take your stipend seat</strong>
+          <p>${id ? 'Copy the ID above and use it to' : 'Use the ID on your certificate to'} enter the stipend of up to $100 a month. 8–10 interns are picked on ${escHtml(nextStipendDate())}.</p>
+        </div>
+        <button type="button" class="cert-btn cert-btn-primary cert-btn-block checkout-cta" onclick="issuedToStipend()">Confirm my stipend seat</button>
+        <div class="issued-links">
+          <a href="${urls.cert}" target="_blank" rel="noopener">View certificate ↗</a>
+          <a href="${urls.lor}" target="_blank" rel="noopener">View LOR ↗</a>
+          ${urls.portfolio !== '#' ? `<a href="${urls.portfolio}" target="_blank" rel="noopener">Portfolio ↗</a>` : ''}
         </div>
       </div>`;
-    syncPayRegionUI();
+    if (!modal.classList.contains('active')) {
+      modal.style.display = 'flex';
+      void modal.offsetWidth;
+      modal.classList.add('active');
+    }
+    const card = modal.querySelector('.payment-modal-card');
+    if (card) card.scrollTop = 0;
+    const issued = body.querySelector('.issued');
+    if (issued) issued.classList.add('is-celebrating');
+    const title = document.getElementById('payment-modal-title');
+    if (title) title.focus({ preventScroll: true });
+  }
+
+  window.copyIssuedId = async function(btn) {
+    const code = document.getElementById('issued-cert-id');
+    if (!code) return;
+    try {
+      await navigator.clipboard.writeText(code.textContent.trim());
+      btn.textContent = 'Copied';
+      setTimeout(() => { btn.textContent = 'Copy'; }, 1800);
+    } catch (e) { // no clipboard access: select the text so the student can copy it themselves
+      const range = document.createRange();
+      range.selectNodeContents(code);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  };
+
+  window.issuedToStipend = function() {
+    window.closePaymentModal();
+    setTimeout(() => window.openStipendModal(), 420);
+  };
+
+  // Developer preview only: the success screen without a real payment.
+  window.previewPaymentIssued = function() {
+    if (!urlParams.get('preview')) return;
+    showPaymentIssued('SM-A1B2-C3D4-E5F6');
+  };
+
+  // "Not right? Fix it first" — the name card lives on the Credentials tab.
+  window.checkoutFixName = function() {
+    window.closePaymentModal();
+    if (typeof window.dashShowPanel === 'function') window.dashShowPanel('panel-credentials');
+    setTimeout(() => {
+      if (typeof window.nameCardEdit === 'function') window.nameCardEdit();
+      const card = document.getElementById('name-card');
+      if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 420);
+  };
+
+  // Credentials tab, eligible but unpaid: a compact claim card that opens the checkout.
+  function renderPaymentBanner(certSection, student, data) {
+    const first = escHtml(firstNameOf(student));
+    const sum = (data && data.summary) || {};
+    certSection.style.display = 'block';
+    certSection.innerHTML = `
+      <div class="claim-card" id="payment-banner">
+        <div class="claim-main">
+          <p class="claim-kicker">${sum.completed_tasks >= 3 ? `${sum.completed_tasks} of ${sum.total_tasks || 4} weeks approved` : 'Priority request approved'}</p>
+          <h3 class="claim-title">Your credentials are ready${first ? `, ${first}` : ''}</h3>
+          <p class="claim-sub">You've done the work. Issue your verified certificate, letter of recommendation and lifetime portfolio. Your certificate also gives you a seat in the stipend round, with the next winners picked on ${escHtml(nextStipendDate())}.</p>
+          <ul class="claim-list">
+            ${CREDENTIAL_ITEMS.map(([t]) => `<li>${ICON_CHECK}${t}</li>`).join('')}
+            <li class="is-stipend">${ICON_TROPHY}Stipend seat</li>
+          </ul>
+          ${fairNoteHtml()}
+        </div>
+        <div class="claim-side">
+          <div class="claim-price">${escHtml(certPriceLabel())}</div>
+          <div class="claim-price-sub">One-time · no subscription</div>
+          <button type="button" class="cert-btn cert-btn-primary cert-btn-block" id="claim-btn" onclick="showPaymentModal(window._dashStudent, window._dashData)">Issue my credentials</button>
+          <button type="button" class="link-btn claim-why" onclick="showPaymentModal(window._dashStudent, window._dashData)">See what's included</button>
+        </div>
+      </div>`;
   }
 
   function renderCertReady(certSection, student, data) {
     if (credPayState !== 'paid') { credPayState = 'paid'; renderJourney(data, lastTasks); }
-    const domain = (data.progress[0] && data.progress[0].domain) || 'web-dev';
-    const certUrl = `${FRONTEND}/certificate.html?student_id=${student.id}&batch_id=${data._batch_id}&name=${encodeURIComponent(student.name)}&domain=${encodeURIComponent(domain)}`;
-    const lorUrl  = `${FRONTEND}/lor.html?student_id=${student.id}&batch_id=${data._batch_id}&name=${encodeURIComponent(student.name)}&domain=${encodeURIComponent(domain)}`;
-    const portfolioUrl = student.id ? `${FRONTEND}/portfolio.html?student_id=${student.id}` : '#';
+    // A paid student holds an issued certificate, so they can enter the stipend round.
+    if (student) student.stipend = Object.assign({ entered: false, entry: null }, student.stipend, { eligible: true });
+    const urls = credentialUrls(student, data);
+    const certUrl = urls.cert, lorUrl = urls.lor, portfolioUrl = urls.portfolio;
 
     // ── Credential quick-strip (above banner) ─────────────────────────────────
     const credStrip = document.getElementById('cred-strip');
@@ -1870,7 +2152,7 @@ document.addEventListener('DOMContentLoaded', () => {
       credStrip.className = 'cred-strip visible';
       credStrip.innerHTML = `
         <a href="${certUrl}" target="_blank" class="cred-pill">
-          <div class="cred-pill-icon">🎓</div>
+          <div class="cred-pill-icon">${credIcon('award', 18)}</div>
           <div class="cred-pill-text">
             <div class="cred-pill-label">Certificate</div>
             <div class="cred-pill-name">View &amp; Download</div>
@@ -1878,7 +2160,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <svg class="cred-pill-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
         <a href="${lorUrl}" target="_blank" class="cred-pill">
-          <div class="cred-pill-icon tone-info">📄</div>
+          <div class="cred-pill-icon tone-info">${credIcon('file', 18)}</div>
           <div class="cred-pill-text">
             <div class="cred-pill-label">Letter of Recommendation</div>
             <div class="cred-pill-name">View LOR</div>
@@ -1886,7 +2168,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <svg class="cred-pill-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </a>
         <a href="${portfolioUrl}" target="${portfolioUrl !== '#' ? '_blank' : '_self'}" class="cred-pill${portfolioUrl === '#' ? ' is-disabled' : ''}">
-          <div class="cred-pill-icon tone-ok">🌐</div>
+          <div class="cred-pill-icon tone-ok">${credIcon('globe', 18)}</div>
           <div class="cred-pill-text">
             <div class="cred-pill-label">Proof of Work</div>
             <div class="cred-pill-name">Public Portfolio</div>
@@ -1896,16 +2178,16 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
     }
 
-    // ── Certificate banner ────────────────────────────────────────────────────
+    // ── Certificate banner + stipend seat ─────────────────────────────────────
     certSection.style.display = 'block';
     certSection.innerHTML = `
       <div class="cert-banner">
         <div class="cert-banner-glow"></div>
         <div class="cert-banner-content">
-          <div class="cert-banner-icon">🏆</div>
+          <div class="cert-banner-icon">${credIcon('trophy', 26)}</div>
           <div class="cert-banner-text">
             <div class="cert-banner-title">Your credentials are ready</div>
-            <div class="cert-banner-sub">Payment confirmed — view, download and share them anywhere.</div>
+            <div class="cert-banner-sub">Payment confirmed. View, download and share them anywhere.</div>
           </div>
           <div class="cert-banner-actions">
             <a href="${certUrl}" target="_blank" class="cert-btn cert-btn-primary">
@@ -1924,14 +2206,227 @@ document.addEventListener('DOMContentLoaded', () => {
             ${portfolioUrl !== '#' ? `<a href="${portfolioUrl}" target="_blank" class="cert-btn cert-btn-secondary">Portfolio ↗</a>` : ''}
           </div>
         </div>
-      </div>`;
+      </div>
+      <div id="stipend-card-slot"></div>`;
 
-    const modalBtn = document.getElementById('modal-pay-btn');
-    if (modalBtn) {
-      modalBtn.innerHTML = 'Paid &amp; Unlocked';
-      modalBtn.disabled = true;
-    }
+    renderStipendCard(student);
+    renderStipendHome(student, 'paid');
   }
+
+  // ─────────────────────────────────────────────────────────────
+  // Top-performer stipend seat
+  // A seat is confirmed by typing the ID of the student's own certificate (one per person,
+  // enforced by POST /api/students/stipend/enter). Typing the ID is deliberate: a small act
+  // of commitment that makes the seat feel claimed rather than handed out.
+  // ─────────────────────────────────────────────────────────────
+  function stipendState(student) {
+    return (student && student.stipend) || { eligible: false, entered: false, entry: null };
+  }
+
+  function formatEntryDate(v) {
+    if (!v) return '';
+    const str = String(v);
+    const d = new Date(str.replace(' ', 'T') + (/[zZ]$|[+-]\d\d:?\d\d$/.test(str) ? '' : 'Z'));
+    return isNaN(d) ? '' : d.toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  function renderStipendCard(student) {
+    const slot = document.getElementById('stipend-card-slot');
+    if (!slot) return;
+    const st = stipendState(student);
+    const figure = '<div class="stipend-card-figure" aria-hidden="true"><span>Up to</span><strong>$100</strong><span>a month</span></div>';
+    if (st.entered && st.entry) {
+      const when = formatEntryDate(st.entry.entered_at);
+      slot.innerHTML = `
+        <section class="stipend-card" data-state="entered" aria-label="Top-performer stipend">
+          ${figure}
+          <div class="stipend-card-copy">
+            <p class="stipend-card-status tone-ok">${ICON_CHECK}Seat confirmed</p>
+            <h3>You're in the stipend round</h3>
+            <p>Entered${when ? ` on ${escHtml(when)}` : ''} with certificate <code>${escHtml(st.entry.cert_id)}</code>. 8–10 interns are picked on the 3rd of every month; the next round is on ${escHtml(nextStipendDate())}. If you're picked, we'll email you.</p>
+            ${fairNoteHtml('Every seat belongs to a verified certificate holder, one per intern. No fake or duplicate entries.')}
+          </div>
+        </section>`;
+      return;
+    }
+    slot.innerHTML = `
+      <section class="stipend-card" data-state="open" aria-label="Top-performer stipend">
+        ${figure}
+        <div class="stipend-card-copy">
+          <p class="stipend-card-status">Seat not confirmed yet</p>
+          <h3>Confirm your stipend seat</h3>
+          <p>Your certificate makes you eligible. Only 8–10 interns are picked each month, and the next round is on ${escHtml(nextStipendDate())}. Enter your certificate ID to take your seat.</p>
+          ${fairNoteHtml()}
+        </div>
+        <button type="button" class="cert-btn cert-btn-primary stipend-card-btn" onclick="openStipendModal()">Confirm my seat</button>
+      </section>`;
+  }
+
+  // Overview card. mode: 'locked' (still working) | 'payable' (can issue credentials) | 'paid'
+  function renderStipendHome(student, mode) {
+    const card = document.getElementById('perf-card');
+    if (!card) return;
+    const status = document.getElementById('perf-status');
+    const text = document.getElementById('perf-text');
+    const btn = document.getElementById('perf-btn');
+    const label = document.getElementById('perf-btn-label');
+    const st = stipendState(student);
+    let state, s, t, l, go;
+    if (mode === 'paid' && st.entered) {
+      state = 'entered'; s = 'Seat confirmed'; l = 'View my seat';
+      t = `You're in the stipend round. 8–10 interns are picked on the 3rd of every month; the next round is on ${nextStipendDate()}. If you're picked, we'll email you.`;
+      go = () => window.dashShowPanel('panel-credentials');
+    } else if (mode === 'paid') {
+      state = 'open'; s = 'Your seat is waiting'; l = 'Confirm my seat';
+      t = `Your certificate makes you eligible. Enter its ID to take your seat. 8–10 interns are picked on the 3rd of every month.`;
+      go = () => window.openStipendModal();
+    } else if (mode === 'payable') {
+      state = 'payable'; s = 'One step away'; l = 'Issue my credentials';
+      t = "You've done the work. Issue your verified certificate to unlock your seat in the stipend round. The nominal fee keeps fake and duplicate entries out, so you compete only with genuine interns.";
+      go = () => window.showPaymentModal(window._dashStudent, window._dashData);
+    } else {
+      return; // keep the static "finish your internship" copy from dashboard.html
+    }
+    card.dataset.state = state;
+    if (status) status.textContent = s;
+    if (text) text.textContent = t;
+    if (label) label.textContent = l;
+    if (btn) btn.onclick = go;
+  }
+
+  window.openStipendModal = function() {
+    const student = window._dashStudent, data = window._dashData;
+    const modal = document.getElementById('stipend-modal');
+    if (!modal || !student || !data) return;
+    const st = stipendState(student);
+    if (!st.eligible && !urlParams.get('preview')) {
+      window.dashShowPanel('panel-credentials');
+      return;
+    }
+    const form = document.getElementById('stipend-form');
+    const input = document.getElementById('stipend-cert-input');
+    const link = document.getElementById('stipend-cert-link');
+    if (link && student.id && data._batch_id) link.href = credentialUrls(student, data).cert;
+    modal.style.display = 'flex';
+    void modal.offsetWidth;
+    modal.classList.add('active');
+    modalOpened(modal);
+    if (st.entered && st.entry) {
+      showStipendDone(st.entry, true);
+      return;
+    }
+    trackCred('stipend_form_opened');
+    form.hidden = false;
+    document.getElementById('stipend-done').hidden = true;
+    input.value = '';
+    input.removeAttribute('aria-invalid');
+    document.getElementById('stipend-error').textContent = '';
+    document.getElementById('stipend-submit-btn').disabled = true;
+    const paste = document.getElementById('stipend-paste-btn');
+    if (paste) paste.hidden = !(navigator.clipboard && navigator.clipboard.readText);
+    setTimeout(() => input.focus({ preventScroll: true }), 60);
+  };
+
+  window.closeStipendModal = function() {
+    const modal = document.getElementById('stipend-modal');
+    if (modal && modal.classList.contains('active')) {
+      modal.classList.remove('active');
+      setTimeout(() => modal.style.display = 'none', 400);
+      modalClosed();
+    }
+  };
+
+  // Shapes whatever is typed or pasted into SM-XXXX-XXXX-XXXX.
+  window.stipendInput = function(el) {
+    let raw = el.value.replace(/[^0-9a-z]/gi, '').toUpperCase();
+    if (raw === 'S' || raw === 'SM') {
+      el.value = raw;
+    } else {
+      if (raw.startsWith('SM')) raw = raw.slice(2);
+      raw = raw.slice(0, 12);
+      el.value = raw ? 'SM-' + raw.match(/.{1,4}/g).join('-') : '';
+    }
+    const complete = /^SM-[0-9A-Z]{4}-[0-9A-Z]{4}-[0-9A-Z]{4}$/.test(el.value);
+    document.getElementById('stipend-submit-btn').disabled = !complete;
+    document.getElementById('stipend-error').textContent = '';
+    el.removeAttribute('aria-invalid');
+  };
+
+  // One tap instead of long-pressing a small field on a phone. Hidden where the browser can't read the clipboard.
+  window.stipendPaste = async function() {
+    const input = document.getElementById('stipend-cert-input');
+    try {
+      input.value = await navigator.clipboard.readText();
+      window.stipendInput(input);
+    } catch (e) { /* permission refused: they can still paste by hand */ }
+    input.focus({ preventScroll: true });
+  };
+
+  function showStipendDone(entry, already) {
+    const form = document.getElementById('stipend-form');
+    const done = document.getElementById('stipend-done');
+    const title = document.getElementById('stipend-done-title');
+    const email = (window._dashData && window._dashData._email) || (window._dashStudent && window._dashStudent.email) || '';
+    const since = formatEntryDate(entry.entered_at);
+    document.getElementById('stipend-done-cert').textContent = entry.cert_id || '—';
+    title.textContent = already ? 'Your seat is already confirmed' : 'Your seat is confirmed';
+    document.getElementById('stipend-done-sub').innerHTML = already
+      ? `Each intern can enter once, and yours is locked in${since ? ` since ${escHtml(since)}` : ''}.`
+      : `We've sent a confirmation to <strong>${escHtml(email)}</strong>.`;
+    form.hidden = true;
+    done.hidden = false;
+    done.classList.remove('is-celebrating'); void done.offsetWidth; done.classList.add('is-celebrating');
+    title.focus({ preventScroll: true });
+  }
+
+  function stipendEntered(entry) {
+    const student = window._dashStudent;
+    if (student) student.stipend = { eligible: true, entered: true, entry };
+    renderStipendCard(student);
+    renderStipendHome(student, 'paid');
+  }
+
+  window.submitStipendEntry = async function(e) {
+    if (e) e.preventDefault();
+    const input = document.getElementById('stipend-cert-input');
+    const btn = document.getElementById('stipend-submit-btn');
+    const err = document.getElementById('stipend-error');
+    if (!input || btn.disabled) return;
+    btn.disabled = true;
+    btn.textContent = 'Confirming…';
+    const fail = (msg) => {
+      err.textContent = msg;
+      input.setAttribute('aria-invalid', 'true');
+      btn.disabled = false;
+      btn.textContent = 'Confirm my seat';
+      input.focus({ preventScroll: true });
+    };
+    if (urlParams.get('preview')) { // mock student: show the success state without the backend
+      const entry = { cert_id: input.value, entered_at: new Date().toISOString() };
+      stipendEntered(entry);
+      showStipendDone(entry, false);
+      btn.textContent = 'Confirm my seat';
+      return;
+    }
+    try {
+      const res = await fetch(`${API}/api/students/stipend/enter`, {
+        method: 'POST',
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ cert_id: input.value }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (res.status === 401) return sessionExpired();
+      if (res.ok || (res.status === 409 && body.entry)) {
+        stipendEntered(body.entry);
+        showStipendDone(body.entry, res.status === 409);
+        btn.textContent = 'Confirm my seat';
+        return;
+      }
+      fail(body.detail || "We couldn't confirm your seat. Please try again.");
+    } catch (ex) {
+      fail("We couldn't reach SkillMe. Check your connection and try again.");
+    }
+  };
 
   // ─────────────────────────────────────────────────────────────
   // ⚡ Urgent (24h) Processing Request Panel
@@ -1961,7 +2456,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="empty-icon tone-ok">
             <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           </div>
-          <h3>Approved ✅</h3>
+          <h3>Approved</h3>
           <p>Your priority request was approved — you can now claim your credentials above.</p>
         </div>`;
       return;
@@ -2012,7 +2507,7 @@ document.addEventListener('DOMContentLoaded', () => {
       content.innerHTML = `
         <div class="urgent-panel">
           <div class="guide-header">
-            <div class="guide-header-icon">⏳</div>
+            <div class="guide-header-icon">${credIcon('clock')}</div>
             <h2>Request submitted</h2>
           </div>
           <p class="guide-subtitle">Our team will process your <strong>${request.request_type}</strong> request within 24 hours.</p>
@@ -2022,11 +2517,11 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    const statusLabel = request.status === 'fulfilled' ? 'Fulfilled ✅' : 'Rejected ❌';
+    const statusLabel = request.status === 'fulfilled' ? 'Fulfilled' : 'Not approved';
     content.innerHTML = `
       <div class="urgent-panel">
         <div class="guide-header">
-          <div class="guide-header-icon">${request.status === 'fulfilled' ? '✅' : '❌'}</div>
+          <div class="guide-header-icon ${request.status === 'fulfilled' ? 'tone-ok' : 'tone-danger'}">${credIcon(request.status === 'fulfilled' ? 'check' : 'x')}</div>
           <h2>${statusLabel}</h2>
         </div>
         <p class="guide-subtitle">Your <strong>${request.request_type}</strong> request was ${request.status} on ${request.resolved_at ? new Date(request.resolved_at).toLocaleString() : ''}.</p>
@@ -2088,7 +2583,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const discountInputMilestone = document.getElementById('discount-code-milestone');
       const discountCode = (discountInputBanner && discountInputBanner.value.trim()) || (discountInputMilestone && discountInputMilestone.value.trim()) || null;
       
-      const PAY_LABEL = `Unlock My Certificate — ${certPriceLabel()}`;
+      const PAY_LABEL = `Issue my credentials · ${certPriceLabel()}`;
       const resetPayButtons = () => {
         if (btn) { btn.disabled = false; btn.textContent = PAY_LABEL; }
         if (modalBtn) { modalBtn.disabled = false; modalBtn.textContent = PAY_LABEL; }
@@ -2211,11 +2706,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const verifyData = await verifyRes.json().catch(() => ({}));
             if (verifyRes.ok && verifyData.status === 'success') {
-              // 5. Show download banner!
+              // 5. Issued: update the page behind, and turn the checkout into the success screen
               const certSection = document.getElementById('cert-section');
               renderCertReady(certSection, window._dashStudent, window._dashData);
-              window.closePaymentModal();
-              dashToast('Payment confirmed. Your certificate is ready.');
+              showPaymentIssued(verifyData.cert_id);
             } else {
               showPaymentProblem("We couldn't confirm your payment yet.", response.razorpay_payment_id);
             }
@@ -2265,6 +2759,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <button onclick="renderCertReady(document.getElementById('cert-section'), window._dashStudent, window._dashData)" style="padding: 7px 15px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(235, 230, 224, 0.2); border-radius: 6px; color: #fff; font-weight: 600; font-size: 0.8rem; cursor: pointer;">
               📜 Test Issued Certificate Banner
             </button>
+            <button onclick="previewPaymentIssued()" style="padding: 7px 15px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(235, 230, 224, 0.2); border-radius: 6px; color: #fff; font-weight: 600; font-size: 0.8rem; cursor: pointer;">
+              🎉 Test Payment Success Screen
+            </button>
           </div>
         </div>
       </details>
@@ -2283,128 +2780,115 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// ─── 100% Completion Celebration Popup ──────────────────────────────────────
+// ─── Credentials unlocked (3 of 4 weeks approved) ────────────────────────────
+// Shown once per completion bracket (75% / 100%). For a student who hasn't paid yet this is
+// the moment to say plainly what they've unlocked: the credentials in their name, the stipend
+// seat and its next date, and the price. It stays until they close it (no auto-close, no confetti).
+
+// Stipend winners are confirmed on the 3rd of every month.
+function nextStipendDate(from = new Date()) {
+  const d = new Date(from.getFullYear(), from.getMonth() + (from.getDate() < 3 ? 0 : 1), 3);
+  return d.toLocaleDateString(undefined, { day: 'numeric', month: 'long' });
+}
+
 function showCompletionPopup(student, data, pct) {
-  const isFullyComplete = typeof pct === 'number' && pct >= 100;
-  // Build credential URLs from available data
-  const FRONTEND = window.SKILLME_FRONTEND || window.location.origin;
-  const domain   = (data && data.progress && data.progress[0] && data.progress[0].domain) || 'web-dev';
-  const batchId  = (data && data._batch_id) || '';
-  const name     = (student && student.name) || '';
-  const certUrl  = `${FRONTEND}/certificate.html?student_id=${student ? student.id : ''}&batch_id=${batchId}&name=${encodeURIComponent(name)}&domain=${encodeURIComponent(domain)}`;
-  const lorUrl   = `${FRONTEND}/lor.html?student_id=${student ? student.id : ''}&batch_id=${batchId}&name=${encodeURIComponent(name)}&domain=${encodeURIComponent(domain)}`;
-  const portfolioUrl = student ? `${FRONTEND}/portfolio.html?student_id=${student.id}` : '#';
+  if (document.getElementById('completion-overlay') || document.querySelector('.payment-modal-overlay.active')) return;
+  const esc = v => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const s = student || {};
+  const summary = (data && data.summary) || {};
+  const total = summary.total_tasks || 4;
+  const done = summary.completed_tasks || Math.round(((pct || 0) / 100) * total);
+  const batchId = (data && data._batch_id) || '';
+  const domain = (data && data.progress && data.progress[0] && data.progress[0].domain) || s.domain || 'web-dev';
+  const base = window.SKILLME_FRONTEND || window.location.origin;
+  const q = `student_id=${s.id || ''}&batch_id=${batchId}&name=${encodeURIComponent(s.name || '')}&domain=${encodeURIComponent(domain)}`;
+  const certUrl = `${base}/certificate.html?${q}`;
+  const lorUrl = `${base}/lor.html?${q}`;
+  const portfolioUrl = s.id ? `${base}/portfolio.html?student_id=${s.id}` : '#';
+  const first = esc((s.first_name || String(s.name || '').split(' ')[0] || '').trim());
+  const track = describeDomain(domain).label;
 
   const flexPdfBtn = document.getElementById('flex-pdf-btn');
-  if (flexPdfBtn && student) {
-      flexPdfBtn.href = `/tasks?student_id=${student.id}&batch_id=${batchId}`;
-  }
+  if (flexPdfBtn && s.id) flexPdfBtn.href = `/tasks?student_id=${s.id}&batch_id=${batchId}`;
 
-  // Create overlay
   const overlay = document.createElement('div');
   overlay.id = 'completion-overlay';
   overlay.className = 'completion-overlay';
-
-  const firstName = (student && student.name) ? student.name.split(' ')[0] : 'Intern';
-
   overlay.innerHTML = `
-    <div class="completion-card" role="dialog" aria-modal="true">
-      <div class="completion-glow"></div>
-      <div class="completion-trophy">🏆</div>
-      <div class="completion-title">Congratulations, ${firstName}!</div>
-      <div class="completion-text">
-        ${isFullyComplete
-          ? `You've completed <strong>100%</strong> of your internship tasks!`
-          : `You've reached <strong>${pct}%</strong> completion — enough to unlock your credentials!`}<br>
-        Your Certificate, LOR, and Portfolio are ready to claim.
-      </div>
-
-      <!-- Credential buttons — rendered by JS after payment check -->
+    <div class="completion-card" role="dialog" aria-modal="true" aria-labelledby="completion-title">
+      <button type="button" class="payment-modal-close completion-close" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+      <p class="completion-kicker">${done} of ${total} weeks approved</p>
+      <h2 class="completion-title" id="completion-title">${first ? `${first}, your` : 'Your'} credentials are unlocked</h2>
       <div id="completion-cred-area" class="completion-cred-area">
-        <div class="completion-loading">Checking payment status…</div>
+        <p class="completion-loading">Checking your credentials…</p>
       </div>
-
-      <button onclick="document.getElementById('completion-overlay').remove()" class="completion-dismiss">Dismiss</button>
-
-      <canvas id="confetti-canvas" class="completion-canvas"></canvas>
-    </div>
-  `;
-
+    </div>`;
   document.body.appendChild(overlay);
   requestAnimationFrame(() => overlay.style.opacity = '1');
 
-  // Payment-gated credential area in popup
+  const close = () => {
+    overlay.style.opacity = '0';
+    setTimeout(() => overlay.remove(), 300);
+  };
+  overlay.querySelector('.completion-close').addEventListener('click', close);
+  overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+  const area = overlay.querySelector('#completion-cred-area');
+  const title = overlay.querySelector('#completion-title');
+
+  const renderUnpaid = () => {
+    area.innerHTML = `
+      <p class="completion-text">You've met the bar for completion. This is what you can issue today:</p>
+      <ul class="completion-list">
+        <li>${credIcon('award', 18)}<div><strong>Verified certificate</strong><span>${esc(track)} Internship, in your name, with an ID any recruiter can check</span></div></li>
+        <li>${credIcon('file', 18)}<div><strong>Letter of recommendation</strong><span>For your track and the skills it covers</span></div></li>
+        <li>${credIcon('globe', 18)}<div><strong>Proof-of-Work portfolio</strong><span>A public link to your work, hosted for life</span></div></li>
+        <li>${credIcon('trophy', 18)}<div><strong>A seat in the stipend of up to $100 a month</strong><span>8–10 interns are picked on the 3rd of every month. Next round: ${esc(nextStipendDate())}.</span></div></li>
+      </ul>
+      ${fairNoteHtml()}
+      <button type="button" class="cert-btn cert-btn-primary cert-btn-block completion-cta">Issue my credentials · ${esc(certPriceLabel())}</button>
+      <button type="button" class="completion-dismiss">Not now</button>`;
+    area.querySelector('.completion-cta').addEventListener('click', () => {
+      overlay.remove();
+      window.showPaymentModal(window._dashStudent, window._dashData);
+    });
+    area.querySelector('.completion-dismiss').addEventListener('click', close);
+  };
+
+  const renderPaid = () => {
+    title.textContent = `${first ? `${first}, you` : 'You'} finished the internship`;
+    area.innerHTML = `
+      <p class="completion-text">Your credentials are issued. Open them, or share your portfolio link.</p>
+      <div class="completion-links">
+        <a class="cert-btn cert-btn-primary" href="${certUrl}" target="_blank" rel="noopener">${credIcon('award', 16)}Certificate</a>
+        <a class="cert-btn cert-btn-secondary" href="${lorUrl}" target="_blank" rel="noopener">${credIcon('file', 16)}LOR</a>
+        ${portfolioUrl !== '#' ? `<a class="cert-btn cert-btn-secondary" href="${portfolioUrl}" target="_blank" rel="noopener">${credIcon('globe', 16)}Portfolio</a>` : ''}
+      </div>
+      <button type="button" class="completion-dismiss">Close</button>`;
+    area.querySelector('.completion-dismiss').addEventListener('click', close);
+  };
+
   (async () => {
-    const credArea = overlay.querySelector('#completion-cred-area');
-    if (!credArea || !student || !student.id || !batchId) return;
+    const preview = new URLSearchParams(window.location.search).get('preview');
+    if (preview) return preview === 'paid' ? renderPaid() : renderUnpaid();
+    if (!s.id || !batchId) return renderUnpaid();
     try {
-      const payStatus = await fetch(`${API}/api/payments/status/${student.id}/${batchId}`);
-      const payData = await payStatus.json();
-      if (payData.status === 'paid') {
-        // Paid — show real credential links
-        credArea.innerHTML = `
-          <div class="completion-cred-grid">
-            <button class="completion-cred-btn is-primary" onclick="window.open('${certUrl}','_blank');document.getElementById('completion-overlay').remove()"><span>🎓</span>Certificate</button>
-            <button class="completion-cred-btn" onclick="window.open('${lorUrl}','_blank');document.getElementById('completion-overlay').remove()"><span>📄</span>View LOR</button>
-            <button class="completion-cred-btn" ${portfolioUrl === '#' ? 'disabled' : ''} onclick="${portfolioUrl !== '#' ? `window.open('${portfolioUrl}','_blank');` : ''}document.getElementById('completion-overlay').remove()"><span>🌐</span>Portfolio</button>
-          </div>`;
-      } else {
-        // Not paid — show pay CTA
-        credArea.innerHTML = `
-          <div class="completion-pay">
-            <p>One-time ${certPriceLabel()} unlocks your Certificate, LOR &amp; Portfolio — verified, downloadable, and yours for life</p>
-            <button class="cert-btn cert-btn-primary cert-btn-block" onclick="document.getElementById('completion-overlay').remove();setTimeout(()=>showPaymentModal(window._dashStudent,window._dashData),200);">Unlock My Certificate — ${certPriceLabel()}</button>
-          </div>`;
-      }
-    } catch(e) {
-      credArea.innerHTML = `<div class="completion-loading">Could not load credentials. <a href="javascript:void(0)" onclick="document.getElementById('completion-overlay').remove()">Close</a> and check the dashboard.</div>`;
+      const res = await fetch(`${API}/api/payments/status/${s.id}/${batchId}`);
+      if (!res.ok) throw new Error('status ' + res.status);
+      const pay = await res.json();
+      if (pay.status === 'paid') renderPaid(); else renderUnpaid();
+    } catch (e) {
+      // Unknown payment state: never push the checkout, send them to the Credentials tab instead.
+      area.innerHTML = `
+        <p class="completion-text">Your Certificate, LOR and Portfolio are waiting in the Credentials tab.</p>
+        <button type="button" class="cert-btn cert-btn-primary cert-btn-block completion-cta">Open Credentials</button>`;
+      area.querySelector('.completion-cta').addEventListener('click', () => {
+        overlay.remove();
+        if (typeof window.dashShowPanel === 'function') window.dashShowPanel('panel-credentials');
+      });
     }
   })();
-
-  // Confetti burst
-  const canvas = overlay.querySelector('#confetti-canvas');
-  const ctx = canvas.getContext('2d');
-  canvas.width = canvas.offsetWidth;
-  canvas.height = canvas.offsetHeight;
-
-  const particles = Array.from({length: 80}, () => ({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height * -1,
-    r: Math.random() * 5 + 2,
-    d: Math.random() * 30 + 10,
-    color: ['#ef3e36','#ff7a2f','#fbbf24','#a1a1aa','#4ade80'][Math.floor(Math.random()*5)],
-    tilt: Math.floor(Math.random() * 10) - 10,
-    tiltAngle: 0, tiltAngleInc: (Math.random() * 0.07) + 0.05
-  }));
-
-  let angle = 0, tick = 0;
-  function drawConfetti() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    angle += 0.01; tick++;
-    particles.forEach(p => {
-      p.tiltAngle += p.tiltAngleInc;
-      p.y += (Math.cos(angle + p.d) + 1 + p.r/2) * 1.2;
-      p.x += Math.sin(angle);
-      p.tilt = Math.sin(p.tiltAngle) * 12;
-      ctx.beginPath();
-      ctx.lineWidth = p.r;
-      ctx.strokeStyle = p.color;
-      ctx.moveTo(p.x + p.tilt + p.r/3, p.y);
-      ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r/5);
-      ctx.stroke();
-      if (p.y > canvas.height) { p.y = -10; p.x = Math.random() * canvas.width; }
-    });
-    if (document.getElementById('completion-overlay')) requestAnimationFrame(drawConfetti);
-  }
-  requestAnimationFrame(drawConfetti);
-
-  // Auto-close after 8 seconds
-  setTimeout(() => {
-    if (document.getElementById('completion-overlay')) {
-      overlay.style.opacity = '0';
-      setTimeout(() => overlay.remove(), 400);
-    }
-  }, 8000);
 }
 
 // ═══════════════════════════════════════════════════════════════
