@@ -74,8 +74,8 @@ async def lifespan(app: FastAPI):
         misfire_grace_time=3600,
     )
 
-    # Credential follow-ups — 11:00 AM IST: "your credentials are waiting" (unlocked, unpaid)
-    # and "your stipend seat is open" (certified, no seat). At most 3 each, a week apart.
+    # Credential follow-up — 11:00 AM IST: "your credentials are waiting" to students who are
+    # eligible but haven't paid, once every two weeks until they pay.
     async def daily_credential_reminders():
         from services.credential_reminder_service import send_credential_reminders
         try:

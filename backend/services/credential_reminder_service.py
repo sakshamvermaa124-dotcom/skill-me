@@ -1,16 +1,12 @@
 """
 SkillMe — Credential follow-ups and the credential funnel.
 
-Two reminder emails, sent by a daily job (see main.py), each at most MAX_SENDS times per person:
+One reminder email, "credentials_waiting", sent by a daily job (see main.py) to students who
+are eligible (3 of 4 weeks approved, or an approved priority request) but haven't paid:
+the first FIRST_DELAY_DAYS after the unlock, then once every GAP_DAYS until they pay.
 
-  credentials_waiting    unlocked (3 of 4 weeks approved, or an approved priority request)
-                         but not paid. First one FIRST_DELAY_DAYS after the unlock.
-  stipend_seat_reminder  holds a certificate but hasn't taken a stipend seat. First one
-                         FIRST_DELAY_DAYS after the certificate was issued.
-
-There is no deadline in either email: they remind, they never threaten. Each stops by itself
-the moment the student acts (pays / enters), because candidates are rebuilt from live data on
-every run. Opt-outs, hard bounces and spam reports are honoured (engagement_service rules), test
+There is no deadline in it: it reminds, it never threatens. It stops by itself the moment the
+student pays, because candidates are rebuilt from live data on every run. Opt-outs, hard bounces and spam reports are honoured (engagement_service rules), test
 accounts are never emailed, and nobody gets two reminder emails within REMINDER_GAP_HOURS.
 
 The funnel half records the browser-side steps (saw the offer, opened checkout, clicked pay,
@@ -32,12 +28,11 @@ logger = logging.getLogger("skillme.credential_reminders")
 
 UNLOCK_WEEKS = 3          # mirrors routes/payments.PAYMENT_UNLOCK_TASKS
 FIRST_DELAY_DAYS = 2      # give them a moment after the unlock before the first nudge
-GAP_DAYS = 7              # between two reminders of the same kind
-MAX_SENDS = 3             # then we stop for good; the dashboard keeps the offer open
+GAP_DAYS = 14             # once every two weeks until they pay
 REMINDER_GAP_HOURS = 24   # across every reminder type, so nobody gets two in a day
 
-KINDS = ("credentials_waiting", "stipend_seat_reminder")
-REMINDER_EMAIL_TYPES = ("task_reminder", "credentials_waiting", "stipend_seat_reminder")
+KINDS = ("credentials_waiting",)
+REMINDER_EMAIL_TYPES = ("task_reminder", "credentials_waiting")
 
 # Steps the dashboard may report. All are once per enrollment (see activation_events).
 FUNNEL_STEPS = {
@@ -46,7 +41,7 @@ FUNNEL_STEPS = {
     "cred_pay_clicked",      # pay button pressed
     "stipend_form_opened",   # seat modal opened (paid)
     "cred_email_clicked",    # arrived from a credentials_waiting email
-    "stipend_email_clicked", # arrived from a stipend_seat_reminder email
+    "stipend_email_clicked", # arrived from an old stipend-seat email link (no longer sent)
 }
 
 
@@ -117,10 +112,8 @@ async def _emailed_recently(email: str) -> bool:
 
 
 async def _due(email: str, kind: str, since: datetime, now: datetime) -> int | None:
-    """The reminder number (1..MAX_SENDS) that is due now, or None."""
+    """The reminder number (1, 2, ...) that is due now, or None."""
     sent, last = await _history(email, kind)
-    if sent >= MAX_SENDS:
-        return None
     if sent == 0 and now - since < timedelta(days=FIRST_DELAY_DAYS):
         return None
     if last and now - last < timedelta(days=GAP_DAYS):
@@ -134,7 +127,7 @@ async def _suppressed(email: str) -> bool:
 
 
 async def get_candidates(now: datetime | None = None) -> list[dict]:
-    """Who gets which reminder today. One email per person per run, whatever the kind."""
+    """Who gets a reminder today: eligible, unpaid, due. One email per person per run."""
     now = now or datetime.utcnow()
     out: list[dict] = []
     seen: set[str] = set()
@@ -151,25 +144,6 @@ async def get_candidates(now: datetime | None = None) -> list[dict]:
             seen.add(em)
             out.append({**r, "kind": "credentials_waiting", "step": step})
 
-    # Stipend seat open: holds a certificate, no seat yet (stipend_service: one seat per email)
-    certs = await db.fetch_all(
-        """SELECT c.cert_id, c.issued_at, c.batch_id, s.id AS student_id, s.email,
-                  s.first_name, s.last_name, s.domain
-           FROM certificates c JOIN students s ON s.id = c.student_id
-           WHERE COALESCE(s.is_test, 0) = 0
-             AND NOT EXISTS (SELECT 1 FROM stipend_entries se WHERE se.email = lower(s.email))
-           ORDER BY c.issued_at"""
-    )
-    for c in certs:
-        em = (c["email"] or "").lower()
-        issued_at = an.parse_ts(c["issued_at"])
-        if not em or em in seen or not issued_at:
-            continue
-        step = await _due(em, "stipend_seat_reminder", issued_at, now)
-        if step:
-            seen.add(em)
-            out.append({**dict(c), "kind": "stipend_seat_reminder", "step": step})
-
     kept = []
     for c in out:
         if await _suppressed(c["email"]) or await _emailed_recently(c["email"]):
@@ -182,23 +156,17 @@ async def get_candidates(now: datetime | None = None) -> list[dict]:
 
 async def send_credential_reminders(now: datetime | None = None, throttle: float = 1.0) -> dict:
     candidates = await get_candidates(now)
-    summary = {"sent": 0, "failed": 0, "credentials_waiting": 0, "stipend_seat_reminder": 0}
+    summary = {"sent": 0, "failed": 0}
     for c in candidates:
         try:
-            if c["kind"] == "credentials_waiting":
-                ok = await email_service.send_credentials_waiting(
-                    c["first_name"], c["last_name"], c["email"], c.get("domain") or "web-dev", c["step"],
-                    student_id=c["student_id"], batch_id=c["batch_id"])
-            else:
-                ok = await email_service.send_stipend_seat_reminder(
-                    c["first_name"], c["last_name"], c["email"], c.get("domain") or "web-dev",
-                    c["cert_id"], c["step"], student_id=c["student_id"], batch_id=c["batch_id"])
+            ok = await email_service.send_credentials_waiting(
+                c["first_name"], c["last_name"], c["email"], c.get("domain") or "web-dev", c["step"],
+                student_id=c["student_id"], batch_id=c["batch_id"])
         except Exception as exc:  # noqa: BLE001 — one bad address must not stop the run
             logger.error("%s to %s failed: %s", c["kind"], c["email"], exc)
             ok = False
         if ok:
             summary["sent"] += 1
-            summary[c["kind"]] += 1
             await asyncio.sleep(throttle)
         else:
             summary["failed"] += 1
@@ -265,7 +233,6 @@ async def funnel_report(days: int | None = None) -> dict:
         "reminders": {
             **sends,
             "came_back_from_credentials_email": len(reached["cred_email_clicked"]),
-            "came_back_from_stipend_email": len(reached["stipend_email_clicked"]),
         },
         "people_unlocked": len(emails),
     }

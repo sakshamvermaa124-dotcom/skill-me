@@ -157,7 +157,7 @@ def list_pending_submissions():
 @cli.command("credential-funnel")
 @click.option("--days", "-d", type=int, default=None, help="Only students unlocked in the last N days")
 def credential_funnel(days):
-    """Where unlocked students drop off: offer seen -> checkout -> pay -> paid -> stipend seat."""
+    """Where eligible students drop off: offer seen -> checkout -> pay -> paid -> stipend seat."""
     async def _run():
         await _init()
         from services.credential_reminder_service import funnel_report
@@ -174,10 +174,8 @@ def credential_funnel(days):
         console.print(table)
         r = rep["reminders"]
         console.print(
-            f"Reminders: credentials_waiting {r['credentials_waiting']['emails']} emails "
-            f"to {r['credentials_waiting']['people']} people, {r['came_back_from_credentials_email']} came back · "
-            f"stipend_seat_reminder {r['stipend_seat_reminder']['emails']} emails "
-            f"to {r['stipend_seat_reminder']['people']} people, {r['came_back_from_stipend_email']} came back"
+            f"Reminders: {r['credentials_waiting']['emails']} 'credentials waiting' emails "
+            f"to {r['credentials_waiting']['people']} people, {r['came_back_from_credentials_email']} came back"
         )
         since = rep["tracking_since"] or "not yet (no browser events recorded)"
         console.print(f"[dim]Browser steps tracked since: {since}. {rep['note']}[/dim]")
@@ -188,7 +186,7 @@ def credential_funnel(days):
 @cli.command("credential-reminders")
 @click.option("--dry-run/--send", default=True, help="List who is due (default) or actually send")
 def credential_reminders(dry_run):
-    """Who gets a 'credentials waiting' or 'stipend seat open' email today (the daily job sends them)."""
+    """Who gets a 'credentials waiting' email today (the daily job sends them)."""
     async def _run():
         await _init()
         from services.credential_reminder_service import get_candidates, send_credential_reminders

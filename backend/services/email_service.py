@@ -725,65 +725,28 @@ class EmailService:
         batch_id: int | None = None,
     ) -> bool:
         from services.engagement_service import unsubscribe_url
-        subjects = {
-            1: f"{first_name}, your credentials are ready to issue",
-            2: f"Your {_domain_label(domain)} certificate is still waiting, {first_name}",
-            3: "One last note about your SkillMe credentials",
-        }
+        # Sent every two weeks until they pay: alternate the follow-up subject so it never repeats twice in a row
+        if step <= 1:
+            subject = f"{first_name}, your credentials are ready to issue"
+        elif step % 2 == 0:
+            subject = f"Your {_domain_label(domain)} certificate is still waiting, {first_name}"
+        else:
+            subject = f"{first_name}, your SkillMe credentials are one step away"
         html = _render(
             "credentials_waiting.html",
             first_name=first_name,
             last_name=last_name,
             domain_label=_domain_label(domain),
             step=step,
-            last=step >= 3,
             cta_url=f"{settings.frontend_url}/dashboard.html?from=cred_email#checkout",
             unsubscribe_url=unsubscribe_url(email),
         )
         return await _send_and_log(
             email,
             f"{first_name} {last_name}",
-            subjects.get(step, subjects[1]),
+            subject,
             html,
             email_type="credentials_waiting",
-            student_id=student_id,
-            batch_id=batch_id,
-        )
-
-    async def send_stipend_seat_reminder(
-        self,
-        first_name: str,
-        last_name: str,
-        email: str,
-        domain: str,
-        cert_id: str,
-        step: int,
-        student_id: int | None = None,
-        batch_id: int | None = None,
-    ) -> bool:
-        from services.engagement_service import unsubscribe_url
-        subjects = {
-            1: f"{first_name}, your stipend seat is still open",
-            2: "Your seat in the $100 stipend is waiting for you",
-            3: "One last note about your stipend seat",
-        }
-        html = _render(
-            "stipend_seat_reminder.html",
-            first_name=first_name,
-            last_name=last_name,
-            domain_label=_domain_label(domain),
-            cert_id=cert_id,
-            step=step,
-            last=step >= 3,
-            cta_url=f"{settings.frontend_url}/dashboard.html?from=stipend_email#stipend",
-            unsubscribe_url=unsubscribe_url(email),
-        )
-        return await _send_and_log(
-            email,
-            f"{first_name} {last_name}",
-            subjects.get(step, subjects[1]),
-            html,
-            email_type="stipend_seat_reminder",
             student_id=student_id,
             batch_id=batch_id,
         )

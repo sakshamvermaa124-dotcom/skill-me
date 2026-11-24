@@ -240,7 +240,6 @@ def mock_email_service():
     mock.send_task_rejected = AsyncMock(return_value=True)
     mock.send_stipend_entry_confirmed = AsyncMock(return_value=True)
     mock.send_credentials_waiting = AsyncMock(return_value=True)
-    mock.send_stipend_seat_reminder = AsyncMock(return_value=True)
     mock.send_test_email = AsyncMock(return_value=True)
     mock.send_activation = AsyncMock(return_value=True)
     return mock

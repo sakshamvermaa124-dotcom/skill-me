@@ -1,9 +1,9 @@
 """
 Credential follow-ups and funnel.
 
-- "credentials waiting": unlocked (3 approved weeks or admin unlock), unpaid, 2+ days after unlock,
-  at most 3 emails a week apart, never to opted-out / test accounts or someone emailed in the last day.
-- "stipend seat open": certificate holder without a seat, same cadence, carries the certificate ID.
+- "credentials waiting": eligible (3 approved weeks or admin unlock), unpaid, 2+ days after unlock,
+  then once every 2 weeks until they pay. Never to opted-out / test accounts or someone emailed in the last day.
+- Certificate holders get no reminder email.
 - POST /api/students/funnel records each step once per enrollment; funnel_report lines them up.
 """
 from datetime import datetime, timedelta
@@ -76,15 +76,17 @@ class TestCredentialsWaiting:
         await test_db.execute("UPDATE enrollments SET payment_unlocked_at = ? WHERE student_id = ?", (_ts(4), sid))
         assert await _due() == [("ana@example.com", "credentials_waiting", 1)]
 
-    async def test_week_between_reminders_then_stops_after_three(self, client):
-        await _student(days_ago=30)
-        await _log("ana@example.com", "credentials_waiting", 3)
-        assert await _due() == []  # too soon after the first
-        await test_db.execute("UPDATE email_logs SET sent_at = ?", (_ts(8),))
-        assert await _due() == [("ana@example.com", "credentials_waiting", 2)]
-        await _log("ana@example.com", "credentials_waiting", 9)
+    async def test_every_two_weeks_until_paid(self, client):
+        sid, bid = await _student(days_ago=90)
         await _log("ana@example.com", "credentials_waiting", 10)
-        assert await _due() == []  # three sent: done for good
+        assert await _due() == []  # less than 2 weeks since the last one
+        await test_db.execute("UPDATE email_logs SET sent_at = ?", (_ts(15),))
+        assert await _due() == [("ana@example.com", "credentials_waiting", 2)]
+        for d in (30, 45, 60, 75):
+            await _log("ana@example.com", "credentials_waiting", d)
+        assert await _due() == [("ana@example.com", "credentials_waiting", 6)]  # no cap: keeps reminding
+        await seed_payment(test_db, sid, bid)
+        assert await _due() == []  # paid: stops
 
     async def test_paid_student_is_not_reminded_to_pay(self, client):
         sid, bid = await _student()
@@ -101,35 +103,17 @@ class TestCredentialsWaiting:
 
 
 @pytest.mark.students
-class TestStipendSeatReminder:
-    async def test_certified_without_seat_gets_reminder(self, client):
+class TestNoSeatReminder:
+    async def test_certificate_holders_get_no_email(self, client):
         sid, bid = await _student()
         await _certify(sid, bid)
-        assert await _due() == [("ana@example.com", "stipend_seat_reminder", 1)]
-
-    async def test_not_before_two_days_after_issue(self, client):
-        sid, bid = await _student()
-        await _certify(sid, bid, days_ago=0.5)
         assert await _due() == []
 
-    async def test_seat_taken_stops_it(self, client):
-        sid, bid = await _student()
-        await _certify(sid, bid)
-        await test_db.execute(
-            "INSERT INTO stipend_entries (email, student_id, batch_id, cert_id) VALUES ('ana@example.com', ?, ?, ?)",
-            (sid, bid, CERT))
-        assert await _due() == []
-
-    async def test_send_passes_cert_id_and_counts(self, client):
-        sid, bid = await _student()
-        await _certify(sid, bid)
+    async def test_send_counts(self, client):
+        await _student()
         await _student("ben@example.com")
-        summary = await crs.send_credential_reminders(throttle=0)
-        assert summary == {"sent": 2, "failed": 0, "credentials_waiting": 1, "stipend_seat_reminder": 1}
-        mock = crs.email_service
-        args = mock.send_stipend_seat_reminder.await_args
-        assert CERT in args.args and args.args[-1] == 1
-        assert mock.send_credentials_waiting.await_args.args[2] == "ben@example.com"
+        assert await crs.send_credential_reminders(throttle=0) == {"sent": 2, "failed": 0}
+        assert crs.email_service.send_credentials_waiting.await_count == 2
 
 
 @pytest.mark.students
@@ -180,23 +164,15 @@ class TestFunnel:
 
 @pytest.mark.students
 class TestTemplates:
-    @pytest.mark.parametrize("step", [1, 2, 3])
+    @pytest.mark.parametrize("step", [1, 2, 5])
     def test_credentials_waiting_renders(self, step):
         from services.email_service import _render
         html = _render("credentials_waiting.html", first_name="Ana", last_name="Roy", domain_label="Web Development",
-                       step=step, last=step >= 3, cta_url="https://x/dashboard.html#checkout", unsubscribe_url="https://x/u")
+                       step=step, cta_url="https://x/dashboard.html#checkout", unsubscribe_url="https://x/u")
         assert "Issue my credentials" in html and "Only genuine interns compete" in html and "https://x/u" in html
-        assert ("last email" in html) == (step == 3)
-        assert "₹" not in html and "deadline" not in html.lower()
-
-    @pytest.mark.parametrize("step", [1, 3])
-    def test_stipend_seat_reminder_renders(self, step):
-        from services.email_service import _render
-        html = _render("stipend_seat_reminder.html", first_name="Ana", last_name="Roy", domain_label="Web Development",
-                       cert_id=CERT, step=step, last=step >= 3, cta_url="https://x/dashboard.html#stipend",
-                       unsubscribe_url="https://x/u")
-        assert CERT in html and "Confirm my seat" in html and "deadline" not in html.lower()
+        assert ("earned your credentials" in html) == (step == 1)
+        assert "last email" not in html and "₹" not in html and "deadline" not in html.lower()
 
     def test_real_sender_exists(self):
         assert callable(real_email_service.send_credentials_waiting)
-        assert callable(real_email_service.send_stipend_seat_reminder)
+        assert not hasattr(real_email_service, "send_stipend_seat_reminder")
