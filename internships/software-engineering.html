@@ -48,7 +48,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/theme.css?v=98690fd7ba">
-  <link rel="stylesheet" href="/internship.css?v=af42a0dbd5">
+  <link rel="stylesheet" href="/internship.css?v=9a07bf3ba9">
   <script src="/theme.js?v=515b2d143f" defer></script>
   <script src="/config.js?v=a6d0001538" defer></script>
   <script src="/attribution.js?v=45426916eb" defer></script>
@@ -157,18 +157,10 @@
         },
         {
           "@type": "Question",
-          "name": "Is the Software Engineering (SDE) internship paid? Is there a stipend?",
+          "name": "What skills will I learn in the Software Engineering (SDE) internship?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Top performers earn a stipend of up to $100 a month. The stipend is performance-based and is not paid to every intern: it goes to the interns whose reviewed work stands out in their cohort."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Who reviews my work?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Every weekly submission is reviewed against that week's acceptance criteria by the SkillMe team, which includes engineers who work at Walmart, Google and LinkedIn. Work that misses the bar comes back with notes on what to fix."
+            "text": "The Software Engineering (SDE) internship works with Data Structures, System Design and Testing. Week 1: separating domain models from storage and application logic; designing classes for a small real-world domain (books, copies, loans). Week 2: building a REST API with FastAPI (or Flask) over an existing service layer; implementing simple relevance-ranked search using string matching and scoring. Week 3: persisting a domain model to SQLite with sqlite3 or a lightweight ORM; implementing a simple LRU cache using a dict plus an ordered structure. Week 4: setting up continuous integration to run the full test suite automatically; efficient batch processing using a set for deduplication instead of repeated linear scans."
           }
         },
         {
@@ -176,31 +168,39 @@
           "name": "Do I need experience to apply for the Software Engineering (SDE) internship?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "You need the basics of Data Structures, System Design, Testing, not prior internship experience. Week 1 starts at Beginner level and week 4 reaches Intermediate+. A short screening quiz (8 questions, about 5 minutes) checks you are ready to start."
+            "text": "You need the basics of Data Structures, System Design and Testing, not prior internship experience. Week 1 starts at beginner level, where you design the core data model for a library lending service and implement it as clean, layered Python code with an in-memory store, before touching a database or API. Week 4 reaches intermediate+ level. A short screening quiz (8 questions, about 5 minutes) checks you are ready to start."
           }
         },
         {
           "@type": "Question",
-          "name": "How long is the internship and how much time does it take?",
+          "name": "How is each Software Engineering (SDE) milestone reviewed?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "It runs for 4 weeks with one milestone a week. Each milestone is planned for about 2-3 hours, and it is fully remote, so you work at your own pace around college or a job."
+            "text": "Every week has a checklist, and a milestone is approved only when it meets all of it. For week 1 of ShelfSpace: Library Lending Service, that means: pytest -v runs and all tests pass with no warnings; checking out the last available copy of a book then attempting one more raises NoCopyAvailableError; returning a loan twice raises a clear error instead of silently succeeding or crashing; the domain logic in library_service.py has no direct dependency on any storage implementation detail beyond calling the repository interface. Reviewers include engineers who work at Walmart, Google and LinkedIn, and work that misses the bar comes back with notes."
           }
         },
         {
           "@type": "Question",
-          "name": "Who can apply? Is it open outside India?",
+          "name": "What can I put on my resume after the Software Engineering (SDE) internship?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Anyone can apply, from any country, college or year, and we encourage you to. Selection is competitive: every application is read by a person, and shortlisted applicants hear back within 48 hours."
+            "text": "Each approved milestone gives you a line you can back up with a public LinkedIn post: Designed a layered library service with domain models, repositories and business logic cleanly separated; Wrote a pytest suite covering both happy paths and real error conditions; Learned to keep business rules out of the storage layer for easier testing and future changes; Built a REST API over a layered service, mapping domain errors to correct HTTP status codes; Implemented ranked search with a custom scoring function and sort key; Wrote API-level tests with a test client separate from my unit test suite; Swapped an in-memory repository for SQLite persistence without changing any service-layer code; Implemented a hand-written LRU cache for search results with proper invalidation; Fixed a real race condition allowing double-checkout of the last available copy; Set up CI so every push automatically runs the full backend test suite; Used a set for O(1) deduplication in a bulk import handling 500+ records efficiently; Got a small backend service to a real deploy-ready state with health checks and docs."
           }
         },
         {
           "@type": "Question",
-          "name": "What do I get when I finish?",
+          "name": "Is the Software Engineering (SDE) internship paid? Is there a stipend?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "An offer letter when you are selected, a public portfolio page with every approved milestone, and a QR-verified certificate and Letter of Recommendation once 3 of your 4 milestones are approved. Top performers also earn the stipend and are referred to hiring partners."
+            "text": "Top performers earn a stipend of up to $100 a month. It is performance-based and goes to the interns whose reviewed Software Engineering (SDE) work stands out in their cohort, not to every intern."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How much time does it take?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "4 weeks, one milestone a week, each planned for about 2-3 hours. It is fully remote and open worldwide, so you work around college or a job."
           }
         }
       ]
@@ -269,7 +269,7 @@
     <section class="section section-soft ip-section" aria-labelledby="summary-title">
       <div class="container ip-narrow">
         <h2 class="h2" id="summary-title">The Software Engineering (SDE) internship in short</h2>
-        <p class="ip-answer">The SkillMe Software Engineering (SDE) internship is a 4-week, fully remote programme open to students worldwide. Over four weekly milestones you build <strong>ShelfSpace: Library Lending Service</strong>, post each milestone publicly on LinkedIn, and have it reviewed against clear acceptance criteria. Reviewers include engineers who work at Walmart, Google and LinkedIn. Top performers earn a stipend of up to $100 a month, and interns who get 3 of 4 milestones approved earn a QR-verified certificate and a Letter of Recommendation.</p>
+        <p class="ip-answer">In the SkillMe Software Engineering (SDE) internship you build <strong>ShelfSpace: Library Lending Service</strong>, a project where you build a small layered backend service for tracking books and loans, with real automated tests and applied data-structure work baked into actual features. In week 1 you design the core data model for a library lending service and implement it as clean, layered Python code with an in-memory store, before touching a database or API. By week 4 you add automated CI, handle a batch-import feature efficiently using an appropriate data structure for deduplication, and get the service into a state you could actually hand off or deploy. Each milestone is posted on LinkedIn and checked against that week's checklist before it counts. Top performers earn a stipend of up to $100 a month.</p>
       </div>
     </section>
 
@@ -309,6 +309,8 @@
               <div><h4>What you learn</h4><ul><li>Separating domain models from storage and application logic</li><li>Designing classes for a small real-world domain (books, copies, loans)</li><li>Writing a service layer that enforces business rules</li><li>Basic unit testing with <code>pytest</code></li></ul></div>
               <div><h4>What you submit</h4><ul><li><code>models.py</code> with <code>Book</code>, <code>Copy</code> and <code>Loan</code> dataclasses</li><li>In-memory <code>BookRepository</code> and <code>LoanRepository</code></li><li>A <code>LibraryService</code> enforcing checkout/return business rules with custom exceptions</li><li>A <code>pytest</code> suite covering happy paths and error paths</li></ul></div>
             </div>
+            <details class="ip-week-done"><summary>How week 1 is reviewed</summary><ul><li><code>pytest -v</code> runs and all tests pass with no warnings</li><li>Checking out the last available copy of a book then attempting one more raises <code>NoCopyAvailableError</code></li><li>Returning a loan twice raises a clear error instead of silently succeeding or crashing</li><li>The domain logic in <code>library_service.py</code> has no direct dependency on any storage implementation detail beyond calling the repository interface</li></ul></details>
+            <p class="ip-week-stretch"><strong>Stretch goal:</strong> Add a <code>LibraryService.list_overdue(today)</code> method that returns all loans past their due date, with a test using a fixed fake &#x27;today&#x27; date.</p>
           </li>
           <li class="card ip-week">
             <div class="ip-week-head">
@@ -321,6 +323,8 @@
               <div><h4>What you learn</h4><ul><li>Building a REST API with FastAPI (or Flask) over an existing service layer</li><li>Implementing simple relevance-ranked search using string matching and scoring</li><li>Using a sort with a custom key function to rank results</li><li>Writing API-level tests with a test client, separate from unit tests</li></ul></div>
               <div><h4>What you submit</h4><ul><li>A REST API exposing checkout, return, book listing and loan lookup</li><li>Proper HTTP status code mapping from service exceptions</li><li>A scored, ranked <code>search_books</code> feature with a search endpoint</li><li>API-level tests using a test client, separate from Week 1&#x27;s unit tests</li></ul></div>
             </div>
+            <details class="ip-week-done"><summary>How week 2 is reviewed</summary><ul><li><code>GET /books/search?q=&lt;word&gt;</code> returns results ordered with exact title matches before partial matches</li><li>Attempting to check out a book with zero available copies returns HTTP 409, not a 500 error</li><li>Looking up a nonexistent loan ID returns HTTP 404 with a clear error body</li><li>All API tests pass and are clearly separate (by file or folder) from Week 1&#x27;s unit tests</li></ul></details>
+            <p class="ip-week-stretch"><strong>Stretch goal:</strong> Add pagination to <code>GET /books</code> (<code>?page=1&amp;page_size=10</code>) and a test confirming page boundaries are correct.</p>
           </li>
           <li class="card ip-week">
             <div class="ip-week-head">
@@ -333,6 +337,8 @@
               <div><h4>What you learn</h4><ul><li>Persisting a domain model to SQLite with <code>sqlite3</code> or a lightweight ORM</li><li>Implementing a simple LRU cache using a dict plus an ordered structure</li><li>Handling a race condition: two near-simultaneous checkouts for the last copy</li><li>Writing integration tests against a real (temporary) database</li></ul></div>
               <div><h4>What you submit</h4><ul><li>SQLite-backed repositories implementing the same interface as the in-memory ones</li><li>A hand-implemented <code>LRUCache</code> used for search result caching with invalidation</li><li>A concurrency safeguard preventing double-checkout of the last available copy</li><li>Integration tests running against a real temporary SQLite database</li></ul></div>
             </div>
+            <details class="ip-week-done"><summary>How week 3 is reviewed</summary><ul><li>Switching the config flag from in-memory to SQLite requires no changes to <code>LibraryService</code> code</li><li>A test proves the search cache is hit on a repeated identical query (fewer underlying DB calls on the second call)</li><li>A test simulating two concurrent checkouts for the last copy results in exactly one success and one clear failure, never both succeeding</li><li>Integration tests pass against a real temporary SQLite file and clean up after themselves</li></ul></details>
+            <p class="ip-week-stretch"><strong>Stretch goal:</strong> Add a cache hit/miss counter exposed at <code>GET /stats</code> so you can observe cache effectiveness while using the API.</p>
           </li>
           <li class="card ip-week">
             <div class="ip-week-head">
@@ -345,26 +351,38 @@
               <div><h4>What you learn</h4><ul><li>Setting up continuous integration to run the full test suite automatically</li><li>Efficient batch processing using a set for deduplication instead of repeated linear scans</li><li>Basic structured logging and a health-check endpoint</li><li>Packaging a service for deployment (environment config, <code>requirements.txt</code>, run instructions)</li></ul></div>
               <div><h4>What you submit</h4><ul><li>A working GitHub Actions CI workflow running the full test suite on push</li><li>A bulk <code>POST /books/import</code> endpoint using set-based deduplication</li><li>Structured request logging middleware and a <code>GET /health</code> endpoint</li><li>A <code>DEPLOY.md</code> and a clean, pinned dependency file</li></ul></div>
             </div>
+            <details class="ip-week-done"><summary>How week 4 is reviewed</summary><ul><li>Pushing a commit triggers CI and the full test suite passes in the Actions log</li><li>Importing 500+ books with duplicate ISBNs adds each unique book exactly once and reports the correct skipped count</li><li><code>GET /health</code> correctly reports a healthy status when the DB is reachable</li><li>A fresh clone of the repo can install dependencies and pass <code>pytest</code> using only <code>DEPLOY.md</code> and the README</li></ul></details>
+            <p class="ip-week-stretch"><strong>Stretch goal:</strong> Add a rate limit on <code>/checkout</code> (e.g. max 10 requests per IP per minute) using a simple in-memory token bucket, with a test confirming the 11th rapid request is rejected.</p>
           </li>
         </ol>
       </div>
     </section>
 
-    <section class="section ip-section" aria-labelledby="get-title">
+    <section class="section ip-section" aria-labelledby="fit-title">
       <div class="container">
         <div class="section-head">
-          <span class="eyebrow">What you get</span>
-          <h2 class="h2" id="get-title">What the Software Engineering (SDE) internship gives you</h2>
+          <span class="eyebrow">Is it for you?</span>
+          <h2 class="h2" id="fit-title">Who the Software Engineering (SDE) internship is for, and what you leave with</h2>
         </div>
-        <div class="ip-benefits">
-          <article class="card card-pad"><h3 class="h3">Stipend for top performers</h3><p>Up to $100 a month for the interns whose reviewed work stands out in their cohort. It is earned, not handed out.</p></article>
-          <article class="card card-pad"><h3 class="h3">Review by working engineers</h3><p>Engineers who work at Walmart, Google and LinkedIn review submissions, so submit mindfully. Work that misses the bar comes back with notes.</p></article>
-          <article class="card card-pad"><h3 class="h3">Offer letter on day one</h3><p>A proper internship offer letter with your track and joining date, for your resume and college records.</p></article>
-          <article class="card card-pad"><h3 class="h3">Certificate recruiters can check</h3><p>A certificate with a unique ID and QR code that anyone can verify, plus a Letter of Recommendation based on your approved work.</p></article>
-          <article class="card card-pad"><h3 class="h3">Public proof of work</h3><p>Four public LinkedIn posts and a portfolio page listing every approved milestone, in one link for your resume.</p></article>
-          <article class="card card-pad"><h3 class="h3">Referrals for top performers</h3><p>Top interns are referred to openings at startups and product companies in our hiring partner network.</p></article>
+        <div class="ip-outcomes">
+          <div class="card card-pad">
+            <h3 class="h3">This internship fits you if</h3>
+            <ul class="ip-outcome-list"><li><strong>You know the basics of Data Structures, System Design and Testing</strong> and want a real project to show for it, not more tutorials.</li><li><strong>You can start at beginner level.</strong> Week 1: Design the core data model for a library lending service and implement it as clean, layered Python code with an in-memory store, before touching a database or API.</li><li><strong>You want to reach intermediate+ level in four weeks.</strong> Week 4: Add automated CI, handle a batch-import feature efficiently using an appropriate data structure for deduplication, and get the service into a state you could actually hand off or deploy.</li><li><strong>You can give it about 2-3 hours a week</strong> around college or a job, from any country.</li></ul>
+          </div>
+          <div class="card card-pad">
+            <h3 class="h3">What you can put on your resume</h3>
+            <p class="ip-outcome-sub">Each line is backed by a public LinkedIn post and a reviewed submission.</p>
+            <ul class="ip-outcome-list"><li>Designed a layered library service with domain models, repositories and business logic cleanly separated</li><li>Wrote a pytest suite covering both happy paths and real error conditions</li><li>Learned to keep business rules out of the storage layer for easier testing and future changes</li><li>Built a REST API over a layered service, mapping domain errors to correct HTTP status codes</li><li>Implemented ranked search with a custom scoring function and sort key</li><li>Wrote API-level tests with a test client separate from my unit test suite</li><li>Swapped an in-memory repository for SQLite persistence without changing any service-layer code</li><li>Implemented a hand-written LRU cache for search results with proper invalidation</li><li>Fixed a real race condition allowing double-checkout of the last available copy</li><li>Set up CI so every push automatically runs the full backend test suite</li><li>Used a set for O(1) deduplication in a bulk import handling 500+ records efficiently</li><li>Got a small backend service to a real deploy-ready state with health checks and docs</li></ul>
+          </div>
         </div>
-        <p class="ip-note">Reviewers take part in a personal capacity. Company names belong to their owners and do not imply a partnership or endorsement.</p>
+        <ul class="ip-included" role="list" aria-label="Included with every internship">
+          <li><strong>Stipend</strong> of up to $100 a month for top performers</li>
+          <li><strong>Offer letter</strong> when you are selected</li>
+          <li><strong>QR-verified certificate</strong> and LOR after 3 of 4 approved milestones</li>
+          <li><strong>Portfolio page</strong> with every approved milestone</li>
+          <li><strong>Referrals</strong> to hiring partners for top performers</li>
+        </ul>
+        <p class="ip-note">Reviewers include engineers who work at Walmart, Google and LinkedIn, taking part in a personal capacity. Company names belong to their owners and do not imply a partnership or endorsement.</p>
       </div>
     </section>
 
@@ -405,28 +423,28 @@
             <div class="acc-body"><p>You build ShelfSpace: Library Lending Service. Build a small layered backend service for tracking books and loans, with real automated tests and applied data-structure work baked into actual features. It is one project built up over four weekly milestones, so each week adds to the last.</p></div>
           </details>
           <details>
-            <summary>Is the Software Engineering (SDE) internship paid? Is there a stipend?</summary>
-            <div class="acc-body"><p>Top performers earn a stipend of up to $100 a month. The stipend is performance-based and is not paid to every intern: it goes to the interns whose reviewed work stands out in their cohort.</p></div>
-          </details>
-          <details>
-            <summary>Who reviews my work?</summary>
-            <div class="acc-body"><p>Every weekly submission is reviewed against that week&#x27;s acceptance criteria by the SkillMe team, which includes engineers who work at Walmart, Google and LinkedIn. Work that misses the bar comes back with notes on what to fix.</p></div>
+            <summary>What skills will I learn in the Software Engineering (SDE) internship?</summary>
+            <div class="acc-body"><p>The Software Engineering (SDE) internship works with Data Structures, System Design and Testing. Week 1: separating domain models from storage and application logic; designing classes for a small real-world domain (books, copies, loans). Week 2: building a REST API with FastAPI (or Flask) over an existing service layer; implementing simple relevance-ranked search using string matching and scoring. Week 3: persisting a domain model to SQLite with sqlite3 or a lightweight ORM; implementing a simple LRU cache using a dict plus an ordered structure. Week 4: setting up continuous integration to run the full test suite automatically; efficient batch processing using a set for deduplication instead of repeated linear scans.</p></div>
           </details>
           <details>
             <summary>Do I need experience to apply for the Software Engineering (SDE) internship?</summary>
-            <div class="acc-body"><p>You need the basics of Data Structures, System Design, Testing, not prior internship experience. Week 1 starts at Beginner level and week 4 reaches Intermediate+. A short screening quiz (8 questions, about 5 minutes) checks you are ready to start.</p></div>
+            <div class="acc-body"><p>You need the basics of Data Structures, System Design and Testing, not prior internship experience. Week 1 starts at beginner level, where you design the core data model for a library lending service and implement it as clean, layered Python code with an in-memory store, before touching a database or API. Week 4 reaches intermediate+ level. A short screening quiz (8 questions, about 5 minutes) checks you are ready to start.</p></div>
           </details>
           <details>
-            <summary>How long is the internship and how much time does it take?</summary>
-            <div class="acc-body"><p>It runs for 4 weeks with one milestone a week. Each milestone is planned for about 2-3 hours, and it is fully remote, so you work at your own pace around college or a job.</p></div>
+            <summary>How is each Software Engineering (SDE) milestone reviewed?</summary>
+            <div class="acc-body"><p>Every week has a checklist, and a milestone is approved only when it meets all of it. For week 1 of ShelfSpace: Library Lending Service, that means: pytest -v runs and all tests pass with no warnings; checking out the last available copy of a book then attempting one more raises NoCopyAvailableError; returning a loan twice raises a clear error instead of silently succeeding or crashing; the domain logic in library_service.py has no direct dependency on any storage implementation detail beyond calling the repository interface. Reviewers include engineers who work at Walmart, Google and LinkedIn, and work that misses the bar comes back with notes.</p></div>
           </details>
           <details>
-            <summary>Who can apply? Is it open outside India?</summary>
-            <div class="acc-body"><p>Anyone can apply, from any country, college or year, and we encourage you to. Selection is competitive: every application is read by a person, and shortlisted applicants hear back within 48 hours.</p></div>
+            <summary>What can I put on my resume after the Software Engineering (SDE) internship?</summary>
+            <div class="acc-body"><p>Each approved milestone gives you a line you can back up with a public LinkedIn post: Designed a layered library service with domain models, repositories and business logic cleanly separated; Wrote a pytest suite covering both happy paths and real error conditions; Learned to keep business rules out of the storage layer for easier testing and future changes; Built a REST API over a layered service, mapping domain errors to correct HTTP status codes; Implemented ranked search with a custom scoring function and sort key; Wrote API-level tests with a test client separate from my unit test suite; Swapped an in-memory repository for SQLite persistence without changing any service-layer code; Implemented a hand-written LRU cache for search results with proper invalidation; Fixed a real race condition allowing double-checkout of the last available copy; Set up CI so every push automatically runs the full backend test suite; Used a set for O(1) deduplication in a bulk import handling 500+ records efficiently; Got a small backend service to a real deploy-ready state with health checks and docs.</p></div>
           </details>
           <details>
-            <summary>What do I get when I finish?</summary>
-            <div class="acc-body"><p>An offer letter when you are selected, a public portfolio page with every approved milestone, and a QR-verified certificate and Letter of Recommendation once 3 of your 4 milestones are approved. Top performers also earn the stipend and are referred to hiring partners.</p></div>
+            <summary>Is the Software Engineering (SDE) internship paid? Is there a stipend?</summary>
+            <div class="acc-body"><p>Top performers earn a stipend of up to $100 a month. It is performance-based and goes to the interns whose reviewed Software Engineering (SDE) work stands out in their cohort, not to every intern.</p></div>
+          </details>
+          <details>
+            <summary>How much time does it take?</summary>
+            <div class="acc-body"><p>4 weeks, one milestone a week, each planned for about 2-3 hours. It is fully remote and open worldwide, so you work around college or a job.</p></div>
           </details>
         </div>
       </div>
@@ -434,8 +452,8 @@
 
     <section class="section ip-section" aria-labelledby="more-title">
       <div class="container">
-        <h2 class="h2" id="more-title">Other remote internships at SkillMe</h2>
-        <ul class="ip-links" role="list"><li><a href="/internships/full-stack-web-development">Full Stack Web Development internship</a></li><li><a href="/internships/python">Python internship</a></li><li><a href="/internships/react-frontend">React Frontend internship</a></li><li><a href="/internships/nodejs-backend">Node.js Backend internship</a></li><li><a href="/internships/ai-engineer">AI Engineer internship</a></li><li><a href="/internships/generative-ai">Generative AI internship</a></li><li><a href="/internships/machine-learning">Machine Learning internship</a></li><li><a href="/internships/data-science">Data Science internship</a></li><li><a href="/internships/java-spring-boot">Java Spring Boot internship</a></li><li><a href="/internships/cpp-dsa">C++ and DSA internship</a></li><li><a href="/internships/devops">DevOps internship</a></li><li><a href="/internships/cloud-aws">Cloud and AWS internship</a></li><li><a href="/internships/flutter-app-development">Flutter App Development internship</a></li><li><a href="/internships/cybersecurity">Cybersecurity internship</a></li><li><a href="/internships/sql-databases">SQL and Databases internship</a></li><li><a href="/internships/ui-ux-design">UI/UX Design internship</a></li><li><a href="/internships/ai-product-management">AI Product Management internship</a></li><li><a href="/internships/forward-deployed-engineer">Forward Deployed Engineer internship</a></li><li><a href="/internships/software-testing-qa">Software Testing and QA internship</a></li></ul>
+        <h2 class="h2" id="more-title">Related remote internships</h2>
+        <ul class="ip-links" role="list"><li><a href="/internships/java-spring-boot">Java Spring Boot internship</a></li><li><a href="/internships/cpp-dsa">C++ and DSA internship</a></li><li><a href="/internships/devops">DevOps internship</a></li><li><a href="/internships/cybersecurity">Cybersecurity internship</a></li><li><a href="/internships/sql-databases">SQL and Databases internship</a></li><li><a href="/internships/forward-deployed-engineer">Forward Deployed Engineer internship</a></li></ul>
         <p class="ip-more"><a href="/internships" class="btn-link">See all 20 internships &rarr;</a></p>
       </div>
     </section>

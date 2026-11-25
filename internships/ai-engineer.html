@@ -48,7 +48,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..800&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/theme.css?v=98690fd7ba">
-  <link rel="stylesheet" href="/internship.css?v=af42a0dbd5">
+  <link rel="stylesheet" href="/internship.css?v=9a07bf3ba9">
   <script src="/theme.js?v=515b2d143f" defer></script>
   <script src="/config.js?v=a6d0001538" defer></script>
   <script src="/attribution.js?v=45426916eb" defer></script>
@@ -157,18 +157,10 @@
         },
         {
           "@type": "Question",
-          "name": "Is the AI Engineer internship paid? Is there a stipend?",
+          "name": "What skills will I learn in the AI Engineer internship?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Top performers earn a stipend of up to $100 a month. The stipend is performance-based and is not paid to every intern: it goes to the interns whose reviewed work stands out in their cohort."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Who reviews my work?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Every weekly submission is reviewed against that week's acceptance criteria by the SkillMe team, which includes engineers who work at Walmart, Google and LinkedIn. Work that misses the bar comes back with notes on what to fix."
+            "text": "The AI Engineer internship works with LLM APIs, RAG and Agents. Week 1: getting and using a free-tier LLM API key with tool/function-calling support (Google Gemini API or Groq); defining a tool schema (name, description, parameters) that the model can call. Week 2: designing a small toolset for one workflow (lookup, classify, escalate); writing a system prompt that defines an agent's role, tools, and boundaries. Week 3: chunking and embedding a small internal knowledge base; exposing retrieval as a callable tool (search_policy_docs) rather than a fixed pre-step. Week 4: exposing an agent as an HTTP endpoint with a lightweight framework (FastAPI or Flask); writing an evaluation set with expected categories and required policy citations."
           }
         },
         {
@@ -176,31 +168,39 @@
           "name": "Do I need experience to apply for the AI Engineer internship?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "You need the basics of LLM APIs, RAG, Agents, not prior internship experience. Week 1 starts at Beginner level and week 4 reaches Intermediate+. A short screening quiz (8 questions, about 5 minutes) checks you are ready to start."
+            "text": "You need the basics of LLM APIs, RAG and Agents, not prior internship experience. Week 1 starts at beginner level, where you get a free LLM API key and make your first tool-calling request: instead of just replying with text, the model decides to call a Python function you defined. Week 4 reaches intermediate+ level. A short screening quiz (8 questions, about 5 minutes) checks you are ready to start."
           }
         },
         {
           "@type": "Question",
-          "name": "How long is the internship and how much time does it take?",
+          "name": "How is each AI Engineer milestone reviewed?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "It runs for 4 weeks with one milestone a week. Each milestone is planned for about 2-3 hours, and it is fully remote, so you work at your own pace around college or a job."
+            "text": "Every week has a checklist, and a milestone is approved only when it meets all of it. For week 1 of TicketPilot: Support Ticket Triage Agent, that means: asking about a known order ID returns a correct, tool-grounded answer, not a guess; asking about an unknown order ID makes the tool return 'not found' and the model reports that honestly; the API key never appears anywhere in committed code or Git history; printing the raw API response shows a clear tool-call step before the final answer. Reviewers include engineers who work at Walmart, Google and LinkedIn, and work that misses the bar comes back with notes."
           }
         },
         {
           "@type": "Question",
-          "name": "Who can apply? Is it open outside India?",
+          "name": "What can I put on my resume after the AI Engineer internship?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Anyone can apply, from any country, college or year, and we encourage you to. Selection is competitive: every application is read by a person, and shortlisted applicants hear back within 48 hours."
+            "text": "Each approved milestone gives you a line you can back up with a public LinkedIn post: Made my first tool-calling LLM request where the model chose which function to run; Wired a Python function into an LLM agent's tool-calling loop end to end; Learned how tool schemas and tool responses fit into a real agent request; Built a multi-tool support ticket triage agent with a real tool-calling loop; Designed a toolset and system prompt so an LLM could gather context before replying; Added a safety cap to prevent runaway tool-calling loops in an autonomous agent; Built a policy knowledge base and exposed retrieval as a callable tool in an AI agent; Combined RAG with tool-calling so agent replies cite real, retrieved policy rules; Verified the agent gives an honest 'cannot confirm' answer instead of fabricating policy; Wrapped my AI triage agent in a FastAPI endpoint with input validation and error handling; Built an evaluation suite that measures triage accuracy against ground-truth tickets; Added a guardrail that escalates low-confidence tickets instead of letting the agent guess."
           }
         },
         {
           "@type": "Question",
-          "name": "What do I get when I finish?",
+          "name": "Is the AI Engineer internship paid? Is there a stipend?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "An offer letter when you are selected, a public portfolio page with every approved milestone, and a QR-verified certificate and Letter of Recommendation once 3 of your 4 milestones are approved. Top performers also earn the stipend and are referred to hiring partners."
+            "text": "Top performers earn a stipend of up to $100 a month. It is performance-based and goes to the interns whose reviewed AI Engineer work stands out in their cohort, not to every intern."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How much time does it take?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "4 weeks, one milestone a week, each planned for about 2-3 hours. It is fully remote and open worldwide, so you work around college or a job."
           }
         }
       ]
@@ -269,7 +269,7 @@
     <section class="section section-soft ip-section" aria-labelledby="summary-title">
       <div class="container ip-narrow">
         <h2 class="h2" id="summary-title">The AI Engineer internship in short</h2>
-        <p class="ip-answer">The SkillMe AI Engineer internship is a 4-week, fully remote programme open to students worldwide. Over four weekly milestones you build <strong>TicketPilot: Support Ticket Triage Agent</strong>, post each milestone publicly on LinkedIn, and have it reviewed against clear acceptance criteria. Reviewers include engineers who work at Walmart, Google and LinkedIn. Top performers earn a stipend of up to $100 a month, and interns who get 3 of 4 milestones approved earn a QR-verified certificate and a Letter of Recommendation.</p>
+        <p class="ip-answer">In the SkillMe AI Engineer internship you build <strong>TicketPilot: Support Ticket Triage Agent</strong>, a project where you build an AI agent that reads incoming support tickets, calls tools to look up real information, and decides what to do next — then prove it actually works with evals. In week 1 you get a free LLM API key and make your first tool-calling request: instead of just replying with text, the model decides to call a Python function you defined. By week 4 you wrap the triage agent in a small API, write an evaluation set to measure how often it triages correctly, and add guardrails so it fails safely. Each milestone is posted on LinkedIn and checked against that week's checklist before it counts. Top performers earn a stipend of up to $100 a month.</p>
       </div>
     </section>
 
@@ -309,6 +309,8 @@
               <div><h4>What you learn</h4><ul><li>Getting and using a free-tier LLM API key with tool/function-calling support (Google Gemini API or Groq)</li><li>Defining a tool schema (name, description, parameters) that the model can call</li><li>Reading a tool-call response and executing the matching Python function</li><li>Sending the tool&#x27;s result back to the model for a final answer</li></ul></div>
               <div><h4>What you submit</h4><ul><li>A working <code>lookup_order_status</code> tool function with sample data</li><li>A tool schema definition wired into a chat completion request</li><li>Glue code that executes a model-requested tool call and returns the result</li><li>A README explaining the tool-calling flow end to end</li></ul></div>
             </div>
+            <details class="ip-week-done"><summary>How week 1 is reviewed</summary><ul><li>Asking about a known order ID returns a correct, tool-grounded answer, not a guess</li><li>Asking about an unknown order ID makes the tool return &#x27;not found&#x27; and the model reports that honestly</li><li>The API key never appears anywhere in committed code or Git history</li><li>Printing the raw API response shows a clear tool-call step before the final answer</li></ul></details>
+            <p class="ip-week-stretch"><strong>Stretch goal:</strong> Add a second tool, <code>lookup_customer(email: str)</code>, and see if the model can chain both tools in one conversation to answer a two-part question.</p>
           </li>
           <li class="card ip-week">
             <div class="ip-week-head">
@@ -321,6 +323,8 @@
               <div><h4>What you learn</h4><ul><li>Designing a small toolset for one workflow (lookup, classify, escalate)</li><li>Writing a system prompt that defines an agent&#x27;s role, tools, and boundaries</li><li>Handling a multi-turn tool-calling loop where the model can call more than one tool per ticket</li><li>Structuring ticket data and agent output for a real workflow</li></ul></div>
               <div><h4>What you submit</h4><ul><li>A <code>tickets.json</code> file with realistic sample tickets</li><li>Three working tools: order lookup, category classification, refund eligibility</li><li>A multi-round tool-calling loop with a max-rounds safety cap</li><li>A batch run over all sample tickets with printed categories, tool calls and drafted replies</li></ul></div>
             </div>
+            <details class="ip-week-done"><summary>How week 2 is reviewed</summary><ul><li>Running the agent over all sample tickets produces a category and draft reply for each one</li><li>At least one ticket in the sample set requires the agent to call two different tools before replying</li><li>The safety cap is verified by testing with a deliberately confusing ticket and confirming the loop stops</li><li>A previously wrong category or tool choice is fixed and verified after a prompt or description tweak</li></ul></details>
+            <p class="ip-week-stretch"><strong>Stretch goal:</strong> Add an <code>escalate_to_human(reason: str)</code> tool the agent can call for tickets it isn&#x27;t confident about, and track how often it gets used across your sample set.</p>
           </li>
           <li class="card ip-week">
             <div class="ip-week-head">
@@ -333,6 +337,8 @@
               <div><h4>What you learn</h4><ul><li>Chunking and embedding a small internal knowledge base</li><li>Exposing retrieval as a callable tool (<code>search_policy_docs</code>) rather than a fixed pre-step</li><li>Combining RAG with tool-calling in a single agent loop</li><li>Grounding generated text in retrieved context and citing the source</li></ul></div>
               <div><h4>What you submit</h4><ul><li>4-6 policy documents forming a small internal knowledge base</li><li>A <code>search_policy_docs</code> retrieval tool with cached embeddings</li><li>An updated agent that calls retrieval before drafting policy-related replies</li><li>Replies that show which policy chunk(s) grounded each claim</li></ul></div>
             </div>
+            <details class="ip-week-done"><summary>How week 3 is reviewed</summary><ul><li>A refund-related ticket produces a reply that correctly cites a real rule from <code>refund_policy.txt</code></li><li>A question about a policy not covered by any document gets an honest &#x27;cannot confirm&#x27; response instead of a fabricated rule</li><li>Re-running the agent does not re-embed the policy documents from scratch (cache is used)</li><li>At least 3 sample tickets show retrieval being called before the reply is drafted</li></ul></details>
+            <p class="ip-week-stretch"><strong>Stretch goal:</strong> Add a <code>top_k</code> sensitivity test: compare retrieved chunks and reply quality at <code>top_k=1</code> vs <code>top_k=3</code> on 3 tricky tickets.</p>
           </li>
           <li class="card ip-week">
             <div class="ip-week-head">
@@ -345,26 +351,38 @@
               <div><h4>What you learn</h4><ul><li>Exposing an agent as an HTTP endpoint with a lightweight framework (FastAPI or Flask)</li><li>Writing an evaluation set with expected categories and required policy citations</li><li>Measuring agent accuracy and tool-call correctness against ground truth</li><li>Adding guardrails: input validation, rate limiting basics, and safe failure modes</li></ul></div>
               <div><h4>What you submit</h4><ul><li>A <code>POST /triage</code> API endpoint wrapping the full agent</li><li>Input validation and safe error handling on the endpoint</li><li>An <code>eval_tickets.json</code> set and <code>evaluate.py</code> script reporting accuracy</li><li>A guardrail that escalates low-confidence or under-grounded triage decisions</li></ul></div>
             </div>
+            <details class="ip-week-done"><summary>How week 4 is reviewed</summary><ul><li><code>POST /triage</code> with a real ticket body returns a category, reply and tool trace within a reasonable time</li><li>A deliberately malformed request (empty body) returns a clean error, not a crash</li><li><code>python evaluate.py</code> runs at least 10 checks and reports an overall accuracy percentage</li><li>A ticket engineered to be low-confidence or ungrounded is escalated instead of answered with a guess</li></ul></details>
+            <p class="ip-week-stretch"><strong>Stretch goal:</strong> Add a <code>/triage/batch</code> endpoint that accepts a list of tickets and returns results with total latency and per-ticket timing, useful for a simple load check.</p>
           </li>
         </ol>
       </div>
     </section>
 
-    <section class="section ip-section" aria-labelledby="get-title">
+    <section class="section ip-section" aria-labelledby="fit-title">
       <div class="container">
         <div class="section-head">
-          <span class="eyebrow">What you get</span>
-          <h2 class="h2" id="get-title">What the AI Engineer internship gives you</h2>
+          <span class="eyebrow">Is it for you?</span>
+          <h2 class="h2" id="fit-title">Who the AI Engineer internship is for, and what you leave with</h2>
         </div>
-        <div class="ip-benefits">
-          <article class="card card-pad"><h3 class="h3">Stipend for top performers</h3><p>Up to $100 a month for the interns whose reviewed work stands out in their cohort. It is earned, not handed out.</p></article>
-          <article class="card card-pad"><h3 class="h3">Review by working engineers</h3><p>Engineers who work at Walmart, Google and LinkedIn review submissions, so submit mindfully. Work that misses the bar comes back with notes.</p></article>
-          <article class="card card-pad"><h3 class="h3">Offer letter on day one</h3><p>A proper internship offer letter with your track and joining date, for your resume and college records.</p></article>
-          <article class="card card-pad"><h3 class="h3">Certificate recruiters can check</h3><p>A certificate with a unique ID and QR code that anyone can verify, plus a Letter of Recommendation based on your approved work.</p></article>
-          <article class="card card-pad"><h3 class="h3">Public proof of work</h3><p>Four public LinkedIn posts and a portfolio page listing every approved milestone, in one link for your resume.</p></article>
-          <article class="card card-pad"><h3 class="h3">Referrals for top performers</h3><p>Top interns are referred to openings at startups and product companies in our hiring partner network.</p></article>
+        <div class="ip-outcomes">
+          <div class="card card-pad">
+            <h3 class="h3">This internship fits you if</h3>
+            <ul class="ip-outcome-list"><li><strong>You know the basics of LLM APIs, RAG and Agents</strong> and want a real project to show for it, not more tutorials.</li><li><strong>You can start at beginner level.</strong> Week 1: Get a free LLM API key and make your first tool-calling request: instead of just replying with text, the model decides to call a Python function you defined.</li><li><strong>You want to reach intermediate+ level in four weeks.</strong> Week 4: Wrap the triage agent in a small API, write an evaluation set to measure how often it triages correctly, and add guardrails so it fails safely.</li><li><strong>You can give it about 2-3 hours a week</strong> around college or a job, from any country.</li></ul>
+          </div>
+          <div class="card card-pad">
+            <h3 class="h3">What you can put on your resume</h3>
+            <p class="ip-outcome-sub">Each line is backed by a public LinkedIn post and a reviewed submission.</p>
+            <ul class="ip-outcome-list"><li>Made my first tool-calling LLM request where the model chose which function to run</li><li>Wired a Python function into an LLM agent&#x27;s tool-calling loop end to end</li><li>Learned how tool schemas and tool responses fit into a real agent request</li><li>Built a multi-tool support ticket triage agent with a real tool-calling loop</li><li>Designed a toolset and system prompt so an LLM could gather context before replying</li><li>Added a safety cap to prevent runaway tool-calling loops in an autonomous agent</li><li>Built a policy knowledge base and exposed retrieval as a callable tool in an AI agent</li><li>Combined RAG with tool-calling so agent replies cite real, retrieved policy rules</li><li>Verified the agent gives an honest &#x27;cannot confirm&#x27; answer instead of fabricating policy</li><li>Wrapped my AI triage agent in a FastAPI endpoint with input validation and error handling</li><li>Built an evaluation suite that measures triage accuracy against ground-truth tickets</li><li>Added a guardrail that escalates low-confidence tickets instead of letting the agent guess</li></ul>
+          </div>
         </div>
-        <p class="ip-note">Reviewers take part in a personal capacity. Company names belong to their owners and do not imply a partnership or endorsement.</p>
+        <ul class="ip-included" role="list" aria-label="Included with every internship">
+          <li><strong>Stipend</strong> of up to $100 a month for top performers</li>
+          <li><strong>Offer letter</strong> when you are selected</li>
+          <li><strong>QR-verified certificate</strong> and LOR after 3 of 4 approved milestones</li>
+          <li><strong>Portfolio page</strong> with every approved milestone</li>
+          <li><strong>Referrals</strong> to hiring partners for top performers</li>
+        </ul>
+        <p class="ip-note">Reviewers include engineers who work at Walmart, Google and LinkedIn, taking part in a personal capacity. Company names belong to their owners and do not imply a partnership or endorsement.</p>
       </div>
     </section>
 
@@ -405,28 +423,28 @@
             <div class="acc-body"><p>You build TicketPilot: Support Ticket Triage Agent. Build an AI agent that reads incoming support tickets, calls tools to look up real information, and decides what to do next — then prove it actually works with evals. It is one project built up over four weekly milestones, so each week adds to the last.</p></div>
           </details>
           <details>
-            <summary>Is the AI Engineer internship paid? Is there a stipend?</summary>
-            <div class="acc-body"><p>Top performers earn a stipend of up to $100 a month. The stipend is performance-based and is not paid to every intern: it goes to the interns whose reviewed work stands out in their cohort.</p></div>
-          </details>
-          <details>
-            <summary>Who reviews my work?</summary>
-            <div class="acc-body"><p>Every weekly submission is reviewed against that week&#x27;s acceptance criteria by the SkillMe team, which includes engineers who work at Walmart, Google and LinkedIn. Work that misses the bar comes back with notes on what to fix.</p></div>
+            <summary>What skills will I learn in the AI Engineer internship?</summary>
+            <div class="acc-body"><p>The AI Engineer internship works with LLM APIs, RAG and Agents. Week 1: getting and using a free-tier LLM API key with tool/function-calling support (Google Gemini API or Groq); defining a tool schema (name, description, parameters) that the model can call. Week 2: designing a small toolset for one workflow (lookup, classify, escalate); writing a system prompt that defines an agent&#x27;s role, tools, and boundaries. Week 3: chunking and embedding a small internal knowledge base; exposing retrieval as a callable tool (search_policy_docs) rather than a fixed pre-step. Week 4: exposing an agent as an HTTP endpoint with a lightweight framework (FastAPI or Flask); writing an evaluation set with expected categories and required policy citations.</p></div>
           </details>
           <details>
             <summary>Do I need experience to apply for the AI Engineer internship?</summary>
-            <div class="acc-body"><p>You need the basics of LLM APIs, RAG, Agents, not prior internship experience. Week 1 starts at Beginner level and week 4 reaches Intermediate+. A short screening quiz (8 questions, about 5 minutes) checks you are ready to start.</p></div>
+            <div class="acc-body"><p>You need the basics of LLM APIs, RAG and Agents, not prior internship experience. Week 1 starts at beginner level, where you get a free LLM API key and make your first tool-calling request: instead of just replying with text, the model decides to call a Python function you defined. Week 4 reaches intermediate+ level. A short screening quiz (8 questions, about 5 minutes) checks you are ready to start.</p></div>
           </details>
           <details>
-            <summary>How long is the internship and how much time does it take?</summary>
-            <div class="acc-body"><p>It runs for 4 weeks with one milestone a week. Each milestone is planned for about 2-3 hours, and it is fully remote, so you work at your own pace around college or a job.</p></div>
+            <summary>How is each AI Engineer milestone reviewed?</summary>
+            <div class="acc-body"><p>Every week has a checklist, and a milestone is approved only when it meets all of it. For week 1 of TicketPilot: Support Ticket Triage Agent, that means: asking about a known order ID returns a correct, tool-grounded answer, not a guess; asking about an unknown order ID makes the tool return &#x27;not found&#x27; and the model reports that honestly; the API key never appears anywhere in committed code or Git history; printing the raw API response shows a clear tool-call step before the final answer. Reviewers include engineers who work at Walmart, Google and LinkedIn, and work that misses the bar comes back with notes.</p></div>
           </details>
           <details>
-            <summary>Who can apply? Is it open outside India?</summary>
-            <div class="acc-body"><p>Anyone can apply, from any country, college or year, and we encourage you to. Selection is competitive: every application is read by a person, and shortlisted applicants hear back within 48 hours.</p></div>
+            <summary>What can I put on my resume after the AI Engineer internship?</summary>
+            <div class="acc-body"><p>Each approved milestone gives you a line you can back up with a public LinkedIn post: Made my first tool-calling LLM request where the model chose which function to run; Wired a Python function into an LLM agent&#x27;s tool-calling loop end to end; Learned how tool schemas and tool responses fit into a real agent request; Built a multi-tool support ticket triage agent with a real tool-calling loop; Designed a toolset and system prompt so an LLM could gather context before replying; Added a safety cap to prevent runaway tool-calling loops in an autonomous agent; Built a policy knowledge base and exposed retrieval as a callable tool in an AI agent; Combined RAG with tool-calling so agent replies cite real, retrieved policy rules; Verified the agent gives an honest &#x27;cannot confirm&#x27; answer instead of fabricating policy; Wrapped my AI triage agent in a FastAPI endpoint with input validation and error handling; Built an evaluation suite that measures triage accuracy against ground-truth tickets; Added a guardrail that escalates low-confidence tickets instead of letting the agent guess.</p></div>
           </details>
           <details>
-            <summary>What do I get when I finish?</summary>
-            <div class="acc-body"><p>An offer letter when you are selected, a public portfolio page with every approved milestone, and a QR-verified certificate and Letter of Recommendation once 3 of your 4 milestones are approved. Top performers also earn the stipend and are referred to hiring partners.</p></div>
+            <summary>Is the AI Engineer internship paid? Is there a stipend?</summary>
+            <div class="acc-body"><p>Top performers earn a stipend of up to $100 a month. It is performance-based and goes to the interns whose reviewed AI Engineer work stands out in their cohort, not to every intern.</p></div>
+          </details>
+          <details>
+            <summary>How much time does it take?</summary>
+            <div class="acc-body"><p>4 weeks, one milestone a week, each planned for about 2-3 hours. It is fully remote and open worldwide, so you work around college or a job.</p></div>
           </details>
         </div>
       </div>
@@ -434,8 +452,8 @@
 
     <section class="section ip-section" aria-labelledby="more-title">
       <div class="container">
-        <h2 class="h2" id="more-title">Other remote internships at SkillMe</h2>
-        <ul class="ip-links" role="list"><li><a href="/internships/full-stack-web-development">Full Stack Web Development internship</a></li><li><a href="/internships/python">Python internship</a></li><li><a href="/internships/react-frontend">React Frontend internship</a></li><li><a href="/internships/nodejs-backend">Node.js Backend internship</a></li><li><a href="/internships/generative-ai">Generative AI internship</a></li><li><a href="/internships/machine-learning">Machine Learning internship</a></li><li><a href="/internships/data-science">Data Science internship</a></li><li><a href="/internships/software-engineering">Software Engineering (SDE) internship</a></li><li><a href="/internships/java-spring-boot">Java Spring Boot internship</a></li><li><a href="/internships/cpp-dsa">C++ and DSA internship</a></li><li><a href="/internships/devops">DevOps internship</a></li><li><a href="/internships/cloud-aws">Cloud and AWS internship</a></li><li><a href="/internships/flutter-app-development">Flutter App Development internship</a></li><li><a href="/internships/cybersecurity">Cybersecurity internship</a></li><li><a href="/internships/sql-databases">SQL and Databases internship</a></li><li><a href="/internships/ui-ux-design">UI/UX Design internship</a></li><li><a href="/internships/ai-product-management">AI Product Management internship</a></li><li><a href="/internships/forward-deployed-engineer">Forward Deployed Engineer internship</a></li><li><a href="/internships/software-testing-qa">Software Testing and QA internship</a></li></ul>
+        <h2 class="h2" id="more-title">Related remote internships</h2>
+        <ul class="ip-links" role="list"><li><a href="/internships/python">Python internship</a></li><li><a href="/internships/generative-ai">Generative AI internship</a></li><li><a href="/internships/machine-learning">Machine Learning internship</a></li><li><a href="/internships/data-science">Data Science internship</a></li><li><a href="/internships/ai-product-management">AI Product Management internship</a></li><li><a href="/internships/full-stack-web-development">Full Stack Web Development internship</a></li></ul>
         <p class="ip-more"><a href="/internships" class="btn-link">See all 20 internships &rarr;</a></p>
       </div>
     </section>

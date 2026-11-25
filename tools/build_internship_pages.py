@@ -58,6 +58,14 @@ TRACKS = [
     ('qa', 'qa', 'Software Quality', 'Software Testing and QA', 'software-testing-qa', 'Test Automation · Selenium · Bug Reports'),
 ]
 
+# Title-case words that are names, so they keep their capital when a sentence is folded into another.
+PROPER = {
+    'Python', 'Java', 'Dart', 'Flutter', 'React', 'Node', 'Express', 'Figma', 'Google', 'Amazon', 'Lambda', 'Docker',
+    'Kubernetes', 'Terraform', 'Linux', 'Git', 'Spring', 'Maven', 'Gradle', 'Selenium', 'Playwright', 'Cypress', 'Postman',
+    'Pandas', 'Matplotlib', 'Seaborn', 'Streamlit', 'Flask', 'Jupyter', 'Kaggle', 'Gemini', 'Groq', 'Excel', 'Tableau',
+    'Firebase', 'Android', 'Chrome', 'Burp', 'Wireshark', 'Nmap', 'Jira', 'Notion', 'Miro', 'LinkedIn', 'English',
+}
+
 # Homepage filter category for each track (quiz key -> category id used by the filter chips).
 CATEGORY = {
     'webdev': 'fullstack', 'react': 'fullstack', 'node': 'fullstack', 'uiux': 'fullstack',
@@ -104,6 +112,51 @@ def week_goal(desc):
 
 def week_learn(desc):
     return [ln[2:].strip() for ln in section(desc, "What You'll Learn").splitlines() if ln.startswith('- ')]
+
+
+def week_done(desc):
+    """The 'Done When' checklist: what a reviewer checks before approving the milestone."""
+    return [ln[6:].strip() for ln in section(desc, 'Done When').splitlines() if ln.startswith('- [ ] ')]
+
+
+def week_stretch(desc):
+    return re.sub(r'\s+', ' ', section(desc, 'Stretch Goal')).strip()
+
+
+def goal_clause(desc):
+    """First sentence of a week goal as a verb phrase that can follow 'you' ('set up...', not 'You will set up...')."""
+    text = plain(first_sentence(week_goal(desc)))
+    text = re.sub(r"^(You will|You'll|You)\s+", '', text)
+    return lower_first(text)
+
+
+def first_sentence(text):
+    return re.split(r'(?<=[.!?])\s', text.strip(), maxsplit=1)[0]
+
+
+def lower_first(text):
+    """Lower-case the first letter unless the first word is an acronym or name (AWS, C++, CloudFolio, Figma's)."""
+    word = text.split(' ', 1)[0] if text else ''
+    bare = re.sub(r"('s|[^A-Za-z0-9+#.-])+$", '', word)
+    if not word or not word[0].isupper() or (len(word) > 1 and not word[1:].islower()) or bare in PROPER:
+        return text
+    return text[0].lower() + text[1:]
+
+
+def join_list(items):
+    items = list(items)
+    return items[0] if len(items) == 1 else ', '.join(items[:-1]) + ' and ' + items[-1]
+
+
+def highlights(project):
+    """Resume-ready lines for a project, one or more per week, without duplicates."""
+    seen, out = set(), []
+    for n in sorted(project['weeks']):
+        for line in project['weeks'][n].get('post_highlights', []):
+            if line not in seen:
+                seen.add(line)
+                out.append(line)
+    return out
 
 
 def asset(name):
@@ -308,29 +361,43 @@ def track_faq(t, projects):
         names = ', '.join(plain(p['project_name']) for p in projects[:-1]) + f" or {plain(projects[-1]['project_name'])}"
         build = (f"You are assigned one of {len(projects)} projects: {names}. Each is a single project built up over "
                  "four weekly milestones, so each week adds to the last.")
-    return [
+    weeks = first['weeks']
+    skills = ' '.join(
+        f"Week {n}: {'; '.join(lower_first(plain(x)) for x in week_learn(weeks[n]['description'])[:2])}."
+        for n in sorted(weeks) if week_learn(weeks[n]['description']))
+    done1 = week_done(weeks['1']['description'])
+    resume = highlights(first)
+    faq = [
         (f'What will I build in the {noun} internship?', build),
-        (f'Is the {noun} internship paid? Is there a stipend?',
-         f'Top performers earn a stipend of {STIPEND}. The stipend is performance-based and is not paid to every intern: '
-         'it goes to the interns whose reviewed work stands out in their cohort.'),
-        ('Who reviews my work?',
-         f'Every weekly submission is reviewed against that week\'s acceptance criteria by the SkillMe team, which includes '
-         f'engineers who work at {REVIEWERS}. Work that misses the bar comes back with notes on what to fix.'),
+        (f'What skills will I learn in the {noun} internship?',
+         f'The {noun} internship works with {join_list(tech.split(" · "))}. {skills}'),
         (f'Do I need experience to apply for the {noun} internship?',
-         f'You need the basics of {tech.replace(" · ", ", ")}, not prior internship experience. Week 1 starts at '
-         f'{first["weeks"]["1"]["difficulty"]} level and week 4 reaches {first["weeks"]["4"]["difficulty"]}. '
-         'A short screening quiz (8 questions, about 5 minutes) checks you are ready to start.'),
-        ('How long is the internship and how much time does it take?',
-         f'It runs for 4 weeks with one milestone a week. Each milestone is planned for about {hours} hours, and it is '
-         'fully remote, so you work at your own pace around college or a job.'),
-        ('Who can apply? Is it open outside India?',
-         'Anyone can apply, from any country, college or year, and we encourage you to. Selection is competitive: every '
-         'application is read by a person, and shortlisted applicants hear back within 48 hours.'),
-        ('What do I get when I finish?',
-         'An offer letter when you are selected, a public portfolio page with every approved milestone, and a QR-verified '
-         'certificate and Letter of Recommendation once 3 of your 4 milestones are approved. Top performers also earn the '
-         'stipend and are referred to hiring partners.'),
+         f'You need the basics of {join_list(tech.split(" · "))}, not prior internship experience. Week 1 starts at '
+         f'{weeks["1"]["difficulty"].lower()} level, where you {goal_clause(weeks["1"]["description"])} '
+         f'Week 4 reaches {weeks["4"]["difficulty"].lower()} level. A short screening quiz (8 questions, about 5 minutes) '
+         'checks you are ready to start.'),
+        (f'How is each {noun} milestone reviewed?',
+         'Every week has a checklist, and a milestone is approved only when it meets all of it. For week 1 of '
+         f'{plain(first["project_name"])}, that means: {"; ".join(lower_first(plain(x)) for x in done1)}. '
+         f'Reviewers include engineers who work at {REVIEWERS}, and work that misses the bar comes back with notes.'),
     ]
+    if resume:
+        faq.append((f'What can I put on my resume after the {noun} internship?',
+                    'Each approved milestone gives you a line you can back up with a public LinkedIn post: '
+                    + '; '.join(plain(x) for x in resume) + '.'))
+    if len(projects) > 1:
+        faq.append((f'What are the other projects in the {noun} internship?',
+                    ' '.join(f"{plain(p['project_name'])}: {plain(p['tagline'])}" for p in projects[1:])
+                    + ' Every project follows the same four-week shape, with one reviewed milestone a week.'))
+    faq += [
+        (f'Is the {noun} internship paid? Is there a stipend?',
+         f'Top performers earn a stipend of {STIPEND}. It is performance-based and goes to the interns whose reviewed '
+         f'{noun} work stands out in their cohort, not to every intern.'),
+        ('How much time does it take?',
+         f'4 weeks, one milestone a week, each planned for about {hours} hours. It is fully remote and open worldwide, '
+         'so you work around college or a job.'),
+    ]
+    return faq
 
 
 def render_track(t, projects, all_tracks):
@@ -376,6 +443,9 @@ def render_track(t, projects, all_tracks):
         summary_build = f"you build <strong>{inline(first['project_name'])}</strong>"
     else:
         summary_build = f"you build one of {len(projects)} projects, such as <strong>{inline(first['project_name'])}</strong>"
+    wk = first['weeks']
+    summary_arc = (f"In week 1 you {inline(goal_clause(wk['1']['description']))} "
+                   f"By week 4 you {inline(goal_clause(wk['4']['description']))}")
 
     p.append(f"""
   <main id="main">
@@ -402,7 +472,7 @@ def render_track(t, projects, all_tracks):
     <section class="section section-soft ip-section" aria-labelledby="summary-title">
       <div class="container ip-narrow">
         <h2 class="h2" id="summary-title">The {esc(noun)} internship in short</h2>
-        <p class="ip-answer">The SkillMe {esc(noun)} internship is a 4-week, fully remote programme open to students worldwide. Over four weekly milestones {summary_build}, post each milestone publicly on LinkedIn, and have it reviewed against clear acceptance criteria. Reviewers include engineers who work at {REVIEWERS}. Top performers earn a stipend of {STIPEND}, and interns who get 3 of 4 milestones approved earn a QR-verified certificate and a Letter of Recommendation.</p>
+        <p class="ip-answer">In the SkillMe {esc(noun)} internship {summary_build}, a project where you {inline(lower_first(first['tagline']))} {summary_arc} Each milestone is posted on LinkedIn and checked against that week's checklist before it counts. Top performers earn a stipend of {STIPEND}.</p>
       </div>
     </section>
 
@@ -439,6 +509,13 @@ def render_track(t, projects, all_tracks):
         w = first['weeks'][n]
         learn = ''.join(f'<li>{inline(x)}</li>' for x in week_learn(w['description']))
         deliver = ''.join(f'<li>{inline(x)}</li>' for x in w['deliverables'])
+        done = ''.join(f'<li>{inline(x)}</li>' for x in week_done(w['description']))
+        stretch = week_stretch(w['description'])
+        extra = ''
+        if done:
+            extra += f'\n            <details class="ip-week-done"><summary>How week {n} is reviewed</summary><ul>{done}</ul></details>'
+        if stretch:
+            extra += f'\n            <p class="ip-week-stretch"><strong>Stretch goal:</strong> {inline(stretch)}</p>'
         p.append(f"""
           <li class="card ip-week">
             <div class="ip-week-head">
@@ -450,28 +527,49 @@ def render_track(t, projects, all_tracks):
             <div class="ip-week-cols">
               <div><h4>What you learn</h4><ul>{learn}</ul></div>
               <div><h4>What you submit</h4><ul>{deliver}</ul></div>
-            </div>
+            </div>{extra}
           </li>""")
+    tech_list = join_list(tech.split(' · '))
+    fit = [
+        f"<li><strong>You know the basics of {esc(tech_list)}</strong> and want a real project to show for it, not more tutorials.</li>",
+        f"<li><strong>You can start at {esc(wk['1']['difficulty'].lower())} level.</strong> Week 1: {inline(first_sentence(week_goal(wk['1']['description'])))}</li>",
+        f"<li><strong>You want to reach {esc(wk['4']['difficulty'].lower())} level in four weeks.</strong> Week 4: {inline(first_sentence(week_goal(wk['4']['description'])))}</li>",
+        f"<li><strong>You can give it about {esc(wk['1']['est_hours'])} hours a week</strong> around college or a job, from any country.</li>",
+    ]
+    resume = highlights(first)
+    resume_html = ''
+    if resume:
+        resume_html = f"""
+          <div class="card card-pad">
+            <h3 class="h3">What you can put on your resume</h3>
+            <p class="ip-outcome-sub">{'From ' + inline(first['project_name']) + '. ' if len(projects) > 1 else ''}Each line is backed by a public LinkedIn post and a reviewed submission.</p>
+            <ul class="ip-outcome-list">{''.join(f'<li>{inline(x)}</li>' for x in resume)}</ul>
+          </div>"""
     p.append(f"""
         </ol>
       </div>
     </section>
 
-    <section class="section ip-section" aria-labelledby="get-title">
+    <section class="section ip-section" aria-labelledby="fit-title">
       <div class="container">
         <div class="section-head">
-          <span class="eyebrow">What you get</span>
-          <h2 class="h2" id="get-title">What the {esc(noun)} internship gives you</h2>
+          <span class="eyebrow">Is it for you?</span>
+          <h2 class="h2" id="fit-title">Who the {esc(noun)} internship is for, and what you leave with</h2>
         </div>
-        <div class="ip-benefits">
-          <article class="card card-pad"><h3 class="h3">Stipend for top performers</h3><p>Up to $100 a month for the interns whose reviewed work stands out in their cohort. It is earned, not handed out.</p></article>
-          <article class="card card-pad"><h3 class="h3">Review by working engineers</h3><p>Engineers who work at {REVIEWERS} review submissions, so submit mindfully. Work that misses the bar comes back with notes.</p></article>
-          <article class="card card-pad"><h3 class="h3">Offer letter on day one</h3><p>A proper internship offer letter with your track and joining date, for your resume and college records.</p></article>
-          <article class="card card-pad"><h3 class="h3">Certificate recruiters can check</h3><p>A certificate with a unique ID and QR code that anyone can verify, plus a Letter of Recommendation based on your approved work.</p></article>
-          <article class="card card-pad"><h3 class="h3">Public proof of work</h3><p>Four public LinkedIn posts and a portfolio page listing every approved milestone, in one link for your resume.</p></article>
-          <article class="card card-pad"><h3 class="h3">Referrals for top performers</h3><p>Top interns are referred to openings at startups and product companies in our hiring partner network.</p></article>
+        <div class="ip-outcomes">
+          <div class="card card-pad">
+            <h3 class="h3">This internship fits you if</h3>
+            <ul class="ip-outcome-list">{''.join(fit)}</ul>
+          </div>{resume_html}
         </div>
-        <p class="ip-note">Reviewers take part in a personal capacity. Company names belong to their owners and do not imply a partnership or endorsement.</p>
+        <ul class="ip-included" role="list" aria-label="Included with every internship">
+          <li><strong>Stipend</strong> of {STIPEND} for top performers</li>
+          <li><strong>Offer letter</strong> when you are selected</li>
+          <li><strong>QR-verified certificate</strong> and LOR after 3 of 4 approved milestones</li>
+          <li><strong>Portfolio page</strong> with every approved milestone</li>
+          <li><strong>Referrals</strong> to hiring partners for top performers</li>
+        </ul>
+        <p class="ip-note">Reviewers include engineers who work at {REVIEWERS}, taking part in a personal capacity. Company names belong to their owners and do not imply a partnership or endorsement.</p>
       </div>
     </section>
 
@@ -499,7 +597,11 @@ def render_track(t, projects, all_tracks):
             <summary>{esc(q)}</summary>
             <div class="acc-body"><p>{esc(a)}</p></div>
           </details>""")
-    others = ''.join(f'<li><a href="/internships/{o["slug"]}">{esc(o["noun"])} internship</a></li>' for o in all_tracks if o['slug'] != slug)
+    # Closest tracks first (same homepage category), so the links are relevant rather than the same list on every page.
+    cat = CATEGORY.get(t['quiz'], 'systems')
+    rest = [o for o in all_tracks if o['slug'] != slug]
+    related = ([o for o in rest if CATEGORY.get(o['quiz'], 'systems') == cat] + [o for o in rest if CATEGORY.get(o['quiz'], 'systems') != cat])[:6]
+    others = ''.join(f'<li><a href="/internships/{o["slug"]}">{esc(o["noun"])} internship</a></li>' for o in related)
     p.append(f"""
         </div>
       </div>
@@ -507,7 +609,7 @@ def render_track(t, projects, all_tracks):
 
     <section class="section ip-section" aria-labelledby="more-title">
       <div class="container">
-        <h2 class="h2" id="more-title">Other remote internships at SkillMe</h2>
+        <h2 class="h2" id="more-title">Related remote internships</h2>
         <ul class="ip-links" role="list">{others}</ul>
         <p class="ip-more"><a href="/internships" class="btn-link">See all {len(all_tracks)} internships &rarr;</a></p>
       </div>
@@ -647,6 +749,7 @@ def render_hub(tracks, curriculum):
             <article class="card ih-card" data-search="{esc(search)}">
               <h4 class="ih-card-title"><a href="/internships/{t['slug']}">{esc(t['label'])}</a></h4>
               <p class="ih-build"><span class="ih-label mono">You build</span>{inline(first['project_name'])}{more}</p>
+              <p class="ih-tagline">{inline(first_sentence(first['tagline']))}</p>
               <ul class="ih-tech" role="list" aria-label="Tech stack">{tech}</ul>
               <ul class="ih-meta" role="list">
                 <li>4 weeks</li><li>{esc(first['weeks']['1']['est_hours'])} hrs/week</li><li>Starts at {esc(first['weeks']['1']['difficulty'].lower())}</li>
