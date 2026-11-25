@@ -334,19 +334,44 @@ def _send_sync(to_email: str, to_name: str, subject: str, html_body: str, tag: s
 
 
 
+def _err_text(exc: Exception) -> str:
+    """Short, human-readable form of an SMTP/network exception for email_logs.error_message."""
+    if isinstance(exc, smtplib.SMTPResponseException):
+        msg = exc.smtp_error.decode("utf-8", "replace") if isinstance(exc.smtp_error, bytes) else str(exc.smtp_error)
+        return f"{exc.smtp_code} {msg}".strip()
+    if isinstance(exc, smtplib.SMTPRecipientsRefused):
+        parts = []
+        for code, msg in exc.recipients.values():
+            parts.append(f"{code} {msg.decode('utf-8', 'replace') if isinstance(msg, bytes) else msg}")
+        return "; ".join(parts) or str(exc)
+    return f"{type(exc).__name__}: {exc}" if str(exc) else type(exc).__name__
+
+
 async def _send_ex(to_email: str, to_name: str, subject: str, html_body: str,
                    tag: str | None = None) -> tuple[bool, str | None]:
     """
     Async wrapper around _send_sync with multi-account failover.
     Returns (success, login of the account that sent it). Never raises.
     """
+    ok, account, _ = await _send_detailed(to_email, to_name, subject, html_body, tag)
+    return ok, account
+
+
+async def _send_detailed(to_email: str, to_name: str, subject: str, html_body: str,
+                         tag: str | None = None) -> tuple[bool, str | None, str | None]:
+    """
+    Same as _send_ex, plus a failure reason for email_logs.error_message (None on success).
+    Reasons start with a short code: quota_exhausted, recipient_refused, smtp_error or
+    not_configured. Never raises.
+    """
     if not settings.email_enabled:
         logger.info("[Email disabled] Would send '%s' to %s", subject, to_email)
-        return True, None
+        return True, None, None
     if not _accounts():
         logger.warning("SMTP credentials not configured — skipping email to %s", to_email)
-        return False, None
+        return False, None, "not_configured: SMTP credentials are not set"
     attempted = False
+    errors: list[str] = []
     for account in await _ordered_accounts():
         login = account[0]
         # Re-check and reserve a credit with no await in between, so concurrent sends can't all
@@ -359,25 +384,28 @@ async def _send_ex(to_email: str, to_name: str, subject: str, html_body: str,
         try:
             await asyncio.to_thread(_send_sync, to_email, to_name, subject, html_body, tag, account)
             _schedule_quota_alert_check()
-            return True, login
+            return True, login, None
         except smtplib.SMTPRecipientsRefused as exc:
             _adjust_credits(login, +1)
             # This recipient is the problem, not the account — another account won't help
             logger.error("Recipient %s refused via account %s: %s", to_email, login, exc)
-            return False, None
+            return False, None, f"recipient_refused: {_err_text(exc)}"[:1000]
         except smtplib.SMTPResponseException as exc:
             _adjust_credits(login, +1)
             if not isinstance(exc, smtplib.SMTPConnectError):
                 # Brevo refused this account (quota hit / bad key) — deprioritise it until the daily reset
                 _refused_today[login] = datetime.now(timezone.utc)
             logger.error("Failed to send email to %s via account %s: %s", to_email, login, exc)
+            errors.append(f"{login}: {_err_text(exc)}")
         except Exception as exc:
             _adjust_credits(login, +1)
             logger.error("Failed to send email to %s via account %s: %s", to_email, login, exc)
+            errors.append(f"{login}: {_err_text(exc)}")
     if not attempted:
         logger.error("Not sending email to %s: every Brevo account is out of today's quota "
                      "(resets 00:00 UTC). Logged as failed so it can be resent.", to_email)
-    return False, None
+        return False, None, "quota_exhausted: every Brevo account is out of today's quota (resets 05:30 IST)"
+    return False, None, ("smtp_error: " + " | ".join(errors))[:1000]
 
 
 async def _send(to_email: str, to_name: str, subject: str, html_body: str, tag: str | None = None) -> bool:
@@ -436,26 +464,68 @@ async def _send_and_log(
         logger.warning("Failed to pre-log email to DB: %s", log_exc)
 
     tag = f"log{log_id}" if log_id else None
-    success, account = await _send_ex(to_email, to_name, subject, html_body, tag)
+    success, account, error = await _send_detailed(to_email, to_name, subject, html_body, tag)
 
     try:
         if log_id:
             await db.execute(
-                "UPDATE email_logs SET status = ?, message_tag = ?, smtp_account = ? WHERE id = ?",
-                ("sent" if success else "failed", tag, account, log_id),
+                "UPDATE email_logs SET status = ?, message_tag = ?, smtp_account = ?, error_message = ? WHERE id = ?",
+                ("sent" if success else "failed", tag, account, error, log_id),
             )
         else:
             # Pre-log insert failed — fall back to a single post-send insert (no tracking tag)
             await db.insert(
                 """INSERT INTO email_logs
-                   (recipient_email, recipient_name, email_type, subject, student_id, batch_id, status, body, smtp_account)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                   (recipient_email, recipient_name, email_type, subject, student_id, batch_id, status, body,
+                    smtp_account, error_message)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (to_email, to_name, email_type, subject, student_id, batch_id,
-                 "sent" if success else "failed", html_body, account),
+                 "sent" if success else "failed", html_body, account, error),
             )
     except Exception as log_exc:
         logger.warning("Failed to log email to DB: %s", log_exc)
     return success
+
+
+_resending: set[int] = set()  # email_logs ids with a resend in flight (blocks double-clicks)
+
+
+async def resend_failed_email(log_id: int) -> dict:
+    """
+    Re-send a failed email_logs row with its stored subject and body, updating that same row
+    (status, error_message, smtp_account, sent_at) so counts and funnels don't double up.
+    Returns {"status": "sent" | "failed", "error": reason or None}.
+    Raises ValueError (missing row, not failed, no stored body) or RuntimeError (already resending).
+    """
+    from db.database import db
+    if log_id in _resending:
+        raise RuntimeError("A resend for this email is already in progress")
+    _resending.add(log_id)
+    try:
+        row = await db.fetch_one(
+            "SELECT id, recipient_email, recipient_name, subject, body, status FROM email_logs WHERE id = ?",
+            (log_id,),
+        )
+        if not row:
+            raise ValueError("Email log not found")
+        if row["status"] != "failed":
+            raise ValueError(f"Only failed emails can be resent (this one is '{row['status']}')")
+        if not row.get("body"):
+            raise ValueError("This email has no stored body, so it can't be resent")
+        tag = f"log{log_id}"
+        success, account, error = await _send_detailed(
+            row["recipient_email"], row["recipient_name"] or "", row["subject"], row["body"], tag)
+        if success:
+            await db.execute(
+                "UPDATE email_logs SET status = 'sent', error_message = NULL, smtp_account = ?, "
+                "message_tag = ?, sent_at = CURRENT_TIMESTAMP WHERE id = ?",
+                (account, tag, log_id),
+            )
+        else:
+            await db.execute("UPDATE email_logs SET error_message = ? WHERE id = ?", (error, log_id))
+        return {"status": "sent" if success else "failed", "error": error}
+    finally:
+        _resending.discard(log_id)
 
 # ── Activation / engagement emails (additive; never used by transactional flows) ──
 

@@ -78,7 +78,9 @@ async function loadEmailLogs(offset = 0) {
         const t = EMAIL_TYPE_LABELS[log.email_type] || { label: log.email_type, color: 'var(--text-3)', bg: 'var(--neutral-wash)' };
         const statusBadge = log.status === 'sent'
           ? '<span style="padding:2px 8px;border-radius:10px;background:var(--ok-wash);color:var(--ok);font-size:0.72rem;font-weight:600;">✅ Sent</span>'
-          : '<span style="padding:2px 8px;border-radius:10px;background:var(--danger-wash);color:var(--danger);font-size:0.72rem;font-weight:600;">❌ Failed</span>';
+          : log.status === 'failed'
+            ? '<span style="padding:2px 8px;border-radius:10px;background:var(--danger-wash);color:var(--danger);font-size:0.72rem;font-weight:600;">❌ Failed</span>' + emailFailureDetail(log)
+            : `<span style="padding:2px 8px;border-radius:10px;background:var(--neutral-wash);color:var(--text-3);font-size:0.72rem;font-weight:600;">⏳ ${esc(log.status || 'pending')}</span>`;
         const d = new Date(log.sent_at && !log.sent_at.endsWith('Z') ? log.sent_at.replace(' ', 'T') + 'Z' : log.sent_at);
         const timeStr = isNaN(d) ? log.sent_at : `${d.toLocaleDateString('en-IN')} ${d.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'})}`;
         const subject = log.subject?.length > 50 ? log.subject.slice(0, 50) + '…' : (log.subject || '—');
@@ -116,6 +118,40 @@ async function loadEmailLogs(offset = 0) {
   } catch (err) {
     tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--danger);">Error loading logs: ${err.message}</td></tr>`;
   }
+}
+
+const EMAIL_FAILURE_LABELS = {
+  quota_exhausted:   'Out of daily quota',
+  recipient_refused: 'Recipient refused',
+  smtp_error:        'SMTP error',
+  not_configured:    'SMTP not configured',
+};
+
+// Reason (stored in error_message as "<code>: <detail>") + a Resend button, under a Failed badge.
+// Rows that failed before reasons were recorded have no error_message and show "Reason not recorded".
+function emailFailureDetail(log) {
+  const raw = log.error_message || '';
+  const m = raw.match(/^(\w+):\s*([\s\S]*)$/);
+  const label = m ? (EMAIL_FAILURE_LABELS[m[1]] || m[1]) : (raw ? 'Error' : 'Reason not recorded');
+  const detail = m ? m[2] : raw;
+  const canResend = !!log.body;
+  return `<div style="margin-top:4px;font-size:0.7rem;color:var(--text-secondary);max-width:180px;" title="${esc(detail)}">
+      ${esc(label)}
+    </div>${canResend ? `<button class="btn btn-ghost" style="margin-top:4px;padding:2px 10px;font-size:0.72rem;"
+      onclick="event.stopPropagation(); resendEmailLog(${Number(log.id)}, this)">↻ Resend</button>` : ''}`;
+}
+
+async function resendEmailLog(id, btn) {
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+  try {
+    const res = await api(`/api/admin/email/logs/${id}/resend`, { method: 'POST' });
+    if (res.status === 'sent') toast('Email resent');
+    else toast(`Resend failed: ${res.error || 'unknown error'}`, 'error');
+  } catch (err) {
+    toast(`Resend failed: ${err.message}`, 'error');
+  }
+  loadEmailLogs(_emailLogOffset);
+  loadEmailAggStats();
 }
 
 // Renders per-row delivery/open/click/bounce/spam badges from email_logs tracking columns.

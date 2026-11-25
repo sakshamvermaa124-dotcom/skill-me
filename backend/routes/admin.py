@@ -813,6 +813,18 @@ async def get_email_logs(
     }
 
 
+@router.post("/email/logs/{log_id}/resend", summary="Resend a failed email")
+async def resend_email_log(log_id: int, _: str = Depends(require_admin)):
+    """Re-send a failed email with its stored subject and body. Updates the same log row."""
+    from services.email_service import resend_failed_email
+    try:
+        return await resend_failed_email(log_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    except RuntimeError as exc:
+        raise HTTPException(status_code=409, detail=str(exc))
+
+
 @router.get("/email/directory", summary="Per-student email contact directory")
 async def get_email_directory(
     _:  str = Depends(require_admin),
