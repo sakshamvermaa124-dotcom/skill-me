@@ -42,8 +42,9 @@ CREATE TABLE IF NOT EXISTS batches (
     batch_number INTEGER NOT NULL,
     status TEXT NOT NULL DEFAULT 'provisioning',  -- provisioning | active | completed | archived
     max_students INTEGER DEFAULT 30,
-    start_date TEXT,
+    start_date TEXT,                   -- joining date printed on the offer letter (certificate runs to +1 month)
     end_date TEXT,
+    original_start_date TEXT,          -- start_date before the student first moved it earlier (NULL = never moved)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(domain, batch_number)

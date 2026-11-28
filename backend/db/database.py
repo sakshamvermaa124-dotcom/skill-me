@@ -219,6 +219,8 @@ class Database:
             "ALTER TABLE payments ADD COLUMN amount_inr INTEGER",
             "ALTER TABLE certificates ADD COLUMN issued_via TEXT",
             "ALTER TABLE certificates ADD COLUMN payment_id INTEGER",
+            # Joining date before the student first moved it earlier (doc_dates_service)
+            "ALTER TABLE batches ADD COLUMN original_start_date TEXT",
             "ALTER TABLE otp_tokens ADD COLUMN verified_at TIMESTAMP",
             "ALTER TABLE otp_tokens ADD COLUMN attempts INTEGER DEFAULT 0",
             "ALTER TABLE students ADD COLUMN country TEXT",

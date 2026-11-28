@@ -15,6 +15,7 @@ from services.certificate_service import certificate_service, generate_certifica
 from services.enrollment_service import enrollment_service
 from services.email_service import email_service, _domain_label
 from services.task_service import task_service
+from services.doc_dates_service import period_fields
 from db.database import db
 
 logger = logging.getLogger("skillme.certificates")
@@ -66,7 +67,9 @@ async def verify_certificate(cert_id: str):
         "domain": row["domain"],
         **_domain_fields(row["domain"]),
         "issued_at": row["issued_at"],
-        "start_date": row["start_date"],
+        # Joining date and completion date (= joining + 1 month, may be in the future).
+        # Certificate and LOR are dated with end_date.
+        **period_fields(row["start_date"], row["issued_at"]),
     }
 
 
@@ -203,7 +206,7 @@ async def get_cert_metadata(student_id: int, batch_id: int):
         "first_name": first,
         "last_name": last,
         "domain": domain,
-        "start_date": info["start_date"] if info else None,
+        **period_fields(info["start_date"] if info else None, cert["issued_at"]),
         **_domain_fields(domain),
     }
 

@@ -53,7 +53,11 @@
   }
 
   // SQLite timestamps look like "YYYY-MM-DD HH:MM:SS"; Safari can't parse the space form.
+  // A bare "YYYY-MM-DD" (joining / completion dates) is a calendar day: read it as local
+  // midnight, or browsers west of UTC would show the day before.
   function parseDate(raw) {
+    const day = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(raw || '').trim());
+    if (day) return new Date(+day[1], +day[2] - 1, +day[3]);
     const d = raw ? new Date(String(raw).replace(' ', 'T')) : new Date();
     return isNaN(d) ? new Date() : d;
   }

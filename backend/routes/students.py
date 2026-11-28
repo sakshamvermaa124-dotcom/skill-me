@@ -18,6 +18,7 @@ from services.urgent_request_service import urgent_request_service
 from services.enrollment_service import enrollment_service
 from services.name_change_service import NameChangeError, change_name, name_status
 from services.stipend_service import StipendError, enter_stipend, stipend_status
+from services.doc_dates_service import DocDatesError, change_start_date, doc_dates_status
 from services import credential_reminder_service as cred_funnel
 from services.payment_service import phone_pay_region
 from services import pricing
@@ -80,6 +81,11 @@ class UpdateNameRequest(BaseModel):
     student_id: int
     first_name: str = Field(..., max_length=200)
     last_name: str = Field(..., max_length=200)
+
+
+class UpdateStartDateRequest(BaseModel):
+    student_id: int
+    start_date: str = Field(..., max_length=10, description="YYYY-MM-DD")
 
 
 class StipendEntryRequest(BaseModel):
@@ -377,6 +383,9 @@ async def _progress_for_student(student: dict) -> dict:
             "name_change": await name_status(student["email"]),
             # Top-performer stipend: {eligible, entered, entry}. One seat per person.
             "stipend": await stipend_status(student["email"]),
+            # Joining / completion dates on the documents, and the window the student may
+            # move the joining date within. None until a certificate is issued.
+            "doc_dates": await doc_dates_status(student["id"], enrollment["batch_id"] if enrollment else None),
             # 'in' | 'intl' | None — picks the default payment options (cards only abroad).
             "pay_region": _pay_region(student),
             # The one certificate price this student sees and pays ({currency, amount, label}).
@@ -458,6 +467,23 @@ async def update_name(req: UpdateNameRequest, me: dict = Depends(require_student
     except NameChangeError as e:
         raise HTTPException(status_code=e.status, detail=e.message)
     return {k: result[k] for k in ("first_name", "last_name", "name", "previous_name", "name_change")}
+
+
+@router.put("/start-date", summary="Move the joining date printed on the student's documents earlier")
+async def update_start_date(req: UpdateStartDateRequest, me: dict = Depends(require_student)):
+    """
+    The offer letter shows the joining date; the certificate and LOR show joining date to
+    joining date + 1 month. A certificate holder may move the joining date earlier, down to
+    one month before the day the certificate was issued (see doc_dates_service).
+    """
+    await _assert_owns(me, req.student_id)
+    enrollment = await enrollment_service.get_current_enrollment(req.student_id)
+    if not enrollment:
+        raise HTTPException(status_code=404, detail="No internship found.")
+    try:
+        return await change_start_date(req.student_id, enrollment["batch_id"], req.start_date)
+    except DocDatesError as e:
+        raise HTTPException(status_code=e.status, detail=e.message)
 
 
 @router.get("/stipend", summary="The signed-in student's stipend eligibility and seat")

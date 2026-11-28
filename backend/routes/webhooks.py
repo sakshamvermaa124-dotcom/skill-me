@@ -190,6 +190,7 @@ async def razorpay_webhook(request: Request, background_tasks: BackgroundTasks):
                         email_service.send_certificate_ready,
                         first_name=student["first_name"], last_name=student["last_name"],
                         email=student["email"], domain=student["domain"] or "web-dev", cert_id=cert["cert_id"],
+                        issued_date=cert.get("issued_on"),  # completion date (joining + 1 month)
                     )
             except ValueError as exc:
                 logger.warning("Webhook paid order %s but certificate not issued: %s", order_id, exc)

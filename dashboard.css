@@ -1616,6 +1616,10 @@ textarea.dash-input { resize: vertical; min-height: 84px; }
 .name-impact strong { color: var(--text-strong); }
 .name-impact[data-tone="warn"] strong { color: var(--warn); }
 .name-card-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+/* Internship dates card (dashboard.js renderDatesCard) reuses the name-card styles */
+.dates-card { margin-top: 16px; }
+.dates-plate-gap { margin-top: 10px; }
+.dates-card .name-field { max-width: 260px; }
 .name-card-actions .cert-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* Review & confirm */

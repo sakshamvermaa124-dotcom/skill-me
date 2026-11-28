@@ -26,6 +26,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.utils import ImageReader
 
 from db.database import db
+from services.doc_dates_service import internship_period, fmt_long
 # Import lazily to avoid circular imports at module level
 _email_service = None
 
@@ -64,19 +65,6 @@ def _track_label(domain: str) -> str:
     from services.email_service import _domain_label  # lazy: email_service is heavy and imported lazily here
     label = _domain_label((domain or "web-dev").strip())
     return label if "internship" in label.lower() else f"{label} Internship"
-
-
-def _format_issued_on(value) -> str:
-    """Format a stored `issued_at` (datetime or 'YYYY-MM-DD HH:MM:SS' / ISO string) as '11 October 2026'."""
-    if isinstance(value, datetime):
-        return value.strftime("%d %B %Y")
-    text = str(value or "").strip()
-    if not text:
-        return datetime.utcnow().strftime("%d %B %Y")
-    try:
-        return datetime.fromisoformat(text.replace("Z", "+00:00").replace(" ", "T", 1)).strftime("%d %B %Y")
-    except ValueError:
-        return text
 
 
 def _cert_id_from_student(student_id: int, batch_id: int) -> str:
@@ -250,7 +238,9 @@ def _draw_body(c: rl_canvas.Canvas, w: float, h: float, student: dict, enrollmen
     c.setFillColor(C_MUTED)
     c.setFont("Helvetica", 7.5)
     desc_y = mid_y - 22 * mm
+    start, end = internship_period(enrollment.get("start_date"))
     desc_lines = [
+        f"Internship period: {fmt_long(start)} to {fmt_long(end)}.",
         "A rigorous 4-week industry-grade internship program consisting of real-world project milestones,",
         "mentor-reviewed submissions, and collaborative software development practices.",
     ]
@@ -380,7 +370,8 @@ def generate_certificate_pdf(student: dict, enrollment: dict, cert_id: str | Non
     Returns (pdf_bytes, cert_id).
     """
     cert_id = cert_id or _cert_id_from_student(student["id"], enrollment["id"])
-    issued_on = issued_on or datetime.utcnow().strftime("%d %B %Y")
+    # Dated with the completion date (joining + 1 month), which may be in the future.
+    issued_on = issued_on or fmt_long(internship_period(enrollment.get("start_date"))[1])
 
     buffer = io.BytesIO()
     c = rl_canvas.Canvas(buffer, pagesize=landscape(A4))
@@ -463,7 +454,9 @@ class CertificateService:
 
         # Always prefer the stored ID so a PDF/email never shows an ID that won't verify
         cert_id = existing["cert_id"] if existing else _cert_id_from_student(student_id, batch_id)
-        issued_on = _format_issued_on(existing["issued_at"]) if existing else datetime.utcnow().strftime("%d %B %Y")
+        # Documents are dated with the completion date: joining date + exactly 1 month
+        # (may be in the future), never the day the certificate happened to be claimed.
+        issued_on = fmt_long(internship_period(batch["start_date"], existing["issued_at"] if existing else None)[1])
         is_new = not existing
 
         if is_new:

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% import "_ui.html" as ui %}
+{#- One-off notice to certificate holders whose documents showed an internship period that
+    wasn't one month. Sent by scripts/send_dates_update_emails.py. -#}
+
+{% block title %}We've corrected the dates on your documents — SkillMe{% endblock %}
+{% block preheader %}Your certificate and LOR now cover exactly one month: {{ start_long }} to {{ end_long }}.{% endblock %}
+
+{% block body %}
+{{ ui.eyebrow("Document update") }}
+{{ ui.title(first_name ~ ", we've corrected the dates on your documents") }}
+{% call ui.p() %}
+  The internship period on your <strong class="ink" style="color:#0a0a0a;">{{ domain_label }}</strong> certificate didn't match the length of the programme.
+  We've fixed it: your certificate and letter of recommendation now cover exactly one month from the joining date on your offer letter.
+{% endcall %}
+
+{% call ui.info_table() %}
+  {{ ui.row("Offer letter · joining date", start_long) }}
+  {{ ui.row("Certificate & LOR · period", start_long ~ " – " ~ end_long) }}
+  {{ ui.row("Certificate ID", cert_id ~ " (unchanged)", last=true) }}
+{% endcall %}
+
+{% if can_edit %}
+{% call ui.note("accent") %}
+  {% if ends_in_future %}
+  <strong class="ink" style="color:#0a0a0a;">Your completion date, {{ end_long }}, is in the future.</strong>
+  If you want it on or before the day your certificate was issued, you can move your joining date earlier, to any day from {{ min_long }} to {{ max_long }}.
+  {% else %}
+  <strong class="ink" style="color:#0a0a0a;">Want a different joining date?</strong>
+  You can move it to any day from {{ min_long }} to {{ max_long }}.
+  {% endif %}
+  Open the <em>Credentials</em> tab on your dashboard. Your offer letter, certificate and LOR update together, and your certificate ID stays the same.
+{% endcall %}
+{% endif %}
+
+{% call ui.actions(mt=24) %}
+  {{ ui.button(dashboard_url, "Review my dates" if can_edit else "Open my dashboard") }}
+  {{ ui.button(certificate_url, "View certificate", "secondary") }}
+{% endcall %}
+
+{% call ui.p(size=13, mb=0) %}
+  <span style="color:#52525b;">Nothing else changes: your certificate is still verified, and links you've already shared keep working and show the corrected dates.</span>
+{% endcall %}
+{% endblock %}

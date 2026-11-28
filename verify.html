@@ -877,8 +877,9 @@
             <dl class="vf-details">
               <div class="vf-detail"><dt>Domain</dt><dd>${escapeHtml(domain)}</dd></div>
               <div class="vf-detail"><dt>Status</dt><dd>Completed</dd></div>
-              <div class="vf-detail"><dt>Date of issue</dt><dd>${escapeHtml(formatDate(data.issued_at))}</dd></div>
+              <div class="vf-detail"><dt>Date of issue</dt><dd>${escapeHtml(formatDate(data.end_date || data.issued_at))}</dd></div>
               <div class="vf-detail"><dt>Duration</dt><dd>4 Weeks · Remote</dd></div>
+              ${data.start_date && data.end_date ? `<div class="vf-detail wide"><dt>Internship period</dt><dd>${escapeHtml(formatDate(data.start_date))} – ${escapeHtml(formatDate(data.end_date))}</dd></div>` : ''}
               ${idRow('Certificate ID', certId, 'Copy ID')}
             </dl>
             ${resultActions(canShare)}
@@ -1077,7 +1078,9 @@
 
     function formatDate(raw) {
       if (!raw) return '—';
-      let d = new Date(raw);
+      // A bare YYYY-MM-DD is a calendar day: local midnight, so it never shows the day before.
+      const day = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(raw).trim());
+      let d = day ? new Date(+day[1], +day[2] - 1, +day[3]) : new Date(raw);
       if (isNaN(d)) d = new Date(String(raw).replace(' ', 'T'));
       if (isNaN(d)) return String(raw);
       return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });

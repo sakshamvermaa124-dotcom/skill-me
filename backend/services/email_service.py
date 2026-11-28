@@ -428,7 +428,7 @@ async def _send_and_log(
     Deduplicates non-OTP emails (welcome, certificate_ready, task_assigned) to prevent duplicate emails.
     """
     # Deduplication guard for single-event emails
-    if email_type in ("certificate_ready", "welcome", "task_assigned"):
+    if email_type in ("certificate_ready", "welcome", "task_assigned", "dates_update"):
         try:
             from db.database import db
             query = """SELECT id FROM email_logs 
@@ -755,6 +755,47 @@ class EmailService:
             f"🏆 Your Certificate & Letter of Recommendation are Ready — {cert_id}",
             html,
             email_type="certificate_ready",
+        )
+
+    # One-off: the internship period on a certificate was corrected to exactly one month
+    # (scripts/send_dates_update_emails.py). `dates` is doc_dates_service.doc_dates_status().
+    async def send_dates_update(
+        self,
+        first_name: str,
+        last_name: str,
+        email: str,
+        domain: str,
+        cert_id: str,
+        dates: dict,
+        student_id: int | None = None,
+        batch_id: int | None = None,
+    ) -> bool:
+        from services.doc_dates_service import fmt_long, parse_day
+        start, end = parse_day(dates["start_date"]), parse_day(dates["end_date"])
+        lo, hi = parse_day(dates.get("min_start")), parse_day(dates.get("max_start"))
+        html = _render(
+            "dates_update.html",
+            first_name=first_name,
+            last_name=last_name,
+            domain_label=_domain_label(domain),
+            cert_id=cert_id,
+            start_long=fmt_long(start),
+            end_long=fmt_long(end),
+            min_long=fmt_long(lo) if lo else "",
+            max_long=fmt_long(hi) if hi else "",
+            can_edit=bool(dates.get("can_edit")),
+            ends_in_future=end > datetime.utcnow().date(),
+            dashboard_url=f"{settings.frontend_url}/dashboard.html?from=dates_email#dates",
+            certificate_url=f"{settings.frontend_url}/certificate.html?cert_id={cert_id}",
+        )
+        return await _send_and_log(
+            email,
+            f"{first_name} {last_name}",
+            "We've corrected the dates on your SkillMe certificate",
+            html,
+            email_type="dates_update",
+            student_id=student_id,
+            batch_id=batch_id,
         )
 
     # Stipend seat confirmed (student submitted their certificate ID on the dashboard)

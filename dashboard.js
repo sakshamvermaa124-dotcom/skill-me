@@ -1122,6 +1122,15 @@ document.addEventListener('DOMContentLoaded', () => {
       if (cameFrom === 'cred_email') trackCred('cred_email_clicked');
       if (cameFrom === 'stipend_email') trackCred('stipend_email_clicked');
       const jump = window.location.hash;
+      // The "dates on your documents" email links to #dates: open Credentials at the dates card.
+      if (jump === '#dates') {
+        history.replaceState(null, '', window.location.pathname);
+        const popup = document.getElementById('completion-overlay');
+        if (popup) popup.remove();
+        if (typeof window.dashShowPanel === 'function') window.dashShowPanel('panel-credentials');
+        const card = document.getElementById('dates-card-slot');
+        if (card) setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+      }
       if (jump === '#checkout' || jump === '#stipend') {
         const qs = new URLSearchParams(window.location.search);
         qs.delete('from');
@@ -2207,10 +2216,132 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         </div>
       </div>
+      <div id="dates-card-slot"></div>
       <div id="stipend-card-slot"></div>`;
 
+    renderDatesCard(student);
     renderStipendCard(student);
     renderStipendHome(student, 'paid');
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // Internship dates on the documents (backend: services/doc_dates_service.py)
+  // Offer letter = joining date; certificate and LOR = joining date to exactly one month
+  // later (may be in the future). A certificate holder may move the joining date earlier,
+  // down to one month before the day their certificate was issued.
+  // ─────────────────────────────────────────────────────────────
+  function ymdToDate(ymd) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(ymd || ''));
+    return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+  }
+  function plusOneMonth(ymd) {
+    const d = ymdToDate(ymd);
+    if (!d) return null;
+    const last = new Date(d.getFullYear(), d.getMonth() + 2, 0).getDate();
+    return new Date(d.getFullYear(), d.getMonth() + 1, Math.min(d.getDate(), last));
+  }
+  function fmtDay(d) {
+    if (typeof d === 'string') d = ymdToDate(d);
+    return d ? d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
+  }
+
+  function renderDatesCard(student, note) {
+    const slot = document.getElementById('dates-card-slot');
+    if (!slot) return;
+    const dd = student && student.doc_dates;
+    if (!dd || !dd.start_date) { slot.innerHTML = ''; return; }
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const endsLater = ymdToDate(dd.end_date) > today;
+    slot.innerHTML = `
+      <section class="name-card dates-card" aria-labelledby="dates-card-title">
+        <div class="name-card-head">
+          <span class="name-card-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          </span>
+          <div class="name-card-heading">
+            <h3 class="name-card-title" id="dates-card-title">Internship dates on your documents</h3>
+            <p class="name-card-sub">Your offer letter shows your joining date. Your certificate and LOR cover exactly one month from it.</p>
+          </div>
+        </div>
+        <div class="name-card-step" id="dates-card-view">
+          <div class="name-plate">
+            <span class="name-plate-label">Offer letter · joining date</span>
+            <span class="name-plate-value">${escHtml(fmtDay(dd.start_date))}</span>
+          </div>
+          <div class="name-plate dates-plate-gap">
+            <span class="name-plate-label">Certificate &amp; LOR · internship period</span>
+            <span class="name-plate-value">${escHtml(fmtDay(dd.start_date))} – ${escHtml(fmtDay(dd.end_date))}</span>
+          </div>
+          ${note ? `<p class="name-impact" role="status"><strong>Saved.</strong> ${escHtml(note)}</p>` : ''}
+          ${dd.can_edit ? `
+          <p class="name-impact">${endsLater
+            ? 'Your completion date is in the future. If you want it on or before the day your certificate was issued, move your joining date earlier.'
+            : `You can move your joining date to any day from ${escHtml(fmtDay(dd.min_start))} to ${escHtml(fmtDay(dd.max_start))}.`}</p>
+          <div class="name-card-actions">
+            <button type="button" class="cert-btn cert-btn-secondary" id="dates-edit-btn">Change joining date</button>
+          </div>` : ''}
+        </div>
+        ${dd.can_edit ? `
+        <form class="name-card-step" id="dates-card-form" hidden novalidate>
+          <label class="name-field">
+            <span>New joining date</span>
+            <input type="date" class="dash-input" id="dates-input" min="${escHtml(dd.min_start)}" max="${escHtml(dd.max_start)}" value="${escHtml(dd.start_date)}" required>
+          </label>
+          <div class="name-preview" aria-live="polite">
+            <span class="name-preview-label">Certificate &amp; LOR will show</span>
+            <span class="name-preview-value" id="dates-preview">—</span>
+          </div>
+          <p class="name-impact">Pick any day from <strong>${escHtml(fmtDay(dd.min_start))}</strong> to <strong>${escHtml(fmtDay(dd.max_start))}</strong>.
+            ${dd.min_start < dd.max_start ? `Choosing ${escHtml(fmtDay(dd.min_start))} makes your internship end on ${escHtml(fmtDay(plusOneMonth(dd.min_start)))}, the day your certificate was issued.` : ''}
+            Your offer letter, certificate and LOR all update together. Your certificate ID stays the same.</p>
+          <p class="name-card-error" id="dates-error" role="alert"></p>
+          <div class="name-card-actions">
+            <button type="button" class="cert-btn cert-btn-secondary" id="dates-cancel-btn">Cancel</button>
+            <button type="submit" class="cert-btn cert-btn-primary" id="dates-save-btn">Save dates</button>
+          </div>
+        </form>` : ''}
+      </section>`;
+    if (!dd.can_edit) return;
+
+    const view = document.getElementById('dates-card-view');
+    const form = document.getElementById('dates-card-form');
+    const input = document.getElementById('dates-input');
+    const preview = document.getElementById('dates-preview');
+    const errEl = document.getElementById('dates-error');
+    const saveBtn = document.getElementById('dates-save-btn');
+    const valid = v => /^\d{4}-\d{2}-\d{2}$/.test(v) && v >= dd.min_start && v <= dd.max_start;
+    const update = () => {
+      const v = input.value;
+      preview.textContent = valid(v) ? `${fmtDay(v)} – ${fmtDay(plusOneMonth(v))}` : '—';
+      saveBtn.disabled = !valid(v) || v === dd.start_date;
+      errEl.textContent = v && !valid(v) ? `Pick a day from ${fmtDay(dd.min_start)} to ${fmtDay(dd.max_start)}.` : '';
+    };
+    input.addEventListener('input', update);
+    document.getElementById('dates-edit-btn').addEventListener('click', () => {
+      view.hidden = true; form.hidden = false; update(); input.focus();
+    });
+    document.getElementById('dates-cancel-btn').addEventListener('click', () => renderDatesCard(student));
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!valid(input.value)) return update();
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving…';
+      try {
+        const res = await fetch(`${API}/api/students/start-date`, {
+          method: 'PUT',
+          headers: authHeaders({ 'Content-Type': 'application/json' }),
+          body: JSON.stringify({ student_id: student.id, start_date: input.value }),
+        });
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(body.detail || 'Could not save your dates. Please try again.');
+        student.doc_dates = body;
+        renderDatesCard(student, 'Your offer letter, certificate and LOR now show the new dates.');
+      } catch (err) {
+        errEl.textContent = err.message;
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save dates';
+      }
+    });
   }
 
   // ─────────────────────────────────────────────────────────────

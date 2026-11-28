@@ -754,7 +754,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js" integrity="sha384-Dr98ddmUw2QkdCarNQ+OL7xLty7cSxgR0T7v1tq4UErS/qLV0132sBYTolRAFuOV" crossorigin="anonymous"></script>
 <script src="config.js?v=a6d0001538"></script>
-<script src="docs.js?v=db7f857171"></script>
+<script src="docs.js?v=36a0b5fa39"></script>
 <script>
   const API = window.SKILLME_API || 'http://localhost:8000';
   const params = new URLSearchParams(window.location.search);
@@ -817,7 +817,8 @@
     const id = d.cert_id;
     // Shareable address: the public cert_id link, not the dashboard handoff params.
     if (id) history.replaceState(null, '', `/lor?cert_id=${encodeURIComponent(id)}`);
-    const dateStr = fmtDate(d.issued_at) || fmtDate(null);
+    // Dated with the internship completion date (joining date + 1 month), like the certificate.
+    const dateStr = fmtDate(d.end_date || d.issued_at);
     const firstName = name.split(' ')[0];
     lorHolder = name;
 
@@ -913,7 +914,7 @@
           const d = await res.json();
           const name = d.holder || d.student_name || nameParam || 'Student';
           populateLOR(name, d);
-          showVerify(true, name, d.cert_id, d.issued_at);
+          showVerify(true, name, d.cert_id, d.end_date || d.issued_at);
           return;
         }
         if (res.status >= 500) return showLocked('unavailable');
@@ -933,7 +934,7 @@
           const d = await res.json();
           const name = d.holder || `${d.first_name||''} ${d.last_name||''}`.trim() || nameParam || 'Student';
           populateLOR(name, d);
-          showVerify(true, name, d.cert_id, d.issued_at);
+          showVerify(true, name, d.cert_id, d.end_date || d.issued_at);
           return;
         }
         if (res.status === 402) {

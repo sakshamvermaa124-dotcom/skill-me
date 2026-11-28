@@ -293,6 +293,7 @@ async def verify_payment(req: VerifyPaymentRequest, background_tasks: Background
             email=student["email"],
             domain=student["domain"] or "web-dev",
             cert_id=cert_data["cert_id"],
+            issued_date=cert_data.get("issued_on"),  # completion date (joining + 1 month)
         )
 
     return {
