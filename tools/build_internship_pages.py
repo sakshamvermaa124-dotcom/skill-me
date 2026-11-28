@@ -31,6 +31,9 @@ OUT_DIR = os.path.join(ROOT, 'internships')
 CURRICULUM = os.path.join(ROOT, 'backend', 'services', 'curriculum.json')
 
 STIPEND = 'up to $100 a month'
+# Same terms as the offer letter and the stipend emails.
+STIPEND_TERMS = ('8–10 interns are picked each month from those who complete the internship and hold an issued '
+                 'certificate. It is not paid to every intern.')
 REVIEWERS = 'Walmart, Google and LinkedIn'
 
 # quiz key (the ?domain= value the homepage cards use), curriculum key, card label, keyword noun
@@ -57,6 +60,205 @@ TRACKS = [
     ('fde', 'fde', 'Forward Deployed Engineer', 'Forward Deployed Engineer', 'forward-deployed-engineer', 'API Integration · Client Tools · Docs'),
     ('qa', 'qa', 'Software Quality', 'Software Testing and QA', 'software-testing-qa', 'Test Automation · Selenium · Bug Reports'),
 ]
+
+# Search Console query targeting (Aug–Nov 2026: queries at positions 4–20 with the most impressions).
+# Each entry overrides the default title, meta description, H1 and hero lead (the short answer under the H1),
+# and adds FAQ entries that use the searcher's exact wording. {hours} is filled in per track; every answer ends with the stipend line.
+SEO = {
+    'cloud-aws': dict(
+        title='AWS Internship (Remote, 4 Weeks) | Cloud and AWS | SkillMe',
+        description='Remote AWS internship, open worldwide. Build a serverless project on S3, Lambda, API Gateway and DynamoDB in 4 reviewed weekly milestones.',
+        h1='AWS internship: remote, hands-on cloud projects',
+        answer="SkillMe's AWS internship is a 4-week remote cloud internship, open worldwide. You build a real serverless "
+               'project on AWS with S3, Lambda, API Gateway and DynamoDB, one reviewed milestone a week, about {hours} '
+               'hours each.',
+        faq=[
+            ('What do you do in this AWS internship?',
+             'You build one serverless project on AWS: CloudFolio (a portfolio site with a contact form), SnapVault (a photo '
+             'gallery on cloud storage) or LinkSnip (a URL shortener). Week 1 sets up a safe AWS account and a static site '
+             'on S3; later weeks add Lambda, API Gateway, DynamoDB with least-privilege access, and CloudFront or AWS SAM.'),
+            ('Is the AWS internship remote?',
+             'Yes. The AWS internship is fully remote and open to students in any country. You work in your own AWS '
+             'account at about {hours} hours a week.'),
+            ('Do I need AWS experience for this AWS cloud internship?',
+             'No. Week 1 starts at beginner level with a safe account setup. A 5-minute screening quiz checks you '
+             'have the basics.'),
+        ]),
+    'devops': dict(
+        title='DevOps Internship Remote, Open Worldwide (4 Weeks) | SkillMe',
+        description='Remote DevOps internship, open worldwide. Docker, Compose, GitHub Actions CI/CD and deployment in 4 reviewed weekly milestones.',
+        h1='DevOps internship, remote and open worldwide',
+        answer="SkillMe's DevOps internship is remote and open worldwide: 4 weeks, one reviewed milestone a week, about "
+               '{hours} hours each. You containerise an app with Docker, add automated tests and CI/CD with GitHub '
+               'Actions, and deploy it.',
+        faq=[
+            ('Is the DevOps internship remote?',
+             'Yes. It is a fully remote DevOps internship, open to students in any country, at about {hours} hours a week.'),
+            ('What does a remote DevOps intern do here?',
+             'You take a small app from code to production: write a Dockerfile, run the app and a database with Docker '
+             'Compose, add automated tests and CI with GitHub Actions, then deploy it with health checks. Other projects '
+             'cover an Nginx gateway with Terraform, or a scheduled uptime monitor with a public status page.'),
+        ]),
+    'software-engineering': dict(
+        title='SDE Internship (Remote, 4 Weeks) | Software Engineering | SkillMe',
+        description='What an SDE internship is, plus a remote one to join: build a tested backend service with a REST API and CI in 4 reviewed weeks.',
+        h1='SDE internship: remote software engineering in 4 weeks',
+        answer='An SDE internship is a software development engineer internship: you design, write, test and ship code. '
+               "SkillMe's remote SDE internship runs 4 weeks. You build ShelfSpace, a layered backend service with data "
+               'structures, a REST API, caching, tests and CI, one reviewed milestone a week.',
+        faq=[
+            ('What is an SDE internship?',
+             'SDE stands for Software Development Engineer. An SDE internship is a software engineering internship where '
+             'you build and test real code. In this one you build a backend service over four weeks: a domain model, '
+             'search and a REST API, persistence with caching and concurrency safety, then CI and deployment readiness.'),
+            ('What does SDE intern mean?',
+             'An SDE intern is a Software Development Engineer intern: a student or graduate doing software engineering '
+             'work for a fixed period. The title is common at product companies; the work is writing, testing and '
+             'shipping code.'),
+            ('Is this SDE internship remote?',
+             'Yes. It is a remote SDE internship open to students in any country, at about {hours} hours a week.'),
+        ]),
+    'software-testing-qa': dict(
+        title='QA Internship Remote: Software Testing (4 Weeks) | SkillMe',
+        description='Remote QA internship, open worldwide. Write a test plan and real bug reports, then automate UI and API tests in CI. 4 reviewed weeks.',
+        h1='QA internship, remote: software testing and automation',
+        answer="SkillMe's QA internship is remote and open worldwide. Over 4 weeks you test a real public web app: a "
+               'test plan, real bug reports, an automated UI test suite and an API test suite running in CI, one '
+               'reviewed milestone a week.',
+        faq=[
+            ('Is the QA internship remote?',
+             'Yes. It is a fully remote QA internship, open to students in any country, at about {hours} hours a week.'),
+            ('What does a remote QA intern do?',
+             'Week 1: write a test plan and run manual tests. Week 2: file bug reports and track regressions. Week 3: '
+             'build an automated UI test suite. Week 4: add an API test suite, a coverage report and CI.'),
+        ]),
+    'java-spring-boot': dict(
+        title='Spring Boot Internship: Java, Remote (4 Weeks) | SkillMe',
+        description='Remote Java Spring Boot internship. Grow a Java console app into a Spring Boot REST API with H2, tests and API docs in 4 reviewed weeks.',
+        h1='Java Spring Boot internship, remote',
+        answer="SkillMe's Spring Boot internship is a 4-week remote Java internship, open worldwide. You grow one app "
+               'from a Java console program into a Spring Boot REST API with H2, validation, tests and API docs, one '
+               'reviewed milestone a week.',
+        faq=[
+            ('What will I build in this Spring Boot internship?',
+             'One of three apps (BankPulse, ShopSphere or TaskForge). Weeks 1 and 2 are core Java with file storage; '
+             'week 3 turns it into a Spring Boot REST API with H2; week 4 adds validation, tests and API docs.'),
+            ('Do I need Spring Boot experience for the Java Spring Boot internship?',
+             'No. You need basic Java. Spring Boot is introduced in week 3, once the core Java version works.'),
+        ]),
+    'ai-engineer': dict(
+        title='AI Engineer Internship, Remote Worldwide (4 Weeks) | SkillMe',
+        description='Remote AI engineer internship, open worldwide. Build an LLM agent with tool calling, RAG, evals and guardrails in 4 reviewed weeks.',
+        h1='AI engineer internship, remote and open worldwide',
+        answer="SkillMe's AI engineer internship is remote and open worldwide: 4 weeks, one reviewed milestone a week. "
+               'You build TicketPilot, a support-ticket agent that calls tools, answers from policy documents with RAG, '
+               'and is tested with evals and guardrails.',
+        faq=[
+            ('Is the AI engineer internship remote?',
+             'Yes. It is a remote AI engineer internship open to students in any country, at about {hours} hours a week.'),
+            ('What does an AI engineer intern build here?',
+             'Week 1: your first tool-calling LLM call. Week 2: a multi-tool triage agent. Week 3: RAG for '
+             'policy-grounded replies. Week 4: an API with evals and guardrails.'),
+        ]),
+    'cybersecurity': dict(
+        title='Remote Cybersecurity Internship, Open Worldwide | SkillMe',
+        description='Remote cybersecurity internship, open worldwide. Build a Python security tool, such as a breach checker or log detector, in 4 reviewed weeks.',
+        h1='Remote cybersecurity internship, open worldwide',
+        answer="SkillMe's cybersecurity internship is remote and open worldwide: 4 weeks, one reviewed milestone a week, "
+               'about {hours} hours each. You build a Python security tool: a password breach checker, a brute-force '
+               'login detector or a file integrity monitor.',
+        faq=[
+            ('Is the cybersecurity internship remote and open worldwide?',
+             'Yes. It is a fully remote cybersecurity internship and you can apply from any country.'),
+            ('Is this a cybersecurity internship with stipend?',
+             'Top performers earn a stipend of {stipend}. ' + STIPEND_TERMS),
+        ]),
+    'ai-product-management': dict(
+        title='AI Product Management Internship (Remote) | SkillMe',
+        description='Remote AI product management internship: write a PRD and eval spec, build a prototype and a launch plan in 4 reviewed weeks. Open worldwide.',
+        h1='AI product management internship, remote',
+        answer="SkillMe's AI product management internship is a 4-week remote product management internship, open "
+               'worldwide. You take an AI feature from problem framing and competitive analysis to a PRD, an eval spec, '
+               'a clickable prototype and a launch plan.',
+        faq=[
+            ('Is this product management internship remote?',
+             'Yes. It is fully remote and open to students in any country, at about {hours} hours a week.'),
+            ('Is it a general product management internship or only AI?',
+             'The project is an AI feature (SmartRecap, AI meeting notes), so you also write an eval spec. The rest, '
+             'from problem framing and PRDs to metrics and launch plans, is core product management work.'),
+        ]),
+    'data-science': dict(
+        title='Remote Data Science Internship, Top-Performer Stipend | SkillMe',
+        description='Remote data science internship, open worldwide. Clean real data with Pandas, train a scikit-learn model, ship a Streamlit dashboard.',
+        h1='Remote data science internship with a top-performer stipend',
+        answer="SkillMe's data science internship is remote and open worldwide: 4 weeks, one reviewed milestone a week. "
+               'You explore a real dataset with Pandas, engineer features, train a scikit-learn model and ship a '
+               'Streamlit dashboard.',
+        faq=[
+            ('Is this a data science internship with stipend?',
+             'Top performers earn a stipend of {stipend}. ' + STIPEND_TERMS),
+            ('Is the data science internship remote?',
+             'Yes. It is a remote data science internship open to students in any country, at about {hours} hours a week.'),
+        ]),
+    'cpp-dsa': dict(
+        title='DSA Internship in C++ (Remote, 4 Weeks) | SkillMe',
+        description='Remote DSA internship in C++, open worldwide. Implement data structures, sorting, recursion and indexing in a real project. 4 reviewed weeks.',
+        h1='DSA internship in C++, remote',
+        answer="SkillMe's DSA internship is a 4-week remote C++ internship, open worldwide. Instead of isolated "
+               'puzzles, you build a C++ command-line project and implement the data structures, sorting, recursion and '
+               'indexing it needs yourself.',
+        faq=[
+            ('What is a DSA internship?',
+             'A DSA (data structures and algorithms) internship is one where the core work is choosing and implementing '
+             'data structures and algorithms. Here you apply them in one C++ project, such as a record toolkit, a '
+             'terminal game or a small in-memory database engine.'),
+            ('Is the DSA internship in C++ only?',
+             'Yes. All work is in modern C++ (C++20) with the STL.'),
+        ]),
+    'nodejs-backend': dict(
+        title='Node.js Internship: Remote Backend (4 Weeks) | SkillMe',
+        description='Remote Node.js backend internship, open worldwide. Build a REST API with Express, SQLite and JWT login in 4 reviewed weekly milestones.',
+        h1='Node.js internship: remote backend development',
+        answer="SkillMe's Node.js internship is a 4-week remote backend internship, open worldwide. You build a REST "
+               'API with Express, add validation and middleware, store data in SQLite and secure it with JWT login, one '
+               'reviewed milestone a week.',
+        faq=[
+            ('Is this Node js internship a backend internship?',
+             'Yes. It is backend work: Express APIs, middleware, databases and authentication. One project (ChatPulse) '
+             'adds real-time messaging with Socket.IO.'),
+            ('Is the Node.js internship remote?',
+             'Yes. It is fully remote and open to students in any country, at about {hours} hours a week.'),
+        ]),
+    'sql-databases': dict(
+        title='SQL Internship Remote: Databases (4 Weeks) | SkillMe',
+        description='Remote SQL internship, open worldwide. Design a database, then write JOINs, CTEs, views and indexes on real data in 4 reviewed weeks.',
+        h1='SQL internship, remote: database design and queries',
+        answer="SkillMe's SQL internship is remote and open worldwide: 4 weeks, one reviewed milestone a week. You "
+               'design a database, load real data, and write JOINs, CTEs, views and indexes to answer real questions.',
+        faq=[
+            ('Is the SQL internship remote?',
+             'Yes. It is a remote SQL internship open to students in any country, at about {hours} hours a week.'),
+            ('Is this a database management internship?',
+             'Yes. You design tables and relationships, add views and indexes, and query the data you manage, ending '
+             'with an analytics report.'),
+        ]),
+    'forward-deployed-engineer': dict(
+        title='Forward Deployed Engineer Internship (Remote) | SkillMe',
+        description='Remote forward deployed engineer internship. Wrap a real third-party API into a client tool and hand it off with a runbook. 4 reviewed weeks.',
+        h1='Forward deployed engineer internship, remote',
+        answer='A forward deployed engineer builds software directly for a client: integrating APIs, configuring tools '
+               "and supporting the handoff. SkillMe's 4-week remote forward deployed engineer internship, open "
+               'worldwide, has you do exactly that for a client project.',
+        faq=[
+            ('What does a forward deployed engineer intern do?',
+             'In this internship: week 1 wraps a third-party API, week 2 builds a config-driven dashboard for a client, '
+             'week 3 handles edge cases, support scenarios and logging, and week 4 delivers setup docs, a runbook and a '
+             'client handoff.'),
+            ('Is this a Google forward deployed engineer intern role?',
+             'No. SkillMe is an independent internship programme and is not affiliated with Google or any company that '
+             'hires forward deployed engineers. It builds the same skills those roles look for.'),
+        ]),
+}
 
 # Title-case words that are names, so they keep their capital when a sentence is folded into another.
 PROPER = {
@@ -391,13 +593,19 @@ def track_faq(t, projects):
                     + ' Every project follows the same four-week shape, with one reviewed milestone a week.'))
     faq += [
         (f'Is the {noun} internship paid? Is there a stipend?',
-         f'Top performers earn a stipend of {STIPEND}. It is performance-based and goes to the interns whose reviewed '
-         f'{noun} work stands out in their cohort, not to every intern.'),
+         f'Top performers earn a stipend of {STIPEND}. It is performance-based: {STIPEND_TERMS}'),
         ('How much time does it take?',
          f'4 weeks, one milestone a week, each planned for about {hours} hours. It is fully remote and open worldwide, '
          'so you work around college or a job.'),
     ]
+    seo = SEO.get(t['slug'])
+    if seo:
+        faq = [(q, fill(a, t, projects)) for q, a in seo['faq']] + faq
     return faq
+
+
+def fill(text, t, projects):
+    return text.format(hours=projects[0]['weeks']['1']['est_hours'].replace('-', '–'), stipend=STIPEND)
 
 
 def render_track(t, projects, all_tracks):
@@ -408,6 +616,13 @@ def render_track(t, projects, all_tracks):
     title = f'{noun} Remote Internship, Stipend for Top Performers | SkillMe'
     description = (f"4-week remote {noun} internship, open worldwide. Top performers earn a stipend of {STIPEND}. "
                    f"Work reviewed by engineers who work at {REVIEWERS}.")
+    h1 = f'{noun} remote internship with stipend'
+    lead = (f'A 4-week remote {esc(noun)} internship with one reviewed milestone a week. Top performers earn a stipend '
+            f'of {STIPEND}, and your work is reviewed by engineers who work at {REVIEWERS}.')
+    seo = SEO.get(slug)
+    if seo:
+        title, description, h1 = seo['title'], seo['description'], seo['h1']
+        lead = esc(fill(seo['answer'], t, projects) + f' Top performers earn a stipend of {STIPEND}.')
     faq = track_faq(t, projects)
 
     graph = [
@@ -453,8 +668,8 @@ def render_track(t, projects, all_tracks):
       <div class="container">
         <nav class="ip-crumbs" aria-label="Breadcrumb"><a href="/">SkillMe</a><span aria-hidden="true">/</span><a href="/internships">Internships</a><span aria-hidden="true">/</span><span aria-current="page">{esc(noun)}</span></nav>
         <span class="eyebrow">Remote internship · 4 weeks · open worldwide</span>
-        <h1 class="h1 ip-title">{esc(noun)} remote internship with stipend</h1>
-        <p class="lead ip-lead">A 4-week remote {esc(noun)} internship with one reviewed milestone a week. Top performers earn a stipend of {STIPEND}, and your work is reviewed by engineers who work at {REVIEWERS}.</p>
+        <h1 class="h1 ip-title">{esc(h1)}</h1>
+        <p class="lead ip-lead">{lead}</p>
         <ul class="ip-chips" role="list" aria-label="Tech stack">{chips}</ul>
         <div class="ip-actions">
           <a href="{apply_url}" class="btn btn-primary btn-lg">Apply for this internship {ARROW}</a>
