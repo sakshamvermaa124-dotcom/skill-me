@@ -89,7 +89,10 @@ async def _context(student_id: int, batch_id: int) -> dict | None:
         """SELECT b.id AS batch_id, b.start_date, b.original_start_date, c.issued_at,
                   (SELECT COUNT(*) FROM enrollments e WHERE e.batch_id = b.id) AS members
            FROM certificates c JOIN batches b ON b.id = c.batch_id
-           WHERE c.student_id = ? AND c.batch_id = ?""",
+           WHERE c.student_id = ? AND c.batch_id = ?
+             -- Only after the certificate is paid for AND issued
+             AND EXISTS (SELECT 1 FROM payments p WHERE p.student_id = c.student_id
+                         AND p.batch_id = c.batch_id AND p.status = 'paid')""",
         (student_id, batch_id),
     )
 
@@ -129,7 +132,7 @@ async def change_start_date(student_id: int, batch_id: int, new_start: str) -> d
     """Move the joining date inside the allowed window. Returns the new status."""
     row = await _context(student_id, batch_id)
     if not row:
-        raise DocDatesError(409, "Your dates can be changed once your certificate has been issued.")
+        raise DocDatesError(409, "Your dates can be changed once your certificate has been paid for and issued.")
     if int(row["members"] or 0) != 1:
         raise DocDatesError(409, "Your dates can't be changed online. Email admin@skill-me-intern.in and we'll fix them.")
     window = _window(row)

@@ -17,6 +17,8 @@ import asyncio
 import os
 import sys
 
+import httpx
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from db.database import db
@@ -24,6 +26,26 @@ from services.doc_dates_service import doc_dates_status
 from services.email_service import email_service
 
 FOUR_WEEKS_OK = range(28, 32)  # 28-31 days already read as "one month"
+LIVE_API = "https://skill-me-yi2p.onrender.com"
+
+
+def check_live_link(r: dict) -> str | None:
+    """Confirm the certificate ID the email links to verifies on the live site, belongs to
+    this student and shows the corrected period. Returns a problem, or None if all good."""
+    try:
+        res = httpx.get(f"{LIVE_API}/api/certificates/verify/{r['cert_id']}", timeout=30)
+    except httpx.HTTPError as e:
+        return f"verify request failed: {e}"
+    if res.status_code != 200:
+        return f"verify returned {res.status_code}"
+    v = res.json()
+    holder = f"{r['first_name']} {r['last_name']}".strip().lower()
+    if v.get("cert_id") != r["cert_id"] or (v.get("holder") or "").strip().lower() != holder:
+        return f"verify shows {v.get('cert_id')} / {v.get('holder')!r}"
+    d = r["dates"]
+    if (v.get("start_date"), v.get("end_date")) != (d["start_date"], d["end_date"]):
+        return f"live period {v.get('start_date')}..{v.get('end_date')} != {d['start_date']}..{d['end_date']}"
+    return None
 
 
 async def candidates() -> list[dict]:
@@ -74,6 +96,12 @@ async def main():
         d = r["dates"]
         print(f"  {r['cert_id']}  old {r['old_days']}d  ->  {d['start_date']} .. {d['end_date']}"
               f"  window {d['min_start']}..{d['max_start']}  edit={d['can_edit']}")
+        problem = check_live_link(r)
+        if problem:
+            failed += 1
+            print(f"      -> SKIPPED, link check failed: {problem}")
+            continue
+        print("      link OK (verifies live, right holder, right dates)")
         if not args.send:
             continue
         sent = await email_service.send_dates_update(
@@ -85,8 +113,7 @@ async def main():
         print(f"      -> {'sent' if sent else 'FAILED'}")
         await asyncio.sleep(0.5)  # stay well under the provider's rate limit
 
-    if args.send:
-        print(f"\nDone: {ok} sent, {failed} failed")
+    print(f"\nDone: {ok} sent, {failed} failed/skipped" if args.send else f"\nDry run: {failed} link problems")
     await db.disconnect()
 
 

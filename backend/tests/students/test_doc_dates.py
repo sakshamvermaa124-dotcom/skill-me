@@ -222,3 +222,61 @@ class TestEmail:
         assert "is in the future" not in html
         assert "move your joining date" not in html.lower()
         assert "Open my dashboard" in html
+
+
+# ── Gate: only after payment AND certificate issued ─────────────────────────
+
+def _pdf_text(pdf: bytes) -> str:
+    """Concatenated, decompressed content streams of a ReportLab PDF."""
+    import base64, re, zlib
+    out = []
+    for m in re.finditer(rb"stream\r?\n(.*?)endstream", pdf, re.S):
+        data = m.group(1).strip()
+        try:
+            if data.endswith(b"~>"):  # ReportLab: ASCII85 over Flate
+                data = base64.a85decode(data[:-2].removeprefix(b"<~"))
+            out.append(zlib.decompress(data).decode("latin-1"))
+        except Exception:
+            pass
+    return "".join(out)
+
+
+class TestGateAndEndToEnd:
+    @pytest.mark.asyncio
+    async def test_hidden_when_certificate_but_not_paid(self, client):
+        sid, bid = await _holder()
+        await test_db.execute("UPDATE payments SET status = 'failed' WHERE student_id = ?", (sid,))
+        assert await _dates(client, sid) is None
+        assert (await _move(client, sid, "2026-11-01")).status_code == 409
+
+    @pytest.mark.asyncio
+    async def test_hidden_when_paid_but_no_certificate(self, client):
+        sid, _ = await _holder(cert=False)
+        assert await _dates(client, sid) is None
+
+    @pytest.mark.asyncio
+    async def test_change_reaches_every_document(self, client):
+        sid, bid = await _holder()
+        cert_id = f"SM-TEST-{sid:04d}-0001"
+        assert (await _move(client, sid, "2026-10-25")).status_code == 200
+
+        # Public verification (certificate page, LOR page, verify page, QR codes)
+        v = await client.get(f"/api/certificates/verify/{cert_id}")
+        assert v.status_code == 200 and v.json()["valid"] is True
+        assert (v.json()["start_date"], v.json()["end_date"]) == ("2026-10-25", "2026-11-25")
+        assert v.json()["cert_id"] == cert_id  # ID never changes
+
+        # Student's own certificate / LOR view
+        m = (await client.get(f"/api/certificates/metadata/{sid}/{bid}")).json()
+        assert (m["start_date"], m["end_date"], m["cert_id"]) == ("2026-10-25", "2026-11-25", cert_id)
+
+        # Offer letter
+        from services.auth_service import offer_ref
+        assert (await client.get(f"/api/students/offer/{sid}/{offer_ref(sid)}")).json()["start_date"] == "2026-10-25"
+
+        # Downloadable PDF certificate
+        r = await client.get(f"/api/certificates/download/{sid}/{bid}")
+        assert r.status_code == 200 and r.content[:4] == b"%PDF"
+        text = _pdf_text(r.content)
+        assert "25 October 2026 to 25 November 2026" in text
+        assert cert_id in text
