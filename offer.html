@@ -241,17 +241,20 @@
       color: #0c0b0b;
     }
 
-    .badge-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 0.76rem;
-      font-weight: 700;
-      color: #047857;
-      background: #d1fae5;
-      padding: 2px 8px;
-      border-radius: 4px;
-      width: fit-content;
+    /* Full-width row (stipend), set off from the cells above by a gold rule. */
+    .detail-cell-wide {
+      grid-column: 1 / -1;
+      padding-top: 14px;
+      border-top: 1px dashed rgba(201, 154, 78, 0.4);
+    }
+
+    .cell-accent { color: var(--gold-dark); }
+
+    .cell-note {
+      font-size: 0.78rem;
+      line-height: 1.5;
+      color: var(--muted-text);
+      margin-top: 3px;
     }
 
     /* Section Headers */
@@ -468,6 +471,12 @@
       .details-table { margin: 16px 0 18px !important; }
       .signature-row { margin-top: 18px !important; padding-top: 12px !important; }
       .sig-img { height: 80px !important; }
+      #view-offer .body-content { line-height: 1.6; }
+      #view-offer .details-table { padding: 14px 20px; gap: 10px 24px; }
+      #view-offer .detail-cell-wide { padding-top: 10px; }
+      #view-offer .section-head { margin: 16px 0 8px; }
+      #view-offer .terms-list { gap: 6px; }
+      #view-offer .terms-list li { line-height: 1.5; }
       .page-break {
         page-break-before: always;
         break-before: page;
@@ -635,13 +644,10 @@
             <span class="cell-label">Date of Joining</span>
             <span class="cell-value doc-joining-text">August 16, 2026</span>
           </div>
-          <div class="detail-cell">
-            <span class="cell-label">Enrollment Status</span>
-            <div class="cell-value"><span class="badge-status">● Verified &amp; Confirmed</span></div>
-          </div>
-          <div class="detail-cell">
-            <span class="cell-label">Verification Link</span>
-            <span class="cell-value" style="font-family:'JetBrains Mono',monospace; font-size:0.8rem; color:#2563eb;">skill-me-intern.in/verify</span>
+          <div class="detail-cell detail-cell-wide">
+            <span class="cell-label">Top-Performer Stipend</span>
+            <span class="cell-value">Up to <span class="cell-accent">$100/month</span> for top performers</span>
+            <span class="cell-note">8–10 interns picked every month. Open to interns who complete the internship and hold an issued certificate.</span>
           </div>
         </div>
 
@@ -1029,6 +1035,8 @@
         orientation: 'portrait',
         width: 860,
         margin: 10,
+        // The offer letter is a one-page document: scale it onto a single A4 page.
+        singlePage: currentView !== 'hod',
         breakAvoid: 'p, li, tr, thead, .section-head, .signature-row, .details-table, .title-section, .letterhead, .doc-meta-ribbon',
       });
     }
