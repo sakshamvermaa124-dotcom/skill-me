@@ -367,7 +367,7 @@ html.theme-switching *, html.theme-switching *::before, html.theme-switching *::
   }
   .dash-app .dash-tab-bar {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
-    display: grid; grid-template-columns: repeat(5, 1fr);
+    display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr);
     padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
     background: var(--nav-bg);
     backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
@@ -897,7 +897,7 @@ textarea.dash-input { resize: vertical; min-height: 84px; }
 @media (max-width: 420px) { .sprint-milestone-step { min-height: 104px; padding: 12px 14px 14px; } }
 
 /* ── Shortcuts ── */
-.shortcut-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.shortcut-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .shortcut-card {
   display: flex; align-items: center; gap: 12px;
   padding: 14px 16px;
@@ -922,7 +922,11 @@ textarea.dash-input { resize: vertical; min-height: 84px; }
 .shortcut-title { font-size: 0.9rem; font-weight: 600; color: var(--text-strong); }
 .shortcut-sub { font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .shortcut-arrow { flex-shrink: 0; color: var(--text-faint); }
-@media (max-width: 760px) { .shortcut-row { grid-template-columns: 1fr; gap: 8px; } }
+@media (max-width: 760px) {
+  .shortcut-row { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .shortcut-card { min-width: 0; }
+  .shortcut-sub { white-space: normal; }
+}
 
 /* ── Quick links (Help) ── */
 .dash-quick-actions {
@@ -2456,3 +2460,10 @@ main.dash-page:focus { outline: none; }
 
 /* The card tip sits under the sticky pay bar, so on a phone the bar stays short */
 .checkout-after .pay-methods-tip { margin: 0 0 12px; text-align: left; }
+
+/* The homepage's mobile `section { padding: 48px 0 !important }` (style.css) wipes the padding of
+   dashboard cards that are <section>s; restore it here, scoped to the dashboard. */
+@media (max-width: 768px) {
+  .dash-app section.name-card { padding: 18px !important; }
+  .dash-app section.stipend-card { padding: 20px !important; }
+}

@@ -502,7 +502,7 @@
 /* ── Wall of work ────────────────────────────────────────────── */
 .wall-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .wall-card {
-  display: flex; flex-direction: column; gap: 12px;
+  display: flex; flex-direction: column; gap: 12px; min-width: 0;
   padding: 18px;
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
@@ -812,7 +812,7 @@
   .hero-stage { padding: 46px 0 40px; }
   .float-review { right: -4px; }
   .float-stipend { left: -4px; }
-  .steps, .domains-grid, .wall-grid, .bento { grid-template-columns: 1fr; }
+  .steps, .domains-grid, .wall-grid, .bento { grid-template-columns: minmax(0, 1fr); }
   .domain-help { grid-template-columns: auto minmax(0, 1fr); }
   .domain-help > span:last-child { grid-column: 1 / -1; }
   .step { display: grid; grid-template-columns: 36px minmax(0, 1fr); column-gap: 14px; row-gap: 4px; padding: 18px; }

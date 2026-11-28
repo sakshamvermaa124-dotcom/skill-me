@@ -244,8 +244,8 @@ body.dc-body {
 }
 @media (max-width: 640px) {
   .dc-toolbar { flex-direction: column; align-items: stretch; margin-bottom: 16px; }
-  .dc-actions { display: flex; flex-wrap: wrap; }
-  .dc-actions .btn { flex: 1 1 0; min-width: 0; padding: 0 10px; gap: 6px; }
+  .dc-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .dc-actions .btn { flex: 1 1 calc(50% - 4px); min-width: 0; padding: 0 12px; gap: 6px; white-space: nowrap; }
   .dc-actions .btn-primary { flex-basis: 100%; height: 46px; }
   .dc-tabs { display: flex; width: 100%; }
   .dc-tab { flex: 1 1 0; padding: 0 8px; font-size: 0.82rem; white-space: normal; line-height: 1.15; text-align: center; }
