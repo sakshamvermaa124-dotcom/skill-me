@@ -1,391 +1,218 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Application Received — SkillMe</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="x-apple-disable-message-reformatting" />
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="supported-color-schemes" content="light dark" />
+  <title>Application received — SkillMe</title>
+  <!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
+  <style>table, td, p, a, h1 { font-family: 'Segoe UI', Arial, sans-serif !important; }</style>
+  <![endif]-->
+  <!--[if !mso]><!-->
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500;600&display=swap" rel="stylesheet" />
+  <!--<![endif]-->
   <style>
-    /* Reset */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { margin: 0 !important; padding: 0 !important; width: 100% !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { border: 0; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; display: block; }
+    a { text-decoration: none; }
+    a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; }
 
-    body {
-      background-color: #e8e4dc;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-      color: #1a1a2e;
-      margin: 0;
-      padding: 0;
-    }
-
-    /* Outer wrapper */
-    .wrapper {
-      max-width: 600px;
-      margin: 32px auto;
-      background-color: #faf8f4;
-      border-radius: 4px;
-      overflow: hidden;
-      border: 1px solid rgba(184,134,11,0.2);
+    @media only screen and (max-width: 620px) {
+      .container { width: 100% !important; }
+      .px { padding-left: 22px !important; padding-right: 22px !important; }
+      .pt { padding-top: 28px !important; }
+      .stack-cell { display: block !important; width: 100% !important; text-align: left !important; }
+      .hide-sm { display: none !important; }
     }
 
-    /* Top accent — gold gradient bar */
-    .accent-bar {
-      height: 4px;
-      background: linear-gradient(90deg, #8b6914, #b8860b, #d4a853, #b8860b, #8b6914);
+    /* Dark mode (Apple Mail, iOS Mail, Outlook for Mac) */
+    @media (prefers-color-scheme: dark) {
+      .bg-page { background: #09090a !important; }
+      .card { background: #121214 !important; border-color: #27272a !important; }
+      .soft { background: #18181b !important; }
+      .line { border-color: #27272a !important; }
+      .ink { color: #fafafa !important; }
+      .text { color: #d4d4d8 !important; }
+      .muted { color: #a1a1aa !important; }
+      .accent { color: #ff8f4f !important; }
+      .btn-secondary { background: #18181b !important; border-color: #3f3f46 !important; }
+      .btn-secondary a { color: #fafafa !important; }
     }
-
-    /* Header — matches certificate letterhead */
-    .header {
-      background: #1a2340;
-      padding: 22px 36px 18px;
-      border-bottom: 3px solid #b8860b;
-    }
-    .logo-wrap {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .logo-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .logo-left img {
-      height: 34px; width: 34px;
-      border-radius: 50%; object-fit: cover;
-    }
-    .brand-name {
-      font-size: 18px;
-      font-weight: 700;
-      color: #ffffff;
-      letter-spacing: -0.02em;
-    }
-    .brand-name span {
-      color: #b8860b;
-    }
-    .header-meta {
-      text-align: right;
-      font-size: 10px;
-      color: rgba(255,255,255,0.55);
-      line-height: 1.6;
-    }
-    .header-meta a {
-      color: rgba(255,255,255,0.7);
-      text-decoration: none;
-    }
-
-    /* Body */
-    .body {
-      background: #faf8f4;
-      padding: 32px 36px;
-    }
-
-    /* Typography */
-    .greeting {
-      font-size: 20px;
-      font-weight: 700;
-      color: #1a1a2e;
-      margin-bottom: 12px;
-      line-height: 1.3;
-    }
-    .lead {
-      font-size: 15px;
-      line-height: 1.7;
-      color: #3d4663;
-      margin-bottom: 24px;
-    }
-
-    /* Divider — gold themed */
-    .divider {
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(184,134,11,0.3), transparent);
-      margin: 28px 0;
-    }
-
-    /* Section label */
-    .section-label {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: #b8860b;
-      margin-bottom: 16px;
-    }
-
-    /* Info table */
-    .info-table {
-      width: 100%;
-      border: 1px solid rgba(184,134,11,0.15);
-      border-radius: 4px;
-      overflow: hidden;
-      margin-bottom: 24px;
-    }
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 11px 16px;
-      border-bottom: 1px solid rgba(184,134,11,0.08);
-      font-size: 14px;
-    }
-    .info-row:last-child { border-bottom: none; }
-    .info-row:nth-child(even) { background: rgba(184,134,11,0.03); }
-    .info-label { color: #64748b; font-weight: 500; }
-    .info-value { color: #1a1a2e; font-weight: 600; text-align: right; }
-
-    /* Steps */
-    .steps { margin: 0 0 4px; }
-    .step {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      padding: 12px 0;
-      border-bottom: 1px solid rgba(184,134,11,0.08);
-    }
-    .step:last-child { border-bottom: none; }
-    .step-num {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      background: #1a2340;
-      color: #ffffff;
-      font-size: 12px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-    .step-text { font-size: 14px; line-height: 1.65; color: #3d4663; }
-    .step-text strong { color: #1a1a2e; font-weight: 600; }
-
-    /* Task items */
-    .task-item {
-      background: rgba(184,134,11,0.04);
-      border: 1px solid rgba(184,134,11,0.15);
-      border-left: 3px solid #b8860b;
-      border-radius: 4px;
-      padding: 12px 16px;
-      margin-bottom: 8px;
-    }
-    .task-item-title { font-size: 14px; font-weight: 600; color: #1a1a2e; }
-    .task-item-link {
-      font-size: 13px;
-      color: #1a2340;
-      text-decoration: none;
-      margin-top: 4px;
-      display: block;
-      font-weight: 500;
-    }
-
-    /* Badge */
-    .badge {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-    .badge-green  { background: #dcfce7; color: #059669; }
-    .badge-blue   { background: #dbeafe; color: #2563eb; }
-    .badge-purple { background: #ede9fe; color: #7c3aed; }
-    .badge-amber  { background: rgba(184,134,11,0.12); color: #8b6914; }
-
-    /* Cert ID block */
-    .cert-id-box {
-      background: rgba(184,134,11,0.06);
-      border: 1px solid rgba(184,134,11,0.2);
-      border-radius: 4px;
-      padding: 20px;
-      text-align: center;
-      margin: 20px 0;
-    }
-    .cert-id-label {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: #b8860b;
-      margin-bottom: 8px;
-    }
-    .cert-id-value {
-      font-size: 22px;
-      font-weight: 700;
-      color: #1a2340;
-      letter-spacing: 0.04em;
-      font-family: 'Courier New', monospace;
-    }
-
-    /* CTA */
-    .cta-wrap { text-align: center; margin: 28px 0; }
-    .cta-btn {
-      display: inline-block;
-      background: linear-gradient(135deg, #b8860b, #d4a853);
-      color: #ffffff !important;
-      font-weight: 700;
-      font-size: 15px;
-      padding: 13px 32px;
-      border-radius: 4px;
-      text-decoration: none;
-      letter-spacing: 0.01em;
-    }
-    .cta-btn-secondary {
-      display: inline-block;
-      background: transparent;
-      color: #1a2340 !important;
-      font-weight: 600;
-      font-size: 14px;
-      padding: 10px 24px;
-      border-radius: 4px;
-      text-decoration: none;
-      border: 1px solid rgba(184,134,11,0.3);
-      margin-top: 10px;
-    }
-
-    /* Repo link */
-    .repo-box {
-      background: rgba(184,134,11,0.04);
-      border: 1px solid rgba(184,134,11,0.15);
-      border-radius: 4px;
-      padding: 16px;
-      margin: 20px 0;
-    }
-    .repo-box p { font-size: 14px; color: #3d4663; margin-bottom: 8px; }
-    .repo-box a { font-size: 14px; color: #1a2340; text-decoration: none; font-weight: 600; word-break: break-all; }
-
-    /* Footer — matches certificate bottom strip */
-    .footer {
-      background: #1a2340;
-      border-top: 3px solid #b8860b;
-      padding: 20px 36px;
-      text-align: center;
-    }
-    .footer-links { margin-bottom: 10px; }
-    .footer-links a {
-      color: rgba(255,255,255,0.6);
-      text-decoration: none;
-      font-size: 12px;
-      margin: 0 10px;
-    }
-    .footer-copy {
-      font-size: 11px;
-      color: rgba(255,255,255,0.35);
-      line-height: 1.6;
-    }
-
-    /* Highlight note */
-    .note {
-      font-size: 13px;
-      color: #3d4663;
-      background: rgba(184,134,11,0.05);
-      border: 1px solid rgba(184,134,11,0.15);
-      border-radius: 4px;
-      padding: 12px 16px;
-      margin-top: 20px;
-      line-height: 1.6;
-    }
-    .note strong { color: #1a1a2e; }
-    .note a { color: #1a2340; font-weight: 600; }
   </style>
 </head>
-<body>
-<div class="wrapper">
+<body class="bg-page" style="margin:0;padding:0;background:#f4f4f5;">
 
-  <!-- Top gold accent line -->
-  <div class="accent-bar"></div>
-
-  <!-- Header — Navy letterhead -->
-  <div class="header">
-    <div class="logo-wrap">
-      <div class="logo-left">
-        <img src="https://www.skill-me-intern.in/assets/logo.png" alt="SkillMe Logo">
-        <div class="brand-name">Skill<span>Me</span></div>
-      </div>
-      <div class="header-meta">
-        <a href="https://skill-me-intern.in">skill-me-intern.in</a><br>
-        New Delhi, India
-      </div>
-    </div>
+  <!-- Inbox preview text (hidden) -->
+  <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#f4f4f5;opacity:0;">
+    We've received your application for the Full Stack Engineer internship. Here's what happens next.
+    &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847;
   </div>
 
-  <!-- Body -->
-  <div class="body">
-    
-<p class="greeting">Hello Saksham,</p>
-<p class="lead">
-  We have received your application for the <strong>Web Development</strong> internship program at SkillMe.
-  Your profile is currently under review by our team.
+  <table role="presentation" class="bg-page" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f4f4f5;">
+    <tr>
+      <td align="center" style="padding:32px 12px 40px;">
+
+        <!--[if mso]><table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+        <table role="presentation" class="container" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;">
+
+          <!-- Header -->
+          <tr>
+            <td style="padding:0 4px 18px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td valign="middle" style="vertical-align:middle;">
+                    <a href="https://skill-me-intern.in" target="_blank" style="text-decoration:none;">
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+                        <td valign="middle" style="padding-right:10px;"><img src="https://skill-me-intern.in/assets/logo.png" alt="SkillMe" width="32" height="32" style="width:32px;height:32px;border-radius:50%;" /></td>
+                        <td valign="middle" class="ink" style="font-family:'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;font-size:18px;line-height:22px;font-weight:700;letter-spacing:-0.4px;color:#0a0a0a;">SkillMe</td>
+                      </tr></table>
+                    </a>
+                  </td>
+                  <td align="right" valign="middle" class="muted" style="vertical-align:middle;text-align:right;font-family:'Geist Mono', 'SFMono-Regular', Menlo, Consolas, monospace;font-size:11px;line-height:14px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:#71717a;">Technical Internship</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Card -->
+          <tr>
+            <td>
+              <table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff;border:1px solid #e7e7ea;border-radius:16px;border-collapse:separate;overflow:hidden;">
+                <tr>
+                  <td height="4" bgcolor="#e5322d" style="height:4px;line-height:4px;font-size:4px;background:#e5322d;background-image:linear-gradient(90deg,#e5322d 0%,#f26a1b 100%);border-radius:16px 16px 0 0;">&nbsp;</td>
+                </tr>
+                <tr>
+                  <td class="px pt" style="padding:36px 40px 38px;">
+                    
+<p class="accent" style="margin:0 0 10px;font-family:&#39;Geist Mono&#39;, &#39;SFMono-Regular&#39;, Menlo, Consolas, &#39;Courier New&#39;, monospace;font-size:12px;line-height:16px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:#c2500d;">Application received</p>
+<h1 class="ink" style="margin:0 0 14px;font-family:&#39;Geist&#39;, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif;font-size:26px;line-height:32px;font-weight:700;letter-spacing:-0.6px;color:#0a0a0a;">Thanks for applying, Saksham</h1>
+<p class="text" style="margin:0 0 18px;font-family:&#39;Geist&#39;, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif;font-size:15px;line-height:25px;color:#3f3f46;">
+  We've received your application for the <strong class="ink" style="color:#0a0a0a;">Full Stack Engineer</strong> internship at SkillMe.
+  Our team is reviewing your profile now — you'll hear from us by email.
 </p>
 
-<div class="divider"></div>
+<p class="ink" style="margin:28px 0 12px;font-family:&#39;Geist&#39;, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif;font-size:14px;line-height:20px;font-weight:700;color:#0a0a0a;">Application summary</p>
+<table role="presentation" class="soft line" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e7e7ea;border-radius:12px;background:#ffffff;border-collapse:separate;margin:0 0 8px;">
 
-<p class="section-label">Next Steps</p>
+  <tr>
+  <td class="muted line" style="padding:12px 16px;border-bottom:1px solid #f0f0f2;font-family:&#39;Geist&#39;, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif;font-size:13px;line-height:20px;color:#71717a;" valign="top">Name</td>
+  <td class="ink line" align="right" style="padding:12px 16px;border-bottom:1px solid #f0f0f2;font-family:&#39;Geist&#39;, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif;font-size:14px;line-height:20px;font-weight:600;color:#0a0a0a;text-align:right;" valign="top">Saksham Verma</td>
+</tr>
+  <tr>
+  <td class="muted line" style="padding:12px 16px;border-bottom:1px solid #f0f0f2;font-family:&#39;Geist&#39;, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif;font-size:13px;line-height:20px;color:#71717a;" valign="top">Email</td>
+  <td class="ink line" align="right" style="padding:12px 16px;border-bottom:1px solid #f0f0f2;font-family:&#39;Geist&#39;, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif;font-size:14px;line-height:20px;font-weight:600;color:#0a0a0a;text-align:right;" valign="top">saksham@example.com</td>
+</tr>
+  <tr>
+  <td class="muted line" style="padding:12px 16px;border-bottom:1px solid #f0f0f2;font-family:&#39;Geist&#39;, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif;font-size:13px;line-height:20px;color:#71717a;" valign="top">Track</td>
+  <td class="ink line" align="right" style="padding:12px 16px;border-bottom:1px solid #f0f0f2;font-family:&#39;Geist&#39;, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif;font-size:14px;line-height:20px;font-weight:600;color:#0a0a0a;text-align:right;" valign="top">Full Stack Engineer</td>
+</tr>
+  <tr>
+  <td class="muted line" style="padding:12px 16px;font-family:&#39;Geist&#39;, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif;font-size:13px;line-height:20px;color:#71717a;" valign="top">Status</td>
+  <td class="ink line" align="right" style="padding:12px 16px;font-family:&#39;Geist&#39;, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif;font-size:14px;line-height:20px;font-weight:600;color:#0a0a0a;text-align:right;" valign="top"><span style="display:inline-block;padding:3px 10px;border-radius:999px;background:#fff7ed;border:1px solid #fed7aa;font-family:&#39;Geist&#39;, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif;font-size:12px;line-height:18px;font-weight:600;color:#b45309;white-space:nowrap;">Under review</span></td>
+</tr>
 
-<div class="steps">
-  <div class="step">
-    <div class="step-num">1</div>
-    <div class="step-text"><strong>Review Process</strong><br />Our team evaluates all applications and selects candidates based on the cohort requirements.</div>
-  </div>
-  <div class="step">
-    <div class="step-num">2</div>
-    <div class="step-text"><strong>Shortlist Status</strong><br />If selected, you will receive a notification email detailing the next steps.</div>
-  </div>
-  <div class="step">
-    <div class="step-num">3</div>
-    <div class="step-text"><strong>Offer Letter</strong><br />Shortlisted candidates will receive a formal offer letter with their joining date and repository access.</div>
-  </div>
-</div>
+</table>
 
-<div class="divider"></div>
+<p class="ink" style="margin:28px 0 12px;font-family:&#39;Geist&#39;, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif;font-size:14px;line-height:20px;font-weight:700;color:#0a0a0a;">What happens next</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 8px;">
 
-<p class="section-label">Application Details</p>
-<div class="info-table">
-  <div class="info-row">
-    <span class="info-label">Name</span>
-    <span class="info-value">Saksham Verma</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">Email</span>
-    <span class="info-value">saksham@example.com</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">Domain</span>
-    <span class="info-value">Web Development</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">GitHub</span>
-    <span class="info-value">@saksham124</span>
-  </div>
-  <div class="info-row">
-    <span class="info-label">Status</span>
-    <span class="info-value"><span class="badge badge-amber">Under Review</span></span>
-  </div>
-</div>
+  <tr>
+  <td width="40" valign="top" style="padding:0 0 16px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td align="center" valign="middle" width="28" height="28" style="width:28px;height:28px;border-radius:999px;background:#0a0a0a;font-family:&#39;Geist Mono&#39;, &#39;SFMono-Regular&#39;, Menlo, Consolas, &#39;Courier New&#39;, monospace;font-size:12px;line-height:28px;font-weight:600;color:#ffffff;text-align:center;">1</td>
+    </tr></table>
+  </td>
+  <td valign="top" style="padding:3px 0 16px;">
+    <p class="ink" style="margin:0 0 2px;font-family:&#39;Geist&#39;, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif;font-size:14px;line-height:20px;font-weight:600;color:#0a0a0a;">Review</p>
+    <p class="text" style="margin:0;font-family:&#39;Geist&#39;, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif;font-size:13.5px;line-height:21px;color:#3f3f46;">We check your track preference and readiness against current internship capacity.</p>
+  </td>
+</tr>
+  <tr>
+  <td width="40" valign="top" style="padding:0 0 16px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td align="center" valign="middle" width="28" height="28" style="width:28px;height:28px;border-radius:999px;background:#0a0a0a;font-family:&#39;Geist Mono&#39;, &#39;SFMono-Regular&#39;, Menlo, Consolas, &#39;Courier New&#39;, monospace;font-size:12px;line-height:28px;font-weight:600;color:#ffffff;text-align:center;">2</td>
+    </tr></table>
+  </td>
+  <td valign="top" style="padding:3px 0 16px;">
+    <p class="ink" style="margin:0 0 2px;font-family:&#39;Geist&#39;, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif;font-size:14px;line-height:20px;font-weight:600;color:#0a0a0a;">Shortlist &amp; offer letter</p>
+    <p class="text" style="margin:0;font-family:&#39;Geist&#39;, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif;font-size:13.5px;line-height:21px;color:#3f3f46;">If you're selected, you'll get a shortlist email followed by your formal offer letter.</p>
+  </td>
+</tr>
+  <tr>
+  <td width="40" valign="top" style="padding:0 0 0px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+      <td align="center" valign="middle" width="28" height="28" style="width:28px;height:28px;border-radius:999px;background:#0a0a0a;font-family:&#39;Geist Mono&#39;, &#39;SFMono-Regular&#39;, Menlo, Consolas, &#39;Courier New&#39;, monospace;font-size:12px;line-height:28px;font-weight:600;color:#ffffff;text-align:center;">3</td>
+    </tr></table>
+  </td>
+  <td valign="top" style="padding:3px 0 0px;">
+    <p class="ink" style="margin:0 0 2px;font-family:&#39;Geist&#39;, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif;font-size:14px;line-height:20px;font-weight:600;color:#0a0a0a;">Start your 4-week project</p>
+    <p class="text" style="margin:0;font-family:&#39;Geist&#39;, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif;font-size:13.5px;line-height:21px;color:#3f3f46;">You'll get your weekly project guide and submit a LinkedIn post each week for review.</p>
+  </td>
+</tr>
 
-<div class="note">
-  <strong>Note:</strong> We recommend keeping your GitHub profile active and updated during the review period. Consistent public activity is highly valued.
-</div>
+</table>
 
-<div class="cta-wrap">
-  <a href="https://skill-me-intern.in" class="cta-btn">Visit SkillMe</a>
-</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:26px 0 4px;"><tr><td align="center" style="text-align:center;">
 
-  </div>
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="display:inline-table;margin:0 4px 8px;border-collapse:separate;">
+  <tr>
+    <td align="center" bgcolor="#e5322d" class="" style="border-radius:10px;background:#e5322d;border:1px solid #e5322d;">
+      <a href="https://skill-me-intern.in/apply.html?view=status" target="_blank" class="" style="display:inline-block;padding:13px 24px;font-family:&#39;Geist&#39;, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif;font-size:15px;line-height:18px;font-weight:600;letter-spacing:-0.1px;color:#ffffff;text-decoration:none;border-radius:10px;">Check application status</a>
+    </td>
+  </tr>
+</table>
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="display:inline-table;margin:0 4px 8px;border-collapse:separate;">
+  <tr>
+    <td align="center" bgcolor="#ffffff" class="btn-secondary" style="border-radius:10px;background:#ffffff;border:1px solid #d4d4d8;">
+      <a href="https://www.linkedin.com/company/skill-me-intern/" target="_blank" class="" style="display:inline-block;padding:13px 24px;font-family:&#39;Geist&#39;, -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Helvetica, Arial, sans-serif;font-size:15px;line-height:18px;font-weight:600;letter-spacing:-0.1px;color:#0a0a0a;text-decoration:none;border-radius:10px;">Follow SkillMe on LinkedIn</a>
+    </td>
+  </tr>
+</table>
 
-  <!-- Footer — Dark navy with gold top-border -->
-  <div class="footer">
-    <div class="footer-links">
-      <a href="https://skill-me-intern.in">Home</a>
-      <a href="https://skill-me-intern.in/dashboard.html">Dashboard</a>
-      <a href="mailto:sakshamverma124@gmail.com">Support</a>
-    </div>
-    <div class="footer-copy">
-      You received this email because you applied on SkillMe.<br />
-      &copy; 2026 SkillMe &mdash; India's Open Source Internship Platform.
-    </div>
-  </div>
+</td></tr></table>
 
-</div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding:26px 16px 0;text-align:center;">
+              <p style="margin:0 0 12px;font-family:'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;font-size:13px;line-height:20px;">
+                <a href="https://skill-me-intern.in" target="_blank" class="muted" style="color:#52525b;font-weight:600;text-decoration:none;">Home</a>
+                <span style="color:#d4d4d8;">&nbsp;·&nbsp;</span>
+                <a href="https://skill-me-intern.in/dashboard.html" target="_blank" class="muted" style="color:#52525b;font-weight:600;text-decoration:none;">Student dashboard</a>
+                <span style="color:#d4d4d8;">&nbsp;·&nbsp;</span>
+                <a href="https://www.linkedin.com/company/skill-me-intern/" target="_blank" class="muted" style="color:#52525b;font-weight:600;text-decoration:none;">LinkedIn</a>
+                <span style="color:#d4d4d8;">&nbsp;·&nbsp;</span>
+                <a href="mailto:sakshamverma124@gmail.com" class="muted" style="color:#52525b;font-weight:600;text-decoration:none;">Support</a>
+              </p>
+              <p class="muted" style="margin:0;font-family:'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;font-size:12px;line-height:19px;color:#a1a1aa;">
+                You received this email because you registered on SkillMe.<br />
+                &copy; 2026 SkillMe &middot; Udyam Registered Enterprise (UDYAM-UP-50-0294192, Govt. of India)
+              </p>
+            </td>
+          </tr>
+
+        </table>
+        <!--[if mso]></td></tr></table><![endif]-->
+
+      </td>
+    </tr>
+  </table>
 </body>
 </html>
