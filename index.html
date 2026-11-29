@@ -787,31 +787,38 @@
           <p class="cta-lead">Or you could still be planning to start. We read every application and shortlist the ones we believe in. Give us a reason to pick yours.</p>
 
           <div class="cta-tracks" role="group" aria-label="Choose a track">
-            <span class="cta-tracks-label mono">Choose a track</span>
-            <button type="button" class="cta-track-pill active" data-domain="webdev" data-name="Web Development" aria-pressed="true">Web dev</button>
-            <button type="button" class="cta-track-pill" data-domain="python" data-name="Python Engineering" aria-pressed="false">Python &amp; AI</button>
-            <button type="button" class="cta-track-pill" data-domain="react" data-name="React &amp; Next.js" aria-pressed="false">React / Next.js</button>
-            <button type="button" class="cta-track-pill" data-domain="devops" data-name="DevOps &amp; Cloud" aria-pressed="false">DevOps / CI-CD</button>
+            <span class="cta-tracks-label mono">Pick a track to start</span>
+            <button type="button" class="cta-track-pill active" data-domain="webdev" data-name="Full Stack" aria-pressed="true">Full Stack</button>
+            <button type="button" class="cta-track-pill" data-domain="ai-engineer" data-name="AI Engineer" aria-pressed="false">AI Engineer</button>
+            <button type="button" class="cta-track-pill" data-domain="python" data-name="Python" aria-pressed="false">Python</button>
+            <button type="button" class="cta-track-pill" data-domain="datascience" data-name="Data Science" aria-pressed="false">Data Science</button>
+            <button type="button" class="cta-track-pill" data-domain="devops" data-name="DevOps" aria-pressed="false">DevOps</button>
+            <a href="#domains" class="cta-track-more">All 20 tracks &rarr;</a>
           </div>
 
           <div class="cta-actions">
-            <a href="quiz.html" class="btn btn-primary btn-lg" id="cta-apply-btn" data-apply>
-              <span id="cta-btn-label">Start screening for Web Development</span>
+            <a href="quiz.html?domain=webdev" class="btn btn-primary btn-lg" id="cta-apply-btn" data-apply>
+              <span id="cta-btn-label">Start my Full Stack application</span>
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
-            <a href="#how-it-works" class="btn btn-lg cta-secondary">Review the 4-week sprint</a>
           </div>
 
           <ul class="cta-points" role="list">
-            <li><strong>Free to start</strong><span>Screening quiz and enrolment are free</span></li>
-            <li><strong>100% remote</strong><span>2–4 hrs a day around your college schedule</span></li>
-            <li><strong>QR-verifiable certificate</strong><span>Unique ID anyone can check, plus an LOR</span></li>
-            <li><strong>Placement referrals</strong><span>Direct hiring partner referrals for top performers</span></li>
+            <li><strong>Hand-picked</strong><span>Every application read by a person</span></li>
+            <li><strong>100% remote</strong><span>2–3 hrs a week around college</span></li>
+            <li><strong>Verifiable</strong><span>QR certificate anyone can check</span></li>
+            <li><strong>Referrals</strong><span>For top performers, to hiring partners</span></li>
           </ul>
         </div>
       </div>
     </section>
   </main>
+
+  <!-- Mobile sticky CTA: script.js shows it between the hero and the final CTA -->
+  <div class="sticky-cta" id="sticky-cta" hidden>
+    <div class="sticky-cta-text"><strong>Applications reviewed by hand</strong><span>5-min quiz to start</span></div>
+    <a href="quiz.html" class="btn btn-primary btn-sm" data-apply>Apply now</a>
+  </div>
 
   <footer class="site-footer">
     <div class="container">
@@ -823,7 +830,7 @@
         <div class="footer-col">
           <h4>Program</h4>
           <a href="index.html#how-it-works">How it works</a>
-          <a href="index.html#domains">Domains</a>
+          <a href="index.html#domains">Tracks</a>
           <a href="quiz.html">Apply now</a>
           <a href="index.html#faq">FAQ</a>
         </div>
@@ -850,6 +857,6 @@
     </div>
   </footer>
 
-  <script src="script.js?v=20261011_home1" defer></script>
+  <script src="script.js?v=20261011_home3" defer></script>
 </body>
 </html>
